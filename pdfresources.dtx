@@ -49,6 +49,20 @@
 %
 % \subsection{\pkg{pkg}}
 %
+% In \pkg{pgf}, resource management is set up in the file |pgfutil-common.tex|.
+% This then provides three functions for adding to the resources, all of which
+% are objects:
+% \begin{itemize}
+%   \item \cs{pgfutil@addpdfresource@extgs}: Extended graphics state
+%   \item \cs{pgfutil@addpdfresource@colorspaces}: Color spaces
+%   \item \cs{pgfutil@addpdfresource@patterns}: Pattterns
+% \end{itemize}
+% All of these are additive.
+%
+% To support these functions, there are a series of set-up macros which install
+% these resources. That has to take place for every page: the exact route
+% therefore depends on the driver.
+%
 % \subsection{\pkg{media9}}
 %
 % \maketitle
