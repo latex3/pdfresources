@@ -57,7 +57,10 @@
 %   \item \cs{pgfutil@addpdfresource@colorspaces}: Color spaces
 %   \item \cs{pgfutil@addpdfresource@patterns}: Patterns
 % \end{itemize}
-% All of these are additive.
+%
+% These resource dictionaries are used by adding entries in a cumulative sense;
+% the macro layer deals with ensuring that each entry is only given once. Note
+% that the objects themselves must be given only once for each page.
 %
 % To support these functions, there are a series of set-up macros which install
 % these resources. That has to take place for every page: the exact route
