@@ -1,0 +1,52 @@
+% !Mode:: "TeX:DE:UTF-8:Main"
+
+
+
+\documentclass{article}
+\usepackage{expl3}
+
+%very bad hack to input the dtx directly ....
+\def\documentclass#1\end#2{}
+
+\makeatletter\ExplSyntaxOn
+\input{pdfresources.dtx}
+\makeatother\ExplSyntaxOff
+
+%don't compress pdf:
+\ExplSyntaxOn
+\driver_pdf_compresslevel:n {0}
+\driver_pdf_objects_disable:
+\ExplSyntaxOff
+
+\usepackage[customdriver=hluatex-experimental]{hyperref}
+\hypersetup{urlcolor=red,pdfborder={1 1 1}}
+\makeatletter 
+\begin{document}
+%test driver link.
+\url{www.blub.de}
+
+%3 0 obj
+%<< /Type /Annot /Border[1 1 1]/H/I/C[0 1 1] /Rect [ 147.716 656.179 207.243 664.319 ]
+% /Subtype/Link/A<</Type/Action/S/URI/URI(www.blub.de)>>
+% >>
+%endobj
+\leavevmode
+\ExplSyntaxOn
+\driver_pdf_startlink_user:nn
+ {
+  /Border~[0~0~1]
+ }
+ {
+  /Subtype/Link~
+       /A<<
+         /Type/Action~
+         /S/URI~
+         /URI~(http://www.latex-project.org)%
+       >>
+ }
+  some link
+\driver_pdf_endlink:
+\ExplSyntaxOff
+
+blub
+\end{document}

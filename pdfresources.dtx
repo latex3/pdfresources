@@ -43,6 +43,7 @@
 %
 % \date{Released 2019-03-04}
 %
+% \maketitle
 % \section{Existing resource usage}
 %
 % \subsection{\pkg{hyperref}}
@@ -65,6 +66,110 @@
 %
 % \subsection{\pkg{media9}}
 %
-% \maketitle
+% \section{Managing Links}
+% \subsection{new experimental l3driver commands}
+% pdftex and luatex the startlink commands can use different \enquote{action spec}
+% \texttt{user}, \texttt{goto} and \texttt{thread}. To be able to translate this to
+% other drivers, three startlink variant are defined.
+% Variants which allow also to set the rule spec are perhaps needed too.
+% Currently only pdftex, luatex and xetex are setup.
+%    \begin{macrocode}
+\sys_if_engine_pdftex:T
+{
+ \cs_new_protected:Nn \driver_pdf_startlink_user:nn
+ {
+   \pdfstartlink
+    attr { #1 }
+    ~
+    user { #2 }
+    \relax %?needed, hyperref seems to think so
+ }
+
+ \cs_new_protected:Nn \driver_pdf_endlink:
+ {
+  \pdfendlink
+ }
+}
+
+\sys_if_engine_luatex:T
+{
+ \cs_new_protected:Nn \driver_pdf_startlink_user:nn
+ {
+   \pdfextension startlink
+    attr { #1 }
+    ~
+    user { #2 }
+    \relax %?needed, hyperref seems to think so
+ }
+
+ \cs_new_protected:Nn \driver_pdf_endlink:
+ {
+  \pdfextension endlink
+ }
+
+}
+
+\sys_if_engine_xetex:T
+{
+ \cs_new_protected:Nn \driver_pdf_startlink_user:nn
+ {
+  \special
+  {
+    pdf:bann
+    <<
+     /Type/Annot
+     #1~#2
+    >>
+  }
+ }
+
+ \cs_new_protected:Nn \driver_pdf_endlink:
+ {
+  \special{pdf:eann}
+ }
+}
+%    \end{macrocode}
+%
+% \subsection{Higher-level link management}
+% packages like ocgx2 and tagpdf wants to add code to links/annotation created by hyperref.
+% So we need a generic command to start a pdflink which allows packages to add
+% their code to the \texttt{attr} argument through hooks.
+%    \begin{macrocode}
+\cs_new:Nn \pdf__get_key_value:nn { #1~#2 } %name?????
+%    \end{macrocode}
+% Attributes are stored in a property list. Packages can add attributes through
+% dedicated command. We assume that there will be different link types (url, file, run, \ldots)
+% and that they should have their own attribute list.
+% Probably we will need some commands to fill more than one prop ...
+%
+%    \begin{macrocode}
+\prop_new:N\g__pdf_startlink_url_attr_prop
+\prop_new:N\g__pdf_startlink_file_attr_prop
+\prop_new:N\g__pdf_startlink_run_attr_prop
+
+\cs_new:Nn \pdf_startlink_add_attr:nnn %#1 type, #2 key, #3 value
+ {
+  \prop_gput:cnn { g__pdf_startlink_#1_attr_prop } { #2 }{ #3 }
+ }
+
+\cs_new:Nn \pdf_startlink_remove_attr:nn %#1 type, #2 key
+ {
+  \prop_gremove:cn { g__pdf_startlink_#1_attr_prop } { #2 }
+ }
+%    \end{macrocode}
+%
+% A high-level startlink command that uses the stored attributes:
+%    \begin{macrocode}
+\cs_new_protected:Nn \pdf_startlink_user:nn %#1 type, #2 action spec
+{
+ \driver_pdf_startlink_user:nn
+  {
+    \prop_map_function:cN
+     { g__pdf_startlink_#1_attr_prop }
+     \pdf__get_key_value:nn
+  }
+  { #2 }
+}
+%    \end{macrocode}
 %
 % \PrintIndex
