@@ -11,6 +11,7 @@
 %%\Hy@VersionCheck{hluatex.def}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % variants of hyperref commands to get attributes in the prop
+\RequirePackage{xparse}
 \ExplSyntaxOn
 \def\Hy@EXPsetpdfborder
  {
@@ -68,6 +69,16 @@
       { [\@filebordercolor] }
    \fi
   }
+
+% for now we are updating the attribute manually after \hypersetup
+% some better method must be found
+\NewDocumentCommand\hypupdateattribute { }
+{
+ \Hy@EXPsetpdfborder
+ \Hy@EXPsetpdfhighlight
+ \Hy@EXPseturlbordercolor
+ \Hy@EXPsetfilebordercolor
+}
 \ExplSyntaxOff
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \protected\def\pdfcatalog        {\pdfextension catalog }
@@ -474,50 +485,20 @@
     \Hy@pstringdef\Hy@pstringURI{#2}%
     \hyper@chars
     \leavevmode
-    \Hy@EXPsetpdfborder
-    \Hy@EXPsetpdfhighlight
-    \Hy@EXPseturlbordercolor
     \pdf_startlink_user:nn { url }
     {
-     {%
-       /Subtype/Link%
-       \ifHy@pdfa /F 4\fi
-       /A<<%
-         /Type/Action%
-         /S/URI%
-         /URI(\Hy@pstringURI)%
+       /Subtype/Link
+       \ifHy@pdfa /F~4\fi
+       /A<<
+         /Type/Action~
+         /S/URI~
+         /URI(\Hy@pstringURI)~
          \ifHy@href@ismap
-           /IsMap true%
+           /IsMap~true~
          \fi
          \Hy@href@nextactionraw
-       >>%
-      }%
+       >>
     }
-    \Hy@colorlink\@urlcolor#1\Hy@xspace@end
-    \close@pdflink
-    \pdfstartlink
-      attr{%
-        \Hy@setpdfborder
-        \Hy@setpdfhighlight
-        \ifx\@urlbordercolor\relax
-        \else
-          /C[\@urlbordercolor]%
-        \fi
-      }%
-      user{%
-       /Subtype/Link%
-       \ifHy@pdfa /F 4\fi
-       /A<<%
-         /Type/Action%
-         /S/URI%
-         /URI(\Hy@pstringURI)%
-         \ifHy@href@ismap
-           /IsMap true%
-         \fi
-         \Hy@href@nextactionraw
-       >>%
-      }%
-      \relax
     \Hy@colorlink\@urlcolor#1\Hy@xspace@end
     \close@pdflink
   \endgroup
