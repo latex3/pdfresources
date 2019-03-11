@@ -72,8 +72,10 @@
 % \texttt{user}, \texttt{goto} and \texttt{thread}. To be able to translate this to
 % other drivers, three startlink variant are defined.
 % Variants which allow also to set the rule spec are perhaps needed too.
-% Currently only pdftex, luatex and xetex are setup.
+% Currently only pdftex, luatex and xetex are setup. Some commands can probably not be
+% implemented in all drivers.
 %    \begin{macrocode}
+
 \sys_if_engine_pdftex:T
 {
  \cs_new_protected:Nn \driver_pdf_startlink_user:nn
@@ -89,6 +91,12 @@
  {
   \pdfendlink
  }
+
+ \cs_new_protected:Nn \driver_pdf_lastlink:
+ {
+  \pdflastlink
+ }
+
 }
 
 \sys_if_engine_luatex:T
@@ -105,6 +113,11 @@
  \cs_new_protected:Nn \driver_pdf_endlink:
  {
   \pdfextension endlink
+ }
+
+ \cs_new_protected:Nn \driver_pdf_lastlink:
+ {
+  \numexpr\pdffeedback lastlink\relax
  }
 
 }
@@ -131,6 +144,7 @@
 %    \end{macrocode}
 %
 % \subsection{Higher-level link management}
+% \subsubsection{Startlink}
 % packages like ocgx2 and tagpdf wants to add code to links/annotation created by hyperref.
 % So we need a generic command to start a pdflink which allows packages to add
 % their code to the \texttt{attr} argument through hooks.
@@ -172,4 +186,17 @@
 }
 %    \end{macrocode}
 %
+% \subsubsection{Endlink}
+% tagpdf needs to execute code at the end of the link to store the object reference etc.
+% So we need a hook. Is a hook a tl or a cs??
+%    \begin{macrocode}
+\cs_new_protected:Nn \pdf_endlink:
+ {
+  \driver_pdf_endlink:
+  \g__pdf_endlink_hook_tl % or \__pdf_endlink_hook: ???
+ }
+
+
+
+%    \end{macrocode}
 % \PrintIndex
