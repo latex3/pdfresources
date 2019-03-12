@@ -442,11 +442,15 @@
 \def\Hy@StartlinkName#1#2{%
   \pdfstartlink attr{#1}goto name{#2}\relax
 }
-\def\close@pdflink{%
+
+\ExplSyntaxOn
+\def\close@EXPpdflink#1{%
   \Hy@endcolorlink
   \Hy@VerboseLinkStop
-  \pdfendlink
+  \pdf_endlink:n { #1 }
 }
+
+\ExplSyntaxOff
 \def\hyper@anchor#1{%
   \new@pdflink{#1}\anchor@spot\pdf@endanchor
 }
@@ -500,7 +504,7 @@
        >>
     }
     \Hy@colorlink\@urlcolor#1\Hy@xspace@end
-    \close@pdflink
+    \close@EXPpdflink { url }
   \endgroup
 }
 \ExplSyntaxOff

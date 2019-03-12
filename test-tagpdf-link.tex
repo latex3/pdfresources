@@ -1,0 +1,144 @@
+% !Mode:: "TeX:DE:UTF-8:Main"
+
+% GRRRRRR. Why do the validators report that the link is not tagged????
+% Damn I forgot that objects must go in the parent tree too ...
+
+\RequirePackage{ifluatex}
+\ifluatex
+\pdfvariable minorversion 7
+\pdfvariable majorversion 1
+\else
+\pdfminorversion 7
+\fi
+
+\documentclass{article}
+
+\usepackage{tagpdf}
+\tagpdfsetup{
+ activate-all,
+ uncompress,
+ tabsorder=structure,
+ interwordspace=true,
+ %show-spaces
+ }
+%metadata
+%\tagpdfsetup{add-new-tag = Link/Link}
+\ifluatex
+\pdfextension catalog{/Lang (en-UK)}
+\else
+\pdfcatalog {/Lang (en-UK)}
+\fi
+
+%very bad hack to input the dtx directly ....
+\def\documentclass#1\end#2{}
+
+\makeatletter\ExplSyntaxOn
+\input{pdfresources.dtx}
+\makeatother\ExplSyntaxOff
+
+\usepackage[customdriver=hluatex-experimental]{hyperref}
+\hypersetup{urlcolor=red,pdfborder={1 1 1}}
+\hypupdateattribute
+
+%add hooks:
+\ExplSyntaxOn\makeatletter
+\pdf_startlink_add_attr:nnn {url}{/StructParent}{\int_use:N\c@g__uftag_parenttree_obj_int}
+\seq_put_right:Nn \l__pdf_endlink_url_hook_seq {\__uftag_struct_finish_link:}
+\ExplSyntaxOff
+\begin{document}
+\tagstructbegin{tag=Document}
+\leavevmode
+\tagstructbegin{tag=P}
+\tagmcbegin{tag=P}
+abc
+\tagmcend
+\tagmcbegin{tag=P}
+abc
+\tagmcend
+\tagstructbegin{tag=Link}
+\tagmcbegin{tag=Span}
+\href{www.dante.de}{link linkl}
+\tagmcend
+\tagstructend
+
+\tagstructbegin{tag=Link}
+\tagmcbegin{tag=Span}
+\ExplSyntaxOn\makeatletter
+
+blb
+%\int_gincr:N\g__uftag_abspage_int
+\__uftag_pdf_startlink:
+    attr {/Border[0~0~1]}
+    user {
+          /Subtype/Link%
+          /A
+           <<
+            /Type/Action
+            /S/URI
+            /URI(http://www.dante.de)
+           >>
+         \c_space_tl
+         /StructParent \c_space_tl \int_use:N\c@g__uftag_parenttree_obj_int
+         }
+    This is a link. a long link a long link a long link a long line
+\__uftag_pdf_endlink:
+\__uftag_struct_finish_link:
+
+\ExplSyntaxOff
+\tagmcend
+\tagstructend
+
+\tagstructbegin{tag=Link}
+\tagmcbegin{tag=Span}
+\ExplSyntaxOn\makeatletter
+blb
+%\int_gincr:N\g__uftag_abspage_int
+\__uftag_pdf_startlink:
+    attr {/Border[0~0~1]}
+    user {
+          /Subtype/Link%
+          /A
+           <<
+            /Type/Action
+            /S/URI
+            /URI(http://www.dante.de)
+           >>
+         \c_space_tl
+         /StructParent \c_space_tl \int_use:N\c@g__uftag_parenttree_obj_int
+         }
+    This is a another link.
+\__uftag_pdf_endlink:
+
+%get the number of the parent link structure:
+\seq_get:NNF
+    \g__uftag_struct_stack_seq
+    \l__uftag_struct_stack_parent_tmp_tl
+    {
+     \msg_error:nn { uftag } { struct-faulty-nesting }
+    }
+% put the obj number of link annot in the kid entry:
+\__uftag_struct_kid_link_gput_right:nx
+ {
+  \l__uftag_struct_stack_parent_tmp_tl
+ }
+ {
+  \int_use:N\__uftag_pdf_lastlink:
+ }
+% add the parent obj number to the parent tree:
+ \__uftag_parenttree_add_objr:nn
+ {
+  \int_use:N\c@g__uftag_parenttree_obj_int
+ }
+ {
+  \prop_item:cn{ g__uftag_struct_\l__uftag_struct_stack_parent_tmp_tl _prop }
+  { objnum }
+ }
+% increase the int:
+\stepcounter{ g__uftag_parenttree_obj_int }
+
+\ExplSyntaxOff
+\tagmcend
+\tagstructend
+\tagstructend
+\tagstructend
+\end{document} 

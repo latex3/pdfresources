@@ -188,14 +188,18 @@
 %
 % \subsubsection{Endlink}
 % tagpdf needs to execute code at the end of the link to store the object reference etc.
-% So we need a hook. Is a hook a tl or a cs??
+% So we need a hook. For now the hook is a seq: This will perhaps allows a system to
+% add and remove hooks by index. The hook depends on the type.
 %    \begin{macrocode}
-\cs_new_protected:Nn \pdf_endlink:
+\seq_new:N \l__pdf_endlink_url_hook_seq
+\seq_new:N \l__pdf_endlink_run_hook_seq
+\seq_new:N \l__pdf_endlink_file_hook_seq
+
+\cs_new_protected:Nn \pdf_endlink:n %#1 type, e.g. url
  {
   \driver_pdf_endlink:
-  \g__pdf_endlink_hook_tl % or \__pdf_endlink_hook: ???
+  \seq_use:cn { l__pdf_endlink_#1_hook_seq }{}
  }
-
 
 
 %    \end{macrocode}
