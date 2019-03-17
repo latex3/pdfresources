@@ -103,6 +103,7 @@
  \Hy@EXPsetfilebordercolor
 }
 \ExplSyntaxOff
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \protected\def\pdfcatalog        {\pdfextension catalog }
 
@@ -110,11 +111,11 @@
 \protected\def\pdflastlink       {\numexpr\pdffeedback lastlink\relax}
 \protected\def\pdflastobj        {\numexpr\pdffeedback lastobj\relax}
 
-\protected\edef\pdflinkmargin          {\pdfvariable linkmargin}
+\protected\edef\pdflinkmargin    {\pdfvariable linkmargin}
 \protected\def\pdfliteral        {\pdfextension literal}
 
 \protected\def\pdfobj            {\pdfextension obj }
-\protected\edef\pdfcompresslevel       {\pdfvariable compresslevel}
+%\protected\edef\pdfcompresslevel       {\pdfvariable compresslevel}
 \protected\edef\pdfpageattr            {\pdfvariable pageattr}
 
 \protected\edef\pdfpageresources       {\pdfvariable pageresources}
@@ -128,11 +129,15 @@
 \protected\def\pdfoutline        {\pdfextension outline }
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\ExplSyntaxOn
 \pdf@ifdraftmode{%
   \let\Hy@PutCatalog\ltx@gobble
 }{%
-  \let\Hy@PutCatalog\pdfcatalog
+  \let\Hy@PutCatalog \driver_pdf_catalog:n
 }
+\ExplSyntaxOff
+
+
 \ifHy@pdfpagelabels
   \def\HyPL@StorePageLabel#1{%
     \toks@\expandafter{\HyPL@Labels}%
@@ -296,126 +301,125 @@
   \edef\Hy@pdfversion{\number\Hy@pdfminorversion}%
 
 \Hy@DisableOption{pdfversion}%
+
+\ExplSyntaxOn
 \ifHy@ocgcolorlinks
-  \pdf@ifdraftmode{}{%
-    \immediate\pdfobj{%
-      <<%
-        /Type/OCG%
-        /Name(View)%
-        /Usage<<%
-          /Print<<%
-            /PrintState/OFF%
-          >>%
-          /View<<%
-            /ViewState/ON%
-          >>%
-        >>%
-      >>%
-    }%
-    \edef\OBJ@OCG@view{\the\pdflastobj\space 0 R}%
-    \immediate\pdfobj{%
-      <<%
-        /Type/OCG%
-        /Name(Print)%
-        /Usage<<%
-          /Print<<%
-            /PrintState/ON%
-          >>%
-          /View<<%
-            /ViewState/OFF%
-          >>%
-        >>%
-      >>%
-    }%
-    \edef\OBJ@OCG@print{\the\pdflastobj\space 0 R}%
-    \immediate\pdfobj{%
-      [%
-        \OBJ@OCG@view\space\OBJ@OCG@print
-      ]%
-    }%
-    \edef\OBJ@OCGs{\the\pdflastobj\space 0 R}%
-    \pdfcatalog{%
-      /OCProperties<<%
-        /OCGs \OBJ@OCGs
-        /D<<%
-          /OFF[\OBJ@OCG@print]%
-          /AS[%
-            <<%
-              /Event/View%
-              /OCGs \OBJ@OCGs
-              /Category[/View]%
-            >>%
-            <<%
-              /Event/Print%
-              /OCGs \OBJ@OCGs
-              /Category[/Print]%
-            >>%
-            <<%
-              /Event/Export%
-              /OCGs \OBJ@OCGs
-              /Category[/Print]%
-            >>%
-          ]%
-        >>%
-      >>%
-    }%
+  \pdf@ifdraftmode{}{
+    \immediate\pdfobj{
+      <<
+        /Type/OCG
+        /Name(View)
+        /Usage<<
+          /Print<<
+            /PrintState/OFF
+          >>
+          /View<<
+            /ViewState/ON
+          >>
+        >>
+      >>
+    }
+    \edef\OBJ@OCG@view{\the\pdflastobj\c_space_tl 0\c_space_tl R}%
+    \immediate\pdfobj{
+      <<
+        /Type/OCG
+        /Name(Print)
+        /Usage<<
+          /Print<<
+            /PrintState/ON
+          >>
+          /View<<
+            /ViewState/OFF
+          >>
+        >>
+      >>
+    }
+    \edef\OBJ@OCG@print{\the\pdflastobj\c_space_tl 0\c_space_tl R}
+    \immediate\pdfobj{
+      [
+        \OBJ@OCG@view\c_space_tl\OBJ@OCG@print
+      ]
+    }
+    \edef\OBJ@OCGs{\the\pdflastobj\c_space_tl 0\c_space_tl R}
+    \driver_pdf_catalog:n
+     {
+      /OCProperties<<
+        /OCGs\c_space_tl\OBJ@OCGs
+        /D<<
+          /OFF[\OBJ@OCG@print]
+          /AS[
+            <<
+              /Event/View
+              /OCGs\c_space_tl \OBJ@OCGs
+              /Category[/View]
+            >>
+            <<
+              /Event/Print
+              /OCGs\c_space_tl \OBJ@OCGs
+              /Category[/Print]
+            >>
+            <<
+              /Event/Export
+              /OCGs\c_space_tl \OBJ@OCGs
+              /Category[/Print]
+            >>
+          ]
+        >>
+      >>
+    }
     \begingroup
       \edef\x{\endgroup
-        \pdfpageresources{%
+        \pdfpageresources{
           \the\pdfpageresources
-          /Properties<<%
-            /OCView \OBJ@OCG@view
-            /OCPrint \OBJ@OCG@print
-          >>%
-        }%
-      }%
+          /Properties<<
+            /OCView\c_space_tl \OBJ@OCG@view
+            /OCPrint\c_space_tl \OBJ@OCG@print
+          >>
+        }
+      }
     \x
-  }%
-  \Hy@AtBeginDocument{%
-    \def\Hy@colorlink#1{%
+  }
+  \Hy@AtBeginDocument{
+    \def\Hy@colorlink#1{
       \begingroup
         \ifHy@ocgcolorlinks
-          \def\Hy@ocgcolor{#1}%
+          \def\Hy@ocgcolor{#1}
           \setbox0=\hbox\bgroup\color@begingroup
         \else
-          \HyColor@UseColor#1%
+          \HyColor@UseColor#1
         \fi
-    }%
-    \def\Hy@endcolorlink{%
+    }
+    \def\Hy@endcolorlink{
       \ifHy@ocgcolorlinks
         \color@endgroup\egroup
-        \mbox{%
-          \pdfliteral page{/OC/OCPrint BDC}%
-          \rlap{\copy0}%
-          \pdfliteral page{EMC/OC/OCView BDC}%
+        \mbox{
+          \pdfliteral~page{/OC/OCPrint BDC}
+          \rlap{\copy0}
+          \pdfliteral~page{EMC/OC/OCView BDC}
           \begingroup
             \expandafter\HyColor@UseColor\Hy@ocgcolor
-            \box0 %
+            \box0~
           \endgroup
-          \pdfliteral page{EMC}%
-        }%
+          \pdfliteral~page{EMC}
+        }
       \fi
       \endgroup
-    }%
-  }%
+    }
+  }
 \else
-  \Hy@DisableOption{ocgcolorlinks}%
+  \Hy@DisableOption{ocgcolorlinks}
 \fi
+\ExplSyntaxOff
+
 \def\setpdflinkmargin#1{%
   \begingroup
     \setlength{\dimen@}{#1}%
   \expandafter\endgroup
   \expandafter\pdflinkmargin\the\dimen@\relax
 }
-\ifx\pdfstartlink\@undefined% less than version 14
-  \let\pdfstartlink\pdfannotlink
-  \let\pdflinkmargin\@tempdima
-  \let\saveboxresource\pdfform
-  \let\lastsavedboxresourceindex\pdflastform
-  \let\useboxresource\pdfrefform
-\else
-  \pdflinkmargin1pt %
-\fi
+
+\pdflinkmargin1pt %
+
 \providecommand*\@pdfview{XYZ}
 \Hy@WrapperDef\new@pdflink#1{%
   \ifhmode
@@ -511,7 +515,7 @@
     \hook_put:nnnn
      { pdf }
      { startlink_link_attr }
-     { /C }{ [\tl_use:c { @#1bordercolor }] } %do I need to expand??
+     { /C }{ [\tl_use:c { @#1bordercolor }] } %do I need to expand?? seems not
    }
    {
     \hook_remove:nnn
@@ -519,14 +523,8 @@
      { startlink_link_attr }
      { /C }
    }
-   \prop_show:N\l__pdf_hook_startlink_link_attr_prop
-  \ltx@IfUndefined{@#1bordercolor}{%
-    \let\CurrentBorderColor\relax
-  }{%
-    \edef\CurrentBorderColor{\csname @#1bordercolor\endcsname}%
-  }%
   \find@pdflink{#1}{#2}#3\Hy@xspace@end
-  \close@pdflink
+  \close@EXPpdflink { link }
 }
 \ExplSyntaxOff
 
@@ -556,6 +554,7 @@
   \endgroup
 }
 \ExplSyntaxOff
+
 \def\hyper@linkfile#1#2#3{% anchor text, filename, linkname
   \begingroup
     \def\Hy@pstringF{#2}%
@@ -640,11 +639,12 @@
       }%
     \x
 
-\def\PDF@SetupDoc{%
+\ExplSyntaxOn
+\def\PDF@SetupDoc{
   \ifx\@pdfpagescrop\@empty
   \else
-    \edef\process@me{%
-      \pdfpagesattr={%
+    \edef\process@me{
+      \pdfpagesattr={
         /CropBox[\@pdfpagescrop]%
         \expandafter\ifx\expandafter\\\the\pdfpagesattr\\%
         \else
@@ -655,7 +655,7 @@
     \process@me
   \fi
   \Hy@pstringdef\Hy@pstringB{\@baseurl}%
-  \pdfcatalog{%
+  \driver_pdf_catalog:n{%
     /PageMode/\@pdfpagemode
     \ifx\@baseurl\@empty
     \else
@@ -666,16 +666,16 @@
   \else
     \ifx\@pdfstartview\@empty
     \else
-      openaction goto page\@pdfstartpage{\@pdfstartview}%
+      openaction~goto~page\@pdfstartpage{\@pdfstartview}%
     \fi
   \fi
   \edef\Hy@temp{%
-    \ifHy@pdftoolbar\else /HideToolbar true\fi
-    \ifHy@pdfmenubar\else /HideMenubar true\fi
-    \ifHy@pdfwindowui\else /HideWindowUI true\fi
-    \ifHy@pdffitwindow /FitWindow true\fi
-    \ifHy@pdfcenterwindow /CenterWindow true\fi
-    \ifHy@pdfdisplaydoctitle /DisplayDocTitle true\fi
+    \ifHy@pdftoolbar\else /HideToolbar\c_space_tl true\fi
+    \ifHy@pdfmenubar\else /HideMenubar\c_space_tl true\fi
+    \ifHy@pdfwindowui\else /HideWindowUI\c_space_tl true\fi
+    \ifHy@pdffitwindow /FitWindow\c_space_tl true\fi
+    \ifHy@pdfcenterwindow /CenterWindow\c_space_tl true\fi
+    \ifHy@pdfdisplaydoctitle /DisplayDocTitle\c_space_tl true\fi
     \Hy@UseNameKey{NonFullScreenPageMode}\@pdfnonfullscreenpagemode
     \Hy@UseNameKey{Direction}\@pdfdirection
     \Hy@UseNameKey{ViewArea}\@pdfviewarea
@@ -694,10 +694,10 @@
     \fi
     \ifx\@pdfnumcopies\@empty
     \else
-      /NumCopies \@pdfnumcopies
+      /NumCopies\c_space_tl \@pdfnumcopies
     \fi
   }%
-  \pdfcatalog{%
+  \driver_pdf_catalog:n{%
     \ifx\Hy@temp\@empty
     \else
       /ViewerPreferences<<\Hy@temp>>%
@@ -709,6 +709,8 @@
     \fi
   }%
 }
+
+\ExplSyntaxOff
 \def\PDF@FinishDoc{%
   \pdf@ifdraftmode{}{%
     \Hy@UseMaketitleInfos
@@ -826,55 +828,9 @@
     \hyper@pagehidden
   }%
 }
-\Hy@AtBeginDocument{%
-  \ifHy@setpagesize
-    \expandafter\@firstofone
-  \else
-    \expandafter\@gobble
-  \fi
-  {%
-    \@ifclassloaded{seminar}{%
-      \setlength{\pdfvariable horigin}{1truein}%
-      \setlength{\pdfvariable vorigin}{1truein}%
-      \ifportrait
-        \ifdim\paperwidth=\z@
-        \else
-          \setlength{\pagewidth}{\strip@pt\paperwidth truept}%
-        \fi
-        \ifdim\paperheight=\z@
-        \else
-          \setlength{\pageheight}{\strip@pt\paperheight truept}%
-        \fi
-      \else
-        \ifdim\paperheight=\z@
-        \else
-          \setlength{\pagewidth}{\strip@pt\paperheight truept}%
-        \fi
-        \ifdim\paperwidth=\z@
-        \else
-          \setlength{\pageheight}{\strip@pt\paperwidth truept}%
-        \fi
-      \fi
-    }{%
-      \ltx@IfUndefined{stockwidth}{%
-        \ifdim\paperwidth>\z@
-          \setlength{\pagewidth}{\paperwidth}%
-        \fi
-        \ifdim\paperheight>\z@
-          \setlength{\pageheight}{\paperheight}%
-        \fi
-      }{%
-        \ifdim\stockwidth>\z@
-          \setlength{\pagewidth}{\stockwidth}%
-        \fi
-        \ifdim\stockheight>\z@
-          \setlength{\pageheight}{\stockheight}%
-        \fi
-      }%
-    }%
-  }%
-  \Hy@DisableOption{setpagesize}%
-}
+
+%%% removed setpagesize code, should be done by kernel/graphicx
+
 \def\Acrobatmenu#1#2{%
   \Hy@Acrobatmenu{#1}{#2}{%
     \leavevmode
@@ -902,17 +858,8 @@
     \close@pdflink
   }%
 }
-\def\Hy@FixNotFirstPage{%
-  \gdef\Hy@FixNotFirstPage{%
-    \setbox\AtBeginShipoutBox=\hbox{%
-      \copy\AtBeginShipoutBox
-    }%
-  }%
-}
-\ltx@ifpackagelater{atbegshi}{2011/10/05}{%
-}{%
-  \AtBeginShipout{\Hy@FixNotFirstPage}%
-}
+%%% removed old atbegshi fix
+
 \def\@Gauge[#1]#2#3#4{% parameters, label, minimum, maximum
   \Hy@Message{Sorry, pdftex does not support FORM gauges}%
 }

@@ -19,13 +19,16 @@
 \ExplSyntaxOff
 \usepackage{xcolor}
 \usepackage[customdriver=hluatex-experimental]{hyperref}
-\hypersetup{urlcolor=blue,linkbordercolor=blue,pdfborder={1 1 1}}
-\makeatletter 
+\tracingmacros=1
+\hypersetup{urlcolor=blue,linkbordercolor=blue,pdfborder={1 1 1},pdfprintpagerange=0}
+\makeatletter
 \hypupdateattribute
-\makeatletter 
+\makeatletter\tracingmacros=1
 \begin{document}
 \section{a}\label{a}
-\tracingmacros=1 \ref{a}
+\ref{a}
+\newpage 
+blblb
 \end{document}
 %test driver link.
 \url{www.blub.de}

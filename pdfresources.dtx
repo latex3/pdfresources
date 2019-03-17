@@ -106,6 +106,11 @@
   \pdflastlink
  }
 
+ \cs_new_protected:Nn \driver_pdf_catalog:n
+ {
+  \pdfcatalog { #1 }
+ }
+
 }
 
 \sys_if_engine_luatex:T
@@ -138,6 +143,11 @@
   \numexpr\pdffeedback lastlink\relax
  }
 
+ \cs_new_protected:Nn \driver_pdf_catalog:n
+ {
+  \pdfextension catalog { #1 }
+ }
+
 }
 
 \sys_if_engine_xetex:T
@@ -158,6 +168,7 @@
  {
   \special{pdf:eann}
  }
+ %% \cs_new_protected:Nn \driver_pdf_catalog:n ????
 }
 %    \end{macrocode}
 %
@@ -185,6 +196,7 @@
 %    \begin{macrocode}
 \cs_new_protected:Nn \pdf_startlink_user:nn %#1 type, #2 action spec
 {
+ \seq_use:cn { l__pdf_hook_startlink_#1_seq }{}
  \driver_pdf_startlink_user:nn
   {
     \prop_map_function:cN
@@ -196,6 +208,7 @@
 
 \cs_new_protected:Nn \pdf_startlink_goto_name:nn %#1 type, #2 destination
 {
+ \seq_use:cn { l__pdf_hook_startlink_#1_seq }{}
  \driver_pdf_startlink_goto_name:nn
   {
     \prop_map_function:cN
@@ -214,6 +227,7 @@
 \seq_new:N \l__pdf_hook_endlink_url_seq
 \seq_new:N \l__pdf_hook_endlink_run_seq
 \seq_new:N \l__pdf_hook_endlink_file_seq
+\seq_new:N \l__pdf_hook_endlink_link_seq
 
 \cs_new_protected:Nn \pdf_endlink:n %#1 type, e.g. url
  {
@@ -223,14 +237,22 @@
 
 
 %    \end{macrocode}
+% \subsection{Before the links}
+% Both hyperref and tagpdf wants to insert code before the \cs{pdfstartlink} so lets
+% setup hooks for this too:
+%    \begin{macrocode}
+\seq_new:N \l__pdf_hook_startlink_url_seq
+\seq_new:N \l__pdf_hook_startlink_run_seq
+\seq_new:N \l__pdf_hook_startlink_file_seq
+\seq_new:N \l__pdf_hook_startlink_link_seq
+%    \end{macrocode}
 %
-%
-% \section{Hooks}
+% \section{Hook management}
 % hooks are commands that allow users and other packages to inject code.
 %
 % \subsection{hooks with token lists}
 %  Hook code can be stored in a simple token list variable (tl). An example is e.g.
-% \verb+\@begindocumenthook+. In this case possible operations are
+% \cs{@begindocumenthook}. In this case possible operations are
 % \begin{itemize}
 % \item \emph{appending} to the hook
 % \item \emph{prepending} to the hook
@@ -244,7 +266,7 @@
 % something to the hook can get an index back.
 % In this case possible operations are
 % \begin{itemize}
-% \item \emph{appending} to the hook (\verb+\seq_put_right+),
+% \item \emph{appending} to the hook (\cs{seq_put_right}),
 % \item \emph{prepending} to the hook (need to keep track of the \enquote{zero pointer} if the user
 % should get an index back)
 % \item \emph{changing} (e.g emptying) a hook item through the index. But as this
@@ -256,7 +278,7 @@
 % It is not quite clear if the additional features of such sequence hooks are really needed
 % but the overhead is not so large, so it should be ok to use is. Probably if the type
 % is used at all, it would be sensible to drop the tl-type so that one doesn't have to define
-% \verb+\hook_put_right_tl:nnn+ and \verb+\hook_put_right_seq:nnn+ functions.
+% \cs{hook_put_right_tl:nnn} and \cs{hook_put_right_seq:nnn} functions.
 %
 % \subsection{hooks with properties}
 % Hook code can also be stored in a property (prop). Here possible operations are
@@ -278,18 +300,23 @@
 % \subsection{Naming hooks and access functions}
 % hooks are module specific. So set functions should probably do be something like
 %
-% \verb+\hook_put_right:nnn {<module>}{<hook-name>}{value}+ (seq- or tl-type)
+% \cs{hook_put_right:nnn}\verb+{<module>}{<hook-name>}{value}+ (seq- or tl-type)
 % or in the case of  properties
-% \verb+\hook_put:nnnn {<module>}{<hook-name>}{<key>}{<value>}
+% \cs{hook_put:nnnn {<module>}{<hook-name>}{<key>}{<value>}
 %
 % hooks should be manipulated only through such access functions. So their
 % name should be an internal command of the module. E.g.
-% \verb+\l__<module>_hook_<hook-name>_prop+
+% \cs{l__<module>_hook_<hook-name>_prop}
 %
 %    \begin{macrocode}
 \cs_new:Nn \hook_put_right:nnn
  {
   \seq_put_right:cn { l__#1_hook_#2_seq } { #3 }
+ }
+
+\cs_new:Nn \hook_put_left:nnn
+ {
+  \seq_put_left:cn { l__#1_hook_#2_seq } { #3 }
  }
 
 \cs_new:Nn \hook_put:nnnn
