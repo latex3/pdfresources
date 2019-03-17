@@ -87,6 +87,15 @@
     \relax %?needed, hyperref seems to think so
  }
 
+ \cs_new_protected:Nn \driver_pdf_startlink_goto_name:nn
+ {
+   \pdfstartlink
+    attr { #1 }
+    ~
+    goto~name { #2 }
+    \relax %?needed, hyperref seems to think so
+ }
+
  \cs_new_protected:Nn \driver_pdf_endlink:
  {
   \pdfendlink
@@ -107,6 +116,15 @@
     attr { #1 }
     ~
     user { #2 }
+    \relax %?needed, hyperref seems to think so
+ }
+
+ \cs_new_protected:Nn \driver_pdf_startlink_goto_name:nn
+ {
+   \pdfextension startlink
+    attr { #1 }
+    ~
+    goto~name { #2 }
     \relax %?needed, hyperref seems to think so
  }
 
@@ -135,7 +153,7 @@
     >>
   }
  }
-
+ %% \cs_new_protected:Nn \driver_pdf_startlink_goto_name:nn %????
  \cs_new_protected:Nn \driver_pdf_endlink:
  {
   \special{pdf:eann}
@@ -157,29 +175,31 @@
 % Probably we will need some commands to fill more than one prop ...
 %
 %    \begin{macrocode}
-\prop_new:N\g__pdf_startlink_url_attr_prop
-\prop_new:N\g__pdf_startlink_file_attr_prop
-\prop_new:N\g__pdf_startlink_run_attr_prop
-
-\cs_new:Nn \pdf_startlink_add_attr:nnn %#1 type, #2 key, #3 value
- {
-  \prop_gput:cnn { g__pdf_startlink_#1_attr_prop } { #2 }{ #3 }
- }
-
-\cs_new:Nn \pdf_startlink_remove_attr:nn %#1 type, #2 key
- {
-  \prop_gremove:cn { g__pdf_startlink_#1_attr_prop } { #2 }
- }
+\prop_new:N\l__pdf_hook_startlink_url_attr_prop  %\hyper@linkurl
+\prop_new:N\l__pdf_hook_startlink_file_attr_prop %\hyper@linkfile
+\prop_new:N\l__pdf_hook_startlink_run_attr_prop  %\@hyper@launch run
+\prop_new:N\l__pdf_hook_startlink_link_attr_prop %\hyper@link, \find@pdflink
 %    \end{macrocode}
 %
-% A high-level startlink command that uses the stored attributes:
+% High-level startlink commands that uses the stored attributes:
 %    \begin{macrocode}
 \cs_new_protected:Nn \pdf_startlink_user:nn %#1 type, #2 action spec
 {
  \driver_pdf_startlink_user:nn
   {
     \prop_map_function:cN
-     { g__pdf_startlink_#1_attr_prop }
+     { l__pdf_hook_startlink_#1_attr_prop }
+     \pdf__get_key_value:nn
+  }
+  { #2 }
+}
+
+\cs_new_protected:Nn \pdf_startlink_goto_name:nn %#1 type, #2 destination
+{
+ \driver_pdf_startlink_goto_name:nn
+  {
+    \prop_map_function:cN
+     { l__pdf_hook_startlink_#1_attr_prop }
      \pdf__get_key_value:nn
   }
   { #2 }
@@ -191,16 +211,109 @@
 % So we need a hook. For now the hook is a seq: This will perhaps allows a system to
 % add and remove hooks by index. The hook depends on the type.
 %    \begin{macrocode}
-\seq_new:N \l__pdf_endlink_url_hook_seq
-\seq_new:N \l__pdf_endlink_run_hook_seq
-\seq_new:N \l__pdf_endlink_file_hook_seq
+\seq_new:N \l__pdf_hook_endlink_url_seq
+\seq_new:N \l__pdf_hook_endlink_run_seq
+\seq_new:N \l__pdf_hook_endlink_file_seq
 
 \cs_new_protected:Nn \pdf_endlink:n %#1 type, e.g. url
  {
   \driver_pdf_endlink:
-  \seq_use:cn { l__pdf_endlink_#1_hook_seq }{}
+  \seq_use:cn { l__pdf_hook_endlink_#1_seq }{}
  }
 
 
 %    \end{macrocode}
+%
+%
+% \section{Hooks}
+% hooks are commands that allow users and other packages to inject code.
+%
+% \subsection{hooks with token lists}
+%  Hook code can be stored in a simple token list variable (tl). An example is e.g.
+% \verb+\@begindocumenthook+. In this case possible operations are
+% \begin{itemize}
+% \item \emph{appending} to the hook
+% \item \emph{prepending} to the hook
+% \item and perhaps some more or less complicated \emph{patching} to remove/replace parts
+% \end{itemize}
+%
+% Such a hook can be \emph{used} by using the variable.
+%
+% \subsection{hooks with sequences}
+% Hook code can also be stored in a sequence (seq). In this data structure every user adding
+% something to the hook can get an index back.
+% In this case possible operations are
+% \begin{itemize}
+% \item \emph{appending} to the hook (\verb+\seq_put_right+),
+% \item \emph{prepending} to the hook (need to keep track of the \enquote{zero pointer} if the user
+% should get an index back)
+% \item \emph{changing} (e.g emptying) a hook item through the index. But as this
+% involves mapping through the sequence to find the right item, it is perhaps too slow.
+% \end{itemize}
+%
+% Such a hook can be \emph{used} by mapping over the sequence. It is possible to filter or
+% exclude items. It is also possible to insert code while processing the individual items.
+% It is not quite clear if the additional features of such sequence hooks are really needed
+% but the overhead is not so large, so it should be ok to use is. Probably if the type
+% is used at all, it would be sensible to drop the tl-type so that one doesn't have to define
+% \verb+\hook_put_right_tl:nnn+ and \verb+\hook_put_right_seq:nnn+ functions.
+%
+% \subsection{hooks with properties}
+% Hook code can also be stored in a property (prop). Here possible operations are
+% \begin{itemize}
+% \item \emph{adding} a new key and its value. It is possible to write the interface so
+% that only a specific set of keys are allowed.
+% \item \emph{changing} the value of an existing key, either by overwriting the
+% current value or by appending more code to the value -- the second could e.g. be used
+% to extend the /ExtGState or /ColorSpace values.
+% \item \emph{removing} a key
+% \end{itemize}
+%
+% A hook stored like this can be used by mapping over the properties, but selective
+% use and filtering is possible too.
+%
+% Such a hook is useful if -- like in the case of dictionary values in a pdf -- various
+% packages need to be able to manipulate the same key.
+%
+% \subsection{Naming hooks and access functions}
+% hooks are module specific. So set functions should probably do be something like
+%
+% \verb+\hook_put_right:nnn {<module>}{<hook-name>}{value}+ (seq- or tl-type)
+% or in the case of  properties
+% \verb+\hook_put:nnnn {<module>}{<hook-name>}{<key>}{<value>}
+%
+% hooks should be manipulated only through such access functions. So their
+% name should be an internal command of the module. E.g.
+% \verb+\l__<module>_hook_<hook-name>_prop+
+%
+%    \begin{macrocode}
+\cs_new:Nn \hook_put_right:nnn
+ {
+  \seq_put_right:cn { l__#1_hook_#2_seq } { #3 }
+ }
+
+\cs_new:Nn \hook_put:nnnn
+ {
+  \prop_put:cnn { l__#1_hook_#2_prop } { #3 }{ #4 }
+ }
+
+\cs_new:Nn \hook_gput:nnnn
+ {
+  \prop_gput:cnn { g__#1_hook_#2_prop } { #3 }{ #4 }
+ }
+
+\cs_new:Nn \hook_remove:nnn
+ {
+  \prop_remove:cn { l__#1_hook_#2_prop } { #3 }
+ }
+
+\cs_new:Nn \hook_gremove:nnn
+ {
+  \prop_gremove:cn { g__#1_hook_#2_prop } { #3 }
+ }
+
+%    \end{macrocode}
+%
+%
+%
 % \PrintIndex
