@@ -17,12 +17,16 @@
 \driver_pdf_compresslevel:n {0}
 \driver_pdf_objects_disable:
 \ExplSyntaxOff
-
+\usepackage{xcolor}
 \usepackage[customdriver=hluatex-experimental]{hyperref}
-\hypersetup{urlcolor=red,pdfborder={1 1 1}}
+\hypersetup{urlcolor=blue,linkbordercolor=blue,pdfborder={1 1 1}}
+\makeatletter 
 \hypupdateattribute
-\makeatletter
+\makeatletter 
 \begin{document}
+\section{a}\label{a}
+\tracingmacros=1 \ref{a}
+\end{document}
 %test driver link.
 \url{www.blub.de}
 

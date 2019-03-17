@@ -15,61 +15,84 @@
 \ExplSyntaxOn
 \def\Hy@EXPsetpdfborder
  {
- \clist_map_inline:nn { url , file , run }
+ \clist_map_inline:nn { url , file , run , link}
    {
-    \ifx\@pdfborder\@empty
-     \pdf_startlink_remove_attr:nn { ##1  } { /Border }
-    \else
-     \pdf_startlink_add_attr:nnn { ##1 }
-     { /Border }
-     { [\@pdfborder] }
-    \fi
-    \ifx\@pdfborderstyle\@empty
-     \pdf_startlink_remove_attr:nn { ##1 } { /BS }
-    \else
-     \pdf_startlink_add_attr:nnn { ##1}
-     { /BS }
-     { <<\@pdfborderstyle>> }
-    \fi
+    \tl_if_empty:NTF \@pdfborder
+     {
+      \hook_remove:nnn { pdf } { startlink_##1_attr } { /Border }
+     }
+     {
+      \hook_put:nnnn
+       { pdf }
+       { startlink_##1_attr }
+       { /Border }
+       { [\@pdfborder] }
+     }
+    \tl_if_empty:NTF \@pdfborderstyle
+     {
+      \hook_remove:nnn  { pdf }{ startlink_##1_attr } { /BS }
+     }
+     {
+      \hook_put:nnnn
+      { pdf }
+      { startlink_##1_attr }
+      { /BS }
+      { <<\@pdfborderstyle>> }
+     }
    }
  }
 
 \def\Hy@EXPsetpdfhighlight
  {
-  \clist_map_inline:nn { url , file , run }
+  \clist_map_inline:nn { url , file , run , link}
    {
-    \ifx\@pdfhighlight\@empty
-     \pdf_startlink_remove_attr:nn { ##1 }{ /H }
-   \else
-     \pdf_startlink_add_attr:nnn  { ##1 }
-     { /H }
-     { \@pdfhighlight }
-  \fi
+    \tl_if_empty:NTF \@pdfhighlight
+     {
+      \hook_remove:nnn { pdf } { startlink_##1_attr }{ /H }
+     }
+     {
+      \hook_put:nnnn
+      { pdf }
+      { startlink_##1_attr }
+      { /H }
+      { \@pdfhighlight }
+     }
   }
  }
 
 \def\Hy@EXPseturlbordercolor
   {
-   \ifx\@urlbordercolor\relax
-     \pdf_startlink_remove_attr:nn { url }{ /C }
-   \else
-     \pdf_startlink_add_attr:nnn { url }
-      { /C }
-      { [\@urlbordercolor] }
-   \fi
+   \cs_if_exist:NTF\@urlbordercolor
+   {
+    \hook_put:nnnn
+     { pdf }
+     { startlink_url_attr }
+     { /C }
+     { [\@urlbordercolor] }
+   }
+   {
+    \hook_remove:nnn { pdf } { startlink_url_attr } { /C }
+   }
   }
 
 \def\Hy@EXPsetfilebordercolor
   {
-   \ifx\@filebordercolor\relax
-     \pdf_startlink_remove_attr:nn { file }{ /C }
-   \else
-     \pdf_startlink_add_attr:nnn { file }
+   \cs_if_exist:NTF \@filebordercolor
+    {
+     \hook_put:nnnn
+      { pdf }
+      { startlink_file_attr }
       { /C }
       { [\@filebordercolor] }
-   \fi
+    }
+    {
+     \hook_remove:nnn { pdf } { startlink_file_attr }{ /C }
+    }
   }
 
+\ifHy@pdfa
+ \hook_put:nnnn { pdf } { startlink_link_attr }{ /F } { 4 }
+\fi
 % for now we are updating the attribute manually after \hypersetup
 % some better method must be found
 \NewDocumentCommand\hypupdateattribute { }
@@ -429,27 +452,34 @@
     }%
   \fi
   \Hy@StartlinkName{%
-    \ifHy@pdfa /F 4\fi
-    \Hy@setpdfborder
-    \Hy@setpdfhighlight
-    \ifx\CurrentBorderColor\relax
-    \else
-      /C[\CurrentBorderColor]%
-    \fi
+    %\ifHy@pdfa /F 4\fi
+%    \Hy@setpdfborder
+%    \Hy@setpdfhighlight
+%    \ifx\CurrentBorderColor\relax
+%    \else
+%      /C[\CurrentBorderColor]%
+%    \fi
   }\Hy@testname
   \expandafter\Hy@colorlink\csname @#1color\endcsname
 }
-\def\Hy@StartlinkName#1#2{%
-  \pdfstartlink attr{#1}goto name{#2}\relax
-}
 
 \ExplSyntaxOn
+\def\Hy@StartlinkName#1#2{%
+  \pdf_startlink_goto_name:nn { link } { #2 }
+}
+
+
 \def\close@EXPpdflink#1{%
   \Hy@endcolorlink
   \Hy@VerboseLinkStop
   \pdf_endlink:n { #1 }
 }
 
+\def\close@pdflink{%
+  \Hy@endcolorlink
+  \Hy@VerboseLinkStop
+  \pdfendlink
+}
 \ExplSyntaxOff
 \def\hyper@anchor#1{%
   \new@pdflink{#1}\anchor@spot\pdf@endanchor
@@ -472,8 +502,24 @@
   \find@pdflink{#1}{#2}%
 }
 \def\hyper@linkend{\close@pdflink}
+\ExplSyntaxOn
 \def\hyper@link#1#2#3{%
   \Hy@VerboseLinkStart{#1}{#2}%
+  \tl_if_exist:cTF
+   { @#1bordercolor }
+   {
+    \hook_put:nnnn
+     { pdf }
+     { startlink_link_attr }
+     { /C }{ [\tl_use:c { @#1bordercolor }] } %do I need to expand??
+   }
+   {
+    \hook_remove:nnn
+     { pdf }
+     { startlink_link_attr }
+     { /C }
+   }
+   \prop_show:N\l__pdf_hook_startlink_link_attr_prop
   \ltx@IfUndefined{@#1bordercolor}{%
     \let\CurrentBorderColor\relax
   }{%
@@ -482,6 +528,8 @@
   \find@pdflink{#1}{#2}#3\Hy@xspace@end
   \close@pdflink
 }
+\ExplSyntaxOff
+
 \let\CurrentBorderColor\@linkbordercolor
 \ExplSyntaxOn
 \def\hyper@linkurl#1#2{%

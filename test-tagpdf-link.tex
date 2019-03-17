@@ -42,8 +42,16 @@
 
 %add hooks:
 \ExplSyntaxOn\makeatletter
-\pdf_startlink_add_attr:nnn {url}{/StructParent}{\int_use:N\c@g__uftag_parenttree_obj_int}
-\seq_put_right:Nn \l__pdf_endlink_url_hook_seq {\__uftag_struct_finish_link:}
+\hook_put:nnnn 
+ { pdf } 
+ { startlink_url_attr }
+ { /StructParent }
+ { \int_use:N\c@g__uftag_parenttree_obj_int }
+\hook_put_right:nnn 
+ { pdf }
+ { endlink_url } 
+ { \__uftag_struct_finish_link: }
+
 \ExplSyntaxOff
 \begin{document}
 \tagstructbegin{tag=Document}
