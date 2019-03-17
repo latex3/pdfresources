@@ -30,11 +30,14 @@
 \fi
 
 %very bad hack to input the dtx directly ....
-\def\documentclass#1\end#2{}
+%\def\documentclass#1\end#2{}
 
-\makeatletter\ExplSyntaxOn
-\input{pdfresources.dtx}
-\makeatother\ExplSyntaxOff
+%\makeatletter\ExplSyntaxOn
+%\input{pdfresources.dtx}
+%\makeatother\ExplSyntaxOff
+
+\usepackage{pdfresources}
+
 \usepackage{xcolor}
 \usepackage[customdriver=hluatex-experimental]{hyperref}
 \hypersetup{urlcolor=red,pdfborder={1 1 1},linkbordercolor=yellow}
