@@ -50,7 +50,7 @@
  { startlink_url }
  {
    \uftag_struct_begin:n{tag=Link}
-   \uftag_mc_begin:n{tag=Link}
+   \uftag_mc_begin:n{tag=Link}\def\blub{abc}
  }
 \hook_put:nnnn
  { pdf }
@@ -60,13 +60,23 @@
 \hook_put_right:nnn
  { pdf }
  { endlink_url }
- { 
+ {
   \__uftag_struct_finish_link:
    \uftag_mc_end:
-   \uftag_struct_end: 
+   \uftag_struct_end:
  }
 
+\hook_put:nnnn
+ { pdf }
+ { startlink_url_attr }
+ { /Contents }
+ { (url) }
 
+\hook_put:nnnn
+ { pdf }
+ { startlink_link_attr }
+ { /Contents }
+ { (ref) }
 
 \hook_put_left:nnn
  { pdf }
@@ -83,10 +93,10 @@
 \hook_put_right:nnn
  { pdf }
  { endlink_link }
- { 
-  \__uftag_struct_finish_link: 
+ {
+  \__uftag_struct_finish_link:
   \uftag_mc_end:
-  \uftag_struct_end: 
+  \uftag_struct_end:
  }
 
 
@@ -100,15 +110,15 @@
   \tagmcend
   \tagmcbegin{tag=P}
    abc
-  \tagmcend 
+  \tagmcend
    \href{www.dante.de}{link linkl}
-  \tagmcbegin{tag=P} 
-   some text 
-  \tagmcend 
+  \tagmcbegin{tag=P}
+   some text
+  \tagmcend
    \ref{test}
  \tagstructend %P
- 
-%attention wrong order: 
+
+%attention wrong order:
 \tagstructbegin{tag=P}
   \tagmcbegin{tag=P}
    abc\refstepcounter{section}\label{test}
@@ -121,7 +131,7 @@
    some text
   %\tagmcend
    \ref{test}
- \tagstructend %P 
+ \tagstructend %P
 \tagstructend %Document
 
 \end{document}
