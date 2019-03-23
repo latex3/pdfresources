@@ -1,0 +1,51 @@
+\documentclass{article}
+\usepackage{tagpdf}
+\tagpdfsetup{uncompress}
+\usepackage{pdfpages}
+\newcommand\insertlink{
+\latelua{
+n = pdf.reserveobj()
+ pdf.obj(n, "<<
+/Type /Annot
+/Border[0 0 1]/H/I/C[0 1 1]
+/Rect ["..e[0].." "..e[1].." "..e[2].." "..e[3].."]
+/Subtype/Link/A<</Type/Action/S/URI/URI("..URI..")>>
+>>")
+ pdf.refobj(n)
+pdf.registerannot(n)}
+}
+
+\usepackage{luacode}
+\begin{luacode}
+
+a=pdfe.open("testinput.pdf").Pages[1]
+--print("XXXX",a)
+hash = pdfe.dictionarytotable(a)
+texio.write_nl(table.serialize(hash))
+b = pdfe.getarray(a,"Annots")
+print("BBBB",b)
+c = pdfe.getdictionary(b,0)
+print("CCCC",c)
+--hash = pdfe.dictionarytotable(c)
+--texio.write_nl(table.serialize(hash))
+
+d = pdfe.getarray(c,"Rect")
+print("DDDD",d)
+e = {}
+e[0] = pdfe.getnumber(d,0)
+e[1] = pdfe.getnumber(d,1)
+e[2] = pdfe.getnumber(d,2)
+e[3] = pdfe.getnumber(d,3)
+print("EEEE",e[0],e[1],e[2],e[3])
+
+action = pdfe.getdictionary(c,"A")
+print("FFFFFFF",action)
+URI    = pdfe.getstring(action,"URI")
+print("GGGGG",URI)
+\end{luacode}
+
+\begin{document}
+%\insertlink blbbl
+bkbkb
+\includepdf[pagecommand={\insertlink}]{testinput}
+\end{document}
