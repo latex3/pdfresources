@@ -184,10 +184,11 @@
 % So we need a generic command to start a pdflink which allows packages to add
 % their code to the \texttt{attr} argument through hooks.
 %    \begin{macrocode}
-\cs_new:Nn \pdf__get_key_value:nn { #1~#2~ } %name?????
+\cs_new:Nn \__pdf_get_key_value:nn { #1~#2~ } %name?????
 %    \end{macrocode}
 % Attributes are stored in a property list. Packages can add attributes through
-% dedicated command. We assume that there will be different link types (url, file, run, \ldots)
+% dedicated command. We assume that there will be different link types
+% (url, file, run, link, is a cite type needed??\ldots)
 % and that they should have their own attribute list.
 % Probably we will need some commands to fill more than one prop ...
 %
@@ -199,6 +200,7 @@
 %    \end{macrocode}
 %
 % High-level startlink commands that uses the stored attributes:
+% At first one with the \texttt{user} argument:
 %    \begin{macrocode}
 \cs_new_protected:Nn \pdf_startlink_user:nn %#1 type, #2 action spec
 {
@@ -207,11 +209,12 @@
   {
     \prop_map_function:cN
      { l__pdf_hook_startlink_#1_attr_prop }
-     \pdf__get_key_value:nn
+     \__pdf_get_key_value:nn
   }
   { #2 }
 }
 
+% At second one with the \texttt{goto name} argument:
 \cs_new_protected:Nn \pdf_startlink_goto_name:nn %#1 type, #2 destination
 {
  \seq_use:cn { l__pdf_hook_startlink_#1_seq }{}
@@ -219,7 +222,7 @@
   {
     \prop_map_function:cN
      { l__pdf_hook_startlink_#1_attr_prop }
-     \pdf__get_key_value:nn
+     \__pdf_get_key_value:nn
   }
   { #2 }
 }

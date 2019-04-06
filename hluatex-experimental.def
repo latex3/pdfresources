@@ -6,7 +6,7 @@
 %%
 
 \ProvidesFile{hluatex-experimental.def}
-  [2019/03/09 v0.1 %
+  [2019/04/06 v0.2 %
   Hyperref driver for luaTeX]
 %%\Hy@VersionCheck{hluatex.def}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -496,17 +496,33 @@
   \pdf@endanchor
   \Hy@activeanchorfalse
 }
-\def\hyper@linkstart#1#2{%
-  \Hy@VerboseLinkStart{#1}{#2}%
-  \ltx@IfUndefined{@#1bordercolor}{%
-    \let\CurrentBorderColor\relax
-  }{%
-    \edef\CurrentBorderColor{\csname @#1bordercolor\endcsname}%
-  }%
-  \find@pdflink{#1}{#2}%
-}
-\def\hyper@linkend{\close@pdflink}
+
 \ExplSyntaxOn
+% #1 is for the color only: found {cite} and {link}
+% #2 is the destination find@pdflink uses than named link
+\def\hyper@linkstart#1#2{%
+  \Hy@VerboseLinkStart{#1}{#2}% only for debug
+  \tl_if_exist:cTF  %or test for blank??
+   { @#1bordercolor }
+   {
+    \hook_put:nnnn
+     { pdf }
+     { startlink_link_attr }
+     { /C }{ [\tl_use:c { @#1bordercolor }] } %do I need to expand?? seems not
+   }
+   {
+    \hook_remove:nnn
+     { pdf }
+     { startlink_link_attr }
+     { /C }
+   }
+  \find@pdflink{#1}{#2}% #1=color type
+}
+
+% the endlink muss have the same type as the start?
+% probably always link works
+\def\hyper@linkend{\close@EXPpdflink { link }}
+
 \def\hyper@link#1#2#3{%
   \Hy@VerboseLinkStart{#1}{#2}%
   \tl_if_exist:cTF
