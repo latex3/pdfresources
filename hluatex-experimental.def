@@ -499,7 +499,7 @@
 
 \ExplSyntaxOn
 % #1 is for the color only: found {cite} and {link}
-% #2 is the destination find@pdflink uses than named link
+% #2 is the destination find@pdflink uses then named link
 \def\hyper@linkstart#1#2{%
   \Hy@VerboseLinkStart{#1}{#2}% only for debug
   \tl_if_exist:cTF  %or test for blank??
@@ -2062,43 +2062,7 @@
 \expandafter\def\csname Parent2\endcsname{}
 \expandafter\def\csname Parent3\endcsname{}
 \expandafter\def\csname Parent4\endcsname{}
-\def\Hy@tempa{%
-  \def\@addchap[##1]##2{%
-    \typeout{##2}%
-    \if@twoside
-      \@mkboth{##1}{}%
-    \else
-      \@mkboth{}{##1}%
-    \fi
-    \addtocontents{lof}{\protect\addvspace{10\p@}}%
-    \addtocontents{lot}{\protect\addvspace{10\p@}}%
-    \Hy@MakeCurrentHrefAuto{\Hy@chapapp*}%
-    \Hy@raisedlink{%
-      \hyper@anchorstart{\@currentHref}\hyper@anchorend
-    }%
-    \if@twocolumn
-       \@topnewpage[\@makeschapterhead{##2}]%
-    \else
-       \@makeschapterhead{##2}%
-       \@afterheading
-    \fi
-    \addcontentsline{toc}{chapter}{##1}%
-  }%
-}
-\@ifclassloaded{scrbook}{%
-  \@ifclasslater{scrbook}{2001/01/01}{%
-    \let\Hy@tempa\@empty
-  }{}%
-}{%
-  \@ifclassloaded{scrreprt}{%
-    \@ifclasslater{scrreprt}{2001/01/01}{%
-      \let\Hy@tempa\@empty
-    }{}%
-  }{%
-    \let\Hy@tempa\@empty
-  }%
-}%
-\Hy@tempa
+
 %%
 %% End of file `hluatex.def'.
 \endinput
