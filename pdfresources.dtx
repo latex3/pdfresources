@@ -84,6 +84,37 @@
 %<*pdfmode>
 %    \end{macrocode}
 %
+% \begin{macro}{\driver_pdf_startlink_goto:nn, \driver_pdf_startlink_user:nn}
+% \begin{macro}{\@@_pdf_startlink:nnn}
+%    \begin{macrocode}
+\cs_new_protected:Npn \driver_pdf_startlink_goto:nn #1#2
+  { \@@_pdf_startlink:nn {#1} { goto~name } {#3} }
+\cs_new_protected:Npn \driver_pdf_startlink_user:nn #1#2
+  { \@@_pdf_startlink:nn {#1} { user } {#3} }
+\cs_new_protected:Npx \@@_pdf_startlink:nn #1#2#3
+  {
+    \cs_if_exist:NTF \tex_pdfextension:D
+      { \tex_pdfextension:D startlink ~ }
+      { \tex_pdfstartlink:D }
+      attr {#1}
+      \exp_not:N \tl_if_blank:nF {#2}
+        { ~ #2 {#3} }
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\driver_pdf_endlink:}
+%    \begin{macrocode}
+\cs_new_protected:Npx \@@_pdf_endline:
+  {
+    \cs_if_exist:NTF \tex_pdfextension:D
+      { \tex_pdfextension:D endlink }
+      { \tex_pdfendlink:D }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
 %    \begin{macrocode}
 %</pdfmode>
 %    \end{macrocode}
