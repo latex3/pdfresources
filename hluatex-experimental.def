@@ -6,13 +6,30 @@
 %%
 
 \ProvidesFile{hluatex-experimental.def}
-  [2019/04/06 v0.2 %
+  [2019/04/07 v0.2 %
   Hyperref driver for luaTeX]
 %%\Hy@VersionCheck{hluatex.def}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % variants of hyperref commands to get attributes in the prop
 \RequirePackage{xparse}
 \ExplSyntaxOn
+%% messages, should later (with more drivers) go somewhere more generic ...
+\prop_gput:Nnn \g_msg_module_name_prop { hyp }{ hyperref }
+\msg_new:nnn
+  {hyp}
+  {missing-bookmark-package}
+  { The~bookmark~package~is~required~for~this~hyperref~driver!}
+%% I'm require the bookmark package to get rid of some of the bookmarks code.
+\AtEndOfPackage{% so that we are later than KOMA ...
+\AtBeginDocument
+ {
+  \ltx@ifpackageloaded{bookmark}
+   {}
+   {\msg_error:nn {hyp}{missing-bookmark-package}}
+ }}
+
+%these are commands to fill various attributes (color, border style) in
+% the hooks for links.
 \def\Hy@EXPsetpdfborder
  {
  \clist_map_inline:nn { url , file , run , link}
@@ -130,8 +147,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \ExplSyntaxOn
+% catalog mapped to expl3 command
 \pdf@ifdraftmode{%
-  \let\Hy@PutCatalog\ltx@gobble
+  \let\Hy@PutCatalog \use_none:n
 }{%
   \let\Hy@PutCatalog \driver_pdf_catalog:n
 }
@@ -815,37 +833,18 @@
     \Hy@RemoveDurPageAttr#1#4\END
   \fi
 }
-\def\hyper@pagehidden{%
-  \ifHy@useHidKey
-    \expandafter
-    \Hy@RemoveHidPageAttr\the\pdfpageattr^^J/Hid{} \END
-    \ifHy@pdfpagehidden
-      \edef\@processme{%
-        \global\pdfpageattr{%
-          \the\pdfpageattr
-          ^^J/Hid true % SPACE
-        }%
-      }%
-      \@processme
-    \fi
-  \fi
-}
-\gdef\Hy@RemoveHidPageAttr#1^^J/Hid#2#3 #4\END{%
-  \ifx\\#2\\%
-    \global\pdfpageattr{#1}%
-  \else
-    \Hy@RemoveHidPageAttr#1#4\END
-  \fi
-}
+%UF removed hyper@pagehidden (obsolete key)
+%   removed \Hy@RemoveHidPageAttr#1^^J/Hid#2#3 #4\END{%
+
 \pdf@ifdraftmode{}{%
   \g@addto@macro\Hy@EveryPageHook{%
     \hyper@pagetransition
     \hyper@pageduration
-    \hyper@pagehidden
+    %\hyper@pagehidden %UF is obsolete
   }%
 }
 
-%%% removed setpagesize code, should be done by kernel/graphicx
+%%% UF removed setpagesize code, should be done by kernel/graphicx
 
 \def\Acrobatmenu#1#2{%
   \Hy@Acrobatmenu{#1}{#2}{%
@@ -874,7 +873,7 @@
     \close@pdflink
   }%
 }
-%%% removed old atbegshi fix
+%%% UF removed old atbegshi fix
 
 \def\@Gauge[#1]#2#3#4{% parameters, label, minimum, maximum
   \Hy@Message{Sorry, pdftex does not support FORM gauges}%
@@ -1720,231 +1719,29 @@
     \Fld@additionalactions
   }%
 \fi
-\def\Hy@writebookmark#1#2#3#4#5{%
-    % section number, text, label, level, file
-  \ifx\WriteBookmarks\relax%
-  \else
-    \ifnum#4>\Hy@bookmarksdepth\relax
-    \else
-      \@@writetorep{#1}{#2}{#3}{#4}{#5}%
-    \fi
-  \fi
-}
-\def\Hy@currentbookmarklevel{0}
-\def\Hy@numberline#1{#1 }
-\def\@@writetorep#1#2#3#4#5{%
-  \begingroup
-    \edef\Hy@tempa{#5}%
-    \ifx\Hy@tempa\Hy@bookmarkstype
-      \edef\Hy@level{#4}%
-      \ifx\Hy@levelcheck Y%
-        \@tempcnta\Hy@level\relax
-        \advance\@tempcnta by -1 %
-        \ifnum\Hy@currentbookmarklevel<\@tempcnta
-          \advance\@tempcnta by -\Hy@currentbookmarklevel\relax
-          \advance\@tempcnta by 1 %
-          \Hy@Warning{%
-            Difference (\the\@tempcnta) between bookmark levels is %
-            greater \MessageBreak than one, level fixed%
-          }%
-          \@tempcnta\Hy@currentbookmarklevel
-          \advance\@tempcnta by 1 %
-          \edef\Hy@level{\the\@tempcnta}%
-        \fi
-      \else
-        \global\let\Hy@levelcheck Y%
-      \fi
-      \global\let\Hy@currentbookmarklevel\Hy@level
-      \@tempcnta\Hy@level\relax
-      \expandafter\xdef\csname Parent\Hy@level\endcsname{#3}%
-      \advance\@tempcnta by -1 %
-      \edef\Hy@tempa{#3}%
-      \edef\Hy@tempb{\csname Parent\the\@tempcnta\endcsname}%
-      \ifx\Hy@tempa\Hy@tempb
-        \Hy@Warning{%
-          The anchor of a bookmark and its parent's must not%
-          \MessageBreak be the same. Added a new anchor%
-        }%
-        \phantomsection
-      \fi
-      \ifHy@bookmarksnumbered
-        \let\numberline\Hy@numberline
-        \let\booknumberline\Hy@numberline
-        \let\partnumberline\Hy@numberline
-        \let\chapternumberline\Hy@numberline
-      \else
-        \let\numberline\@gobble
-        \let\booknumberline\@gobble
-        \let\partnumberline\@gobble
-        \let\chapternumberline\@gobble
-      \fi
-      \HyPsd@XeTeXBigCharstrue
-      \pdfstringdef\Hy@tempa{#2}%
-      \HyPsd@SanitizeForOutFile\Hy@tempa
-      \if@filesw
-        \stepcounter{bookmark@seq@number}%
-        \@ifundefined{@outlinefile}{%
-        }{%
-          \protected@write\@outlinefile{}{%
-            \protect\BOOKMARK
-              [\Hy@level][\@bookmarkopenstatus{\Hy@level}]{#3}%
-              {\Hy@tempa}{\Hy@tempb}%
-              \@percentchar\space\thebookmark@seq@number
-          }%
-        }%
-      \fi
-    \fi
-  \endgroup
-}
-\newcounter{bookmark@seq@number}
-\begingroup
-  \lccode`(=`{%
-  \lccode`)=`}%
-  \lccode`1=\z@
-  \lccode`2=\z@
-  \lccode`3=\z@
-  \lccode`5=\z@
-  \lccode`7=\z@
-  \lccode`\#=\z@
-  \lccode`\`=\z@
-  \lccode`\{=\z@
-  \lccode`\}=\z@
-\lowercase{%
-  \endgroup
-  \def\HyPsd@SanitizeForOutFile#1{%
-    \@onelevel@sanitize\Hy@tempa
-    \escapechar`\\%
-    \edef\Hy@tempa{%
-      \expandafter\HyPsd@SanitizeOut@BraceLeft\Hy@tempa(\@nil
-    }%
-    \edef\Hy@tempa{%
-      \expandafter\HyPsd@SanitizeOut@BraceRight\Hy@tempa)\@nil
-    }%
-  }%
-  \def\HyPsd@SanitizeOut@BraceLeft#1(#2\@nil{%
-    #1%
-    \ifx\\#2\\%
-      \expandafter\ltx@gobble
-    \else
-      \expandafter\ltx@firstofone
-    \fi
-    {%
-      \string\173%
-      \HyPsd@SanitizeOut@BraceLeft#2\@nil
-    }%
-  }%
-  \def\HyPsd@SanitizeOut@BraceRight#1)#2\@nil{%
-    #1%
-    \ifx\\#2\\%
-      \expandafter\ltx@gobble
-    \else
-      \expandafter\ltx@firstofone
-    \fi
-    {%
-      \string\175%
-      \HyPsd@SanitizeOut@BraceRight#2\@nil
-    }%
-  }%
-}
-\newcommand{\currentpdfbookmark}{%
-  \pdfbookmark[\Hy@currentbookmarklevel]%
-}
-\newcommand{\subpdfbookmark}{%
-  \@tempcnta\Hy@currentbookmarklevel
-  \Hy@StepCount\@tempcnta
-  \expandafter\pdfbookmark\expandafter[\the\@tempcnta]%
-}
-\newcommand{\belowpdfbookmark}[2]{%
-  \@tempcnta\Hy@currentbookmarklevel
-  \Hy@StepCount\@tempcnta
-  \expandafter\pdfbookmark\expandafter[\the\@tempcnta]{#1}{#2}%
-  \advance\@tempcnta by -1 %
-  \xdef\Hy@currentbookmarklevel{\the\@tempcnta}%
-}
-\renewcommand\pdfbookmark[3][0]{%
-  \Hy@writebookmark{}{#2}{#3.#1}{#1}{toc}%
-  \hyper@anchorstart{#3.#1}\hyper@anchorend
-}
-\def\BOOKMARK{%
-  \@ifnextchar[{\@BOOKMARK}{\@@BOOKMARK[1][-]}%
-}
-\def\@BOOKMARK[#1]{%
-  \@ifnextchar[{\@@BOOKMARK[{#1}]}{\@@BOOKMARK[{#1}][-]}%
-}
-\RequirePackage{rerunfilecheck}[2009/12/10]
-\def\Hy@OutlineRerunCheck{%
-  \RerunFileCheck{\jobname.out}{%
-    \immediate\closeout\@outlinefile
-  }{%
-    Rerun to get outlines right\MessageBreak
-    or use package `bookmark'%
-  }%
-}
-\def\ReadBookmarks{%
-  \pdf@ifdraftmode{}{%
-    \begingroup
-      \def\do##1{%
-        \ifnum\catcode`##1=\active
-          \@makeother##1%
-        \else
-          \ifnum\catcode`##1=6 %
-            \@makeother##1%
-          \fi
-        \fi
-      }%
-      \dospecials
-      \Hy@safe@activestrue
-      \escapechar=`\\%
-      \def\@@BOOKMARK[##1][##2]##3##4##5{%
-        \calc@bm@number{##5}%
-      }%
-      \InputIfFileExists{\jobname.out}{}{}%
-      \ifx\WriteBookmarks\relax
-        \global\let\WriteBookmarks\relax
-      \fi
-      \def\@@BOOKMARK[##1][##2]##3##4##5{%
-        \def\Hy@temp{##4}%
-        \Hy@pstringdef\Hy@pstringName{\HyperDestNameFilter{##3}}%
-        \Hy@OutlineName{}\Hy@pstringName{%
-          ##2\check@bm@number{##3}%
-        }{%
-          \expandafter\strip@prefix\meaning\Hy@temp
-        }%
-      }%
-      \begingroup
-        \def\WriteBookmarks{0}%
-        \InputIfFileExists{\jobname.out}{}{}%
-      \endgroup
-      %{\escapechar\m@ne\InputIfFileExists{\jobname.out}{}{}}%
-    \endgroup
-  }%
-  \ifx\WriteBookmarks\relax
-  \else
-    \if@filesw
-      \newwrite\@outlinefile
-      \Hy@OutlineRerunCheck
-      \immediate\openout\@outlinefile=\jobname.out\relax
-      \ifHy@typexml
-        \immediate\write\@outlinefile{<relaxxml>\relax}%
-      \fi
-    \fi
-  \fi
-}
-\def\Hy@OutlineName#1#2#3#4{%
-  \pdfextension outline goto name{#2}count#3{#4}%
-}
-\def\check@bm@number#1{%
-  \expandafter\ifx\csname B_#1\endcsname\relax
-    0%
-  \else
-    \csname B_#1\endcsname
-  \fi
-}
-\def\calc@bm@number#1{%
-  \@tempcnta=\check@bm@number{#1}\relax
-  \advance\@tempcnta by 1 %
-  \expandafter\xdef\csname B_#1\endcsname{\the\@tempcnta}%
-}
+
+% UF: removed Hy@writebookmark
+%     \Hy@currentbookmarklevel{0}
+%     \Hy@numberline
+%     \@@writetorep
+%     counter{bookmark@seq@number}
+% removed \HyPsd@SanitizeForOutFile, not needed
+% removed \currentpdfbookmark, defined by bookmark,
+% should use \newcommand there
+% removed \subpdfbookmark, defined by bookmark,
+% should use \newcommand there
+% removed \belowpdfbookmark, defined by bookmark,
+% should use \newcommand there
+% removed \pdfbookmark, defined by bookmark,
+% \BOOKMARK
+% \@BOOKMARK
+%% \RequirePackage{rerunfilecheck}[2009/12/10]
+%% removed \Hy@OutlineRerunCheck, unneeded with bookmark
+%% removed \ReadBookmarks / unneeded with bookmark.
+%% removed \Hy@OutlineName
+%% removed \check@bm@number
+%% removed \calc@bm@number
+
 \ifHy@implicit
 \else
   \expandafter\endinput
