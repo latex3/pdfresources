@@ -186,7 +186,7 @@
 % Currently only pdftex, luatex and xetex are setup. Some commands can probably not be
 % implemented in all drivers.
 %    \begin{macrocode}
-
+%<*package>
 \sys_if_engine_pdftex:T
 {
  \cs_new_protected:Nn \driver_pdf_lastlink:
@@ -198,6 +198,7 @@
  {
   \pdfcatalog { #1 }
  }
+\input{l3pdfmode-pdf.def}
 }
 
 \sys_if_engine_luatex:T
@@ -211,14 +212,16 @@
  {
   \pdfextension catalog { #1 }
  }
-
+\input{l3pdfmode-pdf.def}
 }
 
 \sys_if_engine_xetex:T
 {
  %% \cs_new_protected:Nn \driver_pdf_startlink_goto_name:nn %????
  %% \cs_new_protected:Nn \driver_pdf_catalog:n ????
+ \input{l3dvipdfmx-pdf.def}
 }
+%</package>
 %    \end{macrocode}
 % \section{Management code}
 % \subsection{Higher-level link management}
@@ -227,7 +230,9 @@
 % So we need a generic command to start a pdflink which allows packages to add
 % their code to the \texttt{attr} argument through hooks.
 %    \begin{macrocode}
+%<*package>
 \cs_new:Nn \__pdf_get_key_value:nn { #1~#2~ } %name?????
+%</package>
 %    \end{macrocode}
 % Attributes are stored in a property list. Packages can add attributes through
 % dedicated command. We assume that there will be different link types
@@ -236,15 +241,18 @@
 % Probably we will need some commands to fill more than one prop ...
 %
 %    \begin{macrocode}
+%<*package>
 \prop_new:N\l__pdf_hook_startlink_url_attr_prop  %\hyper@linkurl
 \prop_new:N\l__pdf_hook_startlink_file_attr_prop %\hyper@linkfile
 \prop_new:N\l__pdf_hook_startlink_run_attr_prop  %\@hyper@launch run
 \prop_new:N\l__pdf_hook_startlink_link_attr_prop %\hyper@link, \find@pdflink
+%</package>
 %    \end{macrocode}
 %
 % High-level startlink commands that uses the stored attributes:
 % At first one with the \texttt{user} argument:
 %    \begin{macrocode}
+%<*package>
 \cs_new_protected:Nn \pdf_startlink_user:nn %#1 type, #2 action spec
 {
  \seq_use:cn { l__pdf_hook_startlink_#1_seq }{}
@@ -269,6 +277,7 @@
   }
   { #2 }
 }
+%</package>
 %    \end{macrocode}
 %
 % \subsubsection{Endlink}
@@ -276,6 +285,7 @@
 % So we need a hook. For now the hook is a seq: This will perhaps allows a system to
 % add and remove hooks by index. The hook depends on the type.
 %    \begin{macrocode}
+%<*package>
 \seq_new:N \l__pdf_hook_endlink_url_seq
 \seq_new:N \l__pdf_hook_endlink_run_seq
 \seq_new:N \l__pdf_hook_endlink_file_seq
@@ -287,16 +297,18 @@
   \seq_use:cn { l__pdf_hook_endlink_#1_seq }{}
  }
 
-
+%</package>
 %    \end{macrocode}
 % \subsection{Before the links}
 % Both hyperref and tagpdf wants to insert code before the \cs{pdfstartlink} so lets
 % setup hooks for this too:
 %    \begin{macrocode}
+%<*package>
 \seq_new:N \l__pdf_hook_startlink_url_seq
 \seq_new:N \l__pdf_hook_startlink_run_seq
 \seq_new:N \l__pdf_hook_startlink_file_seq
 \seq_new:N \l__pdf_hook_startlink_link_seq
+%</package>
 %    \end{macrocode}
 %
 % \section{Hook management}
@@ -361,6 +373,7 @@
 % \cs{l__<module>_hook_<hook-name>_prop}
 %
 %    \begin{macrocode}
+%<*package>
 \cs_new:Nn \hook_put_right:nnn
  {
   \seq_put_right:cn { l__#1_hook_#2_seq } { #3 }
@@ -390,9 +403,8 @@
  {
   \prop_gremove:cn { g__#1_hook_#2_prop } { #3 }
  }
-
+%</package>
 %    \end{macrocode}
-%
 %
 %
 % \PrintIndex
