@@ -62,9 +62,12 @@
 % \begin{itemize}
 %   \item \cs{pgfutil@addpdfresource@extgs}: Extended graphics state
 %   \item \cs{pgfutil@addpdfresource@colorspaces}: Color spaces
-%   \item \cs{pgfutil@addpdfresource@patterns}: Pattterns
+%   \item \cs{pgfutil@addpdfresource@patterns}: Patterns
 % \end{itemize}
-% All of these are additive.
+%
+% These resource dictionaries are used by adding entries in a cumulative sense;
+% the macro layer deals with ensuring that each entry is only given once. Note
+% that the objects themselves must be given only once for each page.
 %
 % To support these functions, there are a series of set-up macros which install
 % these resources. That has to take place for every page: the exact route
@@ -72,11 +75,113 @@
 %
 % \subsection{\pkg{media9}}
 %
-% \section{Managing Links}
-% \subsection{new experimental l3driver commands}
-% pdftex and luatex the startlink commands can use different \enquote{action spec}
+% \section{New driver Code}
+% \subsection{already revisited }
+%
+%    \begin{macrocode}
+%<*drivers>
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%<@@=driver>
+%    \end{macrocode}
+%
+% \subsubsection{\texttt{pdfmode} driver}
+%
+%    \begin{macrocode}
+%<*pdfmode>
+%    \end{macrocode}
+%
+% \begin{macro}{\driver_pdf_startlink_goto:nn, \driver_pdf_startlink_user:nn}
+% \begin{macro}{\@@_pdf_startlink:nnn}
+%    \begin{macrocode}
+\cs_new_protected:Npn \driver_pdf_startlink_goto:nn #1#2
+  { \@@_pdf_startlink:nnn {#1} { goto~name } {#3} }
+\cs_new_protected:Npn \driver_pdf_startlink_user:nn #1#2
+  { \@@_pdf_startlink:nnn {#1} { user } {#3} }
+\cs_new_protected:Npx \@@_pdf_startlink:nn #1#2#3
+  {
+    \cs_if_exist:NTF \tex_pdfextension:D
+      { \tex_pdfextension:D startlink ~ }
+      { \tex_pdfstartlink:D }
+      attr {#1}
+      \exp_not:N \tl_if_blank:nF {#2}
+        { ~ #2 {#3} }
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\driver_pdf_endlink:}
+%    \begin{macrocode}
+\cs_new_protected:Npx \@@_pdf_endlink:
+  {
+    \cs_if_exist:NTF \tex_pdfextension:D
+      { \tex_pdfextension:D endlink }
+      { \tex_pdfendlink:D }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+%    \begin{macrocode}
+%</pdfmode>
+%    \end{macrocode}
+%
+% \subsubsection{\texttt{(x)dvipdfmx} driver}
+%
+%    \begin{macrocode}
+%<*dvipdfmx|dvixpdfmx>
+%    \end{macrocode}
+%
+% \begin{macro}{\@@_pdf:n}
+%    \begin{macrocode}
+\cs_new_protected:Npx \@@_pdf:n #1
+  { \@@_literal:n { pdf: #1 } }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\driver_pdf_startlink_goto:nn, \driver_pdf_startlink_user:nn}
+% \begin{macro}{\@@_pdf_startlink:nnn}
+%    \begin{macrocode}
+\cs_new_protected:Npn \driver_pdf_startlink_goto:nn #1#2
+  { \@@_pdf_startlink:nnn {#1} { /GoTo } {#3} }
+\cs_new_protected:Npn \driver_pdf_startlink_user:nn #1#2
+  { \@@_pdf_startlink:nnn {#1} { } {#3} }
+\cs_new_protected:Npn \@@_pdf_startlink:nn #1#2#3
+  {
+    \@@_pdf:n
+      {
+         bann
+         <<
+           /Type /Annot
+           #1 ~ #2 ~ #3
+         >>
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\driver_pdf_endlink:}
+%    \begin{macrocode}
+\cs_new_protected:Npx \@@_pdf_endlink:
+  { \@@_pdf:n { eann } }
+%    \end{macrocode}
+% \end{macro}
+%
+%    \begin{macrocode}
+%</dvipdfmx|dvixpdfmx>
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%</drivers>
+%    \end{macrocode}
+%
+%
+% \subsection{driver commands / experimental}
+% Notes: pdftex and luatex the startlink commands can use different \enquote{action spec}
 % \texttt{user}, \texttt{goto} and \texttt{thread}. To be able to translate this to
-% other drivers, three startlink variant are defined.
+% other drivers, startlink variants are defined.
 % Variants which allow also to set the rule spec are perhaps needed too.
 % Currently only pdftex, luatex and xetex are setup. Some commands can probably not be
 % implemented in all drivers.
@@ -84,29 +189,6 @@
 
 \sys_if_engine_pdftex:T
 {
- \cs_new_protected:Nn \driver_pdf_startlink_user:nn
- {
-   \pdfstartlink
-    attr { #1 }
-    ~
-    user { #2 }
-    \relax %?needed, hyperref seems to think so
- }
-
- \cs_new_protected:Nn \driver_pdf_startlink_goto_name:nn
- {
-   \pdfstartlink
-    attr { #1 }
-    ~
-    goto~name { #2 }
-    \relax %?needed, hyperref seems to think so
- }
-
- \cs_new_protected:Nn \driver_pdf_endlink:
- {
-  \pdfendlink
- }
-
  \cs_new_protected:Nn \driver_pdf_lastlink:
  {
   \pdflastlink
@@ -116,34 +198,10 @@
  {
   \pdfcatalog { #1 }
  }
-
 }
 
 \sys_if_engine_luatex:T
 {
- \cs_new_protected:Nn \driver_pdf_startlink_user:nn
- {
-   \pdfextension startlink
-    attr { #1 }
-    ~
-    user { #2 }
-    \relax %?needed, hyperref seems to think so
- }
-
- \cs_new_protected:Nn \driver_pdf_startlink_goto_name:nn
- {
-   \pdfextension startlink
-    attr { #1 }
-    ~
-    goto~name { #2 }
-    \relax %?needed, hyperref seems to think so
- }
-
- \cs_new_protected:Nn \driver_pdf_endlink:
- {
-  \pdfextension endlink
- }
-
  \cs_new_protected:Nn \driver_pdf_lastlink:
  {
   \numexpr\pdffeedback lastlink\relax
@@ -158,26 +216,11 @@
 
 \sys_if_engine_xetex:T
 {
- \cs_new_protected:Nn \driver_pdf_startlink_user:nn
- {
-  \special
-  {
-    pdf:bann
-    <<
-     /Type/Annot
-     #1~#2
-    >>
-  }
- }
  %% \cs_new_protected:Nn \driver_pdf_startlink_goto_name:nn %????
- \cs_new_protected:Nn \driver_pdf_endlink:
- {
-  \special{pdf:eann}
- }
  %% \cs_new_protected:Nn \driver_pdf_catalog:n ????
 }
 %    \end{macrocode}
-%
+% \section{Management code}
 % \subsection{Higher-level link management}
 % \subsubsection{Startlink}
 % packages like ocgx2 and tagpdf wants to add code to links/annotation created by hyperref.
@@ -218,7 +261,7 @@
 \cs_new_protected:Nn \pdf_startlink_goto_name:nn %#1 type, #2 destination
 {
  \seq_use:cn { l__pdf_hook_startlink_#1_seq }{}
- \driver_pdf_startlink_goto_name:nn
+ \driver_pdf_startlink_goto:nn
   {
     \prop_map_function:cN
      { l__pdf_hook_startlink_#1_attr_prop }
@@ -311,7 +354,7 @@
 %
 % \cs{hook_put_right:nnn}\verb+{<module>}{<hook-name>}{value}+ (seq- or tl-type)
 % or in the case of  properties
-% \cs{hook_put:nnnn {<module>}{<hook-name>}{<key>}{<value>}
+% \cs{hook_put:nnnn} {<module>}{<hook-name>}{<key>}{<value>}
 %
 % hooks should be manipulated only through such access functions. So their
 % name should be an internal command of the module. E.g.
