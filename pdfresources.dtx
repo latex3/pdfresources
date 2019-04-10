@@ -230,7 +230,67 @@
 }
 %</package>
 %    \end{macrocode}
-% \section{Management code}
+% \section{Management code / pdf Module}
+%<@@=pdf>
+% \subsection{Comparing pdf versions}
+% The code assumes that the versions are two integers separated by a period.
+% \begin{macro}{\pdf_version_compare:Nn}
+%    \begin{macrocode}
+%<*package>
+\cs_new:cpn { @@_version_compare_=:w } #1 .#2 . #3\q_stop
+ {
+   \bool_if:nTF
+    {
+     \int_compare_p:n { \driver_pdf_majorversion: = #1  }
+     &&
+     \int_compare_p:n { \driver_pdf_minorversion: = #2}
+    }
+    { \prg_return_true: }
+    { \prg_return_false: }
+ }
+
+\cs_new:cpn { @@_version_compare_<:w } #1 .#2 . #3\q_stop
+ {
+   \bool_if:nTF
+    {
+     \int_compare_p:n  { \driver_pdf_majorversion: < #1}
+     ||
+     (
+      \int_compare_p:n { \driver_pdf_majorversion: = #1 }
+      &&
+      \int_compare_p:n { \driver_pdf_minorversion: < #2 }
+     )
+    }
+    { \prg_return_true: }
+    { \prg_return_false: }
+ }
+
+\cs_new:cpn { @@_version_compare_>:w } #1 .#2 . #3\q_stop
+ {
+   \bool_if:nTF
+    {
+     \int_compare_p:n  { \driver_pdf_majorversion: > #1}
+     ||
+     (
+      \int_compare_p:n { \driver_pdf_majorversion: = #1}
+      &&
+      \int_compare_p:n { \driver_pdf_minorversion: > #2 }
+     )
+    }
+    { \prg_return_true: }
+    { \prg_return_false: }
+ }
+
+\prg_new_conditional:Npnn \pdf_version_compare:Nn #1 #2
+ {
+  p,T,F,TF
+ }
+ {
+  \use:c {@@_version_compare_#1:w} #2 . . \q_stop
+ }
+%</package>
+%    \end{macrocode}
+% \end{macro}
 % \subsection{Higher-level link management}
 % \subsubsection{Startlink}
 % packages like ocgx2 and tagpdf wants to add code to links/annotation created by hyperref.

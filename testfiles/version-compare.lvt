@@ -1,0 +1,26 @@
+\input{regression-test}
+\documentclass{article}
+
+\usepackage{pdfresources}
+\begin{document}\START\showoutput
+\ExplSyntaxOn
+
+$>$  1.4:~\pdf_version_compare:NnTF > {1.4}{true}{false}
+\par
+$>$  2.0:~\pdf_version_compare:NnTF > {2.0}{true}{false}
+\par
+$=$  1.4:~\pdf_version_compare:NnTF = {1.4}{true}{false}
+\par
+$=$  1.5:~\pdf_version_compare:NnTF = {1.5}{true}{false}
+\par
+$<$  1.5:~\pdf_version_compare:NnTF < {1.5}{true}{false}
+\par
+$<$  1.6:~\pdf_version_compare:NnTF < {1.6}{true}{false}
+
+
+\par 
+\driver_pdf_majorversion:\driver_pdf_minorversion:
+
+\ExplSyntaxOff
+
+\end{document}
