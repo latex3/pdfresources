@@ -198,6 +198,9 @@
  {
   \pdfcatalog { #1 }
  }
+
+ \cs_new:Npn \driver_pdf_minorversion: { \tex_the:D \tex_pdfminorversion:D }
+ \cs_new:Npn \driver_pdf_majorversion: { 1 }
 \input{l3pdfmode-pdf.def}
 }
 
@@ -212,6 +215,10 @@
  {
   \pdfextension catalog { #1 }
  }
+
+ \cs_new:Npn \driver_pdf_minorversion: { \tex_the:D \pdfvariable~minorversion }
+ \cs_new:Npn \driver_pdf_majorversion: { \tex_the:D \pdfvariable~majorversion }
+
 \input{l3pdfmode-pdf.def}
 }
 

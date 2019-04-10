@@ -235,11 +235,13 @@
 \edef\Hy@pdfminorversion{\pdfvariable minorversion}%
 \edef\Hy@pdfmajorversion{\pdfvariable majorversion}%
 
+\ExplSyntaxOn
   \ifHy@ocgcolorlinks
     \ifnum\Hy@pdfminorversion<5 %
       \kvsetkeys{Hyp}{pdfversion=1.5}%
     \fi
   \fi
+\ExplSyntaxOff
   \ifHy@setpdfversion
     \ifnum\Hy@pdfversion<5 %
       \ltx@IfUndefined{pdfobjcompresslevel}{%
