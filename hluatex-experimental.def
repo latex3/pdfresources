@@ -28,6 +28,16 @@
    {\msg_error:nn {hyp}{missing-bookmark-package}}
  }}
 
+%this need sorting out later.
+\AtBeginDocument
+{
+   \ifHy@pdfa
+    \hook_put:nnnn
+     { pdf }
+     { startlink_url_attr }
+     { /F }{ 4 } %
+    \fi
+}
 %these are commands to fill various attributes (color, border style) in
 % the hooks for links.
 \def\Hy@EXPsetpdfborder
@@ -571,15 +581,13 @@
 
 \let\CurrentBorderColor\@linkbordercolor
 \ExplSyntaxOn
-\def\hyper@linkurl#1#2{%
-  \begingroup
+\def\hyper@linkurl#1#2{%#1:link text #2: URI,
+  \group_begin:
     \Hy@pstringdef\Hy@pstringURI{#2}%
     \hyper@chars
-    \leavevmode
-    \pdf_startlink_user:nn { url }
-    {
-       /Subtype/Link
-       \ifHy@pdfa /F~4\fi
+    \mode_leave_vertical:
+    \pdf_link_user:nnn { url }
+     {
        /A<<
          /Type/Action~
          /S/URI~
@@ -590,9 +598,13 @@
          \Hy@href@nextactionraw
        >>
     }
-    \Hy@colorlink\@urlcolor#1\Hy@xspace@end
-    \close@EXPpdflink { url }
-  \endgroup
+    {
+     \Hy@colorlink
+     \@urlcolor#1\Hy@xspace@end
+     \Hy@endcolorlink
+     \Hy@VerboseLinkStop
+    }
+  \group_end:
 }
 \ExplSyntaxOff
 
