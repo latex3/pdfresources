@@ -19,7 +19,7 @@
   {hyp}
   {missing-bookmark-package}
   { The~bookmark~package~is~required~for~this~hyperref~driver!}
-%% I'm require the bookmark package to get rid of some of the bookmarks code.
+%% I require the bookmark package to get rid of some of the bookmarks code.
 \AtEndOfPackage{% so that we are later than KOMA ...
 \AtBeginDocument
  {
@@ -237,11 +237,11 @@
 
 \ExplSyntaxOn
   \ifHy@ocgcolorlinks
-    \ifnum\Hy@pdfminorversion<5 %
-      \kvsetkeys{Hyp}{pdfversion=1.5}%
-    \fi
+    \pdf_version_min_gset:n { 1.5 }
   \fi
 \ExplSyntaxOff
+% should this go into the drivers?
+% or in the pdf level?
   \ifHy@setpdfversion
     \ifnum\Hy@pdfversion<5 %
       \ltx@IfUndefined{pdfobjcompresslevel}{%
@@ -431,16 +431,15 @@
 \else
   \Hy@DisableOption{ocgcolorlinks}
 \fi
+
+\def\setpdflinkmargin#1
+ {
+   \driver_pdf_link_margin:n { #1 }
+ }
+ % default:
+ \driver_pdf_link_margin:n { 1pt}
 \ExplSyntaxOff
 
-\def\setpdflinkmargin#1{%
-  \begingroup
-    \setlength{\dimen@}{#1}%
-  \expandafter\endgroup
-  \expandafter\pdflinkmargin\the\dimen@\relax
-}
-
-\pdflinkmargin1pt %
 
 \providecommand*\@pdfview{XYZ}
 \Hy@WrapperDef\new@pdflink#1{%
@@ -457,9 +456,13 @@
   \fi
 }
 \let\pdf@endanchor\@empty
-\def\Hy@DestName#1#2{%
-  \pdfextension dest name{#1}#2\relax
-}
+
+\ExplSyntaxOn
+\def\Hy@DestName#1#2
+ {
+  \driver_pdf_dest_name:nn {#1}{#2}
+ }
+\ExplSyntaxOff
 \providecommand*\@pdfborder{0 0 1}
 \providecommand*\@pdfborderstyle{}
 \def\Hy@undefinedname{UNDEFINED}
@@ -491,7 +494,7 @@
 
 \ExplSyntaxOn
 \def\Hy@StartlinkName#1#2{%
-  \pdf_startlink_goto_name:nn { link } { #2 }
+  \pdf_startlink_goto_name:nn { link } { #2 } %%% can this be done without splitting?
 }
 
 
@@ -524,7 +527,7 @@
 % #2 is the destination find@pdflink uses then named link
 \def\hyper@linkstart#1#2{%
   \Hy@VerboseLinkStart{#1}{#2}% only for debug
-  \tl_if_exist:cTF  %or test for blank??
+  \tl_if_exist:cTF            %or test for blank??
    { @#1bordercolor }
    {
     \hook_put:nnnn

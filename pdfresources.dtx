@@ -95,6 +95,7 @@
 % \begin{macro}{\driver_pdf_startlink_goto:nn, \driver_pdf_startlink_user:nn}
 % \begin{macro}{\@@_pdf_startlink:nnn}
 %    \begin{macrocode}
+% %% will probably go shortly
 \cs_new_protected:Npn \driver_pdf_startlink_goto:nn #1#2
   { \@@_pdf_startlink:nnn {#1} { goto~name } {#2} }
 \cs_new_protected:Npn \driver_pdf_startlink_user:nn #1#2
@@ -189,42 +190,36 @@
 %<*package>
 \sys_if_engine_pdftex:T
 {
- \cs_new_protected:Nn \driver_pdf_lastlink:
- {
-  \pdflastlink
- }
 
  \cs_new_protected:Nn \driver_pdf_catalog:n
  {
   \pdfcatalog { #1 }
  }
 
- \cs_new:Npn \driver_pdf_minorversion: { \tex_the:D \tex_pdfminorversion:D }
- \cs_new:Npn \driver_pdf_majorversion: { 1 }
+\cs_new_protected:Nn \driver_pdf_dest_name:nn %#1 name, #2 dest type (e.g. fitbh)
+ {
+  \pdfdest~{#1}#2\scan_stop:
+ }
 \input{l3pdfmode-pdf.def}
 }
 
 \sys_if_engine_luatex:T
 {
- \cs_new_protected:Nn \driver_pdf_lastlink:
- {
-  \numexpr\pdffeedback lastlink\relax
- }
-
  \cs_new_protected:Nn \driver_pdf_catalog:n
  {
   \pdfextension catalog { #1 }
  }
 
- \cs_new:Npn \driver_pdf_minorversion: { \tex_the:D \pdfvariable~minorversion }
- \cs_new:Npn \driver_pdf_majorversion: { \tex_the:D \pdfvariable~majorversion }
+\cs_new_protected:Nn \driver_pdf_dest_name:nn %#1 name, #2 dest type (e.g. fitbh)
+ {
+  \pdfextension~dest~name~{#1}#2 \scan_stop:
+ }
 
 \input{l3pdfmode-pdf.def}
 }
 
 \sys_if_engine_xetex:T
 {
- %% \cs_new_protected:Nn \driver_pdf_startlink_goto_name:nn %????
  %% \cs_new_protected:Nn \driver_pdf_catalog:n ????
  \input{l3dvipdfmx-pdf.def}
 }
@@ -232,8 +227,35 @@
 %    \end{macrocode}
 % \section{Management code / pdf Module}
 %<@@=pdf>
-% \subsection{Comparing pdf versions}
+% \subsection{Setting / comparing pdf versions}
 % The code assumes that the versions are two integers separated by a period.
+%
+% \begin{macro}{\pdf_version_gset:n, \pdf_version_min_gset:n}
+% \begin{macro}{\@@_version_gset:w}
+%    \begin{macrocode}
+%<*package>
+\cs_new_protected:Npn \pdf_version_gset:n #1
+ {
+  \__pdf_version_gset:w  #1 . . \q_stop
+ }
+
+\cs_new_protected:Npn \pdf_version_min_gset:n #1
+ {
+  \pdf_version_compare:NnT < {#1}
+   {
+    \@@_version_gset:w  #1 . . \q_stop
+   }
+ }
+
+\cs_new_protected:Npn \@@_version_gset:w  #1 .#2 . #3\q_stop
+ {
+  \driver_pdf_version_major_gset:n {#1}
+  \driver_pdf_version_minor_gset:n {#2}
+ }
+%</package>
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
 % \begin{macro}{\pdf_version_compare:Nn}
 %    \begin{macrocode}
 %<*package>
@@ -241,9 +263,9 @@
  {
    \bool_if:nTF
     {
-     \int_compare_p:n { \driver_pdf_majorversion: = #1  }
+     \int_compare_p:n { \driver_pdf_version_major: = #1  }
      &&
-     \int_compare_p:n { \driver_pdf_minorversion: = #2}
+     \int_compare_p:n { \driver_pdf_version_minor: = #2}
     }
     { \prg_return_true: }
     { \prg_return_false: }
@@ -253,12 +275,12 @@
  {
    \bool_if:nTF
     {
-     \int_compare_p:n  { \driver_pdf_majorversion: < #1}
+     \int_compare_p:n  { \driver_pdf_version_major: < #1}
      ||
      (
-      \int_compare_p:n { \driver_pdf_majorversion: = #1 }
+      \int_compare_p:n { \driver_pdf_version_major: = #1 }
       &&
-      \int_compare_p:n { \driver_pdf_minorversion: < #2 }
+      \int_compare_p:n { \driver_pdf_version_minor: < #2 }
      )
     }
     { \prg_return_true: }
@@ -269,12 +291,12 @@
  {
    \bool_if:nTF
     {
-     \int_compare_p:n  { \driver_pdf_majorversion: > #1}
+     \int_compare_p:n  { \driver_pdf_version_major: > #1}
      ||
      (
-      \int_compare_p:n { \driver_pdf_majorversion: = #1}
+      \int_compare_p:n { \driver_pdf_version_major: = #1}
       &&
-      \int_compare_p:n { \driver_pdf_minorversion: > #2 }
+      \int_compare_p:n { \driver_pdf_version_minor: > #2 }
      )
     }
     { \prg_return_true: }
@@ -318,6 +340,30 @@
 %
 % High-level startlink commands that uses the stored attributes:
 % At first one with the \texttt{user} argument:
+% A link command that grabs the content as argument and inserts both
+% startlink and endlink directly (driver command is already in l3driver).
+%    \begin{macrocode}
+%<*package>
+\cs_new_protected:Nn \pdf_link_user:nnn %#1 type (url, file etc, #2 action spec, #3 link text
+ {
+   \seq_use:cn { l__pdf_hook_startlink_#1_seq }{}
+   \mode_leave_vertical:
+   \driver_pdf_link_user:nnn
+    {
+      \prop_map_function:cN
+       { l__pdf_hook_startlink_#1_attr_prop }
+       \__pdf_get_key_value:nn
+    }
+    {
+      #2
+    }
+    {
+      #3
+    }
+   \seq_use:cn { l__pdf_hook_endlink_#1_seq }{}
+ }
+%</package>
+%    \end{macrocode}
 %    \begin{macrocode}
 %<*package>
 \cs_new_protected:Nn \pdf_startlink_user:nn %#1 type, #2 action spec

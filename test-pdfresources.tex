@@ -5,12 +5,7 @@
 \documentclass{article}
 \usepackage{expl3}
 
-%very bad hack to input the dtx directly ....
-\def\documentclass#1\end#2{}
-
-\makeatletter\ExplSyntaxOn
-\input{pdfresources.dtx}
-\makeatother\ExplSyntaxOff
+\usepackage{pdfresources}
 
 %don't compress pdf:
 \ExplSyntaxOn
@@ -18,16 +13,48 @@
 \driver_pdf_objects_disable:
 \ExplSyntaxOff
 \usepackage{xcolor}
-\usepackage[customdriver=hluatex-experimental]{hyperref}
-\tracingmacros=1
+\usepackage[customdriver=hluatex-experimental,ocgcolorlinks]{hyperref}
+
+%%\tracingmacros=1
 \hypersetup{urlcolor=blue,linkbordercolor=blue,pdfborder={1 1 1},pdfprintpagerange=0}
-\makeatletter
+%%%\makeatletter
 \hypupdateattribute
-\makeatletter\tracingmacros=1
+\makeatletter%\tracingmacros=1
+\textwidth=5cm
 \begin{document}
+\ExplSyntaxOn
+\hook_put:nnnn
+     { pdf }
+     { startlink_url_attr }
+     { /C }
+     { [1~0~0] }
+
+\hook_put:nnnn
+       { pdf }
+       { startlink_url_attr }
+       { /Border }
+       { [1~1~1] }
+\driver_pdf_link_margin:n {1pt}
+xx\pdf_link_user:nnn {url}{/A<</Type/Action/S/URI/URI(www.blub.de)>>}{blbl\\blb\par blub}
+
+\par\bigskip
+xxx
+\driver_pdf_link_user:nnn
+ {/C~[1~0~0]
+ /Border [0.5~0.5~0.5]}
+ {/A<</Type/Action/S/URI/URI(www.blub.de)>>}
+ {long~text~text~text~text~text~text~text~text}
+ 
+
 \section{a}\label{a}
 \ref{a}
-\newpage 
+\ExplSyntaxOff
+
+%\hyperlink{blblb}{yabc\\xye\\abc}
+\end{document}
+\section{a}\label{a}
+\ref{a}
+\newpage
 blblb
 \end{document}
 %test driver link.
