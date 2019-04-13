@@ -36,7 +36,17 @@
      { pdf }
      { startlink_url_attr }
      { /F }{ 4 } %
-    \fi
+
+    \hook_put:nnnn
+     { pdf }
+     { startlink_link_attr }
+     { /F } { 4 }
+
+     \hook_put:nnnn
+     { pdf }
+     { startlink_file_attr }
+     { /F } { 4 }
+   \fi
 }
 %these are commands to fill various attributes (color, border style) in
 % the hooks for links.
@@ -117,9 +127,7 @@
     }
   }
 
-\ifHy@pdfa
- \hook_put:nnnn { pdf } { startlink_link_attr }{ /F } { 4 }
-\fi
+
 % for now we are updating the attribute manually after \hypersetup
 % some better method must be found
 \NewDocumentCommand\hypupdateattribute { }
@@ -581,6 +589,7 @@
 
 \let\CurrentBorderColor\@linkbordercolor
 \ExplSyntaxOn
+%% this command is used for \url
 \def\hyper@linkurl#1#2{%#1:link text #2: URI,
   \group_begin:
     \Hy@pstringdef\Hy@pstringURI{#2}%
@@ -608,43 +617,42 @@
 }
 \ExplSyntaxOff
 
+\ExplSyntaxOn
+%file links (need to find out when exactly it is used ...)
 \def\hyper@linkfile#1#2#3{% anchor text, filename, linkname
-  \begingroup
+  \group_begin:
     \def\Hy@pstringF{#2}%
     \Hy@CleanupFile\Hy@pstringF
     \Hy@pstringdef\Hy@pstringF\Hy@pstringF
-    \Hy@pstringdef\Hy@pstringD{#3}%
+    \Hy@pstringdef\Hy@pstringD{#3}
     \Hy@MakeRemoteAction
-    \leavevmode
-    \pdfstartlink
-      attr{%
-        \Hy@setpdfborder
-        \Hy@setpdfhighlight
-        \ifx\@filebordercolor\relax
-        \else
-          /C[\@filebordercolor]%
-        \fi
-      }%
-      user {%
-        /Subtype/Link%
-        \ifHy@pdfa /F 4\fi
-        /A<<%
-          /F(\Hy@pstringF)%
-          /S/GoToR%
+    \mode_leave_vertical:
+    \pdf_link_user:nnn { file }
+      {
+        /A<<
+          /F(\Hy@pstringF)
+          /S/GoToR
           \Hy@SetNewWindow
-          \ifx\\#3\\%
-            /D[\Hy@href@page\@pdfremotestartview]%
+          \ifx\\#3\\
+            /D[\Hy@href@page\@pdfremotestartview]
           \else
-            /D(\Hy@pstringD)%
+            /D(\Hy@pstringD)
           \fi
           \Hy@href@nextactionraw
-        >>%
-      }%
-      \relax
-    \Hy@colorlink\@filecolor#1\Hy@xspace@end
-    \close@pdflink
-  \endgroup
+        >>
+      }
+      {
+       \Hy@colorlink
+       \@filecolor#1\Hy@xspace@end
+       \Hy@endcolorlink
+       \Hy@VerboseLinkStop
+      }
+  \group_end:
 }
+\ExplSyntaxOff
+
+\ExplSyntaxOn
+% use by run links xxxxxxxxxxx
 \def\@hyper@launch run:#1\\#2#3{% filename, anchor text linkname
   \begingroup
     \Hy@pstringdef\Hy@pstringF{#1}%
@@ -678,6 +686,7 @@
     \close@pdflink
   \endgroup
 }
+\ExplSyntaxOff
     \begingroup
       \count@=\luatexversion
       \divide\count@ by 100 %
