@@ -28,7 +28,7 @@
    {\msg_error:nn {hyp}{missing-bookmark-package}}
  }}
 
-%this need sorting out later.
+%this need sorting out later. pdf standards should outside the driver.
 \AtBeginDocument
 {
    \ifHy@pdfa
@@ -260,20 +260,19 @@
 \ExplSyntaxOff
 % should this go into the drivers?
 % or in the pdf level?
+% set pdfversion / needs adaption to major version!!!
+\ExplSyntaxOn
   \ifHy@setpdfversion
     \ifnum\Hy@pdfversion<5 %
-      \ltx@IfUndefined{pdfobjcompresslevel}{%
-      }{%
         \ifHy@verbose
           \Hy@InfoNoLine{%
-            PDF object streams are disabled, because they are%
+            PDF~object~streams~are~disabled,~because~they~are%
             \MessageBreak
-            not supported in requested PDF version %
+            not~supported~in~requested~PDF~version %
             1.\Hy@pdfversion
           }%
-        \fi
-        \pdfobjcompresslevel=\ltx@zero
-      }%
+        \driver_pdf_objects_disable:
+      %
     \fi
     \ifnum\Hy@pdfminorversion=\Hy@pdfversion\relax
     \else
@@ -293,10 +292,7 @@
       \Hy@temp@A\lastsavedboxresourceindex{form XObject}%
       \Hy@temp@A\lastsavedimageresourceindex{image XObject}%
       \Hy@temp@A\pdflastannot{annotation}%
-      \ltx@IfUndefined{pdflastlink}{%
-      }{%
-         \Hy@temp@A\pdflastlink{link}%
-      }%
+      \Hy@temp@A\pdflastlink{link}%
       \ifx\Hy@temp\ltx@empty
         \Hy@pdfminorversion=\Hy@pdfversion\relax
       \else
@@ -339,7 +335,7 @@
     }%
   \fi
   \edef\Hy@pdfversion{\number\Hy@pdfminorversion}%
-
+\ExplSyntaxOff
 \Hy@DisableOption{pdfversion}%
 
 \ExplSyntaxOn
