@@ -28,12 +28,23 @@
    {\msg_error:nn {hyp}{missing-bookmark-package}}
  }}
 
-% this need sorting out later. pdf standards should be handled outside the driver.
-% pdfa forces the flag /F 4 in some places.
+% booleans for the (some) option keys. As hyperref disables them it is okay to set them here, hypersetup
+% can't interfere
+%%% pdfa key:
 \bool_new:N\l__hyp_pdfa_bool
 \ifHy@pdfa
  \bool_set_true:N \l__hyp_pdfa_bool
 \fi
+
+%%% pdfversion
+\bool_new:N\l__hyp_setpdfversion_bool
+\ifHy@setpdfversion
+ \bool_set_true:N \l__hyp_setpdfversion_bool
+\fi
+
+
+% this need sorting out later. pdf standards should be handled outside the driver.
+% pdfa forces the flag /F 4 in some places.
 \AtBeginDocument
 {
   \bool_if:NT \l__hyp_pdfa_bool
@@ -64,7 +75,7 @@
 % the hooks for links from the hyperref keys.
 \def\Hy@EXPsetpdfborder
  {
- \clist_map_inline:nn { url , file , run , link, menu}
+ \clist_map_inline:nn { url , file , run , link, menu }
    {
     \tl_if_empty:NTF \@pdfborder
      {
@@ -193,11 +204,13 @@
 
 \ExplSyntaxOn
 % catalog mapped to expl3 command
-\pdf@ifdraftmode{%
+\pdf@ifdraftmode
+ {
   \let\Hy@PutCatalog \use_none:n
-}{%
+ }
+ {
   \let\Hy@PutCatalog \driver_pdf_catalog:n
-}
+ }
 \ExplSyntaxOff
 
 
@@ -277,10 +290,14 @@
   [0-9]*[1-9][0-9]* 0 R%
 }
 
-\edef\Hy@pdfminorversion{\pdfvariable minorversion}%
-\edef\Hy@pdfmajorversion{\pdfvariable majorversion}%
+
+%\edef\Hy@pdfminorversion{\pdfvariable minorversion}%
+%\edef\Hy@pdfmajorversion{\pdfvariable majorversion}%
 
 \ExplSyntaxOn
+\cs_set_eq:NN \Hy@pdfminorversion \driver_pdf_version_minor:
+\cs_set_eq:NN \Hy@pdfmajorversion \driver_pdf_version_major:
+
   \ifHy@ocgcolorlinks
     \pdf_version_min_gset:n { 1.5 }
   \fi
@@ -289,7 +306,8 @@
 % or in the pdf level?
 % set pdfversion / needs adaption to major version!!!
 \ExplSyntaxOn
-  \ifHy@setpdfversion
+\bool_if:NT\l__hyp_setpdfversion_bool
+ {
     \ifnum\Hy@pdfversion<5 %
         \ifHy@verbose
           \Hy@InfoNoLine{%
@@ -361,7 +379,7 @@
       \expandafter\string\Hy@pdfminorversion
       :=\number\Hy@pdfversion\space
     }%
-  \fi
+ }
   \edef\Hy@pdfversion{\number\Hy@pdfminorversion}%
 \ExplSyntaxOff
 \Hy@DisableOption{pdfversion}%

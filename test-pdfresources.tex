@@ -15,7 +15,7 @@
 \usepackage{xcolor}
 
 
-\usepackage[customdriver=hluatex-experimental,ocgcolorlinks,pdfversion=1.5]{hyperref}
+\usepackage[customdriver=hluatex-experimental,ocgcolorlinks,]{hyperref}
 
 %%\tracingmacros=1
 \hypersetup{urlcolor=blue,linkbordercolor=blue,pdfborder={1 1 1},pdfprintpagerange=0}
@@ -25,6 +25,10 @@
 \textwidth=5cm
 \begin{document}
 \ExplSyntaxOn
+
+\ifnum \driver_pdf_version_minor: = 5 XXXXXXXXX \else YYYYYYY\fi
+
+
 \hook_put:nnnn
      { pdf }
      { startlink_url_attr }
