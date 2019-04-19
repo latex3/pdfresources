@@ -28,10 +28,16 @@
    {\msg_error:nn {hyp}{missing-bookmark-package}}
  }}
 
-%this need sorting out later. pdf standards should outside the driver.
+% this need sorting out later. pdf standards should be handled outside the driver.
+% pdfa forces the flag /F 4 in some places.
+\bool_new:N\l__hyp_pdfa_bool
+\ifHy@pdfa
+ \bool_set_true:N \l__hyp_pdfa_bool
+\fi
 \AtBeginDocument
 {
-   \ifHy@pdfa
+  \bool_if:NT \l__hyp_pdfa_bool
+  {
     \hook_put:nnnn
      { pdf }
      { startlink_url_attr }
@@ -46,13 +52,19 @@
      { pdf }
      { startlink_file_attr }
      { /F } { 4 }
-   \fi
+
+     \hook_put:nnnn
+     { pdf }
+     { startlink_menu_attr }
+     { /F } { 4 }
+   }
 }
-%these are commands to fill various attributes (color, border style) in
-% the hooks for links.
+
+% these are (temporary) commands to fill various attributes (color, border style) in
+% the hooks for links from the hyperref keys.
 \def\Hy@EXPsetpdfborder
  {
- \clist_map_inline:nn { url , file , run , link}
+ \clist_map_inline:nn { url , file , run , link, menu}
    {
     \tl_if_empty:NTF \@pdfborder
      {
@@ -81,7 +93,7 @@
 
 \def\Hy@EXPsetpdfhighlight
  {
-  \clist_map_inline:nn { url , file , run , link}
+  \clist_map_inline:nn { url , file , run , link , menu}
    {
     \tl_if_empty:NTF \@pdfhighlight
      {
@@ -127,6 +139,20 @@
     }
   }
 
+\def\Hy@EXPsetmenubordercolor
+  {
+   \cs_if_exist:NTF \@menuordercolor
+    {
+     \hook_put:nnnn
+      { pdf }
+      { startlink_menu_attr }
+      { /C }
+      { [\@menubordercolor] }
+    }
+    {
+     \hook_remove:nnn { pdf } { startlink_menu_attr }{ /C }
+    }
+  }
 
 % for now we are updating the attribute manually after \hypersetup
 % some better method must be found
@@ -136,6 +162,7 @@
  \Hy@EXPsetpdfhighlight
  \Hy@EXPseturlbordercolor
  \Hy@EXPsetfilebordercolor
+ \Hy@EXPsetmenubordercolor
 }
 \ExplSyntaxOff
 
@@ -271,6 +298,7 @@
             not~supported~in~requested~PDF~version %
             1.\Hy@pdfversion
           }%
+        \fi
         \driver_pdf_objects_disable:
       %
     \fi
@@ -429,14 +457,16 @@
       \ifHy@ocgcolorlinks
         \color@endgroup\egroup
         \mbox{
-          \pdfliteral~page{/OC/OCPrint BDC}
+          %this uses a named object, we really need to sort this ...
+          \pdfliteral~page{/OC/OCPrint~BDC}
           \rlap{\copy0}
-          \pdfliteral~page{EMC/OC/OCView BDC}
+          \driver_pdf_emc:
+          \pdfliteral~page{/OC/OCView~BDC}
           \begingroup
             \expandafter\HyColor@UseColor\Hy@ocgcolor
             \box0~
           \endgroup
-          \pdfliteral~page{EMC}
+          \driver_pdf_emc:
         }
       \fi
       \endgroup
@@ -869,34 +899,29 @@
 }
 
 %%% UF removed setpagesize code, should be done by kernel/graphicx
-
+\ExplSyntaxOn
 \def\Acrobatmenu#1#2{%
   \Hy@Acrobatmenu{#1}{#2}{%
-    \leavevmode
+    \mode_leave_vertical:
     \EdefEscapeName\Hy@temp@menu{#1}%
-    \pdfstartlink
-      attr{%
-        \Hy@setpdfborder
-        \Hy@setpdfhighlight
-        \ifx\@menubordercolor\relax
-        \else
-          /C[\@menubordercolor]%
-        \fi
-      }%
-      user{%
-        /Subtype/Link%
-        \ifHy@pdfa /F 4\fi
-        /A<<%
-          /S/Named%
+    \pdf_link_user:nnn { menu }
+      {
+       /A<<
+          /S/Named
           /N/\Hy@temp@menu
           \Hy@href@nextactionraw
-        >>%
-      }%
-      \relax
-    \Hy@colorlink\@menucolor#2%
-    \close@pdflink
-  }%
+        >>
+
+      }
+      {
+       \Hy@colorlink\@menucolor#2
+       \Hy@xspace@end
+       \Hy@endcolorlink
+       \Hy@VerboseLinkStop
+      }
+  }
 }
+\ExplSyntaxOff
 %%% UF removed old atbegshi fix
 
 \def\@Gauge[#1]#2#3#4{% parameters, label, minimum, maximum
