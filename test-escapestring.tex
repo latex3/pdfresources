@@ -1,0 +1,30 @@
+% !Mode:: "TeX:DE:UTF-8:Main"
+
+
+
+\documentclass{article}
+\usepackage{l3str-convert}
+\usepackage{hyperref}
+%\usepackage[T1]{fontenc}
+%don't compress pdf:
+\ExplSyntaxOn
+\driver_pdf_compresslevel:n {0}
+\driver_pdf_objects_disable:
+\cs_set_eq:NN\strsetconvert\str_set_convert:Nnnn
+\ExplSyntaxOff
+\begin{document}
+\makeatletter 
+\strsetconvert\test{abc \äöüß (}{}{iso88591/string}
+%\strsetconvert\test{abc Œ \äöüß (}{}{iso88591/string} %error
+\show\test
+
+\strsetconvert\test{abc \äöüß (}{}{utf8/string}
+\show\test
+
+
+\edef\test{\pdf@escapestring{\detokenize{abc Œ äöüß  (}}}
+\show\test
+
+\Hy@pstringdef\test{abc Œ äöüß  (}
+\show\test
+\end{document}

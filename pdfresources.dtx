@@ -224,6 +224,8 @@
 
 \sys_if_engine_luatex:T
 {
+ %allow version 2.0 in luatex. Needs sorting out later.
+ \@namedef{Hy@pdfversion@2.0}{10}%
  \cs_new_protected:Nn \driver_pdf_catalog:n
  {
   \pdfextension catalog { #1 }

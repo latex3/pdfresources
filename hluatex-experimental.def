@@ -12,6 +12,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % variants of hyperref commands to get attributes in the prop
 \RequirePackage{xparse}
+
 \ExplSyntaxOn
 %% messages, should later (with more drivers) go somewhere more generic ...
 \prop_gput:Nnn \g_msg_module_name_prop { hyp }{ hyperref }
@@ -227,55 +228,8 @@
     \HyPL@SetPageLabels
   }%
 \fi
-\begingroup\expandafter\expandafter\expandafter\endgroup
-\expandafter\ifx\csname pdf@escapestring\endcsname\relax
-  \begingroup
-    \catcode`\|=0 %
-    \@makeother\\%
-  |@firstofone{|endgroup
-    |def|Hy@pstringdef#1#2{%
-      |begingroup
-        |edef~{|string~}%
-        |xdef|Hy@gtemp{#2}%
-      |endgroup
-      |let#1|Hy@gtemp
-      |@onelevel@sanitize#1%
-      |edef#1{|expandafter|Hy@ExchangeBackslash#1\|@nil}%
-      |edef#1{|expandafter|Hy@ExchangeLeftParenthesis#1(|@nil}%
-      |edef#1{|expandafter|Hy@ExchangeRightParenthesis#1)|@nil}%
-    }%
-    |def|Hy@ExchangeBackslash#1\#2|@nil{%
-      #1%
-      |ifx|\#2|\%%
-      |else
-        \\%
-        |ltx@ReturnAfterFi{%
-          |Hy@ExchangeBackslash#2|@nil
-        }%
-      |fi
-    }%
-  }%
-  \def\Hy@ExchangeLeftParenthesis#1(#2\@nil{%
-    #1%
-    \ifx\\#2\\%
-    \else
-      \@backslashchar(%
-      \ltx@ReturnAfterFi{%
-        \Hy@ExchangeLeftParenthesis#2\@nil
-      }%
-    \fi
-  }%
-  \def\Hy@ExchangeRightParenthesis#1)#2\@nil{%
-    #1%
-    \ifx\\#2\\%
-    \else
-      \@backslashchar)%
-      \ltx@ReturnAfterFi{%
-        \Hy@ExchangeRightParenthesis#2\@nil
-      }%
-    \fi
-  }%
-\else
+%UF removed manual Hy@pstringdef definition, as \pdf@escapestring should be always defined
+%if needed a kernel command should be provided for other drivers ...
   \def\Hy@pstringdef#1#2{%
     \begingroup
       \edef~{\string~}%
@@ -283,7 +237,6 @@
     \endgroup
     \let#1\Hy@gtemp
   }%
-\fi
 \providecommand*{\XR@ext}{pdf}
 \Hy@setbreaklinks{true}
 \def\HyPat@ObjRef{%
@@ -340,7 +293,13 @@
       \Hy@temp@A\pdflastannot{annotation}%
       \Hy@temp@A\pdflastlink{link}%
       \ifx\Hy@temp\ltx@empty
-        \Hy@pdfminorversion=\Hy@pdfversion\relax
+       \int_compare:nNnTF { \Hy@pdfversion}  = {10 }
+        { %pdf 2.0, temporary solution
+          \pdf_version_gset:n {2.0}
+        }
+        {
+          \pdf_version_gset:n{1.\Hy@pdfversion}
+        }
       \else
         \let\Hy@temp@A\ltx@empty
         \ifnum\Hy@pdfversion=4 %
@@ -380,7 +339,7 @@
       :=\number\Hy@pdfversion\space
     }%
  }
-  \edef\Hy@pdfversion{\number\Hy@pdfminorversion}%
+  \edef\Hy@pdfversion{\driver_pdf_version_minor:}% XXXXXXXX = 10 for 2.0
 \ExplSyntaxOff
 \Hy@DisableOption{pdfversion}%
 

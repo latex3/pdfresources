@@ -14,8 +14,10 @@
 \ExplSyntaxOff
 \usepackage{xcolor}
 
-
-\usepackage[customdriver=hluatex-experimental,ocgcolorlinks,]{hyperref}
+\makeatletter
+\@namedef{Hy@pdfversion@2.0}{10}%
+\makeatother%
+\usepackage[customdriver=hluatex-experimental,ocgcolorlinks,pdfversion=2.0]{hyperref}
 
 %%\tracingmacros=1
 \hypersetup{urlcolor=blue,linkbordercolor=blue,pdfborder={1 1 1},pdfprintpagerange=0}
@@ -24,6 +26,7 @@
 \makeatletter%\tracingmacros=1
 \textwidth=5cm
 \begin{document}
+\makeatletter%\show\Hy@pstringdef
 \ExplSyntaxOn
 
 \ifnum \driver_pdf_version_minor: = 5 XXXXXXXXX \else YYYYYYY\fi
