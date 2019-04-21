@@ -52,22 +52,22 @@
   {
     \hook_put:nnnn
      { pdf }
-     { startlink_url_attr }
+     { link_begin_url_attr }
      { /F }{ 4 } %
 
     \hook_put:nnnn
      { pdf }
-     { startlink_link_attr }
+     { link_begin_link_attr }
      { /F } { 4 }
 
      \hook_put:nnnn
      { pdf }
-     { startlink_file_attr }
+     { link_begin_file_attr }
      { /F } { 4 }
 
      \hook_put:nnnn
      { pdf }
-     { startlink_menu_attr }
+     { link_begin_menu_attr }
      { /F } { 4 }
    }
 }
@@ -80,23 +80,23 @@
    {
     \tl_if_empty:NTF \@pdfborder
      {
-      \hook_remove:nnn { pdf } { startlink_##1_attr } { /Border }
+      \hook_remove:nnn { pdf } { link_begin_##1_attr } { /Border }
      }
      {
       \hook_put:nnnn
        { pdf }
-       { startlink_##1_attr }
+       { link_begin_##1_attr }
        { /Border }
        { [\@pdfborder] }
      }
     \tl_if_empty:NTF \@pdfborderstyle
      {
-      \hook_remove:nnn  { pdf }{ startlink_##1_attr } { /BS }
+      \hook_remove:nnn  { pdf }{ link_begin_##1_attr } { /BS }
      }
      {
       \hook_put:nnnn
       { pdf }
-      { startlink_##1_attr }
+      { link_begin_##1_attr }
       { /BS }
       { <<\@pdfborderstyle>> }
      }
@@ -109,12 +109,12 @@
    {
     \tl_if_empty:NTF \@pdfhighlight
      {
-      \hook_remove:nnn { pdf } { startlink_##1_attr }{ /H }
+      \hook_remove:nnn { pdf } { link_begin_##1_attr }{ /H }
      }
      {
       \hook_put:nnnn
       { pdf }
-      { startlink_##1_attr }
+      { link_begin_##1_attr }
       { /H }
       { \@pdfhighlight }
      }
@@ -127,12 +127,12 @@
    {
     \hook_put:nnnn
      { pdf }
-     { startlink_url_attr }
+     { link_begin_url_attr }
      { /C }
      { [\@urlbordercolor] }
    }
    {
-    \hook_remove:nnn { pdf } { startlink_url_attr } { /C }
+    \hook_remove:nnn { pdf } { link_begin_url_attr } { /C }
    }
   }
 
@@ -142,12 +142,12 @@
     {
      \hook_put:nnnn
       { pdf }
-      { startlink_file_attr }
+      { link_begin_file_attr }
       { /C }
       { [\@filebordercolor] }
     }
     {
-     \hook_remove:nnn { pdf } { startlink_file_attr }{ /C }
+     \hook_remove:nnn { pdf } { link_begin_file_attr }{ /C }
     }
   }
 
@@ -157,12 +157,12 @@
     {
      \hook_put:nnnn
       { pdf }
-      { startlink_menu_attr }
+      { link_begin_menu_attr }
       { /C }
       { [\@menubordercolor] }
     }
     {
-     \hook_remove:nnn { pdf } { startlink_menu_attr }{ /C }
+     \hook_remove:nnn { pdf } { link_begin_menu_attr }{ /C }
     }
   }
 
@@ -320,27 +320,27 @@
           The version should be set as early as possible:%
           \MessageBreak
           \space\space
-          \expandafter\string\Hy@pdfminorversion=\Hy@pdfversion
-          \string\relax
+          \string\pdf_version_gset:n{\driver_pdf_version_major:.\driver_pdf_version_minor:}
           \ifnum\Hy@pdfversion<5 %
-            \ltx@ifundefined{pdfobjcompresslevel}{%
-            }{%
               \MessageBreak
               \space\space
-              \string\pdfobjcompresslevel=0\string\relax
-            }%
+              \string\driver_pdf_objects_disable:
           \fi
           \Hy@temp@A
         }%
       \fi
     \fi
     \PackageInfo{hyperref}{%
-      \expandafter\string\Hy@pdfminorversion
-      :=\number\Hy@pdfversion\space
+      pdf~version~set~to~\driver_pdf_version_major:.\driver_pdf_version_minor:\space
     }%
  }
-  \edef\Hy@pdfversion{\driver_pdf_version_minor:}% XXXXXXXX = 10 for 2.0
-\ExplSyntaxOff
+  \edef\Hy@pdfversion
+  { % this will need revision when pdf version stuff is better sorted
+   \int_compare:nNnTF { \driver_pdf_version_minor: } = { 2 }
+    { 10 }
+    {\driver_pdf_version_minor:}
+  }
+ \ExplSyntaxOff
 \Hy@DisableOption{pdfversion}%
 
 \ExplSyntaxOn
@@ -515,14 +515,14 @@
 
 \ExplSyntaxOn
 \def\Hy@StartlinkName#1#2{%
-  \pdf_startlink_goto_name:nn { link } { #2 } %%% can this be done without splitting?
+  \pdf_link_begin_goto:nnw { link } { #2 } %%% can this be done without splitting?
 }
 
 
 \def\close@EXPpdflink#1{%
   \Hy@endcolorlink
   \Hy@VerboseLinkStop
-  \pdf_endlink:n { #1 }
+  \pdf_link_end:n { #1 }
 }
 
 \def\close@pdflink{%
@@ -553,13 +553,13 @@
    {
     \hook_put:nnnn
      { pdf }
-     { startlink_link_attr }
+     { link_begin_link_attr }
      { /C }{ [\tl_use:c { @#1bordercolor }] } %do I need to expand?? seems not
    }
    {
     \hook_remove:nnn
      { pdf }
-     { startlink_link_attr }
+     { link_begin_link_attr }
      { /C }
    }
   \find@pdflink{#1}{#2}% #1=color type
@@ -576,13 +576,13 @@
    {
     \hook_put:nnnn
      { pdf }
-     { startlink_link_attr }
+     { link_begin_link_attr }
      { /C }{ [\tl_use:c { @#1bordercolor }] } %do I need to expand?? seems not
    }
    {
     \hook_remove:nnn
      { pdf }
-     { startlink_link_attr }
+     { link_begin_link_attr }
      { /C }
    }
   \find@pdflink{#1}{#2}#3\Hy@xspace@end

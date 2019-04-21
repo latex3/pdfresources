@@ -27,20 +27,29 @@
 \textwidth=5cm
 \begin{document}
 \makeatletter%\show\Hy@pstringdef
-\ExplSyntaxOn
 
-\ifnum \driver_pdf_version_minor: = 5 XXXXXXXXX \else YYYYYYY\fi
+abc%\end{document}
+\ExplSyntaxOn
+\driver_pdf_link_begin_user:nnw{}{/A<</Type/Action/S/URI/URI(www.blub.de)>>}
+\driver_pdf_link_end:
+
+\driver_pdf_link_begin_goto:nnw{}{Dest} xxx\driver_pdf_link_end:
+\PackageInfo{test}{\string\pdf_version_gset:n{<\driver_pdf_version_major:.\driver_pdf_version_minor:}}
+
+%\ExplSyntaxOff
+%\end{document}
+%\ifnum \driver_pdf_version_minor: = 5 XXXXXXXXX \else YYYYYYY\fi
 
 
 \hook_put:nnnn
      { pdf }
-     { startlink_url_attr }
+     { link_begin_url_attr }
      { /C }
      { [1~0~0] }
 
 \hook_put:nnnn
        { pdf }
-       { startlink_url_attr }
+       { link_begin_url_attr }
        { /Border }
        { [1~1~1] }
 \driver_pdf_link_margin:n {1pt}
@@ -48,11 +57,12 @@ xx\pdf_link_user:nnn {url}{/A<</Type/Action/S/URI/URI(www.blub.de)>>}{blbl\\blb\
 
 \par\bigskip
 xxx
-\driver_pdf_link_user:nnn
+\driver_pdf_link_begin_user:nnw
  {/C~[1~0~0]
  /Border [0.5~0.5~0.5]}
  {/A<</Type/Action/S/URI/URI(www.blub.de)>>}
- {long~text~text~text~text~text~text~text~text}
+ long~text~text~text~text~text~text~text~text
+\driver_pdf_link_end: 
 
 \url{www.blubblubblub.de}
 \section{a}\label{a}
@@ -76,7 +86,7 @@ blblb
 %endobj
 \leavevmode
 \ExplSyntaxOn
-\driver_pdf_startlink_user:nn
+\driver_pdf_link_begin_user:nnw
  {
   /Border~[0~0~1]
  }
@@ -89,7 +99,7 @@ blblb
        >>
  }
   some link
-\driver_pdf_endlink:
+\driver_pdf_link_end:
 \ExplSyntaxOff
 
 blub
