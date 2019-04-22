@@ -1,0 +1,43 @@
+\documentclass{report}
+%management of \pagesattr (plural, only one token per document!)
+\usepackage{expl3}
+\ExplSyntaxOn
+\driver_pdf_compresslevel:n {0}
+\driver_pdf_objects_disable:
+
+\cs_new_protected:Npx \__driver_pdf_pagesattr:n #1
+  {
+    \cs_if_exist:NTF \tex_variable:D
+      { \tex_variable:D pagesattr ~ {#1}}
+      { \pdfpagesattr {#1}}
+  }
+
+\cs_generate_variant:Nn \__driver_pdf_pagesattr:n {x}
+
+\prop_new:N\g__driver_pdf_resource_pagesattr_prop
+
+\cs_new:Nn \__driver_pdf_prop_key_value:nn { #1~#2~ } %name?????
+
+\cs_new:Npn \driver_pdf_resource_pagesattr_gput:nn #1 #2 %#1 key, #2 value
+ {
+  \prop_gput:Nnn \g__driver_pdf_resource_pagesattr_prop { #1 }{ #2 }
+  \__driver_pdf_pagesattr:x
+  {
+    \prop_map_function:NN
+    \g__driver_pdf_resource_pagesattr_prop
+    \__driver_pdf_prop_key_value:nn
+   }
+ }
+
+%function to remove an attribute?
+%function to clear the whole attribute?
+%function to check if a key is there and what value it has?
+\ExplSyntaxOff
+\begin{document}
+\ExplSyntaxOn
+\driver_pdf_resource_pagesattr_gput:nn {/Rotate }{90}
+\driver_pdf_resource_pagesattr_gput:nn {/MediaBox }{[0 0 300 300]}
+\ExplSyntaxOff
+
+ablblb
+\end{document}
