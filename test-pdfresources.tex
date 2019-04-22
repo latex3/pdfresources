@@ -13,7 +13,7 @@
 \driver_pdf_objects_disable:
 \ExplSyntaxOff
 \usepackage{xcolor}
-
+\showthe\luatexversion
 \makeatletter
 \@namedef{Hy@pdfversion@2.0}{10}%
 \makeatother%
@@ -30,6 +30,16 @@
 
 abc%\end{document}
 \ExplSyntaxOn
+\tl_set:Nx\l_tmpa_tl
+ {
+  LuaTeX-
+   \int_div_truncate:nn{\luatexversion}{100}.
+   \int_compare:nNnT {\int_mod:nn{\luatexversion}{100}}<{10}{0}
+   \int_mod:nn{\luatexversion}{100}.
+   \luatexrevision
+ }
+\tl_show:N\l_tmpa_tl 
+
 \driver_pdf_link_begin_user:nnw{}{/A<</Type/Action/S/URI/URI(www.blub.de)>>}
 \driver_pdf_link_end:
 

@@ -132,6 +132,11 @@
   \pdfcatalog { #1 }
  }
 
+ \cs_new_protected:Nn \driver_pdf_info:n
+ {
+  \pdfinfo { #1 }
+ }
+
 \cs_new_protected:Nn \driver_pdf_dest_name:nn %#1 name, #2 dest type (e.g. fitbh)
  {
   \pdfdest~{#1}#2\scan_stop:
@@ -167,6 +172,11 @@
   \pdfextension catalog { #1 }
  }
 
+ \cs_new_protected:Nn \driver_pdf_info:n
+ {
+  \pdfextension info { #1 }
+ }
+
 \cs_new_protected:Nn \driver_pdf_dest_name:nn %#1 name, #2 dest type (e.g. fitbh)
  {
   \pdfextension~dest~name~{#1}#2 \scan_stop:
@@ -187,6 +197,15 @@
       { \tex_pdfliteral:D~page~{EMC}  }
   }
 
+\tl_new:N  \g_driver_pdf_producer_tl % name??
+\tl_gset:x \g_driver_pdf_producer_tl
+ {
+   LuaTeX-
+   \int_div_truncate:nn{\luatexversion}{100}.
+   \int_compare:nNnT {\int_mod:nn{\luatexversion}{100}}<{10}{0}
+   \int_mod:nn{\luatexversion}{100}.
+   \luatexrevision
+ }
 \input{l3pdfmode-pdf.def}
 }
 

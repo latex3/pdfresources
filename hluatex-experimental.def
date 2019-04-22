@@ -514,9 +514,10 @@
 }
 
 \ExplSyntaxOn
-\def\Hy@StartlinkName#1#2{%
-  \pdf_link_begin_goto:nnw { link } { #2 } %%% can this be done without splitting?
-}
+\def\Hy@StartlinkName#1#2
+ {
+  \pdf_link_begin_goto:nnw { link } { #2 } %%%
+ }
 
 
 \def\close@EXPpdflink#1{%
@@ -567,10 +568,14 @@
 
 % the endlink muss have the same type as the start?
 % probably always link works
-\def\hyper@linkend{\close@EXPpdflink { link }}
+\def\hyper@linkend
+ {
+  \close@EXPpdflink { link }
+ }
 
-\def\hyper@link#1#2#3{%
-  \Hy@VerboseLinkStart{#1}{#2}%
+\def\hyper@link#1#2#3
+ {
+  \Hy@VerboseLinkStart{#1}{#2}
   \tl_if_exist:cTF
    { @#1bordercolor }
    {
@@ -630,9 +635,10 @@
     \Hy@pstringdef\Hy@pstringD{#3}
     \Hy@MakeRemoteAction
     \mode_leave_vertical:
-    \pdf_link_user:nnn { file }
-      {
-        /A<<
+    \pdf_link_user:nnn
+     { file }
+     {
+       /A<<
           /F(\Hy@pstringF)
           /S/GoToR
           \Hy@SetNewWindow
@@ -643,68 +649,53 @@
           \fi
           \Hy@href@nextactionraw
         >>
-      }
-      {
+     }
+     {
        \Hy@colorlink
-       \@filecolor#1\Hy@xspace@end
+        \@filecolor#1\Hy@xspace@end
        \Hy@endcolorlink
        \Hy@VerboseLinkStop
-      }
+     }
   \group_end:
 }
 \ExplSyntaxOff
 
 \ExplSyntaxOn
 % use by run links xxxxxxxxxxx
-\def\@hyper@launch run:#1\\#2#3{% filename, anchor text linkname
-  \begingroup
+\def\@hyper@launch run:#1\\#2#3 % filename, anchor text linkname
+ {
+  \group_begin:
     \Hy@pstringdef\Hy@pstringF{#1}%
     \Hy@pstringdef\Hy@pstringP{#3}%
-    \leavevmode
-    \pdfstartlink
-      attr{%
-        \Hy@setpdfborder
-        \Hy@setpdfhighlight
-        \ifx\@runbordercolor\relax
-        \else
-          /C[\@runbordercolor]%
-        \fi
-      }%
-      user {%
-        /Subtype/Link%
-        \ifHy@pdfa /F 4\fi
-        /A<<%
-          /F(\Hy@pstringF)%
-          /S/Launch%
+    \mode_leave_vertical:
+    \pdf_link_user:nnn
+     { run }
+     {
+      /A<<
+          /F(\Hy@pstringF)
+          /S/Launch
           \Hy@SetNewWindow
-          \ifx\\#3\\%
+          \ifx\\#3\\
           \else
-            /Win<</P(\Hy@pstringP)/F(\Hy@pstringF)>>%
+            /Win<</P(\Hy@pstringP)/F(\Hy@pstringF)>>
           \fi
           \Hy@href@nextactionraw
-        >>%
-      }%
-      \relax
-    \Hy@colorlink\@runcolor#2\Hy@xspace@end
-    \close@pdflink
-  \endgroup
+        >>
+      }
+      {
+       \Hy@colorlink
+        \@runcolor#2\Hy@xspace@end
+       \Hy@endcolorlink
+       \Hy@VerboseLinkStop
+      }
+  \group_end:
 }
-\ExplSyntaxOff
-    \begingroup
-      \count@=\luatexversion
-      \divide\count@ by 100 %
-      \edef\x{\the\count@}%
-      \count@=-\x\relax
-      \multiply\count@ by 100 %
-      \advance\count@ by \luatexversion
-      \edef\x{\endgroup
-        \def\noexpand\@pdfproducer{%
-          LuaTeX-\x.\two@digits\count@.\luatexrevision
-        }%
-      }%
-    \x
 
-\ExplSyntaxOn
+\tl_set:Nx\@pdfproducer
+ {
+   \g_driver_pdf_producer_tl
+ }
+%this needs central management in the kernel
 \def\PDF@SetupDoc{
   \ifx\@pdfpagescrop\@empty
   \else
@@ -775,36 +766,41 @@
   }%
 }
 
-\ExplSyntaxOff
+
 \def\PDF@FinishDoc{%
   \pdf@ifdraftmode{}{%
     \Hy@UseMaketitleInfos
     \HyInfo@GenerateAddons
-    \pdfextension info{%
-      /Author(\@pdfauthor)%
-      /Title(\@pdftitle)%
-      /Subject(\@pdfsubject)%
-      /Creator(\@pdfcreator)%
-      \ifx\@pdfcreationdate\@empty
-      \else
-        /CreationDate(\@pdfcreationdate)%
-      \fi
-      \ifx\@pdfmoddate\@empty
-      \else
-        /ModDate(\@pdfmoddate)%
-      \fi
-      \ifx\@pdfproducer\relax
-      \else
-        /Producer(\@pdfproducer)%
-      \fi
-      /Keywords(\@pdfkeywords)%
-      \ifx\@pdftrapped\@empty
-      \else
+    \driver_pdf_info:n
+     {
+      /Author(\@pdfauthor)
+      /Title(\@pdftitle)
+      /Subject(\@pdfsubject)
+      /Creator(\@pdfcreator)
+      \tl_if_empty:NF
+       {\@pdfcreationdate}
+       {
+        /CreationDate(\@pdfcreationdate)
+       }
+     \tl_if_empty:NF
+       {\@pdfmoddate}
+       {
+        /ModDate(\@pdfmoddate)
+       }
+     \tl_if_empty:NF
+       {\@pdfproducer}
+       {
+        /Producer(\@pdfproducer)
+       }
+      /Keywords(\@pdfkeywords)
+     \tl_if_empty:NF
+       {\@pdftrapped}
+       {
         /Trapped/\@pdftrapped
-      \fi
+       }
       \HyInfo@Addons
-    }%
-  }%
+    }
+  }
   \Hy@DisableOption{pdfauthor}%
   \Hy@DisableOption{pdftitle}%
   \Hy@DisableOption{pdfsubject}%
@@ -816,6 +812,7 @@
   \Hy@DisableOption{pdftrapped}%
   \Hy@DisableOption{pdfinfo}%
 }
+ \ExplSyntaxOff
 \def\hyper@pagetransition{%
   \ifx\@pdfpagetransition\relax
   \else
