@@ -197,15 +197,7 @@
       { \tex_pdfliteral:D~page~{EMC}  }
   }
 
-\tl_new:N  \g_driver_pdf_producer_tl % name??
-\tl_gset:x \g_driver_pdf_producer_tl
- {
-   LuaTeX-
-   \int_div_truncate:nn{\luatexversion}{100}.
-   \int_compare:nNnT {\int_mod:nn{\luatexversion}{100}}<{10}{0}
-   \int_mod:nn{\luatexversion}{100}.
-   \luatexrevision
- }
+
 \input{l3pdfmode-pdf.def}
 }
 
