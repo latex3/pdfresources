@@ -752,12 +752,12 @@
         /CreationDate(\@pdfcreationdate)
        }
      \tl_if_empty:NF
-       {\@pdfmoddate}
+       \@pdfmoddate
        {
         /ModDate(\@pdfmoddate)
        }
-     \tl_if_empty:NF
-       {\@pdfproducer}
+     \tl_if_exist:NT
+       \@pdfproducer
        {
         /Producer(\@pdfproducer)
        }
