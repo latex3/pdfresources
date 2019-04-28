@@ -8,11 +8,10 @@
 \ProvidesFile{hluatex-experimental.def}
   [2019/04/07 v0.2 %
   Hyperref driver for luaTeX]
-%%\Hy@VersionCheck{hluatex.def}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% variants of hyperref commands to get attributes in the prop
 \RequirePackage{xparse}
 
+%%\Hy@VersionCheck{hluatex.def}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \ExplSyntaxOn
 %% messages, should later (with more drivers) go somewhere more generic ...
 \prop_gput:Nnn \g_msg_module_name_prop { hyp }{ hyperref }
@@ -71,12 +70,14 @@
      { /F } { 4 }
    }
 }
-
+% variants of hyperref commands to get attributes in the prop
 % these are (temporary) commands to fill various attributes (color, border style) in
 % the hooks for links from the hyperref keys.
+\clist_const:Nn \c__hyp_link_types_clist { url , file , run , link, menu }
+
 \def\Hy@EXPsetpdfborder
  {
- \clist_map_inline:nn { url , file , run , link, menu }
+ \clist_map_inline:Nn \c__hyp_link_types_clist
    {
     \tl_if_empty:NTF \@pdfborder
      {
@@ -105,7 +106,7 @@
 
 \def\Hy@EXPsetpdfhighlight
  {
-  \clist_map_inline:nn { url , file , run , link , menu}
+  \clist_map_inline:nn \c__hyp_link_types_clist
    {
     \tl_if_empty:NTF \@pdfhighlight
      {
@@ -121,49 +122,22 @@
   }
  }
 
-\def\Hy@EXPseturlbordercolor
+\def\Hy@EXPsetbordercolor
   {
-   \cs_if_exist:NTF\@urlbordercolor
+   \clist_map_inline:Nn \c__hyp_link_types_clist
    {
-    \hook_put:nnnn
-     { pdf }
-     { link_begin_url_attr }
-     { /C }
-     { [\@urlbordercolor] }
-   }
-   {
-    \hook_remove:nnn { pdf } { link_begin_url_attr } { /C }
-   }
-  }
-
-\def\Hy@EXPsetfilebordercolor
-  {
-   \cs_if_exist:NTF \@filebordercolor
+    \tl_if_exist:cTF { @##1bordercolor }
     {
      \hook_put:nnnn
       { pdf }
-      { link_begin_file_attr }
+      { link_begin_##1_attr }
       { /C }
-      { [\@filebordercolor] }
+      { [\tl_use:c {@##1bordercolor}] }
     }
     {
-     \hook_remove:nnn { pdf } { link_begin_file_attr }{ /C }
+     \hook_remove:nnn { pdf } { link_begin_##1_attr } { /C }
     }
-  }
-
-\def\Hy@EXPsetmenubordercolor
-  {
-   \cs_if_exist:NTF \@menuordercolor
-    {
-     \hook_put:nnnn
-      { pdf }
-      { link_begin_menu_attr }
-      { /C }
-      { [\@menubordercolor] }
-    }
-    {
-     \hook_remove:nnn { pdf } { link_begin_menu_attr }{ /C }
-    }
+   }
   }
 
 % for now we are updating the attribute manually after \hypersetup
@@ -172,9 +146,7 @@
 {
  \Hy@EXPsetpdfborder
  \Hy@EXPsetpdfhighlight
- \Hy@EXPseturlbordercolor
- \Hy@EXPsetfilebordercolor
- \Hy@EXPsetmenubordercolor
+ \Hy@EXPsetbordercolor
 }
 \ExplSyntaxOff
 
@@ -481,7 +453,7 @@
 \ExplSyntaxOn
 \def\Hy@DestName#1#2
  {
-  \driver_pdf_dest_name:nn {#1}{#2}
+  \pdf_destination:nf {#1}{#2}
  }
 \ExplSyntaxOff
 \providecommand*\@pdfborder{0 0 1}

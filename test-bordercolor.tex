@@ -1,0 +1,31 @@
+% !Mode:: "TeX:DE:UTF-8:Main"
+
+
+
+\documentclass{article}
+\usepackage{pdfresources}
+
+%don't compress pdf:
+\ExplSyntaxOn
+\driver_pdf_compresslevel:n {0}
+\driver_pdf_objects_disable:
+\ExplSyntaxOff
+\usepackage{xcolor}
+\usepackage[customdriver=hluatex-experimental]{hyperref}
+
+\hypersetup{
+ urlbordercolor=blue,
+ linkbordercolor=green,
+ menubordercolor=brown,
+ filebordercolor=yellow,
+ pdfborder={1 1 1}}
+ 
+\hypupdateattribute
+\begin{document}
+
+\section{a}\label{a}
+link: \ref{a} \\
+url:  \url{www.blub.de}\\
+file: \href{test-pdfresources.pdf}{test file}\\
+menu: \Acrobatmenu{Find}{Find}
+\end{document}

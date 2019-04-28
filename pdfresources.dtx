@@ -137,10 +137,7 @@
   \pdfinfo { #1 }
  }
 
-\cs_new_protected:Nn \driver_pdf_dest_name:nn %#1 name, #2 dest type (e.g. fitbh)
- {
-  \pdfdest~{#1}#2\scan_stop:
- }
+
 
 % this needs refinement, probably is should create named objects and add
 % them to the properties, see discussion
@@ -177,10 +174,7 @@
   \pdfextension info { #1 }
  }
 
-\cs_new_protected:Nn \driver_pdf_dest_name:nn %#1 name, #2 dest type (e.g. fitbh)
- {
-  \pdfextension~dest~name~{#1}#2 \scan_stop:
- }
+
 
 \cs_new_protected:Npx \driver_pdf_bdc:nn #1 #2
   {
@@ -413,7 +407,18 @@
 }
 %</package>
 %    \end{macrocode}
-%
+% \subsection{Destinations}
+%    \begin{macrocode}
+%<*package>
+% perhaps some manipulation of the argument will be needed to map the current
+% hyperref syntax
+\cs_new_protected:Npn \pdf_destination:nn #1 #2
+ {
+  \exp_args:Nnx\driver_pdf_destination:nn {#1}{\str_lower_case:n{#2}}
+ }
+\cs_generate_variant:Nn\pdf_destination:nn {no,nf}
+%</package>
+%    \end{macrocode}
 % \subsubsection{Endlink}
 % tagpdf needs to execute code at the end of the link to store the object reference etc.
 % So we need a hook. For now the hook is a seq: This will perhaps allows a system to
