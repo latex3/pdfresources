@@ -1,5 +1,5 @@
 \documentclass{report}
-%management of \pagesattr (plural, only one token per document!)
+% management of \pagesattr (plural, only one token per document!)
 \usepackage{expl3}
 \ExplSyntaxOn
 \driver_pdf_compresslevel:n {0}
@@ -9,7 +9,7 @@
   {
     \cs_if_exist:NTF \tex_variable:D
       { \tex_variable:D pagesattr ~ {#1}}
-      { \pdfpagesattr {#1}}
+      { \tex_pdfpagesattr:D {#1}}
   }
 
 \cs_generate_variant:Nn \__driver_pdf_pagesattr:n {x}
@@ -32,6 +32,7 @@
 %function to remove an attribute?
 %function to clear the whole attribute?
 %function to check if a key is there and what value it has?
+\show\tex_pdfpageattr:D
 \ExplSyntaxOff
 \begin{document}
 \ExplSyntaxOn
@@ -40,4 +41,4 @@
 \ExplSyntaxOff
 
 ablblb
-\end{document}
+\end{document} 

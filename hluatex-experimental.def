@@ -680,13 +680,12 @@
     \process@me
   \fi
   \Hy@pstringdef\Hy@pstringB{\@baseurl}%
-  \driver_pdf_catalog:n{%
-    /PageMode/\@pdfpagemode
-    \ifx\@baseurl\@empty
-    \else
-      /URI<</Base(\Hy@pstringB)>>%
-    \fi
-  }%
+  \pdf_catalog_gput:nn {PageMode}{/\@pdfpagemode}
+  \tl_if_empty:NF \@baseurl
+   {
+    \pdf_catalog_gput:nn {URI}{<</Base(\Hy@pstringB)>>}
+   }
+  %
   \ifx\@pdfstartpage\@empty
   \else
     \ifx\@pdfstartview\@empty
@@ -756,7 +755,7 @@
        {
         /ModDate(\@pdfmoddate)
        }
-     \tl_if_exist:NT
+     \tl_if_exist:NT %special, as \relax is default
        \@pdfproducer
        {
         /Producer(\@pdfproducer)

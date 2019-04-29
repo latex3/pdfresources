@@ -5,22 +5,28 @@
 \documentclass{article}
 \usepackage{expl3}
 
+\makeatletter
+\@namedef{Hy@pdfversion@2.0}{10}%
+\makeatother%
 \usepackage{pdfresources}
 
 %don't compress pdf:
 \ExplSyntaxOn
 \driver_pdf_compresslevel:n {0}
 \driver_pdf_objects_disable:
+
+%\driver_pdf_catalog_gput:nn {Lang}
 \ExplSyntaxOff
 \usepackage{xcolor}
-\showthe\luatexversion
-\makeatletter
-\@namedef{Hy@pdfversion@2.0}{10}%
-\makeatother%
-\usepackage[customdriver=hluatex-experimental,ocgcolorlinks,pdfversion=2.0]{hyperref}
 
+\usepackage[customdriver=hluatex-experimental,pdfversion=2.0,pdftitle=X]{hyperref}
+\ExplSyntaxOn
+\driver_pdf_info_gput:nn{Title}{(A)}
+\driver_pdf_info_gput:nn{Title}{(B)}
+\driver_pdf_info_gput:nn{Title}{(C)}
+\ExplSyntaxOff
 %%\tracingmacros=1
-\hypersetup{urlcolor=blue,linkbordercolor=blue,pdfborder={1 1 1},pdfprintpagerange=0}
+\hypersetup{urlbordercolor=blue,linkbordercolor=green,pdfborder={1 1 1},pdfprintpagerange=0}
 %%%\makeatletter
 \hypupdateattribute
 \makeatletter%\tracingmacros=1
@@ -30,15 +36,7 @@
 
 abc%\end{document}
 \ExplSyntaxOn
-\tl_set:Nx\l_tmpa_tl
- {
-  LuaTeX-
-   \int_div_truncate:nn{\luatexversion}{100}.
-   \int_compare:nNnT {\int_mod:nn{\luatexversion}{100}}<{10}{0}
-   \int_mod:nn{\luatexversion}{100}.
-   \luatexrevision
- }
-\tl_show:N\l_tmpa_tl 
+
 
 \driver_pdf_link_begin_user:nnw{}{/A<</Type/Action/S/URI/URI(www.blub.de)>>}
 \driver_pdf_link_end:
@@ -72,11 +70,12 @@ xxx
  /Border [0.5~0.5~0.5]}
  {/A<</Type/Action/S/URI/URI(www.blub.de)>>}
  long~text~text~text~text~text~text~text~text
-\driver_pdf_link_end: 
+\driver_pdf_link_end:
 
 \url{www.blubblubblub.de}
 \section{a}\label{a}
-\ref{a}
+\newpage
+\ref{a} \quad
 \ExplSyntaxOff
 \Acrobatmenu{Find}{Find}
 %\hyperlink{blblb}{yabc\\xye\\abc}

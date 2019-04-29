@@ -127,16 +127,10 @@
 \sys_if_engine_pdftex:T
 {
 
- \cs_new_protected:Nn \driver_pdf_catalog:n
+ \cs_new_protected:Nn \driver_pdf_docview:nn %#1 page number, #2 e.g. /FitH
  {
-  \pdfcatalog { #1 }
+  \pdfcatalog {  } openaction~goto~page #1 {#2}
  }
-
- \cs_new_protected:Nn \driver_pdf_info:n
- {
-  \pdfinfo { #1 }
- }
-
 
 
 % this needs refinement, probably is should create named objects and add
@@ -164,17 +158,10 @@
 {
  %allow version 2.0 in luatex. Needs sorting out later.
  \@namedef{Hy@pdfversion@2.0}{10}%
- \cs_new_protected:Nn \driver_pdf_catalog:n
+ \cs_new_protected:Nn \driver_pdf_docview:nn %#1 page number, #2 e.g. /FitH
  {
-  \pdfextension catalog { #1 }
+  \pdfextension catalog {  } openaction~goto~page #1 {#2}
  }
-
- \cs_new_protected:Nn \driver_pdf_info:n
- {
-  \pdfextension info { #1 }
- }
-
-
 
 \cs_new_protected:Npx \driver_pdf_bdc:nn #1 #2
   {
@@ -223,6 +210,56 @@
 %    \end{macrocode}
 % \section{Management code / pdf Module}
 %<@@=pdf>
+% \subsection{The info dictionary}
+% The info dictionary is filled by e.g. \verb+\pdfinfo+. Multiple appearances of
+% \verb+\pdfinfo+ are concatenated, so one could end with multiple /Title or /Author entries.
+% It is then viewer dependant which one is showed, so it is better to avoid them. We therefore setup a
+% property which is filled and written to the info directory in one go at begin document.
+%    \begin{macrocode}
+%<*package>
+\prop_new:N \g_@@_info_dict_prop
+\cs_new_protected:Npn \pdf_info_gput:nn #1 #2 %#1 key without /, #2 content
+  {
+   \prop_gput:Nnn\g_@@_info_dict_prop { #1 } { #2 }
+  }
+\AtBeginDocument
+ {
+  \prop_map_function:NN  \g_@@_info_dict_prop \driver_pdf_info_gput:nn
+ }
+%</package>
+%    \end{macrocode}
+% \subsection{The catalog dictionary}
+% The catalog dictionary is filled by e.g. \verb+\pdfcatalog+. Multiple appearances of
+% \verb+\pdfcatalog+ are concatenated, so one could end with multiple entries.
+% We is better to avoid this. We therefore setup a
+% property which is filled and executed in one go at begin document.
+% \verb+\pdfcatalog+ has an option \texttt{openaction} to set the start view options. This is ignored
+% here but set in a separate command (to be in sync with other drivers).
+%    \begin{macrocode}
+%<*package>
+\prop_new:N \g_@@_catalog_dict_prop
+\cs_new_protected:Npn \pdf_catalog_gput:nn #1 #2 %#1 key without /, #2 content
+  {
+   \prop_gput:Nnn\g_@@_catalog_dict_prop { #1 } { #2 }
+  }
+\AtBeginDocument
+ {
+  \prop_map_function:NN  \g_@@_catalog_dict_prop \driver_pdf_catalog_gput:nn
+ }
+%</package>
+%    \end{macrocode}
+% \subsection{Doc View}
+% This commands set Doc View options. This is rather crude /needs review. For now we
+% assume that only the equivalent of \verb+openaction~goto~page\@pdfstartpage{\@pdfstartview}+ in
+% hyperref is needed. The format of the second argument is quite unclear (slash, casing).
+%    \begin{macrocode}
+%<*package>
+\cs_new_protected:Npn \pdf_docview:nn #1 #2
+ {
+  \driver_pdf_docview:nn {#1}{#2}
+ }
+%</package>
+%    \end{macrocode}
 % \subsection{Setting / comparing pdf versions}
 % The code assumes that the versions are two integers separated by a period.
 %
@@ -232,7 +269,7 @@
 %<*package>
 \cs_new_protected:Npn \pdf_version_gset:n #1
  {
-  \__pdf_version_gset:w  #1 . . \q_stop
+  \@@_version_gset:w  #1 . . \q_stop
  }
 
 \cs_new_protected:Npn \pdf_version_min_gset:n #1
@@ -316,7 +353,7 @@
 % their code to the \texttt{attr} argument through hooks.
 %    \begin{macrocode}
 %<*package>
-\cs_new:Nn \__pdf_get_key_value:nn { #1~#2~ } %name?????
+\cs_new:Nn \@@_get_key_value:nn { #1~#2~ } %name?????
 %</package>
 %    \end{macrocode}
 % Attributes are stored in a property list. Packages can add attributes through
@@ -327,11 +364,11 @@
 %
 %    \begin{macrocode}
 %<*package>
-\prop_new:N\l__pdf_hook_link_begin_url_attr_prop  %\hyper@linkurl
-\prop_new:N\l__pdf_hook_link_begin_file_attr_prop %\hyper@linkfile
-\prop_new:N\l__pdf_hook_link_begin_run_attr_prop  %\@hyper@launch run
-\prop_new:N\l__pdf_hook_link_begin_link_attr_prop %\hyper@link, \find@pdflink
-\prop_new:N\l__pdf_hook_link_begin_menu_attr_prop %\Acrobatmenu
+\prop_new:N\l_@@_hook_link_begin_url_attr_prop  %\hyper@linkurl
+\prop_new:N\l_@@_hook_link_begin_file_attr_prop %\hyper@linkfile
+\prop_new:N\l_@@_hook_link_begin_run_attr_prop  %\@hyper@launch run
+\prop_new:N\l_@@_hook_link_begin_link_attr_prop %\hyper@link, \find@pdflink
+\prop_new:N\l_@@_hook_link_begin_menu_attr_prop %\Acrobatmenu
 %</package>
 %    \end{macrocode}
 %
@@ -343,19 +380,19 @@
 %<*package>
 \cs_new_protected:Nn \pdf_link_user:nnn %#1 type (url, file etc, #2 action spec, #3 link text
  {
-   \seq_if_exist:cT { l__pdf_hook_link_begin_#1_seq }
+   \seq_if_exist:cT { l_@@_hook_link_begin_#1_seq }
    {
-    \seq_use:cn { l__pdf_hook_link_begin_#1_seq }{}
+    \seq_use:cn { l_@@_hook_link_begin_#1_seq }{}
    }
    \mode_leave_vertical:
    %\driver_pdf_link_user:nnn
    \driver_pdf_link_begin_user:nnw
     {
-     \prop_if_exist:cT { l__pdf_hook_link_begin_#1_attr_prop }
+     \prop_if_exist:cT { l_@@_hook_link_begin_#1_attr_prop }
      {
       \prop_map_function:cN
-       { l__pdf_hook_link_begin_#1_attr_prop }
-       \__pdf_get_key_value:nn
+       { l_@@_hook_link_begin_#1_attr_prop }
+       \@@_get_key_value:nn
       }
     }
     {
@@ -363,7 +400,7 @@
     }
     #3
    \driver_pdf_link_end:
-   \seq_use:cn { l__pdf_hook_link_end_#1_seq }{}
+   \seq_use:cn { l_@@_hook_link_end_#1_seq }{}
  }
 %</package>
 %    \end{macrocode}
@@ -371,17 +408,17 @@
 %<*package>
 \cs_new_protected:Npn \pdf_link_begin_user:nnw #1 #2 %#1 type, #2 action spec
 {
- \seq_if_exist:cT { l__pdf_hook_link_begin_#1_seq }
+ \seq_if_exist:cT { l_@@_hook_link_begin_#1_seq }
    {
-    \seq_use:cn { l__pdf_hook_link_begin_#1_seq }{}
+    \seq_use:cn { l_@@_hook_link_begin_#1_seq }{}
    }
  \driver_pdf_link_begin_user:nnw
   {
-   \prop_if_exist:cT { l__pdf_hook_link_begin_#1_attr_prop }
+   \prop_if_exist:cT { l_@@_hook_link_begin_#1_attr_prop }
     {
      \prop_map_function:cN
-      { l__pdf_hook_link_begin_#1_attr_prop }
-      \__pdf_get_key_value:nn
+      { l_@@_hook_link_begin_#1_attr_prop }
+      \@@_get_key_value:nn
      }
   }
   { #2 }
@@ -390,17 +427,17 @@
 % At second one with the \texttt{goto name} argument:
 \cs_new_protected:Npn \pdf_link_begin_goto:nnw #1 #2 %#1 type, #2 destination
 {
- \seq_if_exist:cT { l__pdf_hook_link_begin_#1_seq }
+ \seq_if_exist:cT { l_@@_hook_link_begin_#1_seq }
    {
-    \seq_use:cn { l__pdf_hook_link_begin_#1_seq }{}
+    \seq_use:cn { l_@@_hook_link_begin_#1_seq }{}
    }
  \driver_pdf_link_begin_goto:nnw
   {
-   \prop_if_exist:cT { l__pdf_hook_link_begin_#1_attr_prop }
+   \prop_if_exist:cT { l_@@_hook_link_begin_#1_attr_prop }
      {
       \prop_map_function:cN
-      { l__pdf_hook_link_begin_#1_attr_prop }
-      \__pdf_get_key_value:nn
+      { l_@@_hook_link_begin_#1_attr_prop }
+      \@@_get_key_value:nn
      }
   }
   { #2 }
@@ -425,18 +462,18 @@
 % add and remove hooks by index. The hook depends on the type.
 %    \begin{macrocode}
 %<*package>
-\seq_new:N \l__pdf_hook_link_end_url_seq
-\seq_new:N \l__pdf_hook_link_end_run_seq
-\seq_new:N \l__pdf_hook_link_end_file_seq
-\seq_new:N \l__pdf_hook_link_end_link_seq
-\seq_new:N \l__pdf_hook_link_end_menu_seq
+\seq_new:N \l_@@_hook_link_end_url_seq
+\seq_new:N \l_@@_hook_link_end_run_seq
+\seq_new:N \l_@@_hook_link_end_file_seq
+\seq_new:N \l_@@_hook_link_end_link_seq
+\seq_new:N \l_@@_hook_link_end_menu_seq
 
 \cs_new_protected:Nn \pdf_link_end:n %#1 type, e.g. url
  {
   \driver_pdf_link_end:
-  \seq_if_exist:cT {l__pdf_hook_link_end_#1_seq}
+  \seq_if_exist:cT {l_@@_hook_link_end_#1_seq}
    {
-    \seq_use:cn { l__pdf_hook_link_end_#1_seq }{}
+    \seq_use:cn { l_@@_hook_link_end_#1_seq }{}
    }
  }
 
@@ -447,10 +484,10 @@
 % setup hooks for this too:
 %    \begin{macrocode}
 %<*package>
-\seq_new:N \l__pdf_hook_link_begin_url_seq
-\seq_new:N \l__pdf_hook_link_begin_run_seq
-\seq_new:N \l__pdf_hook_link_begin_file_seq
-\seq_new:N \l__pdf_hook_link_begin_link_seq
+\seq_new:N \l_@@_hook_link_begin_url_seq
+\seq_new:N \l_@@_hook_link_begin_run_seq
+\seq_new:N \l_@@_hook_link_begin_file_seq
+\seq_new:N \l_@@_hook_link_begin_link_seq
 %</package>
 %    \end{macrocode}
 %
