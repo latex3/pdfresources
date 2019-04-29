@@ -22,9 +22,9 @@
 %%%\makeatletter
 \hypupdateattribute
 \makeatletter%\tracingmacros=1
-\textwidth=5cm 
-\begin{document} 
-
+\textwidth=5cm
+\begin{document}
+\begin{Form}
 \makeatletter%\show\Hy@pstringdef
 
 abc%\end{document}
@@ -73,8 +73,11 @@ xxx
 \ref{a} \quad
 \ExplSyntaxOff
 \Acrobatmenu{Find}{Find}
-%\hyperlink{blblb}{yabc\\xye\\abc}
+\TextField[bordercolor=, name=signMe]{xxx}
 
+\TextField[bordercolor=, name=signMeB]{xxx}
+%\hyperlink{blblb}{yabc\\xye\\abc}
+\end{Form}
 \end{document}
 \section{a}\label{a}
 \ref{a}

@@ -151,7 +151,6 @@
 \ExplSyntaxOff
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\protected\def\pdfcatalog        {\pdfextension catalog }
 
 \protected\def\pdflastannot      {\numexpr\pdffeedback lastannot\relax}
 \protected\def\pdflastlink       {\numexpr\pdffeedback lastlink\relax}
@@ -987,6 +986,7 @@
     }%
   }%
 \fi
+\ExplSyntaxOn
 \def\@Form[#1]{%
   \@ifundefined{textcolor}{\let\textcolor\@gobble}{}%
   \kvsetkeys{Form}{#1}%
@@ -1005,21 +1005,21 @@
           \fi
           /DR<<%
             /Font<<%
-              /ZaDb \OBJ@ZaDb\space 0 R%
-              /Helv \OBJ@Helv\space 0 R%
+              /ZaDb~\OBJ@ZaDb\space 0~R%
+              /Helv~\OBJ@Helv\space 0~R%
             >>%
           >>%
-          /DA(/Helv 10 Tf 0 g)%
+          /DA(/Helv~10~Tf~0~g)%
           \ifHy@pdfa
           \else
             \ifHyField@NeedAppearances
-              /NeedAppearances true%
+              /NeedAppearances~true%
             \fi
           \fi
         >>%
       }%
       \edef\OBJ@acroform{\the\pdflastobj}%
-      \pdfcatalog{/AcroForm \OBJ@acroform\space 0 R}%
+      \driver_pdf_catalog_gput:nn{AcroForm}{\OBJ@acroform\c_space_tl 0~R}%
     }%
   }%
   \MakeFieldObject{%
@@ -1039,6 +1039,7 @@
     \fbox{\textcolor{yellow}{\textsf{SubmitP}}}%
   }{SubmitP}%
 }
+\ExplSyntaxOff
 \let\@endForm\ltx@empty
 \let\HyAnn@AbsPageLabel\ltx@empty
 \let\Fld@pageobjref\ltx@empty
