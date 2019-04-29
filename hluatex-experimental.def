@@ -885,17 +885,7 @@
 }%
 \let\HyField@afields\ltx@empty
 \let\HyField@cofields\ltx@empty
-\begingroup\expandafter\expandafter\expandafter\endgroup
-\expandafter\ifx\csname pdflastlink\endcsname\relax
-  \let\HyField@AddToFields\relax
-  \PackageInfo{hyperref}{%
-    You need pdfTeX 1.40.0 for setting the /Fields entry.%
-    \MessageBreak
-    Adobe Reader/Acrobat accepts an empty /Field array,%
-    \MessageBreak
-    but other PDF viewers might complain%
-  }%
-\else
+%% UF test for old pdftex removed
   \let\HyField@AuxAddToFields\ltx@gobble
   \let\HyField@AuxAddToCoFields\ltx@gobbletwo
   \def\HyField@AfterAuxOpen{\Hy@AtBeginDocument}%
@@ -985,7 +975,6 @@
       \fi
     }%
   }%
-\fi
 \ExplSyntaxOn
 \def\@Form[#1]{%
   \@ifundefined{textcolor}{\let\textcolor\@gobble}{}%
@@ -996,6 +985,8 @@
       \pdfrefobj\OBJ@ZaDb
       \pdfrefobj\OBJ@Helv
     \AtVeryEndDocument{%
+     %\driver_pdf_object_new:nn  { l_hyp_form_dict_obj } {dict}
+     %\driver_pdf_object_write:nn
       \immediate\pdfobj{%
         <<%
           /Fields[\HyField@afields]%

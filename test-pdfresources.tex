@@ -24,14 +24,29 @@
 \makeatletter%\tracingmacros=1
 \textwidth=5cm
 \begin{document}
-\begin{Form}
 \makeatletter%\show\Hy@pstringdef
 
 abc%\end{document}
+
+\pdfextension obj reserveobjnum 
+\the\pdflastobj
+
+\pdfextension obj reserveobjnum
+\the\pdflastobj
+
 \ExplSyntaxOn
+
+\cs_show:N\driver_pdf_object_new:nn
+
+\driver_pdf_object_new:nn {testobjA}{dict}
+\driver_pdf_object_new:nn {testobjB}{dict}
+\driver_pdf_object_ref:n {testobjA}
+\driver_pdf_object_ref:n {testobjB}
+\ExplSyntaxOff
+\end{document}
 \newpage
 
-\prop_show:N\g__pdf_info_dict_prop
+%\prop_show:N\g__pdf_info_dict_prop
 
 xx\driver_pdf_link_begin_user:nnw{}{/A<</Type/Action/S/URI/URI(www.blub.de)>>}
 \driver_pdf_link_end:
@@ -73,11 +88,8 @@ xxx
 \ref{a} \quad
 \ExplSyntaxOff
 \Acrobatmenu{Find}{Find}
-\TextField[bordercolor=, name=signMe]{xxx}
-
-\TextField[bordercolor=, name=signMeB]{xxx}
 %\hyperlink{blblb}{yabc\\xye\\abc}
-\end{Form}
+
 \end{document}
 \section{a}\label{a}
 \ref{a}
