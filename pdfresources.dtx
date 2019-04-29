@@ -163,6 +163,11 @@
   \pdfextension catalog {  } openaction~goto~page #1 {#2}
  }
 
+\cs_new_protected:Npn \driver_pdf_catalog:n #1 %content, currently needed as hyperref has \Hy@PutCatalog
+ {
+  \pdfextension catalog {#1}
+ }
+
 \cs_new_protected:Npx \driver_pdf_bdc:nn #1 #2
   {
     \cs_if_exist:NTF \tex_pdfextension:D
@@ -214,7 +219,7 @@
 % The info dictionary is filled by e.g. \verb+\pdfinfo+. Multiple appearances of
 % \verb+\pdfinfo+ are concatenated, so one could end with multiple /Title or /Author entries.
 % It is then viewer dependant which one is showed, so it is better to avoid them. We therefore setup a
-% property which is filled and written to the info directory in one go at begin document.
+% property which is filled and written to the info directory in one go.
 %    \begin{macrocode}
 %<*package>
 \prop_new:N \g_@@_info_dict_prop
@@ -222,10 +227,12 @@
   {
    \prop_gput:Nnn\g_@@_info_dict_prop { #1 } { #2 }
   }
-\AtBeginDocument
+
+\cs_new_protected:Npn \pdf_info_out: %internal? How to ensure that it is used only once?
  {
   \prop_map_function:NN  \g_@@_info_dict_prop \driver_pdf_info_gput:nn
  }
+
 %</package>
 %    \end{macrocode}
 % \subsection{The catalog dictionary}

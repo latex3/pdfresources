@@ -354,9 +354,9 @@
       ]
     }
     \edef\OBJ@OCGs{\the\pdflastobj\c_space_tl 0\c_space_tl R}
-    \driver_pdf_catalog:n
-     {
-      /OCProperties<<
+    \pdf_catalog_gput:nn
+     {OCProperties}
+     {<<
         /OCGs\c_space_tl\OBJ@OCGs
         /D<<
           /OFF[\OBJ@OCG@print]
@@ -379,7 +379,7 @@
           ]
         >>
       >>
-    }
+     }
     \begingroup
       \edef\x{\endgroup
         \pdfpageresources{
@@ -721,17 +721,19 @@
       /NumCopies\c_space_tl \@pdfnumcopies
     \fi
   }%
-  \driver_pdf_catalog:n{%
     \ifx\Hy@temp\@empty
     \else
-      /ViewerPreferences<<\Hy@temp>>%
+    \pdf_catalog_gput:nn
+     {ViewerPreferences}{<<\Hy@temp>>}%
     \fi
-    \Hy@UseNameKey{PageLayout}\@pdfpagelayout
+    %% \Hy@UseNameKey{PageLayout}\@pdfpagelayout <------?????
     \ifx\@pdflang\relax
     \else
-      /Lang(\@pdflang)%
+      \pdf_catalog_gput:nn
+       { Lang }
+       {(\@pdflang)}%
     \fi
-  }%
+
 }
 
 
@@ -739,36 +741,43 @@
   \pdf@ifdraftmode{}{%
     \Hy@UseMaketitleInfos
     \HyInfo@GenerateAddons
-    \driver_pdf_info:n
-     {
-      /Author(\@pdfauthor)
-      /Title(\@pdftitle)
-      /Subject(\@pdfsubject)
-      /Creator(\@pdfcreator)
-      \tl_if_empty:NF
+    \pdf_info_gput:nn
+      {Author}{(\@pdfauthor)}
+    \pdf_info_gput:nn
+      {Title}{(\@pdftitle)}
+    \pdf_info_gput:nn
+      {Subject}{(\@pdfsubject)}
+    \pdf_info_gput:nn
+      {Creator}{(\@pdfcreator)} %hm should hyperref set this in any case??
+    \tl_if_empty:NF
        {\@pdfcreationdate}
        {
-        /CreationDate(\@pdfcreationdate)
+        \pdf_info_gput:nn
+         {CreationDate}{(\@pdfcreationdate)}
        }
      \tl_if_empty:NF
        \@pdfmoddate
        {
-        /ModDate(\@pdfmoddate)
+        \pdf_info_gput:nn
+         {ModDate}{(\@pdfmoddate)}
        }
      \tl_if_exist:NT %special, as \relax is default
        \@pdfproducer
        {
-        /Producer(\@pdfproducer)
+        \pdf_info_gput:nn
+         {Producer}{(\@pdfproducer)}
        }
-      /Keywords(\@pdfkeywords)
+     \pdf_info_gput:nn
+       {Keywords}{(\@pdfkeywords)}
      \tl_if_empty:NF
        {\@pdftrapped}
        {
-        /Trapped/\@pdftrapped
+        \pdf_info_gput:nn
+        {Trapped}{/\@pdftrapped}
        }
-      \HyInfo@Addons
+      %\HyInfo@Addons % unclear ....needs probably change in hyperref
+      \pdf_info_out: % where should this go????
     }
-  }
   \Hy@DisableOption{pdfauthor}%
   \Hy@DisableOption{pdftitle}%
   \Hy@DisableOption{pdfsubject}%
