@@ -317,39 +317,35 @@
 \ExplSyntaxOn
 \ifHy@ocgcolorlinks
   \pdf@ifdraftmode{}{
-    \driver_pdf_object_new:nn   { l__hyp_ocg_view_obj } { dict }
-    \driver_pdf_object_write:nn { l__hyp_ocg_view_obj }
+    \driver_pdf_object_new:nn   { l__hyp_ocg_view_dict_obj }  { dict }
+    \driver_pdf_object_new:nn   { l__hyp_ocg_print_dict_obj } { dict }
+    \driver_pdf_object_new:nn   { l__hyp_ocg_ref_array_obj }   { array }
+    \driver_pdf_object_write:nn { l__hyp_ocg_view_dict_obj }
      {
         /Type/OCG
         /Name(View)
-        /Usage<<
-          /Print<<
-            /PrintState/OFF
-          >>
-          /View<<
-            /ViewState/ON
-          >>
-        >>
+        /Usage
+         <<
+          /Print <</PrintState/OFF>>~
+          /View  <</ViewState/ON  >>~
+         >>
      }
-    \immediate\pdfobj{
-      <<
+    \driver_pdf_object_write:nn { l__hyp_ocg_print_dict_obj }
+     {
         /Type/OCG
         /Name(Print)
-        /Usage<<
-          /Print<<
-            /PrintState/ON
-          >>
-          /View<<
-            /ViewState/OFF
-          >>
-        >>
-      >>
-    }
+        /Usage
+         <<
+          /Print <</PrintState/ON>>~
+          /View  <</ViewState/OFF>>~
+         >>
+     }
     \edef\OBJ@OCG@print{\the\pdflastobj\c_space_tl 0\c_space_tl R}
-    \immediate\pdfobj{
-      [
-        \driver_pdf_object_ref:n { l__hyp_ocg_view_obj }\c_space_tl\OBJ@OCG@print
-      ]
+    \driver_pdf_object_write:nx { l__hyp_ocg_ref_array_obj }
+    {
+        \driver_pdf_object_ref:n { l__hyp_ocg_view_dict_obj }
+        \c_space_tl
+        \driver_pdf_object_ref:n { l__hyp_ocg_print_dict_obj }
     }
     \edef\OBJ@OCGs{\the\pdflastobj\c_space_tl 0\c_space_tl R}
     \pdf_catalog_gput:nn
@@ -383,7 +379,7 @@
         \pdfpageresources{
           \the\pdfpageresources
           /Properties<<
-            /OCView ~ \driver_pdf_object_ref:n { l__hyp_ocg_view_obj}
+            /OCView ~ \driver_pdf_object_ref:n { l__hyp_ocg_view_dict_obj}
             /OCPrint\c_space_tl \OBJ@OCG@print
           >>
         }
