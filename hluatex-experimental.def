@@ -976,59 +976,60 @@
     }%
   }%
 \ExplSyntaxOn
-\def\@Form[#1]{%
-  \@ifundefined{textcolor}{\let\textcolor\@gobble}{}%
-  \kvsetkeys{Form}{#1}%
-  \pdf@ifdraftmode{}{%
+
+\def\@Form[#1]
+ {
+  \@ifundefined{textcolor}{\let\textcolor\@gobble}{}
+  \kvsetkeys{Form}{#1}
+  \pdf@ifdraftmode{}
+   {
     \Hy@FormObjects
-      \pdfrefobj\OBJ@pdfdocencoding
-      \pdfrefobj\OBJ@ZaDb
-      \pdfrefobj\OBJ@Helv
-    \AtVeryEndDocument{%
-     %\driver_pdf_object_new:nn  { l_hyp_form_dict_obj } {dict}
-     %\driver_pdf_object_write:nn
-      \immediate\pdfobj{%
-        <<%
-          /Fields[\HyField@afields]%
-          \ifx\HyField@cofields\ltx@empty
-          \else
-            /CO[\romannumeral-`\Q\HyField@cofields]%
-          \fi
-          /DR<<%
-            /Font<<%
-              /ZaDb~\OBJ@ZaDb\space 0~R%
-              /Helv~\OBJ@Helv\space 0~R%
-            >>%
-          >>%
-          /DA(/Helv~10~Tf~0~g)%
-          \ifHy@pdfa
+    \AtVeryEndDocument
+     {
+      \driver_pdf_object_new:nn   { l__hyp_acroform_dict_obj } {dict}
+      \driver_pdf_object_write:nx { l__hyp_acroform_dict_obj }
+      {
+        /Fields[\HyField@afields]
+        \ifx\HyField@cofields\ltx@empty
+        \else
+           /CO[\romannumeral-`\Q\HyField@cofields]%
+         \fi
+        /DR<<
+            /Font<<
+              /ZaDb~\driver_pdf_object_ref:n {l__hyp_font_zapfdingbats_obj}~
+              /Helv~\driver_pdf_object_ref:n {l__hyp_font_helvetica_obj}
+            >>
+          >>
+          /DA(/Helv~10~Tf~0~g)
+          \ifHy@pdfa %???????
           \else
             \ifHyField@NeedAppearances
               /NeedAppearances~true%
             \fi
           \fi
-        >>%
-      }%
-      \edef\OBJ@acroform{\the\pdflastobj}%
-      \driver_pdf_catalog_gput:nn{AcroForm}{\OBJ@acroform\c_space_tl 0~R}%
-    }%
-  }%
-  \MakeFieldObject{%
-    \begingroup
-      \fontfamily{pzd}%
-      \fontencoding{U}%
-      \fontseries{m}%
-      \fontshape{n}%
+      }
+      \driver_pdf_catalog_gput:nn{AcroForm}{\driver_pdf_object_ref:n{l__hyp_acroform_dict_obj}}%
+    }
+  }
+  \MakeFieldObject
+   {
+    \group_begin:
+      \fontfamily{pzd}
+      \fontencoding{U}
+      \fontseries{m}
+      \fontshape{n}
       \selectfont
-      \char123 %
-    \endgroup
-  }{Ding}%
-  \MakeFieldObject{%
-    \fbox{\textcolor{yellow}{\textsf{Submit}}}%
-  }{Submit}%
-  \MakeFieldObject{%
-    \fbox{\textcolor{yellow}{\textsf{SubmitP}}}%
-  }{SubmitP}%
+      \char123
+    \group_end:
+   }{Ding}
+  \MakeFieldObject
+   {
+    \fbox{\textcolor{yellow}{\textsf{Submit}}} %color?
+   }{Submit}
+  \MakeFieldObject
+   {
+    \fbox{\textcolor{yellow}{\textsf{SubmitP}}} %color?
+   }{SubmitP}
 }
 \ExplSyntaxOff
 \let\@endForm\ltx@empty
@@ -1296,62 +1297,72 @@
     }%
   \endgroup
 }
+%hm. Should a luatex driver use type1 fonts in fields????
+\ExplSyntaxOn
 \def\Hy@FormObjects{%
-  \pdfobj {%
-    <<%
-      /Type/Encoding%
-      /Differences[%
-        24/breve/caron/circumflex/dotaccent/hungarumlaut/ogonek%
-          /ring/tilde %
-        39/quotesingle %
+  \driver_pdf_object_new:nn   {l__hyp_encoding_pdfdoc_obj } { dict }
+  \driver_pdf_object_new:nn   {l__hyp_font_zapfdingbats_obj } { dict }
+  \driver_pdf_object_new:nn   {l__hyp_font_helvetica_obj } { dict }
+  \driver_pdf_object_write:nx {l__hyp_encoding_pdfdoc_obj }
+   {
+      /Type/Encoding
+      /Differences[
+        24/breve/caron/circumflex/dotaccent/hungarumlaut/ogonek
+          /ring/tilde
+        \c_space_tl
+        39/quotesingle
+        \c_space_tl
         96/grave %
-        128/bullet/dagger/daggerdbl/ellipsis/emdash/endash/florin%
-           /fraction/guilsinglleft/guilsinglright/minus/perthousand%
-           /quotedblbase/quotedblleft/quotedblright/quoteleft%
-           /quoteright/quotesinglbase/trademark/fi/fl/Lslash/OE%
-           /Scaron/Ydieresis/Zcaron/dotlessi/lslash/oe/scaron/zcaron %
-        164/currency %
-        166/brokenbar %
-        168/dieresis/copyright/ordfeminine %
-        172/logicalnot/.notdef/registered/macron/degree/plusminus%
-           /twosuperior/threesuperior/acute/mu %
-        183/periodcentered/cedilla/onesuperior/ordmasculine %
-        188/onequarter/onehalf/threequarters %
-        192/Agrave/Aacute/Acircumflex/Atilde/Adieresis/Aring/AE%
-           /Ccedilla/Egrave/Eacute/Ecircumflex/Edieresis/Igrave%
-           /Iacute/Icircumflex/Idieresis/Eth/Ntilde/Ograve/Oacute%
-           /Ocircumflex/Otilde/Odieresis/multiply/Oslash/Ugrave%
-           /Uacute/Ucircumflex/Udieresis/Yacute/Thorn/germandbls%
-           /agrave/aacute/acircumflex/atilde/adieresis/aring/ae%
-           /ccedilla/egrave/eacute/ecircumflex/edieresis/igrave%
-           /iacute/icircumflex/idieresis/eth/ntilde/ograve/oacute%
-           /ocircumflex/otilde/odieresis/divide/oslash/ugrave%
-           /uacute/ucircumflex/udieresis/yacute/thorn/ydieresis%
-      ]%
-    >>%
-  }%
-  \xdef\OBJ@pdfdocencoding{\the\pdflastobj}%
-  \pdfobj{%
-    <<%
-      /Type/Font%
-      /Subtype/Type1%
-      /Name/ZaDb%
-      /BaseFont/ZapfDingbats%
-    >>%
-  }%
-  \xdef\OBJ@ZaDb{\the\pdflastobj}%
-  \pdfobj{%
-    <<%
-      /Type/Font%
-      /Subtype/Type1%
-      /Name/Helv%
-      /BaseFont/Helvetica%
-      /Encoding \OBJ@pdfdocencoding\space 0 R%
-    >>%
-  }%
-  \xdef\OBJ@Helv{\the\pdflastobj}%
+        \iow_newline:
+        128/bullet/dagger/daggerdbl/ellipsis/emdash/endash/florin
+           /fraction/guilsinglleft/guilsinglright/minus/perthousand
+           /quotedblbase/quotedblleft/quotedblright/quoteleft
+           /quoteright/quotesinglbase/trademark/fi/fl/Lslash/OE
+           /Scaron/Ydieresis/Zcaron/dotlessi/lslash/oe/scaron/zcaron
+        \iow_newline:
+        164/currency
+        \c_space_tl
+        166/brokenbar
+        \c_space_tl
+        168/dieresis/copyright/ordfeminine
+        \c_space_tl
+        172/logicalnot/.notdef/registered/macron/degree/plusminus
+           /twosuperior/threesuperior/acute/mu
+        \c_space_tl
+        183/periodcentered/cedilla/onesuperior/ordmasculine
+        \c_space_tl
+        188/onequarter/onehalf/threequarters
+        \iow_newline:
+        192/Agrave/Aacute/Acircumflex/Atilde/Adieresis/Aring/AE
+           /Ccedilla/Egrave/Eacute/Ecircumflex/Edieresis/Igrave
+           /Iacute/Icircumflex/Idieresis/Eth/Ntilde/Ograve/Oacute
+           /Ocircumflex/Otilde/Odieresis/multiply/Oslash/Ugrave
+           /Uacute/Ucircumflex/Udieresis/Yacute/Thorn/germandbls
+           /agrave/aacute/acircumflex/atilde/adieresis/aring/ae
+           /ccedilla/egrave/eacute/ecircumflex/edieresis/igrave
+           /iacute/icircumflex/idieresis/eth/ntilde/ograve/oacute
+           /ocircumflex/otilde/odieresis/divide/oslash/ugrave
+           /uacute/ucircumflex/udieresis/yacute/thorn/ydieresis
+      ]
+  }
+  \driver_pdf_object_write:nn {l__hyp_font_zapfdingbats_obj }
+   {
+      /Type/Font
+      /Subtype/Type1
+      /Name/ZaDb
+      /BaseFont/ZapfDingbats
+   }
+  \driver_pdf_object_write:nx {l__hyp_font_helvetica_obj }
+   {
+      /Type/Font
+      /Subtype/Type1
+      /Name/Helv
+      /BaseFont/Helvetica
+      /Encoding~\driver_pdf_object_ref:n { l__hyp_encoding_pdfdoc_obj }
+   }
   \global\let\Hy@FormObjects\relax
 }
+\ExplSyntaxOff
 \providecommand*{\Fld@pageobjref}{}
 \begingroup\expandafter\expandafter\expandafter\endgroup
 \expandafter\ifx\csname pdf@escapestring\endcsname\relax

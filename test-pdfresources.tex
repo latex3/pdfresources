@@ -25,10 +25,12 @@
 \textwidth=5cm
 \begin{document}
 \makeatletter%\show\Hy@pstringdef
-
+\begin{Form}
+\TextField{abc}
+\TextField{cde}
 abc%\end{document}
 
-\pdfextension obj reserveobjnum 
+\pdfextension obj reserveobjnum
 \the\pdflastobj
 
 \pdfextension obj reserveobjnum
@@ -36,13 +38,14 @@ abc%\end{document}
 
 \ExplSyntaxOn
 
-\cs_show:N\driver_pdf_object_new:nn
+%\cs_show:N\driver_pdf_object_new:nn
 
 \driver_pdf_object_new:nn {testobjA}{dict}
 \driver_pdf_object_new:nn {testobjB}{dict}
 \driver_pdf_object_ref:n {testobjA}
 \driver_pdf_object_ref:n {testobjB}
 \ExplSyntaxOff
+\end{Form}
 \end{document}
 \newpage
 
