@@ -15,7 +15,7 @@
 \ExplSyntaxOff
 \usepackage{xcolor}
 
-\usepackage[customdriver=hluatex-experimental,pdfversion=2.0,pdftitle=X]{hyperref}
+\usepackage[customdriver=hluatex-experimental,pdfversion=2.0,pdftitle=X,ocgcolorlinks]{hyperref}
 
 %%\tracingmacros=1
 \hypersetup{urlbordercolor=blue,linkbordercolor=green,pdfborder={1 1 1},pdfprintpagerange=0}
@@ -29,15 +29,36 @@
 \TextField{abc}
 \TextField{cde}
 abc%\end{document}
+%
+%\noindent
+%\TextField[name=hight,align=0]{Hight [cm]}
+%\\
+%
+%\TextField[name=weight,align=0]{Weight [kg]}
+%\\
+%
+%\noindent
+%\TextField[name=BMI, maxlen=4,align=0,readonly=true,
+%           calculate={%
+%                      var f_hight = this.getField("hight");
+%                      var f_weight = this.getField("weight");
+%                      event.value = f_weight.value /((f_hight.value/100)*
+%   (f_hight.value/100));
+%                       }]{BMI}
 
-\pdfextension obj reserveobjnum
-\the\pdflastobj
-
-\pdfextension obj reserveobjnum
-\the\pdflastobj
+%\pdfextension obj reserveobjnum
+%\the\pdflastobj
+%
+%\pdfextension obj reserveobjnum
+%\the\pdflastobj
 
 \ExplSyntaxOn
-
+%\cs_show:N\driver_pdf_link_last_int:
+%
+%%\ifnum \driver_pdf_link_last_int: = 0 yes \fi
+%
+%\ifnum \driver_pdf_link_last_int: = 0 yes \fi
+  
 %\cs_show:N\driver_pdf_object_new:nn
 
 \driver_pdf_object_new:nn {testobjA}{dict}

@@ -126,9 +126,16 @@
 %<*package>
 %some variants
 \cs_generate_variant:Nn\driver_pdf_object_write:nn {nx}
-
+% version for link_last which gives an int. try to get rid of the necessity if possible
 \sys_if_engine_pdftex:T
 {
+ \cs_new:Npx \driver_pdf_link_last_int:
+  {
+    \cs_if_exist:NTF \tex_pdffeedback:D
+      { \tex_numexpr:D \exp_not:N \tex_pdffeedback:D lastlink \scan_stop: }
+      { \exp_not:N \tex_pdflastlink:D }
+  }
+
 
  \cs_new_protected:Nn \driver_pdf_docview:nn %#1 page number, #2 e.g. /FitH
  {
@@ -165,6 +172,13 @@
  {
   \pdfextension catalog {  } openaction~goto~page #1 {#2}
  }
+ % version for link_last which gives an int. try to get rid of the necessity if possible
+ \cs_new:Npx \driver_pdf_link_last_int:
+  {
+    \cs_if_exist:NTF \tex_pdffeedback:D
+      { \tex_numexpr:D \exp_not:N \tex_pdffeedback:D lastlink \scan_stop: }
+      { \exp_not:N \tex_pdflastlink:D }
+  }
 
 \cs_new_protected:Npn \driver_pdf_catalog:n #1 %content, currently needed as hyperref has \Hy@PutCatalog
  {

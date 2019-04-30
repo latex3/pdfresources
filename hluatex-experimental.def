@@ -153,10 +153,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \protected\def\pdflastannot      {\numexpr\pdffeedback lastannot\relax}
-\protected\def\pdflastlink       {\numexpr\pdffeedback lastlink\relax}
+%\protected\def\pdflastlink       {\numexpr\pdffeedback lastlink\relax}
 \protected\def\pdflastobj        {\numexpr\pdffeedback lastobj\relax}
 
-\protected\edef\pdflinkmargin    {\pdfvariable linkmargin}
+%\protected\edef\pdflinkmargin    {\pdfvariable linkmargin}
 \protected\def\pdfliteral        {\pdfextension literal}
 
 \protected\def\pdfobj            {\pdfextension obj }
@@ -166,7 +166,7 @@
 \protected\edef\pdfpageresources       {\pdfvariable pageresources}
 \protected\edef\pdfpagesattr           {\pdfvariable pagesattr}
 
-\protected\def\pdfrefobj         {\pdfextension refobj }
+%\protected\def\pdfrefobj         {\pdfextension refobj }
 
 \protected\def\pdfstartlink      {\pdfextension startlink }
 \protected\def\pdfendlink        {\pdfextension endlink\relax}
@@ -262,7 +262,7 @@
       \Hy@temp@A\lastsavedboxresourceindex{form XObject}%
       \Hy@temp@A\lastsavedimageresourceindex{image XObject}%
       \Hy@temp@A\pdflastannot{annotation}%
-      \Hy@temp@A\pdflastlink{link}%
+      \Hy@temp@A\driver_pdf_link_last_int:{link}%
       \ifx\Hy@temp\ltx@empty
        \int_compare:nNnTF { \Hy@pdfversion}  = {10 }
         { %pdf 2.0, temporary solution
@@ -317,8 +317,9 @@
 \ExplSyntaxOn
 \ifHy@ocgcolorlinks
   \pdf@ifdraftmode{}{
-    \immediate\pdfobj{
-      <<
+    \driver_pdf_object_new:nn   { l__hyp_ocg_view_obj } { dict }
+    \driver_pdf_object_write:nn { l__hyp_ocg_view_obj }
+     {
         /Type/OCG
         /Name(View)
         /Usage<<
@@ -329,9 +330,7 @@
             /ViewState/ON
           >>
         >>
-      >>
-    }
-    \edef\OBJ@OCG@view{\the\pdflastobj\c_space_tl 0\c_space_tl R}%
+     }
     \immediate\pdfobj{
       <<
         /Type/OCG
@@ -349,7 +348,7 @@
     \edef\OBJ@OCG@print{\the\pdflastobj\c_space_tl 0\c_space_tl R}
     \immediate\pdfobj{
       [
-        \OBJ@OCG@view\c_space_tl\OBJ@OCG@print
+        \driver_pdf_object_ref:n { l__hyp_ocg_view_obj }\c_space_tl\OBJ@OCG@print
       ]
     }
     \edef\OBJ@OCGs{\the\pdflastobj\c_space_tl 0\c_space_tl R}
@@ -384,7 +383,7 @@
         \pdfpageresources{
           \the\pdfpageresources
           /Properties<<
-            /OCView\c_space_tl \OBJ@OCG@view
+            /OCView ~ \driver_pdf_object_ref:n { l__hyp_ocg_view_obj}
             /OCPrint\c_space_tl \OBJ@OCG@print
           >>
         }
@@ -889,23 +888,26 @@
   \let\HyField@AuxAddToFields\ltx@gobble
   \let\HyField@AuxAddToCoFields\ltx@gobbletwo
   \def\HyField@AfterAuxOpen{\Hy@AtBeginDocument}%
+
+\ExplSyntaxOn
+
   \def\HyField@ABD@AuxAddToCoFields#1#2{%
-    \begingroup
+    \group_begin:
       \Hy@safe@activestrue
       \let\ltx@secondoftwo\relax
       \ifx\HyField@cofields\ltx@empty
         \xdef\HyField@cofields{%
-          \ltx@secondoftwo{#1}{ #2 0 R}%
-        }%
+          \ltx@secondoftwo{#1}{ #2 ~ 0 ~ R}%
+        }
       \else
         \let\ltx@secondoftwo\relax
         \def\HyField@AddCoField##1##2##3{%
           \ifx##1\ltx@empty
-            \ltx@secondoftwo{#1}{ #2 0 R}%
+            \ltx@secondoftwo{#1}{ #2 ~ 0 ~ R}%
             \expandafter\ltx@gobble
           \else
             \ifnum\pdf@strcmp{##2}{#1}>\ltx@zero
-              \ltx@secondoftwo{#1}{ #2 0 R}%
+              \ltx@secondoftwo{#1}{ #2 ~ 0 ~ R}%
               \ltx@secondoftwo{##2}{##3}%
               \expandafter\expandafter\expandafter\ltx@gobble
             \else
@@ -919,8 +921,9 @@
           \HyField@cofields\ltx@empty\ltx@empty\ltx@empty
         }%
       \fi
-    \endgroup
+    \group_end:
   }%
+
   \Hy@AtBeginDocument{%
     \if@filesw
       \immediate\write\@mainaux{%
@@ -938,14 +941,14 @@
           \HyField@afields
           \space
         \fi
-        #1 0 R%
+        #1 ~ 0 ~ R%
       }%
     }%
     \let\HyField@AuxAddToCoFields\HyField@ABD@AuxAddToCoFields
   }%
   \def\HyField@AddToFields{%
     \expandafter\HyField@@AddToFields\expandafter{%
-      \the\pdflastlink
+      \the\driver_pdf_link_last_int:
     }%
     \ifx\Fld@calculate@code\ltx@empty
     \else
@@ -958,7 +961,7 @@
               \string\HyField@AuxAddToCoFields{%
                 \Fld@calculate@sortkey
               }{%
-                \the\pdflastlink
+                \the\driver_pdf_link_last_int:
               }%
             }%
           \fi
@@ -975,6 +978,8 @@
       \fi
     }%
   }%
+
+\ExplSyntaxOff
 \ExplSyntaxOn
 
 \def\@Form[#1]
