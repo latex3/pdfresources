@@ -8,7 +8,7 @@
 \ProvidesFile{hluatex-experimental.def}
   [2019/04/07 v0.2 %
   Hyperref driver for luaTeX]
-\RequirePackage{xparse}
+\RequirePackage{xparse,etoolbox}
 
 %%\Hy@VersionCheck{hluatex.def}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -19,6 +19,8 @@
   {hyp}
   {missing-bookmark-package}
   { The~bookmark~package~is~required~for~this~hyperref~driver!}
+
+
 %% I require the bookmark package to get rid of some of the bookmarks code.
 \AtEndOfPackage{% so that we are later than KOMA ...
 \AtBeginDocument
@@ -725,47 +727,49 @@
 
 }
 
+\cs_new:Npn \__hyp_info_generate_addons:
+ {
+    \group_begin:
+      \cs_set:Npn \HyInfo@do##1{%
+        \EdefEscapeName\HyInfo@Key{##1}%
+        \pdf_info_gput:on {\HyInfo@Key}{(\csname HyInfo@Value@##1\endcsname)}
+        }
+      \HyInfo@AddonList
+    \group_end:
+ }
 
-\def\PDF@FinishDoc{%
-  \pdf@ifdraftmode{}{%
+
+\def\PDF@FinishDoc{}%
+
+\AtEndPreamble{
+  \pdf@ifdraftmode{}{
     \Hy@UseMaketitleInfos
-    \HyInfo@GenerateAddons
-    \pdf_info_gput:nn
-      {Author}{(\@pdfauthor)}
-    \pdf_info_gput:nn
-      {Title}{(\@pdftitle)}
-    \pdf_info_gput:nn
-      {Subject}{(\@pdfsubject)}
-    \pdf_info_gput:nn
-      {Creator}{(\@pdfcreator)} %hm should hyperref set this in any case??
+    \__hyp_info_generate_addons:
+    \pdf_info_string_gput:no
+      {Author} {\@pdfauthor}
+    \pdf_info_string_gput:no
+      {Title}  {\@pdftitle}
+    \pdf_info_string_gput:no
+      {Subject}{\@pdfsubject}
+    \pdf_info_string_gput:no
+      {Creator}{\@pdfcreator}
+    \pdf_info_string_gput:no
+      {CreationDate}{\@pdfcreationdate}
+    \pdf_info_string_gput:no
+      {ModDate}{\@pdfmoddate}
+    \tl_if_exist:NT \@pdfproducer %special, as \relax is default
+      {
+       \pdf_info_string_gput:no
+        {Producer}{\@pdfproducer}
+      }
+    \pdf_info_string_gput:no
+      {Keywords}{\@pdfkeywords}
     \tl_if_empty:NF
-       {\@pdfcreationdate}
-       {
-        \pdf_info_gput:nn
-         {CreationDate}{(\@pdfcreationdate)}
-       }
-     \tl_if_empty:NF
-       \@pdfmoddate
-       {
-        \pdf_info_gput:nn
-         {ModDate}{(\@pdfmoddate)}
-       }
-     \tl_if_exist:NT %special, as \relax is default
-       \@pdfproducer
-       {
-        \pdf_info_gput:nn
-         {Producer}{(\@pdfproducer)}
-       }
-     \pdf_info_gput:nn
-       {Keywords}{(\@pdfkeywords)}
-     \tl_if_empty:NF
-       {\@pdftrapped}
+       \@pdftrapped
        {
         \pdf_info_gput:nn
         {Trapped}{/\@pdftrapped}
        }
-      %\HyInfo@Addons % unclear ....needs probably change in hyperref
-      \pdf_info_out: % where should this go????
     }
   \Hy@DisableOption{pdfauthor}%
   \Hy@DisableOption{pdftitle}%
