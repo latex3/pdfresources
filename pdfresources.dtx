@@ -241,8 +241,8 @@
 % \section{Management code / pdf Module}
 %<@@=pdf>
 % \subsection{The info dictionary}
-% The info dictionary is filled by e.g. \verb+\pdfinfo+. Multiple appearances of
-% \verb+\pdfinfo+ are concatenated, so one could end with multiple /Title or /Author entries.
+% The info dictionary is filled by e.g. \cs{pdfinfo}. Multiple appearances of
+% \cs{pdfinfo} are concatenated, so one could end with multiple /Title or /Author entries.
 % It is then viewer dependant which one is showed, so it is better to avoid them.
 % We therefore setup a property which is filled and written to the info
 % directory in one go. According to hyperref a few odd drivers (hvtex, dvipsone, dviwind)
@@ -250,7 +250,7 @@
 % strings so there is a special command for this, as entries with empty content
 % should be ommited we add a test. The string command should perhaps escape the argument???
 % hyperref write the info dictionary as the shipout of the first page --
-% probably to catch the  case that \verb+\title+ is issued after the begin of the document.
+% probably to catch the  case that \cs{title} is issued after the begin of the document.
 % We are outputting at begin document, so all info keys should be set before.
 %    \begin{macrocode}
 %<*package>
@@ -285,12 +285,12 @@
 %</package>
 %    \end{macrocode}
 % \subsection{The catalog dictionary}
-% The catalog dictionary is filled by e.g. \verb+\pdfcatalog+. Multiple appearances of
-% \verb+\pdfcatalog+ are concatenated, so one could end with multiple entries.
+% The catalog dictionary is filled by e.g. \cs{pdfcatalog}. Multiple appearances of
+% \cs{pdfcatalog} are concatenated, so one could end with multiple entries.
 % We is better to avoid this. We therefore setup a
-% property which is filled and executed in one go at begin document.
-% \verb+\pdfcatalog+ has an option \texttt{openaction} to set the start view options. This is ignored
-% here but set in a separate command (to be in sync with other drivers).
+% property which is filled and executed in one at a sensible (not yet found) place.
+% \cs{pdfcatalog} has an option \texttt{openaction} to set the start view options.
+% This is ignored here but set in a separate command (to be in sync with other drivers).
 %    \begin{macrocode}
 %<*package>
 \prop_new:N \g_@@_catalog_dict_prop
@@ -318,7 +318,30 @@
 %    \end{macrocode}
 % \subsection{Setting / comparing pdf versions}
 % The code assumes that the versions are two integers separated by a period.
-%
+% The pdf version should be set rather early, before any object has been written.
+% So we define a \cs{documentsetup} commmand which should go before \cs{documentclass}
+% \begin{macro}{\documentsetup}
+%    \begin{macrocode}
+%<*package>
+\msg_new:nnn
+  {pdf}
+  {setup-after-documentclass}
+  { \token_to_str:N \documentsetup\c_space_tl should~be~used~only~before~\token_to_str:N\documentclass}
+
+\NewDocumentCommand\documentsetup { m }
+ {
+  \cs_if_eq:NNTF \documentclass \@twoclasseserror
+   {\msg_error:nn {pdf}{setup-after-documentclass }}
+   {\keys_set:nn { pdf / setup } { #1 }}
+ }
+
+\keys_define:nn { pdf / setup }
+ {
+  pdfversion .code:n = \pdf_version_gset:n { #1 }
+ }
+%</package>
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\pdf_version_gset:n, \pdf_version_min_gset:n}
 % \begin{macro}{\@@_version_gset:w}
 %    \begin{macrocode}

@@ -1,9 +1,10 @@
 % !Mode:: "TeX:DE:UTF-8:Main"
 %\input{regression-test}
+
 \RequirePackage{pdfresources}
-
+\documentsetup{pdfversion=2.0}
 \documentclass{article}
-
+\documentsetup{pdfversion=2.0}
 %\usepackage{pdfresources}
 
 %don't compress pdf:
@@ -14,8 +15,16 @@
 %\driver_pdf_catalog_gput:nn {Lang}
 \ExplSyntaxOff
 \usepackage{xcolor}
-
-\usepackage[customdriver=hluatex-experimental,pdfversion=2.0,pdftitle=X,ocgcolorlinks]{hyperref}
+\title{some title}
+\usepackage[customdriver=hluatex-experimental,
+            pdfusetitle,ocgcolorlinks,
+            pdftrapped=True,
+           % pdfstartpage=3,
+           % pdfstartview=
+            ]{hyperref}
+\makeatletter
+%\makeatother            
+\hypersetup{pdfinfo={blub=bla,blb=zzz}}
 
 \usepackage{bookmark}
 
@@ -24,8 +33,10 @@
 %%%\makeatletter
 \hypupdateattribute
 \makeatletter%\tracingmacros=1
-\textwidth=5cm
-\begin{document}\show\pdfoutline
+\textwidth=5cm 
+\begin{document}
+abc\newpage blb\newpage ccc
+\end{document}
 \tableofcontents
 \section{abc}
 \makeatletter%\show\Hy@pstringdef

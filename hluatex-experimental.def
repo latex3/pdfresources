@@ -30,8 +30,8 @@
    {\msg_error:nn {hyp}{missing-bookmark-package}}
  }}
 
-% booleans for the (some) option keys. As hyperref disables them it is okay to set them here, hypersetup
-% can't interfere
+% booleans for the (some) option keys. As hyperref disables them it is okay to set them here,
+% hypersetup  can't interfere
 %%% pdfa key:
 \bool_new:N\l__hyp_pdfa_bool
 \ifHy@pdfa
@@ -222,11 +222,11 @@
   \ifHy@ocgcolorlinks
     \pdf_version_min_gset:n { 1.5 }
   \fi
-\ExplSyntaxOff
+
 % should this go into the drivers?
 % or in the pdf level?
 % set pdfversion / needs adaption to major version!!!
-\ExplSyntaxOn
+
 \bool_if:NT\l__hyp_setpdfversion_bool
  {
     \ifnum\Hy@pdfversion<5 %
@@ -308,11 +308,10 @@
     { 10 }
     {\driver_pdf_version_minor:}
   }
- \ExplSyntaxOff
 \Hy@DisableOption{pdfversion}%
 
-\ExplSyntaxOn
-\ifHy@ocgcolorlinks
+\legacy_if:nTF {Hy@ocgcolorlinks}
+ {
   \newcommand\OBJ@OCG@view {} % for the hyperref test
   \pdf@ifdraftmode{}{
     \driver_pdf_object_new:nn   { l__hyp_ocg_view_dict_obj }  { dict }
@@ -412,9 +411,10 @@
       \endgroup
     }
   }
-\else
+ }
+ {
   \Hy@DisableOption{ocgcolorlinks}
-\fi
+ }
 
 \def\setpdflinkmargin#1
  {
@@ -677,13 +677,15 @@
     \pdf_catalog_gput:nn {URI}{<</Base(\Hy@pstringB)>>}
    }
   %
-  \ifx\@pdfstartpage\@empty
-  \else
-    \ifx\@pdfstartview\@empty
-    \else
-      openaction~goto~page\@pdfstartpage{\@pdfstartview}%
-    \fi
-  \fi
+  \bool_if:nF
+   {
+    \tl_if_empty_p:N \@pdfstartpage
+    ||
+    \tl_if_empty_p:N \@pdfstartview
+   }
+   {
+     \pdf_docview:nn {\@pdfstartpage} {\@pdfstartview}
+   }
   \edef\Hy@temp{%
     \ifHy@pdftoolbar\else /HideToolbar\c_space_tl true\fi
     \ifHy@pdfmenubar\else /HideMenubar\c_space_tl true\fi
@@ -724,8 +726,8 @@
        { Lang }
        {(\@pdflang)}%
     \fi
-
 }
+
 
 \cs_new:Npn \__hyp_info_generate_addons:
  {
@@ -739,11 +741,11 @@
  }
 
 
-\def\PDF@FinishDoc{}%
+\def\PDF@FinishDoc{}% dummy needed for hyperref ...
 
 \AtEndPreamble{
   \pdf@ifdraftmode{}{
-    \Hy@UseMaketitleInfos
+    \Hy@UseMaketitleInfos %get Title/Author from \title if pdfusetitle is true
     \__hyp_info_generate_addons:
     \pdf_info_string_gput:no
       {Author} {\@pdfauthor}
