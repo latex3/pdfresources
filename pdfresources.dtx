@@ -546,7 +546,7 @@
 % perhaps some manipulation of the argument will be needed to map the current
 % hyperref syntax
 \cs_new_protected:Npn \pdf_destination:nn #1 #2
- {
+ { %hm listings doesn't like \str_lower_case
   \exp_args:Nnx\driver_pdf_destination:nn {#1}{\str_lower_case:n{#2}}
  }
 \cs_generate_variant:Nn\pdf_destination:nn {no,nf}
