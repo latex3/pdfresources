@@ -337,7 +337,11 @@
 
 \keys_define:nn { pdf / setup }
  {
-  pdfversion .code:n = \pdf_version_gset:n { #1 }
+  pdfversion .code:n =
+   {
+    \pdf_version_gset:n { #1 }
+    \@@_version_checks:
+   }
  }
 %</package>
 %    \end{macrocode}
@@ -364,6 +368,19 @@
   \driver_pdf_version_major_gset:n {#1}
   \driver_pdf_version_minor_gset:n {#2}
  }
+
+\cs_new_protected:Npn \@@_version_checks:
+ {
+  \pdf_version_compare:NnT < { 1.5 }
+   {
+    \driver_pdf_objects_disable:
+    \msg_info:nnx {pdf}{object-compression-disabled}
+    { \driver_pdf_version_major:.\driver_pdf_version_minor:}
+   }
+ }
+
+\msg_new:nnn { pdf } {object-compression-disabled}
+             {object~compression~is~not~supported~in~pdf~version~#1}
 %</package>
 %    \end{macrocode}
 % \end{macro}

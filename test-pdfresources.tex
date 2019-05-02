@@ -3,8 +3,9 @@
 
 \RequirePackage{pdfresources}
 \documentsetup{pdfversion=2.0}
+
 \documentclass{article}
-\documentsetup{pdfversion=2.0}
+
 %\usepackage{pdfresources}
 
 %don't compress pdf:
@@ -19,11 +20,12 @@
 \usepackage[customdriver=hluatex-experimental,
             pdfusetitle,ocgcolorlinks,
             pdftrapped=True,
+            pdfversion=1.7
            % pdfstartpage=3,
            % pdfstartview=
             ]{hyperref}
 \makeatletter
-%\makeatother            
+%\makeatother
 \hypersetup{pdfinfo={blub=bla,blb=zzz}}
 
 \usepackage{bookmark}
@@ -33,7 +35,7 @@
 %%%\makeatletter
 \hypupdateattribute
 \makeatletter%\tracingmacros=1
-\textwidth=5cm 
+\textwidth=5cm
 \begin{document}
 abc\newpage blb\newpage ccc
 \end{document}
