@@ -533,9 +533,9 @@
 %</package>
 %    \end{macrocode}
 % \subsection{Destinations}
-% The driver command expects a lower case argument. As the listings package doesn't
-% like a \cs{str_lower_case:n} and also to be able to check the argument we put
-% allowed values in a property.
+% The command expects a lower case argument, it is up to the package to
+% ensure this.
+%
 %    \begin{macrocode}
 %<*package>
 % perhaps some manipulation of the argument will be needed to map the current
@@ -557,12 +557,13 @@
 \prop_put:Nnn \l_@@_views_map_prop {FitV} { fitv }
 \prop_put:Nnn \l_@@_views_map_prop {fitv} { fitv }
 
-
+\cs_generate_variant:Nn \driver_pdf_destination:nn {nx}
 \cs_new_protected:Npn \pdf_destination:nn #1 #2
  {
   \prop_if_in:NnTF \l_@@_views_map_prop { #2 }
    {
-    \exp_args:Nnx\driver_pdf_destination:nn {#1}{\prop_item:Nn\l_@@_views_map_prop{#2}}
+    %\exp_args:Nnx\driver_pdf_destination:nn {#1}{\prop_item:Nn\l_@@_views_map_prop{#2}}
+    \driver_pdf_destination:nx { #1 } { \str_lower_case:n { #2 } }
    }
    {
     % should we assume that it is a zoom value then??
