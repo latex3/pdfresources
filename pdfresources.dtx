@@ -75,14 +75,6 @@
 %
 % \subsection{\pkg{media9}}
 %
-% \section{Helper code (temporarly!!)}
-%    \begin{macrocode}
-%<*package>
-\prg_new_conditional:Npnn \legacy_if:n #1 {p, T , F , TF }
-  { \exp_args:Nc\if_meaning:w { if#1 } \iftrue \prg_return_true:
-                                        \else: \prg_return_false: \fi: }
-%</package>
-%    \end{macrocode}
 % \section{New driver Code}
 % \subsection{already revisited }
 %
@@ -541,13 +533,41 @@
 %</package>
 %    \end{macrocode}
 % \subsection{Destinations}
+% The driver command expects a lower case argument. As the listings package doesn't
+% like a \cs{str_lower_case:n} and also to be able to check the argument we put
+% allowed values in a property.
 %    \begin{macrocode}
 %<*package>
 % perhaps some manipulation of the argument will be needed to map the current
 % hyperref syntax
+
+\prop_new:N \l_@@_views_map_prop
+\prop_put:Nnn \l_@@_views_map_prop {XYZ} { xyz }
+\prop_put:Nnn \l_@@_views_map_prop {xyz} { xyz }
+\prop_put:Nnn \l_@@_views_map_prop {Fit} { fit }
+\prop_put:Nnn \l_@@_views_map_prop {fit} { fit }
+\prop_put:Nnn \l_@@_views_map_prop {FitB} { fitb }
+\prop_put:Nnn \l_@@_views_map_prop {fitb} { fitb }
+\prop_put:Nnn \l_@@_views_map_prop {FitBH} { fitbh }
+\prop_put:Nnn \l_@@_views_map_prop {fitbh} { fitbh }
+\prop_put:Nnn \l_@@_views_map_prop {FitBv} { fitbv }
+\prop_put:Nnn \l_@@_views_map_prop {fitbv} { fitbv }
+\prop_put:Nnn \l_@@_views_map_prop {FitH} { fith }
+\prop_put:Nnn \l_@@_views_map_prop {fith} { fith }
+\prop_put:Nnn \l_@@_views_map_prop {FitV} { fitv }
+\prop_put:Nnn \l_@@_views_map_prop {fitv} { fitv }
+
+
 \cs_new_protected:Npn \pdf_destination:nn #1 #2
- { %hm listings doesn't like \str_lower_case
-  \exp_args:Nnx\driver_pdf_destination:nn {#1}{\str_lower_case:n{#2}}
+ {
+  \prop_if_in:NnTF \l_@@_views_map_prop { #2 }
+   {
+    \exp_args:Nnx\driver_pdf_destination:nn {#1}{\prop_item:Nn\l_@@_views_map_prop{#2}}
+   }
+   {
+    % should we assume that it is a zoom value then??
+    % or should there be a third argument for this case and for other coordinates?
+   }
  }
 \cs_generate_variant:Nn\pdf_destination:nn {no,nf}
 %</package>
