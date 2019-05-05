@@ -142,7 +142,6 @@
   \pdfcatalog {  } openaction~goto~page #1 {#2}
  }
 
-
 % this needs refinement, probably is should create named objects and add
 % them to the properties, see discussion
 %
@@ -179,6 +178,7 @@
       { \tex_numexpr:D \exp_not:N \tex_pdffeedback:D lastlink \scan_stop: }
       { \exp_not:N \tex_pdflastlink:D }
   }
+
 
 \cs_new_protected:Npn \driver_pdf_catalog:n #1 %content, currently needed as hyperref has \Hy@PutCatalog
  {
@@ -488,7 +488,10 @@
     }
     #3
    \driver_pdf_link_end:
-   \seq_use:cn { l_@@_hook_link_end_#1_seq }{}
+   \seq_if_exist:cT { l_@@_hook_link_end_#1_seq }
+    {
+     \seq_use:cn { l_@@_hook_link_end_#1_seq }{}
+    }
  }
 %</package>
 %    \end{macrocode}
@@ -540,7 +543,7 @@
 %<*package>
 % perhaps some manipulation of the argument will be needed to map the current
 % hyperref syntax
-
+% unclear currently if is this is useful for anything.
 \prop_new:N \l_@@_views_map_prop
 \prop_put:Nnn \l_@@_views_map_prop {XYZ} { xyz }
 \prop_put:Nnn \l_@@_views_map_prop {xyz} { xyz }
@@ -557,13 +560,11 @@
 \prop_put:Nnn \l_@@_views_map_prop {FitV} { fitv }
 \prop_put:Nnn \l_@@_views_map_prop {fitv} { fitv }
 
-\cs_generate_variant:Nn \driver_pdf_destination:nn {nx}
 \cs_new_protected:Npn \pdf_destination:nn #1 #2
  {
   \prop_if_in:NnTF \l_@@_views_map_prop { #2 }
    {
-    %\exp_args:Nnx\driver_pdf_destination:nn {#1}{\prop_item:Nn\l_@@_views_map_prop{#2}}
-    \driver_pdf_destination:nx { #1 } { \str_lower_case:n { #2 } }
+    \driver_pdf_destination:nn { #1 } {  #2  }
    }
    {
     % should we assume that it is a zoom value then??

@@ -19,7 +19,7 @@
 \title{some title}
 \usepackage[customdriver=hluatex-experimental,
             pdfusetitle,
-            pdftrapped=True,
+            %pdftrapped=True,
             pdfversion=1.7,
            % pdfstartpage=3,
            % pdfstartview=
@@ -29,8 +29,7 @@
 
 \usepackage[ocgcolorlinks]{ocgx2}
 
-\hypersetup{pdfview=FitV,pdfinfo={blub=bla,blb=zzz}}
-\usepackage[ocgcolorlinks]{ocgx2}
+\hypersetup{pdfview=FitV 50,pdfinfo={blub=bla,blb=zzz}}
 
 
 \usepackage{bookmark}
@@ -41,30 +40,19 @@
 \makeatletter%\tracingmacros=1
 \textwidth=5cm
 \begin{document}
-\begin{lstlisting}[columns=fixed]
-stream
-   BT
-   /F27 14.3462 Tf                 %select font
-   89.291 746.742 Td               %move point
-   [(1)-574(Intro)-32(duction)]TJ  %print text
-   /F24 10.9091 Tf                 %select font
-    0 -24.35 Td                    %move point
-    [(Let's)-331(start)]TJ         %print text
-    205.635 -605.688 Td            %move point
-    [(1)]TJ                        %print text
-   ET
-endstream
-\end{lstlisting}
-\url{www.xxx.com}
-abc\newpage blb\newpage ccc
-\end{document}
-\tableofcontents
-\section{abc}
+%
+%\url{www.xxx.com}
+%abc\newpage blb\newpage ccc
+%
+%\tableofcontents
+%\section{abc}
 \makeatletter%\show\Hy@pstringdef
 \begin{Form}
 \TextField{abc}
 \TextField{cde}
-abc%\end{document}
+abc
+\end{Form}
+\end{document}
 %
 %\noindent
 %\TextField[name=hight,align=0]{Hight [cm]}
