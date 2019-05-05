@@ -23,7 +23,7 @@
             pdfversion=1.7,
            % pdfstartpage=3,
            % pdfstartview=
-           pdfview=FitV
+           pdfview=FitV,pdfa
             ]{hyperref}
 
 
@@ -39,7 +39,7 @@
 \hypupdateattribute
 \makeatletter%\tracingmacros=1
 \textwidth=5cm
-\begin{document}
+\begin{document}\parskip=1cm
 %
 %abc\newpage blb\newpage ccc
 %
@@ -51,6 +51,17 @@
 \ChoiceMenu{yyy}{aaa,bbb,ccc,dddd}
 
 \ChoiceMenu[radio]{radio}{aaa,bbb,ccc,dddd}
+
+\ChoiceMenu[combo]{combo}{aaa,bbb,ccc,dddd}
+
+\ChoiceMenu[]{list}{aaa,bbb,ccc,dddd}
+
+\PushButton[
+  name=additem,
+  borderwidth=0.5pt,
+  bordercolor=blue,
+  backgroundcolor=red % why doesn't this work ?
+]{\textcolor{blue}{Add an item}}
 
 
 \TextField{abc}

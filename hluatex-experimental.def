@@ -26,6 +26,10 @@
   { This~hyperref~driver~ignores~the~pdfversion~key!\\
     Set~the~pdfversion~in~\token_to_str:N \documentsetup}
 
+\msg_new:nnn
+  {hyp}
+  {pdfa-no-push-button}
+  {PDF/A:~Push~button~with~JavaScript~is~prohibited}
 %% I require the bookmark package to get rid of some of the bookmarks code.
 \AtEndOfPackage{% so that we are later than KOMA ...
 \AtBeginDocument
@@ -1216,77 +1220,91 @@
        }
      {  \MakeRadioField{\Fld@width}{\Fld@height} }
      %\pdfendlink
-    \ifnum\Fld@listcount=1 %
-      \HyField@AddToFields
-    \fi
+     \int_compare:nNnT { \Fld@listcount} = { 1 }
+      { \HyField@AddToFields }
     \c_space_tl % deliberate space between radio buttons
+                % to do: --> should be configurable
   }%
 }
-\ExplSyntaxOff
+
 \newcount\Fld@listcount
-\def\@@Listbox#1{%
-  \HyField@PDFChoices{#1}%
-  \leavevmode
+\def\@@Listbox#1
+ {
+  \HyField@PDFChoices{#1}
+  \mode_leave_vertical:
   \HyAnn@AbsPageLabel
   \Hy@escapeform\PDFForm@List
-  \pdfstartlink user {\PDFForm@List}\relax
-  \MakeChoiceField{\Fld@width}{\Fld@height}%
-  \pdfendlink
+  \pdf_link_user:nnn
+       {widget} %perhaps we need more types??
+       {\PDFForm@List}
+       {\MakeChoiceField{\Fld@width}{\Fld@height}}
   \HyField@AddToFields
-}
+ }
+
+
 \def\@PushButton[#1]#2{% parameters, label
   \def\Fld@name{#2}%
-  \begingroup
-    \expandafter\HyField@SetKeys\expandafter{%
-      \DefaultOptionsofPushButton,#1%
-    }%
+  \group_begin:
+    \exp_args:No\HyField@SetKeys
+     {
+      \DefaultOptionsofPushButton,#1
+     }
     \PDFForm@Name
-    \ifHy@pdfa
-      \Hy@Error{%
-        PDF/A: Push button with JavaScript is prohibited%
-      }\@ehc
-      \LayoutPushButtonField{%
-        \leavevmode
-        \MakeButtonField{#2}%
-      }%
-    \else
+    \bool_if:NTF \l__hyp_pdfa_bool
+     {
+      \msg_error:nn { hyp }{ pdfa-no-push-button }
+       \LayoutPushButtonField
+        {
+         \mode_leave_vertical:
+         \MakeButtonField{#2}
+        }
+     }
+     {
       \HyField@FlagsPushButton
       \ifFld@hidden\def\Fld@width{1sp}\fi
-      \LayoutPushButtonField{%
-        \leavevmode
+      \LayoutPushButtonField
+       {
+        \mode_leave_vertical:
         \HyAnn@AbsPageLabel
         \Hy@escapeform\PDFForm@Push
-        \pdfstartlink user {\PDFForm@Push}\relax
-        \MakeButtonField{#2}%
-        \pdfendlink
+        \pdf_link_user:nnn
+         {widget} %perhaps we need more types
+         {\PDFForm@Push}
+         {\MakeButtonField{#2}}
         \HyField@AddToFields
-      }%
-    \fi
-  \endgroup
+       }
+      }
+  \group_end:
 }
-\def\@Submit[#1]#2{%
-  \def\Fld@width{\DefaultWidthofSubmit}%
-  \def\Fld@height{\DefaultHeightofSubmit}%
-  \begingroup
-    \expandafter\HyField@SetKeys\expandafter{%
-      \DefaultOptionsofSubmit,#1%
-    }%
+
+\def\@Submit[#1]#2
+ {
+  \def\Fld@width{\DefaultWidthofSubmit}
+  \def\Fld@height{\DefaultHeightofSubmit}
+  \group_begin:
+   \exp_args:No\HyField@SetKeys
+    {
+      \DefaultOptionsofSubmit,#1
+    }
     \HyField@FlagsPushButton
     \HyField@FlagsSubmit
     \ifFld@hidden\def\Fld@width{1sp}\fi
-    \leavevmode
+    \mode_leave_vertical:
     \HyAnn@AbsPageLabel
     \Hy@escapeform\PDFForm@Submit
-    \pdfstartlink user {%
-      \PDFForm@Submit
-      /AP<</N \SubmitObject/D \SubmitPObject>>%
-    }%
-    \relax
-    \MakeButtonField{#2}%
-    \pdfendlink
+    \pdf_link_user:nnn
+      {widget} %perhaps more types needed
+      {
+        \PDFForm@Submit
+       /AP<</N~\SubmitObject/D~\SubmitPObject>>
+       }
+      { \MakeButtonField{#2} }
     \HyField@AddToFields
-  \endgroup
-}
+  \group_end:
+ }
+
+\ExplSyntaxOff
+
 \def\@Reset[#1]#2{%
   \def\Fld@width{\DefaultWidthofReset}%
   \def\Fld@height{\DefaultHeightofReset}%
