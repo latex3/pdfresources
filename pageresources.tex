@@ -1,0 +1,197 @@
+% !Mode:: "TeX:DE:UTF-8:Main"
+%\input{regression-test}
+\RequirePackage{pdfresources}
+%\documentsetup{pdfversion=2.0}
+\ExplSyntaxOn
+\driver_pdf_compresslevel:n {0}
+\driver_pdf_objects_disable:
+\ExplSyntaxOff
+\documentclass{article}
+\usepackage[english]{babel}
+\usepackage[autostyle]{csquotes}
+%\RequirePackage[customdriver=hluatex-experimental]{hyperref}
+\begin{document}
+
+\title{Sorting page resources}
+\maketitle
+
+\section{pdfpagesattr}
+\begin{itemize}
+\item token register, is added to the root object when the pdf is finished 
+
+\item non-additive: A new call overwrites the content of the register.
+\end{itemize}
+
+\begin{verbatim}
+\pdfpagesattr{/WWWWW (blab)}
+<<
+/Type /Pages
+/Count 1
+/Kids [2 0 R]
+/WWWWW (blab)
+>>
+\end{verbatim}
+
+\subsection{Uses}
+\begin{description}
+\item[zref-pageattr]: get current content
+\item[hyperref: Cropbox] \verb+/CropBox[\@pdfpagescrop]+, takes care of existing content
+\item[llncsconf: Cropbox]    overwrites existing content
+\item[authorarchive: Cropbox] overwrites existing content
+\item[pdfx: various box sizes in pdf/x standard]  overwrites existing content
+\begin{verbatim}
+  \edef\next{\endgroup\pdfpagesattr{%
+    /MediaBox[0 0 \pdfx@mwidth\space \pdfx@mheight]^^J
+%%    /ArtBox[0 0 \pdfx@mwidth\space \pdfx@mheight]^^J
+    /BleedBox[0 0 \pdfx@mwidth\space \pdfx@mheight]^^J
+    /CropBox[0 0 \pdfx@mwidth\space \pdfx@mheight]^^J
+    /TrimBox[25 20 \pdfx@twidth\space \pdfx@theight]}
+  }\next
+\end{verbatim}
+and then copies to the page attribute if these are empty (why?): 
+\begin{verbatim}
+ \EveryShipout{%
+    \expandafter\ifx\expandafter\relax\the\pdfpageattr\relax
+     \immediate\pdfpageattr\expandafter{\the\pdfpagesattr}%
+    \fi }%
+\end{verbatim}    
+\end{description}
+
+\subsection{Discussion}
+
+The values added here are simple arrays. The data structure is easy: One needs a property, a command to add and one to remove a key. The main open problem is when to move the content of the property to \verb`\pdfpagesattr` and how to force packages to use the property. Can one redefine \verb+\pdfpageattr+ so that \verb+\the\pdfpageattr+ doesn't gives bad errors?
+ 
+
+\section{pdfpageattr}
+\begin{itemize}
+\item token register, is added to the current page at shipout
+\item non-additive: A new call overwrites the content of the register.
+\item Entries (emphasized if used/set by packages): 
+   \begin{enumerate}
+    \item Resources (dict, see below),
+    \item \emph{MediaBox}, \emph{CropBox}, \emph{Bleedbox}, \emph{Trimbox}, \emph{Artbox} (rectangle array), 
+    \item \emph{Rotate} (integer),
+    \item \emph{Dur} (number),
+    \item \emph{Trans} (dict), 
+    \item \emph{AA} (dict, \enquote{additional actions}), 
+    \item \emph{StructParents} (integer), 
+    \item \emph{Tabs} (name, possible values are /R, /C, /S),   
+    \item BoxColorInfo (dict), 
+    \item Contents (stream or array, automatic),  
+    \item Group (dict), 
+    \item Thumb (stream), 
+    \item B (array),  
+    \item Annots (array, automatic), 
+    \item Metadata (stream), 
+    \item PieceInfo (dict), 
+    \item ID (byte string), 
+    \item PZ (number), 
+    \item SeparationInfo (dict),  
+    \item TemplateInstantiated (name),
+    \item  PresSteps (dict), 
+    \item UserUnit (number), 
+    \item VP (dict).
+    \end{enumerate}
+   \end{itemize}
+\begin{verbatim}
+\pdfpageattr{/XXXXXXXX (blub)}
+<<
+/Type /Page
+/Contents 3 0 R
+/Resources 1 0 R
+/MediaBox [0 0 595.276 841.89]
+/XXXXXXXX (blub)
+/Parent 9 0 R
+>>
+\end{verbatim}
+
+\subsection{Uses}
+\begin{description}
+  \item[aastex62.cls: Rotate] overwrites existing content
+  \item[beamer/multimedia: AA] \verb+ /AA << \mm@pdfpageadditionalaction\space >>+, uses hyperref code to add/remove entries.
+  \item[fancytoolstips: AA] \verb+/AA << /O << /S /JavaScript /JS (    \fancytooltips@pdfpageattrJS) >>  >>+, seems not to care about other packages.
+      
+  \item[gentombow: Bleedbox,Trimbox] seems not to care about other packages. 
+  \item[lscape: Rotate] seems not to care about other packages. 
+  \item[hyperref: Trans] \verb+/Trans << /S /\@pdfpagetransition\space >>+, has code to remove an existing /Trans value (if the dict is not an indirect object), takes care of existing content of the register.
+      
+  \item[hyperref: Dur] \verb+/Dur \@pdfpageduration\space+, see Trans.   
+  \item[hyperref: Hid] (obsolete page object) 
+  \item[jmlrbook.cls: MediaBox,Bleedbox,Trimbox] seems not to care about other packages. 
+  \item[pdflscape: Rotate] has code to remove an existing Rotate entry, takes care of existing content of the register.
+  \item[zref-pageattr:] Retrieve and store content.
+  \item[pdfslide (old): Trans]  seems not to care about other packages. 
+  \item[pdfx] See above at pdfpagesattr.
+  \item[tagpdf: StructParents, Tabs] (in tree code), avoids duplicates and takes care of existing content.
+\end{description}
+
+\subsection{Discussion}
+
+Most values are simple and can be handled similar to pdfpagesattr. The content of Trans can be a rather complicated dict, but only one transition per page makes sense, so it is ok if one package \enquote{wins}. It is theoretically possible that the AA entry should combine content from two sources (e.g. two javascript commands) but imho it should be then the task of the packages/the users to coordinate this.
+
+It must be decided when to copy the property into pdfpageattr. Atbeginshipout?
+
+\section{pdfpageresources}
+\begin{itemize}
+\item token register, is added to the Resources dictionary of all \emph{following} pages. 
+\item non-additive: A new call overwrites the content of the register.
+\item Entries:
+ \begin{enumerate}
+ \item \emph{ExtGState} (dict) 
+ \item \emph{ColorSpace} (dict)
+ \item \emph{Pattern} (dict)
+ \item \emph{Shading} (dict)
+ \item \emph{Properties} (dict) (maps names to objects for BDC-dictionaries)
+ \item Font (dict)
+ \item XObject (dict)
+ \item ProcSet (array) (obsolete)
+ \end{enumerate}
+  
+\end{itemize}
+\begin{verbatim}
+\pdfpageresources{/BBBBB (blub)}
+11 0 obj
+<<
+/Type /Page
+/Contents 12 0 R
+/Resources 10 0 R
+/MediaBox [0 0 595.276 841.89]
+/Parent 9 0 R
+>>
+endobj
+
+10 0 obj
+<<
+/BBBBB (blub)
+/Font << /F26 4 0 R /F14 5 0 R /F8 6 0 R /F31 13 0 R /F29 7 0 R >>
+/ProcSet [ /PDF /Text ]
+>>
+endobj
+\end{verbatim}
+
+\subsection{Uses}
+\begin{description}
+  \item[ocg] old sty, only pdftex. Add something to Properties, takes care of the rest of the resources but not of the current content of Properties.
+  \item[colorspace] Add entries to the Colorspace dict. Seems to expect that color are defined in the preamble or the first page. Unclear if it still clashes with pgf, see https://tex.stackexchange.com/a/405166/2388.
+  \item[hyperref] adds /OCView and /OCPrint to Properties, takes care of other content of pdfpageresources, but not of the content of Properties.
+  \item[pdfbase] adds content to Properties, takes care of other content of pdfpageresources, but imho not of the content of Properties. Will probably have a problem if the value of Properties is an indirect object.
+  \item[transparent] adds content to ExtGState \verb+/ExtGState<</TRP1<</ca 1/CA 1>>>>+. Tries to be compatible with pgf. 
+  \item[ocg-p] similar to ocg
+  \item[pdfpagediff] \verb+\edef\next{\pdfpageresources={/Properties \layersnames}}+
+  \item[sesamanuel.cls] \verb+/ExtGState \@extgs\space 0 R +, saves rest of resources.
+  \item[spotcolor] (old) \verb+/ColorSpace<<#1>>+, saves rest of resources. 
+  \item[storebox] copies pageresources to xform resources.    
+  \item[zwpagelayout] \verb+/ExtGState \@extgs\space 0 R+, saves rest of resources.
+  \item[pgf] Reserves objects for (at least) ExtGState, ColorSpace and Pattern, Shading seems to be used directly. 
+\end{description}
+
+\subsection{Discussion}
+Every of the five dictionaries ExtGState, ColorSpace, Pattern, Shading, Properties can receive values from more than one package and must combine them. So every of this entries needs its own properties and commands to add to the property. Packages can avoid duplicate keys by suitable name spaces. 
+
+It must be decided when to write the properties to pdfpageresources.
+
+\section{pdfcatalog}
+
+yet missing
+\end{document}
+

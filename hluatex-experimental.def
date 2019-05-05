@@ -30,6 +30,12 @@
   {hyp}
   {pdfa-no-push-button}
   {PDF/A:~Push~button~with~JavaScript~is~prohibited}
+
+\msg_new:nnn
+  {hyp}
+  {pdfa-no-reset-button}
+  {PDF/A:~Reset~action~is~prohibited}
+
 %% I require the bookmark package to get rid of some of the bookmarks code.
 \AtEndOfPackage{% so that we are later than KOMA ...
 \AtBeginDocument
@@ -161,7 +167,7 @@
 %\protected\def\pdflastannot      {\numexpr\pdffeedback lastannot\relax}
 %\protected\def\pdflastobj        {\numexpr\pdffeedback lastobj\relax}
 
-\protected\def\pdfliteral        {\pdfextension literal}
+%\protected\def\pdfliteral        {\pdfextension literal}
 
 \protected\edef\pdfpageattr            {\pdfvariable pageattr}
 
@@ -169,8 +175,8 @@
 \protected\edef\pdfpagesattr           {\pdfvariable pagesattr}
 
 
-\protected\def\pdfstartlink      {\pdfextension startlink }
-\protected\def\pdfendlink        {\pdfextension endlink\relax}
+%\protected\def\pdfstartlink      {\pdfextension startlink }
+%\protected\def\pdfendlink        {\pdfextension endlink\relax}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -388,7 +394,7 @@
   }
   \Hy@AtBeginDocument{
     \def\Hy@colorlink#1{
-      \begingroup
+      \group_begin:
         \ifHy@ocgcolorlinks
           \def\Hy@ocgcolor{#1}
           \setbox0=\hbox\bgroup\color@begingroup
@@ -401,18 +407,20 @@
         \color@endgroup\egroup
         \mbox{
           %this uses a named object, we really need to sort this ...
-          \pdfliteral~page{/OC/OCPrint~BDC}
+          \driver_pdf_bdc:nn {/OC}{/OCPrint}
+          %\pdfliteral~page{/OC/OCPrint~BDC}
           \rlap{\copy0}
           \driver_pdf_emc:
-          \pdfliteral~page{/OC/OCView~BDC}
-          \begingroup
+          %\pdfliteral~page{/OC/OCView~BDC}
+          \driver_pdf_bdc:nn {/OC}{/OCView}
+          \group_begin:
             \expandafter\HyColor@UseColor\Hy@ocgcolor
             \box0~
-          \endgroup
+          \group_end:
           \driver_pdf_emc:
         }
       \fi
-      \endgroup
+      \group_end:
     }
   }
  }
@@ -505,11 +513,11 @@
   \pdf_link_end:n { #1 }
 }
 
-\def\close@pdflink{%
-  \Hy@endcolorlink
-  \Hy@VerboseLinkStop
-  \pdfendlink
-}
+%\def\close@pdflink{%
+%  \Hy@endcolorlink
+%  \Hy@VerboseLinkStop
+%  \pdfendlink
+%}
 \ExplSyntaxOff
 \def\hyper@anchor#1{%
   \new@pdflink{#1}\anchor@spot\pdf@endanchor
@@ -1206,9 +1214,8 @@
     \HyAnn@AbsPageLabel
     \Hy@escapeform\PDFForm@Radio
     \pdf_link_user:nnn
-       {widget} %perhaps we need more types??
-     %\pdfstartlink user
-       {
+      {widget} %perhaps we need more types??
+      {
         \PDFForm@Radio
         /AP
          <<
@@ -1217,9 +1224,8 @@
           /\@currValue\c_space_tl \DingObject
           >>
          >>
-       }
-     {  \MakeRadioField{\Fld@width}{\Fld@height} }
-     %\pdfendlink
+      }
+      {  \MakeRadioField{\Fld@width}{\Fld@height} }
      \int_compare:nNnT { \Fld@listcount} = { 1 }
       { \HyField@AddToFields }
     \c_space_tl % deliberate space between radio buttons
@@ -1303,56 +1309,63 @@
   \group_end:
  }
 
-\ExplSyntaxOff
-
-\def\@Reset[#1]#2{%
-  \def\Fld@width{\DefaultWidthofReset}%
-  \def\Fld@height{\DefaultHeightofReset}%
-  \begingroup
-    \expandafter\HyField@SetKeys\expandafter{%
-      \DefaultOptionsofReset,#1%
-    }%
-    \leavevmode
-    \ifHy@pdfa
-      \Hy@Error{%
-        PDF/A: Reset action is prohibited%
-      }\@ehc
-      \MakeButtonField{#2}%
-    \else
+\def\@Reset[#1]#2
+ {
+  \def\Fld@width{\DefaultWidthofReset}
+  \def\Fld@height{\DefaultHeightofReset}
+  \group_begin:
+    \exp_args:No\HyField@SetKeys
+     {
+       \DefaultOptionsofReset,#1
+     }
+    \mode_leave_vertical:
+    \bool_if:NTF \l__hyp_pdfa_bool
+     {
+      \msg_error:nn { hyp }{ pdfa-no-reset-button }
+      \MakeButtonField{#2}
+     }
+     {
       \HyField@FlagsPushButton
       \ifFld@hidden\def\Fld@width{1sp}\fi
       \HyAnn@AbsPageLabel
       \Hy@escapeform\PDFForm@Reset
-      \pdfstartlink user {\PDFForm@Reset}\relax
-      \MakeButtonField{#2}%
-      \pdfendlink
+      \pdf_link_user:nnn
+       {widget} %perhaps more types needed
+       {\PDFForm@Reset}
+       {\MakeButtonField{#2}}
       \HyField@AddToFields
-    \fi
-  \endgroup
+     }
+  \group_end:
 }
-\def\@CheckBox[#1]#2{% parameters, label
-  \def\Fld@name{#2}%
-  \def\Fld@default{0}%
-  \begingroup
-    \def\Fld@width{\DefaultWidthofCheckBox}%
-    \def\Fld@height{\DefaultHeightofCheckBox}%
-    \expandafter\HyField@SetKeys\expandafter{%
-      \DefaultOptionsofCheckBox,#1%
-    }%
+
+\def\@CheckBox[#1]#2
+ {% parameters, label
+  \def\Fld@name{#2}
+  \def\Fld@default{0}
+  \group_begin:
+    \def\Fld@width{\DefaultWidthofCheckBox}
+    \def\Fld@height{\DefaultHeightofCheckBox}
+    \exp_args:No\HyField@SetKeys
+     {
+      \DefaultOptionsofCheckBox,#1
+     }
     \PDFForm@Name
     \HyField@FlagsCheckBox
     \ifFld@hidden\def\Fld@width{1sp}\fi
     \LayoutCheckField{#2}{%
-      \leavevmode
+      \mode_leave_vertical:
       \HyAnn@AbsPageLabel
       \Hy@escapeform\PDFForm@Check
-      \pdfstartlink user {\PDFForm@Check}\relax
-      \MakeCheckField{\Fld@width}{\Fld@height}%
-      \pdfendlink
+      \pdf_link_user:nnn
+       {widget} %perhaps we need more types
+       {\PDFForm@Check}
+       {\MakeCheckField{\Fld@width}{\Fld@height}}
       \HyField@AddToFields
-    }%
-  \endgroup
+    }
+  \group_end:
 }
+\ExplSyntaxOff
+
 %hm. Should a luatex driver use type1 fonts in fields????
 \ExplSyntaxOn
 \def\Hy@FormObjects{%
