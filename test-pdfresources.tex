@@ -12,7 +12,7 @@
 \ExplSyntaxOn
 \driver_pdf_compresslevel:n {0}
 \driver_pdf_objects_disable:
-
+\cs_set:Nn \__driver_pdf_AR_fix: {}
 %\driver_pdf_catalog_gput:nn {Lang}
 \ExplSyntaxOff
 \usepackage{xcolor,listings}
@@ -27,7 +27,7 @@
             ]{hyperref}
 
 
-\usepackage[ocgcolorlinks]{ocgx2}
+%\usepackage[ocgcolorlinks]{ocgx2}
 
 \hypersetup{pdfview=FitV 50,pdfinfo={blub=bla,blb=zzz}}
 
@@ -41,13 +41,18 @@
 \textwidth=5cm
 \begin{document}
 %
-%\url{www.xxx.com}
 %abc\newpage blb\newpage ccc
 %
 %\tableofcontents
 %\section{abc}
 \makeatletter%\show\Hy@pstringdef
 \begin{Form}
+\url{www.xxx.com}
+\ChoiceMenu{yyy}{aaa,bbb,ccc,dddd}
+
+\ChoiceMenu[radio]{radio}{aaa,bbb,ccc,dddd}
+
+
 \TextField{abc}
 \TextField{cde}
 abc

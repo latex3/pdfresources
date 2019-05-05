@@ -1077,7 +1077,10 @@
   }{%
   }%
 }
-%\ExplSyntaxOn
+\ExplSyntaxOn
+%% check if the attr should be set through
+%% hooks.
+%% check if options are missing.
 \def\@TextField[#1]#2{% parameters, label
   \def\Fld@name{#2}%
   \let\Fld@default\ltx@empty
@@ -1102,32 +1105,29 @@
       \leavevmode
       \HyAnn@AbsPageLabel
       \Hy@escapeform\PDFForm@Text
-      %\show\PDFForm@Text
-      \pdfstartlink user {\PDFForm@Text}\relax
-      %\pdf_link_user:nnn
-%      \driver_pdf_raw_link_begin_user:nnw {}
-%       {widget} %perhaps we need more types??
-%       {\PDFForm@Text}
-       %{
+      \pdf_link_user:nnn
+       {widget} %perhaps we need more types??
+       {\PDFForm@Text}
+       {
        \MakeTextField{\Fld@width}{\Fld@height}
-       %}
-       \pdfendlink
-%      \driver_pdf_link_end:
+       }
       \HyField@AddToFields
     }%
   \endgroup
 }
-%\ExplSyntaxOff
+
 \def\@ChoiceMenu[#1]#2#3{% parameters, label, choices
-  \def\Fld@name{#2}%
+  \def\Fld@name{#2}
   \let\Fld@default\relax
   \let\Fld@value\relax
-  \def\Fld@width{\DefaultWidthofChoiceMenu}%
-  \def\Fld@height{\DefaultHeightofChoiceMenu}%
+  \def\Fld@width{\DefaultWidthofChoiceMenu}
+  \def\Fld@height{\DefaultHeightofChoiceMenu}
   \begingroup
     \Fld@menulength=0 %
     \@tempdima\z@
-    \@for\@curropt:=#3\do{%
+    \clist_map_variable:nNn { #3 } \@curropt
+    %\@for\@curropt:=#3\do
+    {%
       \expandafter\Fld@checkequals\@curropt==\\%
       \Hy@StepCount\Fld@menulength
       \settowidth{\@tempdimb}{\@currDisplay}%
@@ -1135,7 +1135,7 @@
     }%
     \advance\@tempdima by 15\p@
     \begingroup
-      \HyField@SetKeys{#1}%
+      \HyField@SetKeys{#1}
     \edef\x{\endgroup
       \noexpand\expandafter
       \noexpand\HyField@SetKeys
@@ -1187,10 +1187,13 @@
     }%
   \endgroup
 }
+
 \def\@@Radio#1{%
   \Fld@listcount=0 %
   \EdefEscapeName\Fld@default{\Fld@default}%
-  \@for\@curropt:=#1\do{%
+  \clist_map_variable:nNn { #1 } \@curropt
+  %\@for\@curropt:=#1\do
+   {%
     \expandafter\Fld@checkequals\@curropt==\\%
     \EdefEscapeName\@currValue{\@currValue}%
     \Hy@StepCount\Fld@listcount
@@ -1198,22 +1201,28 @@
     \leavevmode
     \HyAnn@AbsPageLabel
     \Hy@escapeform\PDFForm@Radio
-    \pdfstartlink user {%
-      \PDFForm@Radio
-      /AP<<%
-        /N<<%
-          /\@currValue\space \DingObject
-        >>%
-      >>%
-    }%
-    \relax
-    \MakeRadioField{\Fld@width}{\Fld@height}\pdfendlink
+    \pdf_link_user:nnn
+       {widget} %perhaps we need more types??
+     %\pdfstartlink user
+       {
+        \PDFForm@Radio
+        /AP
+         <<
+         /N
+          <<
+          /\@currValue\c_space_tl \DingObject
+          >>
+         >>
+       }
+     {  \MakeRadioField{\Fld@width}{\Fld@height} }
+     %\pdfendlink
     \ifnum\Fld@listcount=1 %
       \HyField@AddToFields
     \fi
-    \space % deliberate space between radio buttons
+    \c_space_tl % deliberate space between radio buttons
   }%
 }
+\ExplSyntaxOff
 \newcount\Fld@listcount
 \def\@@Listbox#1{%
   \HyField@PDFChoices{#1}%
