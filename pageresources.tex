@@ -123,6 +123,7 @@ The values added here are simple arrays. The data structure is easy: One needs a
   \item[pdfslide (old): Trans]  seems not to care about other packages.
   \item[pdfx] See above at pdfpagesattr.
   \item[tagpdf: StructParents, Tabs] (in tree code), avoids duplicates and takes care of existing content.
+  \item[aeb-pro.def: Trans, AA] 
 \end{description}
 
 \subsection{Discussion}
@@ -221,6 +222,9 @@ endobj
   \item \emph{PageMode} (name: UseNone, UseOutlines, UseThumbs, FullScreen, UseOC (PDF 1.5),
    UseAttachments (PDF 1.6)
   \item \emph{ViewerPreferences} (dict)
+  \item \emph{OutputIntents} (array of dict)
+  An array of output intent dictionaries describing the color characteristics of output devices on which the document might be rendered 
+  \item \emph{MarkInfo} (dict) relevant for tagging 
   \item PageLabels (number tree /indirect object) 
   \item Names (dict)
   \item Dests (dict, must be an indirect reference) 
@@ -236,11 +240,10 @@ endobj
   \item AA (dict, additional-actions) 
   \item URI (dict) 
   \item StructTreeRoot (dict) relevant for tagging
-  \item MarkInfo (dict) relevant for tagging 
+ 
    \item Lang (string, e.g. (de-DE))
   \item SpiderInfo (dict) 
-  \item OutputIntents (array of dict) 
-  An array of output intent dictionaries describing the color characteristics of output devices on which the document might be rendered \item PieceInfo (dict) 
+  \item PieceInfo (dict) 
  
   \item Perms (dict, pdf 1.5, permissions) 
   \item Legal (dict, pdf 1.5)
@@ -268,13 +271,15 @@ endobj
   \item[jmlrbook.cls] /OutputIntents, /Metadata  
   \item[pdfbase] AcroForm
   \item[ocgbase] /OCProperties, 
-  \item[ocg-p]
-  \item[pdfpagediff]
-  \item[pdfx]
-  \item[tagpdf-tree-code]
-  \item[vpe]
-  \item[xmpincl]
-  \item[zwpagelayout]
+  \item[ocg-p] /OCProperties
+  \item[pdfpagediff] /OCProperties
+  \item[pdfx] /ViewerPreferences, /OutputIntents, /Metadata
+  \item[tagpdf-tree-code] /MarkInfo, /StructTreeRoot
+  \item[vpe] (old, by Heiko, implements source specials with annotations) /AcroForm
+  \item[xmpincl] (old, doesn't work with dvi, but nevertheless loaded by pdfx, should probably be dropped ...) /Metadata
+  \item[zwpagelayout] /OutputIntents
+  \item[insdljs (acrotex)] /AA, /Type/Requirement/S/EnableJavaScripts  (directly in the catalog?? Shouldn't that be inside Requirements?), /OpenAction,
+  \item[aebpro.def (aeb-pro)] /ViewerPreferences,  /MarkInfo, /PageMode, /OpenAction
 \end{description}
 
 \subsection{Discussion}
@@ -286,6 +291,7 @@ Some values in the catalog need special treatment. So we will have a central pro
  \item AcroForm: (unclear) It looks as if only one can win here. Compare what the packages do and if overwriting is a problem. 
  \item Metadata: (unclear) Only one can win here, so we need to sort out, how to create and fill the stream. 
  \item PageMode, Uri, Lang: (direct write) 
+ \item StructTreeRoot, MarkInfo: this belongs to tagging. Two packages/code trying to add a structure to a pdf would give chaos, so there must be a unique access to this keys. 
  \item ViewerPreferences: needs its own property that can be filled by packages. At the end it should then be added by us to the catalog. 
      
  \item OutputIntents: needs it own property, as more than one intent can be added. The \enquote{ID} of an intent is the value of OutputCondition, so there should be a way to test it.
