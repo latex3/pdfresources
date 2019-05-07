@@ -703,6 +703,13 @@
  }
 %</package>
 %    \end{macrocode}
+% \subsection{Passing external information to hooks}
+% hooks sometimes wants to know something about the arguments of the surrounding command.
+% E.g. a hook in \cs{@startsection} perhaps needs the current section level or
+% if it is a run-in or display sectioning. Using \#-arguments in the hook is possible
+% but rather fragile. It is probably better if the surrounding command offers a
+% documentated interface through e.g. tl-variables. It should be also clear which
+% variables are read-only and which can be changed by the hook code. 
 %
 %
 % \PrintIndex
