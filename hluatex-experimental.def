@@ -172,7 +172,7 @@
 \protected\edef\pdfpageattr            {\pdfvariable pageattr}
 
 \protected\edef\pdfpageresources       {\pdfvariable pageresources}
-\protected\edef\pdfpagesattr           {\pdfvariable pagesattr}
+%\protected\edef\pdfpagesattr           {\pdfvariable pagesattr}
 
 
 %\protected\def\pdfstartlink      {\pdfextension startlink }
@@ -684,19 +684,10 @@
 
 %this needs central management in the kernel
 \def\PDF@SetupDoc{
-  \ifx\@pdfpagescrop\@empty
-  \else
-    \edef\process@me{
-      \pdfpagesattr={
-        /CropBox[\@pdfpagescrop]%
-        \expandafter\ifx\expandafter\\\the\pdfpagesattr\\%
-        \else
-          ^^J\the\pdfpagesattr
-        \fi
-      }%
-    }%
-    \process@me
-  \fi
+  \tl_if_empty:NF\@pdfpagescrop
+  {
+   \pdf_pagesattr_gput:nn {CropBox}{[\@pdfpagescrop]}
+  }
   \Hy@pstringdef\Hy@pstringB{\@baseurl}%
   \pdf_catalog_gput:nn {PageMode}{/\@pdfpagemode}
   \tl_if_empty:NF \@baseurl

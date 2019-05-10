@@ -361,13 +361,13 @@
 % \subsection{The info dictionary}
 % The info dictionary is filled by e.g. \cs{pdfinfo}. Multiple appearances of
 % \cs{pdfinfo} are concatenated, so one could end with multiple /Title or /Author entries.
-% It is then viewer dependant which one is showed, so it is better to avoid them.
+% It is then viewer dependant which one is showed, so it is better to avoid this.
 % We therefore setup a property which is filled and written to the info
 % directory in one go. According to hyperref a few odd drivers (hvtex, dvipsone, dviwind)
 % don't support arbitrary keys, but this should be handle elsewhere. Most entries are
 % strings so there is a special command for this, as entries with empty content
 % should be ommited we add a test. The string command should perhaps escape the argument???
-% hyperref write the info dictionary as the shipout of the first page --
+% hyperref write the info dictionary at the shipout of the first page --
 % probably to catch the  case that \cs{title} is issued after the begin of the document.
 % We are outputting at begin document, so all info keys should be set before.
 %    \begin{macrocode}
