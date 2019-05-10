@@ -1,0 +1,24 @@
+\PassOptionsToPackage{enable-debug,check-declarations}{expl3}
+\RequirePackage[debug]{pdfresources}
+\input{regression-test}
+\documentclass{article}
+\begin{document}
+\START 
+some text
+\ExplSyntaxOn
+ \pdf_pagesattr_gput:nn {YYY}{(yyy)}
+%test local: 
+{\pdf_pagesattr_gput:nn {ZZZ}{(zzz)}}
+
+%test "wrong" primitive call:
+ \__driver_pdf_pagesattr:n{/WWW~(someusersetting)}
+
+%test doublette
+ \pdf_pagesattr_gput:nn {YYY}{(y22)}
+
+%test command:
+\newcommand\attributecontent{(somesetting)}
+\pdf_pagesattr_gput:nn {SSS}{\attributecontent}
+\tl_show:N\g__pdf_pagesattr_tl
+\ExplSyntaxOff
+\end{document}

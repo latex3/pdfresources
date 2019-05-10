@@ -1,0 +1,27 @@
+% !Mode:: "TeX:DE:UTF-8:Main"
+
+
+
+\input{regression-test}
+\documentclass{article}
+\usepackage{pdfresources}
+
+\usepackage{xcolor}
+\usepackage[customdriver=hluatex-experimental]{hyperref}
+
+\hypersetup{
+ urlbordercolor=blue,
+ linkbordercolor=green,
+ menubordercolor=brown,
+ filebordercolor=yellow,
+ pdfborder={1 1 1}}
+ 
+\hypupdateattribute
+\begin{document}
+\START 
+\section{a}\label{a}
+link: \ref{a} \\
+url:  \url{www.blub.de}\\
+file: \href{test-pdfresources.pdf}{test file}\\
+menu: \Acrobatmenu{Find}{Find}
+\end{document}
