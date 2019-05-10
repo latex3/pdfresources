@@ -1,0 +1,12 @@
+\PassOptionsToPackage{enable-debug,check-declarations}{expl3}
+\RequirePackage[debug]{pdfresources}
+\input{regression-test}
+\documentclass{article}
+\ExplSyntaxOn
+\pdf_info_string_gput:nn {Title}{A~Title}
+\pdf_info_string_gput:nn {Author}{Some~Author}
+\ExplSyntaxOff
+\begin{document}
+\START 
+some text
+\end{document}

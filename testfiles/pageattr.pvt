@@ -1,0 +1,29 @@
+\PassOptionsToPackage{enable-debug,check-declarations}{expl3}
+\RequirePackage[debug]{pdfresources}
+\input{regression-test}
+\documentclass{article}
+\begin{document}
+\START
+some text
+\ExplSyntaxOn
+ \pdf_pageattr_gput:nn {Rotate}{90}
+%test local:
+{\pdf_pageattr_gput:nn {CropBox}{[0~0~300~300]}}
+
+%test "wrong" primitive call:
+ \__driver_pdf_pageattr:n{/WWW~(someusersetting)}
+
+%test doublette
+ \pdf_pageattr_gput:nn {Rotate}{90}
+
+%test command:
+\newcommand\attributecontent{(somesetting)}
+\pdf_pageattr_gput:nn {SSS}{\attributecontent}
+\tl_show:N\g__pdf_pageattr_tl
+
+\newpage
+\pdf_pageattr_gremove:n {Rotate}
+
+some text more text
+\ExplSyntaxOff
+\end{document} 
