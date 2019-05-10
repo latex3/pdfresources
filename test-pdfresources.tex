@@ -1,7 +1,7 @@
 % !Mode:: "TeX:DE:UTF-8:Main"
 %\input{regression-test}
-
-\RequirePackage{pdfresources}
+\PassOptionsToPackage{enable-debug,check-declarations}{expl3}
+\RequirePackage[debug]{pdfresources}
 \documentsetup{pdfversion=2.0}
 
 \documentclass{article}
@@ -11,36 +11,48 @@
 %don't compress pdf:
 \ExplSyntaxOn
 \driver_pdf_compresslevel:n {0}
-\driver_pdf_objects_disable:
+\driver_pdf_compress_objects:n {0}
 \cs_set:Nn \__driver_pdf_AR_fix: {}
 %\driver_pdf_catalog_gput:nn {Lang}
 \ExplSyntaxOff
 \usepackage{xcolor,listings}
 \title{some title}
-\usepackage[customdriver=hluatex-experimental,
-            pdfusetitle,
-            %pdftrapped=True,
-            pdfversion=1.7,
-           % pdfstartpage=3,
-           % pdfstartview=
-           pdfview=FitV,
-            ]{hyperref}
+%\usepackage[customdriver=hluatex-experimental,
+%            pdfusetitle,
+%            %pdftrapped=True,
+%            pdfversion=1.7,
+%           % pdfstartpage=3,
+%           % pdfstartview=
+%           pdfview=FitV,
+%            ]{hyperref}
 
 
 %\usepackage[ocgcolorlinks]{ocgx2}
 
-\hypersetup{pdfview=FitV 50,pdfinfo={blub=bla,blb=zzz}}
-
+%\hypersetup{pdfview=FitV 50,pdfinfo={blub=bla,blb=zzz}}
 
 \usepackage{bookmark}
 %%\tracingmacros=1
 \hypersetup{urlbordercolor=blue,linkbordercolor=green,pdfborder={1 1 1},pdfprintpagerange=0}
 %%%\makeatletter
-\hypupdateattribute
+%\hypupdateattribute
 \makeatletter%\tracingmacros=1
 \textwidth=5cm
 \begin{document}\parskip=1cm
 %
+\ExplSyntaxOn
+\pdf_pagesattr_gput:nn {YYY}{(blbl)}
+{\pdf_pagesattr_gput:nn {ZZZ}{(abc)}}
+
+%\pdfpagesattr{/WWW~(someusersetting)}
+%
+%\driver_pdf_pagesattr_gpop:N\g_tmpa_tl
+%\tl_show:N\g_tmpa_tl
+\pdf_pagesattr_gput:nn {ZZZ}{(abc)}
+\ExplSyntaxOff
+ 
+aaa
+\end{document}
 %abc\newpage blb\newpage ccc
 %
 %\tableofcontents

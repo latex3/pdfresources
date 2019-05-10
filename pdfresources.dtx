@@ -34,6 +34,8 @@
 \RequirePackage{xparse}
 \ProvidesExplPackage {pdfresources} {2019-03-17} {0.1}
   {experimental pdf-resource management}
+\DeclareOption { debug }{\msg_redirect_module:nnn {pdf}{warning}{error}}
+\ProcessOptions\relax
 %    \end{macrocode}
 %
 % \title{\pkg{pdfresources}}
@@ -126,9 +128,100 @@
 %<*package>
 %some variants
 \cs_generate_variant:Nn\driver_pdf_object_write:nn {nx}
+% helper command to output a key value of prop as needed in a dict.
+% name??????????? explicit spaces?
+% not internal as perhaps needed also by users?
+\cs_new:Npn \driver_pdf_dict_item:nn #1 #2 {/#1~#2~}
+%</package>
+%    \end{macrocode}
+% \subsubsection{pdfpagesattr}
+% pdfpagesattr is a single token register which is output at the end of the compilation.
+% It is normally used only a few times in a document, so it is okay to update the
+% register at every change.
+% We need to find a way to avoid that uses of the primitives interfere. For now, we issue
+% the push code at the end of document, so that it wins. But how to warn users?
+%
+%    \begin{macrocode}
+%<*package>
+
+\prop_new:N \g_@@_pdf_pagesattr_prop
+% setter:
+\cs_new_protected:Npn \driver_pdf_pagesattr_gput:nn #1 #2
+  {
+   \prop_gput:Nnn \g_@@_pdf_pagesattr_prop { #1 }{ #2}
+   \@@_pdf_pagesattr_gpush:
+  }
+
+% getter from the prop:
+\cs_new_protected:Npn \driver_pdf_pagesattr_get:nN #1 #2
+  {
+   \prop_get:NnN \g_@@_pdf_pagesattr_prop { #1 }
+   \@@_pdf_pagesattr_gpush:
+  }
+
+% remove:
+\cs_new_protected:Npn \driver_pdf_pagesattr_gremove:nn #1 #2
+  {
+   \prop_gremove:Nnn \g_@@_pdf_pagesattr_prop { #1 }{ #2}
+   \@@_pdf_pagesattr_gpush:
+  }
+
+% push to the register
+\cs_new_protected:Npn \@@_pdf_pagesattr_gpush:
+  {
+    \exp_args:NNx \tex_global:D \@@_pdf_pagesattr:n
+    {
+     \prop_map_function:NN \g_@@_pdf_pagesattr_prop \driver_pdf_dict_item:nn
+    }
+  }
+
+
+\sys_if_engine_pdftex:T
+{
+ %definition works also for luatex
+ \cs_new_protected:Npx \@@_pdf_pagesattr:n #1
+  {
+    \exp_not:N \tex_global:D
+    \cs_if_exist:NTF \tex_pdfpagesattr:D
+      { \tex_pdfpagesattr:D }
+      { \tex_pdfvariable:D pagesattr }
+      {#1}
+  }
+
+ \cs_new_protected:Npn \driver_pdf_pagesattr_get:N #1
+ {
+   \tl_set:Nx #1 {\tex_the:D \tex_pdfpagesattr:D}
+ }
+}
+
+\sys_if_engine_luatex:T
+{
+  \cs_new_protected:Npx \@@_pdf_pagesattr:n #1
+  {
+    \exp_not:N \tex_global:D
+    \cs_if_exist:NTF \tex_pdfpagesattr:D
+      { \tex_pdfpagesattr:D }
+      { \tex_pdfvariable:D pagesattr }
+      {#1}
+  }
+  \cs_new_protected:Npn \driver_pdf_pagesattr_get:N #1
+  {
+   \tl_set:Nx #1 {\tex_the:D \tex_pdfvariable:D pagesattr}
+  }
+}
+
+\AtEndDocument{\@@_pdf_pagesattr_gpush:}
+%</package>
+%    \end{macrocode}
+% \subsubsection{other stuff}
+%    \begin{macrocode}
+%<*package>
 % version for link_last which gives an int. try to get rid of the necessity if possible
 \sys_if_engine_pdftex:T
 {
+ %Push the pages attr prop to the token register:
+ %should it be an internal command?
+
  \cs_new:Npx \driver_pdf_link_last_int:
   {
     \cs_if_exist:NTF \tex_pdffeedback:D
@@ -141,6 +234,7 @@
  {
   \pdfcatalog {  } openaction~goto~page #1 {#2}
  }
+
 
 % this needs refinement, probably is should create named objects and add
 % them to the properties, see discussion
@@ -232,6 +326,38 @@
 %    \end{macrocode}
 % \section{Management code / pdf Module}
 %<@@=pdf>
+% \subsection{pdfpagesattr}
+% A token register that is added to the root pages object when the pdf is finished.
+% The following command copy more or less the driver commands but add a few tests
+% and warning if other packages or users have used the primitive commands.
+%    \begin{macrocode}
+%<*package>
+\msg_new:nnnn { pdf }{ pagesattr-changed }
+ {
+   The~content~of~pagesattr ~has~changed.~
+   Check~if~it~is~correct.
+ }
+ {
+  This~is~probably~due~to~some~package~or~command~using~the~
+  primitive~\token_to_str:N\pdfpagesattr\c_space_tl or~an~equivalent~command~
+  instead~of~the~expl3~interface.
+ }
+\tl_new:N \g_@@_pagesattr_tl
+
+\cs_new_protected:Npn \pdf_pagesattr_gput:nn #1 #2
+ {
+  \driver_pdf_pagesattr_get:N \l_tmpa_tl
+  \tl_if_eq:NNF \l_tmpa_tl \g_@@_pagesattr_tl
+   {
+    \msg_warning:nn { pdf }{ pagesattr-changed }
+   }
+  \driver_pdf_pagesattr_gput:nn { #1 } { #2 }
+  \driver_pdf_pagesattr_get:N \l_tmpa_tl
+  \tl_gset_eq:NN \g_@@_pagesattr_tl \l_tmpa_tl
+ }
+
+%</package>
+%    \end{macrocode}
 % \subsection{The info dictionary}
 % The info dictionary is filled by e.g. \cs{pdfinfo}. Multiple appearances of
 % \cs{pdfinfo} are concatenated, so one could end with multiple /Title or /Author entries.
@@ -246,6 +372,7 @@
 % We are outputting at begin document, so all info keys should be set before.
 %    \begin{macrocode}
 %<*package>
+%% should this be driver commands??
 \prop_new:N \g_@@_info_dict_prop
 \cs_new_protected:Npn \pdf_info_gput:nn #1 #2 %#1 key without /, #2 content
   {
@@ -268,7 +395,7 @@
 \cs_new_protected:Npn \@@_info_out: %internal, to ensure that it is used only once
  {
   \prop_map_function:NN  \g_@@_info_dict_prop \driver_pdf_info_gput:nn
-  \prop_clear:N \g_@@_info_dict_prop
+  \prop_gclear:N \g_@@_info_dict_prop
  }
 
 \AtBeginDocument{\@@_info_out:}
@@ -308,6 +435,9 @@
  }
 %</package>
 %    \end{macrocode}
+% \subsection{pdfpagesattr}
+%
+%
 % \subsection{Setting / comparing pdf versions}
 % The code assumes that the versions are two integers separated by a period.
 % The pdf version should be set rather early, before any object has been written.
@@ -365,7 +495,7 @@
  {
   \pdf_version_compare:NnT < { 1.5 }
    {
-    \driver_pdf_objects_disable:
+    \driver_pdf_compress_objects:n {0}
     \msg_info:nnx {pdf}{object-compression-disabled}
     { \driver_pdf_version_major:.\driver_pdf_version_minor:}
    }
@@ -709,7 +839,7 @@
 % if it is a run-in or display sectioning. Using \#-arguments in the hook is possible
 % but rather fragile. It is probably better if the surrounding command offers a
 % documentated interface through e.g. tl-variables. It should be also clear which
-% variables are read-only and which can be changed by the hook code. 
+% variables are read-only and which can be changed by the hook code.
 %
 %
 % \PrintIndex

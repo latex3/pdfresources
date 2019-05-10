@@ -4,7 +4,7 @@
 %\documentsetup{pdfversion=2.0}
 \ExplSyntaxOn
 \driver_pdf_compresslevel:n {0}
-\driver_pdf_objects_disable:
+\driver_pdf_compress_objects:n {0}
 \ExplSyntaxOff
 \documentclass{article}
 \usepackage[english]{babel}
@@ -289,7 +289,7 @@ Some values in the catalog need special treatment. So we will have a central pro
  \item Collection: unclear
  \item OCProperties: (unclear) Possible that more than one package wants to add something. Then it must be done in the sub dicts OCGs and Configs and would need management.
  \item AcroForm: (difficult, with sub sub dictionaries) Entries: Fields (array of references to fields, looks as if it needs to be filled by more than one package), NeedAppearances (boolean, only one can win, deprecated in 2.0), SigFlags (only one can win), CO (array, probably only one package should add here \ldots), DR (resources dictionary, seems to have a rich structure on its own \ldots, but only hyperref fills it), DA (string), Q (Integer), XFA (stream or array, deprecated in 2.0).
-     Currently the packages conflicts. 
+     Currently the packages conflicts.
 
  \item Metadata: (unclear) Only one can win here, so we need to sort out, how to create and fill the stream.
  \item PageMode, Uri, Lang: (direct write)
