@@ -128,22 +128,22 @@
 %<*package>
 %some variants
 \cs_generate_variant:Nn\driver_pdf_object_write:nn {nx}
-% helper command to output a key value of prop as needed in a dict.
-% name??????????? explicit spaces?
+% helper command to output a key + value of a prop as needed in a dict.
+% name? explicit spaces?
 % not internal as perhaps needed also by users?
 \cs_new:Npn \driver_pdf_dict_item:nn #1 #2 {/#1~#2~}
 %</package>
 %    \end{macrocode}
-% \subsubsection{pdfpagesattr}
+%
+% \subsubsection{driver / pdfpagesattr}
 % pdfpagesattr is a single token register which is output at the end of the compilation.
 % It is normally used only a few times in a document, so it is okay to update the
-% register at every change.
-% We need to find a way to avoid that uses of the primitives interfere. For now, we issue
-% the push code at the end of document, so that it wins. But how to warn users?
+% register at every change. This also allows to test for unwanted changes.
+% throught uses of the primitives. We issue the push code also at the end of
+% the document, so that it wins.
 %
 %    \begin{macrocode}
 %<*package>
-
 \prop_new:N \g_@@_pdf_pagesattr_prop
 % setter:
 \cs_new_protected:Npn \driver_pdf_pagesattr_gput:nn #1 #2
@@ -160,9 +160,9 @@
   }
 
 % remove:
-\cs_new_protected:Npn \driver_pdf_pagesattr_gremove:nn #1 #2
+\cs_new_protected:Npn \driver_pdf_pagesattr_gremove:n #1
   {
-   \prop_gremove:Nnn \g_@@_pdf_pagesattr_prop { #1 }{ #2}
+   \prop_gremove:Nn \g_@@_pdf_pagesattr_prop { #1 }
    \@@_pdf_pagesattr_gpush:
   }
 
@@ -192,6 +192,7 @@
  {
    \tl_set:Nx #1 {\tex_the:D \tex_pdfpagesattr:D}
  }
+ \AtEndDocument{\@@_pdf_pagesattr_gpush:}
 }
 
 \sys_if_engine_luatex:T
@@ -208,11 +209,94 @@
   {
    \tl_set:Nx #1 {\tex_the:D \tex_pdfvariable:D pagesattr}
   }
+
+  \AtEndDocument{\@@_pdf_pagesattr_gpush:}
 }
 
-\AtEndDocument{\@@_pdf_pagesattr_gpush:}
+
 %</package>
 %    \end{macrocode}
+% \subsubsection{driver / pdfpageattr}
+% pdfpageattr is a single token register which is output at the shipout for every page.
+% It is normally used only a few times in a document, so it is okay to update the
+% register at every change. This also allows to test for unwanted changes.
+% through uses of the primitives.
+% Open is the question if one need more shipout hooks to set e.g. Rotate on specific
+% pages.
+% See also https://tex.stackexchange.com/questions/479812/extension-of-rotating-package-to-set-pdf-rotation
+%
+%    \begin{macrocode}
+%<*package>
+\prop_new:N \g_@@_pdf_pageattr_prop
+% setter:
+\cs_new_protected:Npn \driver_pdf_pageattr_gput:nn #1 #2
+  {
+   \prop_gput:Nnn \g_@@_pdf_pageattr_prop { #1 }{ #2}
+   \@@_pdf_pageattr_gpush:
+  }
+
+% getter from the prop:
+\cs_new_protected:Npn \driver_pdf_pageattr_get:nN #1 #2
+  {
+   \prop_get:NnN \g_@@_pdf_pageattr_prop { #1 }
+   \@@_pdf_pageattr_gpush:
+  }
+
+% remove:
+\cs_new_protected:Npn \driver_pdf_pageattr_gremove:n #1
+  {
+   \prop_gremove:Nn \g_@@_pdf_pageattr_prop { #1 }
+   \@@_pdf_pageattr_gpush:
+  }
+
+% push to the register
+\cs_new_protected:Npn \@@_pdf_pageattr_gpush:
+  {
+    \exp_args:NNx \tex_global:D \@@_pdf_pageattr:n
+    {
+     \prop_map_function:NN \g_@@_pdf_pageattr_prop \driver_pdf_dict_item:nn
+    }
+  }
+
+
+\sys_if_engine_pdftex:T
+{
+ %definition works also for luatex
+ \cs_new_protected:Npx \@@_pdf_pageattr:n #1
+  {
+    \exp_not:N \tex_global:D
+    \cs_if_exist:NTF \tex_pdfpageattr:D
+      { \tex_pdfpageattr:D }
+      { \tex_pdfvariable:D pageattr }
+      {#1}
+  }
+
+ \cs_new_protected:Npn \driver_pdf_pageattr_get:N #1
+ {
+   \tl_set:Nx #1 {\tex_the:D \tex_pdfpageattr:D}
+ }
+}
+
+\sys_if_engine_luatex:T
+{
+  \cs_new_protected:Npx \@@_pdf_pageattr:n #1
+  {
+    \exp_not:N \tex_global:D
+    \cs_if_exist:NTF \tex_pdfpageattr:D
+      { \tex_pdfpageattr:D }
+      { \tex_pdfvariable:D pageattr }
+      {#1}
+  }
+  \cs_new_protected:Npn \driver_pdf_pageattr_get:N #1
+  {
+   \tl_set:Nx #1 {\tex_the:D \tex_pdfvariable:D pageattr}
+  }
+}
+
+
+%</package>
+%    \end{macrocode}
+%
 % \subsubsection{other stuff}
 %    \begin{macrocode}
 %<*package>
@@ -358,6 +442,54 @@
 
 %</package>
 %    \end{macrocode}
+%
+% \subsection{pdfpageattr}
+%
+% A token register that is added to the page object when the page is shipped out.
+% The following command copy more or less the driver commands but add a few tests
+% and warning if other packages or users have used the primitive commands.
+%    \begin{macrocode}
+%<*package>
+\msg_new:nnnn { pdf }{ pageattr-changed }
+ {
+   The~content~of~pageattr ~has~changed.~
+   Check~if~it~is~correct.
+ }
+ {
+  This~is~probably~due~to~some~package~or~command~using~the~
+  primitive~\token_to_str:N\pdfpageattr\c_space_tl or~an~equivalent~command~
+  instead~of~the~expl3~interface.
+ }
+\tl_new:N \g_@@_pageattr_tl
+
+\cs_new_protected:Npn \pdf_pageattr_gput:nn #1 #2
+ {
+  \driver_pdf_pageattr_get:N \l_tmpa_tl
+  \tl_if_eq:NNF \l_tmpa_tl \g_@@_pageattr_tl
+   {
+    \msg_warning:nn { pdf }{ pageattr-changed }
+   }
+  \driver_pdf_pageattr_gput:nn { #1 } { #2 }
+  \driver_pdf_pageattr_get:N \l_tmpa_tl
+  \tl_gset_eq:NN \g_@@_pageattr_tl \l_tmpa_tl
+ }
+
+\cs_new_protected:Npn \pdf_pageattr_gremove:n #1
+ {
+  \driver_pdf_pageattr_get:N \l_tmpa_tl
+  \tl_if_eq:NNF \l_tmpa_tl \g_@@_pageattr_tl
+   {
+    \msg_warning:nn { pdf }{ pageattr-changed }
+   }
+  \driver_pdf_pageattr_gremove:n { #1 }
+  \driver_pdf_pageattr_get:N \l_tmpa_tl
+  \tl_gset_eq:NN \g_@@_pageattr_tl \l_tmpa_tl
+ }
+
+
+%</package>
+%    \end{macrocode}
+%
 % \subsection{The info dictionary}
 % The info dictionary is filled by e.g. \cs{pdfinfo}. Multiple appearances of
 % \cs{pdfinfo} are concatenated, so one could end with multiple /Title or /Author entries.
@@ -366,39 +498,46 @@
 % directory in one go. According to hyperref a few odd drivers (hvtex, dvipsone, dviwind)
 % don't support arbitrary keys, but this should be handle elsewhere. Most entries are
 % strings so there is a special command for this, as entries with empty content
-% should be ommited we add a test. The string command should perhaps escape the argument???
-% hyperref write the info dictionary at the shipout of the first page --
+% should be ommited we add a test. The string command should perhaps escape the argument,
+% but for now we are assuming that the argument is pdf safe.
+% hyperref writes to the info dictionary at the shipout of the first page --
 % probably to catch the  case that \cs{title} is issued after the begin of the document.
 % We are outputting at begin document, so all info keys should be set before.
 %    \begin{macrocode}
 %<*package>
 %% should this be driver commands??
-\prop_new:N \g_@@_info_dict_prop
+\prop_new:N \g_@@_info_prop
 \cs_new_protected:Npn \pdf_info_gput:nn #1 #2 %#1 key without /, #2 content
   {
-   \prop_gput:Nnn\g_@@_info_dict_prop { #1 } { #2 }
+   \prop_gput:Nnn\g_@@_info_prop { #1 } { #2 }
   }
 
 \cs_generate_variant:Nn \pdf_info_gput:nn {o}
 
+%  should #2 be inside a some escaping command?
+%  hyperref passes them through
+%  \HyXeTeX@CheckUnicode
+%  \HyPsd@XeTeXBigCharstrue
+%  \HyPsd@PrerenderUnicode{#1}%
+%  \pdfstringdef\@pdftitle{#1}%
 \cs_new_protected:Npn \pdf_info_string_gput:nn #1 #2 %#1 key without /, #2 content
   {
    \tl_if_empty:nF { #2 }
     {
-     \prop_gput:Nnn\g_@@_info_dict_prop { #1 } { (#2) }
+     \prop_gput:Nnn\g_@@_info_prop { #1 } { (#2) }
     }
   }
 
 \cs_generate_variant:Nn \pdf_info_string_gput:nn {no,oo,on}
 
 
-\cs_new_protected:Npn \@@_info_out: %internal, to ensure that it is used only once
+\cs_new_protected:Npn \@@_info_push: %internal, to ensure that it is used only once
  {
-  \prop_map_function:NN  \g_@@_info_dict_prop \driver_pdf_info_gput:nn
-  \prop_gclear:N \g_@@_info_dict_prop
+  \prop_map_function:NN  \g_@@_info_prop \driver_pdf_info_gput:nn
+  \prop_gclear:N \g_@@_info_prop
  }
 
-\AtBeginDocument{\@@_info_out:}
+\AtBeginDocument{\@@_info_push:}
 
 
 %</package>

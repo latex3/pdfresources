@@ -23,8 +23,8 @@
             pdfversion=1.7,
            % pdfstartpage=3,
            % pdfstartview=
-           pdfview=FitV,
-           pdfpagescrop={0 0 300 300}
+           %pdfview=FitV,
+          % pdfpagescrop={0 0 300 300}
             ]{hyperref}
 
 
@@ -32,15 +32,20 @@
 
 %\hypersetup{pdfview=FitV 50,pdfinfo={blub=bla,blb=zzz}}
 
-\usepackage{bookmark}
+\usepackage{bookmark,graphicx}
 %%\tracingmacros=1
-\hypersetup{urlbordercolor=blue,linkbordercolor=green,pdfborder={1 1 1},pdfprintpagerange=0}
+\hypersetup{urlbordercolor=blue,linkbordercolor=green,pdfborder={1 1 1},pdfprintpagerange=0,pdfpagetransition=Dissolve}
 %%%\makeatletter
 %\hypupdateattribute
 \makeatletter%\tracingmacros=1
-\textwidth=5cm
+%\textwidth=5cm
 \begin{document}\parskip=1cm
 %
+\includegraphics[page=1]{example-image-duck}
+spme text\newpage 
+\includegraphics[page=2]{example-image-duck}
+some text
+\end{document}
 \ExplSyntaxOn
 \pdf_pagesattr_gput:nn {YYY}{(blbl)}
 {\pdf_pagesattr_gput:nn {ZZZ}{(abc)}}

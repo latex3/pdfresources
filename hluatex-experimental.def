@@ -169,7 +169,7 @@
 
 %\protected\def\pdfliteral        {\pdfextension literal}
 
-\protected\edef\pdfpageattr            {\pdfvariable pageattr}
+%\protected\edef\pdfpageattr            {\pdfvariable pageattr}
 
 \protected\edef\pdfpageresources       {\pdfvariable pageresources}
 %\protected\edef\pdfpagesattr           {\pdfvariable pagesattr}
@@ -802,57 +802,30 @@
   \Hy@DisableOption{pdftrapped}%
   \Hy@DisableOption{pdfinfo}%
 }
- \ExplSyntaxOff
+
 \def\hyper@pagetransition{%
   \ifx\@pdfpagetransition\relax
   \else
-    \expandafter\Hy@RemoveTransPageAttr
-    \the\pdfpageattr^^J/Trans{}>>\END
-    \ifx\@pdfpagetransition\@empty
-    \else
-      \edef\@processme{%
-        \global\pdfpageattr{%
-          \the\pdfpageattr
-          ^^J/Trans << /S /\@pdfpagetransition\space >>%
-        }%
-      }%
-      \@processme
-    \fi
+   \pdf_pageattr_gremove:n {Trans}
+   \tl_if_empty:NF \@pdfpagetransition
+    {
+     \pdf_pageattr_gput:nn {Trans}{<< /S /\@pdfpagetransition\space >>}
+    }
   \fi
 }
-\gdef\Hy@RemoveTransPageAttr#1^^J/Trans#2#3>>#4\END{%
-  \ifx\\#2\\%
-    \global\pdfpageattr{#1}%
-  \else
-    \Hy@RemoveTransPageAttr#1#4\END
-  \fi
-}
+
 \def\hyper@pageduration{%
   \ifx\@pdfpageduration\relax
   \else
-    \expandafter
-    \Hy@RemoveDurPageAttr\the\pdfpageattr^^J/Dur{} \END
-    \ifx\@pdfpageduration\@empty
-    \else
-      \edef\@processme{%
-        \global\pdfpageattr{%
-          \the\pdfpageattr
-          ^^J/Dur \@pdfpageduration\space
-        }%
-      }%
-      \@processme
-    \fi
+   \pdf_pageattr_gremove:n {Dur}
+   \tl_if_empty:NF \@pdfpageduration
+    {
+     \pdf_pageattr_gput:nn {Dur}{\@pdfpageduration\space}
+    }
   \fi
 }
-\gdef\Hy@RemoveDurPageAttr#1^^J/Dur#2#3 #4\END{%
-  \ifx\\#2\\%
-    \global\pdfpageattr{#1}%
-  \else
-    \Hy@RemoveDurPageAttr#1#4\END
-  \fi
-}
-%UF removed hyper@pagehidden (obsolete key)
-%   removed \Hy@RemoveHidPageAttr#1^^J/Hid#2#3 #4\END{%
+\ExplSyntaxOff
+
 
 \pdf@ifdraftmode{}{%
   \g@addto@macro\Hy@EveryPageHook{%

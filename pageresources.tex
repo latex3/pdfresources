@@ -61,6 +61,8 @@ and then copies to the page attribute if these are empty (why?):
 
 The values added here are simple arrays. The data structure is easy: One needs a property, a command to add and one to remove a key. The main open problem is when to move the content of the property to \verb`\pdfpagesattr` and how to force packages to use the property. Can one redefine \verb+\pdfpageattr+ so that \verb+\the\pdfpageattr+ doesn't gives bad errors?
 
+\subsection{Implementation}
+new values are stored in a prop, and at every change the register is updated. There is a test for changes so intermediate calls of the primitive can be detected and users are warned. The register is updated a last time at the end of the document.
 
 \section{pdfpageattr}
 \begin{itemize}
@@ -299,5 +301,55 @@ Some values in the catalog need special treatment. So we will have a central pro
  \item OutputIntents: needs it own property, as more than one intent can be added. The \enquote{ID} of an intent is the value of OutputCondition, so there should be a way to test it.
 \item
 \end{itemize}
+
+\section{pdfinfo}
+\begin{itemize}
+\item The info dictionary (in the xref-dict) is filled by e.g. \verb+\pdfinfo+. 
+\item Multiple appearances are concatenated.
+\item Standard entries are Title, Author, Subject, Keywords, Creator, Producer (all text strings), CreationDate (date), ModDate (date), Trapped (name: either /True, /False, or /Unknown).
+\item More entries are allowed, their value should be text strings.
+\item If the value is empty, the entries should be removed.    
+\item A number of entries are added by the engine automatically but can be overwritten with own data. 
+CreationDate and ModDate can be suppressed with \verb+\pdfinfoomitdate+. The fullbanner with \verb+\pdfsuppressptexinfo+.
+\begin{verbatim}
+12 0 obj
+<<
+/Producer (pdfTeX-1.40.20)
+/Creator (TeX)
+/CreationDate (D:20190510185641+02'00')
+/ModDate (D:20190510185641+02'00')
+/Trapped /False
+/PTEX.Fullbanner (This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/W32TeX) kpathsea version 6.3.1)
+>>
+endobj
+\end{verbatim}
+\end{itemize}
+
+\subsection{Use}
+\begin{description}
+  \item[ltnews.cls] 
+  \item[beamerthemeTorinoTh] 
+  \item[bgteubner.cls] 
+  \item[exam-n.cls] 
+  \item[factura.cls]
+  \item[hcart.cls]
+  \item[hrreport.cls]
+  \item[hcslides.cls]
+  \item[hustthesis.cls]
+  \item[hyperref]
+  \item[jmlrbook.cls]
+  \item[l3build/regression-test.tex]
+  \item[lion-msc.cls]
+  \item[pdfprivacy]
+  \item[pdfx]
+  \item[skb]
+  \item[skrapport.cls]
+  \item[legislation.cls]
+  \item[webquiz-doc.code.tex]
+  \item[zwpagelayout]
+  
+\end{description}
+
+
 \end{document}
 
