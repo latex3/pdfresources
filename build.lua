@@ -8,3 +8,6 @@ module  = "pdfresources"
 
 installfiles = {"*.sty","*.cls","*.def"}
 sourcefiles =  {"*.dtx","*.ins","hluatex-experimental.def"}
+
+checkruns = 2
+
