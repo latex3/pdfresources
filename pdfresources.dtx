@@ -124,6 +124,11 @@
 % Variants which allow also to set the rule spec are perhaps needed too.
 % Currently only pdftex, luatex and xetex are setup. Some commands can probably not be
 % implemented in all drivers.
+% % still needed:
+% % \saveboxresource/ \pdfxform
+% % \lastsavedboxresourceindex / \pdflastxform
+% % \pdf@strcmp??
+% % \pdf@escapestring?? \pdfescapestring
 %    \begin{macrocode}
 %<*package>
 %some variants
@@ -134,7 +139,65 @@
 \cs_new:Npn \driver_pdf_dict_item:nn #1 #2 {/#1~#2~}
 %</package>
 %    \end{macrocode}
-%
+%\subsubsection{pdfxform}
+% as in dvi mode the xform is immediate, let's do it for pdftex/luatex too. If needed
+% a delayed version can be added later.
+%    \begin{macrocode}
+%<*package>
+\prop_new:N \g__driver_pdf_xform_prop
+\sys_if_engine_pdftex:T
+{
+ \cs_new_protected:Npn \driver_pdf_xform_new:nnnN #1 #2 #3 #4 %name, attr, resources, box
+ {
+  \tex_immediate:D \tex_pdfxform:D~attr { #2 }~resources {#3} #4
+  \int_const:cn
+   { c__driver_pdf_xform_ \tl_to_str:n {#1} _int }
+   { \tex_pdflastxform:D }
+  \prop_gput:Nnx \g__driver_pdf_xform_prop {#1}
+   {
+    \tex_pdfxformname:D \int_use:c {c__driver_pdf_xform_ \tl_to_str:n {#1} _int}
+   }
+ }
+
+\cs_new:Npn \driver_pdf_xform_use:n #1
+ {
+  \tex_pdfrefxform:D \int_use:c { c__driver_pdf_xform_ \tl_to_str:n {#1} _int } \scan_stop:
+ }
+\cs_new:Npn \driver_pdf_xform_ref:n #1
+  { \int_use:c { c__driver_pdf_xform_ \tl_to_str:n {#1} _int } ~ 0 ~ R }
+
+\cs_new:Npn \driver_pdf_xform_name_ref:n #1
+  { /Fm\prop_item:Nn \g__driver_pdf_xform_prop {#1} }
+}
+
+%nearly identical but not completly ...
+\sys_if_engine_luatex:T
+{
+ \cs_new_protected:Npn \driver_pdf_xform_new:nnnN #1 #2 #3 #4 %name, attr, resources, box
+ {
+  \tex_immediate:D \tex_pdfxform:D~attr { #2 }~resources {#3} #4
+  \int_const:cn
+   { c__driver_pdf_xform_ \tl_to_str:n {#1} _int }
+   { \tex_pdflastxform:D }
+  \prop_gput:Nnx \g__driver_pdf_xform_prop {#1}
+   {
+    \tex_pdffeedback:D~xformname  \int_use:c {c__driver_pdf_xform_ \tl_to_str:n {#1} _int}
+   }
+ }
+
+\cs_new:Npn \driver_pdf_xform_use:n #1
+ {
+  \tex_pdfrefxform:D \int_use:c { c__driver_pdf_xform_ \tl_to_str:n {#1} _int } \scan_stop:
+ }
+\cs_new:Npn \driver_pdf_xform_ref:n #1
+  { \int_use:c { c__driver_pdf_xform_ \tl_to_str:n {#1} _int } ~ 0 ~ R }
+
+\cs_new:Npn \driver_pdf_xform_name_ref:n #1
+  { /Fm\prop_item:Nn \g__driver_pdf_xform_prop {#1} }
+}
+
+%</package>
+%    \end{macrocode}
 % \subsubsection{driver / pdfpagesattr}
 % pdfpagesattr is a single token register which is output at the end of the compilation.
 % It is normally used only a few times in a document, so it is okay to update the

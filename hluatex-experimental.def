@@ -862,9 +862,10 @@
 \ExplSyntaxOff
 %%% UF removed old atbegshi fix
 
-\def\@Gauge[#1]#2#3#4{% parameters, label, minimum, maximum
-  \Hy@Message{Sorry, pdftex does not support FORM gauges}%
-}
+%\def\@Gauge[#1]#2#3#4{% parameters, label, minimum, maximum
+%  \Hy@Message{Sorry, pdftex does not support FORM gauges}%
+%}
+
 \def\MakeFieldObject#1#2{\sbox0{#1}%
   \immediate\saveboxresource0 %
   \expandafter\edef\csname #2Object\endcsname{%
