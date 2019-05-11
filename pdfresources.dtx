@@ -125,8 +125,6 @@
 % Currently only pdftex, luatex and xetex are setup. Some commands can probably not be
 % implemented in all drivers.
 % % still needed:
-% % \saveboxresource/ \pdfxform
-% % \lastsavedboxresourceindex / \pdflastxform
 % % \pdf@strcmp??
 % % \pdf@escapestring?? \pdfescapestring
 %    \begin{macrocode}
@@ -163,6 +161,8 @@
  {
   \tex_pdfrefxform:D \int_use:c { c__driver_pdf_xform_ \tl_to_str:n {#1} _int } \scan_stop:
  }
+
+% should there be a test if the name exists???
 \cs_new:Npn \driver_pdf_xform_ref:n #1
   { \int_use:c { c__driver_pdf_xform_ \tl_to_str:n {#1} _int } ~ 0 ~ R }
 
@@ -218,8 +218,7 @@
 % getter from the prop:
 \cs_new_protected:Npn \driver_pdf_pagesattr_get:nN #1 #2
   {
-   \prop_get:NnN \g_@@_pdf_pagesattr_prop { #1 }
-   \@@_pdf_pagesattr_gpush:
+   \prop_get:NnN \g_@@_pdf_pagesattr_prop { #1 } #2
   }
 
 % remove:
@@ -301,8 +300,7 @@
 % getter from the prop:
 \cs_new_protected:Npn \driver_pdf_pageattr_get:nN #1 #2
   {
-   \prop_get:NnN \g_@@_pdf_pageattr_prop { #1 }
-   \@@_pdf_pageattr_gpush:
+   \prop_get:NnN \g_@@_pdf_pageattr_prop { #1 } #2
   }
 
 % remove:
@@ -359,7 +357,104 @@
 
 %</package>
 %    \end{macrocode}
+% \subsection{pdfpageresources}
+% We need code for ExtGState, ColorSpace, Pattern, Shading and Properties.
+% All are dictionaries which can receive entries from more than one source.
+% We follow the pgf code: for all objects are reserved which are written at end document.
+% This means that pages that uses the entries share the same resource. So removing
+% entries makes no sense.
+%    \begin{macrocode}
+%<*package>
+ \clist_const:Nn \c_@@_pdf_pageresources_clist
+  {
+   ExtGState,
+   ColorSpace,
+   Pattern,
+   Shading,
+   Properties
+  }
+
+ \prop_new:N \g_@@_pdf_pageresources_prop
+
+ \clist_map_inline:Nn \c_@@_pdf_pageresources_clist
+  {
+   \prop_new:c {g_@@_pdf_page_#1_prop}
+   \driver_pdf_object_new:nn {g_@@_pdf_page_#1_obj}{dict}
+   \bool_new:c {g_@@_pdf_page_#1_bool}
+  }
+
+
+
+% setter: add test for existence?? #1 is always the "name"
+\cs_new_protected:Npn \driver_pdf_pageresources_gput:nnn #1 #2 #3
+  {
+   \prop_gput:cnn { g_@@_pdf_page_#1_prop} { #2 }{ #3 }
+   \bool_if:cF {g_@@_pdf_page_#1_bool}
+    {
+     \prop_gput:Nnx \g_@@_pdf_pageresources_prop
+      {#1}
+      {\driver_pdf_object_ref:n {g_@@_pdf_page_#1_obj}}
+      \@@_pdf_pageresources_gpush:
+    }
+   \bool_gset_true:c {g_@@_pdf_page_#1_bool}
+  }
+
 %
+%% push to the register
+\cs_new_protected:Npn \@@_pdf_pageresources_gpush:
+  {
+    \exp_args:NNx \tex_global:D \@@_pdf_pageresources:n
+    {
+     \prop_map_function:NN \g_@@_pdf_pageresources_prop \driver_pdf_dict_item:nn
+    }
+  }
+
+%to be able to test if someone tampered with the resources:
+\sys_if_engine_pdftex:T
+{
+  \cs_new_protected:Npn \driver_pdf_pageresources_get:N #1
+  {
+   \tl_set:Nx #1 {\tex_the:D \tex_pdfpageresources:D}
+  }
+}
+
+\sys_if_engine_luatex:T
+{
+  \cs_new_protected:Npn \driver_pdf_pageresources_get:N #1
+  {
+   \tl_set:Nx #1 {\tex_the:D \tex_pdfvariable:D pageresources}
+  }
+}
+
+\bool_if:nT { \sys_if_engine_pdftex_p: || \sys_if_engine_luatex_p: }
+{
+ \cs_new_protected:Npx \@@_pdf_pageresources:n #1
+  {
+    \exp_not:N \tex_global:D
+    \cs_if_exist:NTF \tex_pdfpageresources:D
+      { \tex_pdfpageresources:D }
+      { \tex_pdfvariable:D pageresources }
+      {#1}
+  }
+}
+
+\AtEndDocument
+ {
+   \clist_map_inline:Nn \c_@@_pdf_pageresources_clist
+    {
+      \bool_if:cT { g_@@_pdf_page_#1_bool }
+       {
+        \exp_args:Nnx
+         \driver_pdf_object_write:nn { g_@@_pdf_page_#1_obj }
+           {
+             \prop_map_function:cN { g_@@_pdf_page_#1_prop} \driver_pdf_dict_item:nn
+           }
+       }
+    }
+ }
+
+%</package>
+%    \end{macrocode}
 % \subsubsection{other stuff}
 %    \begin{macrocode}
 %<*package>
