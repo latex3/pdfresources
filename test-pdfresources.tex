@@ -2,7 +2,7 @@
 %\input{regression-test}
 \PassOptionsToPackage{enable-debug,check-declarations}{expl3}
 \RequirePackage[debug]{pdfresources}
-\documentsetup{pdfversion=2.0}
+%\documentsetup{pdfversion=2.0}
 
 \documentclass{article}
 
@@ -12,13 +12,14 @@
 \ExplSyntaxOn
 \driver_pdf_compresslevel:n {0}
 \driver_pdf_compress_objects:n {0}
-\cs_set:Nn \__driver_pdf_AR_fix: {}
+%\cs_set:Nn \__driver_pdf_AR_fix: {}
 %\driver_pdf_catalog_gput:nn {Lang}
 \ExplSyntaxOff
 \usepackage{xcolor,listings}
 \title{some title}
 \usepackage[customdriver=hluatex-experimental,
-            pdfusetitle,
+            %pdfusetitle,
+            ocgcolorlinks,
             %pdftrapped=True,
             pdfversion=1.7,
            % pdfstartpage=3,
@@ -41,8 +42,10 @@
 %\textwidth=5cm
 \begin{document}\parskip=1cm
 %
+bllb
+\end{document}
 \includegraphics[page=1]{example-image-duck}
-spme text\newpage 
+spme text\newpage
 \includegraphics[page=2]{example-image-duck}
 some text
 \end{document}
@@ -56,7 +59,7 @@ some text
 %\tl_show:N\g_tmpa_tl
 \pdf_pagesattr_gput:nn {ZZZ}{(abc)}
 \ExplSyntaxOff
- 
+
 aaa
 \end{document}
 %abc\newpage blb\newpage ccc
