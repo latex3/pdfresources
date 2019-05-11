@@ -866,12 +866,12 @@
 %  \Hy@Message{Sorry, pdftex does not support FORM gauges}%
 %}
 
-\def\MakeFieldObject#1#2{\sbox0{#1}%
-  \immediate\saveboxresource0 %
-  \expandafter\edef\csname #2Object\endcsname{%
-    \the\lastsavedboxresourceindex\space 0 R%
+\ExplSyntaxOn
+\def\MakeFieldObject#1#2
+ {
+  \hbox_set:Nn\l_tmpa_box {#1}
+  \driver_pdf_xform_new:nnnN { #2 }{}{} \l_tmpa_box
   }%
-}%
 \let\HyField@afields\ltx@empty
 \let\HyField@cofields\ltx@empty
 %% UF test for old pdftex removed
@@ -879,7 +879,6 @@
   \let\HyField@AuxAddToCoFields\ltx@gobbletwo
   \def\HyField@AfterAuxOpen{\Hy@AtBeginDocument}%
 
-\ExplSyntaxOn
 
   \def\HyField@ABD@AuxAddToCoFields#1#2{%
     \group_begin:
@@ -1016,15 +1015,15 @@
       \selectfont
       \char123
     \group_end:
-   }{Ding}
+   }{__hyp_xform_Ding}
   \MakeFieldObject
    {
     \fbox{\textcolor{yellow}{\textsf{Submit}}} %color?
-   }{Submit}
+   }{__hyp_xform_Submit}
   \MakeFieldObject
    {
     \fbox{\textcolor{yellow}{\textsf{SubmitP}}} %color?
-   }{SubmitP}
+   }{__hyp_xform_SubmitP}
 }
 \ExplSyntaxOff
 \let\@endForm\ltx@empty
@@ -1186,7 +1185,7 @@
          <<
          /N
           <<
-          /\@currValue\c_space_tl \DingObject
+          /\@currValue\c_space_tl \driver_pdf_xform_ref:n {__hyp_xform_Ding}
           >>
          >>
       }
@@ -1267,7 +1266,10 @@
       {widget} %perhaps more types needed
       {
         \PDFForm@Submit
-       /AP<</N~\SubmitObject/D~\SubmitPObject>>
+       /AP<<
+          /N~\driver_pdf_xform_ref:n {__hyp_xform_Submit}~
+          /D~\driver_pdf_xform_ref:n {__hyp_xform_SubmitP}
+         >>
        }
       { \MakeButtonField{#2} }
     \HyField@AddToFields
