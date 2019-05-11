@@ -90,7 +90,7 @@ new values are stored in a prop, and at every change the register is updated. Th
     \item PZ (number),
     \item SeparationInfo (dict),
     \item TemplateInstantiated (name),
-    \item  PresSteps (dict),
+    \item PresSteps (dict),
     \item UserUnit (number),
     \item VP (dict).
     \end{enumerate}
@@ -106,6 +106,9 @@ new values are stored in a prop, and at every change the register is updated. Th
 /Parent 9 0 R
 >>
 \end{verbatim}
+
+\subsection{Implementation}
+new values are stored in a prop, and at every change the register is updated. There is a test for changes so intermediate calls of the primitive can be detected and users are warned. 
 
 \subsection{Uses}
 \begin{description}
@@ -137,7 +140,7 @@ It must be decided when to copy the property into pdfpageattr. Atbeginshipout?
 \section{pdfpageresources}
 \begin{itemize}
 \item token register, is added to the Resources dictionary of all \emph{following} pages.
-\item non-additive: A new call overwrites the content of the register.
+\item non-additive: A new call overwrites the content of the register (but not automatic entries like Font or XObject).
 \item Entries:
  \begin{enumerate}
  \item \emph{ExtGState} (dict)
@@ -145,9 +148,9 @@ It must be decided when to copy the property into pdfpageattr. Atbeginshipout?
  \item \emph{Pattern} (dict)
  \item \emph{Shading} (dict)
  \item \emph{Properties} (dict) (maps names to objects for BDC-dictionaries)
- \item Font (dict)
- \item XObject (dict)
- \item ProcSet (array) (obsolete)
+ \item Font (dict, automatic)
+ \item XObject (dict, automatic)
+ \item ProcSet (array, automatic) (obsolete)
  \end{enumerate}
 
 \end{itemize}
@@ -304,12 +307,12 @@ Some values in the catalog need special treatment. So we will have a central pro
 
 \section{pdfinfo}
 \begin{itemize}
-\item The info dictionary (in the xref-dict) is filled by e.g. \verb+\pdfinfo+. 
+\item The info dictionary (in the xref-dict) is filled by e.g. \verb+\pdfinfo+.
 \item Multiple appearances are concatenated.
 \item Standard entries are Title, Author, Subject, Keywords, Creator, Producer (all text strings), CreationDate (date), ModDate (date), Trapped (name: either /True, /False, or /Unknown).
 \item More entries are allowed, their value should be text strings.
-\item If the value is empty, the entries should be removed.    
-\item A number of entries are added by the engine automatically but can be overwritten with own data. 
+\item If the value is empty, the entries should be removed.
+\item A number of entries are added by the engine automatically but can be overwritten with own data.
 CreationDate and ModDate can be suppressed with \verb+\pdfinfoomitdate+. The fullbanner with \verb+\pdfsuppressptexinfo+.
 \begin{verbatim}
 12 0 obj
@@ -327,10 +330,10 @@ endobj
 
 \subsection{Use}
 \begin{description}
-  \item[ltnews.cls] 
-  \item[beamerthemeTorinoTh] 
-  \item[bgteubner.cls] 
-  \item[exam-n.cls] 
+  \item[ltnews.cls]
+  \item[beamerthemeTorinoTh]
+  \item[bgteubner.cls]
+  \item[exam-n.cls]
   \item[factura.cls]
   \item[hcart.cls]
   \item[hrreport.cls]
@@ -347,7 +350,7 @@ endobj
   \item[legislation.cls]
   \item[webquiz-doc.code.tex]
   \item[zwpagelayout]
-  
+
 \end{description}
 
 
