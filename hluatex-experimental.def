@@ -171,7 +171,7 @@
 
 %\protected\edef\pdfpageattr            {\pdfvariable pageattr}
 
-\protected\edef\pdfpageresources       {\pdfvariable pageresources}
+%\protected\edef\pdfpageresources       {\pdfvariable pageresources}
 %\protected\edef\pdfpagesattr           {\pdfvariable pagesattr}
 
 
@@ -380,17 +380,14 @@
         >>
       >>
      }
-    \begingroup
-      \edef\x{\endgroup
-        \pdfpageresources{
-          \the\pdfpageresources
-          /Properties<<
-            /OCView ~ \driver_pdf_object_ref:n { l__hyp_ocg_view_dict_obj}
-            /OCPrint~ \driver_pdf_object_ref:n { l__hyp_ocg_print_dict_obj}
-          >>
-        }
-      }
-    \x
+     \driver_pdf_pageresources_gput:nnn{Properties}{OCView}
+     {
+      \driver_pdf_object_ref:n { l__hyp_ocg_view_dict_obj}
+     }
+    \driver_pdf_pageresources_gput:nnn{Properties}{OCPrint}
+     {
+      \driver_pdf_object_ref:n { l__hyp_ocg_print_dict_obj}
+     }
   }
   \Hy@AtBeginDocument{
     \def\Hy@colorlink#1{
