@@ -17,6 +17,35 @@
 \ExplSyntaxOff
 \usepackage{xcolor,listings}
 \title{some title}
+\usepackage{tikz}
+\showthe\pdfpageresources
+\makeatletter
+\show\pgf@sys@pgf@resource@list@colorspaces
+\show\pgf@sys@pgf@resource@list@patterns
+\ExplSyntaxOn
+%Trying to patch pdf ...
+\cs_new:Npn \__pdf_dict_entry_split:w  #1/#2 <<#3>> \q_stop
+{
+ \driver_pdf_pageresources_gput:nnn {#1}{#2}{<<#3>>}
+}
+%this works
+\def\pgf@sys@addpdfresource@extgs@plain#1
+ {
+  \__pdf_dict_entry_split:w {ExtGState}#1\q_stop
+ }
+%need to check the value 
+%\def\pgf@sys@addpdfresource@patterns@plain #1
+% {
+%  \__pdf_dict_entry_split:w {Patterns}#1\q_stop
+% }
+ %wrong, colorspace entry has an array as value internally
+%\def\pgf@sys@addpdfresource@colorspaces@plain#1
+% {
+%  \__pdf_dict_entry_split:w {ColorSpace}#1\q_stop
+% }
+ 
+  \exp_args:Nno \__pdf_dict_entry_split:w {ColorSpace}\pgf@sys@pgf@resource@list@colorspaces\q_stop
+\ExplSyntaxOff
 \usepackage[customdriver=hluatex-experimental,
             %pdfusetitle,
             ocgcolorlinks,
@@ -43,6 +72,8 @@
 \begin{document}\parskip=1cm
 %
 bllb
+
+\tikz\fill[red,opacity=0.5] (0,0) rectangle (1,1);
 \end{document}
 \includegraphics[page=1]{example-image-duck}
 spme text\newpage
