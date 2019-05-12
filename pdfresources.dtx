@@ -31,11 +31,16 @@
 % \fi
 %
 %    \begin{macrocode}
+%<@@=pdf>
+%<*package>
 \RequirePackage{xparse}
 \ProvidesExplPackage {pdfresources} {2019-03-17} {0.1}
   {experimental pdf-resource management}
 \DeclareOption { debug }{\msg_redirect_module:nnn {pdf}{warning}{error}}
+\bool_new:N\g_@@_patches_bool
+\DeclareOption { patches }{\bool_gset_true:N\g_@@_patches_bool}
 \ProcessOptions\relax
+%</package>
 %    \end{macrocode}
 %
 % \title{\pkg{pdfresources}}
@@ -1139,4 +1144,57 @@
 % variables are read-only and which can be changed by the hook code.
 %
 %
+% \section{Patches}
+% This code is temporary! It tries to patch commands of other packages which
+% fills pdfresources too, to remove clashes and test if everything works as expected.
+% This code should disappear when packages adapt to the central interfaces.
+% \subsection{pgf}
+% For the pageresources we need to avoid that pgf interferes in ExtGState,
+% ColorSpace and Pattern (Shadings are added to the xform resources and so probably
+% unproblematic for now).
+%    \begin{macrocode}
+%<*package>
+\bool_if:NF \g_@@_patches_bool
+ {
+  \file_input_stop:
+ }
+
+\AtBeginDocument
+ {
+  %Trying to patch pgf ...
+  % extgstate
+  \cs_new:Npn \__pdf_patch_pgfextgs:w  #1/#2<<#3>>#4\q_stop
+   {
+    \driver_pdf_pageresources_gput:nnn {ExtGState}{#2}{<<#3>>}
+   }
+
+  \def\pgf@sys@addpdfresource@extgs@plain#1
+   {
+    \__pdf_patch_pgfextgs:w #1\q_stop
+   }
+
+  % patterns
+  \cs_new:Npn \__pdf_patch_pgfpatterns:w  #1/#2\space#3\q_stop
+   {
+    \exp_args:Nnnx \driver_pdf_pageresources_gput:nnn {Pattern}{#2}{#3}
+   }
+  \def\pgf@sys@addpdfresource@patterns@plain#1
+   {
+    \__pdf_patch_pgfpatterns:w #1\q_stop
+   }
+
+  %colorspace is already set when tikz is loaded:
+  \cs_new:Npn \__pdf_patch_pgfcolorspace:w  #1/#2[#3]#4\q_stop
+   {
+    \driver_pdf_pageresources_gput:nnn {ColorSpace}{#2}{[#3]}
+   }
+
+  \exp_last_unbraced:NV
+   \__pdf_patch_pgfcolorspace:w  \pgf@sys@pgf@resource@list@colorspaces\q_stop
+
+   \pgfutil@everybye{}
+ }
+
+%</package>
+%    \end{macrocode}
 % \PrintIndex
