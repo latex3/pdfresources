@@ -1161,9 +1161,10 @@
   \file_input_stop:
  }
 \msg_info:nn{pdf}{patches}
+\RequirePackage{etoolbox}
+  %Trying to patch pgf ..
 \AtBeginDocument
  {
-  %Trying to patch pgf ...
   % extgstate
   \cs_new:Npn \__pdf_patch_pgfextgs:w  #1/#2<<#3>>#4\q_stop
    {
@@ -1172,6 +1173,7 @@
 
   \def\pgf@sys@addpdfresource@extgs@plain#1
    {
+    \exp_after:wN %for transparent which passes a command
     \__pdf_patch_pgfextgs:w #1\q_stop
    }
 
@@ -1190,11 +1192,29 @@
    {
     \driver_pdf_pageresources_gput:nnn {ColorSpace}{#2}{[#3]}
    }
-
-  \exp_last_unbraced:NV
-   \__pdf_patch_pgfcolorspace:w  \pgf@sys@pgf@resource@list@colorspaces\q_stop
-
+  \tl_if_exist:NT \pgf@sys@pgf@resource@list@colorspaces
+  {
+   \exp_last_unbraced:NV
+    \__pdf_patch_pgfcolorspace:w  \pgf@sys@pgf@resource@list@colorspaces\q_stop
    \pgfutil@everybye{}
+  }
+ }
+% transparent, we assume that pdfresource is loaded first.
+
+\AtEndPreamble
+ {
+  \def\TRP@addresource
+   {
+    \driver_pdf_pageresources_gput:nnn{ExtGState}{TRP1}{<</ca~1/CA~1>>}
+   }
+  \def\transparent@use#1
+  {
+   \tl_if_exist:cF{TRP#1}
+    {
+     \driver_pdf_pageresources_gput:nnn{ExtGState}{TRP#1}{<</ca~#1/CA~#1>>}
+     \tl_const:cn{TRP#1}{/TRP#1~gs}
+    }
+  }
  }
 
 %</package>
