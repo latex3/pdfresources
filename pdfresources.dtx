@@ -148,7 +148,7 @@
 %    \begin{macrocode}
 %<*package>
 \prop_new:N \g__driver_pdf_xform_prop
-\sys_if_engine_pdftex:T
+\bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
 {
  \cs_new_protected:Npn \driver_pdf_xform_new:nnnN #1 #2 #3 #4 %name, attr, resources, box
  {
@@ -243,7 +243,7 @@
   }
 
 
-\sys_if_engine_pdftex:T
+\bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
 {
  %definition works also for luatex
  \cs_new_protected:Npx \@@_pdf_pagesattr:n #1
@@ -279,8 +279,6 @@
 
   \AtEndDocument{\@@_pdf_pagesattr_gpush:}
 }
-
-
 %</package>
 %    \end{macrocode}
 % \subsubsection{driver / pdfpageattr}
@@ -325,7 +323,7 @@
   }
 
 
-\sys_if_engine_pdftex:T
+\bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
 {
  %definition works also for luatex
  \cs_new_protected:Npx \@@_pdf_pageattr:n #1
@@ -358,7 +356,6 @@
    \tl_set:Nx #1 {\tex_the:D \tex_pdfvariable:D pageattr}
   }
 }
-
 
 %</package>
 %    \end{macrocode}
@@ -415,7 +412,7 @@
   }
 
 %to be able to test if someone tampered with the resources:
-\sys_if_engine_pdftex:T
+\bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
 {
   \cs_new_protected:Npn \driver_pdf_pageresources_get:N #1
   {
@@ -464,7 +461,7 @@
 %    \begin{macrocode}
 %<*package>
 % version for link_last which gives an int. try to get rid of the necessity if possible
-\sys_if_engine_pdftex:T
+\bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
 {
  %Push the pages attr prop to the token register:
  %should it be an internal command?
@@ -573,12 +570,10 @@
 %    \end{macrocode}
 % \section{Management code / pdf Module}
 %<@@=pdf>
-% \subsection{pdfpagesattr}
-% A token register that is added to the root pages object when the pdf is finished.
-% The following command copy more or less the driver commands but add a few tests
-% and warning if other packages or users have used the primitive commands.
+%% messages
 %    \begin{macrocode}
 %<*package>
+\msg_new:nnn {pdf}{patches}{loading~patch~code}
 \msg_new:nnnn { pdf }{ pagesattr-changed }
  {
    The~content~of~pagesattr ~has~changed.~
@@ -589,6 +584,31 @@
   primitive~\token_to_str:N\pdfpagesattr\c_space_tl or~an~equivalent~command~
   instead~of~the~expl3~interface.
  }
+\msg_new:nnnn { pdf }{ pageattr-changed }
+ {
+   The~content~of~pageattr ~has~changed.~
+   Check~if~it~is~correct.
+ }
+ {
+  This~is~probably~due~to~some~package~or~command~using~the~
+  primitive~\token_to_str:N\pdfpageattr\c_space_tl or~an~equivalent~command~
+  instead~of~the~expl3~interface.
+ }
+\msg_new:nnn
+  {pdf}
+  {setup-after-documentclass}
+  { \token_to_str:N \documentsetup\c_space_tl should~be~used~only~before~\token_to_str:N\documentclass}
+\msg_new:nnn { pdf } {object-compression-disabled}
+             {object~compression~is~not~supported~in~pdf~version~#1}
+
+%</package>
+%    \end{macrocode}
+% \subsection{pdfpagesattr}
+% A token register that is added to the root pages object when the pdf is finished.
+% The following command copy more or less the driver commands but add a few tests
+% and warning if other packages or users have used the primitive commands.
+%    \begin{macrocode}
+%<*package>
 \tl_new:N \g_@@_pagesattr_tl
 
 \cs_new_protected:Npn \pdf_pagesattr_gput:nn #1 #2
@@ -613,16 +633,6 @@
 % and warning if other packages or users have used the primitive commands.
 %    \begin{macrocode}
 %<*package>
-\msg_new:nnnn { pdf }{ pageattr-changed }
- {
-   The~content~of~pageattr ~has~changed.~
-   Check~if~it~is~correct.
- }
- {
-  This~is~probably~due~to~some~package~or~command~using~the~
-  primitive~\token_to_str:N\pdfpageattr\c_space_tl or~an~equivalent~command~
-  instead~of~the~expl3~interface.
- }
 \tl_new:N \g_@@_pageattr_tl
 
 \cs_new_protected:Npn \pdf_pageattr_gput:nn #1 #2
@@ -648,8 +658,6 @@
   \driver_pdf_pageattr_get:N \l_tmpa_tl
   \tl_gset_eq:NN \g_@@_pageattr_tl \l_tmpa_tl
  }
-
-
 %</package>
 %    \end{macrocode}
 %
@@ -747,10 +755,6 @@
 % \begin{macro}{\documentsetup}
 %    \begin{macrocode}
 %<*package>
-\msg_new:nnn
-  {pdf}
-  {setup-after-documentclass}
-  { \token_to_str:N \documentsetup\c_space_tl should~be~used~only~before~\token_to_str:N\documentclass}
 
 \NewDocumentCommand\documentsetup { m }
  {
@@ -803,8 +807,6 @@
    }
  }
 
-\msg_new:nnn { pdf } {object-compression-disabled}
-             {object~compression~is~not~supported~in~pdf~version~#1}
 %</package>
 %    \end{macrocode}
 % \end{macro}
@@ -1154,11 +1156,11 @@
 % unproblematic for now).
 %    \begin{macrocode}
 %<*package>
-\bool_if:NF \g_@@_patches_bool
+\bool_if:nT { !\g__pdf_patches_bool || \sys_if_output_dvi_p:  }
  {
   \file_input_stop:
  }
-
+\msg_info:nn{pdf}{patches}
 \AtBeginDocument
  {
   %Trying to patch pgf ...
