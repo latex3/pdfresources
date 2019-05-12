@@ -10,4 +10,5 @@ installfiles = {"*.sty","*.cls","*.def"}
 sourcefiles =  {"*.dtx","*.ins","hluatex-experimental.def"}
 
 checkruns = 2
+checkengines = {"luatex","pdftex"}
 
