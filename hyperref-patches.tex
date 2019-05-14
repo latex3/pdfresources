@@ -1,0 +1,163 @@
+\section{stuff that hyperref et all patches}
+\subsection{nameref}
+
+\label to store \@currentlabelname and \@currentHref
+
+\slabel (?) similar
+
+\@writetocindents@ (?)
+
+\@sect, \@ssect: To get the content (\NR@gettitle{#7,}\NR@gettitle{#5}) and to add 
+ \Sectionformat{#8}
+ 
+\@part, \@spart, \@chapter,  
+\M@sect (memoir?) to get the content 
+
+\LT@c@ption: to get the content
+
+\descriptionlabel: to get the content
+
+\ttl@sect@i: (titlesec): to get the content
+
+(beamer): patches section, subsection, subsubsection, theorem begin.
+
+@opargbegintheorem (?): to get content
+
+(amsthm): \@begintheorem to get the name
+
+\ref, \pageref (if hyperref is loaded) to accomodate to the larger number of arguments of label.
+
+(ifthen):\ifthenelse (for some internal problem ...)
+
+\@@vpageref: adapt to changed \newlabel arguments.
+
+(listings): \lst@MakeCaption: to get the caption contents.
+
+ 
+\subsection{hyperref driver}
+in the driver files
+
+\@ssect: to set an anchor
+
+\@schapter:  to set an anchor
+
+\@chapter
+
+\@part
+
+\@spart
+
+\subsection{hyperref.sty}
+memoir stuff -> memhfixc.sty
+
+subfigure: \sub@label (add \@currentHref to the \newlabel
+
+XR@addURL ??
+
+
+\xspaceaddexceptions{\Hy@xspace@end,\hyper@linkend,\hyper@anchorend}
+needed for new commands too?
+
+\let\texttilde\~% for some languages
+
+\url (to add links)
+
+
+shipout hook: why pdftex different? (finish doc sets info)
+
+\ltx@iffileloaded{hpdftex.def}{%
+  \AtBeginShipout{%
+    \Hy@FirstPageHook
+    \global\let\Hy@FirstPageHook\ltx@empty
+  }%
+}{%
+  \AtBeginShipoutFirst{%
+    \Hy@FirstPageHook
+  }%
+}
+\g@addto@macro\Hy@FirstPageHook{%
+  \PDF@FinishDoc
+  \global\let\PDF@FinishDoc\ltx@empty
+}
+
+
+the following can be stopped with implicit=false
+
+\item (to add number for destination names)
+
+\refstepcounter (to add anchor)
+
+\appendix (to change the H-counter)
+
+(fancyvrb) \FV@StepLineNo to add anchor
+
+(lastpage/revtex4) \lastpage@putlabel (anchor)
+
+(titlesec): \ttl@Hy@steplink, \ttl@Hy@PatchSaveWrite, \ttl@Hy@refstepcounter
+
+(titletoc) \ttl@gobblecontents
+
+(varioref) \vref@pagenum, \refstepcounter
+
+(longtable) \LT@array? \LT@start (anchor)?
+
+(amsmath): \equation, \endequation (anchors), \eqnarray, \endeqnarray, eqnarray*, endeqnarray*, subeqnarray, \endsubeqnarray, \subequations
+
+(cleveref) \@thm
+
+(amsthm) \@thm
+
+==========
+with hyperfootnotes:
+
+\@footnotetext, \@footnotemark, \@mpfootnotetext 
+
+(tabularx): \TX@endtabularx to add code for footnotes.
+
+(longtable): \LT@p@ftntext for something with footnotes
+
+(fancyvrb): \V@@footnotetext
+
+\footref
+
+\maketitle (something with foonotes)
+========
+
+\caption, \@caption: anchors
+
+(float): \float@makebox for anchor
+
+\bibcite, \@lbibitem, \@bibitem for anchors (unless natbib is loaded)
+
+(revtex) \@CITEX, \@citex
+
+(harvard) \HAR@citetoaux, \harvardcite, \harvarditem, \@harvarditem, \HAR@checkcitations
+
+(chicago) \shortciteN, \citeN, \@citedata@opt, ...
+
+(slides) \slide, \note, \overlay, ... for page anchors
+
+\addcontentsline (destination name, bookmarks code, writes a \contentsline with four arguments)
+
+\contentsline: uses fourth argument to build \Hy@tocdestname and to add a link in l@#1: 
+      \csname l@#1\endcsname{%
+        \hyper@linkstart{link}{\Hy@tocdestname}{#2}\hyper@linkend
+      }{#3}%
+      
+\@definecounter, \@newctr, \@addtoreset: adds a setup for \theH<counter>      
+
+(amsmath): \df@tag (for anchor)
+
+\@seteqlabel (only with pdftex??)
+
+(amsmath) \numberwithin for \theHcounter
+
+\Gin@setfile (if hyperfigures, makes them a destination?)
+
+\@wrindex, \@@wrindex: index stuff
+
+A number of providing H-counter for various classes/styles: foils, seminar
+
+(slidesec): a number of patches for hyperref stuff.
+
+\@setref, \@pagesetref: to get link
