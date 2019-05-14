@@ -363,8 +363,10 @@
 % We need code for ExtGState, ColorSpace, Pattern, Shading and Properties.
 % All are dictionaries which can receive entries from more than one source.
 % We follow the pgf code: for all objects are reserved which are written at end document.
-% This means that pages that uses the entries share the same resource. So removing
+% This means that normally pages that uses the entries share the same resource. So removing
 % entries makes no sense.
+% For ColorSpace (colorspace) and Properties (ocgx) there is also a need for page related
+% resources. 
 %    \begin{macrocode}
 %<*package>
  \clist_const:Nn \c_@@_pdf_pageresources_clist
