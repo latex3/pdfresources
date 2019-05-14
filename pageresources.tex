@@ -108,7 +108,7 @@ new values are stored in a prop, and at every change the register is updated. Th
 \end{verbatim}
 
 \subsection{Implementation}
-new values are stored in a prop, and at every change the register is updated. There is a test for changes so intermediate calls of the primitive can be detected and users are warned. 
+new values are stored in a prop, and at every change the register is updated. There is a test for changes so intermediate calls of the primitive can be detected and users are warned.
 
 \subsection{Uses}
 \begin{description}
@@ -144,10 +144,10 @@ It must be decided when to copy the property into pdfpageattr. Atbeginshipout?
 \item Entries:
  \begin{enumerate}
  \item \emph{ExtGState} (dict)
- \item \emph{ColorSpace} (dict)
+ \item \emph{ColorSpace} (dict), e.g. with colorspace added page wise
  \item \emph{Pattern} (dict)
  \item \emph{Shading} (dict)
- \item \emph{Properties} (dict) (maps names to objects for BDC-dictionaries)
+ \item \emph{Properties} (dict) (maps names to objects for BDC-dictionaries, done page wise in ocgx)
  \item Font (dict, automatic)
  \item XObject (dict, automatic)
  \item ProcSet (array, automatic) (obsolete)
@@ -178,10 +178,10 @@ endobj
 \subsection{Uses}
 \begin{description}
   \item[ocg] old sty, only pdftex. Add something to Properties, takes care of the rest of the resources but not of the current content of Properties.
-  \item[colorspace] Add entries to the Colorspace dict. Seems to expect that color are defined in the preamble or the first page. Unclear if it still clashes with pgf, see https://tex.stackexchange.com/a/405166/2388.
-  \item[hyperref] adds /OCView and /OCPrint to Properties, takes care of other content of pdfpageresources, but not of the content of Properties.
+  \item[colorspace] Add entries to the Colorspace dict and also /ExtGState. Seems to expect that color are defined in the preamble or the first page. Unclear if it still clashes with pgf, see https://tex.stackexchange.com/a/405166/2388. Additions to ColorSpace are page wise!
+  \item[hyperref] adds /OCView and /OCPrint to Properties, takes care of other content of pdfpageresources, but not of the content of Properties. (experimental driver uses central interface).
   \item[pdfbase] adds content to Properties, takes care of other content of pdfpageresources, but imho not of the content of Properties. Will probably have a problem if the value of Properties is an indirect object.
-  \item[transparent] adds content to ExtGState \verb+/ExtGState<</TRP1<</ca 1/CA 1>>>>+. Tries to be compatible with pgf.
+  \item[transparent] adds content to ExtGState \verb+/ExtGState<</TRP1<</ca 1/CA 1>>>>+. Tries to be compatible with pgf. (patch added to pdfresources, but need to be addressed properly in the sty).
   \item[ocg-p] similar to ocg
   \item[pdfpagediff] \verb+\edef\next{\pdfpageresources={/Properties \layersnames}}+
   \item[sesamanuel.cls] \verb+/ExtGState \@extgs\space 0 R +, saves rest of resources.
@@ -194,6 +194,7 @@ endobj
 \subsection{Discussion}
 Every of the five dictionaries ExtGState, ColorSpace, Pattern, Shading, Properties can receive values from more than one package and must combine them. So every of this entries needs its own properties and commands to add to the property. Packages can avoid duplicate keys by suitable name spaces.
 
+At least two should be handled pagewise.
 It must be decided when to write the properties to pdfpageresources.
 
 \section{pdfcatalog}
@@ -230,7 +231,7 @@ endobj
   \item \emph{OutputIntents} (array of dict)
   An array of output intent dictionaries describing the color characteristics of output devices on which the document might be rendered
   \item \emph{MarkInfo} (dict) relevant for tagging
-  \item PageLabels (number tree /indirect object)
+  \item \emph{PageLabels} (number tree /indirect object)
   \item Names (dict)
   \item Dests (dict, must be an indirect reference)
 
@@ -271,7 +272,7 @@ endobj
   \item[cooltooltips] \verb+/AcroForm \the\pdflastobj\space 0 R + (a dict)
   \item[pdfnotiz] /AcroForm (in sync with cooltooltips)
   \item[dccpaper-base] /Metadata (XML-stream)
-  \item[hyperref] /OCProperties, /PageMode, /URI, openaction goto page, /ViewerPreferences<<lots of content>>, /Lang, /AcroForm (not in sync with cooltooltips),
+  \item[hyperref] /OCProperties, /PageMode, /URI, openaction goto page, /ViewerPreferences<<lots of content>>, /Lang, /AcroForm (not in sync with cooltooltips), /PageLabels
   \item[hyperxmp] /Metadata
   \item[jmlrbook.cls] /OutputIntents, /Metadata
   \item[pdfbase] /AcroForm
