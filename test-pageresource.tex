@@ -1,0 +1,21 @@
+\documentclass[12pt,oneside]{article}
+\usepackage[patches]{pdfresources}
+\usepackage{tikz}
+\usepackage{transparent}
+\ExplSyntaxOn
+\driver_pdf_compresslevel:n {0}
+\driver_pdf_compress_objects:n {0}
+%test local resource:
+\driver_pdf_pageresources_gput:nnnn{1}{ColorSpace}{abc}{/Deviceblub}
+%\driver_pdf_catalog_gput:nn {Lang}
+
+\ExplSyntaxOff
+
+\begin{document}
+abc
+\newpage
+blblb
+
+\newpage
+clclcl \texttransparent{0.3}{bbbbbb}
+\end{document}

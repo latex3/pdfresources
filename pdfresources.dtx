@@ -34,6 +34,7 @@
 %<@@=pdf>
 %<*package>
 \RequirePackage{xparse}
+\RequirePackage{tmpl3shipout}
 \ProvidesExplPackage {pdfresources} {2019-03-17} {0.1}
   {experimental pdf-resource management}
 \DeclareOption { debug }{\msg_redirect_module:nnn {pdf}{warning}{error}}
@@ -362,58 +363,46 @@
 % \subsection{pdfpageresources}
 % We need code for ExtGState, ColorSpace, Pattern, Shading and Properties.
 % All are dictionaries which can receive entries from more than one source.
-% We follow the pgf code: for all objects are reserved which are written at end document.
-% This means that normally pages that uses the entries share the same resource. So removing
-% entries makes no sense.
-% For ColorSpace (colorspace) and Properties (ocgx) there is also a need for page related
-% resources. 
+% For at least ColorSpace (colorspace) and Properties (ocgx/tagpdf) there is also a need for page related
+% resources, so we have to check on every page if a local resource list for this page
+% exists. A global dictionary can be empty but as this is known only at the end of the document
+% it would require a two-pass compilation to test it and the overhead is small so we ignore this.
+% Example for ColorSpace:
+%% Global resources are stored in g_@@_pdf_pageresources_ColorSpace_prop
+%% An object {g_@@_pdf_pageresources_ColorSpace_obj} is reserved
+%% At the end of the document the obj is written to the pdf with the content of the prop:
+%% \driver_pdf_object_write:nn { g_@@_pdf_pageresources_ColorSpace_obj }
+%%           {
+%%             \prop_map_function:cN { g_@@_pdf_pageresources_#1_prop} \driver_pdf_dict_item:nn
+%%           }
+%% local resources for page N are stored in g_@@_pdf_pageresources_N_ColorSpace_prop
+%% An object {g_@@_pdf_pageresources_N_ColorSpace_obj} is reserved
+%% At the end of the document first the global then the local property is
+%% added to a temporary prop:
+%% \prop_set_eq:Nc \g_tmpa_prop { g_@@_pdf_pageresource_ColorSpace_prop}
+%% \prop_map_inline:cn { g_@@_pdf_pageresource_N_ColorSpace_prop}
+%% {\prop_gput:Nnn \g_tmpa_prop {#1}{#2}}
+%%
+%% then obj is written to the pdf with the combined content of the global and the
+%% local prop:
+%% \driver_pdf_object_write:nn { g_@@_pdf_pageresources_N_ColorSpace_obj }
+%%           {
+%%             \prop_map_function:cN \g_tmpa_prop \driver_pdf_dict_item:nn
+%%           }
+%% This means that local entries can overwrite global entries, it is up to the user to avoid this
+%% with sensible names spaces.
+%% At every shipout we check if g_@@_pdf_pageresource_N_ColorSpace_prop exists.
+%% (That's probably more effective than trying to keep a list of pages with local settings.)
+%% If yes we put "ColorSpace = objnum  of g_@@_pdf_pageresources_N_ColorSpace_obj" into
+%% \g_@@_pdf_pageresources_prop and push this into pdfpageresources
+%% If not we put "ColorSpace = objnum of g_@@_pdf_pageresources_ColorSpace_obj" into
+%% \g_@@_pdf_pageresources_prop and push this into pdfpageresources
+
+
 %    \begin{macrocode}
 %<*package>
- \clist_const:Nn \c_@@_pdf_pageresources_clist
-  {
-   ExtGState,
-   ColorSpace,
-   Pattern,
-   Shading,
-   Properties
-  }
-
- \prop_new:N \g_@@_pdf_pageresources_prop
-
- \clist_map_inline:Nn \c_@@_pdf_pageresources_clist
-  {
-   \prop_new:c {g_@@_pdf_page_#1_prop}
-   \driver_pdf_object_new:nn {g_@@_pdf_page_#1_obj}{dict}
-   \bool_new:c {g_@@_pdf_page_#1_bool}
-  }
-
-
-
-% setter: add test for existence?? #1 is always the "name"
-\cs_new_protected:Npn \driver_pdf_pageresources_gput:nnn #1 #2 #3
-  {
-   \prop_gput:cnn { g_@@_pdf_page_#1_prop} { #2 }{ #3 }
-   \bool_if:cF {g_@@_pdf_page_#1_bool}
-    {
-     \prop_gput:Nnx \g_@@_pdf_pageresources_prop
-      {#1}
-      {\driver_pdf_object_ref:n {g_@@_pdf_page_#1_obj}}
-      \@@_pdf_pageresources_gpush:
-    }
-   \bool_gset_true:c {g_@@_pdf_page_#1_bool}
-  }
-
-%
-%% push to the register
-\cs_new_protected:Npn \@@_pdf_pageresources_gpush:
-  {
-    \exp_args:NNx \tex_global:D \@@_pdf_pageresources:n
-    {
-     \prop_map_function:NN \g_@@_pdf_pageresources_prop \driver_pdf_dict_item:nn
-    }
-  }
-
-%to be able to test if someone tampered with the resources:
+% lowlevel stuff
+% to be able to test if someone tampered with the resources a command to retrieve the content:
 \bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
 {
   \cs_new_protected:Npn \driver_pdf_pageresources_get:N #1
@@ -430,6 +419,7 @@
   }
 }
 
+% the command to fill the register
 \bool_if:nT { \sys_if_engine_pdftex_p: || \sys_if_engine_luatex_p: }
 {
  \cs_new_protected:Npx \@@_pdf_pageresources:n #1
@@ -442,20 +432,130 @@
   }
 }
 
-\AtEndDocument
- {
-   \clist_map_inline:Nn \c_@@_pdf_pageresources_clist
+% push a prop to the register:
+\cs_new_protected:Npn \@@_pdf_pageresources_gpush:N #1
+  {
+    \exp_args:NNx \tex_global:D \@@_pdf_pageresources:n
     {
-      \bool_if:cT { g_@@_pdf_page_#1_bool }
-       {
-        \exp_args:Nnx
-         \driver_pdf_object_write:nn { g_@@_pdf_page_#1_obj }
-           {
-             \prop_map_function:cN { g_@@_pdf_page_#1_prop} \driver_pdf_dict_item:nn
-           }
-       }
+     \prop_map_function:NN #1 \driver_pdf_dict_item:nn
     }
+  }
+%
+
+% management code
+% the list of standard resources which are handle with objects
+ \clist_const:Nn \c_@@_pdf_pageresources_clist
+  {
+   ExtGState,
+   ColorSpace,
+   Pattern,
+   Shading,
+   Properties
+  }
+
+\prop_new:N \g_@@_pdf_pageresources_prop
+
+% the global objects
+ \clist_map_inline:Nn \c_@@_pdf_pageresources_clist
+  {
+   \prop_new:c {g_@@_pdf_pageresources_#1_prop}
+   \driver_pdf_object_new:nn {g_@@_pdf_pageresources_#1_obj}{dict}
+  }
+
+% setter:  #1 is the name of the resource
+\cs_new_protected:Npn \driver_pdf_pageresources_gput:nnn #1 #2 #3
+  {
+   \prop_gput:cnn { g_@@_pdf_pageresources_#1_prop} { #2 }{ #3 }
+  }
+
+% local resources
+% a general bool if local resources as been used at all:
+% saves use to map through the five resources if not
+
+\bool_new:N \g_@@_pdf_pageresources_local_bool
+
+% setter for page wise settings:
+% #1 is the absolute page number, #2 the resource name, #3 the key, #4 the content
+\cs_new_protected:Npn \driver_pdf_pageresources_gput:nnnn #1 #2 #3 #4
+  {
+   \prop_if_exist:cF { g_@@_pdf_pageresources_#1_#2_prop }
+    {
+     \prop_new:c { g_@@_pdf_pageresources_#1_#2_prop }
+     \driver_pdf_object_new:nn {g_@@_pdf_pageresources_#1_#2_obj}{dict}
+    }
+   \prop_gput:cnn { g_@@_pdf_pageresources_#1_#2_prop} { #3 }{ #4 }
+   \bool_gset_true:N \g_@@_pdf_pageresources_local_bool
+  }
+%
+% The shipout code:
+%
+
+\cs_new_protected:Npn \@@_pdf_pageresources_shipout:n #1 %#1 the page number
+ {
+  \clist_map_inline:Nn \c_@@_pdf_pageresources_clist
+  {
+   \prop_if_exist:cTF { g_@@_pdf_pageresources_#1_##1_prop }
+   {
+    \prop_gput:Nnx { \g_@@_pdf_pageresources_prop } {##1}
+    {
+      \driver_pdf_object_ref:n { g_@@_pdf_pageresources_#1_##1_obj }
+    }
+   }
+   {
+    \prop_gput:Nnx { \g_@@_pdf_pageresources_prop } {##1}
+    {
+      \driver_pdf_object_ref:n { g_@@_pdf_pageresources_##1_obj }
+    }
+   }
+  }
+  \@@_pdf_pageresources_gpush:N \g_@@_pdf_pageresources_prop
  }
+
+
+\hook_post_push:nn {shipout}
+{
+ \shipout_page_add:nn { fg }
+  {
+   \exp_args:Nx  \@@_pdf_pageresources_shipout:n {\int_eval:n { \g_shipout_page_int }}
+  }
+}
+
+\AtEndDocument % must perhaps be even later??
+ {
+   % write the global objects:
+  \clist_map_inline:Nn \c_@@_pdf_pageresources_clist
+  {
+   \exp_args:Nnx
+     \driver_pdf_object_write:nn { g_@@_pdf_pageresources_#1_obj }
+     {
+      \prop_map_function:cN { g_@@_pdf_pageresources_#1_prop} \driver_pdf_dict_item:nn
+     }
+    }
+   % write the local objects
+  \bool_if:NT \g_@@_pdf_pageresources_local_bool
+  {
+   \clist_map_inline:Nn \c_@@_pdf_pageresources_clist
+   {
+    \int_step_inline:nn {\g_shipout_page_int}
+    {
+     \prop_if_exist:cT { g_@@_pdf_pageresources_##1_#1_prop }
+     {
+      \prop_set_eq:Nc \g_tmpa_prop { g_@@_pdf_pageresources_#1_prop}
+      \prop_map_inline:cn { g_@@_pdf_pageresources_##1_#1_prop}
+      {
+       \prop_gput:Nnn \g_tmpa_prop {####1}{####2}
+      }
+      \exp_args:Nnx
+       \driver_pdf_object_write:nn { g_@@_pdf_pageresources_##1_#1_obj }
+       {
+        \prop_map_function:NN \g_tmpa_prop \driver_pdf_dict_item:nn
+       }
+     }
+    }
+   }
+  }
+ }
+
 
 %</package>
 %    \end{macrocode}
