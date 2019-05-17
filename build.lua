@@ -7,7 +7,7 @@ bundle  = ""
 module  = "pdfresources"
 
 installfiles = {"*.sty","*.cls","*.def"}
-sourcefiles =  {"*.dtx","*.ins","hluatex-experimental.def"}
+sourcefiles =  {"*.dtx","*.ins","hluatex-experimental.def","tmpl3shipout.sty"}
 
 checkruns = 2
 checkengines = {"luatex","pdftex"}
