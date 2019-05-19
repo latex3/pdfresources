@@ -136,7 +136,6 @@
 %    \begin{macrocode}
 %<*package>
 %some variants
-\cs_generate_variant:Nn\driver_pdf_object_write:nn {nx}
 % helper command to output a key + value of a prop as needed in a dict.
 % name? explicit spaces?
 % not internal as perhaps needed also by users?
@@ -401,24 +400,37 @@
 
 %    \begin{macrocode}
 %<*package>
+%message
+\msg_new:nnnn{driver}{pageresources-changed}
+ {
+   The~content~of~pageresources~has~changed~on~the~absolute~page~#1.~
+   Check~if~it~is~correct.
+ }
+ {
+  This~is~probably~due~to~some~package~or~command~using~the~
+  primitive~\token_to_str:N\pdfresources\c_space_tl or~an~equivalent~command~
+  instead~of~the~expl3~interface.
+ }
 % lowlevel stuff
 % to be able to test if someone tampered with the resources a command to retrieve the content:
 \bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
 {
-  \cs_new_protected:Npn \driver_pdf_pageresources_get:N #1
+  \cs_new_protected:Npn \driver_pdf_pageresources_gget:N #1
   {
-   \tl_set:Nx #1 {\tex_the:D \tex_pdfpageresources:D}
+   \tl_gset:Nx #1 {\tex_the:D \tex_pdfpageresources:D}
   }
 }
 
 \sys_if_engine_luatex:T
 {
-  \cs_new_protected:Npn \driver_pdf_pageresources_get:N #1
+  \cs_new_protected:Npn \driver_pdf_pageresources_gget:N #1
   {
-   \tl_set:Nx #1 {\tex_the:D \tex_pdfvariable:D pageresources}
+   \tl_gset:Nx #1 {\tex_the:D \tex_pdfvariable:D pageresources}
   }
 }
-
+\tl_new:N\g_@@_pdf_pageresources_tl
+\tl_new:N\g_@@_pdf_pageresources_tmp_tl
+\driver_pdf_pageresources_gget:N \g_@@_pdf_pageresources_tl
 % the command to fill the register
 \bool_if:nT { \sys_if_engine_pdftex_p: || \sys_if_engine_luatex_p: }
 {
@@ -492,6 +504,11 @@
 
 \cs_new_protected:Npn \@@_pdf_pageresources_shipout:n #1 %#1 the page number
  {
+  \driver_pdf_pageresources_gget:N \g_@@_pdf_pageresources_tmp_tl
+  \tl_if_eq:NNF \g_@@_pdf_pageresources_tmp_tl \g_@@_pdf_pageresources_tl
+   {
+    \msg_warning:nnn{driver}{pageresources-changed}{#1} %hm global/local ??
+   }
   \clist_map_inline:Nn \c_@@_pdf_pageresources_clist
   {
    \prop_if_exist:cTF { g_@@_pdf_pageresources_#1_##1_prop }
@@ -509,6 +526,7 @@
    }
   }
   \@@_pdf_pageresources_gpush:N \g_@@_pdf_pageresources_prop
+  \driver_pdf_pageresources_gget:N \g_@@_pdf_pageresources_tl
  }
 
 
@@ -762,7 +780,14 @@
  }
 %</package>
 %    \end{macrocode}
-%
+% \subsection{page resources}
+% This mostly makes the driver commands available under the pdf module name.
+%    \begin{macrocode}
+%<*package>
+\cs_set_eq:NN \pdf_pageresources_gput:nnn \driver_pdf_pageresources_gput:nnn
+\cs_set_eq:NN \pdf_pageresources_gput:nnnn \driver_pdf_pageresources_gput:nnnn
+%</package>
+%    \end{macrocode}
 % \subsection{The info dictionary}
 % The info dictionary is filled by e.g. \cs{pdfinfo}. Multiple appearances of
 % \cs{pdfinfo} are concatenated, so one could end with multiple /Title or /Author entries.
