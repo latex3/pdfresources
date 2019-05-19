@@ -1,0 +1,48 @@
+% !Mode:: "TeX:UTF-8:Main"
+\RequirePackage[patches]{pdfresources}
+\documentclass{beamer}
+
+\usepackage{tikz,xcolor,l3str-convert}
+\usepackage{transparent}
+\ExplSyntaxOn
+\driver_pdf_compresslevel:n {0}
+\driver_pdf_compress_objects:n {0}
+%test local resource:
+%\driver_pdf_pageresources_gput:nnnn{1}{ColorSpace}{abc}{/Deviceblub}
+
+\driver_pdf_object_new:nn {spotcolor_obj}{array}
+\cs_generate_variant:Nn \driver_pdf_object_write:nn {nx}
+\str_set_convert:Nnnn \l_tmpa_str {BarTone~555~GN}{utf8}{utf8/name}
+\str_show:N\l_tmpa_str
+\driver_pdf_object_write:nx{spotcolor_obj}
+{
+  /Separation~/\l_tmpa_str~ /DeviceCMYK
+      << /C0~[0~0~0~0] /FunctionType~2 /C1 [0.8~0.2~0.5~0.3] /Domain [0~1] /N~1 >>
+}
+\cs_generate_variant:Nn \driver_pdf_pageresources_gput:nnnn {nnnx}
+\driver_pdf_pageresources_gput:nnnx{1}{ColorSpace}{foo}{\driver_pdf_object_ref:n{spotcolor_obj}}
+\ExplSyntaxOff
+\begin{document}
+\begin{frame}
+\color{red}
+Hello
+\pdfliteral{/foo cs /foo CS 1 sc 1 SC}
+world
+\end{frame}
+
+\begin{frame}
+\color{red}
+Hello
+\pdfliteral{/foo cs /foo CS 1 sc 1 SC}
+world
+\end{frame}
+
+\end{document}
+
+abc
+\newpage
+blblb
+
+\newpage
+clclcl \texttransparent{0.3}{bbbbbb}
+\end{document} 

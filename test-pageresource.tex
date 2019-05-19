@@ -1,7 +1,8 @@
 % !Mode:: "TeX:UTF-8:Main"
 \documentclass[12pt,oneside]{article}
 \usepackage[patches]{pdfresources}
-\usepackage{tikz,xcolor,l3str-convert}
+\usepackage{tikz,colorspace}
+\usepackage{l3str-convert}
 \usepackage{transparent}
 \ExplSyntaxOn
 \driver_pdf_compresslevel:n {0}
@@ -11,21 +12,48 @@
 
 \driver_pdf_object_new:nn {spotcolor_obj}{array}
 \cs_generate_variant:Nn \driver_pdf_object_write:nn {nx}
+
 \str_set_convert:Nnnn \l_tmpa_str {BarTone~555~GN}{utf8}{utf8/name}
-\str_show:N\l_tmpa_str
+
 \driver_pdf_object_write:nx{spotcolor_obj}
 {
   /Separation~/\l_tmpa_str~ /DeviceCMYK
       << /C0~[0~0~0~0] /FunctionType~2 /C1 [0.8~0.2~0.5~0.3] /Domain [0~1] /N~1 >>
 }
-\cs_generate_variant:Nn \driver_pdf_pageresources_gput:nnnn {nnnx}
-\driver_pdf_pageresources_gput:nnnx{1}{ColorSpace}{foo}{\driver_pdf_object_ref:n{spotcolor_obj}}
+\cs_generate_variant:Nn \pdf_pageresources_gput:nnnn {nnnx}
+\pdf_pageresources_gput:nnnx{1}{ColorSpace}{foo}{\driver_pdf_object_ref:n{spotcolor_obj}}
+
+
+% colorspace is basically broken. One can readd the object to the ColorSpace but to really work
+% the package must be rewritten or avoided ...
+\cs_new:Npn \uf_storespotcolor_aux:w /#1~#2\q_stop
+ {
+  \pdf_pageresources_gput:nnn {ColorSpace}{#1}{#2}
+ }
+
+\NewDocumentCommand\storespotcolor{m}
+ {
+  \exp_last_unbraced:Nx \uf_storespotcolor_aux:w  {\str_use:c{spc@ir@#1}} \q_stop
+ }
+
+
 \ExplSyntaxOff
+\definespotcolor{spot}{Spotcolor}{0.85 0.75 0 0}
+\storespotcolor {spot}
+
 \begin{document}
-\color{red} 
+
+{%\color{red}
 Hello
 \pdfliteral{/foo cs /foo CS 1 sc 1 SC}
-world
+world}
+
+\newpage
+hello
+\pdfliteral{/foo cs /foo CS 1 sc 1 SC}
+abc
+
+\newpage \color{spot} xxxxxxxxxxxx
 \end{document}
 
 abc
