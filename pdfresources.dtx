@@ -786,6 +786,8 @@
 %<*package>
 \cs_set_eq:NN \pdf_pageresources_gput:nnn \driver_pdf_pageresources_gput:nnn
 \cs_set_eq:NN \pdf_pageresources_gput:nnnn \driver_pdf_pageresources_gput:nnnn
+\cs_generate_variant:Nn \pdf_pageresources_gput:nnnn {nnnx}
+\cs_generate_variant:Nn \pdf_pageresources_gput:nnn {nnx}
 %</package>
 %    \end{macrocode}
 % \subsection{The info dictionary}
@@ -1343,6 +1345,41 @@
     }
   }
  }
+
+%colorspace.sty
+% rather difficult as no real places to inject patches
+% at first a try to avoid that it's ExtGState is missing:
+% it can not be avoided to recreate the objects (and so to get duplicates)
+% as colorspace uses temporary macros whose contents is lost.
+\AtEndPreamble
+{
+ \tl_if_exist:NT \spc@op
+ {
+  \driver_pdf_object_new:nn  {__spc_extgstate_op_false}{dict}
+  \driver_pdf_object_write:nn
+   {__spc_extgstate_op_false}
+   {/Type /ExtGState~/op~false~/OP~false}
+  \pdf_pageresources_gput:nnn
+   {ExtGState}
+   {SPCko}
+   {\driver_pdf_object_ref:n {__spc_extgstate_op_false}}
+  \driver_pdf_object_new:nn  {__spc_extgstate_op_true0}{dict}
+  \driver_pdf_object_write:nn{__spc_extgstate_op_true0}
+   {/Type /ExtGState~/op~true~/OP~true~/OPM~0}%
+  \pdf_pageresources_gput:nnn
+   {ExtGState}
+   {SPCmz}
+   {\driver_pdf_object_ref:n {__spc_extgstate_op_true0}}
+  \driver_pdf_object_new:nn  {__spc_extgstate_op_true1}{dict}
+  \driver_pdf_object_write:nn{__spc_extgstate_op_true1}
+   {/Type /ExtGState~/op~true~/OP~true~/OPM~1}%
+  \pdf_pageresources_gput:nnn
+   {ExtGState}
+   {SPCop}
+   {\driver_pdf_object_ref:n {__spc_extgstate_op_true1}}
+ \def\spc@Pageresources#1{}
+ }
+}
 
 %</package>
 %    \end{macrocode}
