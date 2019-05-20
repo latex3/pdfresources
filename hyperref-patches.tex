@@ -7,11 +7,11 @@
 
 \@writetocindents@ (?)
 
-\@sect, \@ssect: To get the content (\NR@gettitle{#7,}\NR@gettitle{#5}) and to add 
+\@sect, \@ssect: To get the content (\NR@gettitle{#7,}\NR@gettitle{#5}) and to add
  \Sectionformat{#8}
- 
-\@part, \@spart, \@chapter,  
-\M@sect (memoir?) to get the content 
+
+\@part, \@spart, \@chapter,
+\M@sect (memoir?) to get the content
 
 \LT@c@ption: to get the content
 
@@ -33,7 +33,7 @@
 
 (listings): \lst@MakeCaption: to get the caption contents.
 
- 
+
 \subsection{hyperref driver}
 in the driver files
 
@@ -110,7 +110,7 @@ the following can be stopped with implicit=false
 ==========
 with hyperfootnotes:
 
-\@footnotetext, \@footnotemark, \@mpfootnotetext 
+\@footnotetext, \@footnotemark, \@mpfootnotetext
 
 (tabularx): \TX@endtabularx to add code for footnotes.
 
@@ -139,12 +139,12 @@ with hyperfootnotes:
 
 \addcontentsline (destination name, bookmarks code, writes a \contentsline with four arguments)
 
-\contentsline: uses fourth argument to build \Hy@tocdestname and to add a link in l@#1: 
+\contentsline: uses fourth argument to build \Hy@tocdestname and to add a link in l@#1:
       \csname l@#1\endcsname{%
         \hyper@linkstart{link}{\Hy@tocdestname}{#2}\hyper@linkend
       }{#3}%
-      
-\@definecounter, \@newctr, \@addtoreset: adds a setup for \theH<counter>      
+
+\@definecounter, \@newctr, \@addtoreset: adds a setup for \theH<counter>
 
 (amsmath): \df@tag (for anchor)
 
@@ -160,4 +160,19 @@ A number of providing H-counter for various classes/styles: foils, seminar
 
 (slidesec): a number of patches for hyperref stuff.
 
-\@setref, \@pagesetref: to get link
+\@setref, \@pagesetref: to get link 
+
+\section{Escaping in the drivers}
+
+\pdf@escapestring -> \Hy@pstringdef\Hy@pstringDest{\HyperDestNameFilter{#1}}
+
+\EdefEscapeName
+
+\Hy@escapeform?? (probably \pdfescapestring but ...
+
+\HyPsd@XeTeXBigCharstrue
+    \pdfstringdef\Hy@gtemp#1%
+
+ \pdfstringdef
+   \HyPsd@ConvertToUnicode#1%
+      \ifx\HyPsd@pdfencoding\HyPsd@pdfencoding@auto   

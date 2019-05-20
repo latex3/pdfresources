@@ -727,9 +727,58 @@
   { \token_to_str:N \documentsetup\c_space_tl should~be~used~only~before~\token_to_str:N\documentclass}
 \msg_new:nnn { pdf } {object-compression-disabled}
              {object~compression~is~not~supported~in~pdf~version~#1}
+\msg_new:nnn { pdf } {catalog-special}
+             {values~to~the~catalog~entry~#1~should~be~added~with~\token_to_str:N\pdf_catalog_ #1_gput:nn}
 
 %</package>
 %    \end{macrocode}
+% \subsection{the pdfcatalog}
+% The catalog is a dictionary whose entries have varying requirements regarding the
+% pdf management. Some entries (like /Lang) are simple values where the last setting can
+% simply win, other like /OutputIntents are dictionaries which can be filled from more than
+% one source. /AF is even an array of dictionaries.
+% There is probably no way to test what has already been added to the catalog,
+% so doublettes can only be avoided with ``don't do it''.
+% \subsubsection{Simple values}
+% Simple values can be added with \cs{\pdf_catalog_gput:nn}. This will add the value to
+% a prop. The prop is then pushed to the catalog at the end of the document.
+% Entries which can be added like this are
+% \begin{description}
+% \item[Version]  a version as name, e.g. \texttt{/1.7}
+% \item[PageMode] (name: /UseNone, /UseOutlines, /UseThumbs, /FullScreen, /UseOC (PDF 1.5),
+%   /UseAttachments (PDF 1.6)
+% \item[MarkInfo] a dictionary with up to three entries, whose values are booleans (\texttt{true}
+% or \texttt{false}). The default values of all always \texttt{false}. The dictionary should be set
+% in one go by whatever package is handling tagging. Example\\
+%  \verb+<</Marked true /UserProperties true /Suspects true>>+
+%  \item[PageLayout] (name: one of /SinglePage, /OneColumn,
+%  /TwoColumnLeft, /TwoColumnRight, /TwoPageLeft (PDF 1.5), /TwoPageRight (PDF 1.5)
+%  \item[Outlines] a indirect reference (x 0 R) to an object.
+%  \item[OpenAction] array (e.g. \verb+[page /Fit]+ or dictionary \verb+<</Type /Action /S /GoTo /D /somedest>>)
+%  \item[URI] dict, e.g. \verb+<</S/URI /URI (someurl)>>+
+%  \item[StructTreeRoot] a dict (normally an indirect reference to a dict),
+%   the package doing the tagging should create this.
+%  \item[Lang] (string, e.g. (de-DE))
+%  \item[NeedsRendering] (boolean, pdf 1.7)
+% \end{description}
+%    \begin{macrocode}
+%<*package>
+\prop_new:N \g_@@_pdf_catalog_prop
+\cs_new_protected:Npn \pdf_catalog_gput:nn #1 #2 %#1 name, #2 value
+ {
+  % Add later: test for the names that should be handled specially
+  \prop_gput:Nnn \g_@@_pdf_catalog_prop {#1}{#2}
+ }
+%</package>
+%    \end{macrocode}
+%%% open: Collection, OCProperties, AcroForm, Metadata, ViewerPreferences, OutputIntents, PageLabels, Names,
+%% Dests, AF (array of dictionaries, pdf 2.0, associated files, important for accessibility),
+%% Threads, AA (dict, additional-actions),
+%% open not so important:SpiderInfo (dict), PieceInfo (dict), (dict, pdf 1.5, permissions), Legal (dict, pdf 1.5)
+%% Requirements (array, pdf 1.7), Extensions (dict, pdf 2.0), DSS (dict, pdf 2.0),
+%% DPartRoot, (dict, pdf 2.0)
+% \subsubsection{catalog, special cases}
+%
 % \subsection{pdfpagesattr}
 % A token register that is added to the root pages object when the pdf is finished.
 % The following command copy more or less the driver commands but add a few tests
