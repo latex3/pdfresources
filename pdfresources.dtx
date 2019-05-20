@@ -542,7 +542,8 @@
 %\AtEndDocument % must perhaps be even later??
 %
 \RequirePackage{etoolbox}
-\AfterEndDocument
+\AfterEndDocument %works better
+% Alternative?
 %\RequirePackage{atenddvi}
 %\AtEndDvi
  {
@@ -560,8 +561,8 @@
   {
    \clist_map_inline:Nn \c_@@_pdf_pageresources_clist
    {
-    \int_step_inline:nn {\g_shipout_page_int}
-    {
+    \int_step_inline:nn {\g_shipout_page_int} %<---- isn't the lastpage number with \AtEndDocument when floats are involved
+    {%\tl_set:Nn\l_tmpa_tl{##1}\tl_show:N\l_tmpa_tl
      \prop_if_exist:cT { g_@@_pdf_pageresources_##1_#1_prop }
      {
       \prop_set_eq:Nc \g_tmpa_prop { g_@@_pdf_pageresources_#1_prop}
