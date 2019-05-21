@@ -9,7 +9,7 @@
   [2019/04/07 v0.2 %
   Hyperref driver for luaTeX]
 \RequirePackage{xparse,etoolbox}
-
+\RequirePackage{l3str-convert,pdfresources}
 %%\Hy@VersionCheck{hluatex.def}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \ExplSyntaxOn
@@ -205,15 +205,28 @@
     \HyPL@SetPageLabels
   }%
 \fi
-%UF removed manual Hy@pstringdef definition, as \pdf@escapestring should be always defined
-%if needed a kernel command should be provided for other drivers ...
-  \def\Hy@pstringdef#1#2{%
-    \begingroup
-      \edef~{\string~}%
-      \xdef\Hy@gtemp{\pdf@escapestring{#2}}%
-    \endgroup
-    \let#1\Hy@gtemp
-  }%
+%UF replace Hy@pstringdef definition.
+\ExplSyntaxOn
+\cs_new:Npn \__hyp_pstringdef:Nn #1 #2
+{
+ \group_begin:
+ \char_set_catcode_other:N \~
+ \char_set_active_eq:NN \~ \c_tilde_str
+ \char_set_catcode_active:N \~
+ \exp_args:NNx % or only o?
+ \str_gset_convert:Nnnn \g_tmpa_str {#2}{}{utf8/string} %utf8 because of hyperref
+ \group_end:
+ \str_set_eq:NN#1 \g_tmpa_str
+}
+\cs_set_eq:NN\Hy@pstringdef \__hyp_pstringdef:Nn
+\ExplSyntaxOff
+%  \def\Hy@pstringdef#1#2{%
+%    \begingroup
+%      \edef~{\string~}%
+%      \xdef\Hy@gtemp{\pdf@escapestring{#2}}%
+%    \endgroup
+%    \let#1\Hy@gtemp
+%  }%
 \providecommand*{\XR@ext}{pdf}
 \Hy@setbreaklinks{true}
 \def\HyPat@ObjRef{%
@@ -1397,8 +1410,16 @@
 }
 \ExplSyntaxOff
 \providecommand*{\Fld@pageobjref}{}
-\begingroup\expandafter\expandafter\expandafter\endgroup
-\expandafter\ifx\csname pdf@escapestring\endcsname\relax
+\ifcsname pdf@escapestring\endcsname
+  \def\Hy@escapeform#1{%
+    \ifHy@pdfescapeform
+      \let\Hy@escapestring\pdfescapestring
+    \else
+      \let\Hy@escapestring\@firstofone
+    \fi
+  }%
+  \Hy@escapeform{}%
+\else
   \let\Hy@escapestring\@firstofone
   \def\Hy@escapeform#1{%
     \ifHy@pdfescapeform
@@ -1429,15 +1450,6 @@
       }%
     \fi
   }%
-\else
-  \def\Hy@escapeform#1{%
-    \ifHy@pdfescapeform
-      \let\Hy@escapestring\pdfescapestring
-    \else
-      \let\Hy@escapestring\@firstofone
-    \fi
-  }%
-  \Hy@escapeform{}%
 \fi
 \def\PDFForm@Name{%
   \PDFForm@@Name\Fld@name
