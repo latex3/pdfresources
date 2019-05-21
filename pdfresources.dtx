@@ -777,19 +777,93 @@
  }
 %</package>
 %    \end{macrocode}
-%%% open: Collection, OCProperties, AcroForm, Metadata, ViewerPreferences, OutputIntents, PageLabels, Names,
+%%% open: Collection, OCProperties, AcroForm, Metadata, ViewerPreferences, PageLabels, Names,
 %% Dests, AF (array of dictionaries, pdf 2.0, associated files, important for accessibility),
 %% Threads, AA (dict, additional-actions),
 %% open not so important:SpiderInfo (dict), PieceInfo (dict), (dict, pdf 1.5, permissions), Legal (dict, pdf 1.5)
 %% Requirements (array, pdf 1.7), Extensions (dict, pdf 2.0), DSS (dict, pdf 2.0),
 %% DPartRoot, (dict, pdf 2.0)
+%% resolved: OutputIntents
 % \subsubsection{catalog, special cases}
-%
+% \paragraph{OCProperties}
+%  This is a dictionary with three entries:
+%  \begin{description}
+%  \item[/OCGS] (required) An array of indirect references, access needed for more than one package probably
+%  \item[/D] (required)    a dict (at best as indirect reference) to the default configuration
+%  \item[/Configs] (optional) an array of indirect references to more configurations.
+%  \end{description}
+%  The /D entry is also a config, so it can be the first from a seq.
+%    \begin{macrocode}
+%<*package>
+\seq_new:N \g_@@_catalog_OCProperties_OCGS_seq
+\seq_new:N \g_@@_catalog_OCProperties_Configs_seq
+
+\cs_new_protected:Npn\pdf_catalog_OCProperties_OCGS_gput:n #1
+ {
+  \seq_gput_right:Nn \g_@@_catalog_OCProperties_OCGS_seq {#1}
+ }
+
+\cs_new_protected:Npn\pdf_catalog_OCProperties_Configs_gput:n #1
+ {
+  \seq_gput_right:Nn \g_@@_catalog_OCProperties_Configs_seq {#1}
+ }
+
+\cs_new_protected:Npn\pdf_catalog_OCProperties_Configs_default_gput:n #1
+ {
+  \seq_gput_left:Nn \g_@@_catalog_OCProperties_Configs_seq {#1}
+ }
+
+\cs_new_protected:Npn\@@_catalog_OCProperties_gpush:
+ {
+  \int_compare:nNnT
+   {
+    (\seq_count:N \g_@@_catalog_OCProperties_OCGS_seq)*
+    (\seq_count:N \g_@@_catalog_OCProperties_Configs_seq)
+   } > {0}
+  {
+   \driver_pdf_object_new:nn   {g_@@_catalog_OCProperties_obj} {dict}
+   \seq_gpop_left:NN \g_@@_catalog_OCProperties_Configs_seq \g_tmpa_tl
+   \exp_args:Nnx
+    \driver_pdf_object_write:nn {g_@@_catalog_OCProperties_obj}
+    {
+     /OCGS~[\seq_use:Nn \g_@@_catalog_OCProperties_OCGS_seq {~}]
+     /D~\g_tmpa_tl~
+     \seq_if_empty:NF \g_@@_catalog_OCProperties_Configs_seq
+     {
+     /Configs~[\seq_use:Nn \g_@@_catalog_OCProperties_Configs_seq {~}]
+     }
+    }
+  } %----------not finished
+ }
+%</package>
+%    \end{macrocode}
+% \paragraph{OutputIntents}
+% This is an array of dict/indirect references. So we need a seq to hold the items
+% and some code to put it in the catalog. The user is responsable that the indirect reference points to
+% sensible objects.
+%    \begin{macrocode}
+%<*package>
+\seq_new:N\g_@@_catalog_OutputIntents_seq
+\cs_new_protected:Npn\pdf_catalog_OutputIntents_gput:n #1
+ {
+  \seq_gput_right:Nn \g_@@_catalog_OutputIntents_seq {#1}
+ }
+
+\cs_new_protected:Npn\@@_catalog_array_gpush:n #1
+ {
+  \int_compare:nNnT {\seq_count:c {g_@@_catalog_#1_seq}} > {0}
+  {
+   \exp_args:Nnx \driver_pdf_catalog_gput:nn  {#1} {[\seq_use:cn{g_@@_catalog_#1_seq} {~}]}
+  }
+ }
+%</package>
+%    \end{macrocode}
 % \subsubsection{catalog, output}
 %    \begin{macrocode}
 %<*package>
 \AtBeginDocument %need to be decided ...
  {
+  \@@_catalog_array_gpush:n {OutputIntents}
   \prop_map_function:NN  \g_@@_catalog_prop \driver_pdf_catalog_gput:nn
  }
 %</package>
