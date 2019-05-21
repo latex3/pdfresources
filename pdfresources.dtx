@@ -733,14 +733,20 @@
 %</package>
 %    \end{macrocode}
 % \subsection{the pdfcatalog}
-% The catalog is a dictionary whose entries have varying requirements regarding the
+% The catalog dictionary is filled by e.g. \cs{pdfcatalog}. Multiple appearances of
+% \cs{pdfcatalog} are concatenated, so one could end with multiple entries.
+% We is better to avoid this. We therefore setup a
+% property which is filled and executed in one at a sensible (not yet found) place.
+% \cs{pdfcatalog} has an option \texttt{openaction} to set the start view options.
+% This is ignored here but set in a separate command (to be in sync with other drivers).
+% The entries in the catalog have varying requirements regarding the
 % pdf management. Some entries (like /Lang) are simple values where the last setting can
 % simply win, other like /OutputIntents are dictionaries which can be filled from more than
 % one source. /AF is even an array of dictionaries.
 % There is probably no way to test what has already been added to the catalog,
 % so doublettes can only be avoided with ``don't do it''.
 % \subsubsection{Simple values}
-% Simple values can be added with \cs{\pdf_catalog_gput:nn}. This will add the value to
+% Simple values can be added with \cs{pdf_catalog_gput:nn}. This will add the value to
 % a prop. The prop is then pushed to the catalog at the end of the document.
 % Entries which can be added like this are
 % \begin{description}
@@ -763,11 +769,11 @@
 % \end{description}
 %    \begin{macrocode}
 %<*package>
-\prop_new:N \g_@@_pdf_catalog_prop
+\prop_new:N \g_@@_catalog_prop
 \cs_new_protected:Npn \pdf_catalog_gput:nn #1 #2 %#1 name, #2 value
  {
   % Add later: test for the names that should be handled specially
-  \prop_gput:Nnn \g_@@_pdf_catalog_prop {#1}{#2}
+  \prop_gput:Nnn \g_@@_catalog_prop {#1}{#2}
  }
 %</package>
 %    \end{macrocode}
@@ -779,6 +785,28 @@
 %% DPartRoot, (dict, pdf 2.0)
 % \subsubsection{catalog, special cases}
 %
+% \subsubsection{catalog, output}
+%    \begin{macrocode}
+%<*package>
+\AtBeginDocument %need to be decided ...
+ {
+  \prop_map_function:NN  \g_@@_catalog_prop \driver_pdf_catalog_gput:nn
+ }
+%</package>
+%    \end{macrocode}
+%
+% \subsubsection{Doc View}
+% This commands set Doc View options. This is rather crude /needs review. For now we
+% assume that only the equivalent of \verb+openaction~goto~page\@pdfstartpage{\@pdfstartview}+ in
+% hyperref is needed. The format of the second argument is quite unclear (slash, casing).
+%    \begin{macrocode}
+%<*package>
+\cs_new_protected:Npn \pdf_docview:nn #1 #2
+ {
+  \driver_pdf_docview:nn {#1}{#2}
+ }
+%</package>
+%    \end{macrocode}
 % \subsection{pdfpagesattr}
 % A token register that is added to the root pages object when the pdf is finished.
 % The following command copy more or less the driver commands but add a few tests
@@ -868,7 +896,7 @@
    \prop_gput:Nnn\g_@@_info_prop { #1 } { #2 }
   }
 
-\cs_generate_variant:Nn \pdf_info_gput:nn {o}
+\cs_generate_variant:Nn \pdf_info_gput:nn {no}
 
 %  should #2 be inside a some escaping command?
 %  hyperref passes them through
@@ -898,38 +926,7 @@
 
 %</package>
 %    \end{macrocode}
-% \subsection{The catalog dictionary}
-% The catalog dictionary is filled by e.g. \cs{pdfcatalog}. Multiple appearances of
-% \cs{pdfcatalog} are concatenated, so one could end with multiple entries.
-% We is better to avoid this. We therefore setup a
-% property which is filled and executed in one at a sensible (not yet found) place.
-% \cs{pdfcatalog} has an option \texttt{openaction} to set the start view options.
-% This is ignored here but set in a separate command (to be in sync with other drivers).
-%    \begin{macrocode}
-%<*package>
-\prop_new:N \g_@@_catalog_dict_prop
-\cs_new_protected:Npn \pdf_catalog_gput:nn #1 #2 %#1 key without /, #2 content
-  {
-   \prop_gput:Nnn\g_@@_catalog_dict_prop { #1 } { #2 }
-  }
-\AtBeginDocument
- {
-  \prop_map_function:NN  \g_@@_catalog_dict_prop \driver_pdf_catalog_gput:nn
- }
-%</package>
-%    \end{macrocode}
-% \subsection{Doc View}
-% This commands set Doc View options. This is rather crude /needs review. For now we
-% assume that only the equivalent of \verb+openaction~goto~page\@pdfstartpage{\@pdfstartview}+ in
-% hyperref is needed. The format of the second argument is quite unclear (slash, casing).
-%    \begin{macrocode}
-%<*package>
-\cs_new_protected:Npn \pdf_docview:nn #1 #2
- {
-  \driver_pdf_docview:nn {#1}{#2}
- }
-%</package>
-%    \end{macrocode}
+
 % \subsection{pdfpagesattr}
 %
 %
