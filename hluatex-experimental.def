@@ -720,8 +720,12 @@
      \pdf_docview:nn {\@pdfstartpage} {\@pdfstartview}
    }
   \edef\Hy@temp{%
-    \ifHy@pdftoolbar\else /HideToolbar\c_space_tl true\fi
-    \ifHy@pdfmenubar\else /HideMenubar\c_space_tl true\fi
+    \ifHy@pdftoolbar\else
+     \pdf_catalog_ViewerPreferences_gput:nn{HideToolbar}{true}
+    \fi
+    \ifHy@pdfmenubar\else
+     \pdf_catalog_ViewerPreferences_gput:nn{HideMenubar}{true}
+    \fi
     \ifHy@pdfwindowui\else /HideWindowUI\c_space_tl true\fi
     \ifHy@pdffitwindow /FitWindow\c_space_tl true\fi
     \ifHy@pdfcenterwindow /CenterWindow\c_space_tl true\fi

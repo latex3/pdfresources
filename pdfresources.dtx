@@ -766,6 +766,8 @@
 %   the package doing the tagging should create this.
 %  \item[Lang] (string, e.g. (de-DE))
 %  \item[NeedsRendering] (boolean, pdf 1.7)
+%  \item[PageLabels] dictionary containing on /Nums + array entry describing the numbering system of the pages.
+%  (done by hyperref).
 % \end{description}
 %    \begin{macrocode}
 %<*package>
@@ -777,14 +779,40 @@
  }
 %</package>
 %    \end{macrocode}
-%%% open: Collection, OCProperties, AcroForm, Metadata, ViewerPreferences, PageLabels, Names,
+%%% open: Collection,  AcroForm, Metadata, ViewerPreferences, Names,
 %% Dests, AF (array of dictionaries, pdf 2.0, associated files, important for accessibility),
 %% Threads, AA (dict, additional-actions),
 %% open not so important:SpiderInfo (dict), PieceInfo (dict), (dict, pdf 1.5, permissions), Legal (dict, pdf 1.5)
 %% Requirements (array, pdf 1.7), Extensions (dict, pdf 2.0), DSS (dict, pdf 2.0),
 %% DPartRoot, (dict, pdf 2.0)
-%% resolved: OutputIntents
+%% resolved: OutputIntents, OCProperties,
 % \subsubsection{catalog, special cases}
+% \paragraph{ViewerPreferences}
+% This is a dictionary with various entries. So we setup a prop that can be filled and is pushed to
+% the catalog / an object later.
+%    \begin{macrocode}
+%<*package>
+\prop_new:N\g_@@_catalog_ViewerPreferences_prop
+\cs_new_protected:Npn \pdf_catalog_ViewerPreferences_gput:nn #1 #2
+ {
+  \prop_gput:Nnn \g_@@_catalog_ViewerPreferences_prop {#1}{#2}
+ }
+
+\cs_new_protected:Npn\@@_catalog_ViewerPreferences_gpush:
+ {
+  \prop_if_empty:NF\g_@@_catalog_ViewerPreferences_prop
+   {
+    \driver_pdf_object_new:nn   {g_@@_catalog_ViewerPreferences_obj} {dict}
+    \driver_pdf_object_write:nx   {g_@@_catalog_ViewerPreferences_obj}
+    {
+     \prop_map_function:NN \g_@@_catalog_ViewerPreferences_prop \driver_pdf_dict_item:nn
+    }
+    \driver_pdf_catalog_gput:nn {ViewerPreferences}{\driver_pdf_object_ref:n {g_@@_catalog_ViewerPreferences_obj}}
+   }
+ }
+
+%</package>
+%    \end{macrocode}
 % \paragraph{OCProperties}
 %  This is a dictionary with three entries:
 %  \begin{description}
@@ -864,8 +892,9 @@
 %<*package>
 \AtBeginDocument %need to be decided ...
  {
-  \@@_catalog_array_gpush:n {OutputIntents}
-  \@@_catalog_OCProperties_gpush:
+  \@@_catalog_array_gpush:n {OutputIntents} %OutputIntents
+  \@@_catalog_OCProperties_gpush:           %OCProperties
+  \@@_catalog_ViewerPreferences_gpush:      %ViewerPreferences
   \prop_map_function:NN  \g_@@_catalog_prop \driver_pdf_catalog_gput:nn
  }
 %</package>
