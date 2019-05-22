@@ -338,9 +338,11 @@
  {
   \newcommand\OBJ@OCG@view {} % for the hyperref test
   \pdf@ifdraftmode{}{
-    \driver_pdf_object_new:nn   { l__hyp_ocg_view_dict_obj }  { dict }
-    \driver_pdf_object_new:nn   { l__hyp_ocg_print_dict_obj } { dict }
+    \driver_pdf_object_new:nn   { l__hyp_ocg_view_dict_obj }   { dict }
+    \driver_pdf_object_new:nn   { l__hyp_ocg_print_dict_obj }  { dict }
+    \driver_pdf_object_new:nn   { l__hyp_ocg_config_dict_obj } { dict }
     \driver_pdf_object_new:nn   { l__hyp_ocg_ref_array_obj }   { array }
+
     \driver_pdf_object_write:nn { l__hyp_ocg_view_dict_obj }
      {
         /Type/OCG
@@ -361,47 +363,46 @@
           /View  <</ViewState/OFF>>~
          >>
      }
-    \exp_args:Nx\pdf_catalog_OCProperties_OCGs_gput:n { \driver_pdf_object_ref:n { l__hyp_ocg_view_dict_obj }}
-    \exp_args:Nx\pdf_catalog_OCProperties_OCGs_gput:n { \driver_pdf_object_ref:n { l__hyp_ocg_view_print_obj }}
-%    \driver_pdf_object_write:nx { l__hyp_ocg_ref_array_obj }
-%    {
-%        \driver_pdf_object_ref:n { l__hyp_ocg_view_dict_obj }
-%        \c_space_tl
-%        \driver_pdf_object_ref:n { l__hyp_ocg_print_dict_obj }
-%    }
-    \exp_args:Nx \pdf_catalog_OCProperties_Configs_gput:n
-    %\pdf_catalog_gput:nn
-    % {OCProperties}
-     {%<<
-      %  /OCGs~\driver_pdf_object_ref:n { l__hyp_ocg_ref_array_obj }
-      %  ~
-      %  /D<<
-          /OFF[\driver_pdf_object_ref:n { l__hyp_ocg_print_dict_obj }]
-          /AS[
-            <<
-              /Event/View
-              /OCGs\c_space_tl \driver_pdf_object_ref:n { l__hyp_ocg_ref_array_obj }
-              /Category[/View]
-            >>
-            <<
-              /Event/Print
-              /OCGs\c_space_tl \driver_pdf_object_ref:n { l__hyp_ocg_ref_array_obj }
-              /Category[/Print]
-            >>
-            <<
-              /Event/Export
-              /OCGs\c_space_tl \driver_pdf_object_ref:n { l__hyp_ocg_ref_array_obj }
-              /Category[/Print]
-            >>
+
+   \driver_pdf_object_write:nx { l__hyp_ocg_ref_array_obj }
+   {
+     \driver_pdf_object_ref:n { l__hyp_ocg_view_dict_obj }
+     \c_space_tl
+     \driver_pdf_object_ref:n { l__hyp_ocg_print_dict_obj }
+   }
+   \driver_pdf_object_write:nx { l__hyp_ocg_config_dict_obj }
+    {
+      /OFF[\driver_pdf_object_ref:n { l__hyp_ocg_print_dict_obj }]
+      /AS[
+        <<
+         /Event/View
+         /OCGs\c_space_tl \driver_pdf_object_ref:n { l__hyp_ocg_ref_array_obj }
+         /Category[/View]
+        >>
+        <<
+         /Event/Print
+         /OCGs\c_space_tl \driver_pdf_object_ref:n { l__hyp_ocg_ref_array_obj }
+         /Category[/Print]
+        >>
+        <<
+         /Event/Export
+         /OCGs\c_space_tl \driver_pdf_object_ref:n { l__hyp_ocg_ref_array_obj }
+         /Category[/Print]
+        >>
           ]
-      %  >>
-     % >>
+    }
+    \exp_args:Nx\pdf_catalog_OCProperties_OCGs_gput:n { \driver_pdf_object_ref:n { l__hyp_ocg_view_dict_obj }}
+    \exp_args:Nx\pdf_catalog_OCProperties_OCGs_gput:n { \driver_pdf_object_ref:n { l__hyp_ocg_print_dict_obj }}
+    \exp_args:Nx\pdf_catalog_OCProperties_Configs_gput:n
+     {
+      \driver_pdf_object_ref:n { l__hyp_ocg_config_dict_obj }
      }
-     \driver_pdf_pageresources_gput:nnn{Properties}{OCView}
+
+     \pdf_pageresources_gput:nnn{Properties}{OCView}
      {
       \driver_pdf_object_ref:n { l__hyp_ocg_view_dict_obj}
      }
-    \driver_pdf_pageresources_gput:nnn{Properties}{OCPrint}
+    \pdf_pageresources_gput:nnn{Properties}{OCPrint}
      {
       \driver_pdf_object_ref:n { l__hyp_ocg_print_dict_obj}
      }
