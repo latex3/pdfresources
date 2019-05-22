@@ -816,10 +816,10 @@
 \cs_new_protected:Npn\@@_catalog_OCProperties_gpush:
  {
   \int_compare:nNnT
-   {
+  {
     (\seq_count:N \g_@@_catalog_OCProperties_OCGS_seq)*
     (\seq_count:N \g_@@_catalog_OCProperties_Configs_seq)
-   } > {0}
+  } > {0}
   {
    \driver_pdf_object_new:nn   {g_@@_catalog_OCProperties_obj} {dict}
    \seq_gpop_left:NN \g_@@_catalog_OCProperties_Configs_seq \g_tmpa_tl
@@ -833,6 +833,7 @@
      /Configs~[\seq_use:Nn \g_@@_catalog_OCProperties_Configs_seq {~}]
      }
     }
+   \driver_pdf_catalog_gput:nn {OCProperties}{\driver_pdf_object_ref:n {g_@@_catalog_OCProperties_obj}}
   } %----------not finished
  }
 %</package>
@@ -864,6 +865,7 @@
 \AtBeginDocument %need to be decided ...
  {
   \@@_catalog_array_gpush:n {OutputIntents}
+  \@@_catalog_OCProperties_gpush:
   \prop_map_function:NN  \g_@@_catalog_prop \driver_pdf_catalog_gput:nn
  }
 %</package>
@@ -909,6 +911,8 @@
 % A token register that is added to the page object when the page is shipped out.
 % The following command copy more or less the driver commands but add a few tests
 % and warning if other packages or users have used the primitive commands.
+% ? should we use a prop and delay the filling of the register to shipout  like for
+% the page resources ? Do we need page related variants?
 %    \begin{macrocode}
 %<*package>
 \tl_new:N \g_@@_pageattr_tl

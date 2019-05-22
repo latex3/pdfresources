@@ -1,0 +1,22 @@
+\input{regression-test}
+\documentclass{article}
+\usepackage{pdfresources}
+\ExplSyntaxOn
+\driver_pdf_compresslevel:n {0}
+\driver_pdf_compress_objects:n {0}
+
+%some senseless additions to test the commands
+\pdf_catalog_OCProperties_OCGS_gput:n{1~0~R}
+\pdf_catalog_OCProperties_OCGS_gput:n{2~0~R}
+\pdf_catalog_OCProperties_Configs_gput:n {99~0~R}
+\pdf_catalog_OCProperties_Configs_gput:n {100~0~R}
+\pdf_catalog_OCProperties_Configs_gput:n {101~0~R}
+%sets the /D-entries
+\pdf_catalog_OCProperties_Configs_default_gput:n{102~0~R}
+\ExplSyntaxOff
+
+\begin{document}
+abc
+
+
+\end{document}
