@@ -788,19 +788,19 @@
 % \paragraph{OCProperties}
 %  This is a dictionary with three entries:
 %  \begin{description}
-%  \item[/OCGS] (required) An array of indirect references, access needed for more than one package probably
+%  \item[/OCGs] (required) An array of indirect references, access needed for more than one package probably
 %  \item[/D] (required)    a dict (at best as indirect reference) to the default configuration
 %  \item[/Configs] (optional) an array of indirect references to more configurations.
 %  \end{description}
 %  The /D entry is also a config, so it can be the first from a seq.
 %    \begin{macrocode}
 %<*package>
-\seq_new:N \g_@@_catalog_OCProperties_OCGS_seq
+\seq_new:N \g_@@_catalog_OCProperties_OCGs_seq
 \seq_new:N \g_@@_catalog_OCProperties_Configs_seq
 
-\cs_new_protected:Npn\pdf_catalog_OCProperties_OCGS_gput:n #1
+\cs_new_protected:Npn\pdf_catalog_OCProperties_OCGs_gput:n #1
  {
-  \seq_gput_right:Nn \g_@@_catalog_OCProperties_OCGS_seq {#1}
+  \seq_gput_right:Nn \g_@@_catalog_OCProperties_OCGs_seq {#1}
  }
 
 \cs_new_protected:Npn\pdf_catalog_OCProperties_Configs_gput:n #1
@@ -817,7 +817,7 @@
  {
   \int_compare:nNnT
   {
-    (\seq_count:N \g_@@_catalog_OCProperties_OCGS_seq)*
+    (\seq_count:N \g_@@_catalog_OCProperties_OCGs_seq)*
     (\seq_count:N \g_@@_catalog_OCProperties_Configs_seq)
   } > {0}
   {
@@ -826,7 +826,7 @@
    \exp_args:Nnx
     \driver_pdf_object_write:nn {g_@@_catalog_OCProperties_obj}
     {
-     /OCGS~[\seq_use:Nn \g_@@_catalog_OCProperties_OCGS_seq {~}]
+     /OCGs~[\seq_use:Nn \g_@@_catalog_OCProperties_OCGs_seq {~}]
      /D~\g_tmpa_tl~
      \seq_if_empty:NF \g_@@_catalog_OCProperties_Configs_seq
      {
