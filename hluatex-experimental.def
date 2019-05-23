@@ -715,7 +715,10 @@
    }
   \tl_if_exist:NT\@pdflang
    {
-    \pdf_catalog_gput:nn { Lang } { (\@pdflang) }
+    \tl_if_empty:NF\@pdflang
+    {
+     \pdf_catalog_gput:nn { Lang } { (\@pdflang) }
+    } 
    }
   \bool_if:nF
    {
@@ -744,47 +747,47 @@
     \ifHy@pdfdisplaydoctitle
      \pdf_catalog_ViewerPreferences_gput:nn { DisplayDocTitle } { true }
     \fi
-    \tl_if_empty:oF { \@pdfnonfullscreenpagemode }
+    \tl_if_empty:NF  \@pdfnonfullscreenpagemode
     {
      \pdf_catalog_ViewerPreferences_gput:nx { NonFullScreenPageMode } { /\@pdfnonfullscreenpagemode }
     }
-    \tl_if_empty:oF { \@pdfdirection }
+    \tl_if_empty:NF  \@pdfdirection
     {
      \pdf_catalog_ViewerPreferences_gput:nx { Direction } { /\@pdfdirection }
     }
-    \tl_if_empty:oF { \@pdfviewarea }
+    \tl_if_empty:NF  \@pdfviewarea
     {
      \pdf_catalog_ViewerPreferences_gput:nx { ViewArea }{/\@pdfviewarea }
     }
-    \tl_if_empty:oF { \@pdfviewclip }
+    \tl_if_empty:NF  \@pdfviewclip
     {
      \pdf_catalog_ViewerPreferences_gput:nx { ViewClip } { /\@pdfviewclip }
     }
-    \tl_if_empty:oF { \@pdfprintarea }
+    \tl_if_empty:NF  \@pdfprintarea
     {
      \pdf_catalog_ViewerPreferences_gput:nx { PrintArea } { /\@pdfprintarea }
     }
-    \tl_if_empty:oF { \@pdfprintclip }
+    \tl_if_empty:NF  \@pdfprintclip
     {
      \pdf_catalog_ViewerPreferences_gput:nx { PrintClip } { /\@pdfprintclip }
     }
-    \tl_if_empty:oF { \@pdfprintscaling }
+    \tl_if_empty:NF  \@pdfprintscaling
     {
      \pdf_catalog_ViewerPreferences_gput:nx { PrintScaling } { /\@pdfprintscaling }
     }
-    \tl_if_empty:oF { \@pdfduplex }
+    \tl_if_empty:NF  \@pdfduplex
     {
      \pdf_catalog_ViewerPreferences_gput:nx { Duplex } { /\@pdfduplex }
     }
-    \tl_if_empty:oF { \@pdfpicktraybypdfsize }
+    \tl_if_empty:NF \@pdfpicktraybypdfsize
     {
      \pdf_catalog_ViewerPreferences_gput:nx { PickTrayByPDFSize } { \@pdfpicktraybypdfsize }
     }
-    \tl_if_empty:oF { \@pdfprintpagerange }
+    \tl_if_empty:NF \@pdfprintpagerange
     {
      \pdf_catalog_ViewerPreferences_gput:nx { PrintPageRange } {  [ \@pdfprintpagerange ] }
     }
-    \tl_if_empty:oF { \@pdfnumcopies }
+    \tl_if_empty:NF  \@pdfnumcopies
     {
      \pdf_catalog_ViewerPreferences_gput:nx { NumCopies } {  \@pdfnumcopies }
     }
