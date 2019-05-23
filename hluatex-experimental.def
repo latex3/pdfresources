@@ -6,7 +6,7 @@
 %%
 
 \ProvidesFile{hluatex-experimental.def}
-  [2019/04/07 v0.2 %
+  [2019/05/23 v0.3 %
   Hyperref driver for luaTeX]
 \RequirePackage{xparse,etoolbox}
 \RequirePackage{l3str-convert,pdfresources}
@@ -701,15 +701,22 @@
 \def\PDF@SetupDoc{
   \tl_if_empty:NF\@pdfpagescrop
   {
-   \pdf_pagesattr_gput:nn {CropBox}{[\@pdfpagescrop]}
+   \pdf_pagesattr_gput:nn { CropBox } { [\@pdfpagescrop] }
   }
   \Hy@pstringdef\Hy@pstringB{\@baseurl}%
-  \pdf_catalog_gput:nn {PageMode}{/\@pdfpagemode}
+  \pdf_catalog_gput:nn { PageMode }{ /\@pdfpagemode }
   \tl_if_empty:NF \@baseurl
    {
-    \pdf_catalog_gput:nn {URI}{<</Base(\Hy@pstringB)>>}
+    \pdf_catalog_gput:nn { URI }{ <</Base(\Hy@pstringB)>> }
    }
-  %
+  \tl_if_empty:oF { \@pdfpagelayout }
+   {
+    \pdf_catalog_gput:nn{ PageLayout }{ /\@pdfpagelayout }
+   }
+  \tl_if_exist:NT\@pdflang
+   {
+    \pdf_catalog_gput:nn { Lang } { (\@pdflang) }
+   }
   \bool_if:nF
    {
     \tl_if_empty_p:N \@pdfstartpage
@@ -719,50 +726,68 @@
    {
      \pdf_docview:nn {\@pdfstartpage} {\@pdfstartview}
    }
-  \edef\Hy@temp{%
     \ifHy@pdftoolbar\else
-     \pdf_catalog_ViewerPreferences_gput:nn{HideToolbar}{true}
+     \pdf_catalog_ViewerPreferences_gput:nn { HideToolbar } { true }
     \fi
     \ifHy@pdfmenubar\else
-     \pdf_catalog_ViewerPreferences_gput:nn{HideMenubar}{true}
+     \pdf_catalog_ViewerPreferences_gput:nn { HideMenubar } { true }
     \fi
-    \ifHy@pdfwindowui\else /HideWindowUI\c_space_tl true\fi
-    \ifHy@pdffitwindow /FitWindow\c_space_tl true\fi
-    \ifHy@pdfcenterwindow /CenterWindow\c_space_tl true\fi
-    \ifHy@pdfdisplaydoctitle /DisplayDocTitle\c_space_tl true\fi
-    \Hy@UseNameKey{NonFullScreenPageMode}\@pdfnonfullscreenpagemode
-    \Hy@UseNameKey{Direction}\@pdfdirection
-    \Hy@UseNameKey{ViewArea}\@pdfviewarea
-    \Hy@UseNameKey{ViewClip}\@pdfviewclip
-    \Hy@UseNameKey{PrintArea}\@pdfprintarea
-    \Hy@UseNameKey{PrintClip}\@pdfprintclip
-    \Hy@UseNameKey{PrintScaling}\@pdfprintscaling
-    \Hy@UseNameKey{Duplex}\@pdfduplex
-    \ifx\@pdfpicktraybypdfsize\@empty
-    \else
-      /PickTrayByPDFSize \@pdfpicktraybypdfsize
+    \ifHy@pdfwindowui\else
+     \pdf_catalog_ViewerPreferences_gput:nn { HideWindowUI } { true }
     \fi
-    \ifx\@pdfprintpagerange\@empty
-    \else
-      /PrintPageRange[\@pdfprintpagerange]%
+    \ifHy@pdffitwindow
+     \pdf_catalog_ViewerPreferences_gput:nn { FitWindow } { true }
     \fi
-    \ifx\@pdfnumcopies\@empty
-    \else
-      /NumCopies\c_space_tl \@pdfnumcopies
+    \ifHy@pdfcenterwindow
+     \pdf_catalog_ViewerPreferences_gput:nn { CenterWindow } { true }
     \fi
-  }%
-    \ifx\Hy@temp\@empty
-    \else
-    \pdf_catalog_gput:nn
-     {ViewerPreferences}{<<\Hy@temp>>}%
+    \ifHy@pdfdisplaydoctitle
+     \pdf_catalog_ViewerPreferences_gput:nn { DisplayDocTitle } { true }
     \fi
-    %% \Hy@UseNameKey{PageLayout}\@pdfpagelayout <------?????
-    \ifx\@pdflang\relax
-    \else
-      \pdf_catalog_gput:nn
-       { Lang }
-       {(\@pdflang)}%
-    \fi
+    \tl_if_empty:oF { \@pdfnonfullscreenpagemode }
+    {
+     \pdf_catalog_ViewerPreferences_gput:nx { NonFullScreenPageMode } { /\@pdfnonfullscreenpagemode }
+    }
+    \tl_if_empty:oF { \@pdfdirection }
+    {
+     \pdf_catalog_ViewerPreferences_gput:nx { Direction } { /\@pdfdirection }
+    }
+    \tl_if_empty:oF { \@pdfviewarea }
+    {
+     \pdf_catalog_ViewerPreferences_gput:nx { ViewArea }{/\@pdfviewarea }
+    }
+    \tl_if_empty:oF { \@pdfviewclip }
+    {
+     \pdf_catalog_ViewerPreferences_gput:nx { ViewClip } { /\@pdfviewclip }
+    }
+    \tl_if_empty:oF { \@pdfprintarea }
+    {
+     \pdf_catalog_ViewerPreferences_gput:nx { PrintArea } { /\@pdfprintarea }
+    }
+    \tl_if_empty:oF { \@pdfprintclip }
+    {
+     \pdf_catalog_ViewerPreferences_gput:nx { PrintClip } { /\@pdfprintclip }
+    }
+    \tl_if_empty:oF { \@pdfprintscaling }
+    {
+     \pdf_catalog_ViewerPreferences_gput:nx { PrintScaling } { /\@pdfprintscaling }
+    }
+    \tl_if_empty:oF { \@pdfduplex }
+    {
+     \pdf_catalog_ViewerPreferences_gput:nx { Duplex } { /\@pdfduplex }
+    }
+    \tl_if_empty:oF { \@pdfpicktraybypdfsize }
+    {
+     \pdf_catalog_ViewerPreferences_gput:nx { PickTrayByPDFSize } { \@pdfpicktraybypdfsize }
+    }
+    \tl_if_empty:oF { \@pdfprintpagerange }
+    {
+     \pdf_catalog_ViewerPreferences_gput:nx { PrintPageRange } {  [ \@pdfprintpagerange ] }
+    }
+    \tl_if_empty:oF { \@pdfnumcopies }
+    {
+     \pdf_catalog_ViewerPreferences_gput:nx { NumCopies } {  \@pdfnumcopies }
+    }
 }
 
 

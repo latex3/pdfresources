@@ -37,7 +37,11 @@
 \RequirePackage{tmpl3shipout}
 \ProvidesExplPackage {pdfresources} {2019-03-17} {0.1}
   {experimental pdf-resource management}
-\DeclareOption { debug }{\msg_redirect_module:nnn {pdf}{warning}{error}}
+\DeclareOption { debug }
+ {
+  %\msg_redirect_module:nnn { pdf } { warning }{ error }
+  \msg_redirect_module:nnn { pdf } { none } { warning }
+  }
 \bool_new:N\g_@@_patches_bool
 \DeclareOption { patches }{\bool_gset_true:N\g_@@_patches_bool}
 \ProcessOptions\relax
@@ -139,6 +143,9 @@
 % helper command to output a key + value of a prop as needed in a dict.
 % name? explicit spaces?
 % not internal as perhaps needed also by users?
+% I don't check if #1 or #2 is empty, imho this should be done only in the pdf layer
+% at the input?
+%
 \cs_new:Npn \driver_pdf_dict_item:nn #1 #2 {/#1~#2~}
 %</package>
 %    \end{macrocode}
@@ -256,9 +263,9 @@
   }
 
  \cs_new_protected:Npn \driver_pdf_pagesattr_get:N #1
- {
+  {
    \tl_set:Nx #1 {\tex_the:D \tex_pdfpagesattr:D}
- }
+  }
  \AtEndDocument{\@@_pdf_pagesattr_gpush:}
 }
 
@@ -315,16 +322,16 @@
 
 % push to the register
 \cs_new_protected:Npn \@@_pdf_pageattr_gpush:
-  {
-    \exp_args:NNx \tex_global:D \@@_pdf_pageattr:n
-    {
-     \prop_map_function:NN \g_@@_pdf_pageattr_prop \driver_pdf_dict_item:nn
-    }
-  }
+ {
+   \exp_args:NNx \tex_global:D \@@_pdf_pageattr:n
+   {
+    \prop_map_function:NN \g_@@_pdf_pageattr_prop \driver_pdf_dict_item:nn
+   }
+ }
 
 
 \bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
-{
+ {
  %definition works also for luatex
  \cs_new_protected:Npx \@@_pdf_pageattr:n #1
   {
@@ -700,7 +707,8 @@
 %% messages
 %    \begin{macrocode}
 %<*package>
-\msg_new:nnn {pdf}{patches}{loading~patch~code}
+\msg_new:nnn  { pdf } { patches } { loading~patch~code }
+\msg_new:nnn  { pdf } { empty-value }{ The~value~for~#1~is~empty~and~will~be~ignored }
 \msg_new:nnnn { pdf }{ pagesattr-changed }
  {
    The~content~of~pagesattr ~has~changed.~
@@ -721,14 +729,12 @@
   primitive~\token_to_str:N\pdfpageattr\c_space_tl or~an~equivalent~command~
   instead~of~the~expl3~interface.
  }
-\msg_new:nnn
-  {pdf}
-  {setup-after-documentclass}
+\msg_new:nnn { pdf } { setup-after-documentclass }
   { \token_to_str:N \documentsetup\c_space_tl should~be~used~only~before~\token_to_str:N\documentclass}
-\msg_new:nnn { pdf } {object-compression-disabled}
-             {object~compression~is~not~supported~in~pdf~version~#1}
-\msg_new:nnn { pdf } {catalog-special}
-             {values~to~the~catalog~entry~#1~should~be~added~with~\token_to_str:N\pdf_catalog_ #1_gput:nn}
+\msg_new:nnn { pdf } { object-compression-disabled }
+             { object~compression~is~not~supported~in~pdf~version~#1 }
+\msg_new:nnn { pdf } { catalog-special }
+             { values~to~the~catalog~entry~#1~should~be~added~with~\token_to_str:N\pdf_catalog_ #1_gput:nn }
 
 %</package>
 %    \end{macrocode}
@@ -774,8 +780,13 @@
 \prop_new:N \g_@@_catalog_prop
 \cs_new_protected:Npn \pdf_catalog_gput:nn #1 #2 %#1 name, #2 value
  {
-  % Add later: test for the names that should be handled specially
+  \tl_if_empty:nTF { #2 }
+  {
+   \msg_none:nnn { pdf }{ empty-value }{ #1 }
+  }
+  {% Add later: test for the names that should be handled specially
   \prop_gput:Nnn \g_@@_catalog_prop {#1}{#2}
+  }
  }
 %</package>
 %    \end{macrocode}
@@ -795,9 +806,16 @@
 \prop_new:N\g_@@_catalog_ViewerPreferences_prop
 \cs_new_protected:Npn \pdf_catalog_ViewerPreferences_gput:nn #1 #2
  {
-  \prop_gput:Nnn \g_@@_catalog_ViewerPreferences_prop {#1}{#2}
+  \tl_if_empty:nTF { #2 }
+  {
+   \msg_none:nnn { pdf }{ empty-value }{ #1 }
+  }
+  {
+   \prop_gput:Nnn \g_@@_catalog_ViewerPreferences_prop {#1}{#2}
+  }
  }
 
+\cs_generate_variant:Nn\pdf_catalog_ViewerPreferences_gput:nn {no,nx}
 \cs_new_protected:Npn\@@_catalog_ViewerPreferences_gpush:
  {
   \prop_if_empty:NF\g_@@_catalog_ViewerPreferences_prop
@@ -828,17 +846,35 @@
 
 \cs_new_protected:Npn\pdf_catalog_OCProperties_OCGs_gput:n #1
  {
-  \seq_gput_right:Nn \g_@@_catalog_OCProperties_OCGs_seq {#1}
+  \tl_if_empty:nTF { #1 }
+  {
+   \msg_none:nnn { pdf }{ empty-value }{ OCGs }
+  }
+  {
+   \seq_gput_right:Nn \g_@@_catalog_OCProperties_OCGs_seq { #1 }
+  }
  }
 
 \cs_new_protected:Npn\pdf_catalog_OCProperties_Configs_gput:n #1
  {
-  \seq_gput_right:Nn \g_@@_catalog_OCProperties_Configs_seq {#1}
+  \tl_if_empty:nTF { #1 }
+  {
+   \msg_none:nnn { pdf }{ empty-value }{ OCProperties/Configs }
+  }
+  {
+   \seq_gput_right:Nn \g_@@_catalog_OCProperties_Configs_seq { #1 }
+  }
  }
 
 \cs_new_protected:Npn\pdf_catalog_OCProperties_Configs_default_gput:n #1
  {
-  \seq_gput_left:Nn \g_@@_catalog_OCProperties_Configs_seq {#1}
+  \tl_if_empty:nTF { #1 }
+  {
+   \msg_none:nnn { pdf }{ empty-value }{ OCProperties/Configs }
+  }
+  {
+   \seq_gput_left:Nn \g_@@_catalog_OCProperties_Configs_seq {#1}
+  }
  }
 
 \cs_new_protected:Npn\@@_catalog_OCProperties_gpush:
@@ -873,9 +909,16 @@
 %    \begin{macrocode}
 %<*package>
 \seq_new:N\g_@@_catalog_OutputIntents_seq
+
 \cs_new_protected:Npn\pdf_catalog_OutputIntents_gput:n #1
  {
-  \seq_gput_right:Nn \g_@@_catalog_OutputIntents_seq {#1}
+  \tl_if_empty:nTF { #1 }
+  {
+   \msg_none:nnn { pdf }{ empty-value }{ OutputIntents }
+  }
+  {
+   \seq_gput_right:Nn \g_@@_catalog_OutputIntents_seq { #1 }
+  }
  }
 
 \cs_new_protected:Npn\@@_catalog_array_gpush:n #1
@@ -890,7 +933,7 @@
 % \subsubsection{catalog, output}
 %    \begin{macrocode}
 %<*package>
-\AtBeginDocument %need to be decided ...
+\AfterEndPreamble %need to be decided ...
  {
   \@@_catalog_array_gpush:n {OutputIntents} %OutputIntents
   \@@_catalog_OCProperties_gpush:           %OCProperties
@@ -922,6 +965,11 @@
 
 \cs_new_protected:Npn \pdf_pagesattr_gput:nn #1 #2
  {
+  \tl_if_empty:nTF { #2 }
+  {
+   \msg_none:nnn { pdf }{ empty-value }{ #1 }
+  }
+  {
   \driver_pdf_pagesattr_get:N \l_tmpa_tl
   \tl_if_eq:NNF \l_tmpa_tl \g_@@_pagesattr_tl
    {
@@ -930,6 +978,7 @@
   \driver_pdf_pagesattr_gput:nn { #1 } { #2 }
   \driver_pdf_pagesattr_get:N \l_tmpa_tl
   \tl_gset_eq:NN \g_@@_pagesattr_tl \l_tmpa_tl
+  }
  }
 
 %</package>
@@ -940,7 +989,7 @@
 % A token register that is added to the page object when the page is shipped out.
 % The following command copy more or less the driver commands but add a few tests
 % and warning if other packages or users have used the primitive commands.
-% ? should we use a prop and delay the filling of the register to shipout  like for
+% ???? should we use a prop and delay the filling of the register to shipout  like for
 % the page resources ? Do we need page related variants?
 %    \begin{macrocode}
 %<*package>
@@ -948,6 +997,11 @@
 
 \cs_new_protected:Npn \pdf_pageattr_gput:nn #1 #2
  {
+  \tl_if_empty:nTF { #2 }
+  {
+   \msg_none:nnn { pdf }{ empty-value }{ pageattr/#1 }
+  }
+  {
   \driver_pdf_pageattr_get:N \l_tmpa_tl
   \tl_if_eq:NNF \l_tmpa_tl \g_@@_pageattr_tl
    {
@@ -956,6 +1010,7 @@
   \driver_pdf_pageattr_gput:nn { #1 } { #2 }
   \driver_pdf_pageattr_get:N \l_tmpa_tl
   \tl_gset_eq:NN \g_@@_pageattr_tl \l_tmpa_tl
+   }
  }
 
 \cs_new_protected:Npn \pdf_pageattr_gremove:n #1
@@ -973,10 +1028,31 @@
 %    \end{macrocode}
 % \subsection{page resources}
 % This mostly makes the driver commands available under the pdf module name.
+% But adds a test for empty values
 %    \begin{macrocode}
 %<*package>
-\cs_set_eq:NN \pdf_pageresources_gput:nnn \driver_pdf_pageresources_gput:nnn
-\cs_set_eq:NN \pdf_pageresources_gput:nnnn \driver_pdf_pageresources_gput:nnnn
+\cs_new_protected:Npn \pdf_pageresources_gput:nnn #1 #2 #3
+ {
+   \tl_if_empty:nTF { #3 }
+  {
+   \msg_none:nnn { pdf }{ empty-value }{ Resources/#2 }
+  }
+  {
+    \driver_pdf_pageresources_gput:nnn { #1 } { #2 } { #3 }
+  }
+ }
+
+\cs_new_protected:Npn \pdf_pageresources_gput:nnnn #1 #2 #3 #4
+ {
+   \tl_if_empty:nTF { #4 }
+  {
+   \msg_none:nnn { pdf }{ empty-value }{ Resources/#3 }
+  }
+  {
+    \driver_pdf_pageresources_gput:nnn { #1 } { #2 } { #3 } { #4}
+  }
+ }
+
 \cs_generate_variant:Nn \pdf_pageresources_gput:nnnn {nnnx}
 \cs_generate_variant:Nn \pdf_pageresources_gput:nnn {nnx}
 %</package>
@@ -1000,7 +1076,13 @@
 \prop_new:N \g_@@_info_prop
 \cs_new_protected:Npn \pdf_info_gput:nn #1 #2 %#1 key without /, #2 content
   {
-   \prop_gput:Nnn\g_@@_info_prop { #1 } { #2 }
+   \tl_if_empty:nTF { #2 }
+   {
+    \msg_none:nnn { pdf }{ empty-value }{ Info/#1 }
+   }
+   {
+    \prop_gput:Nnn\g_@@_info_prop { #1 } { #2 }
+   }
   }
 
 \cs_generate_variant:Nn \pdf_info_gput:nn {no}
@@ -1013,7 +1095,10 @@
 %  \pdfstringdef\@pdftitle{#1}%
 \cs_new_protected:Npn \pdf_info_string_gput:nn #1 #2 %#1 key without /, #2 content
   {
-   \tl_if_empty:nF { #2 }
+   \tl_if_empty:nTF { #2 }
+    {
+     \msg_none:nnn { pdf }{ empty-value }{ Info/#1 }
+    }
     {
      \prop_gput:Nnn\g_@@_info_prop { #1 } { (#2) }
     }
