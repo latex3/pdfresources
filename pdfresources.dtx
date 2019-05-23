@@ -1033,7 +1033,7 @@
 %<*package>
 \cs_new_protected:Npn \pdf_pageresources_gput:nnn #1 #2 #3
  {
-   \tl_if_empty:nTF { #3 }
+  \tl_if_empty:nTF { #3 }
   {
    \msg_none:nnn { pdf }{ empty-value }{ Resources/#2 }
   }
@@ -1049,7 +1049,7 @@
    \msg_none:nnn { pdf }{ empty-value }{ Resources/#3 }
   }
   {
-    \driver_pdf_pageresources_gput:nnn { #1 } { #2 } { #3 } { #4}
+    \driver_pdf_pageresources_gput:nnnn { #1 } { #2 } { #3 } { #4}
   }
  }
 

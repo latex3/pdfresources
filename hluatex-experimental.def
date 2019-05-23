@@ -464,7 +464,7 @@
 }
 
 \ExplSyntaxOff
-
+\newcommand\Hy@pstringDest{}
 \Hy@WrapperDef\new@pdflink#1{%
   \ifhmode
     \@savsf\spacefactor
@@ -703,10 +703,10 @@
   {
    \pdf_pagesattr_gput:nn { CropBox } { [\@pdfpagescrop] }
   }
-  \Hy@pstringdef\Hy@pstringB{\@baseurl}%
   \pdf_catalog_gput:nn { PageMode }{ /\@pdfpagemode }
   \tl_if_empty:NF \@baseurl
    {
+    \Hy@pstringdef\Hy@pstringB{\@baseurl}%
     \pdf_catalog_gput:nn { URI }{ <</Base(\Hy@pstringB)>> }
    }
   \tl_if_empty:oF { \@pdfpagelayout }
