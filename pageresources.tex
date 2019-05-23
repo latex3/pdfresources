@@ -232,8 +232,8 @@ endobj
   An array of output intent dictionaries describing the color characteristics of output devices on which the document might be rendered
   \item \emph{MarkInfo} (dict) relevant for tagging
   \item \emph{PageLabels} (number tree /indirect object)
-  \item Names (dict)
-  \item Dests (dict, must be an indirect reference)
+  \item \emph{Names} (dict): Is created automatically (along with a subdict /Dests) is \verb+\pdfdest+ with keyword names is used. No manual use/setting could be found. Contains various name trees.      
+  \item Dests (dict, must be an indirect reference, outdated, Dests is now a subdictionary of Names)
 
   \item PageLayout (name: one of SinglePage, OneColumn,
   TwoColumnLeft, TwoColumnRight, TwoPageLeft (PDF 1.5), TwoPageRight (PDF 1.5)

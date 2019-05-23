@@ -774,6 +774,7 @@
 %  \item[NeedsRendering] (boolean, pdf 1.7)
 %  \item[PageLabels] dictionary containing on /Nums + array entry describing the numbering system of the pages.
 %  (done by hyperref).
+%  \item[Collection] should be added by one package only (for an example see embedfile package).
 % \end{description}
 %    \begin{macrocode}
 %<*package>
@@ -790,13 +791,16 @@
  }
 %</package>
 %    \end{macrocode}
-%%% open: Collection,  AcroForm, Metadata, ViewerPreferences, Names,
-%% Dests, AF (array of dictionaries, pdf 2.0, associated files, important for accessibility),
+%% open:  AcroForm, Metadata,
+%% AF (array of dictionaries, pdf 2.0, associated files, important for accessibility),
 %% Threads, AA (dict, additional-actions),
-%% open not so important:SpiderInfo (dict), PieceInfo (dict), (dict, pdf 1.5, permissions), Legal (dict, pdf 1.5)
+%% open but unclear: Names. Is created automatically (for the Dests subdict), but no
+%% other use found in the texmf tree. So perhaps later.
+%% open not so important: Dests (only pdf 1.1, later subdict of Names), SpiderInfo (dict),
+%% PieceInfo (dict), (dict, pdf 1.5, permissions), Legal (dict, pdf 1.5)
 %% Requirements (array, pdf 1.7), Extensions (dict, pdf 2.0), DSS (dict, pdf 2.0),
 %% DPartRoot, (dict, pdf 2.0)
-%% resolved: OutputIntents, OCProperties,
+%% resolved: OutputIntents, OCProperties, ViewerPreferences,
 % \subsubsection{catalog, special cases}
 % \paragraph{ViewerPreferences}
 % This is a dictionary with various entries. So we setup a prop that can be filled and is pushed to
@@ -933,7 +937,8 @@
 % \subsubsection{catalog, output}
 %    \begin{macrocode}
 %<*package>
-\AfterEndPreamble %need to be decided ...
+%\AfterEndPreamble %need to be decided ...
+\AtEndDocument
  {
   \@@_catalog_array_gpush:n {OutputIntents} %OutputIntents
   \@@_catalog_OCProperties_gpush:           %OCProperties
