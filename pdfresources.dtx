@@ -134,9 +134,9 @@
 % Variants which allow also to set the rule spec are perhaps needed too.
 % Currently only pdftex, luatex and xetex are setup. Some commands can probably not be
 % implemented in all drivers.
-% % still needed:
-% % \pdf@strcmp??
-% % \pdf@escapestring?? \pdfescapestring
+%^^A still needed:
+%^^A \pdf@strcmp??
+%^^A \pdf@escapestring?? \pdfescapestring
 %    \begin{macrocode}
 %<*package>
 %some variants
@@ -374,35 +374,35 @@
 % exists. A global dictionary can be empty but as this is known only at the end of the document
 % it would require a two-pass compilation to test it and the overhead is small so we ignore this.
 % Example for ColorSpace:
-%% Global resources are stored in g_@@_pdf_pageresources_ColorSpace_prop
-%% An object {g_@@_pdf_pageresources_ColorSpace_obj} is reserved
-%% At the end of the document the obj is written to the pdf with the content of the prop:
-%% \driver_pdf_object_write:nn { g_@@_pdf_pageresources_ColorSpace_obj }
-%%           {
-%%             \prop_map_function:cN { g_@@_pdf_pageresources_#1_prop} \driver_pdf_dict_item:nn
-%%           }
-%% local resources for page N are stored in g_@@_pdf_pageresources_N_ColorSpace_prop
-%% An object {g_@@_pdf_pageresources_N_ColorSpace_obj} is reserved
-%% At the end of the document first the global then the local property is
-%% added to a temporary prop:
-%% \prop_set_eq:Nc \g_tmpa_prop { g_@@_pdf_pageresource_ColorSpace_prop}
-%% \prop_map_inline:cn { g_@@_pdf_pageresource_N_ColorSpace_prop}
-%% {\prop_gput:Nnn \g_tmpa_prop {#1}{#2}}
-%%
-%% then obj is written to the pdf with the combined content of the global and the
-%% local prop:
-%% \driver_pdf_object_write:nn { g_@@_pdf_pageresources_N_ColorSpace_obj }
-%%           {
-%%             \prop_map_function:cN \g_tmpa_prop \driver_pdf_dict_item:nn
-%%           }
-%% This means that local entries can overwrite global entries, it is up to the user to avoid this
-%% with sensible names spaces.
-%% At every shipout we check if g_@@_pdf_pageresource_N_ColorSpace_prop exists.
-%% (That's probably more effective than trying to keep a list of pages with local settings.)
-%% If yes we put "ColorSpace = objnum  of g_@@_pdf_pageresources_N_ColorSpace_obj" into
-%% \g_@@_pdf_pageresources_prop and push this into pdfpageresources
-%% If not we put "ColorSpace = objnum of g_@@_pdf_pageresources_ColorSpace_obj" into
-%% \g_@@_pdf_pageresources_prop and push this into pdfpageresources
+%^^A Global resources are stored in g_@@_pdf_pageresources_ColorSpace_prop
+%^^A An object {g_@@_pdf_pageresources_ColorSpace_obj} is reserved
+%^^A At the end of the document the obj is written to the pdf with the content of the prop:
+%^^A \driver_pdf_object_write:nn { g_@@_pdf_pageresources_ColorSpace_obj }
+%^^A           {
+%^^A             \prop_map_function:cN { g_@@_pdf_pageresources_#1_prop} \driver_pdf_dict_item:nn
+%^^A           }
+%^^A local resources for page N are stored in g_@@_pdf_pageresources_N_ColorSpace_prop
+%^^A An object {g_@@_pdf_pageresources_N_ColorSpace_obj} is reserved
+%^^A At the end of the document first the global then the local property is
+%^^A added to a temporary prop:
+%^^A \prop_set_eq:Nc \g_tmpa_prop { g_@@_pdf_pageresource_ColorSpace_prop}
+%^^A \prop_map_inline:cn { g_@@_pdf_pageresource_N_ColorSpace_prop}
+%^^A {\prop_gput:Nnn \g_tmpa_prop {#1}{#2}}
+%^^A
+%^^A then obj is written to the pdf with the combined content of the global and the
+%^^A local prop:
+%^^A \driver_pdf_object_write:nn { g_@@_pdf_pageresources_N_ColorSpace_obj }
+%^^A           {
+%^^A             \prop_map_function:cN \g_tmpa_prop \driver_pdf_dict_item:nn
+%^^A           }
+%^^A This means that local entries can overwrite global entries, it is up to the user to avoid this
+%^^A with sensible names spaces.
+%^^A At every shipout we check if g_@@_pdf_pageresource_N_ColorSpace_prop exists.
+%^^A (That's probably more effective than trying to keep a list of pages with local settings.)
+%^^A If yes we put "ColorSpace = objnum  of g_@@_pdf_pageresources_N_ColorSpace_obj" into
+%^^A \g_@@_pdf_pageresources_prop and push this into pdfpageresources
+%^^A If not we put "ColorSpace = objnum of g_@@_pdf_pageresources_ColorSpace_obj" into
+%^^A \g_@@_pdf_pageresources_prop and push this into pdfpageresources
 
 
 %    \begin{macrocode}
@@ -419,7 +419,8 @@
   instead~of~the~expl3~interface.
  }
 % lowlevel stuff
-% to be able to test if someone tampered with the resources a command to retrieve the content:
+% to be able to test if someone tampered with the resources
+% a command to retrieve the content:
 \bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
 {
   \cs_new_protected:Npn \driver_pdf_pageresources_gget:N #1
@@ -568,7 +569,9 @@
   {
    \clist_map_inline:Nn \c_@@_pdf_pageresources_clist
    {
-    \int_step_inline:nn {\g_shipout_page_int} %<---- isn't the lastpage number with \AtEndDocument when floats are involved
+    \int_step_inline:nn {\g_shipout_page_int} %<---- isn't the lastpage number
+                                              %with \AtEndDocument when floats
+                                              %are involved
     {%\tl_set:Nn\l_tmpa_tl{##1}\tl_show:N\l_tmpa_tl
      \prop_if_exist:cT { g_@@_pdf_pageresources_##1_#1_prop }
      {
@@ -652,7 +655,8 @@
   }
 
 
-\cs_new_protected:Npn \driver_pdf_catalog:n #1 %content, currently needed as hyperref has \Hy@PutCatalog
+%content, currently needed as hyperref has \Hy@PutCatalog
+\cs_new_protected:Npn \driver_pdf_catalog:n #1
  {
   \pdfextension catalog {#1}
  }
@@ -730,15 +734,17 @@
   instead~of~the~expl3~interface.
  }
 \msg_new:nnn { pdf } { setup-after-documentclass }
-  { \token_to_str:N \documentsetup\c_space_tl should~be~used~only~before~\token_to_str:N\documentclass}
+  { \token_to_str:N \documentsetup\c_space_tl
+    should~be~used~only~before~\token_to_str:N\documentclass}
 \msg_new:nnn { pdf } { object-compression-disabled }
              { object~compression~is~not~supported~in~pdf~version~#1 }
 \msg_new:nnn { pdf } { catalog-special }
-             { values~to~the~catalog~entry~#1~should~be~added~with~\token_to_str:N\pdf_catalog_ #1_gput:nn }
+             { values~to~the~catalog~entry~#1~should~be~added~with~
+               \token_to_str:N\pdf_catalog_ #1_gput:nn }
 
 %</package>
 %    \end{macrocode}
-% \subsection{the pdfcatalog}
+% \subsection{The catalog}
 % The catalog dictionary is filled by e.g. \cs{pdfcatalog}. Multiple appearances of
 % \cs{pdfcatalog} are concatenated, so one could end with multiple entries.
 % We is better to avoid this. We therefore setup a
@@ -766,7 +772,7 @@
 %  \item[PageLayout] (name: one of /SinglePage, /OneColumn,
 %  /TwoColumnLeft, /TwoColumnRight, /TwoPageLeft (PDF 1.5), /TwoPageRight (PDF 1.5)
 %  \item[Outlines] a indirect reference (x 0 R) to an object.
-%  \item[OpenAction] array (e.g. \verb+[page /Fit]+ or dictionary \verb+<</Type /Action /S /GoTo /D /somedest>>)
+%  \item[OpenAction] array (e.g. \verb+[page /Fit]+ or dictionary \verb+<</Type /Action /S /GoTo /D /somedest>>+)
 %  \item[URI] dict, e.g. \verb+<</S/URI /URI (someurl)>>+
 %  \item[StructTreeRoot] a dict (normally an indirect reference to a dict),
 %   the package doing the tagging should create this.
@@ -802,6 +808,7 @@
 %% DPartRoot, (dict, pdf 2.0)
 %% resolved: OutputIntents, OCProperties, ViewerPreferences,
 % \subsubsection{catalog, special cases}
+%
 % \paragraph{ViewerPreferences}
 % This is a dictionary with various entries. So we setup a prop that can be filled and is pushed to
 % the catalog / an object later.
