@@ -92,7 +92,9 @@ new values are stored in a prop, and at every change the register is updated. Th
     \item TemplateInstantiated (name),
     \item PresSteps (dict),
     \item UserUnit (number),
-    \item VP (dict).
+    \item VP (array of dict).
+    \item OutputIntents (pdf 2.0) (array of dictionaries)
+    \item AF (pdf 2.0) (array of dictionaries, associated files, important probably for accessibility)
     \end{enumerate}
    \end{itemize}
 \begin{verbatim}
@@ -135,9 +137,13 @@ new values are stored in a prop, and at every change the register is updated. Th
 
 Most values are simple and can be handled similar to pdfpagesattr. The content of Trans can be a rather complicated dict, but only one transition per page makes sense, so it is ok if one package \enquote{wins}. It is theoretically possible that the AA entry should combine content from two sources (e.g. two javascript commands) but imho it should be then the task of the packages/the users to coordinate this.
 
+The AF-entry needs probably a dedicated setter function. OutputIntents perhaps too.
+
 It must be decided when to copy the property into pdfpageattr. Atbeginshipout?
 
 \section{pdfpageresources}
+(perhaps should be handled as an instance for a resource dictionary, entries ExtGState,
+ColorSpace, Pattern, Shading, XObject, Font, ProcSet, Properties, see e.g. /DR entry in AcroForm).
 \begin{itemize}
 \item token register, is added to the Resources dictionary of all \emph{following} pages.
 \item non-additive: A new call overwrites the content of the register (but not automatic entries like Font or XObject).
