@@ -981,8 +981,15 @@
 %  \item[/Configs] (optional) an array of indirect references to more configurations.
 %  \end{description}
 %  The /D entry is also a config, so it can be the first from a seq.
+%  The overall structure is nested: a dict with arrays. 
 %    \begin{macrocode}
 %<*package>
+% user command: \pdf_catalog_OCproperties_gput:nn, no, nx /should not be used hide it???
+% push command: \__pdf_value_catalog_OCproperties_gpush:
+
+%%% not finished ...............
+%%%\_@@_value_dict_new:nnn { catalog }{ OCproperties }{ \driver_pdf_catalog_gput:nn }
+
 \seq_new:N \g_@@_catalog_OCProperties_OCGs_seq
 \seq_new:N \g_@@_catalog_OCProperties_Configs_seq
 
