@@ -1,0 +1,14 @@
+\PassOptionsToPackage{enable-debug,check-declarations}{expl3}
+\RequirePackage[debug]{pdfresources}
+\input{regression-test}
+\documentclass{article}
+\ExplSyntaxOn
+%senseless values ...
+\pdf_catalog_AF_gput:n {(testAF1)}
+\pdf_catalog_AF_gput:n {(testAF2)}
+\pdf_catalog_AF_gput_left:n {(testAF0)}
+\ExplSyntaxOff
+\begin{document}
+\START
+some text
+\end{document} 
