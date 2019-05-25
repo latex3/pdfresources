@@ -9,6 +9,6 @@ module  = "pdfresources"
 installfiles = {"*.sty","*.cls","*.def"}
 sourcefiles =  {"*.dtx","*.ins","hluatex-experimental.def","tmpl3shipout.sty"}
 
-checkruns = 2
+checkruns = 3
 checkengines = {"luatex","pdftex"}
 

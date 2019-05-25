@@ -885,6 +885,13 @@
 %  \item[Threads] this is an indirect reference pointing to an array of dictionaries. If threads are
 %  added to a document it should be done by one package only.
 % \end{description}
+% \begin{function}[added = 2019-05-25]{\pdf_catalog_gput:nn}
+%   \begin{syntax}
+%     \cs{pdf_catalog_gput:nn} \meta{name} \meta{value}
+%   \end{syntax}
+%   Inserts \texttt{/name value} in the catalog.
+% \end{function}
+% \begin{macro}{\pdf_catalog_gput:nn}
 %    \begin{macrocode}
 %<*package>
 \prop_new:N \g_@@_catalog_prop
@@ -900,6 +907,7 @@
  }
 %</package>
 %    \end{macrocode}
+% \end{macro}
 %^^A open:  AcroForm, AA (dict, additional-actions),
 %^^A open but unclear: Names. Is created automatically (for the Dests subdict), but no
 %^^A other use found in the texmf tree. So perhaps later.
@@ -947,8 +955,15 @@
 %    \end{macrocode}
 % \end{macro}
 % \paragraph{ViewerPreferences}
-% This is a dictionary with various entries. So we setup a prop that can be filled and is pushed to
-% the catalog / an object later.
+% This is a dictionary with various entries. So we setup a prop that can be filled
+% and is pushed to the catalog / an object later.
+% \begin{function}[added = 2019-05-25]{\pdf_catalog_ViewerPreferences_gput:nn}
+%   \begin{syntax}
+%     \cs{pdf_catalog_ViewerPreferences_gput:n} \meta{name}\meta{value}
+%   \end{syntax}
+%   Inserts the /name value in the ViewerPreferences dictionary.
+% \end{function}
+% \begin{macro}{\pdf_catalog_ViewerPreferences_gput:nn}
 %    \begin{macrocode}
 %<*package>
 % user command: \pdf_catalog_ViewerPreferences_gput:nn, no, nx
@@ -957,6 +972,7 @@
 \_@@_value_dict_new:nnn { catalog }{ ViewerPreferences }{ \driver_pdf_catalog_gput:nn }
 %</package>
 %    \end{macrocode}
+% \end{macro}
 % \paragraph{OCProperties}
 %  This is a dictionary with three entries:
 %  \begin{description}
@@ -1030,30 +1046,23 @@
 %    \end{macrocode}
 % \paragraph{OutputIntents}
 % This is an array of dict/indirect references. So we need a seq to hold the items
-% and some code to put it in the catalog. The user is responsable that the indirect reference points to
-% sensible objects.
+% and some code to put it in the catalog. The user is responsable that the indirect
+% reference points to sensible objects.
+% \begin{function}[added = 2019-05-25]{\pdf_catalog_OutputIntents_gput:nn}
+%   \begin{syntax}
+%     \cs{pdf_catalog_OutputIntents_gput:nn} \meta{name}\meta{indirect object reference}
+%   \end{syntax}
+%   Inserts \texttt{/name reference} in the OutputIntents dictionay of the catalog.
+%   The referenced object must be created by the user.
+% \end{function}
 %    \begin{macrocode}
 %<*package>
-\seq_new:N\g_@@_catalog_OutputIntents_seq
+% user command: \pdf_catalog_OutputIntents_gput:nn, no, nx
+% push command: \__pdf_value_catalog_OutputIntents_gpush:
 
-\cs_new_protected:Npn\pdf_catalog_OutputIntents_gput:n #1
- {
-  \tl_if_empty:nTF { #1 }
-  {
-   \msg_none:nnn { pdf }{ empty-value }{ OutputIntents }
-  }
-  {
-   \seq_gput_right:Nn \g_@@_catalog_OutputIntents_seq { #1 }
-  }
- }
+\_@@_value_array_new:nnn { catalog } { OutputIntents }
+                         {\driver_pdf_catalog_gput:nn}
 
-\cs_new_protected:Npn\@@_catalog_array_gpush:n #1
- {
-  \int_compare:nNnT {\seq_count:c {g_@@_catalog_#1_seq}} > {0}
-  {
-   \exp_args:Nnx \driver_pdf_catalog_gput:nn  {#1} {[\seq_use:cn{g_@@_catalog_#1_seq} {~}]}
-  }
- }
 %</package>
 %    \end{macrocode}
 % \subsubsection{catalog, output}
@@ -1062,11 +1071,10 @@
 %\AfterEndPreamble %need to be decided ...
 \AtEndDocument
  {
-  \@@_catalog_array_gpush:n {OutputIntents} %OutputIntents
+  \@@_value_catalog_OutputIntents_gpush:    %OutputIntents
   \@@_value_catalog_AF_gpush:               %AF
   \@@_catalog_OCProperties_gpush:           %OCProperties
   \@@_value_catalog_ViewerPreferences_gpush:
-  %\@@_catalog_ViewerPreferences_gpush:      %ViewerPreferences
   \prop_map_function:NN  \g_@@_catalog_prop \driver_pdf_catalog_gput:nn
  }
 %</package>
