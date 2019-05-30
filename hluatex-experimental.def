@@ -183,13 +183,24 @@
 
 \ExplSyntaxOn
 % catalog mapped to expl3 command
+% \Hy@PutCatalog is used only in one place, so unclear if really usefull ...
+\cs_new:Npn\__hyp_put_catalog_aux:w /#1<<#2>>\q_stop
+ {
+  \driver_pdf_catalog_gput:nn {#1}{<<#2>>}
+ }
+\cs_new:Npn\__hyp_put_catalog:n #1
+ {
+  \__hyp_put_catalog_aux:w #1\q_stop
+ }
+ 
 \pdf@ifdraftmode
  {
   \let\Hy@PutCatalog \use_none:n
  }
  {
-  \let\Hy@PutCatalog \driver_pdf_catalog:n
+  \let\Hy@PutCatalog \__hyp_put_catalog:n
  }
+
 \ExplSyntaxOff
 
 
@@ -253,78 +264,6 @@
 \legacy_if:nT { Hy@setpdfversion }
  {
     \msg_warning:nn { hyp }{ pdfversion-disabled }
- %   \ifnum\Hy@pdfversion<5 %
-%        \ifHy@verbose
-%          \Hy@InfoNoLine{%
-%            PDF~object~streams~are~disabled,~because~they~are%
-%            \MessageBreak
-%            not~supported~in~requested~PDF~version %
-%            1.\Hy@pdfversion
-%          }%
-%        \fi
-%        \driver_pdf_objects_disable:
-%      %
-%    \fi
-%    \ifnum\Hy@pdfminorversion=\Hy@pdfversion\relax
-%    \else
-%      \let\Hy@temp\ltx@empty
-%      \def\Hy@temp@A#1#2{%
-%        \ifnum#1>\ltx@zero
-%          \edef\Hy@temp{%
-%            \Hy@temp
-%            \space\space
-%            \the#1\space #2%
-%            \ifnum#1=\ltx@one\else s\fi
-%            \MessageBreak
-%          }%
-%        \fi
-%      }%
-%      \Hy@temp@A\pdflastobj{PDF object}%
-%      \Hy@temp@A\lastsavedboxresourceindex{form XObject}%
-%      \Hy@temp@A\lastsavedimageresourceindex{image XObject}%
-%      \Hy@temp@A\pdflastannot{annotation}%
-%      \Hy@temp@A\driver_pdf_link_last_int:{link}%
-%      \ifx\Hy@temp\ltx@empty
-%       \int_compare:nNnTF { \Hy@pdfversion}  = {10 }
-%        { %pdf 2.0, temporary solution
-%          \pdf_version_gset:n {2.0}
-%        }
-%        {
-%          \pdf_version_gset:n{1.\Hy@pdfversion}
-%        }
-%      \else
-%        \let\Hy@temp@A\ltx@empty
-%        \ifnum\Hy@pdfversion=4 %
-%          \IfFileExists{pdf14.sty}{%
-%            \def\Hy@temp@A{%
-%              \MessageBreak
-%              Or \string\RequirePackage{pdf14} can be used%
-%              \MessageBreak
-%              before \string\documentclass\space as shortcut%
-%            }%
-%          }{}%
-%        \fi
-%        \Hy@WarningNoLine{%
-%          The PDF version number could not be set,\MessageBreak
-%          because some PDF objects are already written:%
-%          \MessageBreak
-%          \Hy@temp
-%          The version should be set as early as possible:%
-%          \MessageBreak
-%          \space\space
-%          \string\pdf_version_gset:n{\driver_pdf_version_major:.\driver_pdf_version_minor:}
-%          \ifnum\Hy@pdfversion<5 %
-%              \MessageBreak
-%              \space\space
-%              \string\driver_pdf_objects_disable:
-%          \fi
-%          \Hy@temp@A
-%        }%
-%      \fi
-%    \fi
-%    \PackageInfo{hyperref}{%
-%      pdf~version~set~to~\driver_pdf_version_major:.\driver_pdf_version_minor:\space
-%    }%
  }
  \edef\Hy@pdfversion
   { % this will need revision when pdf version stuff is better sorted
@@ -718,7 +657,7 @@
     \tl_if_empty:NF\@pdflang
     {
      \pdf_catalog_gput:nn { Lang } { (\@pdflang) }
-    } 
+    }
    }
   \bool_if:nF
    {
@@ -933,17 +872,17 @@
       \let\ltx@secondoftwo\relax
       \ifx\HyField@cofields\ltx@empty
         \xdef\HyField@cofields{%
-          \ltx@secondoftwo{#1}{ #2 ~ 0 ~ R}%
+          \ltx@secondoftwo{#1}{~#2}%
         }
       \else
         \let\ltx@secondoftwo\relax
         \def\HyField@AddCoField##1##2##3{%
           \ifx##1\ltx@empty
-            \ltx@secondoftwo{#1}{ #2 ~ 0 ~ R}%
+            \ltx@secondoftwo{#1}{~#2}%
             \expandafter\ltx@gobble
           \else
             \ifnum\pdf@strcmp{##2}{#1}>\ltx@zero
-              \ltx@secondoftwo{#1}{ #2 ~ 0 ~ R}%
+              \ltx@secondoftwo{#1}{~#2}%
               \ltx@secondoftwo{##2}{##3}%
               \expandafter\expandafter\expandafter\ltx@gobble
             \else
@@ -977,15 +916,16 @@
           \HyField@afields
           \space
         \fi
-        #1 ~ 0 ~ R%
+        #1
       }%
     }%
     \let\HyField@AuxAddToCoFields\HyField@ABD@AuxAddToCoFields
   }%
   \def\HyField@AddToFields{%
-    \expandafter\HyField@@AddToFields\expandafter{%
-      \the\driver_pdf_link_last_int:
-    }%
+     \exp_args:Nx\HyField@@AddToFields
+      {%
+       \driver_pdf_link_last:
+      }%
     \ifx\Fld@calculate@code\ltx@empty
     \else
       \begingroup
@@ -993,19 +933,22 @@
         \edef\Hy@temp{%
           \endgroup
           \if@filesw
-            \write\@mainaux{%
-              \string\HyField@AuxAddToCoFields{%
+            \write\@mainaux
+             {
+              \string\HyField@AuxAddToCoFields
+               {
                 \Fld@calculate@sortkey
-              }{%
-                \the\driver_pdf_link_last_int:
-              }%
-            }%
+               }
+               {
+                \driver_pdf_link_last:
+               }
+            }
           \fi
         }%
       \Hy@temp
     \fi
   }%
-  \def\HyField@@AddToFields#1{%
+  \def\HyField@@AddToFields#1{
     \HyField@AfterAuxOpen{%
       \if@filesw
         \write\@mainaux{%

@@ -1,0 +1,10 @@
+%validity checks
+
+/OCProperties has two required fields:
+
+
+  \int_compare:nNnT
+  {
+    (\seq_count:N \g_@@_catalog_OCProperties_OCGs_seq)*
+    (\seq_count:N \g_@@_catalog_OCProperties_Configs_seq)
+  } > {0}

@@ -266,7 +266,7 @@
   {
    \tl_set:Nx #1 {\tex_the:D \tex_pdfpagesattr:D}
   }
- \AtEndDocument{\@@_pdf_pagesattr_gpush:}
+ \AtEndDocument{\clearpage\@@_pdf_pagesattr_gpush:}
 }
 
 \sys_if_engine_luatex:T
@@ -284,7 +284,7 @@
    \tl_set:Nx #1 {\tex_the:D \tex_pdfvariable:D pagesattr}
   }
 
-  \AtEndDocument{\@@_pdf_pagesattr_gpush:}
+  \AtEndDocument{\clearpage\@@_pdf_pagesattr_gpush:}
 }
 %</package>
 %    \end{macrocode}
@@ -550,11 +550,12 @@
 %\AtEndDocument % must perhaps be even later??
 %
 \RequirePackage{etoolbox}
-\AfterEndDocument %works better
+%\AfterEndDocument %works better
 % Alternative?
 %\RequirePackage{atenddvi}
 %\AtEndDvi
- {
+\AtEndDocument
+ {\clearpage
    % write the global objects:
   \clist_map_inline:Nn \c_@@_pdf_pageresources_clist
   {
@@ -597,20 +598,8 @@
 % \subsubsection{other stuff}
 %    \begin{macrocode}
 %<*package>
-% version for link_last which gives an int. try to get rid of the necessity if possible
 \bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
 {
- %Push the pages attr prop to the token register:
- %should it be an internal command?
-
- \cs_new:Npx \driver_pdf_link_last_int:
-  {
-    \cs_if_exist:NTF \tex_pdffeedback:D
-      { \tex_numexpr:D \exp_not:N \tex_pdffeedback:D lastlink \scan_stop: }
-      { \exp_not:N \tex_pdflastlink:D }
-  }
-
-
  \cs_new_protected:Nn \driver_pdf_docview:nn %#1 page number, #2 e.g. /FitH
  {
   \pdfcatalog {  } openaction~goto~page #1 {#2}
@@ -646,20 +635,7 @@
  {
   \pdfextension catalog {  } openaction~goto~page #1 {#2}
  }
- % version for link_last which gives an int. try to get rid of the necessity if possible
- \cs_new:Npx \driver_pdf_link_last_int:
-  {
-    \cs_if_exist:NTF \tex_pdffeedback:D
-      { \tex_numexpr:D \exp_not:N \tex_pdffeedback:D lastlink \scan_stop: }
-      { \exp_not:N \tex_pdflastlink:D }
-  }
 
-
-%content, currently needed as hyperref has \Hy@PutCatalog
-\cs_new_protected:Npn \driver_pdf_catalog:n #1
- {
-  \pdfextension catalog {#1}
- }
 
 \cs_new_protected:Npx \driver_pdf_bdc:nn #1 #2
   {
@@ -701,7 +677,6 @@
     %\special{pdf:content EMC}%accsupp
   }
 
- %% \cs_new_protected:Nn \driver_pdf_catalog:n ????
  \input{l3dvipdfmx-pdf.def}
 }
 %</package>
@@ -981,7 +956,7 @@
 %  \item[/Configs] (optional) an array of indirect references to more configurations.
 %  \end{description}
 %  The /D entry is also a config, so it can be the first from a seq.
-%  The overall structure is nested: a dict with arrays. 
+%  The overall structure is nested: a dict with arrays.
 %    \begin{macrocode}
 %<*package>
 % user command: \pdf_catalog_OCproperties_gput:nn, no, nx /should not be used hide it???
