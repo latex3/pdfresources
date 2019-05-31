@@ -436,6 +436,17 @@
    \tl_gset:Nx #1 {\tex_the:D \tex_pdfvariable:D pageresources}
   }
 }
+
+\sys_if_engine_xetex:T
+{
+  \cs_new_protected:Npn \driver_pdf_pageresources_gget:N #1
+  {
+  %%???????????????????
+   %\tl_gset:Nx #1 {\tex_the:D \tex_pdfvariable:D pageresources}
+  }
+}
+
+
 \tl_new:N\g_@@_pdf_pageresources_tl
 \tl_new:N\g_@@_pdf_pageresources_tmp_tl
 \driver_pdf_pageresources_gget:N \g_@@_pdf_pageresources_tl
@@ -1238,9 +1249,16 @@
 %</package>
 %    \end{macrocode}
 
-% \subsection{pdfpagesattr}
-%
-%
+% \subsection{Compression}
+% \begin{macro}{\pdf_uncompress:}
+%    \begin{macrocode}
+\cs_new_protected:Npn \pdf_uncompress:
+{
+ \driver_pdf_compresslevel:n {0}
+ \driver_pdf_compress_objects:n {0}
+}
+%    \end{macrocode}
+% \end{macro}
 % \subsection{Setting / comparing pdf versions}
 % The code assumes that the versions are two integers separated by a period.
 % The pdf version should be set rather early, before any object has been written.
