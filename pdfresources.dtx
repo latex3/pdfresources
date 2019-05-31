@@ -1252,12 +1252,14 @@
 % \subsection{Compression}
 % \begin{macro}{\pdf_uncompress:}
 %    \begin{macrocode}
+%<*package>
 \cs_new_protected:Npn \pdf_uncompress:
 {
  \driver_pdf_compresslevel:n {0}
  \driver_pdf_compress_objects:n {0}
 }
 %    \end{macrocode}
+%</package>
 % \end{macro}
 % \subsection{Setting / comparing pdf versions}
 % The code assumes that the versions are two integers separated by a period.
