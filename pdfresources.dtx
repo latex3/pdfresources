@@ -694,8 +694,8 @@
 \cs_new_protected:Npx \driver_pdf_bdc:nn #1 #2
   {
     \cs_if_exist:NTF \tex_pdfextension:D
-      { \tex_pdfextension:D literal~page~{#1~#2~BDC} }
-      { \tex_pdfliteral:D~page~{#1~#2~BDC}  }
+      { \tex_pdfextension:D literal~page~{/#1~#2~BDC} }
+      { \tex_pdfliteral:D~page~{/#1~#2~BDC}  }
   }
 
 
@@ -715,13 +715,13 @@
  %% need to be checked if resources are ok!!!!
  \cs_new_protected:Npn \driver_pdf_bmc:n #1
   {
-    \special{pdf:code~#1~BMC}
+    \special{pdf:code~/#1~BMC}
     %\special{pdf:content~#1~BMC}%
   }
 
 \cs_new_protected:Npn \driver_pdf_bdc:nn #1 #2
   {
-    \special{pdf:code~#1~#2~BDC}
+    \special{pdf:code~/#1~#2~BDC}
     %\special{pdf:content~#1~#2~BDC}%accsupp
   }
 
@@ -770,6 +770,28 @@
 \msg_new:nnn { pdf } { catalog-special }
              { values~to~the~catalog~entry~#1~should~be~added~with~
                \token_to_str:N\pdf_catalog_ #1_gput:nn }
+
+%</package>
+%    \end{macrocode}
+% \subsection{Objects and other stuff}
+% NEEDS REVISING!!!
+%    \begin{macrocode}
+%<*package>
+\cs_set_eq:NN \pdf_object_new:nn \driver_pdf_object_new:nn
+\cs_set_eq:NN \pdf_object_write:nn \driver_pdf_object_write:nn
+\cs_generate_variant:Nn \pdf_object_write:nn {nx}
+\cs_set_eq:NN \pdf_object_ref:n \driver_pdf_object_ref:n
+\cs_set_eq:NN \pdf_link_margin:n \driver_pdf_link_margin:n
+\cs_set_eq:NN \pdf_xform_new:nnnN \driver_pdf_xform_new:nnnN
+\cs_set_eq:NN \pdf_link_last: \driver_pdf_link_last:
+%</package>
+%    \end{macrocode}
+% \subsection{BDC/EMC commands}
+% NEEDS SORTING OUT! Properties for arg 2?????
+%    \begin{macrocode}
+%<*package>
+ \cs_set_eq:NN\pdf_bdc:nn\driver_pdf_bdc:nn
+ \cs_set_eq:NN\pdf_emc: \driver_pdf_emc:
 
 %</package>
 %    \end{macrocode}
@@ -1363,8 +1385,8 @@
    }
  }
 
-\cs_set_eq:Npn \pdf_version_major: \driver_pdf_version_major:
-\cs_set_eq:Npn \pdf_version_minor: \driver_pdf_version_minor:
+\cs_set_eq:NN \pdf_version_major: \driver_pdf_version_major:
+\cs_set_eq:NN \pdf_version_minor: \driver_pdf_version_minor:
 
 %</package>
 %    \end{macrocode}

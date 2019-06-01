@@ -13,7 +13,6 @@
 %%\Hy@VersionCheck{hluatex.def}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \ExplSyntaxOn
-\cs_generate_variant:Nn \driver_pdf_object_write:nn {nx}
 %% messages, should later (with more drivers) go somewhere more generic ...
 \prop_gput:Nnn \g_msg_module_name_prop { hyp }{ hyperref }
 \msg_new:nnn
@@ -186,7 +185,7 @@
 % \Hy@PutCatalog is used only in one place, so unclear if really usefull ...
 \cs_new:Npn\__hyp_put_catalog_aux:w /#1<<#2>>\q_stop
  {
-  \driver_pdf_catalog_gput:nn {#1}{<<#2>>}
+  \pdf_catalog_gput:nn {#1}{<<#2>>}
  }
 \cs_new:Npn\__hyp_put_catalog:n #1
  {
@@ -250,8 +249,8 @@
 %\edef\Hy@pdfmajorversion{\pdfvariable majorversion}%
 
 \ExplSyntaxOn
-\cs_set_eq:NN \Hy@pdfminorversion \driver_pdf_version_minor:
-\cs_set_eq:NN \Hy@pdfmajorversion \driver_pdf_version_major:
+\cs_set_eq:NN \Hy@pdfminorversion \pdf_version_minor:
+\cs_set_eq:NN \Hy@pdfmajorversion \pdf_version_major:
 
   \ifHy@ocgcolorlinks
     \pdf_version_min_gset:n { 1.5 }
@@ -273,16 +272,17 @@
   }
 \Hy@DisableOption{pdfversion}%
 
+%need redoing, should use the pdfresources stuff ...
 \legacy_if:nTF {Hy@ocgcolorlinks}
  {
   \newcommand\OBJ@OCG@view {} % for the hyperref test
   \pdf@ifdraftmode{}{
-    \driver_pdf_object_new:nn   { l__hyp_ocg_view_dict_obj }   { dict }
-    \driver_pdf_object_new:nn   { l__hyp_ocg_print_dict_obj }  { dict }
-    \driver_pdf_object_new:nn   { l__hyp_ocg_config_dict_obj } { dict }
-    \driver_pdf_object_new:nn   { l__hyp_ocg_ref_array_obj }   { array }
+    \pdf_object_new:nn   { l__hyp_ocg_view_dict_obj }   { dict }
+    \pdf_object_new:nn   { l__hyp_ocg_print_dict_obj }  { dict }
+    \pdf_object_new:nn   { l__hyp_ocg_config_dict_obj } { dict }
+    \pdf_object_new:nn   { l__hyp_ocg_ref_array_obj }   { array }
 
-    \driver_pdf_object_write:nn { l__hyp_ocg_view_dict_obj }
+    \pdf_object_write:nn { l__hyp_ocg_view_dict_obj }
      {
         /Type/OCG
         /Name(View)
@@ -292,7 +292,7 @@
           /View  <</ViewState/ON  >>~
          >>
      }
-    \driver_pdf_object_write:nn { l__hyp_ocg_print_dict_obj }
+    \pdf_object_write:nn { l__hyp_ocg_print_dict_obj }
      {
         /Type/OCG
         /Name(Print)
@@ -303,47 +303,49 @@
          >>
      }
 
-   \driver_pdf_object_write:nx { l__hyp_ocg_ref_array_obj }
+   \pdf_object_write:nx { l__hyp_ocg_ref_array_obj }
    {
-     \driver_pdf_object_ref:n { l__hyp_ocg_view_dict_obj }
+     \pdf_object_ref:n { l__hyp_ocg_view_dict_obj }
      \c_space_tl
-     \driver_pdf_object_ref:n { l__hyp_ocg_print_dict_obj }
+     \pdf_object_ref:n { l__hyp_ocg_print_dict_obj }
    }
-   \driver_pdf_object_write:nx { l__hyp_ocg_config_dict_obj }
+   \pdf_object_write:nx { l__hyp_ocg_config_dict_obj }
     {
-      /OFF[\driver_pdf_object_ref:n { l__hyp_ocg_print_dict_obj }]
+      /OFF[\pdf_object_ref:n { l__hyp_ocg_print_dict_obj }]
       /AS[
         <<
          /Event/View
-         /OCGs\c_space_tl \driver_pdf_object_ref:n { l__hyp_ocg_ref_array_obj }
+         /OCGs\c_space_tl \pdf_object_ref:n { l__hyp_ocg_ref_array_obj }
          /Category[/View]
         >>
         <<
          /Event/Print
-         /OCGs\c_space_tl \driver_pdf_object_ref:n { l__hyp_ocg_ref_array_obj }
+         /OCGs\c_space_tl \pdf_object_ref:n { l__hyp_ocg_ref_array_obj }
          /Category[/Print]
         >>
         <<
          /Event/Export
-         /OCGs\c_space_tl \driver_pdf_object_ref:n { l__hyp_ocg_ref_array_obj }
+         /OCGs\c_space_tl \pdf_object_ref:n { l__hyp_ocg_ref_array_obj }
          /Category[/Print]
         >>
           ]
     }
-    \exp_args:Nx\pdf_catalog_OCProperties_OCGs_gput:n { \driver_pdf_object_ref:n { l__hyp_ocg_view_dict_obj }}
-    \exp_args:Nx\pdf_catalog_OCProperties_OCGs_gput:n { \driver_pdf_object_ref:n { l__hyp_ocg_print_dict_obj }}
+    \exp_args:Nx\pdf_catalog_OCProperties_OCGs_gput:n
+     { \pdf_object_ref:n { l__hyp_ocg_view_dict_obj } }
+    \exp_args:Nx\pdf_catalog_OCProperties_OCGs_gput:n { \pdf_object_ref:n
+     { l__hyp_ocg_print_dict_obj } }
     \exp_args:Nx\pdf_catalog_OCProperties_Configs_gput:n
      {
-      \driver_pdf_object_ref:n { l__hyp_ocg_config_dict_obj }
+      \pdf_object_ref:n { l__hyp_ocg_config_dict_obj }
      }
 
      \pdf_pageresources_gput:nnn{Properties}{OCView}
      {
-      \driver_pdf_object_ref:n { l__hyp_ocg_view_dict_obj}
+      \pdf_object_ref:n { l__hyp_ocg_view_dict_obj}
      }
     \pdf_pageresources_gput:nnn{Properties}{OCPrint}
      {
-      \driver_pdf_object_ref:n { l__hyp_ocg_print_dict_obj}
+      \pdf_object_ref:n { l__hyp_ocg_print_dict_obj}
      }
   }
   \Hy@AtBeginDocument{
@@ -361,17 +363,17 @@
         \color@endgroup\egroup
         \mbox{
           %this uses a named object, we really need to sort this ...
-          \driver_pdf_bdc:nn {/OC}{/OCPrint}
+          \pdf_bdc:nn {OC}{/OCPrint}
           %\pdfliteral~page{/OC/OCPrint~BDC}
           \rlap{\copy0}
-          \driver_pdf_emc:
+          \pdf_emc:
           %\pdfliteral~page{/OC/OCView~BDC}
-          \driver_pdf_bdc:nn {/OC}{/OCView}
+          \pdf_bdc:nn {OC}{/OCView}
           \group_begin:
             \expandafter\HyColor@UseColor\Hy@ocgcolor
             \box0~
           \group_end:
-          \driver_pdf_emc:
+          \pdf_emc:
         }
       \fi
       \group_end:
@@ -384,10 +386,10 @@
 
 \def\setpdflinkmargin#1
  {
-   \driver_pdf_link_margin:n { #1 }
+   \pdf_link_margin:n { #1 }
  }
  % default:
- \driver_pdf_link_margin:n { 1pt}
+ \pdf_link_margin:n { 1pt}
 
 \providecommand*\@pdfview{XYZ}
 \str_set:Nx\@pdfview{\str_lower_case:f {\@pdfview}}
@@ -856,7 +858,7 @@
 \def\MakeFieldObject#1#2
  {
   \hbox_set:Nn\l_tmpa_box {#1}
-  \driver_pdf_xform_new:nnnN { #2 }{}{} \l_tmpa_box
+  \pdf_xform_new:nnnN { #2 }{}{} \l_tmpa_box
   }%
 \let\HyField@afields\ltx@empty
 \let\HyField@cofields\ltx@empty
@@ -924,7 +926,7 @@
   \def\HyField@AddToFields{%
      \exp_args:Nx\HyField@@AddToFields
       {%
-       \driver_pdf_link_last:
+       \pdf_link_last:
       }%
     \ifx\Fld@calculate@code\ltx@empty
     \else
@@ -940,7 +942,7 @@
                 \Fld@calculate@sortkey
                }
                {
-                \driver_pdf_link_last:
+                \pdf_link_last:
                }
             }
           \fi
@@ -970,8 +972,8 @@
     \Hy@FormObjects
     \AtVeryEndDocument
      {
-      \driver_pdf_object_new:nn   { l__hyp_acroform_dict_obj } {dict}
-      \driver_pdf_object_write:nx { l__hyp_acroform_dict_obj }
+      \pdf_object_new:nn   { l__hyp_acroform_dict_obj } {dict}
+      \pdf_object_write:nx { l__hyp_acroform_dict_obj }
       {
         /Fields[\HyField@afields]
         \ifx\HyField@cofields\ltx@empty
@@ -980,8 +982,8 @@
          \fi
         /DR<<
             /Font<<
-              /ZaDb~\driver_pdf_object_ref:n {l__hyp_font_zapfdingbats_obj}~
-              /Helv~\driver_pdf_object_ref:n {l__hyp_font_helvetica_obj}
+              /ZaDb~\pdf_object_ref:n {l__hyp_font_zapfdingbats_obj}~
+              /Helv~\pdf_object_ref:n {l__hyp_font_helvetica_obj}
             >>
           >>
           /DA(/Helv~10~Tf~0~g)
@@ -992,6 +994,7 @@
             \fi
           \fi
       }
+      %%% Acroform management needs sorting out  ...
       \driver_pdf_catalog_gput:nn{AcroForm}{\driver_pdf_object_ref:n{l__hyp_acroform_dict_obj}}%
     }
   }
@@ -1326,10 +1329,10 @@
 %hm. Should a luatex driver use type1 fonts in fields????
 \ExplSyntaxOn
 \def\Hy@FormObjects{%
-  \driver_pdf_object_new:nn   {l__hyp_encoding_pdfdoc_obj } { dict }
-  \driver_pdf_object_new:nn   {l__hyp_font_zapfdingbats_obj } { dict }
-  \driver_pdf_object_new:nn   {l__hyp_font_helvetica_obj } { dict }
-  \driver_pdf_object_write:nx {l__hyp_encoding_pdfdoc_obj }
+  \pdf_object_new:nn   {l__hyp_encoding_pdfdoc_obj } { dict }
+  \pdf_object_new:nn   {l__hyp_font_zapfdingbats_obj } { dict }
+  \pdf_object_new:nn   {l__hyp_font_helvetica_obj } { dict }
+  \pdf_object_write:nx {l__hyp_encoding_pdfdoc_obj }
    {
       /Type/Encoding
       /Differences[
@@ -1371,20 +1374,20 @@
            /uacute/ucircumflex/udieresis/yacute/thorn/ydieresis
       ]
   }
-  \driver_pdf_object_write:nn {l__hyp_font_zapfdingbats_obj }
+  \pdf_object_write:nn {l__hyp_font_zapfdingbats_obj }
    {
       /Type/Font
       /Subtype/Type1
       /Name/ZaDb
       /BaseFont/ZapfDingbats
    }
-  \driver_pdf_object_write:nx {l__hyp_font_helvetica_obj }
+  \pdf_object_write:nx {l__hyp_font_helvetica_obj }
    {
       /Type/Font
       /Subtype/Type1
       /Name/Helv
       /BaseFont/Helvetica
-      /Encoding~\driver_pdf_object_ref:n { l__hyp_encoding_pdfdoc_obj }
+      /Encoding~\pdf_object_ref:n { l__hyp_encoding_pdfdoc_obj }
    }
   \global\let\Hy@FormObjects\relax
 }
