@@ -192,7 +192,7 @@
  {
   \__hyp_put_catalog_aux:w #1\q_stop
  }
- 
+
 \pdf@ifdraftmode
  {
   \let\Hy@PutCatalog \use_none:n
@@ -267,9 +267,9 @@
  }
  \edef\Hy@pdfversion
   { % this will need revision when pdf version stuff is better sorted
-   \int_compare:nNnTF { \driver_pdf_version_minor: } = { 2 }
+   \int_compare:nNnTF { \pdf_version_minor: } = { 2 }
     { 10 }
-    {\driver_pdf_version_minor:}
+    {\pdf_version_minor:}
   }
 \Hy@DisableOption{pdfversion}%
 

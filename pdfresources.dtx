@@ -147,6 +147,24 @@
 % at the input?
 %
 \cs_new:Npn \driver_pdf_dict_item:nn #1 #2 {/#1~#2~}
+
+%% temporary command for the "end of run"
+\bool_if:nT {(\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p:) || \sys_if_engine_luatex_p: }
+{
+ \cs_new_protected:Npn \driver_pdf_at_end_of_run:n #1
+  {
+   \AtEndDocument{\clearpage #1}
+  }
+}
+
+\sys_if_engine_xetex:T
+{
+ \RequirePackage{atenddvi}
+ \cs_new_protected:Npn \driver_pdf_at_end_of_run:n #1
+  {
+   \AtEndDvi{#1}
+  }
+}
 %</package>
 %    \end{macrocode}
 %\subsubsection{pdfxform}
@@ -463,14 +481,38 @@
   }
 }
 
+\sys_if_engine_xetex:T
+{
+ \cs_new_protected:Npx \@@_pdf_pageresources:n #1
+  {
+   \special{pdf:pageresources<<#1>>} %???????
+  }
+}
+
 % push a prop to the register:
-\cs_new_protected:Npn \@@_pdf_pageresources_gpush:N #1
+\bool_if:nT { \sys_if_engine_pdftex_p: || \sys_if_engine_luatex_p: }
+{
+ \cs_new_protected:Npn \@@_pdf_pageresources_gpush:N #1
   {
     \exp_args:NNx \tex_global:D \@@_pdf_pageresources:n
     {
      \prop_map_function:NN #1 \driver_pdf_dict_item:nn
     }
   }
+}
+
+\sys_if_engine_xetex:T
+{%??????????????????????????????????
+ \cs_new_protected:Npn \@@_pdf_pageresources_gpush:N #1
+  {
+    %\tl_set:Nx \l_tmpa_tl {\prop_map_function:NN #1 \driver_pdf_dict_item:nn}
+    %\tl_show:N \l_tmpa_tl
+    \exp_args:Nx \@@_pdf_pageresources:n
+    {
+     \prop_map_function:NN #1 \driver_pdf_dict_item:nn
+    }
+  }
+}
 %
 
 % management code
@@ -544,6 +586,7 @@
     }
    }
   }
+  %\prop_show:N\g_@@_pdf_pageresources_prop
   \@@_pdf_pageresources_gpush:N \g_@@_pdf_pageresources_prop
   \driver_pdf_pageresources_gget:N \g_@@_pdf_pageresources_tl
  }
@@ -560,13 +603,13 @@
 % doesn't work: ocg layer of float gets lost ...
 %\AtEndDocument % must perhaps be even later??
 %
-\RequirePackage{etoolbox}
+%\RequirePackage{etoolbox}
 %\AfterEndDocument %works better
 % Alternative?
 %\RequirePackage{atenddvi}
 %\AtEndDvi
-\AtEndDocument
- {\clearpage
+\driver_pdf_at_end_of_run:n
+ {
    % write the global objects:
   \clist_map_inline:Nn \c_@@_pdf_pageresources_clist
   {
@@ -1319,6 +1362,9 @@
     { \driver_pdf_version_major:.\driver_pdf_version_minor:}
    }
  }
+
+\cs_set_eq:Npn \pdf_version_major: \driver_pdf_version_major:
+\cs_set_eq:Npn \pdf_version_minor: \driver_pdf_version_minor:
 
 %</package>
 %    \end{macrocode}
