@@ -1278,18 +1278,6 @@
 %</package>
 %    \end{macrocode}
 
-% \subsection{Compression}
-% \begin{macro}{\pdf_uncompress:}
-%    \begin{macrocode}
-%<*package>
-\cs_new_protected:Npn \pdf_uncompress:
-{
- \driver_pdf_compresslevel:n {0}
- \driver_pdf_compress_objects:n {0}
-}
-%    \end{macrocode}
-%</package>
-% \end{macro}
 % \subsection{Setting / comparing pdf versions}
 % The code assumes that the versions are two integers separated by a period.
 % The pdf version should be set rather early, before any object has been written.
@@ -1313,106 +1301,27 @@
     \@@_version_checks:
    }
  }
-%</package>
-%    \end{macrocode}
-% \end{macro}
-% \begin{macro}{\pdf_version_gset:n, \pdf_version_min_gset:n}
-% \begin{macro}{\@@_version_gset:w}
-%    \begin{macrocode}
-%<*package>
-\cs_new_protected:Npn \pdf_version_gset:n #1
- {
-  \@@_version_gset:w  #1 . . \q_stop
- }
-
-\cs_new_protected:Npn \pdf_version_min_gset:n #1
- {
-  \pdf_version_compare:NnT < {#1}
-   {
-    \@@_version_gset:w  #1 . . \q_stop
-   }
- }
-
-\cs_new_protected:Npn \@@_version_gset:w  #1 .#2 . #3\q_stop
- {
-  \driver_pdf_version_major_gset:n {#1}
-  \driver_pdf_version_minor_gset:n {#2}
- }
-
 \cs_new_protected:Npn \@@_version_checks:
  {
   \pdf_version_compare:NnT < { 1.5 }
    {
-    \driver_pdf_compress_objects:n {0}
+    \@@_backend_compress_objects:n {0}
     \msg_info:nnx {pdf}{object-compression-disabled}
-    { \driver_pdf_version_major:.\driver_pdf_version_minor:}
+    { \@@_backend_version_major:.\@@_backend_version_minor:}
+   }
+ }\cs_new_protected:Npn \@@_version_checks:
+ {
+  \pdf_version_compare:NnT < { 1.5 }
+   {
+    \@@_backend_compress_objects:n {0}
+    \msg_info:nnx {pdf}{object-compression-disabled}
+    { \@@_backend_version_major:.\@@_backend_version_minor:}
    }
  }
-
-\cs_set_eq:NN \pdf_version_major: \driver_pdf_version_major:
-\cs_set_eq:NN \pdf_version_minor: \driver_pdf_version_minor:
-
 %</package>
 %    \end{macrocode}
 % \end{macro}
-% \end{macro}
-% \begin{macro}{\pdf_version_compare:Nn}
-%    \begin{macrocode}
-%<*package>
-\cs_new:cpn { @@_version_compare_=:w } #1 .#2 . #3\q_stop
- {
-   \bool_if:nTF
-    {
-     \int_compare_p:n { \driver_pdf_version_major: = #1  }
-     &&
-     \int_compare_p:n { \driver_pdf_version_minor: = #2}
-    }
-    { \prg_return_true: }
-    { \prg_return_false: }
- }
 
-\cs_new:cpn { @@_version_compare_<:w } #1 .#2 . #3\q_stop
- {
-   \bool_if:nTF
-    {
-     \int_compare_p:n  { \driver_pdf_version_major: < #1}
-     ||
-     (
-      \int_compare_p:n { \driver_pdf_version_major: = #1 }
-      &&
-      \int_compare_p:n { \driver_pdf_version_minor: < #2 }
-     )
-    }
-    { \prg_return_true: }
-    { \prg_return_false: }
- }
-
-\cs_new:cpn { @@_version_compare_>:w } #1 .#2 . #3\q_stop
- {
-   \bool_if:nTF
-    {
-     \int_compare_p:n  { \driver_pdf_version_major: > #1}
-     ||
-     (
-      \int_compare_p:n { \driver_pdf_version_major: = #1}
-      &&
-      \int_compare_p:n { \driver_pdf_version_minor: > #2 }
-     )
-    }
-    { \prg_return_true: }
-    { \prg_return_false: }
- }
-
-\prg_new_conditional:Npnn \pdf_version_compare:Nn #1 #2
- {
-  p,T,F,TF
- }
- {
-  \use:c {@@_version_compare_#1:w} #2 . . \q_stop
- }
-%</package>
-%    \end{macrocode}
-% \end{macro}
 % \subsection{Higher-level link management}
 % \subsubsection{Startlink}
 % packages like ocgx2 and tagpdf wants to add code to links/annotation created by hyperref.
