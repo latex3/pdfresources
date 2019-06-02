@@ -622,24 +622,6 @@
  }
 
 
-% this needs refinement, probably is should create named objects and add
-% them to the properties, see discussion
-% https://chat.stackexchange.com/transcript/message/49970158#49970158
-\cs_new_protected:Npx \driver_pdf_bdc:nn #1 #2
-  {
-    \cs_if_exist:NTF \tex_pdfextension:D
-      { \tex_pdfextension:D literal~page~{#1~#2~BDC} }
-      { \tex_pdfliteral:D~page~{#1~#2~BDC}  }
-  }
-
-
-\cs_new_protected:Npx \driver_pdf_emc:
-  {
-    \cs_if_exist:NTF \tex_pdfextension:D
-      { \tex_pdfextension:D literal~page~{EMC} }
-      { \tex_pdfliteral:D~page~{EMC}  }
-  }
-
 \input{l3pdfmode-pdf.def}
 }
 
@@ -652,23 +634,6 @@
   \pdfextension catalog {  } openaction~goto~page #1 {#2}
  }
 
-
-\cs_new_protected:Npx \driver_pdf_bdc:nn #1 #2
-  {
-    \cs_if_exist:NTF \tex_pdfextension:D
-      { \tex_pdfextension:D literal~page~{/#1~#2~BDC} }
-      { \tex_pdfliteral:D~page~{/#1~#2~BDC}  }
-  }
-
-
-\cs_new_protected:Npx \driver_pdf_emc:
-  {
-    \cs_if_exist:NTF \tex_pdfextension:D
-      { \tex_pdfextension:D literal~page~{EMC} }
-      { \tex_pdfliteral:D~page~{EMC}  }
-  }
-
-
 \input{l3pdfmode-pdf.def}
 }
 
@@ -679,18 +644,6 @@
   {
     \special{pdf:code~/#1~BMC}
     %\special{pdf:content~#1~BMC}%
-  }
-
-\cs_new_protected:Npn \driver_pdf_bdc:nn #1 #2
-  {
-    \special{pdf:code~/#1~#2~BDC}
-    %\special{pdf:content~#1~#2~BDC}%accsupp
-  }
-
-\cs_new_protected:Npn \driver_pdf_emc:
-  {
-    \special{pdf:code~EMC}
-    %\special{pdf:content EMC}%accsupp
   }
 
  \input{l3dvipdfmx-pdf.def}
