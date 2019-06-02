@@ -3,11 +3,6 @@
 \PassOptionsToPackage{debug}{pdfresources}
 \usepackage{pdfresources}
 
-\ExplSyntaxOn
-\driver_pdf_compresslevel:n {0}
-\driver_pdf_compress_objects:n {0}
-%\pdf_version_gset:n{1.7}
-\ExplSyntaxOff
 \usepackage{hyperxmp,lipsum}
 
 \usepackage[customdriver=hluatex-experimental,
@@ -21,8 +16,8 @@
    {hyperref}
 
 \ExplSyntaxOn
-\driver_pdf_object_new:nn{metadata-obj}{stream}
-\pdf_catalog_gput:nn{Metadata}{\driver_pdf_object_ref:n{metadata-obj}}
+\pdf_object_new:nn{metadata-obj}{stream}
+\pdf_catalog_gput:nn{Metadata}{\pdf_object_ref:n{metadata-obj}}
 \ExplSyntaxOff
 
  \begin{document}
@@ -30,6 +25,6 @@
  \ExplSyntaxOn\makeatletter
  \hyxmp@find@metadata
  \hyxmp@construct@packet
- \exp_args:Nnx\driver_pdf_object_write:nn{metadata-obj}{{/Type~/Metadata~/Subtype~/XML}{\hyxmp@xml}}%
+ \exp_args:Nnx\pdf_object_write:nn{metadata-obj}{{/Type~/Metadata~/Subtype~/XML}{\hyxmp@xml}}%
 \ExplSyntaxOff
 \end{document}

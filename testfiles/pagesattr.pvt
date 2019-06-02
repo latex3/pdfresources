@@ -3,15 +3,15 @@
 \input{regression-test}
 \documentclass{article}
 \begin{document}
-\START 
+\START
 some text
 \ExplSyntaxOn
  \pdf_pagesattr_gput:nn {YYY}{(yyy)}
-%test local: 
+%test local:
 {\pdf_pagesattr_gput:nn {ZZZ}{(zzz)}}
 
 %test "wrong" primitive call:
- \__driver_pdf_pagesattr:n{/WWW~(someusersetting)}
+ \__pdf_backend_pagesattr:n{/WWW~(someusersetting)}
 
 %test doublette
  \pdf_pagesattr_gput:nn {YYY}{(y22)}
@@ -21,4 +21,4 @@ some text
 \pdf_pagesattr_gput:nn {SSS}{\attributecontent}
 \tl_show:N\g__pdf_pagesattr_tl
 \ExplSyntaxOff
-\end{document}
+\end{document} 

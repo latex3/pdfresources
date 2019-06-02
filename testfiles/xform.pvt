@@ -3,17 +3,17 @@
 \usepackage{pdfresources}
 \begin{document}
 \START
-text 
+text
 \ExplSyntaxOn
 
 \hbox_set:Nn \l_tmpa_box{xxxxxxxxxx}
-\driver_pdf_xform_new:nnnN  {myxform}{/yyy~(bla)}{/bbb~(x)}\l_tmpa_box
-\driver_pdf_xform_use:n {myxform}~
+\pdf_xform_new:nnnN  {myxform}{/yyy~(bla)}{/bbb~(x)}\l_tmpa_box
+\pdf_xform_use:n {myxform}~
 some~text~
-\driver_pdf_xform_use:n {myxform}
+\pdf_xform_use:n {myxform}
 ~
-~\driver_pdf_xform_ref:n {myxform}
-~\driver_pdf_xform_name_ref:n {myxform}
-\prop_show:N\g__driver_pdf_xform_prop
+~\pdf_xform_ref:n {myxform}
+~\pdf_xform_name_ref:n {myxform}
+\prop_show:N\g__pdf_xform_prop
 \ExplSyntaxOff
-\end{document}
+\end{document} 
