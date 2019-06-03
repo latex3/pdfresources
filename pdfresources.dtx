@@ -185,10 +185,6 @@
 %    \end{macrocode}
 % \subsubsection{backend / pdfpagesattr}
 % pdfpagesattr is a single token register which is output at the end of the compilation.
-% It is normally used only a few times in a document, so it is okay to update the
-% register at every change. We issue the push code also at the end of
-% the document, so that it wins.
-%
 %    \begin{macrocode}
 %<*package>
 \bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
@@ -226,17 +222,11 @@
   }
 }
 %dvips, dvipdfmx missing
-% move this !!!!!!!!!!!!!!!!!!
-\@@_backend_end_run:n { \@@_pdf_pagesattr_gpush: }
+
 %</package>
 %    \end{macrocode}
 % \subsubsection{backend / pdfpageattr}
 % pdfpageattr is a single token register which is output at the shipout for every page.
-% It is normally used only a few times in a document, so it is okay to update the
-% register at every change.
-% Open is the question if one need more shipout hooks to set e.g. Rotate on specific
-% pages. Open is the setter for /AF (and perhaps /OutputIntents).
-% See also https://tex.stackexchange.com/questions/479812/extension-of-rotating-package-to-set-pdf-rotation
 %
 %    \begin{macrocode}
 %<*package>
@@ -277,11 +267,44 @@
 %dvips, dvipdfmx missing
 %</package>
 %    \end{macrocode}
-% \subsection{ pagesattr / resources management}
+% \subsection{backend / pageresources}
+%    \begin{macrocode}
+%<*package>
+% backend commands the command to fill the register
+\bool_if:nT { \sys_if_engine_pdftex_p: || \sys_if_engine_luatex_p: }
+{
+ \cs_new_protected:Npx \@@_backend_pageresources:n #1
+  {
+    \exp_not:N \tex_global:D
+    \cs_if_exist:NTF \tex_pdfpageresources:D
+      { \tex_pdfpageresources:D }
+      { \tex_pdfvariable:D pageresources }
+      {#1}
+  }
+}
+
+\sys_if_engine_xetex:T
+{
+ \cs_new_protected:Npx \@@_backend_pageresources:n #1
+  {
+   \special{pdf:pageresources<<#1>>} %???????
+  }
+}
+%dvips missing
+%</package>
+%    \end{macrocode}
+% \section{Management code}
+% \subsection{ management / pagesattr }
+% The register is normally used only a few times in a document, so it is okay to update the
+% register at every change.
+% We issue the push code also at the end of the document, so that it wins.
+% Open is the question if one need more shipout hooks to set e.g. Rotate on specific
+% pages. Open is the setter for /AF (and perhaps /OutputIntents).
+% See also https://tex.stackexchange.com/questions/479812/extension-of-rotating-package-to-set-pdf-rotation
 %    \begin{macrocode}
 %<*package>
 \prop_new:N \g_@@_pagesattr_prop
-% setter: internal???
+% setter:
 \cs_new_protected:Npn \pdf_pagesattr_gput:nn #1 #2
   {
    \prop_gput:Nnn \g_@@_pagesattr_prop { #1 }{ #2}
@@ -309,9 +332,13 @@
      \prop_map_function:NN \g_@@_pagesattr_prop \@@_dict_item:nn
     }
   }
+
+\@@_backend_end_run:n { \@@_pdf_pagesattr_gpush: }
 %</package>
 %    \end{macrocode}
 % \subsection{pageattr / management commands}
+% The register is normally used only a few times in a document, so it is okay to update the
+% register at every change.
 %    \begin{macrocode}
 \prop_new:N \g_@@_pageattr_prop
 % setter:
@@ -344,7 +371,7 @@
  }
 %    \end{macrocode}
 %
-% \subsection{pdfpageresources}
+% \subsection{pdfpageresources /management}
 % We need code for ExtGState, ColorSpace, Pattern, Shading and Properties.
 % All are dictionaries which can receive entries from more than one source.
 % For at least ColorSpace (colorspace) and Properties (ocgx/tagpdf) there is also a need for page related
@@ -388,26 +415,6 @@
 %message
 % lowlevel stuff
 
-% backend commands the command to fill the register
-\bool_if:nT { \sys_if_engine_pdftex_p: || \sys_if_engine_luatex_p: }
-{
- \cs_new_protected:Npx \@@_backend_pageresources:n #1
-  {
-    \exp_not:N \tex_global:D
-    \cs_if_exist:NTF \tex_pdfpageresources:D
-      { \tex_pdfpageresources:D }
-      { \tex_pdfvariable:D pageresources }
-      {#1}
-  }
-}
-
-\sys_if_engine_xetex:T
-{
- \cs_new_protected:Npx \@@_backend_pageresources:n #1
-  {
-   \special{pdf:pageresources<<#1>>} %???????
-  }
-}
 
 % push a prop to the register:
  \cs_new_protected:Npn \@@_pageresources_gpush:N #1
