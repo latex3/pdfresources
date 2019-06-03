@@ -87,9 +87,9 @@
 %
 % \subsection{\pkg{media9}}
 %
-% \section{New driver Code}
+% \section{New backend Code}
 %
-% \subsection{driver commands / experimental}
+% \subsection{Backend commands / experimental}
 % Notes: pdftex and luatex the startlink commands can use different \enquote{action spec}
 % \texttt{user}, \texttt{goto} and \texttt{thread}. To be able to translate this to
 % other drivers, startlink variants are defined.
@@ -101,19 +101,17 @@
 %^^A \pdf@escapestring?? \pdfescapestring
 %    \begin{macrocode}
 %<*package>
-%some variants
 % helper command to output a key + value of a prop as needed in a dict.
-% name? explicit spaces?
 % not internal as perhaps needed also by users?
 % I don't check if #1 or #2 is empty, imho this should be done only in the pdf layer
 % at the input?
 %
-\cs_new:Npn \driver_pdf_dict_item:nn #1 #2 {/#1~#2~}
+\cs_new:Npn \@@_dict_item:nn #1 #2 {/#1~#2~}
 
-%% temporary command for the "end of run"
+%% TEMPORARY command for the "end of run"
 \bool_if:nT {(\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p:) || \sys_if_engine_luatex_p: }
 {
- \cs_new_protected:Npn \driver_pdf_at_end_of_run:n #1
+ \cs_new_protected:Npn \@@_backend_end_run:n #1
   {
    \AtEndDocument{\clearpage #1}
   }
@@ -122,7 +120,7 @@
 \sys_if_engine_xetex:T
 {
  \RequirePackage{atenddvi}
- \cs_new_protected:Npn \driver_pdf_at_end_of_run:n #1
+ \cs_new_protected:Npn \@@_backend_end_run:n #1
   {
    \AtEndDvi{#1}
   }
@@ -570,7 +568,7 @@
 % Alternative?
 %\RequirePackage{atenddvi}
 %\AtEndDvi
-\driver_pdf_at_end_of_run:n
+\@@_backend_end_run:n
  {
    % write the global objects:
   \clist_map_inline:Nn \c_@@_pdf_pageresources_clist
