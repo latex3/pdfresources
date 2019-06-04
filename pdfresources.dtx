@@ -304,7 +304,8 @@
 % \subsection{ management / pagesattr }
 % \begin{NOTE}{UF}
 % The register is normally used only a few times in a document, so in pdfmode
-% it is okay to update the register at every change but is this also true for dvips?
+% it is okay to update the register at every change but is this also true for
+% dvips/dvipdfmx?
 % We issue the push code also at the end of the document, so that it wins.
 % \end{NOTE}
 % \begin{function}[added = 2019-06-04]
@@ -386,10 +387,19 @@
 %    \end{macrocode}
 %
 % \subsection{pageattr / management commands}
+% \begin{NOTE}{UF}
+% dvips syntax: \special{ps: [{ThisPage}<</Rotate 90>> /PUT pdfmark}%
+% There seem to be an in-built management code: multiple uses don't lead to
+% multiple entries (/Rotate is special: there is always a /Rotate 0 in the dict, but seems
+% not to do harm).
+% dvipdfmx syntax: \special{pdf: put @thispage << /Rotate 90 >>}, like dvips has an in-built
+% management code.
+% Both change only the current page, so to get the pdftex behaviour (which sets
+% also the following pages) one need to repeat it on every shipout.
 % Open is the question if one need more shipout hooks to set e.g. Rotate on specific
 % pages. Open is the setter for /AF (and perhaps /OutputIntents).
 % See also https://tex.stackexchange.com/questions/479812/extension-of-rotating-package-to-set-pdf-rotation
-
+% \end{NOTE}
 % \begin{function}[added = 2019-06-04]
 %   {\pdf_pageattr_gput:nn}
 %   \begin{syntax}
