@@ -88,20 +88,16 @@
 % \subsection{\pkg{media9}}
 %
 % \section{New backend Code / experimental }
-%
-% \subsection{end of run}
-% Notes: pdftex and luatex the startlink commands can use different \enquote{action spec}
-% \texttt{user}, \texttt{goto} and \texttt{thread}. To be able to translate this to
-% other drivers, startlink variants are defined.
-% Variants which allow also to set the rule spec are perhaps needed too.
-% Currently only pdftex, luatex and xetex are setup. Some commands can probably not be
-% implemented in all drivers.
 %^^A still needed:
 %^^A \pdf@strcmp??
 %^^A \pdf@escapestring?? \pdfescapestring
+% \subsection{end of run}
+% \begin{NOTE}{UF}
+% the \enquote{end-of-run} command is temporary until shipout/atendshipout code
+% is ready. dvips implementation missing.
+% \end{NOTE}
 %    \begin{macrocode}
 %<*package>
-%% TEMPORARY command for the "end of run"
 \bool_if:nT {(\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p:) || \sys_if_engine_luatex_p: }
 {
  \cs_new_protected:Npn \@@_backend_end_run:n #1
@@ -121,8 +117,10 @@
 %</package>
 %    \end{macrocode}
 %\subsubsection{pdfxform}
-% as in dvi mode the xform is immediate, let's do it for pdftex/luatex too. If needed
-% a delayed version can be added later.
+% \begin{NOTE}{UF}
+%  As in dvi mode the xform is immediate, this is done for pdftex/luatex too. If needed
+%  a delayed version can be added later. dvips, dvipdfmx implementation is missing
+%  \end{NOTE}
 %    \begin{macrocode}
 %<*package>
 
@@ -184,12 +182,14 @@
 %</package>
 %    \end{macrocode}
 % \subsubsection{backend / pdfpagesattr}
-% pdfpagesattr is a single token register which is output at the end of the compilation.
+% \begin{NOTE}{UF}
+%  pdfpagesattr is a single token register which is used at the end of the compilation.
+%  Implementation for dvips, dvipdfmx missing (needs end-of-run?)
+% \end{NOTE}
 %    \begin{macrocode}
 %<*package>
 \bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
 {
- %definition works also for luatex
  \cs_new_protected:Npx \@@_backend_pagesattr:n #1
   {
     \exp_not:N \tex_global:D
@@ -221,13 +221,14 @@
    \tl_set:Nx #1 {\tex_the:D \tex_pdfvariable:D pagesattr}
   }
 }
-%dvips, dvipdfmx missing
 
 %</package>
 %    \end{macrocode}
 % \subsubsection{backend / pdfpageattr}
-% pdfpageattr is a single token register which is output at the shipout for every page.
-%
+% \begin{NOTE}{UF}
+%  pdfpageattr is a single token register which is output at the shipout for every page.
+%  Implementation for dvips, dvipdfmx missing (needs end-of-run?)
+% \end{NOTE}
 %    \begin{macrocode}
 %<*package>
 %% backend commands
@@ -264,10 +265,12 @@
    \tl_set:Nx #1 {\tex_the:D \tex_pdfvariable:D pageattr}
   }
 }
-%dvips, dvipdfmx missing
 %</package>
 %    \end{macrocode}
 % \subsection{backend / pageresources}
+% \begin{NOTE}{UF} Implementation for dvips missing, for xetex untested.
+% \enquote{Correct} content needed at every shipout
+% \end{NOTE}
 %    \begin{macrocode}
 %<*package>
 % backend commands the command to fill the register
@@ -290,7 +293,6 @@
    \special{pdf:pageresources<<#1>>} %???????
   }
 }
-%dvips missing
 %</package>
 %    \end{macrocode}
 %
@@ -298,17 +300,56 @@
 %
 %
 % \section{Management code}
+%
 % \subsection{ management / pagesattr }
-% The register is normally used only a few times in a document, so it is okay to update the
-% register at every change.
+% \begin{NOTE}{UF}
+% The register is normally used only a few times in a document, so in pdfmode
+% it is okay to update the register at every change but is this also true for dvips?
 % We issue the push code also at the end of the document, so that it wins.
-% Open is the question if one need more shipout hooks to set e.g. Rotate on specific
-% pages. Open is the setter for /AF (and perhaps /OutputIntents).
-% See also https://tex.stackexchange.com/questions/479812/extension-of-rotating-package-to-set-pdf-rotation
+% \end{NOTE}
+% \begin{function}[added = 2019-06-04]
+%   {\pdf_pagesattr_gput:nn}
+%   \begin{syntax}
+%     \cs{pdf_pagesattr_gput:nn} \Arg{name} \Arg{value}
+%   \end{syntax}
+%   Adds |/|\meta{name} \meta{value} the |/Pages| dictionary.
+%   It is always stored globally. The content is written to the pdf
+%   at the end of the compilation,so values can be added, changed or removed until then.
+%   \meta{name} should be a valid pdf name without the leading slash,
+%   \meta{value} should be a valid pdf value. Any escaping or (re)encoding must be
+%   done explictly. If a \meta{name} is used twice, only the last \meta{value}
+%   set will be used.
+% \end{function}
+% \begin{function}[added = 2019-06-04]
+%   {\pdf_pagesattr_get:nN}
+%   \begin{syntax}
+%     \cs{pdf_pagesattr_get:nN} \Arg{name} \meta{tl var}
+%   \end{syntax}
+%   Recovers the \meta{value} stored by \cs{pdf_pagesattr_gput:nn} for
+%   \meta{name} and places this in the \meta{token list
+%   variable}. If \meta{name} is not found
+%   then the \meta{token list variable} is set
+%   to the special marker \cs{q_no_value}. The \meta{token list
+%   variable} is set within the current \TeX{} group.
+% \end{function}
+% \begin{function}[added = 2019-06-04]
+%   {
+%    \pdf_pagesattr_gremove:n
+%   }
+%   \begin{syntax}
+%     \pdf_pagesattr_gremove:n \Arg{name}
+%   \end{syntax}
+%   Removes  |/|\meta{name} and its associated \meta{value} from the |/Pages| dictionary
+%   (if the name-value pair has been added by  \cs{pdf_pagesattr_gput:nn}).
+%   If \meta{name} is not found no change occurs,
+%   \emph{i.e}~there is no need to test for the existence of a name before
+%   trying to remove it.
+% \end{function}
 %    \begin{macrocode}
 %<*package>
 \prop_new:N \g_@@_pagesattr_prop
 % setter:
+%^^A documentated
 \cs_new_protected:Npn \pdf_pagesattr_gput:nn #1 #2
   {
    \prop_gput:Nnn \g_@@_pagesattr_prop { #1 }{ #2}
@@ -316,12 +357,14 @@
   }
 
 % getter from the prop:
+%^^A documentated
 \cs_new_protected:Npn \pdf_pagesattr_get:nN #1 #2
   {
    \prop_get:NnN \g_@@_pagesattr_prop { #1 } #2
   }
 
 % remove:
+%^^A documentated
 \cs_new_protected:Npn \pdf_pagesattr_gremove:n #1
   {
    \prop_gremove:Nn \g_@@_pagesattr_prop { #1 }
@@ -337,11 +380,16 @@
     }
   }
 
+%^^A: !!!!!!MOVE to general "push place"
 \@@_backend_end_run:n { \@@_pdf_pagesattr_gpush: }
 %</package>
 %    \end{macrocode}
 %
 % \subsection{pageattr / management commands}
+% Open is the question if one need more shipout hooks to set e.g. Rotate on specific
+% pages. Open is the setter for /AF (and perhaps /OutputIntents).
+% See also https://tex.stackexchange.com/questions/479812/extension-of-rotating-package-to-set-pdf-rotation
+
 % \begin{function}[added = 2019-06-04]
 %   {\pdf_pageattr_gput:nn}
 %   \begin{syntax}
