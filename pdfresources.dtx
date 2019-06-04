@@ -293,6 +293,10 @@
 %dvips missing
 %</package>
 %    \end{macrocode}
+%
+%
+%
+%
 % \section{Management code}
 % \subsection{ management / pagesattr }
 % The register is normally used only a few times in a document, so it is okay to update the
@@ -336,12 +340,54 @@
 \@@_backend_end_run:n { \@@_pdf_pagesattr_gpush: }
 %</package>
 %    \end{macrocode}
+%
 % \subsection{pageattr / management commands}
-% The register is normally used only a few times in a document, so it is okay to update the
-% register at every change.
+% \begin{function}[added = 2019-06-04]
+%   {\pdf_pageattr_gput:nn}
+%   \begin{syntax}
+%     \cs{pdf_pageattr_gput:nn} \Arg{name} \Arg{value}
+%   \end{syntax}
+%   Adds |/|\meta{name} \meta{value} at shipout to the page dictionaries of the
+%   current page and the following pages. The name-value pair is stored immediatly,
+%   so the asynchronous page breaking must be taken into account when adding content.
+%   It is always stored globally.
+%   \meta{name} should be a valid pdf name without the leading slash,
+%   \meta{value} should be a valid pdf value. Any escaping or (re)encoding must be
+%   done explictly. If a \meta{name} is used twice, only the last \meta{value}
+%   set will be used.
+% \end{function}
+% \begin{function}[added = 2019-06-04]
+%   {\pdf_pageattr_get:nN}
+%   \begin{syntax}
+%     \cs{pdf_pageattr_get:nN} \Arg{name} \meta{tl var}
+%   \end{syntax}
+%   Recovers the \meta{value} stored by \cs{pdf_pageattr_gput:nn} for
+%   \meta{name} and places this in the \meta{token list
+%   variable}. If \meta{name} is not found in the page attributes
+%   then the \meta{token list variable} is set
+%   to the special marker \cs{q_no_value}. The \meta{token list
+%   variable} is set within the current \TeX{} group.
+% \end{function}
+% \begin{function}[added = 2019-06-04]
+%   {
+%    \pdf_pageattr_gremove:n
+%   }
+%   \begin{syntax}
+%     \pdf_pageattr_gremove:n \Arg{name}
+%   \end{syntax}
+%   Removes  |/|\meta{name} and its associated \meta{value} from the page dictionaries
+%   of the current and the following pages (if the name-value pair has been added by
+%   \cs{pdf_pageattr_gput:nn}). If \meta{name} is not found no change occurs,
+%   \emph{i.e}~there is no need to test for the existence of a name before
+%   trying to remove it.
+% \end{function}
 %    \begin{macrocode}
+%<*package>
 \prop_new:N \g_@@_pageattr_prop
-% setter:
+% setter.
+% The register is normally used only a few times in a document, so it is okay
+% to update the register at every change.
+%^^A documentated
 \cs_new_protected:Npn \pdf_pageattr_gput:nn #1 #2
   {
    \prop_gput:Nnn \g_@@_pageattr_prop { #1 }{ #2}
@@ -349,12 +395,14 @@
   }
 
 % getter from the prop:
+%^^A documentated
 \cs_new_protected:Npn \pdf_pageattr_get:nN #1 #2
   {
    \prop_get:NnN \g_@@_pageattr_prop { #1 } #2
   }
 
 % remove:
+%^^A documentated
 \cs_new_protected:Npn \pdf_pageattr_gremove:n #1
   {
    \prop_gremove:Nn \g_@@_pageattr_prop { #1 }
@@ -369,6 +417,7 @@
     \prop_map_function:NN \g_@@_pageattr_prop \@@_dict_item:nn
    }
  }
+%</package>
 %    \end{macrocode}
 %
 % \subsection{pdfpageresources /management}
