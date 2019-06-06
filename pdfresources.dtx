@@ -35,6 +35,7 @@
 %<*package>
 \RequirePackage{xparse}
 %\RequirePackage{tmpl3shipout}
+\RequirePackage{atbegshi}
 \ProvidesExplPackage {pdfresources} {2019-03-17} {0.1}
   {experimental pdf-resource management}
 \DeclareOption { debug }
@@ -184,7 +185,9 @@
 % \subsubsection{backend / pdfpagesattr}
 % \begin{NOTE}{UF}
 %  pdfpagesattr is a single token register which is used at the end of the compilation.
-%  Implementation for dvips, dvipdfmx missing (needs end-of-run?)
+%  dvips syntax: \verb+\special{ps: [/ABC /CDE /EFG /FGH /Rotate 90 /PAGES pdfmark}+
+%  dvipdfmx syntax: \verb+\special{pdf:put @pages <</ABC /WEZ /EFG /XYZ /Rotate 0>>}+
+%  both remove duplicate entries automatically, so there is no need to be careful.
 % \end{NOTE}
 %    \begin{macrocode}
 %<*package>
@@ -199,6 +202,7 @@
       {#1}
   }
 
+%does this make sense in view that nothing similar for dvips/dvipdfmx exists?
  \cs_new_protected:Npn \@@_backend_pagesattr_get:N #1
   {
    \tl_set:Nx #1 {\tex_the:D \tex_pdfpagesattr:D}
@@ -222,12 +226,24 @@
   }
 }
 
+%need to be checked/
+\sys_if_engine_xetex:T
+ {
+  \cs_new_protected:Npn \@@_backend_pagesattr:n #1
+   {
+    \@@_backend:n{put~@pages~<<#1>>}
+   }
+ }
+
 %</package>
 %    \end{macrocode}
 % \subsubsection{backend / pdfpageattr}
 % \begin{NOTE}{UF}
 %  pdfpageattr is a single token register which is output at the shipout for every page.
-%  Implementation for dvips, dvipdfmx missing (needs end-of-run?)
+%  Implementation for dvips, dvipdfmx missing. dvips syntax:
+%  \verb+ \special{ps: [{ThisPage}<</Rotate 90>> /PUT pdfmark}+
+%  dvipdfmx syntax: \verb+\special{pdf: put @thispage << /ABC /XYZ >>}+
+%
 % \end{NOTE}
 %    \begin{macrocode}
 %<*package>
@@ -265,6 +281,7 @@
    \tl_set:Nx #1 {\tex_the:D \tex_pdfvariable:D pageattr}
   }
 }
+\endinput
 %</package>
 %    \end{macrocode}
 % \subsection{backend / pageresources}
@@ -303,10 +320,10 @@
 %
 % \subsection{ management / pagesattr }
 % \begin{NOTE}{UF}
-% The register is normally used only a few times in a document, so in pdfmode
-% it is okay to update the register at every change but is this also true for
-% dvips/dvipdfmx?
-% We issue the push code also at the end of the document, so that it wins.
+% The register is normally used only a few times in a document, so it would be
+% okay to update the register/add the special at every change,
+% but with dvips/dvipdfmx this would disable removing entries.
+% So we issue the push code only at the end of the document.
 % \end{NOTE}
 % \begin{function}[added = 2019-06-04]
 %   {\pdf_pagesattr_gput:nn}
@@ -354,7 +371,6 @@
 \cs_new_protected:Npn \pdf_pagesattr_gput:nn #1 #2
   {
    \prop_gput:Nnn \g_@@_pagesattr_prop { #1 }{ #2}
-   \@@_pagesattr_gpush:
   }
 
 % getter from the prop:
@@ -369,10 +385,9 @@
 \cs_new_protected:Npn \pdf_pagesattr_gremove:n #1
   {
    \prop_gremove:Nn \g_@@_pagesattr_prop { #1 }
-   \@@_pagesattr_gpush:
   }
 
-% push to the register command
+% push to the register command / issue the special
 \cs_new_protected:Npn \@@_pagesattr_gpush:
   {
     \exp_args:Nx \@@_backend_pagesattr:n
@@ -396,6 +411,7 @@
 % management code.
 % Both change only the current page, so to get the pdftex behaviour (which sets
 % also the following pages) one need to repeat it on every shipout.
+% TODO: sort pdftex/dvips difference
 % Open is the question if one need more shipout hooks to set e.g. Rotate on specific
 % pages. Open is the setter for /AF (and perhaps /OutputIntents).
 % See also https://tex.stackexchange.com/questions/479812/extension-of-rotating-package-to-set-pdf-rotation
@@ -443,13 +459,14 @@
 %<*package>
 \prop_new:N \g_@@_pageattr_prop
 % setter.
-% The register is normally used only a few times in a document, so it is okay
-% to update the register at every change.
+% The register is normally used only a few times in a document, but to get similar
+% behaviour between dvips/dvipdfmx and pdfmode it should be better be updated
+% only at shipout.
 %^^A documentated
 \cs_new_protected:Npn \pdf_pageattr_gput:nn #1 #2
   {
    \prop_gput:Nnn \g_@@_pageattr_prop { #1 }{ #2}
-   \@@_pageattr_gpush:
+  % \@@_pageattr_gpush:
   }
 
 % getter from the prop:
@@ -464,7 +481,7 @@
 \cs_new_protected:Npn \pdf_pageattr_gremove:n #1
   {
    \prop_gremove:Nn \g_@@_pageattr_prop { #1 }
-   \@@_pageattr_gpush:
+   %\@@_pageattr_gpush:
   }
 
 % push to the register
@@ -475,6 +492,9 @@
     \prop_map_function:NN \g_@@_pageattr_prop \@@_dict_item:nn
    }
  }
+%must this be in a box??
+\AtBeginShipout{\@@_pageattr_gpush}
+
 %</package>
 %    \end{macrocode}
 %
@@ -553,7 +573,7 @@
   }
 
 % setter:  #1 is the name of the resource
-\cs_new_protected:Npn \driver_pdf_pageresources_gput:nnn #1 #2 #3
+\cs_new_protected:Npn \pdf_pageresources_gput:nnn #1 #2 #3
   {
    \prop_gput:cnn { g_@@_pdf_pageresources_#1_prop} { #2 }{ #3 }
   }
@@ -566,12 +586,12 @@
 
 % setter for page wise settings:
 % #1 is the absolute page number, #2 the resource name, #3 the key, #4 the content
-\cs_new_protected:Npn \driver_pdf_pageresources_gput:nnnn #1 #2 #3 #4
+\cs_new_protected:Npn \pdf_pageresources_gput:nnnn #1 #2 #3 #4
   {
    \prop_if_exist:cF { g_@@_pdf_pageresources_#1_#2_prop }
     {
      \prop_new:c { g_@@_pdf_pageresources_#1_#2_prop }
-     \driver_pdf_object_new:nn {g_@@_pdf_pageresources_#1_#2_obj}{dict}
+     \pdf_object_new:nn {g_@@_pdf_pageresources_#1_#2_obj}{dict}
     }
    \prop_gput:cnn { g_@@_pdf_pageresources_#1_#2_prop} { #3 }{ #4 }
    \bool_gset_true:N \g_@@_pdf_pageresources_local_bool
@@ -582,30 +602,24 @@
 
 \cs_new_protected:Npn \@@_pdf_pageresources_shipout:n #1 %#1 the page number
  {
-  \driver_pdf_pageresources_gget:N \g_@@_pdf_pageresources_tmp_tl
-  \tl_if_eq:NNF \g_@@_pdf_pageresources_tmp_tl \g_@@_pdf_pageresources_tl
-   {
-    \msg_warning:nnn{driver}{pageresources-changed}{#1} %hm global/local ??
-   }
   \clist_map_inline:Nn \c_@@_pdf_pageresources_clist
   {
    \prop_if_exist:cTF { g_@@_pdf_pageresources_#1_##1_prop }
    {
     \prop_gput:Nnx { \g_@@_pdf_pageresources_prop } {##1}
     {
-      \driver_pdf_object_ref:n { g_@@_pdf_pageresources_#1_##1_obj }
+      \pdf_object_ref:n { g_@@_pdf_pageresources_#1_##1_obj }
     }
    }
    {
     \prop_gput:Nnx { \g_@@_pdf_pageresources_prop } {##1}
     {
-      \driver_pdf_object_ref:n { g_@@_pdf_pageresources_##1_obj }
+      \pdf_object_ref:n { g_@@_pdf_pageresources_##1_obj }
     }
    }
   }
   %\prop_show:N\g_@@_pdf_pageresources_prop
   \@@_pdf_pageresources_gpush:N \g_@@_pdf_pageresources_prop
-  \driver_pdf_pageresources_gget:N \g_@@_pdf_pageresources_tl
  }
 
 
@@ -631,7 +645,7 @@
   \clist_map_inline:Nn \c_@@_pdf_pageresources_clist
   {
    \exp_args:Nnx
-     \driver_pdf_object_write:nn { g_@@_pdf_pageresources_#1_obj }
+     \pdf_object_write:nn { g_@@_pdf_pageresources_#1_obj }
      {
       \prop_map_function:cN { g_@@_pdf_pageresources_#1_prop} \@@_dict_item:nn
      }
@@ -653,7 +667,7 @@
        \prop_gput:Nnn \g_tmpa_prop {####1}{####2}
       }
       \exp_args:Nnx
-       \driver_pdf_object_write:nn { g_@@_pdf_pageresources_##1_#1_obj }
+       \pdf_object_write:nn { g_@@_pdf_pageresources_##1_#1_obj }
        {
         \prop_map_function:NN \g_tmpa_prop \@@_dict_item:nn
        }
@@ -663,7 +677,7 @@
   }
  }
 
-
+\endinput %!!!!
 %</package>
 %    \end{macrocode}
 % \subsubsection{other stuff}

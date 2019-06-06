@@ -18,8 +18,9 @@
 \section{pdfpagesattr}
 \begin{itemize}
 \item token register, is added to the root object when the pdf is finished
-
 \item non-additive: A new call overwrites the content of the register.
+\item dvips and (x)dvipdfmx already do management: is a new value is set for a new name it replaces the old one.
+
 \end{itemize}
 
 \begin{verbatim}
@@ -32,6 +33,25 @@
 >>
 \end{verbatim}
 
+\begin{verbatim}
+%dvips
+\special{ps: [/ABC /CDE /EFG /FGH /Rotate 90 /PAGES pdfmark}
+<< /Type /Pages /Kids [
+4 0 R
+12 0 R
+] /Count 2
+/Rotate 90
+/ABC/CDE
+/EFG/FGH
+>>
+\end{verbatim}
+
+\begin{verbatim}
+%xetex/xdvipdfmx
+\special{pdf:put @pages <</ABC /WEZ /EFG /XYZ /Rotate 0>>}
+<</Rotate 0/ABC/WEZ/EFG/XYZ/Type/Pages/Count 2/Kids[3 0 R 8 0 R]
+/MediaBox[0 0 595.28 841.89]>>
+\end{verbatim}
 \subsection{Uses}
 \begin{description}
 \item[zref-pageattr]: get current content
@@ -68,6 +88,9 @@ new values are stored in a prop, and at every change the register is updated. Th
 \begin{itemize}
 \item token register, is added to the current page at shipout
 \item non-additive: A new call overwrites the content of the register.
+\item dvips syntax: 
+\verb+ \special{ps: [{ThisPage}<</Rotate 90>> /PUT pdfmark}+
+\item dvipdmx syntax \verb+\special{pdf: put @thispage << /ABC /XYZ >>}+ 
 \item Entries (emphasized if used/set by packages):
    \begin{enumerate}
     \item Resources (dict, see below),
