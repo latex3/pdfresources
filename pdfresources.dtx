@@ -184,6 +184,7 @@
 %    \end{macrocode}
 % \subsubsection{backend / pdfpagesattr}
 % \begin{NOTE}{UF}
+%  path: pages
 %  pdfpagesattr is a single token register which is used at the end of the compilation.
 %  dvips syntax: \verb+\special{ps: [/ABC /CDE /EFG /FGH /Rotate 90 /PAGES pdfmark}+
 %  dvipdfmx syntax: \verb+\special{pdf:put @pages <</ABC /WEZ /EFG /XYZ /Rotate 0>>}+
@@ -239,6 +240,7 @@
 %    \end{macrocode}
 % \subsubsection{backend / pdfpageattr}
 % \begin{NOTE}{UF}
+%  path: page
 %  pdfpageattr is a single token register which is output at the shipout for every page.
 %  Implementation for dvips, dvipdfmx missing. dvips syntax:
 %  \verb+ \special{ps: [{ThisPage}<</Rotate 90>> /PUT pdfmark}+
@@ -281,7 +283,6 @@
    \tl_set:Nx #1 {\tex_the:D \tex_pdfvariable:D pageattr}
   }
 }
-\endinput
 %</package>
 %    \end{macrocode}
 % \subsection{backend / pageresources}
@@ -310,6 +311,7 @@
    \special{pdf:pageresources<<#1>>} %???????
   }
 }
+
 %</package>
 %    \end{macrocode}
 %
@@ -397,7 +399,7 @@
   }
 
 %^^A: !!!!!!MOVE to general "push place"
-\@@_backend_end_run:n { \@@_pdf_pagesattr_gpush: }
+\@@_backend_end_run:n { \@@_pagesattr_gpush: }
 %</package>
 %    \end{macrocode}
 %
@@ -493,8 +495,7 @@
    }
  }
 %must this be in a box??
-\AtBeginShipout{\@@_pageattr_gpush}
-
+\AtBeginShipout{\@@_pageattr_gpush:}
 %</package>
 %    \end{macrocode}
 %
@@ -554,7 +555,7 @@
 
 % management code
 % the list of standard resources which are handle with objects
- \clist_const:Nn \c_@@_pdf_pageresources_clist
+ \clist_const:Nn \c_@@_pageresources_clist
   {
    ExtGState,
    ColorSpace,
@@ -563,73 +564,74 @@
    Properties
   }
 
-\prop_new:N \g_@@_pdf_pageresources_prop
+\prop_new:N \g_@@_pageresources_prop
 
 % the global objects
- \clist_map_inline:Nn \c_@@_pdf_pageresources_clist
+ \clist_map_inline:Nn \c_@@_pageresources_clist
   {
-   \prop_new:c {g_@@_pdf_pageresources_#1_prop}
-   \driver_pdf_object_new:nn {g_@@_pdf_pageresources_#1_obj}{dict}
+   \prop_new:c {g_@@_pageresources_#1_prop}
+   \@@_backend_object_new:nn {g_@@_pageresources_#1_obj}{dict}
   }
 
 % setter:  #1 is the name of the resource
 \cs_new_protected:Npn \pdf_pageresources_gput:nnn #1 #2 #3
   {
-   \prop_gput:cnn { g_@@_pdf_pageresources_#1_prop} { #2 }{ #3 }
+   \prop_gput:cnn { g_@@_pageresources_#1_prop} { #2 }{ #3 }
   }
 
 % local resources
 % a general bool if local resources as been used at all:
 % saves use to map through the five resources if not
 
-\bool_new:N \g_@@_pdf_pageresources_local_bool
+\bool_new:N \g_@@_pageresources_local_bool
 
 % setter for page wise settings:
 % #1 is the absolute page number, #2 the resource name, #3 the key, #4 the content
 \cs_new_protected:Npn \pdf_pageresources_gput:nnnn #1 #2 #3 #4
   {
-   \prop_if_exist:cF { g_@@_pdf_pageresources_#1_#2_prop }
+   \prop_if_exist:cF { g_@@_pageresources_#1_#2_prop }
     {
-     \prop_new:c { g_@@_pdf_pageresources_#1_#2_prop }
-     \pdf_object_new:nn {g_@@_pdf_pageresources_#1_#2_obj}{dict}
+     \prop_new:c { g_@@_pageresources_#1_#2_prop }
+     \@@_backend_object_new:nn {g_@@_pageresources_#1_#2_obj}{dict}
     }
-   \prop_gput:cnn { g_@@_pdf_pageresources_#1_#2_prop} { #3 }{ #4 }
-   \bool_gset_true:N \g_@@_pdf_pageresources_local_bool
+   \prop_gput:cnn { g_@@_pageresources_#1_#2_prop} { #3 }{ #4 }
+   \bool_gset_true:N \g_@@_pageresources_local_bool
   }
 %
 % The shipout code:
 %
 
-\cs_new_protected:Npn \@@_pdf_pageresources_shipout:n #1 %#1 the page number
+\cs_new_protected:Npn \@@_pageresources_shipout:n #1 %#1 the page number
  {
-  \clist_map_inline:Nn \c_@@_pdf_pageresources_clist
+  \clist_map_inline:Nn \c_@@pageresources_clist
   {
-   \prop_if_exist:cTF { g_@@_pdf_pageresources_#1_##1_prop }
+   \prop_if_exist:cTF { g_@@_pageresources_#1_##1_prop }
    {
-    \prop_gput:Nnx { \g_@@_pdf_pageresources_prop } {##1}
+    \prop_gput:Nnx { \g_@@_pageresources_prop } {##1}
     {
-      \pdf_object_ref:n { g_@@_pdf_pageresources_#1_##1_obj }
+      \@@_backend_object_ref:n { g_@@_pageresources_#1_##1_obj }
     }
    }
    {
-    \prop_gput:Nnx { \g_@@_pdf_pageresources_prop } {##1}
+    \prop_gput:Nnx { \g_@@_pageresources_prop } {##1}
     {
-      \pdf_object_ref:n { g_@@_pdf_pageresources_##1_obj }
+      \@@_backend_object_ref:n { g_@@_pageresources_##1_obj }
     }
    }
   }
   %\prop_show:N\g_@@_pdf_pageresources_prop
-  \@@_pdf_pageresources_gpush:N \g_@@_pdf_pageresources_prop
+  \@@_pageresources_gpush:N \g_@@_pageresources_prop
  }
 
-
-\hook_post_push:nn {shipout}
-{
- \shipout_page_add:nn { fg }
-  {
-   \exp_args:Nx  \@@_pdf_pageresources_shipout:n {\int_eval:n { \g_shipout_page_int }}
-  }
-}
+%???????????????
+% shipout code missing currently
+%\hook_post_push:nn {shipout}
+%{
+% \shipout_page_add:nn { fg }
+%  {
+%   \exp_args:Nx  \@@_pageresources_shipout:n {\int_eval:n { \g_shipout_page_int }}
+%  }
+%}
 
 % doesn't work: ocg layer of float gets lost ...
 %\AtEndDocument % must perhaps be even later??
@@ -642,32 +644,32 @@
 \@@_backend_end_run:n
  {
    % write the global objects:
-  \clist_map_inline:Nn \c_@@_pdf_pageresources_clist
+  \clist_map_inline:Nn \c_@@_pageresources_clist
   {
    \exp_args:Nnx
-     \pdf_object_write:nn { g_@@_pdf_pageresources_#1_obj }
+     \pdf_object_write:nn { g_@@_pageresources_#1_obj }
      {
-      \prop_map_function:cN { g_@@_pdf_pageresources_#1_prop} \@@_dict_item:nn
+      \prop_map_function:cN { g_@@_pageresources_#1_prop} \@@_dict_item:nn
      }
     }
    % write the local objects
-  \bool_if:NT \g_@@_pdf_pageresources_local_bool
+  \bool_if:NT \g_@@_pageresources_local_bool
   {
-   \clist_map_inline:Nn \c_@@_pdf_pageresources_clist
+   \clist_map_inline:Nn \c_@@_pageresources_clist
    {
     \int_step_inline:nn {\g_shipout_page_int} %<---- isn't the lastpage number
                                               %with \AtEndDocument when floats
                                               %are involved
     {%\tl_set:Nn\l_tmpa_tl{##1}\tl_show:N\l_tmpa_tl
-     \prop_if_exist:cT { g_@@_pdf_pageresources_##1_#1_prop }
+     \prop_if_exist:cT { g_@@_pageresources_##1_#1_prop }
      {
-      \prop_set_eq:Nc \g_tmpa_prop { g_@@_pdf_pageresources_#1_prop}
-      \prop_map_inline:cn { g_@@_pdf_pageresources_##1_#1_prop}
+      \prop_set_eq:Nc \g_tmpa_prop { g_@@_pageresources_#1_prop}
+      \prop_map_inline:cn { g_@@_pageresources_##1_#1_prop}
       {
        \prop_gput:Nnn \g_tmpa_prop {####1}{####2}
       }
       \exp_args:Nnx
-       \pdf_object_write:nn { g_@@_pdf_pageresources_##1_#1_obj }
+       \pdf_object_write:nn { g_@@_pageresources_##1_#1_obj }
        {
         \prop_map_function:NN \g_tmpa_prop \@@_dict_item:nn
        }
@@ -677,7 +679,6 @@
   }
  }
 
-\endinput %!!!!
 %</package>
 %    \end{macrocode}
 % \subsubsection{other stuff}
@@ -688,39 +689,38 @@
 % I don't check if #1 or #2 is empty, imho this should be done only in the pdf layer
 % at the input?
 \cs_new:Npn \@@_dict_item:nn #1 #2 {/#1~#2~}
+
 \bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
 {
- \cs_new_protected:Nn \driver_pdf_docview:nn %#1 page number, #2 e.g. /FitH
+ \cs_new_protected:Nn \@@_backend_docview:nn %#1 page number, #2 e.g. /FitH
  {
   \pdfcatalog {  } openaction~goto~page #1 {#2}
  }
 
 
-\input{l3pdfmode-pdf.def}
+%\input{l3pdfmode-pdf.def}
 }
 
 \sys_if_engine_luatex:T
 {
  %allow version 2.0 in luatex. Needs sorting out later.
  \@namedef{Hy@pdfversion@2.0}{10}%
- \cs_new_protected:Nn \driver_pdf_docview:nn %#1 page number, #2 e.g. /FitH
+ \cs_new_protected:Nn \@@_backend_docview:nn %#1 page number, #2 e.g. /FitH
  {
   \pdfextension catalog {  } openaction~goto~page #1 {#2}
  }
 
-\input{l3pdfmode-pdf.def}
+%\input{l3pdfmode-pdf.def}
 }
 
 \sys_if_engine_xetex:T
 {
  %% need to be checked if resources are ok!!!!
- \cs_new_protected:Npn \driver_pdf_bmc:n #1
+ \cs_new_protected:Npn \@@_backend_bmc:n #1
   {
     \special{pdf:code~/#1~BMC}
     %\special{pdf:content~#1~BMC}%
   }
-
- \input{l3dvipdfmx-pdf.def}
 }
 %</package>
 %    \end{macrocode}
@@ -766,19 +766,19 @@
 % NEEDS REVISING!!!
 %    \begin{macrocode}
 %<*package>
-\cs_set_eq:NN \pdf_link_margin:n \driver_pdf_link_margin:n
-\cs_set_eq:NN \pdf_xform_new:nnnN \driver_pdf_xform_new:nnnN
-\cs_set_eq:NN \pdf_link_last: \driver_pdf_link_last:
-\cs_set_eq:NN\pdf_xform_ref:n \driver_pdf_xform_ref:n
-\cs_set_eq:NN\pdf_DONTUSE_catalog_gput:nn \driver_pdf_catalog_gput:nn
+\cs_set_eq:NN \pdf_link_margin:n \@@_backend_link_margin:n
+\cs_set_eq:NN \pdf_xform_new:nnnN \@@_backend_xform_new:nnnN
+\cs_set_eq:NN \pdf_link_last: \@@_backend_link_last:
+\cs_set_eq:NN \pdf_xform_ref:n \@@_backend_xform_ref:n
+\cs_set_eq:NN\pdf_DONTUSE_catalog_gput:nn \@@_backend_catalog_gput:nn
 %</package>
 %    \end{macrocode}
 % \subsection{BDC/EMC commands}
 % NEEDS SORTING OUT! Properties for arg 2?????
 %    \begin{macrocode}
 %<*package>
- \cs_set_eq:NN\pdf_bdc:nn\driver_pdf_bdc:nn
- \cs_set_eq:NN\pdf_emc: \driver_pdf_emc:
+ \cs_set_eq:NN\pdf_bdc:nn\@@_backend_bdc:nn
+ \cs_set_eq:NN\pdf_emc: \@@_backend_emc:
 
 %</package>
 %    \end{macrocode}
@@ -795,7 +795,7 @@
   %#1 prefix e.g. catalog
   %#2 key name, e.g. ViewerPreferences
   %#3 the command /code needed to write the value, e.g.
-  %   \driver_pdf_catalog_gput:nn, or a \pdf-setter
+  %   \@@_backend_catalog_gput:nn, or a \pdf-setter
  {
   \prop_new:c { g_@@_value_#1_#2_prop }
   \cs_new_protected:cpn { pdf_#1_#2_gput:nn } ##1 ##2
@@ -814,12 +814,12 @@
    {%\prop_show:c { g_@@_value_#1_#2_prop }
     \prop_if_empty:cF { g_@@_value_#1_#2_prop }
      {
-      \driver_pdf_object_new:nn   { g_@@_value_#1_#2_obj } { dict }
-      \driver_pdf_object_write:nx { g_@@_value_#1_#2_obj }
+      \@@_backend_object_new:nn   { g_@@_value_#1_#2_obj } { dict }
+      \@@_backend_object_write:nx { g_@@_value_#1_#2_obj }
        {
         \prop_map_function:cN  { g__pdf_value_#1_#2_prop } \@@_dict_item:nn
        }
-      #3 { #2 }{ \driver_pdf_object_ref:n { g_@@_value_#1_#2_obj } }
+      #3 { #2 }{ \@@_backend_object_ref:n { g_@@_value_#1_#2_obj } }
      }
    }
  }
@@ -866,12 +866,12 @@
    {%\seq_show:c { g_@@_value_#1_#2_seq }
     \seq_if_empty:cF { g_@@_value_#1_#2_seq }
      {
-      \driver_pdf_object_new:nn   { g_@@_value_#1_#2_obj } { array }
-      \exp_args:Nnx \driver_pdf_object_write:nn { g_@@_value_#1_#2_obj }
+      \@@_backend_object_new:nn   { g_@@_value_#1_#2_obj } { array }
+      \exp_args:Nnx \@@_backend_object_write:nn { g_@@_value_#1_#2_obj }
        {
         \seq_use:cn { g_@@_value_#1_#2_seq } {~}
        }
-      #3 { #2 }{ \driver_pdf_object_ref:n { g_@@_value_#1_#2_obj } }
+      #3 { #2 }{ \@@_backend_object_ref:n { g_@@_value_#1_#2_obj } }
      }
    }
  }
