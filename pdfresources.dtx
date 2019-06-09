@@ -372,7 +372,13 @@
 %^^A documentated
 \cs_new_protected:Npn \pdf_pagesattr_gput:nn #1 #2
   {
-   \prop_gput:Nnn \g_@@_pagesattr_prop { #1 }{ #2}
+   \tl_if_empty:nTF { #2 }
+   {
+    \msg_none:nnn { pdf }{ empty-value }{ #1 }
+   }
+   {
+    \prop_gput:Nnn \g_@@_pagesattr_prop { #1 }{ #2}
+   }
   }
 
 % getter from the prop:
@@ -467,8 +473,13 @@
 %^^A documentated
 \cs_new_protected:Npn \pdf_pageattr_gput:nn #1 #2
   {
-   \prop_gput:Nnn \g_@@_pageattr_prop { #1 }{ #2}
-  % \@@_pageattr_gpush:
+   \tl_if_empty:nTF { #2 }
+   {
+    \msg_none:nnn { pdf }{ empty-value }{ pageattr/#1 }
+   }
+   {
+    \prop_gput:Nnn \g_@@_pageattr_prop { #1 }{ #2}
+   }
   }
 
 % getter from the prop:
@@ -483,7 +494,6 @@
 \cs_new_protected:Npn \pdf_pageattr_gremove:n #1
   {
    \prop_gremove:Nn \g_@@_pageattr_prop { #1 }
-   %\@@_pageattr_gpush:
   }
 
 % push to the register
@@ -988,7 +998,7 @@
 % user command: \pdf_catalog_AF_gput:n, o, x
 % push command: \__pdf_value_catalog_AF_gpush:
 \_@@_value_array_new:nnn { catalog } { AF }
-                         {\driver_pdf_catalog_gput:nn}
+                         {\@@_backend_catalog_gput:nn}
 %</package>
 %    \end{macrocode}
 % \end{macro}
@@ -1007,7 +1017,7 @@
 % user command: \pdf_catalog_ViewerPreferences_gput:nn, no, nx
 % push command: \__pdf_value_catalog_ViewerPreferences_gpush:
 
-\_@@_value_dict_new:nnn { catalog }{ ViewerPreferences }{ \driver_pdf_catalog_gput:nn }
+\_@@_value_dict_new:nnn { catalog }{ ViewerPreferences }{ \@@_backend_catalog_gput:nn }
 %</package>
 %    \end{macrocode}
 % \end{macro}
@@ -1026,7 +1036,7 @@
 % push command: \__pdf_value_catalog_OCproperties_gpush:
 
 %%% not finished ...............
-%%%\_@@_value_dict_new:nnn { catalog }{ OCproperties }{ \driver_pdf_catalog_gput:nn }
+%%%\_@@_value_dict_new:nnn { catalog }{ OCproperties }{ \@@_backend_catalog_gput:nn }
 
 \seq_new:N \g_@@_catalog_OCProperties_OCGs_seq
 \seq_new:N \g_@@_catalog_OCProperties_Configs_seq
@@ -1072,10 +1082,10 @@
     (\seq_count:N \g_@@_catalog_OCProperties_Configs_seq)
   } > {0}
   {
-   \driver_pdf_object_new:nn   {g_@@_catalog_OCProperties_obj} {dict}
+   \@@_backend_object_new:nn   {g_@@_catalog_OCProperties_obj} {dict}
    \seq_gpop_left:NN \g_@@_catalog_OCProperties_Configs_seq \g_tmpa_tl
    \exp_args:Nnx
-    \driver_pdf_object_write:nn {g_@@_catalog_OCProperties_obj}
+    \@@_backend_object_write:nn {g_@@_catalog_OCProperties_obj}
     {
      /OCGs~[\seq_use:Nn \g_@@_catalog_OCProperties_OCGs_seq {~}]
      /D~\g_tmpa_tl~
@@ -1084,7 +1094,7 @@
      /Configs~[\seq_use:Nn \g_@@_catalog_OCProperties_Configs_seq {~}]
      }
     }
-   \driver_pdf_catalog_gput:nn {OCProperties}{\driver_pdf_object_ref:n {g_@@_catalog_OCProperties_obj}}
+   \@@_backend_catalog_gput:nn {OCProperties}{\@@_backend_object_ref:n {g_@@_catalog_OCProperties_obj}}
   } %----------not finished
  }
 %</package>
@@ -1106,7 +1116,7 @@
 % push command: \__pdf_value_catalog_OutputIntents_gpush:
 
 \_@@_value_array_new:nnn { catalog } { OutputIntents }
-                         {\driver_pdf_catalog_gput:nn}
+                         {\@@_backend_catalog_gput:nn}
 
 %</package>
 %    \end{macrocode}
@@ -1120,7 +1130,7 @@
   \@@_value_catalog_AF_gpush:               %AF
   \@@_catalog_OCProperties_gpush:           %OCProperties
   \@@_value_catalog_ViewerPreferences_gpush:
-  \prop_map_function:NN  \g_@@_catalog_prop \driver_pdf_catalog_gput:nn
+  \prop_map_function:NN  \g_@@_catalog_prop \@@_backend_catalog_gput:nn
  }
 %</package>
 %    \end{macrocode}
@@ -1133,110 +1143,42 @@
 %<*package>
 \cs_new_protected:Npn \pdf_docview:nn #1 #2
  {
-  \driver_pdf_docview:nn {#1}{#2}
- }
-%</package>
-%    \end{macrocode}
-% \subsection{pdfpagesattr}
-% A token register that is added to the root pages object when the pdf is finished.
-% The following command copy more or less the driver commands but add a few tests
-% and warning if other packages or users have used the primitive commands.
-%    \begin{macrocode}
-%<*package>
-\tl_new:N \g_@@_pagesattr_tl
-
-\cs_new_protected:Npn \pdf_pagesattr_gput:nn #1 #2
- {
-  \tl_if_empty:nTF { #2 }
-  {
-   \msg_none:nnn { pdf }{ empty-value }{ #1 }
-  }
-  {
-  \driver_pdf_pagesattr_get:N \l_tmpa_tl
-  \tl_if_eq:NNF \l_tmpa_tl \g_@@_pagesattr_tl
-   {
-    \msg_warning:nn { pdf }{ pagesattr-changed }
-   }
-  \driver_pdf_pagesattr_gput:nn { #1 } { #2 }
-  \driver_pdf_pagesattr_get:N \l_tmpa_tl
-  \tl_gset_eq:NN \g_@@_pagesattr_tl \l_tmpa_tl
-  }
+  \@@_backend_docview:nn {#1}{#2}
  }
 
 %</package>
 %    \end{macrocode}
-%
-% \subsection{pdfpageattr}
-%
-% A token register that is added to the page object when the page is shipped out.
-% The following command copy more or less the driver commands but add a few tests
-% and warning if other packages or users have used the primitive commands.
-% ???? should we use a prop and delay the filling of the register to shipout  like for
-% the page resources ? Do we need page related variants?
-%    \begin{macrocode}
-%<*package>
-\tl_new:N \g_@@_pageattr_tl
 
-\cs_new_protected:Npn \pdf_pageattr_gput:nn #1 #2
- {
-  \tl_if_empty:nTF { #2 }
-  {
-   \msg_none:nnn { pdf }{ empty-value }{ pageattr/#1 }
-  }
-  {
-  \driver_pdf_pageattr_get:N \l_tmpa_tl
-  \tl_if_eq:NNF \l_tmpa_tl \g_@@_pageattr_tl
-   {
-    \msg_warning:nn { pdf }{ pageattr-changed }
-   }
-  \driver_pdf_pageattr_gput:nn { #1 } { #2 }
-  \driver_pdf_pageattr_get:N \l_tmpa_tl
-  \tl_gset_eq:NN \g_@@_pageattr_tl \l_tmpa_tl
-   }
- }
-
-\cs_new_protected:Npn \pdf_pageattr_gremove:n #1
- {
-  \driver_pdf_pageattr_get:N \l_tmpa_tl
-  \tl_if_eq:NNF \l_tmpa_tl \g_@@_pageattr_tl
-   {
-    \msg_warning:nn { pdf }{ pageattr-changed }
-   }
-  \driver_pdf_pageattr_gremove:n { #1 }
-  \driver_pdf_pageattr_get:N \l_tmpa_tl
-  \tl_gset_eq:NN \g_@@_pageattr_tl \l_tmpa_tl
- }
-%</package>
-%    \end{macrocode}
 % \subsection{page resources}
 % This mostly makes the driver commands available under the pdf module name.
 % But adds a test for empty values
+% !!!!!!!!!!!!!!!!!!!!!!
 %    \begin{macrocode}
 %<*package>
-\cs_new_protected:Npn \pdf_pageresources_gput:nnn #1 #2 #3
+\cs_new_protected:Npn \@@_pageresources_gput:nnn #1 #2 #3
  {
   \tl_if_empty:nTF { #3 }
   {
    \msg_none:nnn { pdf }{ empty-value }{ Resources/#2 }
   }
   {
-    \driver_pdf_pageresources_gput:nnn { #1 } { #2 } { #3 }
+    \@@_backend_pageresources_gput:nnn { #1 } { #2 } { #3 }
   }
  }
 
-\cs_new_protected:Npn \pdf_pageresources_gput:nnnn #1 #2 #3 #4
+\cs_new_protected:Npn \@@_pageresources_gput:nnnn #1 #2 #3 #4
  {
    \tl_if_empty:nTF { #4 }
   {
    \msg_none:nnn { pdf }{ empty-value }{ Resources/#3 }
   }
   {
-    \driver_pdf_pageresources_gput:nnnn { #1 } { #2 } { #3 } { #4}
+    \@@_backend_pageresources_gput:nnnn { #1 } { #2 } { #3 } { #4}
   }
  }
 
-\cs_generate_variant:Nn \pdf_pageresources_gput:nnnn {nnnx}
-\cs_generate_variant:Nn \pdf_pageresources_gput:nnn {nnx}
+\cs_generate_variant:Nn \@@_pageresources_gput:nnnn {nnnx}
+\cs_generate_variant:Nn \@@_pageresources_gput:nnn {nnx}
 %</package>
 %    \end{macrocode}
 % \subsection{The info dictionary}
@@ -1291,13 +1233,11 @@
 
 \cs_new_protected:Npn \@@_info_push: %internal, to ensure that it is used only once
  {
-  \prop_map_function:NN  \g_@@_info_prop \driver_pdf_info_gput:nn
+  \prop_map_function:NN  \g_@@_info_prop \@@_backend_info_gput:nn
   \prop_gclear:N \g_@@_info_prop
  }
 
 \AtBeginDocument{\@@_info_push:}
-
-
 %</package>
 %    \end{macrocode}
 
@@ -1332,15 +1272,8 @@
     \msg_info:nnx {pdf}{object-compression-disabled}
     { \@@_backend_version_major:.\@@_backend_version_minor:}
    }
- }\cs_new_protected:Npn \@@_version_checks:
- {
-  \pdf_version_compare:NnT < { 1.5 }
-   {
-    \@@_backend_compress_objects:n {0}
-    \msg_info:nnx {pdf}{object-compression-disabled}
-    { \@@_backend_version_major:.\@@_backend_version_minor:}
-   }
  }
+
 %</package>
 %    \end{macrocode}
 % \end{macro}
@@ -1385,7 +1318,7 @@
    }
    \mode_leave_vertical:
    %\driver_pdf_link_user:nnn
-   \driver_pdf_link_begin_user:nnw
+   \@@_backend_link_begin_user:nnw
     {
      \prop_if_exist:cT { l_@@_hook_link_begin_#1_attr_prop }
      {
@@ -1398,7 +1331,7 @@
       #2
     }
     #3
-   \driver_pdf_link_end:
+   \@@_backend_link_end:
    \seq_if_exist:cT { l_@@_hook_link_end_#1_seq }
     {
      \seq_use:cn { l_@@_hook_link_end_#1_seq }{}
@@ -1414,7 +1347,7 @@
    {
     \seq_use:cn { l_@@_hook_link_begin_#1_seq }{}
    }
- \driver_pdf_link_begin_user:nnw
+ \@@_backend_link_begin_user:nnw
   {
    \prop_if_exist:cT { l_@@_hook_link_begin_#1_attr_prop }
     {
@@ -1433,7 +1366,7 @@
    {
     \seq_use:cn { l_@@_hook_link_begin_#1_seq }{}
    }
- \driver_pdf_link_begin_goto:nnw
+ \@@_backend_link_begin_goto:nnw
   {
    \prop_if_exist:cT { l_@@_hook_link_begin_#1_attr_prop }
      {
@@ -1475,7 +1408,7 @@
  {
   \prop_if_in:NnTF \l_@@_views_map_prop { #2 }
    {
-    \driver_pdf_destination:nn { #1 } {  #2  }
+    \@@_backend_destination:nn { #1 } {  #2  }
    }
    {
     % should we assume that it is a zoom value then??
@@ -1499,7 +1432,7 @@
 
 \cs_new_protected:Nn \pdf_link_end:n %#1 type, e.g. url
  {
-  \driver_pdf_link_end:
+  \@@_backend_link_end:
   \seq_if_exist:cT {l_@@_hook_link_end_#1_seq}
    {
     \seq_use:cn { l_@@_hook_link_end_#1_seq }{}
@@ -1633,32 +1566,32 @@
 % unproblematic for now).
 %    \begin{macrocode}
 %<*package>
-\bool_if:nT { !\g__pdf_patches_bool || \sys_if_output_dvi_p:  }
+\bool_if:nT { !\g_@@_patches_bool || \sys_if_output_dvi_p:  }
  {
   \file_input_stop:
  }
 \msg_info:nn{pdf}{patches}
 \RequirePackage{etoolbox}
 % code to add to the resources existing stuff in the format "/name value":
-\cs_new:Npn \__pdf_split_dict_entry_aux:NNw #1 #2 /#3~#4\q_stop
+\cs_new:Npn \_@@_split_dict_entry_aux:NNw #1 #2 /#3~#4\q_stop
  {
   \tl_set:Nn #1 {#3}
   \tl_set:Nn #2 {#4}
  }
-\tl_new:N \l__pdf_name_tmp_tl
-\tl_new:N \l__pdf_value_tmp_tl
+\tl_new:N \l_@@_name_tmp_tl
+\tl_new:N \l_@@_value_tmp_tl
 \cs_generate_variant:Nn \pdf_pageresources_gput:nnnn {nnoo}
 \cs_new_protected:Npn \pdf_pageresources_split_gput:nnn  #1 #2 #3 %#1 page, #2 resources
  {
-   \__pdf_split_dict_entry_aux:NNw \l__pdf_name_tmp_tl \l__pdf_value_tmp_tl #3 \q_stop
-   \pdf_pageresources_gput:nnoo {#1}{#2}{\l__pdf_name_tmp_tl}{\l__pdf_value_tmp_tl}
+   \@@_split_dict_entry_aux:NNw \l_@@_name_tmp_tl \l_@@_value_tmp_tl #3 \q_stop
+   \pdf_pageresources_gput:nnoo {#1}{#2}{\l_@@_name_tmp_tl}{\l_@@_value_tmp_tl}
  }
 
 \cs_generate_variant:Nn \pdf_pageresources_gput:nnn {noo}
 \cs_new_protected:Npn \pdf_pageresources_split_gput:nn  #1 #2  %#1  resources
  {
-   \__pdf_split_dict_entry_aux:NNw \l__pdf_name_tmp_tl \l__pdf_value_tmp_tl #2 \q_stop
-   \pdf_pageresources_gput:noo {#1}{#2}{\l__pdf_name_tmp_tl}{\l__pdf_value_tmp_tl}
+   \@@_split_dict_entry_aux:NNw \l_@@_name_tmp_tl \l_@@_value_tmp_tl #2 \q_stop
+   \pdf_pageresources_gput:noo {#1}{#2}{\l_@@_name_tmp_tl}{\l_@@_value_tmp_tl}
  }
 
 
@@ -1666,36 +1599,36 @@
 \AtBeginDocument
  {
   % extgstate
-  \cs_new:Npn \__pdf_patch_pgfextgs:w  #1/#2<<#3>>#4\q_stop
+  \cs_new:Npn \@@_patch_pgfextgs:w  #1/#2<<#3>>#4\q_stop
    {
-    \driver_pdf_pageresources_gput:nnn {ExtGState}{#2}{<<#3>>}
+    \@@_backend_pageresources_gput:nnn {ExtGState}{#2}{<<#3>>}
    }
 
   \def\pgf@sys@addpdfresource@extgs@plain#1
    {
     \exp_after:wN %for transparent which passes a command
-    \__pdf_patch_pgfextgs:w #1\q_stop
+    \@@_patch_pgfextgs:w #1\q_stop
    }
 
   % patterns
-  \cs_new:Npn \__pdf_patch_pgfpatterns:w  #1/#2\space#3\q_stop
+  \cs_new:Npn \@@_patch_pgfpatterns:w  #1/#2\space#3\q_stop
    {
-    \exp_args:Nnnx \driver_pdf_pageresources_gput:nnn {Pattern}{#2}{#3}
+    \exp_args:Nnnx \@@_backend_pageresources_gput:nnn {Pattern}{#2}{#3}
    }
   \def\pgf@sys@addpdfresource@patterns@plain#1
    {
-    \__pdf_patch_pgfpatterns:w #1\q_stop
+    \@@_patch_pgfpatterns:w #1\q_stop
    }
 
   %colorspace is already set when tikz is loaded:
-  \cs_new:Npn \__pdf_patch_pgfcolorspace:w  #1/#2[#3]#4\q_stop
+  \cs_new:Npn \@@_patch_pgfcolorspace:w  #1/#2[#3]#4\q_stop
    {
-    \driver_pdf_pageresources_gput:nnn {ColorSpace}{#2}{[#3]}
+    \@@_backend_pageresources_gput:nnn {ColorSpace}{#2}{[#3]}
    }
   \tl_if_exist:NT \pgf@sys@pgf@resource@list@colorspaces
   {
    \exp_last_unbraced:NV
-    \__pdf_patch_pgfcolorspace:w  \pgf@sys@pgf@resource@list@colorspaces\q_stop
+    \@@_patch_pgfcolorspace:w  \pgf@sys@pgf@resource@list@colorspaces\q_stop
    \pgfutil@everybye{}
   }
  }
@@ -1705,13 +1638,13 @@
  {
   \def\TRP@addresource
    {
-    \driver_pdf_pageresources_gput:nnn{ExtGState}{TRP1}{<</ca~1/CA~1>>}
+    \@@_backend_pageresources_gput:nnn{ExtGState}{TRP1}{<</ca~1/CA~1>>}
    }
   \def\transparent@use#1
   {
    \tl_if_exist:cF{TRP#1}
     {
-     \driver_pdf_pageresources_gput:nnn{ExtGState}{TRP#1}{<</ca~#1/CA~#1>>}
+     \@@_backend_pageresources_gput:nnn{ExtGState}{TRP#1}{<</ca~#1/CA~#1>>}
      \tl_const:cn{TRP#1}{/TRP#1~gs}
     }
   }
@@ -1726,28 +1659,28 @@
 {
  \tl_if_exist:NT \spc@op
  {
-  \driver_pdf_object_new:nn  {__spc_extgstate_op_false}{dict}
-  \driver_pdf_object_write:nn
+  \@@_backend_object_new:nn  {__spc_extgstate_op_false}{dict}
+  \@@_backend_object_write:nn
    {__spc_extgstate_op_false}
    {/Type /ExtGState~/op~false~/OP~false}
   \pdf_pageresources_gput:nnn
    {ExtGState}
    {SPCko}
-   {\driver_pdf_object_ref:n {__spc_extgstate_op_false}}
-  \driver_pdf_object_new:nn  {__spc_extgstate_op_true0}{dict}
-  \driver_pdf_object_write:nn{__spc_extgstate_op_true0}
+   {\@@_backend_object_ref:n {__spc_extgstate_op_false}}
+  \@@_backend_object_new:nn  {__spc_extgstate_op_true0}{dict}
+  \@@_backend_object_write:nn{__spc_extgstate_op_true0}
    {/Type /ExtGState~/op~true~/OP~true~/OPM~0}%
   \pdf_pageresources_gput:nnn
    {ExtGState}
    {SPCmz}
-   {\driver_pdf_object_ref:n {__spc_extgstate_op_true0}}
-  \driver_pdf_object_new:nn  {__spc_extgstate_op_true1}{dict}
-  \driver_pdf_object_write:nn{__spc_extgstate_op_true1}
+   {\@@_backend_object_ref:n {__spc_extgstate_op_true0}}
+  \@@_backend_object_new:nn  {__spc_extgstate_op_true1}{dict}
+  \@@_backend_object_write:nn{__spc_extgstate_op_true1}
    {/Type /ExtGState~/op~true~/OP~true~/OPM~1}%
   \pdf_pageresources_gput:nnn
    {ExtGState}
    {SPCop}
-   {\driver_pdf_object_ref:n {__spc_extgstate_op_true1}}
+   {\@@_backend_object_ref:n {__spc_extgstate_op_true1}}
  \def\spc@Pageresources#1{}
  }
 }
