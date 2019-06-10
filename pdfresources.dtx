@@ -99,22 +99,23 @@
 % \end{NOTE}
 %    \begin{macrocode}
 %<*package>
-\bool_if:nT {(\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p:) || \sys_if_engine_luatex_p: }
-{
- \cs_new_protected:Npn \@@_backend_end_run:n #1
-  {
-   \AtEndDocument{\clearpage #1}
-  }
-}
-
-\sys_if_engine_xetex:T
-{
- \RequirePackage{atenddvi}
- \cs_new_protected:Npn \@@_backend_end_run:n #1
-  {
-   \AtEndDvi{#1}
-  }
-}
+%\bool_if:nT {(\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p:) || \sys_if_engine_luatex_p: }
+%{
+% \cs_new_protected:Npn \@@_backend_end_run:n #1
+%  {
+%   \AtEndDocument{\clearpage #1}
+%  }
+%}
+%
+%\bool_if:nT{ \sys_if_engine_xetex:T ||
+%{%need to be checked ...
+% \RequirePackage{atenddvi}
+% \cs_new_protected:Npn \@@_backend_end_run:n #1
+%  {
+%   %\AtEndDvi{#1}
+%  }
+%}
+\cs_new_protected:Npn \@@_backend_end_run:n #1 {} %check ...
 %</package>
 %    \end{macrocode}
 %\subsubsection{pdfxform}
@@ -248,7 +249,21 @@
   }
  }
 
+\sys_if_engine_xetex:T
+ {
+   \cs_new_protected:Npx \@@_backend_pageattr:n #1
+   {
+    \tex_special:D{pdf:~put~@thispage~<<#1>>}
+   }
+ }
 
+\bool_if:nT {\sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p: }
+{
+  \cs_new_protected:Npx \@@_backend_pageattr:n #1
+  {
+   \tex_special:D{ps:~[{ThisPage}<<#1>>~/PUT~pdfmark}
+  }
+}
 %</package>
 %    \end{macrocode}
 % \subsection{backend / pageresources}
@@ -308,7 +323,7 @@
  }
 \cs_new_protected:Npn \@@_lastpage_hook_code:
  {
-
+   \@@_pagesattr_gpush:
  }
 %</package>
 %    \end{macrocode}
@@ -396,8 +411,6 @@
     }
   }
 
-%^^A: !!!!!!MOVE to general "push place"
-\@@_backend_end_run:n { \@@_pagesattr_gpush: }
 %</package>
 %    \end{macrocode}
 %
@@ -425,6 +438,20 @@
 %   current page and the following pages. The name-value pair is stored immediatly,
 %   so the asynchronous page breaking must be taken into account when adding content.
 %   It is always stored globally.
+%   \meta{name} should be a valid pdf name without the leading slash,
+%   \meta{value} should be a valid pdf value. Any escaping or (re)encoding must be
+%   done explictly. If a \meta{name} is used twice, only the last \meta{value}
+%   set will be used.
+% \end{function}
+% \begin{function}[added = 2019-06-11]
+%   {\pdf_pageattr_gput:nnn}
+%   \begin{syntax}
+%     \cs{pdf_pageattr_gput:nnn} \Arg{num} \Arg{name} \Arg{value}
+%   \end{syntax}
+%   Adds |/|\meta{name} \meta{value} at shipout to the page dictionaries of the
+%   page with the absolute page number \meta{num}.
+%   It is always stored globally. If \Arg{name} has already a value set with
+%   \cs{pdf_pageattr_gput:nn} it will overwrite it for this page.
 %   \meta{name} should be a valid pdf name without the leading slash,
 %   \meta{value} should be a valid pdf value. Any escaping or (re)encoding must be
 %   done explictly. If a \meta{name} is used twice, only the last \meta{value}
@@ -471,6 +498,22 @@
    }
    {
     \prop_gput:Nnn \g_@@_pageattr_prop { #1 }{ #2}
+   }
+  }
+
+% setter by page:
+\cs_new_protected:Npn \pdf_pageattr_gput:nnn #1 #2 #3
+  {
+   \tl_if_empty:nTF { #3 }
+   {
+    \msg_none:nnn { pdf }{ empty-value }{ pageattr/#2 }
+   }
+   {
+    \prop_if_exist:cF{ g_@@_pageattr_#1_prop }
+     {
+      \prop_new:c { g_@@_pageattr_#1_prop }
+     }
+    \prop_gput:cnn { g_@@_pageattr_#1_prop } { #2 }{ #3}
    }
   }
 
