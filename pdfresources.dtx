@@ -35,7 +35,7 @@
 %<*package>
 \RequirePackage{xparse,l3pdf}
 %\RequirePackage{tmpl3shipout}
-\RequirePackage{atbegshi}
+\RequirePackage{atbegshi,zref-lastpage}
 \ProvidesExplPackage {pdfresources} {2019-03-17} {0.1}
   {experimental pdf-resource management}
 \DeclareOption { debug }
@@ -203,6 +203,15 @@
       {#1}
   }
 
+%dvips
+\bool_if:nT {\sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p: }
+{
+ \cs_new_protected:Npx \@@_backend_pagesattr:n #1
+  {
+    \tex_special:D{ps:~[#1~/PAGES~pdfmark}
+  }
+}
+
 %does this make sense in view that nothing similar for dvips/dvipdfmx exists?
  \cs_new_protected:Npn \@@_backend_pagesattr_get:N #1
   {
@@ -250,7 +259,7 @@
 %    \begin{macrocode}
 %<*package>
 %% backend commands
-\bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
+\bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: || \sys_if_engine_luatex_p: }
  {
  %definition works also for luatex
  \cs_new_protected:Npx \@@_backend_pageattr:n #1
@@ -261,38 +270,19 @@
       { \tex_pdfvariable:D pageattr }
       {#1}
   }
-
- \cs_new_protected:Npn \@@_backend_pageattr_get:N #1
- {
-   \tl_set:Nx #1 {\tex_the:D \tex_pdfpageattr:D}
  }
-}
 
-\sys_if_engine_luatex:T
-{
-  \cs_new_protected:Npx \@@_backend_pageattr:n #1
-  {
-    \exp_not:N \tex_global:D
-    \cs_if_exist:NTF \tex_pdfpageattr:D
-      { \tex_pdfpageattr:D }
-      { \tex_pdfvariable:D pageattr }
-      {#1}
-  }
-  \cs_new_protected:Npn \@@_backend_pageattr_get:N #1
-  {
-   \tl_set:Nx #1 {\tex_the:D \tex_pdfvariable:D pageattr}
-  }
-}
+
 %</package>
 %    \end{macrocode}
 % \subsection{backend / pageresources}
-% \begin{NOTE}{UF} Implementation for dvips missing, for xetex untested.
+% \begin{NOTE}{UF} Implementation for dvips missing (perhaps impossible ...), for xetex untested.
 % \enquote{Correct} content needed at every shipout
 % \end{NOTE}
 %    \begin{macrocode}
 %<*package>
 % backend commands the command to fill the register
-\bool_if:nT { \sys_if_engine_pdftex_p: || \sys_if_engine_luatex_p: }
+\bool_if:nT { (\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p:) || \sys_if_engine_luatex_p: }
 {
  \cs_new_protected:Npx \@@_backend_pageresources:n #1
   {
@@ -312,6 +302,7 @@
   }
 }
 
+%dvips missing
 %</package>
 %    \end{macrocode}
 %
@@ -319,7 +310,32 @@
 %
 %
 % \section{Management code}
-%
+% \subsection{page wise managment in shipouthook}
+% For now until expl3/kernel interface exists code is added with atbegshi:
+%    \begin{macrocode}
+%<*package>
+\AtBeginShipout
+ {
+  \AtBeginShipoutAddToBox
+  {
+   \@@_shipout_hook_code:
+  }
+ }
+\int_new:N \g_@@_abspage_int
+\cs_new_protected:Npn \@@_shipout_hook_code:
+ {
+  \int_gincr:N \g_@@_abspage_int
+  \int_compare:nNnT { \g_@@_abspage_int }={\zref@extractdefault{LastPage}{abspage}{0}}
+  {
+   \@@_lastpage_hook_code:
+  }
+ }
+\cs_new_protected:Npn \@@_lastpage_hook_code:
+ {
+
+ }
+%</package>
+%    \end{macrocode}
 % \subsection{ management / pagesattr }
 % \begin{NOTE}{UF}
 % The register is normally used only a few times in a document, so it would be
