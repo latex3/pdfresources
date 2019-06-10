@@ -192,7 +192,7 @@
 % \end{NOTE}
 %    \begin{macrocode}
 %<*package>
-\bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
+\bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: || \sys_if_engine_luatex_p:}
 {
  \cs_new_protected:Npx \@@_backend_pagesattr:n #1
   {
@@ -202,37 +202,13 @@
       { \tex_pdfvariable:D pagesattr }
       {#1}
   }
-
+}
 %dvips
 \bool_if:nT {\sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p: }
 {
  \cs_new_protected:Npx \@@_backend_pagesattr:n #1
   {
     \tex_special:D{ps:~[#1~/PAGES~pdfmark}
-  }
-}
-
-%does this make sense in view that nothing similar for dvips/dvipdfmx exists?
- \cs_new_protected:Npn \@@_backend_pagesattr_get:N #1
-  {
-   \tl_set:Nx #1 {\tex_the:D \tex_pdfpagesattr:D}
-  }
-
-}
-
-\sys_if_engine_luatex:T
-{
-  \cs_new_protected:Npx \@@_backend_pagesattr:n #1
-  {
-    \exp_not:N \tex_global:D
-    \cs_if_exist:NTF \tex_pdfpagesattr:D
-      { \tex_pdfpagesattr:D }
-      { \tex_pdfvariable:D pagesattr }
-      {#1}
-  }
-  \cs_new_protected:Npn \@@_backend_pagesattr_get:N #1
-  {
-   \tl_set:Nx #1 {\tex_the:D \tex_pdfvariable:D pagesattr}
   }
 }
 
