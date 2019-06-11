@@ -301,7 +301,12 @@
 %
 %
 % \section{Management code}
-% \subsection{Pathes}
+% \subsection{tree pathes}
+%  This is a bit experimental. Let's look if one can define some generic commands
+%  based on pathes. The main question will be if one can encode the different
+%  inner structures (array/dict) and the cases where users shouldn't fill a value
+%  but it should be done by subtrees ...
+%  \begin{verbatim}
 %  /Pages           %w,  \pagesattr
 %  /PageN           %w, N=1,..n or empty (=all pages) \pageattr
 %  /PageN/Resources %nw? \pageresources
@@ -313,6 +318,41 @@
 %  /Info           %w, \pdfinfo
 %  /Catalog/OCProperties
 %  /Catalog/OutputIntents
+%  \end{verbatim}
+%    \begin{macrocode}
+%<*package>
+\cs_new_protected:Npn \@@_tree_new:nn #1 #2 %parent/kid
+ {
+  \prop_if_exist:cF { g_@@_#1/#2_prop }
+   {
+    \prop_new:c  { g_@@_#1/#2_prop }
+   }
+ }
+\cs_new_protected:Npn \@@_tree_gput:nnn #1 #2 #3 %#1 path without starting /
+ { %test if tree path is allowed here?
+  \tl_if_empty:nTF { #3 }
+   {
+    \msg_none:nnn { pdf }{ empty-value }{ /#1/#2 }
+   }
+   {
+    \prop_gput:cnn { g_@@_/#1_prop }{ #2 } { #3 }
+   }
+ }
+\cs_new_protected:Npn \@@_tree_get:nnN  #1 #2 #3
+  {
+   \prop_get:cnN { g_@@_/#1_prop } { #2 } #3
+  }
+
+\cs_new_protected:Npn \@@_tree_gremove:nn #1 #2
+  {
+   \prop_gremove:cn { g_@@_/#1_prop } { #2 }
+  }
+\cs_new:Npn \@@_tree_map_dict_item:n #1
+ {
+   \prop_map_function:cN { g_@@_/#1_prop } \@@_dict_item:nn
+ }
+%</package>
+%    \end{macrocode}
 % \subsection{helper commands}
 %    \begin{macrocode}
 %<*package>
@@ -340,7 +380,7 @@
    \@@_lastpage_shipout_code:
   }
  }
-\cs_new_protected:Npn \@@_everypage_shipout_code:n
+\cs_new_protected:Npn \@@_everypage_shipout_code:n #1
  {
   \@@_pageattr_gpush:n { #1 }
  }
@@ -398,32 +438,26 @@
 % \end{function}
 %    \begin{macrocode}
 %<*package>
-\prop_new:c  { g_@@_/Pages_prop }
+\@@_tree_new:nn {}{Pages}
 % setter:
 %^^A documentated
 \cs_new_protected:Npn \pdf_pagesattr_gput:nn #1 #2
   {
-   \tl_if_empty:nTF { #2 }
-   {
-    \msg_none:nnn { pdf }{ empty-value }{ #1 }
-   }
-   {
-    \prop_gput:cnn { g_@@_/Pages_prop } { #1 }{ #2}
-   }
+   \@@_tree_gput:nnn {Pages}{#1}{#2}
   }
 
 % getter from the prop:
 %^^A documentated
 \cs_new_protected:Npn \pdf_pagesattr_get:nN #1 #2
   {
-   \prop_get:cnN { g_@@_/Pages_prop } { #1 } #2
+   \@@_tree_get:nnN {Pages}{#1} #2
   }
 
 % remove:
 %^^A documentated
 \cs_new_protected:Npn \pdf_pagesattr_gremove:n #1
   {
-   \prop_gremove:cn { g_@@_/Pages_prop } { #1 }
+   \@@_tree_gremove:nn {Pages}{#1}
   }
 
 % push to the register command / issue the special
@@ -431,7 +465,7 @@
   {
     \exp_args:Nx \@@_backend_pagesattr:n
     {
-     \prop_map_function:cN { g_@@_/Pages_prop } \@@_dict_item:nn
+     \@@_tree_map_dict_item:n {Pages}
     }
   }
 
@@ -508,7 +542,7 @@
 % \end{function}
 %    \begin{macrocode}
 %<*package>
-\prop_new:c { g_@@_/Page_prop }
+\@@_tree_new:nn {}{Page}
 % setter.
 % The register is normally used only a few times in a document, but to get similar
 % behaviour between dvips/dvipdfmx and pdfmode it should be better be updated
@@ -516,43 +550,28 @@
 %^^A documentated
 \cs_new_protected:Npn \pdf_pageattr_gput:nn #1 #2
   {
-   \tl_if_empty:nTF { #2 }
-   {
-    \msg_none:nnn { pdf }{ empty-value }{ pageattr/#1 }
-   }
-   {
-    \prop_gput:cnn { g_@@_/Page_prop } { #1 }{ #2}
-   }
+   \@@_tree_gput:nnn {Page}{#1}{#2}
   }
 
 % setter by page:
 \cs_new_protected:Npn \pdf_pageattr_gput:nnn #1 #2 #3
   {
-   \tl_if_empty:nTF { #3 }
-   {
-    \msg_none:nnn { pdf }{ empty-value }{ pageattr/#2 }
-   }
-   {
-    \prop_if_exist:cF{ g_@@_/Page#1_prop }
-     {
-      \prop_new:c { g_@@_/Page#1_prop }
-     }
-    \prop_gput:cnn { g_@@_/Page#1_prop }{ #2 }{ #3}
-   }
+   \@@_tree_new:nn {}{Page#1}
+   \@@_tree_gput:nnn {Page#1}{#2}{#3}
   }
 
 % getter from the prop:
 %^^A documentated
 \cs_new_protected:Npn \pdf_pageattr_get:nN #1 #2
   {
-   \prop_get:cnN { g_@@_/Page_prop } { #1 } #2
+   \@@_tree_get:nnN { Page } { #1 } #2
   }
 
 % remove:
 %^^A documentated
 \cs_new_protected:Npn \pdf_pageattr_gremove:n #1
   {
-   \prop_gremove:cn { g_@@_/Page_prop } { #1 }
+   \@@_tree_gremove:nn { Page } { #1 }
   }
 
 % push to the register

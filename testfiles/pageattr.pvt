@@ -10,16 +10,12 @@ some text
 %test local:
 {\pdf_pageattr_gput:nn {CropBox}{[0~0~300~300]}}
 
-%test "wrong" primitive call:
- \__pdf_backend_pageattr:n{/WWW~(someusersetting)}
-
 %test doublette
  \pdf_pageattr_gput:nn {Rotate}{90}
 
 %test command:
 \newcommand\attributecontent{(somesetting)}
 \pdf_pageattr_gput:nn {SSS}{\attributecontent}
-\tl_show:N\g__pdf_pageattr_tl
 
 \newpage
 \pdf_pageattr_gremove:n {Rotate}
