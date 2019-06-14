@@ -1,0 +1,21 @@
+\documentclass{article}
+\usepackage{l3pdf}
+\ExplSyntaxOn
+\pdf_uncompress:
+\ExplSyntaxOff
+\begin{document}
+
+\special{pdf:code /Span /Test1 BDC}
+      \special{pdf:put @resources <<
+        /Properties <</Test1 <</Type /Artifact>>>>>>}
+blblblb
+\special{pdf:code EMC}
+
+\special{pdf:code /Span /Test2 BDC}
+      \special{pdf:put @resources <<
+        /Properties <</Test2 <</Type /Artifact>>>>>>}
+blblblb
+\special{pdf:code EMC}
+
+
+\end{document}
