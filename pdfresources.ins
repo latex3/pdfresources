@@ -31,6 +31,7 @@ for those people who are interested.
 \input l3docstrip.tex
 \askforoverwritefalse
 
+\let\MetaPrefix\relax
 \preamble
 
 Copyright (C) 2019 The LaTeX3 Project
@@ -46,6 +47,7 @@ This file is part of the "pdfresources bundle" (The Work in LPPL)
 and all files in that bundle must be distributed together.
 
 \endpreamble
+\let\MetaPrefix\DoubleperCent
 % stop docstrip adding \endinput
 \postamble
 \endpostamble
@@ -59,11 +61,18 @@ and all files in that bundle must be distributed together.
         \from{pdfresources.dtx}{package}
       }%
   }
-\generate{\file{pdfresources.lua}   {\from{pdfresources.dtx}{lua} }}
+
 \generate{\file{l3dvipdfmx-pdf.def} {\from{pdfresources.dtx}{drivers,dvipdfmx} }}
 \generate{\file{l3dvips-pdf.def}    {\from{pdfresources.dtx}{drivers,dvips}    }}
 \generate{\file{l3dvisvgm-pdf.def}  {\from{pdfresources.dtx}{drivers,dvisvgm}  }}
 \generate{\file{l3pdfmode-pdf.def}  {\from{pdfresources.dtx}{drivers,pdfmode}  }}
 \generate{\file{l3xdvipdfmx-pdf.def}{\from{pdfresources.dtx}{drivers,xdvipdfmx}}}
 
+\def\MetaPrefix{-- }
+\def\defaultpostamble{%
+  \MetaPrefix^^J%
+  \MetaPrefix\space End of File `\outFileName'.%
+}
+\def\currentpostamble{\defaultpostamble}%
+\generate{\file{pdfresources.lua}   {\from{pdfresources.dtx}{lua} }}
 \endbatchfile
