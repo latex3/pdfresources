@@ -1,0 +1,37 @@
+\documentclass{article}
+\usepackage{l3pdf,pdfresources}
+\ExplSyntaxOn
+\pdf_uncompress:
+\ExplSyntaxOff
+\usepackage{zref-user,zref-abspage}
+%pdflatex needs two pass?
+\begin{document}
+abc
+
+\vspace{44\baselineskip}
+
+x\\x\\x\\
+\ExplSyntaxOn\makeatletter
+\__pdf_backend_object_new:nn  {BDC1}{dict}
+\__pdf_backend_object_write:nn{BDC1}{/Type/Artifact}
+\AtBeginShipout{%
+\int_compare:nNnT{\zref@extractdefault {BDC1} {abspage} {0}}={\g__pdf_abspage_int}
+{\exp_args:Nx\__pdf_backend_pageresources:n {/Properties~<</BDC1~\__pdf_backend_object_ref:n {BDC1}>>}}}
+%\latelua{pdf.setpageresources("/Properties <</BDC1~\__pdf_backend_object_ref:n {BDC1}>>")}
+\__pdf_backend_bdc:nn {Span}{/BDC1}\zref@label{BDC1}
+abc
+\__pdf_backend_emc:
+
+\begin{figure}[p]
+\__pdf_backend_object_new:nn  {BDC2}{dict}
+\__pdf_backend_object_write:nn{BDC2}{/Type/Artifact}
+\AtBeginShipout{%
+\int_compare:nNnT{\zref@extractdefault {BDC2} {abspage} {0}}={\g__pdf_abspage_int}
+{\exp_args:Nx\__pdf_backend_pageresources:n {/Properties~<</BDC2~\__pdf_backend_object_ref:n {BDC2}>>}}}
+\__pdf_backend_bdc:nn {Span}{/BDC2}\zlabel{BDC2}
+abc
+\__pdf_backend_emc:
+\end{figure}
+\ExplSyntaxOff
+
+\end{document}

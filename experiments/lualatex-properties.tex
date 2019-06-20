@@ -1,0 +1,32 @@
+\documentclass{article}
+\usepackage{l3pdf,pdfresources}
+\ExplSyntaxOn
+\pdf_uncompress:
+\ExplSyntaxOff
+%This is works ...
+%to do: check if more than one by page can be handled
+\begin{document}
+abc
+
+\vspace{44\baselineskip}
+
+x\\x\\x\\
+\ExplSyntaxOn
+\__pdf_backend_object_new:nn  {BDC1}{dict}
+\__pdf_backend_object_write:nn{BDC1}{/Type/Artifact}
+\latelua{pdf.setpageresources("/Properties <</BDC1~\__pdf_backend_object_ref:n {BDC1}>>")}
+\__pdf_backend_bdc:nn {Span}{/BDC1}
+abc
+\__pdf_backend_emc:
+\ExplSyntaxOff
+
+\begin{figure}[p]
+\__pdf_backend_object_new:nn  {BDC2}{dict}
+\__pdf_backend_object_write:nn{BDC2}{/Type/Artifact}
+%\exp_args:Nx\__pdf_backend_pageresources:n {/Properties~<</BDC2~\__pdf_backend_object_ref:n {BDC2}>>}
+\latelua{pdf.setpageresources("/Properties <</BDC2~\__pdf_backend_object_ref:n {BDC2}>>")}
+\__pdf_backend_bdc:nn {Span}{/BDC2}
+abc
+\__pdf_backend_emc:
+\end{figure}
+\end{document}

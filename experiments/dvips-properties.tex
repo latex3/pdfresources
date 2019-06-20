@@ -1,0 +1,18 @@
+\documentclass{article}
+\usepackage{l3pdf,pdfresources}
+\ExplSyntaxOn
+\pdf_uncompress:
+\ExplSyntaxOff
+%looks okay, 
+\begin{document}
+abc
+
+\vspace{44\baselineskip}
+
+x\\x\\x\\
+\special{ps:[/Span <</Type /Artifact>> /BDC pdfmark}
+some text
+\special{ps:[/EMC pdfmark}
+
+
+\end{document}

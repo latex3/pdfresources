@@ -1,0 +1,66 @@
+\documentclass[10pt]{article}
+\usepackage{l3pdf,pdfresources,luacode}
+\begin{luacode}
+pdfdata= pdfdata or {}
+pdfdata.resources  = pdfdata.resources or {}
+pdfdata.resources.properties  = pdfdata.resources.properties or {}
+
+function pdfdata.resources.properties.store (id,obj)
+ pdfdata.resources.properties[tex.count["c@page"]] = pdfdata.resources.properties[tex.count["c@page"]] or {}
+ pdfdata.resources.properties[tex.count["c@page"]]["LTX"..id]= obj
+end
+
+function pdfdata.resources.properties.output(page)
+ local t = pdfdata.resources.properties[page]
+ if t and not( next(t) == nil) then
+  local dict="/Properties <<"
+  for name, obj in pairs(t) do
+   dict=dict.." /"..name.." "..obj
+  end
+   dict=dict..">>"
+  return dict
+ end
+end
+\end{luacode}
+\ExplSyntaxOn
+\pdf_uncompress:
+\int_new:N\g__pdf_BDCobj_int
+\cs_set_protected:Npn \__pdf_backend_bdc:nn #1 #2
+ {
+  \int_gincr:N\g__pdf_BDCobj_int
+  \__pdf_backend_object_now:nn {dict}{#1}%
+  \exp_args:Nx \latelua{
+   pdfdata.resources.properties.store ("\int_use:N\g__pdf_BDCobj_int", "\__pdf_backend_object_last:")
+   pdfdata.resources.properties.output(tex.count["c@page"])
+   pdf.setpageresources (pdfdata.resources.properties.output(tex.count["c@page"]))
+%   texio.write_nl(table.serialize(pdfdata.resources.properties))
+   }
+ }
+\ExplSyntaxOff
+%This is works ...
+%to do: check if more than one by page can be handled
+\begin{document}
+abc
+
+\vspace{44\baselineskip}
+
+x\\x\\x\\
+\ExplSyntaxOn
+%\__pdf_backend_bdc:nn {span}{/Type/Artifact}
+
+%\__pdf_backend_object_new:nn  {BDC1}{dict}
+%\__pdf_backend_object_write:nn{BDC1}{/Type/Artifact}
+%\latelua{pdf.setpageresources("/Properties <</BDC1~\__pdf_backend_object_ref:n {BDC1}>>")}
+\__pdf_backend_bdc:nn {Span}{/Type/Artifact}
+abc
+\__pdf_backend_emc:
+\__pdf_backend_bdc:nn {Span}{/Type/X /MCID~1}
+abc
+\__pdf_backend_emc:
+
+\mbox{\__pdf_backend_bdc:nn {Span}{/Type/X /MCID~2}
+abc
+\__pdf_backend_emc:}
+
+\ExplSyntaxOff
+\end{document}

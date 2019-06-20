@@ -3,8 +3,13 @@
 \ExplSyntaxOn
 \pdf_uncompress:
 \ExplSyntaxOff
+%works fine, resources only on page 2
 \begin{document}
+abc
 
+\vspace{44\baselineskip}
+
+x\\x\\x\\
 \special{pdf:code /Span /Test1 BDC}
       \special{pdf:put @resources <<
         /Properties <</Test1 <</Type /Artifact>>>>>>}
@@ -17,5 +22,10 @@ blblblb
 blblblb
 \special{pdf:code EMC}
 
+\mbox{\special{pdf:code /Span /Test3 BDC}
+      \special{pdf:put @resources <<
+        /Properties <</Test3 <</Type /Artifact>>>>>>}
+blblblb
+\special{pdf:code EMC}}
 
-\end{document}
+\end{document} 

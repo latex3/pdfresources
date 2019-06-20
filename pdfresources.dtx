@@ -92,6 +92,15 @@
 %^^A still needed:
 %^^A \pdf@strcmp??
 %^^A \pdf@escapestring?? \pdfescapestring
+% \subsection{luacode}
+%    \begin{macrocode}
+%<*package>
+\sys_if_engine_luatex:T
+{
+ \directlua{require("pdfresources.lua")}
+}
+%</package>
+%    \end{macrocode}
 % \subsection{end of run}
 % \begin{NOTE}{UF}
 % the \enquote{end-of-run} command is temporary until shipout/atendshipout code
@@ -227,33 +236,87 @@
 % \subsubsection{backend / pdfpageattr}
 % \begin{NOTE}{UF}
 %  path: page
-%  pdfpageattr is a single token register which is output at the shipout for every page.
-%  Implementation for dvips, dvipdfmx missing. dvips syntax:
-%  \verb+ \special{ps: [{ThisPage}<</Rotate 90>> /PUT pdfmark}+
-%  dvipdfmx syntax: \verb+\special{pdf: put @thispage << /ABC /XYZ >>}+
-%
+%  The engines differ a lot here: pdflatex and lualatex uses a register while with
+%  dvips a one-shot-special ist used. So for pdflatex and lualatex code to clear the register
+%  is needed. Specials are used at shipout, registers set directly. With lualatex one can use
+%  \cs{latelua} to delay the setting, with pdflatex one has to use a shipout hook. To get
+%  the code on the correct page one has to use the aux with pdflatex. In sum this means that
+%  quite a lot backend commands are needed to handle this differences. Simply variants of \cs{pdfpageattr}
+%  are not enough ...%
 % \end{NOTE}
 %    \begin{macrocode}
 %<*package>
 %% backend commands
-\bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: || \sys_if_engine_luatex_p: }
+\bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
  {
- %definition works also for luatex
- \cs_new_protected:Npx \@@_backend_pageattr:n #1
-  {
-    \exp_not:N \tex_global:D
-    \cs_if_exist:NTF \tex_pdfpageattr:D
-      { \tex_pdfpageattr:D }
-      { \tex_pdfvariable:D pageattr }
-      {#1}
-  }
+  \cs_new_protected:Npn \@@_backend_pageattr:n #1
+   {
+     \tex_global:D \tex_pdfpageattr:D {#1}
+   }
+  %clear the register, should be used in shipout before
+  %filling with the new values. Noops in dvips/dvipdfmx
+  \cs_new_protected:Npn \@@_backend_pageattr_clear:
+   {
+     \tex_global:D \tex_pdfpageattr:D {}
+   }
+  % the command used in the document.
+  % special with dvips/dvipdfmx
+  % \latelua with lualatex
+  % write to aux with pdflatex
+  \cs_new_protected:Npn \@@_backend_pageattr_doc:nn #1 #2
+   {
+     \@@_backend_pageattr_aux:nn {#1}{#2}
+   }
+  \cs_new_protected:Npn \@@_backend_pageattr_aux:nn #1 #2
+   {
+    \iow_shipout_x:Nx \@auxout
+    {
+     \token_to_str:N\csname
+     __pdf_backend_pageattr_gput:nnn
+     \token_to_str:N\endcsname
+      {\exp_not:N\int_use:N \g__pdf_abspage_int}
+      { #1 }
+      { #2 }
+    }
+   }
  }
 
+\sys_if_engine_luatex:T
+{
+ %needed ??????????????
+ \cs_new_protected:Npn \@@_backend_pageattr:n #1
+   {
+     \latelua{pdf.setpageattributes("#1")}
+   }
+ %clear the register, should be used in shipout before
+ %filling with the new values. Noops in dvips/dvipdfmx
+ \cs_new_protected:Npn \@@_backend_pageattr_clear:
+   {
+     \latelua{pdf.setpageattributes("")}
+   }
+  %the command used in the document.
+  % special with dvips/dvipdfmx
+  % \latelua with lualatex
+  % write to aux with pdflatex
+  \cs_new_protected:Npn \@@_backend_pageattr_doc:nn #1 #2
+   {
+     \latelua{l3kernel._@@.pageattr_doc (tex.count["g_@@_abspage_int"],"#1","#2")}
+   }
+}
 \sys_if_engine_xetex:T
  {
    \cs_new_protected:Npx \@@_backend_pageattr:n #1
    {
     \tex_special:D{pdf:~put~@thispage~<<#1>>}
+   }
+  \cs_new_protected:Npn \@@_backend_pageattr_clear: {}
+  % the command used in the document.
+  % special with dvips/dvipdfmx
+  % \latelua with lualatex
+  % write to aux with pdflatex
+  \cs_new_protected:Npn \@@_backend_pageattr_doc:nn #1 #2
+   {
+     \@@_backend_pageattr:n {/#1~#2}
    }
  }
 
@@ -262,6 +325,15 @@
   \cs_new_protected:Npx \@@_backend_pageattr:n #1
   {
    \tex_special:D{ps:~[{ThisPage}<<#1>>~/PUT~pdfmark}
+  }
+ \cs_new_protected:Npn \@@_backend_pageattr_clear: {}
+ % the command used in the document.
+ % special with dvips/dvipdfmx
+ % \latelua with lualatex
+ % write to aux with pdflatex
+ \cs_new_protected:Npn \@@_backend_pageattr_doc:nn #1 #2
+  {
+     \@@_backend_pageattr:n {/#1~#2}
   }
 }
 %</package>
@@ -394,6 +466,7 @@
 \cs_new_protected:Npn \@@_shipout_code:
  {
   \int_gincr:N \g_@@_abspage_int
+  \int_show:N \g_@@_abspage_int
   \@@_everypage_shipout_code:V \g_@@_abspage_int
   \int_compare:nNnT { \g_@@_abspage_int }={\zref@extractdefault{LastPage}{abspage}{0}}
   {
@@ -512,14 +585,55 @@
 %   \begin{syntax}
 %     \cs{pdf_pageattr_gput:nn} \Arg{name} \Arg{value}
 %   \end{syntax}
-%   Adds |/|\meta{name} \meta{value} at shipout to the page dictionaries of the
-%   current page and the following pages. The name-value pair is stored immediatly,
-%   so the asynchronous page breaking must be taken into account when adding content.
-%   It is always stored globally.
+%   Adds |/|\meta{name} \meta{value} to the page dictionary of the
+%   current page and the following pages. The values are assigned directly,
+%   so one should take into account the asynchronous page breaking and use the
+%   command only in sensible places like after a \cs{clearpage} and not inside
+%   floats. It is always stored globally.
 %   \meta{name} should be a valid pdf name without the leading slash,
 %   \meta{value} should be a valid pdf value. Any escaping or (re)encoding must be
 %   done explictly. If a \meta{name} is used twice, only the last \meta{value}
-%   set will be used.
+%   set will be used. Names set with \cs{pdf_thispageattr_gput:nn} will overwrite
+%   names set with \cs{pdf_pageattr_gput:nn} if there is a clash.
+% \end{function}
+% \begin{function}[added = 2019-06-04]
+%   {
+%    \pdf_pageattr_gremove:n
+%   }
+%   \begin{syntax}
+%     \pdf_pageattr_gremove:n \Arg{name}
+%   \end{syntax}
+%   Removes |/|\meta{name} and its associated \meta{value} added by \cs{pdf_pageattr_gput:nn}
+%   from the page dictionaries of the current and the following pages.
+%   If \meta{name} is not found no change occurs,
+%   \emph{i.e}~there is no need to test for the existence of a name before
+%   trying to remove it. It doesn't affect values set with \cs{pdf_thispageattr_gput:nn}.
+% \end{function}
+% \begin{function}[added = 2019-06-04]
+%   {\pdf_pageattr_get:nN}
+%   \begin{syntax}
+%     \cs{pdf_pageattr_get:nN} \Arg{name} \meta{tl var}
+%   \end{syntax}
+%   Recovers the \meta{value} stored by \cs{pdf_pageattr_gput:nn} for
+%   \meta{name} and places this in the \meta{token list
+%   variable}. If \meta{name} is not found in the page attributes
+%   then the \meta{token list variable} is set
+%   to the special marker \cs{q_no_value}. The \meta{token list
+%   variable} is set within the current \TeX{} group.
+% \end{function}
+% \begin{function}[added = 2019-06-19]
+%   {\pdf_thispageattr_gput:nn}
+%   \begin{syntax}
+%     \cs{pdf_thispageattr_gput:nn}  \Arg{name} \Arg{value}
+%   \end{syntax}
+%   Adds |/|\meta{name} \meta{value} at shipout to the page dictionary of the
+%   current page.
+%   It is always stored globally. If \Arg{name} has already a value set with
+%   \cs{pdf_pageattr_gput:nn} it will overwrite it for this page.
+%   \meta{name} should be a valid pdf name without the leading slash,
+%   \meta{value} should be a valid pdf value. Any escaping or (re)encoding must be
+%   done explictly. If a \meta{name} is used twice, only the last \meta{value}
+%   set will be used. With the engine pdflatex at least a second compilation is needed.
 % \end{function}
 % \begin{function}[added = 2019-06-11]
 %   {\pdf_pageattr_gput:nnn}
@@ -535,31 +649,8 @@
 %   done explictly. If a \meta{name} is used twice, only the last \meta{value}
 %   set will be used.
 % \end{function}
-% \begin{function}[added = 2019-06-04]
-%   {\pdf_pageattr_get:nN}
-%   \begin{syntax}
-%     \cs{pdf_pageattr_get:nN} \Arg{name} \meta{tl var}
-%   \end{syntax}
-%   Recovers the \meta{value} stored by \cs{pdf_pageattr_gput:nn} for
-%   \meta{name} and places this in the \meta{token list
-%   variable}. If \meta{name} is not found in the page attributes
-%   then the \meta{token list variable} is set
-%   to the special marker \cs{q_no_value}. The \meta{token list
-%   variable} is set within the current \TeX{} group.
-% \end{function}
-% \begin{function}[added = 2019-06-04]
-%   {
-%    \pdf_pageattr_gremove:n
-%   }
-%   \begin{syntax}
-%     \pdf_pageattr_gremove:n \Arg{name}
-%   \end{syntax}
-%   Removes  |/|\meta{name} and its associated \meta{value} from the page dictionaries
-%   of the current and the following pages (if the name-value pair has been added by
-%   \cs{pdf_pageattr_gput:nn}). If \meta{name} is not found no change occurs,
-%   \emph{i.e}~there is no need to test for the existence of a name before
-%   trying to remove it.
-% \end{function}
+
+
 %    \begin{macrocode}
 %<*package>
 \@@_tree_new:n {Page}
@@ -573,8 +664,8 @@
    \@@_tree_gput:nnn {Page}{#1}{#2}
   }
 
-% setter by page:
-\cs_new_protected:Npn \pdf_pageattr_gput:nnn #1 #2 #3
+% setter by page number:
+\cs_new_protected:Npn \@@_pageattr_gput:nnn #1 #2 #3
   {
    \@@_tree_new:n {Page#1}
    \@@_tree_gput:nnn {Page#1}{#2}{#3}
@@ -592,6 +683,11 @@
 \cs_new_protected:Npn \pdf_pageattr_gremove:n #1
   {
    \@@_tree_gremove:nn { Page } { #1 }
+  }
+
+\cs_new_protected:Npn \pdf_thispageattr_gput:nn #1
+  {
+
   }
 
 % push to the register
@@ -1784,5 +1880,35 @@
 }
 
 %</package>
+%    \end{macrocode}
+% \subsection{lua code for lualatex}
+%    \begin{macrocode}
+%<*lua>
+l3kernel= l3kernel or {}
+l3kernel._@@      = l3kernel._@@ or {}
+l3kernel._@@.Page = l3kernel._@@.Page or {}
+local _@@ = l3kernel._@@
+local pdf = pdf
+
+local function _@@_addpageattributes (page,name,value)
+ _@@.Page[page] = _@@.Page[page] or {}
+ _@@.Page[page][name]=value
+end
+
+local function _@@_pushpageattributes (page)
+ local token=""
+ if _@@.Page[page] then
+  for name,value in pairs(_@@.Page[page]) do
+   token = token .. "/"..name.." "..value
+  end
+ end
+ return token
+end
+
+function l3kernel._@@.pageattr_doc (page,name,value) -- tex.count["g__pdf_abspage_int"]
+ _@@_addpageattributes (page,name,value)
+ pdf.setpageattributes(_@@_pushpageattributes (page))
+end
+%</lua>
 %    \end{macrocode}
 % \PrintIndex
