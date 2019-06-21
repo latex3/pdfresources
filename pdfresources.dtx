@@ -136,6 +136,78 @@
 \cs_new_protected:Npn \@@_backend_end_run:n #1 {} %check ...
 %</package>
 %    \end{macrocode}
+% \subsection{tree pathes}
+%  This is a bit experimental. Let's look if one can define some generic commands
+%  based on pathes. The main question will be if one can encode the different
+%  inner structures (array/dict) and the cases where users shouldn't fill a value
+%  but it should be done by subtrees ...
+%  \begin{verbatim}
+%  /Pages           %w,  \pagesattr
+%  /PageN           %w, N=1,..n or empty (=all pages) \pageattr
+%  /PageN/Resources %nw? \pageresources
+%  /PageN/Resources/ExtGState
+%  /PageN/Resources/ColorSpace
+%  /PageN/Resources/Pattern
+%  /PageN/Resources/Shading
+%  /PageN/Resources/Properties
+%  //Info           %w, \pdfinfo
+%  /Catalog/OCProperties
+%  /Catalog/OutputIntents
+%  \end{verbatim}
+%    \begin{macrocode}
+%<*package>
+\cs_new:Npn \@@_tree_prop_name:n #1 % path name without /
+ {
+   g_@@_/#1_prop
+ }
+
+\cs_new_protected:Npn \@@_tree_new:n #1
+ {
+  \prop_if_exist:cF { \@@_tree_prop_name:n {#1} }
+   {
+    \prop_new:c  { \@@_tree_prop_name:n {#1} }
+   }
+ }
+
+
+\cs_new_protected:Npn \@@_tree_gput:nnn #1 #2 #3  %#1 name
+ { %test if tree path is allowed here?
+  \tl_if_empty:nTF { #3 }
+   {
+    \msg_none:nnn { pdf }{ empty-value }{ /#1/#2 }
+   }
+   {
+    \prop_gput:cnn { \@@_tree_prop_name:n {#1} }{ #2 } { #3 }
+   }
+ }
+\cs_new_protected:Npn \@@_tree_get:nnnN  #1 #2 #3
+  {
+   \prop_get:cnN { \@@_tree_prop_name:n {#1} } { #2} #3
+  }
+
+\cs_new_protected:Npn \@@_tree_gremove:nn #1 #2
+  {
+   \prop_gremove:cn { \@@_tree_prop_name:n {#1} } { #2 }
+  }
+
+\cs_new:Npn \@@_tree_map_dict_item:n #1
+ {
+   \prop_map_function:cN { \@@_tree_prop_name:n {#1}} \@@_dict_item:nn
+ }
+
+\cs_new_protected:Npn \@@_tree_merge:nnN #1 #2 #3 % merges: first #1 then optionally #2 into prop #3
+ {
+   \prop_set_eq:Nc #3 { \@@_tree_prop_name:n  { #1 } }
+   \prop_if_exist:cT  { \@@_tree_prop_name:n  { #2 } }
+   {
+    \prop_map_inline:cn { \@@_tree_prop_name:n  { #2 } }
+    {
+      \prop_put:Nnn #3 { ##1 }{ ##2 }
+    }
+   }
+ }
+%</package>
+%    \end{macrocode}
 %\subsubsection{pdfxform}
 % \begin{NOTE}{UF}
 %  As in dvi mode the xform is immediate, this is done for pdftex/luatex too. If needed
@@ -257,107 +329,178 @@
 %<*package>
 %% backend commands
 %% stores values by pages. Only used and needed by pdflatex
-%% try later to merge this with the "tree" setup
-\cs_new_protected:Npn \@@_backend_pageattr_gput:nnn #1 #2 #3
-{
-  \prop_if_exist:cF { g_@@_backend_pageattr#1_prop }
-  {
-   \prop_new:c { g_@@_backend_pageattr#1_prop }
-  }
-  \prop_gput:cnn { g_@@_backend_pageattr#1_prop } { #2 } { #3 }
-}
+%%
+\@@_tree_new:n {backend_Page}
 
-\cs_new_protected:Npn \@@_backend_pageattr_push:n #1
-{
-}
-
-
+\tl_new:N\l_@@_tmp_page_tl
+%pdflatex
 \bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
  {
-  \cs_new_protected:Npn \@@_backend_pageattr:n #1
+  %the primitive
+  \cs_new_protected:Npn \@@_backend_Page_primitive:n #1
    {
      \tex_global:D \tex_pdfpageattr:D {#1}
    }
-  %clear the register, should be used in shipout before
-  %filling with the new values. Noops in dvips/dvipdfmx
-  \cs_new_protected:Npn \@@_backend_pageattr_clear:
-   {
-     \tex_global:D \tex_pdfpageattr:D {}
-   }
+  % the command to store default values. Prop with
+  % pdflatex + dvi, lua table with lualatex
+  \cs_new_protected:Npn \@@_backend_Page_gput:nn #1 #2
+  {
+   \@@_tree_gput:nnn {backend_Page}{ #1 }{ #2 }
+  }
+  % the command to remove a default value. Prop with
+  % pdflatex + dvi, lua table with lualatex
+  \cs_new_protected:Npn \@@_backend_Page_gremove:n #1
+  {
+   \@@_tree_gremove:nn  {backend_Page}{ #1 }
+  }
   % the command used in the document.
-  % special with dvips/dvipdfmx
-  % \latelua with lualatex
+  % direct call of the primitive special with dvips/dvipdfmx
+  % \latelua to fill a page related table with lualatex
   % write to aux and store in prop with pdflatex
-  \cs_new_protected:Npn \@@_backend_pageattr_doc:nn #1 #2
+  \cs_new_protected:Npn \@@_backend_PageN_gput:nn #1 #2
    {
     \int_gincr:N\g_@@_resourceid_int
     \zref@labelbylist {l3pdf\int_use:N\g_@@_resourceid_int} {l3pdf}
-    \@@_backend_pageattr_gput:nnn
+    \tl_set:Nx \l_@@_tmp_page_tl
      {
       \zref@extractdefault{l3pdf\int_use:N\g_@@_resourceid_int}
                           {pdf@abspage}
                           {0}
-     }{#1}{#2}
-    \prop_show:c { g_@@_backend_pageattr
-                    \zref@extractdefault{l3pdf\int_use:N\g_@@_resourceid_int}
-                          {pdf@abspage}
-                          {0}_prop }
+     }
+    \@@_tree_new:n    {backend_Page\l_@@_tmp_page_tl}
+    \@@_tree_gput:nnn {backend_Page\l_@@_tmp_page_tl}{#1}{#2}
    }
+  %the code to push the values, used in shipout
+  %merges the two props and then fill the register in pdflatex
+  %merges the two tables and then fill (in lua) in luatex
+  %issues the values store in the global prop with dvi
+  \cs_new_protected:Npn \@@_backend_PageN_gpush:n #1
+  {
+   \@@_tree_merge:nnN {backend_Page}{backend_Page#1}\l_@@_tmpa_prop
+   \exp_args:Nx \@@_backend_Page_primitive:n
+   {
+    \prop_map_function:NN \l_@@_tmpa_prop \@@_dict_item:nn
+   }
+  }
  }
 
 \sys_if_engine_luatex:T
 {
  %needed ??????????????
- \cs_new_protected:Npn \@@_backend_pageattr:n #1
+ \cs_new_protected:Npn \@@_backend_Page_primitive:n #1
    {
-     \latelua{pdf.setpageattributes("#1")}
+     \tex_latelua:D {pdf.setpageattributes("#1")}
    }
- %clear the register, should be used in shipout before
- %filling with the new values. Noops in dvips/dvipdfmx
- \cs_new_protected:Npn \@@_backend_pageattr_clear:
-   {
-     \latelua{pdf.setpageattributes("")}
-   }
-  %the command used in the document.
-  % special with dvips/dvipdfmx
-  % \latelua with lualatex
-  % write to aux with pdflatex
-  \cs_new_protected:Npn \@@_backend_pageattr_doc:nn #1 #2
-   {
-     \latelua{l3kernel._@@.pageattr_doc (tex.count["g_@@_abspage_int"],"#1","#2")}
-   }
+ % the command to store default values. Prop with
+ % pdflatex + dvi, lua table with lualatex
+ \cs_new_protected:Npn \@@_backend_Page_gput:nn #1 #2
+ {
+   \tex_directlua:D { l3kernel.__pdf._backend_Page_gput ("#1","#2") }
+ }
+ % the command to remove a default value. Prop with
+ % pdflatex + dvi, lua table with lualatex
+ \cs_new_protected:Npn \@@_backend_Page_gremove:n #1
+ {
+  \tex_directlua:D { l3kernel.__pdf._backend_Page_gremove ("#1") }
+ }
+ % the command used in the document.
+ % direct call of the primitive special with dvips/dvipdfmx
+ % \latelua: fill a page related table with lualatex, merge it with the page
+ % table and push it directly
+ % write to aux and store in prop with pdflatex
+ \cs_new_protected:Npn \@@_backend_PageN_gput:nn #1 #2
+  {
+   \tex_latelua:D
+    {
+     l3kernel.__pdf._backend_PageN_gput (tex.count["g__pdf_abspage_int"],"#1","#2")
+     l3kernel.__pdf._backend_PageN_gpush (tex.count["g__pdf_abspage_int"])
+    }
+  }
+  %the code to push the values, used in shipout
+  %merges the two props and then fill the register in pdflatex
+  %merges the two tables (the one is probably still empty) and then fill (in lua) in luatex
+  %issues the values store in the global prop with dvi
+  \cs_new_protected:Npn \@@_backend_PageN_gpush:n #1
+  {
+    \tex_latelua:D
+    {
+     l3kernel.__pdf._backend_PageN_gpush (tex.count["g__pdf_abspage_int"])
+    }
+  }
 }
+
 \sys_if_engine_xetex:T
  {
-   \cs_new_protected:Npx \@@_backend_pageattr:n #1
+  %the primitive
+  \cs_new_protected:Npn \@@_backend_Page_primitive:n #1
    {
     \tex_special:D{pdf:~put~@thispage~<<#1>>}
    }
-  \cs_new_protected:Npn \@@_backend_pageattr_clear: {}
+  % the command to store default values. Prop with
+  % pdflatex + dvi, lua table with lualatex
+  \cs_new_protected:Npn \@@_backend_Page_gput:nn #1 #2
+  {
+   \@@_tree_gput:nnn {backend_Page}{ #1 }{ #2 }
+  }
+  % the command to remove a default value. Prop with
+  % pdflatex + dvi, lua table with lualatex
+  \cs_new_protected:Npn \@@_backend_Page_gremove:n #1
+  {
+   \@@_tree_gremove:nn  {backend_Page}{ #1 }
+  }
   % the command used in the document.
-  % special with dvips/dvipdfmx
-  % \latelua with lualatex
-  % write to aux with pdflatex
-  \cs_new_protected:Npn \@@_backend_pageattr_doc:nn #1 #2
+  % direct call of the primitive special with dvips/dvipdfmx
+  % \latelua: fill a page related table with lualatex, merge it with the page
+  % table and push it directly
+  % write to aux and store in prop with pdflatex
+  \cs_new_protected:Npn \@@_backend_PageN_gput:nn #1 #2
    {
-     \@@_backend_pageattr:n {/#1~#2}
+    \@@_backend_Page_primitive:n { #1 }
    }
+  %the code to push the values, used in shipout
+  %merges the two props and then fill the register in pdflatex
+  %merges the two tables (the one is probably still empty) and then fill (in lua) in luatex
+  %issues the values store in the global prop with dvi
+  \cs_new_protected:Npn \@@_backend_PageN_gpush:n #1
+  {
+    \exp_args:Nx \@@_backend_Page_primitive:n { \@@_tree_map_dict_item:n {backend_Page} }
+  }
  }
 
 \bool_if:nT {\sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p: }
 {
-  \cs_new_protected:Npx \@@_backend_pageattr:n #1
+  \cs_new_protected:Npn \@@_backend_Page_primitive:n #1
   {
-   \tex_special:D{ps:~[{ThisPage}<<#1>>~/PUT~pdfmark}
+   \tex_special:D{ps:~[{ThisPage}<<#1>>~/PUT~pdfmark} %]
   }
- \cs_new_protected:Npn \@@_backend_pageattr_clear: {}
- % the command used in the document.
- % special with dvips/dvipdfmx
- % \latelua with lualatex
- % write to aux with pdflatex
- \cs_new_protected:Npn \@@_backend_pageattr_doc:nn #1 #2
+  % the command to store default values. Prop with
+  % pdflatex + dvi, lua table with lualatex
+  \cs_new_protected:Npn \@@_backend_Page_gput:nn #1 #2
   {
-     \@@_backend_pageattr:n {/#1~#2}
+   \@@_tree_gput:nnn {backend_Page}{ #1 }{ #2 }
+  }
+  % the command to remove a default value. Prop with
+  % pdflatex + dvi, lua table with lualatex
+  \cs_new_protected:Npn \@@_backend_Page_gremove:n #1
+  {
+   \@@_tree_gremove:nn  {backend_Page}{ #1 }
+  }
+  % the command used in the document.
+  % direct call of the primitive special with dvips/dvipdfmx
+  % \latelua: fill a page related table with lualatex, merge it with the page
+  % table and push it directly
+  % write to aux and store in prop with pdflatex
+  \cs_new_protected:Npn \@@_backend_PageN_gput:nn #1 #2
+   {
+    \@@_backend_Page_primitive:n { #1 }
+   }
+  %the code to push the values, used in shipout
+  %merges the two props and then fill the register in pdflatex
+  %merges the two tables (the one is probably still empty) and then fill (in lua) in luatex
+  %issues the values store in the global prop with dvi
+  \cs_new_protected:Npn \@@_backend_PageN_gpush:n #1
+  {
+    \exp_args:Nx \@@_backend_Page_primitive:n { \@@_tree_map_dict_item:n {backend_Page} }
   }
 }
 %</package>
@@ -397,78 +540,7 @@
 %
 %
 % \section{Management code}
-% \subsection{tree pathes}
-%  This is a bit experimental. Let's look if one can define some generic commands
-%  based on pathes. The main question will be if one can encode the different
-%  inner structures (array/dict) and the cases where users shouldn't fill a value
-%  but it should be done by subtrees ...
-%  \begin{verbatim}
-%  /Pages           %w,  \pagesattr
-%  /PageN           %w, N=1,..n or empty (=all pages) \pageattr
-%  /PageN/Resources %nw? \pageresources
-%  /PageN/Resources/ExtGState
-%  /PageN/Resources/ColorSpace
-%  /PageN/Resources/Pattern
-%  /PageN/Resources/Shading
-%  /PageN/Resources/Properties
-%  //Info           %w, \pdfinfo
-%  /Catalog/OCProperties
-%  /Catalog/OutputIntents
-%  \end{verbatim}
-%    \begin{macrocode}
-%<*package>
-\cs_new:Npn \@@_tree_prop_name:n #1 % path name without /
- {
-   g_@@_/#1_prop
- }
 
-\cs_new_protected:Npn \@@_tree_new:n #1
- {
-  \prop_if_exist:cF { \@@_tree_prop_name:n {#1} }
-   {
-    \prop_new:c  { \@@_tree_prop_name:n {#1} }
-   }
- }
-
-
-\cs_new_protected:Npn \@@_tree_gput:nnn #1 #2 #3  %#1 name
- { %test if tree path is allowed here?
-  \tl_if_empty:nTF { #3 }
-   {
-    \msg_none:nnn { pdf }{ empty-value }{ /#1/#2 }
-   }
-   {
-    \prop_gput:cnn { \@@_tree_prop_name:n {#1} }{ #2 } { #3 }
-   }
- }
-\cs_new_protected:Npn \@@_tree_get:nnnN  #1 #2 #3
-  {
-   \prop_get:cnN { \@@_tree_prop_name:n {#1} } { #2} #3
-  }
-
-\cs_new_protected:Npn \@@_tree_gremove:nn #1 #2
-  {
-   \prop_gremove:cn { \@@_tree_prop_name:n {#1} } { #2 }
-  }
-
-\cs_new:Npn \@@_tree_map_dict_item:n #1
- {
-   \prop_map_function:cN { \@@_tree_prop_name:n {#1}} \@@_dict_item:nn
- }
-
-\cs_new_protected:Npn \@@_tree_merge:nnN #1 #2 #3 % merges: first #1 then optionally #2 into prop #3
- {
-   \prop_set_eq:Nc #3 { \@@_tree_prop_name:n  { #1 } }
-   \prop_if_exist:cT  { \@@_tree_prop_name:n  { #2 } }
-   {
-    \prop_map_inline:cn { \@@_tree_prop_name:n  { #2 } }
-    {
-      \prop_put:Nnn #3 { ##1 }{ ##2 }
-    }
-   }
- }
-%</package>
-%    \end{macrocode}
 % \subsection{helper commands}
 %    \begin{macrocode}
 %<*package>
@@ -646,7 +718,6 @@
 %   done explictly. If a \meta{name} is used twice, only the last \meta{value}
 %   set will be used. With the engine pdflatex at least a second compilation is needed.
 % \end{function}
-
 %    \begin{macrocode}
 %<*package>
 \@@_tree_new:n {Page}
