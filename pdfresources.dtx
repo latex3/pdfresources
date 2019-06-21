@@ -87,9 +87,16 @@
 % therefore depends on the driver.
 %
 % \subsection{\pkg{media9}}
-%
-% \section{New backend Code / experimental }
-% \subsection{some zref code, that needs to be replaced later}
+% \section{Preparation/helper Code}
+%^^A still needed:
+%^^A \pdf@strcmp??
+%^^A \pdf@escapestring?? \pdfescapestring
+%    \begin{macrocode}
+%<*package>
+\prop_new:N\l_@@_tmpa_prop
+%</package>
+%    \end{macrocode}
+% \subsection{some zref code, needs to be replaced later}
 %    \begin{macrocode}
 %<*package>
 \int_new:N \g_@@_abspage_int
@@ -98,12 +105,11 @@
 \zref@newlist  {l3pdf}
 \zref@newprop* {pdf@abspage} [0] {\int_use:N\g_@@_abspage_int}
 \zref@addprop  {l3pdf} {pdf@abspage}
-
-%^^A still needed:
-%^^A \pdf@strcmp??
-%^^A \pdf@escapestring?? \pdfescapestring
+%</package>
+%    \end{macrocode}
 % \subsection{luacode}
 %    \begin{macrocode}
+%<*package>
 \sys_if_engine_luatex:T
 {
  \directlua{require("pdfresources.lua")}
@@ -113,31 +119,20 @@
 % \subsection{end of run}
 % \begin{NOTE}{UF}
 % the \enquote{end-of-run} command is temporary until shipout/atendshipout code
-% is ready. dvips implementation missing.
+% is ready. dvips implementation missing. Currently a noop.
 % \end{NOTE}
 %    \begin{macrocode}
 %<*package>
-%\bool_if:nT {(\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p:) || \sys_if_engine_luatex_p: }
-%{
-% \cs_new_protected:Npn \@@_backend_end_run:n #1
-%  {
-%   \AtEndDocument{\clearpage #1}
-%  }
-%}
 %
-%\bool_if:nT{ \sys_if_engine_xetex:T ||
-%{%need to be checked ...
-% \RequirePackage{atenddvi}
-% \cs_new_protected:Npn \@@_backend_end_run:n #1
-%  {
-%   %\AtEndDvi{#1}
-%  }
-%}
+%   \AtEndDocument{\clearpage #1} ? (not dvi)
+%   \AtEndDvi{#1}                 ?
 \cs_new_protected:Npn \@@_backend_end_run:n #1 {} %check ...
 %</package>
 %    \end{macrocode}
-% \subsection{tree pathes}
-%  This is a bit experimental. Let's look if one can define some generic commands
+%
+% \subsection{Tree / path-Code}
+%  This is a bit experimental. Many code parts are quite similar: props are
+%  filled and output. So we define some generic commands
 %  based on pathes. The main question will be if one can encode the different
 %  inner structures (array/dict) and the cases where users shouldn't fill a value
 %  but it should be done by subtrees ...
@@ -150,7 +145,7 @@
 %  /PageN/Resources/Pattern
 %  /PageN/Resources/Shading
 %  /PageN/Resources/Properties
-%  //Info           %w, \pdfinfo
+%  /Info           %w, \pdfinfo
 %  /Catalog/OCProperties
 %  /Catalog/OutputIntents
 %  \end{verbatim}
@@ -170,7 +165,7 @@
  }
 
 
-\cs_new_protected:Npn \@@_tree_gput:nnn #1 #2 #3  %#1 name
+\cs_new_protected:Npn \@@_tree_gput:nnn #1 #2 #3  %#1 path, #2 name, #3 value
  { %test if tree path is allowed here?
   \tl_if_empty:nTF { #3 }
    {
@@ -208,6 +203,130 @@
  }
 %</package>
 %    \end{macrocode}
+% \section{Resources management}
+% \subsection{pdfpagesattr}
+% \subsubsection{pdfpagesattr/backend}
+% \begin{NOTE}{UF}
+%  path: Pages
+%  pdfpagesattr is a single token register which is used at the end of the compilation.
+%  dvips syntax: \verb+\special{ps: [/ABC /CDE /EFG /FGH /Rotate 90 /PAGES pdfmark}+
+%  dvipdfmx syntax: \verb+\special{pdf:put @pages <</ABC /WEZ /EFG /XYZ /Rotate 0>>}+
+%  both remove duplicate entries automatically, so there is no need to be careful.
+% \end{NOTE}
+%    \begin{macrocode}
+%<*package>
+\bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: || \sys_if_engine_luatex_p:}
+{
+ \cs_new_protected:Npx \@@_backend_pagesattr:n #1
+  {
+    \exp_not:N \tex_global:D
+    \cs_if_exist:NTF \tex_pdfpagesattr:D
+      { \tex_pdfpagesattr:D }
+      { \tex_pdfvariable:D pagesattr }
+      {#1}
+  }
+}
+%dvips
+\bool_if:nT {\sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p: }
+{
+ \cs_new_protected:Npx \@@_backend_pagesattr:n #1
+  {
+    \tex_special:D{ps:~[#1~/PAGES~pdfmark}
+  }
+}
+
+%need to be checked/
+\sys_if_engine_xetex:T
+ {
+  \cs_new_protected:Npn \@@_backend_pagesattr:n #1
+   {
+    \@@_backend:n{put~@pages~<<#1>>}
+   }
+ }
+
+%</package>
+%    \end{macrocode}
+% \subsubsection{pdfpagesattr/management}
+% \begin{NOTE}{UF}
+% The register is normally used only a few times in a document, so it would be
+% okay to update the register/add the special at every change,
+% but with dvips/dvipdfmx this would disable removing entries.
+% So we issue the push code only at the end of the document.
+% \end{NOTE}
+% \begin{function}[added = 2019-06-04]
+%   {\pdf_pagesattr_gput:nn}
+%   \begin{syntax}
+%     \cs{pdf_pagesattr_gput:nn} \Arg{name} \Arg{value}
+%   \end{syntax}
+%   Adds |/|\meta{name} \meta{value} the |/Pages| dictionary.
+%   It is always stored globally. The content is written to the pdf
+%   at the end of the compilation,so values can be added, changed or removed until then.
+%   \meta{name} should be a valid pdf name without the leading slash,
+%   \meta{value} should be a valid pdf value. Any escaping or (re)encoding must be
+%   done explictly. If a \meta{name} is used twice, only the last \meta{value}
+%   set will be used.
+% \end{function}
+% \begin{function}[added = 2019-06-04]
+%   {\pdf_pagesattr_get:nN}
+%   \begin{syntax}
+%     \cs{pdf_pagesattr_get:nN} \Arg{name} \meta{tl var}
+%   \end{syntax}
+%   Recovers the \meta{value} stored by \cs{pdf_pagesattr_gput:nn} for
+%   \meta{name} and places this in the \meta{token list
+%   variable}. If \meta{name} is not found
+%   then the \meta{token list variable} is set
+%   to the special marker \cs{q_no_value}. The \meta{token list
+%   variable} is set within the current \TeX{} group.
+% \end{function}
+% \begin{function}[added = 2019-06-04]
+%   {
+%    \pdf_pagesattr_gremove:n
+%   }
+%   \begin{syntax}
+%     \pdf_pagesattr_gremove:n \Arg{name}
+%   \end{syntax}
+%   Removes  |/|\meta{name} and its associated \meta{value} from the |/Pages| dictionary
+%   (if the name-value pair has been added by  \cs{pdf_pagesattr_gput:nn}).
+%   If \meta{name} is not found no change occurs,
+%   \emph{i.e}~there is no need to test for the existence of a name before
+%   trying to remove it.
+% \end{function}
+%    \begin{macrocode}
+%<*package>
+\@@_tree_new:n {Pages}
+% setter:
+%^^A documentated
+\cs_new_protected:Npn \pdf_pagesattr_gput:nn #1 #2
+  {
+   \@@_tree_gput:nnn {Pages}{#1}{#2}
+  }
+
+% getter from the prop:
+%^^A documentated
+\cs_new_protected:Npn \pdf_pagesattr_get:nN #1 #2
+  {
+   \@@_tree_get:nnN {Pages}{#1} #2
+  }
+
+% remove:
+%^^A documentated
+\cs_new_protected:Npn \pdf_pagesattr_gremove:n #1
+  {
+   \@@_tree_gremove:nn {Pages}{#1}
+  }
+
+% push to the register command / issue the special
+\cs_new_protected:Npn \@@_pagesattr_gpush:
+  {
+    \exp_args:Nx \@@_backend_pagesattr:n
+    {
+     \@@_tree_map_dict_item:n {Pages}
+    }
+  }
+
+%</package>
+%    \end{macrocode}
+%
 %\subsubsection{pdfxform}
 % \begin{NOTE}{UF}
 %  As in dvi mode the xform is immediate, this is done for pdftex/luatex too. If needed
@@ -273,47 +392,7 @@
 
 %</package>
 %    \end{macrocode}
-% \subsubsection{backend / pdfpagesattr}
-% \begin{NOTE}{UF}
-%  path: pages
-%  pdfpagesattr is a single token register which is used at the end of the compilation.
-%  dvips syntax: \verb+\special{ps: [/ABC /CDE /EFG /FGH /Rotate 90 /PAGES pdfmark}+
-%  dvipdfmx syntax: \verb+\special{pdf:put @pages <</ABC /WEZ /EFG /XYZ /Rotate 0>>}+
-%  both remove duplicate entries automatically, so there is no need to be careful.
-% \end{NOTE}
-%    \begin{macrocode}
-%<*package>
-\bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: || \sys_if_engine_luatex_p:}
-{
- \cs_new_protected:Npx \@@_backend_pagesattr:n #1
-  {
-    \exp_not:N \tex_global:D
-    \cs_if_exist:NTF \tex_pdfpagesattr:D
-      { \tex_pdfpagesattr:D }
-      { \tex_pdfvariable:D pagesattr }
-      {#1}
-  }
-}
-%dvips
-\bool_if:nT {\sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p: }
-{
- \cs_new_protected:Npx \@@_backend_pagesattr:n #1
-  {
-    \tex_special:D{ps:~[#1~/PAGES~pdfmark}
-  }
-}
 
-%need to be checked/
-\sys_if_engine_xetex:T
- {
-  \cs_new_protected:Npn \@@_backend_pagesattr:n #1
-   {
-    \@@_backend:n{put~@pages~<<#1>>}
-   }
- }
-
-%</package>
-%    \end{macrocode}
 % \subsubsection{backend / pdfpageattr}
 % \begin{NOTE}{UF}
 %  path: Page
@@ -540,13 +619,6 @@
 %
 %
 % \section{Management code}
-
-% \subsection{helper commands}
-%    \begin{macrocode}
-%<*package>
-\prop_new:N\l_@@_tmpa_prop
-%</package>
-%    \end{macrocode}
 % \subsection{page wise managment in shipouthook}
 % For now until expl3/kernel interface exists code is added with atbegshi:
 %    \begin{macrocode}
@@ -579,86 +651,7 @@
  }
 %</package>
 %    \end{macrocode}
-% \subsection{ management / pagesattr }
-% \begin{NOTE}{UF}
-% The register is normally used only a few times in a document, so it would be
-% okay to update the register/add the special at every change,
-% but with dvips/dvipdfmx this would disable removing entries.
-% So we issue the push code only at the end of the document.
-% \end{NOTE}
-% \begin{function}[added = 2019-06-04]
-%   {\pdf_pagesattr_gput:nn}
-%   \begin{syntax}
-%     \cs{pdf_pagesattr_gput:nn} \Arg{name} \Arg{value}
-%   \end{syntax}
-%   Adds |/|\meta{name} \meta{value} the |/Pages| dictionary.
-%   It is always stored globally. The content is written to the pdf
-%   at the end of the compilation,so values can be added, changed or removed until then.
-%   \meta{name} should be a valid pdf name without the leading slash,
-%   \meta{value} should be a valid pdf value. Any escaping or (re)encoding must be
-%   done explictly. If a \meta{name} is used twice, only the last \meta{value}
-%   set will be used.
-% \end{function}
-% \begin{function}[added = 2019-06-04]
-%   {\pdf_pagesattr_get:nN}
-%   \begin{syntax}
-%     \cs{pdf_pagesattr_get:nN} \Arg{name} \meta{tl var}
-%   \end{syntax}
-%   Recovers the \meta{value} stored by \cs{pdf_pagesattr_gput:nn} for
-%   \meta{name} and places this in the \meta{token list
-%   variable}. If \meta{name} is not found
-%   then the \meta{token list variable} is set
-%   to the special marker \cs{q_no_value}. The \meta{token list
-%   variable} is set within the current \TeX{} group.
-% \end{function}
-% \begin{function}[added = 2019-06-04]
-%   {
-%    \pdf_pagesattr_gremove:n
-%   }
-%   \begin{syntax}
-%     \pdf_pagesattr_gremove:n \Arg{name}
-%   \end{syntax}
-%   Removes  |/|\meta{name} and its associated \meta{value} from the |/Pages| dictionary
-%   (if the name-value pair has been added by  \cs{pdf_pagesattr_gput:nn}).
-%   If \meta{name} is not found no change occurs,
-%   \emph{i.e}~there is no need to test for the existence of a name before
-%   trying to remove it.
-% \end{function}
-%    \begin{macrocode}
-%<*package>
-\@@_tree_new:n {Pages}
-% setter:
-%^^A documentated
-\cs_new_protected:Npn \pdf_pagesattr_gput:nn #1 #2
-  {
-   \@@_tree_gput:nnn {Pages}{#1}{#2}
-  }
 
-% getter from the prop:
-%^^A documentated
-\cs_new_protected:Npn \pdf_pagesattr_get:nN #1 #2
-  {
-   \@@_tree_get:nnN {Pages}{#1} #2
-  }
-
-% remove:
-%^^A documentated
-\cs_new_protected:Npn \pdf_pagesattr_gremove:n #1
-  {
-   \@@_tree_gremove:nn {Pages}{#1}
-  }
-
-% push to the register command / issue the special
-\cs_new_protected:Npn \@@_pagesattr_gpush:
-  {
-    \exp_args:Nx \@@_backend_pagesattr:n
-    {
-     \@@_tree_map_dict_item:n {Pages}
-    }
-  }
-
-%</package>
-%    \end{macrocode}
 %
 % \subsection{pageattr / management commands}
 % \begin{NOTE}{UF}
