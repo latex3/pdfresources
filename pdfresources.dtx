@@ -95,6 +95,12 @@
 %<*package>
 \prop_new:N\l_@@_tmpa_prop
 \tl_new:N\l_@@_tmpa_tl
+
+% helper command to output a key + value of a prop as needed in a dict.
+% I don't check if #1 or #2 is empty, imho this should be done only in the pdf layer
+% at the input?
+\cs_new:Npn \@@_dict_item:nn #1 #2 {/#1~#2~}
+
 %</package>
 %    \end{macrocode}
 % \subsection{some zref code, needs to be replaced later}
@@ -160,6 +166,7 @@
 \cs_new_protected:Npn \@@_lastpage_shipout_code:
  {
    \@@_Pages_gpush:
+   \@@_Info_gpush:
  }
 %</package>
 %    \end{macrocode}
@@ -648,6 +655,82 @@
 
 %</package>
 %    \end{macrocode}
+% ===================================
+% \subsection{The info dictionary}
+% \begin{NOTE}{UF}
+% path: Info
+% The info dictionary is filled by e.g. \cs{pdfinfo}. Multiple appearances of
+% \cs{pdfinfo} are concatenated, so one could end with multiple /Title or /Author entries.
+% It is then viewer dependant which one is showed, so it is better to avoid this.
+% We therefore setup a property which is filled and written to the info
+% directory in one go. According to hyperref a few odd drivers (hvtex, dvipsone, dviwind)
+% don't support arbitrary keys, but this should be handle elsewhere. Most entries are
+% strings so there is a special command for this. As entries with empty content
+% should be omited we add a test. The string command should perhaps escape the argument,
+% but for now we are assuming that the argument is pdf safe.
+% hyperref writes to the info dictionary at the shipout of the first page --
+% probably to catch the  case that \cs{title} is issued after the begin of the document.
+% We are outputting at the last page -- this needs a second compilation but
+% this is needed anyway.
+% \end{NOTE}
+% \subsubsection{Info /backend}
+% backend code is already in expl3
+% \subsubsection{Info / management}
+% % \begin{function}[added = 2019-06-22]
+%   {
+%    \pdf_info_gput:nn
+%   }
+%   \begin{syntax}
+%     \pdf_info_gput:nn \Arg{name} \Arg{value}
+%   \end{syntax}
+%   Adds |/|\meta{name} and the \meta{value} to the info dictionary.
+%   \meta{name} should be a valid pdf name without the leading slash,
+%   \meta{value} should be a valid pdf value. Any escaping or (re)encoding must be
+%   done explictly. If a \meta{name} is used twice, only the last \meta{value}
+%   set will be used. The info dictionary is written at the end of the compilation,
+%   so values can be set at any time.
+% \end{function}
+%    \begin{macrocode}
+%<*package>
+\@@_tree_new:n {Info}
+
+
+\cs_new_protected:Npn \pdf_info_gput:nn #1 #2 %#1 key without /, #2 content
+  {
+   \@@_tree_gput:nnn {Info}{#1}{#2}
+  }
+
+\cs_generate_variant:Nn \pdf_info_gput:nn {no}
+
+%  should #2 be inside a some escaping command?
+%  hyperref passes them through
+%  \HyXeTeX@CheckUnicode
+%  \HyPsd@XeTeXBigCharstrue
+%  \HyPsd@PrerenderUnicode{#1}%
+%  \pdfstringdef\@pdftitle{#1}%
+\cs_new_protected:Npn \pdf_info_string_gput:nn #1 #2 %#1 key without /, #2 content
+  {
+   \@@_tree_gput:nnn {Info}{#1}{(#2)}
+  }
+
+\cs_generate_variant:Nn \pdf_info_string_gput:nn {no,oo,on}
+
+
+\cs_new_protected:Npn \@@_info_push: %internal, to ensure that it is used only once
+ {
+  \prop_map_function:NN  \g_@@_info_prop \@@_backend_info_gput:nn
+  \prop_gclear:N \g_@@_info_prop
+ }
+
+% push to the register command / issue the special
+\cs_new_protected:Npn \@@_Info_gpush:
+  {
+    \prop_map_function:cN  { \@@_tree_prop_name:n {Info} } \@@_backend_info_gput:nn
+    \prop_gclear:c { \@@_tree_prop_name:n {Info} }
+  }
+%\AtBeginDocument{\@@_info_push:}
+%</package>
+%    \end{macrocode}
 % ================
 %\subsubsection{pdfxform}
 % \begin{NOTE}{UF}
@@ -751,8 +834,6 @@
 %
 %
 % \section{Management code}
-
-
 %
 %
 %
@@ -941,11 +1022,6 @@
 % \subsubsection{other stuff}
 %    \begin{macrocode}
 %<*package>
-% helper command to output a key + value of a prop as needed in a dict.
-% not internal as perhaps needed also by users?
-% I don't check if #1 or #2 is empty, imho this should be done only in the pdf layer
-% at the input?
-\cs_new:Npn \@@_dict_item:nn #1 #2 {/#1~#2~}
 
 \bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
 {
@@ -1428,65 +1504,7 @@
 \cs_generate_variant:Nn \@@_pageresources_gput:nnn {nnx}
 %</package>
 %    \end{macrocode}
-% \subsection{The info dictionary}
-% The info dictionary is filled by e.g. \cs{pdfinfo}. Multiple appearances of
-% \cs{pdfinfo} are concatenated, so one could end with multiple /Title or /Author entries.
-% It is then viewer dependant which one is showed, so it is better to avoid this.
-% We therefore setup a property which is filled and written to the info
-% directory in one go. According to hyperref a few odd drivers (hvtex, dvipsone, dviwind)
-% don't support arbitrary keys, but this should be handle elsewhere. Most entries are
-% strings so there is a special command for this, as entries with empty content
-% should be ommited we add a test. The string command should perhaps escape the argument,
-% but for now we are assuming that the argument is pdf safe.
-% hyperref writes to the info dictionary at the shipout of the first page --
-% probably to catch the  case that \cs{title} is issued after the begin of the document.
-% We are outputting at begin document, so all info keys should be set before.
-%    \begin{macrocode}
-%<*package>
-%% should this be driver commands??
-\prop_new:N \g_@@_info_prop
-\cs_new_protected:Npn \pdf_info_gput:nn #1 #2 %#1 key without /, #2 content
-  {
-   \tl_if_empty:nTF { #2 }
-   {
-    \msg_none:nnn { pdf }{ empty-value }{ Info/#1 }
-   }
-   {
-    \prop_gput:Nnn\g_@@_info_prop { #1 } { #2 }
-   }
-  }
 
-\cs_generate_variant:Nn \pdf_info_gput:nn {no}
-
-%  should #2 be inside a some escaping command?
-%  hyperref passes them through
-%  \HyXeTeX@CheckUnicode
-%  \HyPsd@XeTeXBigCharstrue
-%  \HyPsd@PrerenderUnicode{#1}%
-%  \pdfstringdef\@pdftitle{#1}%
-\cs_new_protected:Npn \pdf_info_string_gput:nn #1 #2 %#1 key without /, #2 content
-  {
-   \tl_if_empty:nTF { #2 }
-    {
-     \msg_none:nnn { pdf }{ empty-value }{ Info/#1 }
-    }
-    {
-     \prop_gput:Nnn\g_@@_info_prop { #1 } { (#2) }
-    }
-  }
-
-\cs_generate_variant:Nn \pdf_info_string_gput:nn {no,oo,on}
-
-
-\cs_new_protected:Npn \@@_info_push: %internal, to ensure that it is used only once
- {
-  \prop_map_function:NN  \g_@@_info_prop \@@_backend_info_gput:nn
-  \prop_gclear:N \g_@@_info_prop
- }
-
-\AtBeginDocument{\@@_info_push:}
-%</package>
-%    \end{macrocode}
 
 % \subsection{Setting / comparing pdf versions}
 % The code assumes that the versions are two integers separated by a period.
