@@ -316,7 +316,7 @@
 %    \end{macrocode}
 % \subsubsection{backend / pdfpageattr}
 % \begin{NOTE}{UF}
-%  path: page
+%  path: Page
 %  The engines differ a lot here: pdflatex and lualatex uses a register while with
 %  dvips a one-shot-special ist used. So for pdflatex and lualatex code to clear the register
 %  is needed. Specials are used at shipout, registers set directly. With lualatex one can use
@@ -454,8 +454,8 @@
   % table and push it directly
   % write to aux and store in prop with pdflatex
   \cs_new_protected:Npn \@@_backend_PageN_gput:nn #1 #2
-   {
-    \@@_backend_Page_primitive:n { #1 }
+   {\tl_set:Nn\l_tmpa_tl{#1xx#2}\tl_show:N\l_tmpa_tl
+    \@@_backend_Page_primitive:n { /#1~#2 }
    }
   %the code to push the values, used in shipout
   %merges the two props and then fill the register in pdflatex
@@ -492,7 +492,7 @@
   % write to aux and store in prop with pdflatex
   \cs_new_protected:Npn \@@_backend_PageN_gput:nn #1 #2
    {
-    \@@_backend_Page_primitive:n { #1 }
+    \@@_backend_Page_primitive:n { /#1~#2 }
    }
   %the code to push the values, used in shipout
   %merges the two props and then fill the register in pdflatex
