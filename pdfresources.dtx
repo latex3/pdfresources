@@ -646,21 +646,6 @@
 %   done explictly. If a \meta{name} is used twice, only the last \meta{value}
 %   set will be used. With the engine pdflatex at least a second compilation is needed.
 % \end{function}
-% \begin{function}[added = 2019-06-11]
-%   {\pdf_pageattr_gput:nnn}
-%   \begin{syntax}
-%     \cs{pdf_pageattr_gput:nnn} \Arg{num} \Arg{name} \Arg{value}
-%   \end{syntax}
-%   Adds |/|\meta{name} \meta{value} at shipout to the page dictionaries of the
-%   page with the absolute page number \meta{num}.
-%   It is always stored globally. If \Arg{name} has already a value set with
-%   \cs{pdf_pageattr_gput:nn} it will overwrite it for this page.
-%   \meta{name} should be a valid pdf name without the leading slash,
-%   \meta{value} should be a valid pdf value. Any escaping or (re)encoding must be
-%   done explictly. If a \meta{name} is used twice, only the last \meta{value}
-%   set will be used.
-% \end{function}
-
 
 %    \begin{macrocode}
 %<*package>
