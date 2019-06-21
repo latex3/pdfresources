@@ -94,6 +94,7 @@
 %    \begin{macrocode}
 %<*package>
 \prop_new:N\l_@@_tmpa_prop
+\tl_new:N\l_@@_tmpa_tl
 %</package>
 %    \end{macrocode}
 % \subsection{some zref code, needs to be replaced later}
@@ -330,7 +331,291 @@
 
 %</package>
 %    \end{macrocode}
-% 
+% \subsection{pdfpageattr}
+% \subsubsection{pdfpageattr/backend}
+% \begin{NOTE}{UF}
+%  path: Page
+%  The engines differ a lot here: pdflatex and lualatex uses a register while with
+%  dvips/dvipdfmx a one-shot-special ist used. So for pdflatex and lualatex code
+%  to assemble the content of the register is needed. Specials are used at shipout,
+%  the registers is set directly. With lualatex one can use
+%  \cs{latelua} to delay the setting, with pdflatex one has to use a shipout hook.
+%  To get the code on the correct page one has to use the aux with pdflatex.
+%  In sum this means that quite a lot backend commands are needed to handle
+%  this differences. Simply variants of \cs{pdfpageattr} are not enough ...%
+%  dvips syntax: \special{ps: [{ThisPage}<</Rotate 90>> /PUT pdfmark}%
+%  There seem to be an in-built management code: multiple uses don't lead to
+%  multiple entries (/Rotate is special: there is always a /Rotate 0 in the dict, but seems
+%  not to do harm).
+%  dvipdfmx syntax: \special{pdf: put @thispage << /Rotate 90 >>}, like dvips has an in-built
+%  management code.
+%  Both change only the current page, so to get the pdftex behaviour (which sets
+%  also the following pages) one need to repeat it on every shipout.
+% \end{NOTE}
+%    \begin{macrocode}
+%<*package>
+%% backend commands
+% a prop for global/default settings which are used for more than
+% one page
+\@@_tree_new:n {backend_Page}
+%pdflatex
+\bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
+ {
+  %the primitive
+  \cs_new_protected:Npn \@@_backend_Page_primitive:n #1
+   {
+     \tex_global:D \tex_pdfpageattr:D {#1}
+   }
+  % the command to store default values.
+  % Uses a prop with pdflatex + dvi,
+  % sets a lua table with lualatex
+  \cs_new_protected:Npn \@@_backend_Page_gput:nn #1 #2
+  {
+   \@@_tree_gput:nnn {backend_Page}{ #1 }{ #2 }
+  }
+  % the command to remove a default value.
+  % Uses a prop with pdflatex + dvi,
+  % changes a lua table with lualatex
+  \cs_new_protected:Npn \@@_backend_Page_gremove:n #1
+  {
+   \@@_tree_gremove:nn  {backend_Page}{ #1 }
+  }
+ % the command used in the document.
+ % direct call of the primitive special with dvips/dvipdfmx
+ % \latelua: fill a page related table with lualatex, merge it with the page
+ % table and push it directly
+ % write to aux and store in prop with pdflatex
+  \cs_new_protected:Npn \@@_backend_PageN_gput:nn #1 #2
+   {
+    \int_gincr:N\g_@@_resourceid_int
+    \zref@labelbylist {l3pdf\int_use:N\g_@@_resourceid_int} {l3pdf}
+    \tl_set:Nx \l_@@_tmpa_tl
+     {
+      \zref@extractdefault{l3pdf\int_use:N\g_@@_resourceid_int}
+                          {pdf@abspage}
+                          {0}
+     }
+    \@@_tree_new:n    {backend_Page\l_@@_tmpa_tl}
+    \@@_tree_gput:nnn {backend_Page\l_@@_tmpa_tl}{#1}{#2}
+   }
+  %the code to push the values, used in shipout
+  %merges the two props and then fills the register in pdflatex
+  %merges the two tables and then fills (in lua) in luatex
+  %issues the values stored in the global prop with dvi
+  \cs_new_protected:Npn \@@_backend_PageN_gpush:n #1
+  {
+   \@@_tree_merge:nnN {backend_Page}{backend_Page#1}\l_@@_tmpa_prop
+   \exp_args:Nx \@@_backend_Page_primitive:n
+   {
+    \prop_map_function:NN \l_@@_tmpa_prop \@@_dict_item:nn
+   }
+  }
+ }
+
+\sys_if_engine_luatex:T
+{% do we need to use some escaping for the values?????
+ %not used, only there for consistency
+ \cs_new_protected:Npn \@@_backend_Page_primitive:n #1
+   {
+     \tex_latelua:D {pdf.setpageattributes("#1")}
+   }
+  % the command to store default values.
+  % Uses a prop with pdflatex + dvi,
+  % sets a lua table with lualatex
+ \cs_new_protected:Npn \@@_backend_Page_gput:nn #1 #2
+ {
+   \tex_directlua:D { l3kernel.__pdf._backend_Page_gput ("#1","#2") }
+ }
+  % the command to remove a default value.
+  % Uses a prop with pdflatex + dvi,
+  % changes a lua table with lualatex
+ \cs_new_protected:Npn \@@_backend_Page_gremove:n #1
+ {
+  \tex_directlua:D { l3kernel.__pdf._backend_Page_gremove ("#1") }
+ }
+ % the command used in the document.
+ % direct call of the primitive special with dvips/dvipdfmx
+ % \latelua: fill a page related table with lualatex, merge it with the page
+ % table and push it directly
+ % write to aux and store in prop with pdflatex
+ \cs_new_protected:Npn \@@_backend_PageN_gput:nn #1 #2
+  {
+   \tex_latelua:D
+    {
+     l3kernel.__pdf._backend_PageN_gput (tex.count["g__pdf_abspage_int"],"#1","#2")
+     l3kernel.__pdf._backend_PageN_gpush (tex.count["g__pdf_abspage_int"])
+    }
+  }
+  %the code to push the values, used in shipout
+  %merges the two props and then fills the register in pdflatex
+  %merges the two tables (the one is probably still empty) and then fills (in lua) in luatex
+  %issues the values stored in the global prop with dvi
+  \cs_new_protected:Npn \@@_backend_PageN_gpush:n #1
+  {
+    \tex_latelua:D
+    {
+     l3kernel.__pdf._backend_PageN_gpush (tex.count["g__pdf_abspage_int"])
+    }
+  }
+}
+
+\sys_if_engine_xetex:T
+ {
+  %the primitive
+  \cs_new_protected:Npn \@@_backend_Page_primitive:n #1
+   {
+    \tex_special:D{pdf:~put~@thispage~<<#1>>}
+   }
+  % the command to store default values.
+  % Uses a prop with pdflatex + dvi,
+  % sets a lua table with lualatex
+  \cs_new_protected:Npn \@@_backend_Page_gput:nn #1 #2
+  {
+   \@@_tree_gput:nnn {backend_Page}{ #1 }{ #2 }
+  }
+  % the command to remove a default value.
+  % Uses a prop with pdflatex + dvi,
+  % changes a lua table with lualatex
+  \cs_new_protected:Npn \@@_backend_Page_gremove:n #1
+  {
+   \@@_tree_gremove:nn  {backend_Page}{ #1 }
+  }
+  % the command used in the document.
+  % direct call of the primitive special with dvips/dvipdfmx
+  % \latelua: fill a page related table with lualatex, merge it with the page
+  % table and push it directly
+  % write to aux and store in prop with pdflatex
+  \cs_new_protected:Npn \@@_backend_PageN_gput:nn #1 #2
+   {\tl_set:Nn\l_tmpa_tl{#1xx#2}\tl_show:N\l_tmpa_tl
+    \@@_backend_Page_primitive:n { /#1~#2 }
+   }
+  %the code to push the values, used in shipout
+  %merges the two props and then fills the register in pdflatex
+  %merges the two tables (the one is probably still empty) and then fills (in lua) in luatex
+  %issues the values stored in the global prop with dvi
+  \cs_new_protected:Npn \@@_backend_PageN_gpush:n #1
+  {
+    \exp_args:Nx \@@_backend_Page_primitive:n { \@@_tree_map_dict_item:n {backend_Page} }
+  }
+ }
+%dvips
+\bool_if:nT {\sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p: }
+{
+  \cs_new_protected:Npn \@@_backend_Page_primitive:n #1
+  {
+   \tex_special:D{ps:~[{ThisPage}<<#1>>~/PUT~pdfmark} %]
+  }
+  % the command to store default values.
+  % Uses a prop with pdflatex + dvi,
+  % sets a lua table with lualatex
+  \cs_new_protected:Npn \@@_backend_Page_gput:nn #1 #2
+  {
+   \@@_tree_gput:nnn {backend_Page}{ #1 }{ #2 }
+  }
+  % the command to remove a default value.
+  % Uses a prop with pdflatex + dvi,
+  % changes a lua table with lualatex
+  \cs_new_protected:Npn \@@_backend_Page_gremove:n #1
+  {
+   \@@_tree_gremove:nn  {backend_Page}{ #1 }
+  }
+  % the command used in the document.
+  % direct call of the primitive special with dvips/dvipdfmx
+  % \latelua: fill a page related table with lualatex, merge it with the page
+  % table and push it directly
+  % write to aux and store in prop with pdflatex
+  \cs_new_protected:Npn \@@_backend_PageN_gput:nn #1 #2
+   {
+    \@@_backend_Page_primitive:n { /#1~#2 }
+   }
+  %the code to push the values, used in shipout
+  %merges the two props and then fills the register in pdflatex
+  %merges the two tables (the one is probably still empty) and then fills (in lua) in luatex
+  %issues the values stored in the global prop with dvi
+  \cs_new_protected:Npn \@@_backend_PageN_gpush:n #1
+  {
+    \exp_args:Nx \@@_backend_Page_primitive:n { \@@_tree_map_dict_item:n {backend_Page} }
+  }
+}
+%</package>
+%    \end{macrocode}
+% \subsubsection{pdfpageattr/management}
+% \begin{NOTE}{UF}
+% Open is the question if one need a command to set attribute on a page by page number.
+% Open is the setter for /AF (and perhaps /OutputIntents).
+% See also https://tex.stackexchange.com/questions/479812/extension-of-rotating-package-to-set-pdf-rotation
+% (should work now)
+% \end{NOTE}
+% \begin{function}[added = 2019-06-04]
+%   {\pdf_pageattr_gput:nn}
+%   \begin{syntax}
+%     \cs{pdf_pageattr_gput:nn} \Arg{name} \Arg{value}
+%   \end{syntax}
+%   Adds |/|\meta{name} \meta{value} to the page dictionary of the
+%   current page and the following pages. The values are assigned directly,
+%   so one should take into account the asynchronous page breaking and use the
+%   command only e.g. after a \cs{clearpage} and not inside
+%   floats. It is always stored globally.
+%   \meta{name} should be a valid pdf name without the leading slash,
+%   \meta{value} should be a valid pdf value. Any escaping or (re)encoding must be
+%   done explictly. If a \meta{name} is used twice, only the last \meta{value}
+%   set will be used. Names set with \cs{pdf_thispageattr_gput:nn} will overwrite
+%   names set with \cs{pdf_pageattr_gput:nn} if there is a clash.
+% \end{function}
+% \begin{function}[added = 2019-06-04]
+%   {
+%    \pdf_pageattr_gremove:n
+%   }
+%   \begin{syntax}
+%     \pdf_pageattr_gremove:n \Arg{name}
+%   \end{syntax}
+%   Removes |/|\meta{name} and its associated \meta{value} added by \cs{pdf_pageattr_gput:nn}
+%   from the page dictionaries of the current and the following pages.
+%   If \meta{name} is not found no change occurs,
+%   \emph{i.e}~there is no need to test for the existence of a name before
+%   trying to remove it. It doesn't affect values set with \cs{pdf_thispageattr_gput:nn}.
+% \end{function}
+% \begin{function}[added = 2019-06-19]
+%   {\pdf_thispageattr_gput:nn}
+%   \begin{syntax}
+%     \cs{pdf_thispageattr_gput:nn}  \Arg{name} \Arg{value}
+%   \end{syntax}
+%   Adds |/|\meta{name} \meta{value} at shipout to the page dictionary of the
+%   current page.
+%   It is always stored globally. If \Arg{name} has already a value set with
+%   \cs{pdf_pageattr_gput:nn} it will overwrite it for this page.
+%   \meta{name} should be a valid pdf name without the leading slash,
+%   \meta{value} should be a valid pdf value. Any escaping or (re)encoding must be
+%   done explictly. If a \meta{name} is used twice, only the last \meta{value}
+%   set will be used. With the engine pdflatex (at least) a second compilation is needed.
+% \end{function}
+%    \begin{macrocode}
+%<*package>
+\@@_tree_new:n {Page}
+% setter.
+%^^A documentated
+\cs_new_protected:Npn \pdf_pageattr_gput:nn #1 #2
+  {
+   \@@_backend_Page_gput:nn {#1}{#2}
+  }
+
+% remove:
+%^^A documentated
+\cs_new_protected:Npn \pdf_pageattr_gremove:n #1
+  {
+   \@@_backend_Page_gremove:n { #1 }
+  }
+
+% add to this page:
+%^^A documentated
+\cs_new_protected:Npn \pdf_thispageattr_gput:nn #1 #2
+  {
+   \@@_backend_PageN_gput:nn { #1 }{ #2 }
+  }
+
+%</package>
+%    \end{macrocode}
+% ================ 
 %\subsubsection{pdfxform}
 % \begin{NOTE}{UF}
 %  As in dvi mode the xform is immediate, this is done for pdftex/luatex too. If needed
@@ -397,197 +682,7 @@
 %</package>
 %    \end{macrocode}
 
-% \subsubsection{backend / pdfpageattr}
-% \begin{NOTE}{UF}
-%  path: Page
-%  The engines differ a lot here: pdflatex and lualatex uses a register while with
-%  dvips a one-shot-special ist used. So for pdflatex and lualatex code to clear the register
-%  is needed. Specials are used at shipout, registers set directly. With lualatex one can use
-%  \cs{latelua} to delay the setting, with pdflatex one has to use a shipout hook. To get
-%  the code on the correct page one has to use the aux with pdflatex. In sum this means that
-%  quite a lot backend commands are needed to handle this differences. Simply variants of \cs{pdfpageattr}
-%  are not enough ...%
-% \end{NOTE}
-%    \begin{macrocode}
-%<*package>
-%% backend commands
-%% stores values by pages. Only used and needed by pdflatex
-%%
-\@@_tree_new:n {backend_Page}
 
-\tl_new:N\l_@@_tmp_page_tl
-%pdflatex
-\bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
- {
-  %the primitive
-  \cs_new_protected:Npn \@@_backend_Page_primitive:n #1
-   {
-     \tex_global:D \tex_pdfpageattr:D {#1}
-   }
-  % the command to store default values. Prop with
-  % pdflatex + dvi, lua table with lualatex
-  \cs_new_protected:Npn \@@_backend_Page_gput:nn #1 #2
-  {
-   \@@_tree_gput:nnn {backend_Page}{ #1 }{ #2 }
-  }
-  % the command to remove a default value. Prop with
-  % pdflatex + dvi, lua table with lualatex
-  \cs_new_protected:Npn \@@_backend_Page_gremove:n #1
-  {
-   \@@_tree_gremove:nn  {backend_Page}{ #1 }
-  }
-  % the command used in the document.
-  % direct call of the primitive special with dvips/dvipdfmx
-  % \latelua to fill a page related table with lualatex
-  % write to aux and store in prop with pdflatex
-  \cs_new_protected:Npn \@@_backend_PageN_gput:nn #1 #2
-   {
-    \int_gincr:N\g_@@_resourceid_int
-    \zref@labelbylist {l3pdf\int_use:N\g_@@_resourceid_int} {l3pdf}
-    \tl_set:Nx \l_@@_tmp_page_tl
-     {
-      \zref@extractdefault{l3pdf\int_use:N\g_@@_resourceid_int}
-                          {pdf@abspage}
-                          {0}
-     }
-    \@@_tree_new:n    {backend_Page\l_@@_tmp_page_tl}
-    \@@_tree_gput:nnn {backend_Page\l_@@_tmp_page_tl}{#1}{#2}
-   }
-  %the code to push the values, used in shipout
-  %merges the two props and then fill the register in pdflatex
-  %merges the two tables and then fill (in lua) in luatex
-  %issues the values store in the global prop with dvi
-  \cs_new_protected:Npn \@@_backend_PageN_gpush:n #1
-  {
-   \@@_tree_merge:nnN {backend_Page}{backend_Page#1}\l_@@_tmpa_prop
-   \exp_args:Nx \@@_backend_Page_primitive:n
-   {
-    \prop_map_function:NN \l_@@_tmpa_prop \@@_dict_item:nn
-   }
-  }
- }
-
-\sys_if_engine_luatex:T
-{
- %needed ??????????????
- \cs_new_protected:Npn \@@_backend_Page_primitive:n #1
-   {
-     \tex_latelua:D {pdf.setpageattributes("#1")}
-   }
- % the command to store default values. Prop with
- % pdflatex + dvi, lua table with lualatex
- \cs_new_protected:Npn \@@_backend_Page_gput:nn #1 #2
- {
-   \tex_directlua:D { l3kernel.__pdf._backend_Page_gput ("#1","#2") }
- }
- % the command to remove a default value. Prop with
- % pdflatex + dvi, lua table with lualatex
- \cs_new_protected:Npn \@@_backend_Page_gremove:n #1
- {
-  \tex_directlua:D { l3kernel.__pdf._backend_Page_gremove ("#1") }
- }
- % the command used in the document.
- % direct call of the primitive special with dvips/dvipdfmx
- % \latelua: fill a page related table with lualatex, merge it with the page
- % table and push it directly
- % write to aux and store in prop with pdflatex
- \cs_new_protected:Npn \@@_backend_PageN_gput:nn #1 #2
-  {
-   \tex_latelua:D
-    {
-     l3kernel.__pdf._backend_PageN_gput (tex.count["g__pdf_abspage_int"],"#1","#2")
-     l3kernel.__pdf._backend_PageN_gpush (tex.count["g__pdf_abspage_int"])
-    }
-  }
-  %the code to push the values, used in shipout
-  %merges the two props and then fill the register in pdflatex
-  %merges the two tables (the one is probably still empty) and then fill (in lua) in luatex
-  %issues the values store in the global prop with dvi
-  \cs_new_protected:Npn \@@_backend_PageN_gpush:n #1
-  {
-    \tex_latelua:D
-    {
-     l3kernel.__pdf._backend_PageN_gpush (tex.count["g__pdf_abspage_int"])
-    }
-  }
-}
-
-\sys_if_engine_xetex:T
- {
-  %the primitive
-  \cs_new_protected:Npn \@@_backend_Page_primitive:n #1
-   {
-    \tex_special:D{pdf:~put~@thispage~<<#1>>}
-   }
-  % the command to store default values. Prop with
-  % pdflatex + dvi, lua table with lualatex
-  \cs_new_protected:Npn \@@_backend_Page_gput:nn #1 #2
-  {
-   \@@_tree_gput:nnn {backend_Page}{ #1 }{ #2 }
-  }
-  % the command to remove a default value. Prop with
-  % pdflatex + dvi, lua table with lualatex
-  \cs_new_protected:Npn \@@_backend_Page_gremove:n #1
-  {
-   \@@_tree_gremove:nn  {backend_Page}{ #1 }
-  }
-  % the command used in the document.
-  % direct call of the primitive special with dvips/dvipdfmx
-  % \latelua: fill a page related table with lualatex, merge it with the page
-  % table and push it directly
-  % write to aux and store in prop with pdflatex
-  \cs_new_protected:Npn \@@_backend_PageN_gput:nn #1 #2
-   {\tl_set:Nn\l_tmpa_tl{#1xx#2}\tl_show:N\l_tmpa_tl
-    \@@_backend_Page_primitive:n { /#1~#2 }
-   }
-  %the code to push the values, used in shipout
-  %merges the two props and then fill the register in pdflatex
-  %merges the two tables (the one is probably still empty) and then fill (in lua) in luatex
-  %issues the values store in the global prop with dvi
-  \cs_new_protected:Npn \@@_backend_PageN_gpush:n #1
-  {
-    \exp_args:Nx \@@_backend_Page_primitive:n { \@@_tree_map_dict_item:n {backend_Page} }
-  }
- }
-
-\bool_if:nT {\sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p: }
-{
-  \cs_new_protected:Npn \@@_backend_Page_primitive:n #1
-  {
-   \tex_special:D{ps:~[{ThisPage}<<#1>>~/PUT~pdfmark} %]
-  }
-  % the command to store default values. Prop with
-  % pdflatex + dvi, lua table with lualatex
-  \cs_new_protected:Npn \@@_backend_Page_gput:nn #1 #2
-  {
-   \@@_tree_gput:nnn {backend_Page}{ #1 }{ #2 }
-  }
-  % the command to remove a default value. Prop with
-  % pdflatex + dvi, lua table with lualatex
-  \cs_new_protected:Npn \@@_backend_Page_gremove:n #1
-  {
-   \@@_tree_gremove:nn  {backend_Page}{ #1 }
-  }
-  % the command used in the document.
-  % direct call of the primitive special with dvips/dvipdfmx
-  % \latelua: fill a page related table with lualatex, merge it with the page
-  % table and push it directly
-  % write to aux and store in prop with pdflatex
-  \cs_new_protected:Npn \@@_backend_PageN_gput:nn #1 #2
-   {
-    \@@_backend_Page_primitive:n { /#1~#2 }
-   }
-  %the code to push the values, used in shipout
-  %merges the two props and then fill the register in pdflatex
-  %merges the two tables (the one is probably still empty) and then fill (in lua) in luatex
-  %issues the values store in the global prop with dvi
-  \cs_new_protected:Npn \@@_backend_PageN_gpush:n #1
-  {
-    \exp_args:Nx \@@_backend_Page_primitive:n { \@@_tree_map_dict_item:n {backend_Page} }
-  }
-}
-%</package>
-%    \end{macrocode}
 % \subsection{backend / pageresources}
 % \begin{NOTE}{UF} Implementation for dvips missing (perhaps impossible ...), for xetex untested.
 % \enquote{Correct} content needed at every shipout
@@ -657,90 +752,7 @@
 %    \end{macrocode}
 
 %
-% \subsection{pageattr / management commands}
-% \begin{NOTE}{UF}
-% dvips syntax: \special{ps: [{ThisPage}<</Rotate 90>> /PUT pdfmark}%
-% There seem to be an in-built management code: multiple uses don't lead to
-% multiple entries (/Rotate is special: there is always a /Rotate 0 in the dict, but seems
-% not to do harm).
-% dvipdfmx syntax: \special{pdf: put @thispage << /Rotate 90 >>}, like dvips has an in-built
-% management code.
-% Both change only the current page, so to get the pdftex behaviour (which sets
-% also the following pages) one need to repeat it on every shipout.
-% Open is the question if one need more shipout hooks to set e.g. Rotate on specific
-% pages. Open is the setter for /AF (and perhaps /OutputIntents).
-% See also https://tex.stackexchange.com/questions/479812/extension-of-rotating-package-to-set-pdf-rotation
-% \end{NOTE}
-% \begin{function}[added = 2019-06-04]
-%   {\pdf_pageattr_gput:nn}
-%   \begin{syntax}
-%     \cs{pdf_pageattr_gput:nn} \Arg{name} \Arg{value}
-%   \end{syntax}
-%   Adds |/|\meta{name} \meta{value} to the page dictionary of the
-%   current page and the following pages. The values are assigned directly,
-%   so one should take into account the asynchronous page breaking and use the
-%   command only in sensible places like after a \cs{clearpage} and not inside
-%   floats. It is always stored globally.
-%   \meta{name} should be a valid pdf name without the leading slash,
-%   \meta{value} should be a valid pdf value. Any escaping or (re)encoding must be
-%   done explictly. If a \meta{name} is used twice, only the last \meta{value}
-%   set will be used. Names set with \cs{pdf_thispageattr_gput:nn} will overwrite
-%   names set with \cs{pdf_pageattr_gput:nn} if there is a clash.
-% \end{function}
-% \begin{function}[added = 2019-06-04]
-%   {
-%    \pdf_pageattr_gremove:n
-%   }
-%   \begin{syntax}
-%     \pdf_pageattr_gremove:n \Arg{name}
-%   \end{syntax}
-%   Removes |/|\meta{name} and its associated \meta{value} added by \cs{pdf_pageattr_gput:nn}
-%   from the page dictionaries of the current and the following pages.
-%   If \meta{name} is not found no change occurs,
-%   \emph{i.e}~there is no need to test for the existence of a name before
-%   trying to remove it. It doesn't affect values set with \cs{pdf_thispageattr_gput:nn}.
-% \end{function}
-% \begin{function}[added = 2019-06-19]
-%   {\pdf_thispageattr_gput:nn}
-%   \begin{syntax}
-%     \cs{pdf_thispageattr_gput:nn}  \Arg{name} \Arg{value}
-%   \end{syntax}
-%   Adds |/|\meta{name} \meta{value} at shipout to the page dictionary of the
-%   current page.
-%   It is always stored globally. If \Arg{name} has already a value set with
-%   \cs{pdf_pageattr_gput:nn} it will overwrite it for this page.
-%   \meta{name} should be a valid pdf name without the leading slash,
-%   \meta{value} should be a valid pdf value. Any escaping or (re)encoding must be
-%   done explictly. If a \meta{name} is used twice, only the last \meta{value}
-%   set will be used. With the engine pdflatex at least a second compilation is needed.
-% \end{function}
-%    \begin{macrocode}
-%<*package>
-\@@_tree_new:n {Page}
-% setter.
-% The register is normally used only a few times in a document, but to get similar
-% behaviour between dvips/dvipdfmx and pdfmode it should be better be updated
-% only at shipout.
-%^^A documentated
-\cs_new_protected:Npn \pdf_pageattr_gput:nn #1 #2
-  {
-   \@@_backend_Page_gput:nn {#1}{#2}
-  }
-
-% remove:
-%^^A documentated
-\cs_new_protected:Npn \pdf_pageattr_gremove:n #1
-  {
-   \@@_backend_Page_gremove:n { #1 }
-  }
-
-\cs_new_protected:Npn \pdf_thispageattr_gput:nn #1 #2
-  {
-   \@@_backend_PageN_gput:nn { #1 }{ #2 }
-  }
-
-%</package>
-%    \end{macrocode}
+%
 %
 % \subsection{pdfpageresources /management}
 % We need code for ExtGState, ColorSpace, Pattern, Shading and Properties.
