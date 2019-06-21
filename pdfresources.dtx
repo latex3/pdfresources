@@ -215,35 +215,39 @@
 % \end{NOTE}
 %    \begin{macrocode}
 %<*package>
-\bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: || \sys_if_engine_luatex_p:}
+%pdftex
+\bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p:}
 {
- \cs_new_protected:Npx \@@_backend_pagesattr:n #1
+ \cs_new_protected:Npn \@@_backend_Pages_primitive:n #1
   {
-    \exp_not:N \tex_global:D
-    \cs_if_exist:NTF \tex_pdfpagesattr:D
-      { \tex_pdfpagesattr:D }
-      { \tex_pdfvariable:D pagesattr }
-      {#1}
+    \tex_global:D \tex_pdfpagesattr:D {#1}
   }
 }
+%luatex
+\sys_if_engine_luatex:T
+ {
+  \cs_new_protected:Npn \@@_backend_Pages_primitive:n #1
+   {
+     \tex_directlua:D {pdf.setpagesattributes("#1")}
+   }
+ }
 %dvips
 \bool_if:nT {\sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p: }
 {
- \cs_new_protected:Npx \@@_backend_pagesattr:n #1
+ \cs_new_protected:Npx \@@_backend_Pages_primitive:n #1
   {
-    \tex_special:D{ps:~[#1~/PAGES~pdfmark}
+    \tex_special:D{ps:~[#1~/PAGES~pdfmark} %]
   }
 }
 
-%need to be checked/
+%xetex
 \sys_if_engine_xetex:T
  {
-  \cs_new_protected:Npn \@@_backend_pagesattr:n #1
+  \cs_new_protected:Npn \@@_backend_Pages_primitive:n #1
    {
     \@@_backend:n{put~@pages~<<#1>>}
    }
  }
-
 %</package>
 %    \end{macrocode}
 % \subsubsection{pdfpagesattr/management}
@@ -258,9 +262,9 @@
 %   \begin{syntax}
 %     \cs{pdf_pagesattr_gput:nn} \Arg{name} \Arg{value}
 %   \end{syntax}
-%   Adds |/|\meta{name} \meta{value} the |/Pages| dictionary.
+%   Adds |/|\meta{name} \meta{value} to the |/Pages| dictionary.
 %   It is always stored globally. The content is written to the pdf
-%   at the end of the compilation,so values can be added, changed or removed until then.
+%   at the end of the compilation, so values can be added, changed or removed until then.
 %   \meta{name} should be a valid pdf name without the leading slash,
 %   \meta{value} should be a valid pdf value. Any escaping or (re)encoding must be
 %   done explictly. If a \meta{name} is used twice, only the last \meta{value}
@@ -318,7 +322,7 @@
 % push to the register command / issue the special
 \cs_new_protected:Npn \@@_pagesattr_gpush:
   {
-    \exp_args:Nx \@@_backend_pagesattr:n
+    \exp_args:Nx \@@_backend_Pages_primitive:n
     {
      \@@_tree_map_dict_item:n {Pages}
     }
@@ -326,7 +330,7 @@
 
 %</package>
 %    \end{macrocode}
-%
+% 
 %\subsubsection{pdfxform}
 % \begin{NOTE}{UF}
 %  As in dvi mode the xform is immediate, this is done for pdftex/luatex too. If needed
