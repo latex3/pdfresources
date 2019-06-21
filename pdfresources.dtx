@@ -570,7 +570,7 @@
 
 \cs_new_protected:Npn \@@_everypage_shipout_code:n #1
  {
-  \@@_pageattr_gpush:n { #1 }
+  \@@_backend_PageN_gpush:n { #1 }
  }
 \cs_generate_variant:Nn \@@_everypage_shipout_code:n {V}
 \cs_new_protected:Npn \@@_lastpage_shipout_code:
@@ -670,7 +670,6 @@
 % management code.
 % Both change only the current page, so to get the pdftex behaviour (which sets
 % also the following pages) one need to repeat it on every shipout.
-% TODO: sort pdftex/dvips difference
 % Open is the question if one need more shipout hooks to set e.g. Rotate on specific
 % pages. Open is the setter for /AF (and perhaps /OutputIntents).
 % See also https://tex.stackexchange.com/questions/479812/extension-of-rotating-package-to-set-pdf-rotation
@@ -728,45 +727,20 @@
 %^^A documentated
 \cs_new_protected:Npn \pdf_pageattr_gput:nn #1 #2
   {
-   \@@_tree_gput:nnn {Page}{#1}{#2}
-  }
-
-% setter by page number:
-\cs_new_protected:Npn \@@_pageattr_gput:nnn #1 #2 #3
-  {
-   \@@_tree_new:n {Page#1}
-   \@@_tree_gput:nnn {Page#1}{#2}{#3}
-  }
-
-% getter from the prop:
-%^^A documentated
-\cs_new_protected:Npn \pdf_pageattr_get:nN #1 #2
-  {
-   \@@_tree_get:nnN { Page } { #1 } #2
+   \@@_backend_Page_gput:nn {#1}{#2}
   }
 
 % remove:
 %^^A documentated
 \cs_new_protected:Npn \pdf_pageattr_gremove:n #1
   {
-   \@@_tree_gremove:nn { Page } { #1 }
+   \@@_backend_Page_gremove:n { #1 }
   }
 
-\cs_new_protected:Npn \pdf_thispageattr_gput:nn #1
+\cs_new_protected:Npn \pdf_thispageattr_gput:nn #1 #2
   {
-
+   \@@_backend_PageN_gput:nn { #1 }{ #2 }
   }
-
-% push to the register
-\cs_new_protected:Npn \@@_pageattr_gpush:n #1 %#1 = page number
- {
-  \@@_backend_pageattr_clear:
-  \@@_tree_merge:nnN {Page}{Page#1}\l_@@_tmpa_prop
-  \exp_args:Nx \@@_backend_pageattr:n
-   {
-    \prop_map_function:NN \l_@@_tmpa_prop \@@_dict_item:nn
-   }
- }
 
 %</package>
 %    \end{macrocode}
@@ -1978,7 +1952,10 @@ end
 
 local function _@@_backend_PageN_gpush (page)
  local token=""
- local t = _@@.Page.dflt
+ local t = {}
+ for name,value in pairs(__pdf.Page.dflt) do
+   t[name]=value
+ end
  if _@@.Page[page] then
   for name,value in pairs(_@@.Page[page]) do
    t[name] = value
