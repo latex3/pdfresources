@@ -89,12 +89,21 @@
 % \subsection{\pkg{media9}}
 %
 % \section{New backend Code / experimental }
+% \subsection{some zref code, that needs to be replaced later}
+%    \begin{macrocode}
+%<*package>
+\int_new:N \g_@@_abspage_int
+\int_new:N \g_@@_resourceid_int
+
+\zref@newlist  {l3pdf}
+\zref@newprop* {pdf@abspage} [0] {\int_use:N\g_@@_abspage_int}
+\zref@addprop  {l3pdf} {pdf@abspage}
+
 %^^A still needed:
 %^^A \pdf@strcmp??
 %^^A \pdf@escapestring?? \pdfescapestring
 % \subsection{luacode}
 %    \begin{macrocode}
-%<*package>
 \sys_if_engine_luatex:T
 {
  \directlua{require("pdfresources.lua")}
@@ -247,6 +256,22 @@
 %    \begin{macrocode}
 %<*package>
 %% backend commands
+%% stores values by pages. Only used and needed by pdflatex
+%% try later to merge this with the "tree" setup
+\cs_new_protected:Npn \@@_backend_pageattr_gput:nnn #1 #2 #3
+{
+  \prop_if_exist:cF { g_@@_backend_pageattr#1_prop }
+  {
+   \prop_new:c { g_@@_backend_pageattr#1_prop }
+  }
+  \prop_gput:cnn { g_@@_backend_pageattr#1_prop } { #2 } { #3 }
+}
+
+\cs_new_protected:Npn \@@_backend_pageattr_push:n #1
+{
+}
+
+
 \bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
  {
   \cs_new_protected:Npn \@@_backend_pageattr:n #1
@@ -262,22 +287,21 @@
   % the command used in the document.
   % special with dvips/dvipdfmx
   % \latelua with lualatex
-  % write to aux with pdflatex
+  % write to aux and store in prop with pdflatex
   \cs_new_protected:Npn \@@_backend_pageattr_doc:nn #1 #2
    {
-     \@@_backend_pageattr_aux:nn {#1}{#2}
-   }
-  \cs_new_protected:Npn \@@_backend_pageattr_aux:nn #1 #2
-   {
-    \iow_shipout_x:Nx \@auxout
-    {
-     \token_to_str:N\csname
-     __pdf_backend_pageattr_gput:nnn
-     \token_to_str:N\endcsname
-      {\exp_not:N\int_use:N \g__pdf_abspage_int}
-      { #1 }
-      { #2 }
-    }
+    \int_gincr:N\g_@@_resourceid_int
+    \zref@labelbylist {l3pdf\int_use:N\g_@@_resourceid_int} {l3pdf}
+    \@@_backend_pageattr_gput:nnn
+     {
+      \zref@extractdefault{l3pdf\int_use:N\g_@@_resourceid_int}
+                          {pdf@abspage}
+                          {0}
+     }{#1}{#2}
+    \prop_show:c { g_@@_backend_pageattr
+                    \zref@extractdefault{l3pdf\int_use:N\g_@@_resourceid_int}
+                          {pdf@abspage}
+                          {0}_prop }
    }
  }
 
@@ -462,17 +486,16 @@
    \@@_shipout_code:
   }
  }
-\int_new:N \g_@@_abspage_int
 \cs_new_protected:Npn \@@_shipout_code:
  {
   \int_gincr:N \g_@@_abspage_int
-  \int_show:N \g_@@_abspage_int
   \@@_everypage_shipout_code:V \g_@@_abspage_int
   \int_compare:nNnT { \g_@@_abspage_int }={\zref@extractdefault{LastPage}{abspage}{0}}
   {
    \@@_lastpage_shipout_code:
   }
  }
+
 \cs_new_protected:Npn \@@_everypage_shipout_code:n #1
  {
   \@@_pageattr_gpush:n { #1 }
@@ -693,6 +716,7 @@
 % push to the register
 \cs_new_protected:Npn \@@_pageattr_gpush:n #1 %#1 = page number
  {
+  \@@_backend_pageattr_clear:
   \@@_tree_merge:nnN {Page}{Page#1}\l_@@_tmpa_prop
   \exp_args:Nx \@@_backend_pageattr:n
    {
@@ -1887,27 +1911,59 @@
 l3kernel= l3kernel or {}
 l3kernel._@@      = l3kernel._@@ or {}
 l3kernel._@@.Page = l3kernel._@@.Page or {}
+l3kernel._@@.Page.dflt = l3kernel._@@.Page.dflt or {}
 local _@@ = l3kernel._@@
 local pdf = pdf
 
-local function _@@_addpageattributes (page,name,value)
+local function _@@_backend_Page_gput (name,value)
+ _@@.Page.dflt[name]=value
+end
+
+local function _@@_backend_Page_gremove (name)
+ _@@.Page.dflt[name]=nil
+end
+
+local function _@@_backend_Page_gclear ()
+ _@@.Page.dflt={}
+end
+
+local function _@@_backend_PageN_gput (page,name,value)
  _@@.Page[page] = _@@.Page[page] or {}
  _@@.Page[page][name]=value
 end
 
-local function _@@_pushpageattributes (page)
+local function _@@_backend_PageN_gpush (page)
  local token=""
+ local t = _@@.Page.dflt
  if _@@.Page[page] then
   for name,value in pairs(_@@.Page[page]) do
-   token = token .. "/"..name.." "..value
+   t[name] = value
   end
+ end
+ for name,value in pairs(t) do
+   token = token .. "/"..name.." "..value
  end
  return token
 end
 
-function l3kernel._@@.pageattr_doc (page,name,value) -- tex.count["g__pdf_abspage_int"]
- _@@_addpageattributes (page,name,value)
- pdf.setpageattributes(_@@_pushpageattributes (page))
+function l3kernel._@@._backend_PageN_gput (page,name,value) -- tex.count["g__pdf_abspage_int"]
+ _@@_backend_PageN_gput (page,name,value)
+end
+
+function l3kernel._@@._backend_PageN_gpush (page)
+  pdf.setpageattributes(_@@_backend_PageN_gpush (page))
+end
+
+function l3kernel._@@._backend_Page_gput (name,value)
+  _@@_backend_Page_gput (name,value)
+end
+
+function l3kernel._@@._backend_Page_gremove (name)
+  _@@_backend_Page_gremove (name)
+end
+
+function l3kernel._@@._backend_Page_gclear ()
+  _@@_backend_Page_gclear ()
 end
 %</lua>
 %    \end{macrocode}
