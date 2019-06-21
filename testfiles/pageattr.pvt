@@ -1,6 +1,6 @@
 \PassOptionsToPackage{enable-debug,check-declarations}{expl3}
 \RequirePackage[debug]{pdfresources}
-\input{regression-test}
+%\input{regression-test}
 \documentclass{article}
 \begin{document}
 \START
@@ -8,7 +8,7 @@ some text
 \ExplSyntaxOn
  \pdf_pageattr_gput:nn {Rotate}{90}
 %test local:
-{\pdf_pageattr_gput:nn {CropBox}{[0~0~300~300]}}
+{\pdf_pageattr_gput:nn {CropBox}{[0~0~300~350]}}
 
 %test doublette
  \pdf_pageattr_gput:nn {Rotate}{90}
@@ -19,7 +19,13 @@ some text
 
 \newpage
 \pdf_pageattr_gremove:n {Rotate}
-
+\pdf_pageattr_gremove:n {CropBox}
 some text more text
+\begin{figure}[p]
+\rule{1cm}{15cm}
+\pdf_thispageattr_gput:nn{Rotate}{-90}
+\end{figure}
+\newpage
+abbb
 \ExplSyntaxOff
 \end{document} 
