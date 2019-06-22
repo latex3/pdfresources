@@ -269,7 +269,7 @@
  {
   \cs_new_protected:Npn \@@_backend_Pages_primitive:n #1
    {
-     \tex_directlua:D {pdf.setpagesattributes("#1")}
+     \tex_directlua:D {pdf.setpagesattributes(\@@_backend_luastring:n {#1})}
    }
  }
 %dvips
@@ -454,24 +454,35 @@
 
 \sys_if_engine_luatex:T
 {% do we need to use some escaping for the values?????
+ \cs_new:Npn \@@_backend_luastring:n #1
+  {
+   "\tex_luaescapestring:D{\tex_unexpanded:D {#1}}"
+  }
  %not used, only there for consistency
  \cs_new_protected:Npn \@@_backend_Page_primitive:n #1
    {
-     \tex_latelua:D {pdf.setpageattributes("#1")}
+     \tex_latelua:D {pdf.setpageattributes(\@@_backend_luastring:n {#1})}
    }
   % the command to store default values.
   % Uses a prop with pdflatex + dvi,
   % sets a lua table with lualatex
  \cs_new_protected:Npn \@@_backend_Page_gput:nn #1 #2
  {
-   \tex_directlua:D { l3kernel.__pdf._backend_Page_gput ("#1","#2") }
+   \tex_directlua:D
+    {
+     l3kernel.__pdf._backend_Page_gput
+      (
+       \@@_backend_luastring:n {#1},
+       \@@_backend_luastring:n {#2}
+      )
+    }
  }
   % the command to remove a default value.
   % Uses a prop with pdflatex + dvi,
   % changes a lua table with lualatex
  \cs_new_protected:Npn \@@_backend_Page_gremove:n #1
  {
-  \tex_directlua:D { l3kernel.__pdf._backend_Page_gremove ("#1") }
+  \tex_directlua:D { l3kernel.__pdf._backend_Page_gremove (\@@_backend_luastring:n {#1}) }
  }
  % the command used in the document.
  % direct call of the primitive special with dvips/dvipdfmx
@@ -482,7 +493,12 @@
   {
    \tex_latelua:D
     {
-     l3kernel.__pdf._backend_PageN_gput (tex.count["g__pdf_abspage_int"],"#1","#2")
+     l3kernel.__pdf._backend_PageN_gput
+      (
+       tex.count["g__pdf_abspage_int"],
+       \@@_backend_luastring:n {#1},
+       \@@_backend_luastring:n {#2}
+      )
      l3kernel.__pdf._backend_PageN_gpush (tex.count["g__pdf_abspage_int"])
     }
   }

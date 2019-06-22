@@ -1,6 +1,6 @@
 \PassOptionsToPackage{enable-debug,check-declarations}{expl3}
 \RequirePackage[debug]{pdfresources}
-%\input{regression-test}
+\input{regression-test}
 \documentclass{article}
 \begin{document}
 \START
@@ -15,7 +15,7 @@ some text
 
 %test command:
 \newcommand\attributecontent{(somesetting)}
-\pdf_pageattr_gput:nn {SSS}{\attributecontent}
+\exp_args:Nno\pdf_pageattr_gput:nn {SSS}{\attributecontent}
 
 \newpage
 \pdf_pageattr_gremove:n {Rotate}
