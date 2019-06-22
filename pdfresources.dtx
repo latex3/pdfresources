@@ -671,7 +671,6 @@
 
 %</package>
 %    \end{macrocode}
-% ===================================
 % \subsection{The info dictionary}
 % \begin{NOTE}{UF}
 % path: Info
@@ -689,10 +688,11 @@
 % We are outputting at the last page -- this needs a second compilation but
 % this is needed anyway.
 % \end{NOTE}
-% \subsubsection{Info /backend}
-% backend code is already in expl3
+% \subsubsection{Info / backend}
+% The backend code is already in expl3. \verb+\__pdf_backend_info_gput:nn+
+% inserts one name/value pair.
 % \subsubsection{Info / management}
-% % \begin{function}[added = 2019-06-22]
+%  \begin{function}[added = 2019-06-22]
 %   {
 %    \pdf_info_gput:nn
 %   }
@@ -702,14 +702,41 @@
 %   Adds |/|\meta{name} and the \meta{value} to the info dictionary.
 %   \meta{name} should be a valid pdf name without the leading slash,
 %   \meta{value} should be a valid pdf value. Any escaping or (re)encoding must be
-%   done explictly. If a \meta{name} is used twice, only the last \meta{value}
+%   done explictly.
+%   The info dictionary expects utf8 in the strings, so a conversion like this is
+%   normally sensible:
+%   \begin{verbatim}
+%   \str_set_convert:Nnnn \l_tmpa_str { Grüße }{ utf8 } {utf8/string}
+%   \pdf_info_string_gput:nn {Title}{\l_tmpa_str}
+%   \end{verbatim}
+%   If a \meta{name} is used twice, only the last \meta{value}
+%   set will be used. The info dictionary is written at the end of the compilation,
+%   so values can be set at any time.
+% \end{function}
+% \begin{function}[added = 2019-06-22]
+%   {
+%    \pdf_info_string_gput:nn
+%   }
+%   \begin{syntax}
+%     \pdf_info_string_gput:nn \Arg{name} \Arg{value}
+%   \end{syntax}
+%   Adds |/|\meta{name} and the \meta{value} surrounded by parentheses to the info dictionary.
+%   \meta{name} should be a valid pdf name without the leading slash,
+%   \meta{value} should be a valid content of pdf string. Any escaping or (re)encoding must be
+%   done explictly.
+%   The info dictionary expects utf8 in the strings, so a conversion like this is
+%   normally sensible:
+%   \begin{verbatim}
+%   \str_set_convert:Nnnn \l_tmpa_str { Grüße }{ utf8 } {utf8/string}
+%   \pdf_info_string_gput:no {Title}{\l_tmpa_str}
+%   \end{verbatim}
+%   If a \meta{name} is used twice, only the last \meta{value}
 %   set will be used. The info dictionary is written at the end of the compilation,
 %   so values can be set at any time.
 % \end{function}
 %    \begin{macrocode}
 %<*package>
 \@@_tree_new:n {Info}
-
 
 \cs_new_protected:Npn \pdf_info_gput:nn #1 #2 %#1 key without /, #2 content
   {
@@ -718,7 +745,7 @@
 
 \cs_generate_variant:Nn \pdf_info_gput:nn {no}
 
-%  should #2 be inside a some escaping command?
+%  should #2 be inside a some escaping command? (no)
 %  hyperref passes them through
 %  \HyXeTeX@CheckUnicode
 %  \HyPsd@XeTeXBigCharstrue
@@ -731,23 +758,15 @@
 
 \cs_generate_variant:Nn \pdf_info_string_gput:nn {no,oo,on}
 
-
-\cs_new_protected:Npn \@@_info_push: %internal, to ensure that it is used only once
- {
-  \prop_map_function:NN  \g_@@_info_prop \@@_backend_info_gput:nn
-  \prop_gclear:N \g_@@_info_prop
- }
-
 % push to the register command / issue the special
 \cs_new_protected:Npn \@@_Info_gpush:
   {
     \prop_map_function:cN  { \@@_tree_prop_name:n {Info} } \@@_backend_info_gput:nn
     \prop_gclear:c { \@@_tree_prop_name:n {Info} }
   }
-%\AtBeginDocument{\@@_info_push:}
 %</package>
 %    \end{macrocode}
-% ================
+% ===================================
 %\subsubsection{pdfxform}
 % \begin{NOTE}{UF}
 %  As in dvi mode the xform is immediate, this is done for pdftex/luatex too. If needed
