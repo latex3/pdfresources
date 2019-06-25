@@ -1,0 +1,167 @@
+% !Mode:: "TeX:DE:UTF-8:Main"
+\documentclass{article}
+\usepackage{l3pdf,ifluatex,atbegshi}
+
+
+\ExplSyntaxOn
+\cs_new:Nn\properties_shipout_code:{}
+\AtBeginShipout
+ {%
+  \AtBeginShipoutAddToBox
+  {
+   \properties_shipout_code:
+  }
+ }
+
+%correct g to c, is already in master ...
+\sys_if_engine_xetex:T
+{
+ \cs_set:Npn \__pdf_backend_object_ref:n #1
+   { @pdf.obj \int_use:c { c__pdf_backend_object_ \tl_to_str:n {#1} _int } }
+}   
+
+\pdf_uncompress:
+\ExplSyntaxOff
+\ifluatex
+\usepackage{luacode}
+% the following should latter get in the l3kernel table and be named
+% more sensibly. This here is only for testing
+\begin{luacode}
+l3kernel= l3kernel or {}
+l3kernel.properties = l3kernel.properties or {}
+
+local function __pdf_backend_PageN_Resources_gpush (page)
+ local token=""
+ if l3kernel.properties[page] then
+  for name,value in pairs(l3kernel.properties[page]) do
+   token = token .. "/"..name.." "..value
+  end 
+  token = "/Properties <<"..token..">>"
+ end
+ -- add ExtGstate etc here ....
+ return token
+end
+
+function l3kernel.PageN_properties_gput (page,name,value) -- tex.count["g__pdf_abspage_int"]
+ l3kernel.properties[page] = l3kernel.properties[page] or {}
+ l3kernel.properties[page][name]=value
+end
+
+function l3kernel.properties_PageN_gpush (page)
+ if l3kernel.properties[page] then 
+  pdf.setpageresources(__pdf_backend_PageN_Resources_gpush (page))
+ end 
+end
+\end{luacode}
+\fi
+
+\ExplSyntaxOn
+%dvips
+% dvips is easy: create an object, and reference it in the bdc
+% ghostscript will then automatically replace it by a name
+% and add the name to the /Properties dict
+% first special from pdfbase.sty, second from von accsupp:
+
+\bool_if:nT {\sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p: }
+ {
+  \cs_set_protected:Npn \__pdf_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
+   {
+     %\special{ps:~SDict~begin~mark~/#1~\__pdf_backend_object_ref:n{#2}~/BDC~pdfmark~end}
+     \special{ps:[/#1~\__pdf_backend_object_ref:n{#2}~BDC~pdfmark} %]
+   }
+  \cs_set_protected:Npn \__pdf_backend_emc:
+   {
+    %\special{ps:~SDict~begin~mark~/EMC~pdfmark~end}
+    \special{ps:[/EMC~pdfmark} %]
+   }
+ }
+
+\int_new:N  \g__pdf_backend_name_int
+%xetex has so create the entries in the /Properties manually (like the other backends)
+\sys_if_engine_xetex:T
+{
+ \cs_set_protected:Npn \__pdf_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
+   {
+     \int_gincr:N \g__pdf_backend_name_int
+     %\special{pdf:code~#1/l3pdf\int_use:N\g__pdf_backend_name_int\c_space_tl BDC}
+     \special{pdf:content~/#1/l3pdf\int_use:N\g__pdf_backend_name_int\c_space_tl BDC}
+     \special{
+        pdf:put~@resources~
+        <<
+         /Properties~
+          <<
+           /l3pdf\int_use:N\g__pdf_backend_name_int\c_space_tl
+           \__pdf_backend_object_ref:n{#2}
+          >>
+         >>
+       }
+     %\special{ps:~SDict~begin~mark~/#1~\__pdf_backend_object_ref:n{#2}~/BDC~pdfmark~end}
+   }
+  \cs_set_protected:Npn \__pdf_backend_emc:
+   {
+    %\special{pdf:code~EMC}  %pdfbase
+    \special{pdf:content~EMC}% accsupp
+   }
+
+}
+
+% luatex
+\sys_if_engine_luatex:T
+{
+ \cs_set_protected:Npn \__pdf_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
+   {
+     \int_gincr:N \g__pdf_backend_name_int
+     \exp_args:Nx\__kernel_backend_literal_page:n
+       {/#1 ~ /l3pdf\int_use:N\g__pdf_backend_name_int\c_space_tl BDC}
+     \exp_args:Nx\tex_latelua:D
+     {
+      l3kernel.PageN_properties_gput 
+       ( tex.count["c@page"],
+         "l3pdf\int_use:N\g__pdf_backend_name_int",
+         "\__pdf_backend_object_ref:n{#2}"
+       )
+      l3kernel.properties_PageN_gpush (tex.count["c@page"]) 
+     }
+   }
+  \cs_set_protected:Npn \__pdf_backend_emc:
+   {
+    \__kernel_backend_literal_page:n { EMC }
+   }
+}
+% pdflatex is the most complicated as it has to go through the aux ...
+\bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
+{
+ \cs_set_protected:Npn \__pdf_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
+   {
+     \int_gincr:N \g__pdf_backend_name_int
+     \exp_args:Nx\__kernel_backend_literal_page:n
+       {/#1 ~ /l3pdf\int_use:N\g__pdf_backend_name_int\c_space_tl BDC}
+    % code to set the property ....   
+       
+   }    
+ \cs_set_protected:Npn \__pdf_backend_emc:
+   {
+    \__kernel_backend_literal_page:n { EMC }
+   }
+}
+\ExplSyntaxOff
+\begin{document}
+\ExplSyntaxOn
+\__pdf_backend_object_new:nn   {objA}{dict}
+\__pdf_backend_object_write:nn {objA}{/Type/Artifact}
+
+\__pdf_backend_object_new:nn   {objB}{dict}
+\__pdf_backend_object_write:nn {objB}{/ActualText(abc)}
+
+
+\__pdf_backend_bdc:nn {Span}{objA}xxx
+\__pdf_backend_emc:
+
+\__pdf_backend_bdc:nn {Span}{objA}xxx
+\__pdf_backend_emc:
+
+\__pdf_backend_bdc:nn {Span}{objB}xxx
+\__pdf_backend_emc:
+
+\ExplSyntaxOff
+\end{document} 
