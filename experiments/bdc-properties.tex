@@ -1,24 +1,16 @@
 % !Mode:: "TeX:DE:UTF-8:Main"
 \documentclass{article}
-\usepackage{l3pdf,ifluatex,atbegshi}
+\usepackage{l3pdf,pdfresources,ifluatex}
 
 
 \ExplSyntaxOn
-\cs_new:Nn\properties_shipout_code:{}
-\AtBeginShipout
- {%
-  \AtBeginShipoutAddToBox
-  {
-   \properties_shipout_code:
-  }
- }
 
 %correct g to c, is already in master ...
 \sys_if_engine_xetex:T
 {
  \cs_set:Npn \__pdf_backend_object_ref:n #1
    { @pdf.obj \int_use:c { c__pdf_backend_object_ \tl_to_str:n {#1} _int } }
-}   
+}
 
 \pdf_uncompress:
 \ExplSyntaxOff
@@ -28,30 +20,33 @@
 % more sensibly. This here is only for testing
 \begin{luacode}
 l3kernel= l3kernel or {}
-l3kernel.properties = l3kernel.properties or {}
+l3kernel.__pdf      = l3kernel.__pdf or {}
+l3kernel.__pdf.Page = l3kernel.__pdf.Page or {}
+l3kernel.__pdf.Page.Resources = l3kernel.__pdf.Resources or {}
+l3kernel.__pdf.Page.Resources.Properties = l3kernel.__pdf.Page.Resources.Properties or {}
+l3kernel.pdf= l3kernel.pdf or {} -- for "public" functions
+
+local Properties= l3kernel.__pdf.Page.Resources.Properties
 
 local function __pdf_backend_PageN_Resources_gpush (page)
  local token=""
- if l3kernel.properties[page] then
-  for name,value in pairs(l3kernel.properties[page]) do
+ if Properties[page] then
+  for name,value in pairs(Properties[page]) do
    token = token .. "/"..name.." "..value
-  end 
+  end
   token = "/Properties <<"..token..">>"
  end
  -- add ExtGstate etc here ....
  return token
 end
 
-function l3kernel.PageN_properties_gput (page,name,value) -- tex.count["g__pdf_abspage_int"]
- l3kernel.properties[page] = l3kernel.properties[page] or {}
- l3kernel.properties[page][name]=value
+-- the function is public, as I probably need it in tagpdf too ...
+function l3kernel.pdf.Page_Resources_Properties_gput (page,name,value) -- tex.count["g__pdf_abspage_int"]
+ Properties[page] = Properties[page] or {}
+ Properties[page][name]=value
+ pdf.setpageresources(__pdf_backend_PageN_Resources_gpush (page))
 end
 
-function l3kernel.properties_PageN_gpush (page)
- if l3kernel.properties[page] then 
-  pdf.setpageresources(__pdf_backend_PageN_Resources_gpush (page))
- end 
-end
 \end{luacode}
 \fi
 
@@ -74,6 +69,7 @@ end
     %\special{ps:~SDict~begin~mark~/EMC~pdfmark~end}
     \special{ps:[/EMC~pdfmark} %]
    }
+  \cs_new_protected:Npn \__pdf_backend_PageN_Resources_gpush:n #1 {} 
  }
 
 \int_new:N  \g__pdf_backend_name_int
@@ -102,7 +98,7 @@ end
     %\special{pdf:code~EMC}  %pdfbase
     \special{pdf:content~EMC}% accsupp
    }
-
+  \cs_new_protected:Npn \__pdf_backend_PageN_Resources_gpush:n #1 {}
 }
 
 % luatex
@@ -114,20 +110,22 @@ end
      \exp_args:Nx\__kernel_backend_literal_page:n
        {/#1 ~ /l3pdf\int_use:N\g__pdf_backend_name_int\c_space_tl BDC}
      \exp_args:Nx\tex_latelua:D
-     {
-      l3kernel.PageN_properties_gput 
-       ( tex.count["c@page"],
-         "l3pdf\int_use:N\g__pdf_backend_name_int",
-         "\__pdf_backend_object_ref:n{#2}"
-       )
-      l3kernel.properties_PageN_gpush (tex.count["c@page"]) 
-     }
+      {
+       l3kernel.pdf.Page_Resources_Properties_gput
+        ( tex.count["c@page"],
+          "l3pdf\int_use:N\g__pdf_backend_name_int",
+          "\__pdf_backend_object_ref:n{#2}"
+        )
+      }
    }
   \cs_set_protected:Npn \__pdf_backend_emc:
    {
     \__kernel_backend_literal_page:n { EMC }
    }
+  \cs_new_protected:Npn \__pdf_backend_PageN_Resources_gpush:n #1 {}
 }
+\makeatletter
+
 % pdflatex is the most complicated as it has to go through the aux ...
 \bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
 {
@@ -136,14 +134,48 @@ end
      \int_gincr:N \g__pdf_backend_name_int
      \exp_args:Nx\__kernel_backend_literal_page:n
        {/#1 ~ /l3pdf\int_use:N\g__pdf_backend_name_int\c_space_tl BDC}
-    % code to set the property ....   
-       
-   }    
+    % code to set the property ....
+    \int_gincr:N\g__pdf_resourceid_int
+    \zref@labelbylist {l3pdf\int_use:N\g__pdf_resourceid_int} {l3pdf}
+    \tl_set:Nx \l__pdf_tmpa_tl
+     {
+      \zref@extractdefault{l3pdf\int_use:N\g__pdf_resourceid_int}
+                          {pdf@abspage}
+                          {0}
+     }
+    \__pdf_tree_new:n    {backend_Page\l__pdf_tmpa_tl/Resources/Properties}
+    \exp_args:Nnx\__pdf_tree_gput:nnn 
+     {backend_Page\l__pdf_tmpa_tl/Resources/Properties}
+     {l3pdf\int_use:N\g__pdf_resourceid_int}
+     {\__pdf_backend_object_ref:n{#2}}
+   }
  \cs_set_protected:Npn \__pdf_backend_emc:
    {
     \__kernel_backend_literal_page:n { EMC }
    }
+   
+ \cs_new_protected:Npn \__pdf_backend_PageN_Resources_gpush:n #1
+  {
+   \exp_args:NNx \tex_global:D \tex_pdfpageresources:D
+   {
+    \prop_if_exist:cT  { \__pdf_tree_prop_name:n  { backend_Page#1/Resources/Properties } }
+     { 
+      /Properties~<<
+       \prop_map_function:cN 
+        { \__pdf_tree_prop_name:n  { backend_Page#1/Resources/Properties } } \__pdf_dict_item:nn
+       >> 
+     }
+    %% add ExtGState etc   
+   }
+  } 
 }
+
+% for testing here
+  \cs_set_protected:Npn \__pdf_everypage_shipout_code:n #1
+  {
+   \__pdf_backend_PageN_gpush:n { #1 }
+   \__pdf_backend_PageN_Resources_gpush:n { #1 }
+  }    
 \ExplSyntaxOff
 \begin{document}
 \ExplSyntaxOn
@@ -153,13 +185,13 @@ end
 \__pdf_backend_object_new:nn   {objB}{dict}
 \__pdf_backend_object_write:nn {objB}{/ActualText(abc)}
 
-
+\vspace*{44\baselineskip}
 \__pdf_backend_bdc:nn {Span}{objA}xxx
 \__pdf_backend_emc:
-
+\\
 \__pdf_backend_bdc:nn {Span}{objA}xxx
 \__pdf_backend_emc:
-
+\\
 \__pdf_backend_bdc:nn {Span}{objB}xxx
 \__pdf_backend_emc:
 
