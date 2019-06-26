@@ -1,0 +1,26 @@
+\documentclass{article}
+%The same seems to be the case for patterns, as there exists a PostScript command makepattern
+%https://chat.stackexchange.com/transcript/message/50669431#50669431
+\begin{document}
+
+\special{"
+/DeviceRGB setcolorspace
+10 setlinewidth
+0 0 moveto
+100 0 lineto
+100 100 lineto
+0 100 lineto
+closepath
+gsave
+0 0 1 setcolor
+% 0.5 .setopacityalpha
+fill
+grestore
+gsave
+% 0.8 .setopacityalpha
+stroke
+grestore
+}%
+\makebox[100bp]{\rule{0pt}{100bp}}
+
+\end{document}

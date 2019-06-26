@@ -1,0 +1,53 @@
+% don't forget -dNOSAFER!!!
+% ps2pdf -dCompressStreams=false -dCompressPages=false -dNOSAFER dvips-transparency.ps
+
+\documentclass{article}
+%https://chat.stackexchange.com/transcript/message/50669099#50669099
+\begin{document}
+Hello
+%works
+%\special{ps:
+%  systemdict /.setopacityalpha known
+%  {0.5 .setopacityalpha}{mark /CA 0.5 /ca 0.5 /SetTransparency pdfmark}
+%  ifelse
+%} 
+World!
+
+%seems to do nothing ...
+%\special{ps:
+%  mark /CA 0.5 /ca 0.5 /SetTransparency pdfmark
+%  }
+
+World!
+
+% works too
+%\special{ps: 0.5 .setopacityalpha}
+World!
+
+% overprint? transparency fill/stroke?
+\end{document}
+
+
+\special{"
+  10 setlinewidth
+  0 0 moveto
+  100 0 lineto
+  100 100 lineto
+  0 100 lineto
+  closepath
+  gsave
+    0 0 1 setrgbcolor
+    0.5 .setopacityalpha
+    fill
+  grestore
+  gsave
+    0.8 .setopacityalpha
+    stroke
+  grestore
+}%
+\makebox[100bp]{\rule{0pt}{100bp}}
+
+\end{document}
+
+\bf 
+\bye
