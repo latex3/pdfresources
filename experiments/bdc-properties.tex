@@ -55,32 +55,31 @@ end
 % dvips is easy: create an object, and reference it in the bdc
 % ghostscript will then automatically replace it by a name
 % and add the name to the /Properties dict
-% first special from pdfbase.sty, second from von accsupp:
+% special variant von accsupp https://chat.stackexchange.com/transcript/message/50831812#50831812
 
 \bool_if:nT {\sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p: }
  {
   \cs_set_protected:Npn \__pdf_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
    {
-     %\special{ps:~SDict~begin~mark~/#1~\__pdf_backend_object_ref:n{#2}~/BDC~pdfmark~end}
-     \special{ps:[/#1~\__pdf_backend_object_ref:n{#2}~BDC~pdfmark} %]
+     \special{ps:~mark~/#1~\__pdf_backend_object_ref:n{#2}~BDC~pdfmark} 
    }
   \cs_set_protected:Npn \__pdf_backend_emc:
    {
-    %\special{ps:~SDict~begin~mark~/EMC~pdfmark~end}
-    \special{ps:[/EMC~pdfmark} %]
+    \special{ps:~mark~/EMC~pdfmark} %
    }
-  \cs_new_protected:Npn \__pdf_backend_PageN_Resources_gpush:n #1 {} 
+  \cs_new_protected:Npn \__pdf_backend_PageN_Resources_gpush:n #1 {}
  }
 
 \int_new:N  \g__pdf_backend_name_int
 %xetex has so create the entries in the /Properties manually (like the other backends)
+% use pdfbase special https://chat.stackexchange.com/transcript/message/50832016#50832016
 \sys_if_engine_xetex:T
 {
  \cs_set_protected:Npn \__pdf_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
    {
      \int_gincr:N \g__pdf_backend_name_int
-     %\special{pdf:code~#1/l3pdf\int_use:N\g__pdf_backend_name_int\c_space_tl BDC}
-     \special{pdf:content~/#1/l3pdf\int_use:N\g__pdf_backend_name_int\c_space_tl BDC}
+     \special{pdf:code~/#1/l3pdf\int_use:N\g__pdf_backend_name_int\c_space_tl BDC}
+     %\special{pdf:content~/#1/l3pdf\int_use:N\g__pdf_backend_name_int\c_space_tl BDC}
      \special{
         pdf:put~@resources~
         <<
@@ -91,12 +90,11 @@ end
           >>
          >>
        }
-     %\special{ps:~SDict~begin~mark~/#1~\__pdf_backend_object_ref:n{#2}~/BDC~pdfmark~end}
-   }
+    }
   \cs_set_protected:Npn \__pdf_backend_emc:
    {
-    %\special{pdf:code~EMC}  %pdfbase
-    \special{pdf:content~EMC}% accsupp
+    \special{pdf:code~EMC}  %pdfbase
+    %\special{pdf:content~EMC}% accsupp
    }
   \cs_new_protected:Npn \__pdf_backend_PageN_Resources_gpush:n #1 {}
 }
@@ -112,7 +110,7 @@ end
      \exp_args:Nx\tex_latelua:D
       {
        l3kernel.pdf.Page_Resources_Properties_gput
-        ( tex.count["c@page"],
+        ( tex.count["g__pdf_abspage_int"],
           "l3pdf\int_use:N\g__pdf_backend_name_int",
           "\__pdf_backend_object_ref:n{#2}"
         )
@@ -144,7 +142,7 @@ end
                           {0}
      }
     \__pdf_tree_new:n    {backend_Page\l__pdf_tmpa_tl/Resources/Properties}
-    \exp_args:Nnx\__pdf_tree_gput:nnn 
+    \exp_args:Nnx\__pdf_tree_gput:nnn
      {backend_Page\l__pdf_tmpa_tl/Resources/Properties}
      {l3pdf\int_use:N\g__pdf_resourceid_int}
      {\__pdf_backend_object_ref:n{#2}}
@@ -153,21 +151,21 @@ end
    {
     \__kernel_backend_literal_page:n { EMC }
    }
-   
+
  \cs_new_protected:Npn \__pdf_backend_PageN_Resources_gpush:n #1
   {
    \exp_args:NNx \tex_global:D \tex_pdfpageresources:D
    {
     \prop_if_exist:cT  { \__pdf_tree_prop_name:n  { backend_Page#1/Resources/Properties } }
-     { 
+     {
       /Properties~<<
-       \prop_map_function:cN 
+       \prop_map_function:cN
         { \__pdf_tree_prop_name:n  { backend_Page#1/Resources/Properties } } \__pdf_dict_item:nn
-       >> 
+       >>
      }
-    %% add ExtGState etc   
+    %% add ExtGState etc
    }
-  } 
+  }
 }
 
 % for testing here
@@ -175,7 +173,7 @@ end
   {
    \__pdf_backend_PageN_gpush:n { #1 }
    \__pdf_backend_PageN_Resources_gpush:n { #1 }
-  }    
+  }
 \ExplSyntaxOff
 \begin{document}
 \ExplSyntaxOn
