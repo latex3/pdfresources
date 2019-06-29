@@ -18,36 +18,36 @@
 \usepackage{luacode}
 % the following should latter get in the l3kernel table and be named
 % more sensibly. This here is only for testing
-\begin{luacode}
-l3kernel= l3kernel or {}
-l3kernel.__pdf      = l3kernel.__pdf or {}
-l3kernel.__pdf.Page = l3kernel.__pdf.Page or {}
-l3kernel.__pdf.Page.Resources = l3kernel.__pdf.Resources or {}
-l3kernel.__pdf.Page.Resources.Properties = l3kernel.__pdf.Page.Resources.Properties or {}
-l3kernel.pdf= l3kernel.pdf or {} -- for "public" functions
-
-local Properties= l3kernel.__pdf.Page.Resources.Properties
-
-local function __pdf_backend_PageN_Resources_gpush (page)
- local token=""
- if Properties[page] then
-  for name,value in pairs(Properties[page]) do
-   token = token .. "/"..name.." "..value
-  end
-  token = "/Properties <<"..token..">>"
- end
- -- add ExtGstate etc here ....
- return token
-end
-
--- the function is public, as I probably need it in tagpdf too ...
-function l3kernel.pdf.Page_Resources_Properties_gput (page,name,value) -- tex.count["g__pdf_abspage_int"]
- Properties[page] = Properties[page] or {}
- Properties[page][name]=value
- pdf.setpageresources(__pdf_backend_PageN_Resources_gpush (page))
-end
-
-\end{luacode}
+%\begin{luacode}
+%l3kernel= l3kernel or {}
+%l3kernel.__pdf      = l3kernel.__pdf or {}
+%l3kernel.__pdf.Page = l3kernel.__pdf.Page or {}
+%l3kernel.__pdf.Page.Resources = l3kernel.__pdf.Resources or {}
+%l3kernel.__pdf.Page.Resources.Properties = l3kernel.__pdf.Page.Resources.Properties or {}
+%l3kernel.pdf= l3kernel.pdf or {} -- for "public" functions
+%
+%local Properties= l3kernel.__pdf.Page.Resources.Properties
+%
+%local function __pdf_backend_PageN_Resources_gpush (page)
+% local token=""
+% if Properties[page] then
+%  for name,value in pairs(Properties[page]) do
+%   token = token .. "/"..name.." "..value
+%  end
+%  token = "/Properties <<"..token..">>"
+% end
+% -- add ExtGstate etc here ....
+% return token
+%end
+%
+%-- the function is public, as I probably need it in tagpdf too ...
+%function l3kernel.pdf.Page_Resources_Properties_gput (page,name,value) -- tex.count["g__pdf_abspage_int"]
+% Properties[page] = Properties[page] or {}
+% Properties[page][name]=value
+% pdf.setpageresources(__pdf_backend_PageN_Resources_gpush (page))
+%end
+%
+%\end{luacode}
 \fi
 
 \ExplSyntaxOn
@@ -61,7 +61,7 @@ end
  {
   \cs_set_protected:Npn \__pdf_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
    {
-     \special{ps:~mark~/#1~\__pdf_backend_object_ref:n{#2}~BDC~pdfmark} 
+     \special{ps:~mark~/#1~\__pdf_backend_object_ref:n{#2}~BDC~pdfmark}
    }
   \cs_set_protected:Npn \__pdf_backend_emc:
    {
