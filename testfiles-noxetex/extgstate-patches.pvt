@@ -1,0 +1,15 @@
+\input{regression-test}
+\RequirePackage[enable-debug,check-declarations]{expl3}
+\RequirePackage[patches]{pdfresources}
+
+\documentclass{article}
+\usepackage{tikz,transparent}
+\usetikzlibrary{patterns,shadings}
+\usepackage[overprint]{colorspace}
+
+
+\begin{document}
+\tikz\fill[opacity=0.4,red](0,0)rectangle (1,1);
+
+abc\texttransparent{0.6}{XXXXXXXXXX}
+\end{document} 
