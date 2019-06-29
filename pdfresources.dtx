@@ -470,7 +470,7 @@
  {
    \tex_directlua:D
     {
-     l3kernel.__pdf._backend_Page_gput
+     l3kernel._@@.backend_Page_gput
       (
        \@@_backend_luastring:n {#1},
        \@@_backend_luastring:n {#2}
@@ -482,7 +482,7 @@
   % changes a lua table with lualatex
  \cs_new_protected:Npn \@@_backend_Page_gremove:n #1
  {
-  \tex_directlua:D { l3kernel.__pdf._backend_Page_gremove (\@@_backend_luastring:n {#1}) }
+  \tex_directlua:D { l3kernel._@@.backend_Page_gremove (\@@_backend_luastring:n {#1}) }
  }
  % the command used in the document.
  % direct call of the primitive special with dvips/dvipdfmx
@@ -493,13 +493,13 @@
   {
    \tex_latelua:D
     {
-     l3kernel.__pdf._backend_PageN_gput
+     l3kernel._@@.backend_PageN_gput
       (
-       tex.count["g__pdf_abspage_int"],
+       tex.count["g_@@_abspage_int"],
        \@@_backend_luastring:n {#1},
        \@@_backend_luastring:n {#2}
       )
-     l3kernel.__pdf._backend_PageN_gpush (tex.count["g__pdf_abspage_int"])
+     l3kernel._@@.backend_PageN_gpush (tex.count["g_@@_abspage_int"])
     }
   }
   %the code to push the values, used in shipout
@@ -510,7 +510,7 @@
   {
     \tex_latelua:D
     {
-     l3kernel.__pdf._backend_PageN_gpush (tex.count["g__pdf_abspage_int"])
+     l3kernel._@@.backend_PageN_gpush (tex.count["g_@@_abspage_int"])
     }
   }
 }
@@ -1185,7 +1185,7 @@
       \@@_backend_object_new:nn   { g_@@_value_#1_#2_obj } { dict }
       \@@_backend_object_write:nx { g_@@_value_#1_#2_obj }
        {
-        \prop_map_function:cN  { g__pdf_value_#1_#2_prop } \@@_dict_item:nn
+        \prop_map_function:cN  { g_@@_value_#1_#2_prop } \@@_dict_item:nn
        }
       #3 { #2 }{ \@@_backend_object_ref:n { g_@@_value_#1_#2_obj } }
      }
@@ -1354,7 +1354,7 @@
 %    \begin{macrocode}
 %<*package>
 % user command: \pdf_catalog_AF_gput:n, o, x
-% push command: \__pdf_value_catalog_AF_gpush:
+% push command: \_@@_value_catalog_AF_gpush:
 \_@@_value_array_new:nnn { catalog } { AF }
                          {\@@_backend_catalog_gput:nn}
 %</package>
@@ -1373,7 +1373,7 @@
 %    \begin{macrocode}
 %<*package>
 % user command: \pdf_catalog_ViewerPreferences_gput:nn, no, nx
-% push command: \__pdf_value_catalog_ViewerPreferences_gpush:
+% push command: \_@@_value_catalog_ViewerPreferences_gpush:
 
 \_@@_value_dict_new:nnn { catalog }{ ViewerPreferences }{ \@@_backend_catalog_gput:nn }
 %</package>
@@ -1391,7 +1391,7 @@
 %    \begin{macrocode}
 %<*package>
 % user command: \pdf_catalog_OCproperties_gput:nn, no, nx /should not be used hide it???
-% push command: \__pdf_value_catalog_OCproperties_gpush:
+% push command: \_@@_value_catalog_OCproperties_gpush:
 
 %%% not finished ...............
 %%%\_@@_value_dict_new:nnn { catalog }{ OCproperties }{ \@@_backend_catalog_gput:nn }
@@ -1471,7 +1471,7 @@
 %    \begin{macrocode}
 %<*package>
 % user command: \pdf_catalog_OutputIntents_gput:nn, no, nx
-% push command: \__pdf_value_catalog_OutputIntents_gpush:
+% push command: \_@@_value_catalog_OutputIntents_gpush:
 
 \_@@_value_array_new:nnn { catalog } { OutputIntents }
                          {\@@_backend_catalog_gput:nn}
@@ -1994,6 +1994,11 @@ l3kernel= l3kernel or {}
 l3kernel._@@      = l3kernel._@@ or {}
 l3kernel._@@.Page = l3kernel._@@.Page or {}
 l3kernel._@@.Page.dflt = l3kernel._@@.Page.dflt or {}
+l3kernel= l3kernel or {}
+l3kernel._@@.Page.Resources = l3kernel._@@.Resources or {}
+l3kernel._@@.Page.Resources.Properties = l3kernel._@@.Page.Resources.Properties or {}
+l3kernel.pdf= l3kernel.pdf or {} -- for "public" functions
+
 local _@@ = l3kernel._@@
 local pdf = pdf
 
@@ -2017,7 +2022,7 @@ end
 local function _@@_backend_PageN_gpush (page)
  local token=""
  local t = {}
- for name,value in pairs(__pdf.Page.dflt) do
+ for name,value in pairs(_@@.Page.dflt) do
    t[name]=value
  end
  if _@@.Page[page] then
@@ -2031,24 +2036,46 @@ local function _@@_backend_PageN_gpush (page)
  return token
 end
 
-function l3kernel._@@._backend_PageN_gput (page,name,value) -- tex.count["g__pdf_abspage_int"]
+function l3kernel._@@.backend_PageN_gput (page,name,value) -- tex.count["g_@@_abspage_int"]
  _@@_backend_PageN_gput (page,name,value)
 end
 
-function l3kernel._@@._backend_PageN_gpush (page)
+function l3kernel._@@.backend_PageN_gpush (page)
   pdf.setpageattributes(_@@_backend_PageN_gpush (page))
 end
 
-function l3kernel._@@._backend_Page_gput (name,value)
+function l3kernel._@@.backend_Page_gput (name,value)
   _@@_backend_Page_gput (name,value)
 end
 
-function l3kernel._@@._backend_Page_gremove (name)
+function l3kernel._@@.backend_Page_gremove (name)
   _@@_backend_Page_gremove (name)
 end
 
-function l3kernel._@@._backend_Page_gclear ()
+function l3kernel._@@.backend_Page_gclear ()
   _@@_backend_Page_gclear ()
+end
+
+
+local Properties= l3kernel._@@.Page.Resources.Properties
+
+local function _@@_backend_PageN_Resources_gpush (page)
+ local token=""
+ if Properties[page] then
+  for name,value in pairs(Properties[page]) do
+   token = token .. "/"..name.." "..value
+  end
+  token = "/Properties <<"..token..">>"
+ end
+ -- add ExtGstate etc here ....
+ return token
+end
+
+-- the function is public, as I probably need it in tagpdf too ...
+function l3kernel.pdf.Page_Resources_Properties_gput (page,name,value) -- tex.count["g_@@_abspage_int"]
+ Properties[page] = Properties[page] or {}
+ Properties[page][name]=value
+ pdf.setpageresources(_@@_backend_PageN_Resources_gpush (page))
 end
 %</lua>
 %    \end{macrocode}
