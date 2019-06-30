@@ -1,10 +1,8 @@
 % !Mode:: "TeX:DE:UTF-8:Main"
 \documentclass{article}
-\usepackage{l3pdf,pdfresources,ifluatex}
-
+\usepackage{l3pdf,pdfresources}
 
 \ExplSyntaxOn
-
 %correct g to c, is already in master ...
 \sys_if_engine_xetex:T
 {
@@ -14,184 +12,24 @@
 
 \pdf_uncompress:
 \ExplSyntaxOff
-\ifluatex
-\usepackage{luacode}
-% the following should latter get in the l3kernel table and be named
-% more sensibly. This here is only for testing
-%\begin{luacode}
-%l3kernel= l3kernel or {}
-%l3kernel.__pdf      = l3kernel.__pdf or {}
-%l3kernel.__pdf.Page = l3kernel.__pdf.Page or {}
-%l3kernel.__pdf.Page.Resources = l3kernel.__pdf.Resources or {}
-%l3kernel.__pdf.Page.Resources.Properties = l3kernel.__pdf.Page.Resources.Properties or {}
-%l3kernel.pdf= l3kernel.pdf or {} -- for "public" functions
-%
-%local Properties= l3kernel.__pdf.Page.Resources.Properties
-%
-%local function __pdf_backend_PageN_Resources_gpush (page)
-% local token=""
-% if Properties[page] then
-%  for name,value in pairs(Properties[page]) do
-%   token = token .. "/"..name.." "..value
-%  end
-%  token = "/Properties <<"..token..">>"
-% end
-% -- add ExtGstate etc here ....
-% return token
-%end
-%
-%-- the function is public, as I probably need it in tagpdf too ...
-%function l3kernel.pdf.Page_Resources_Properties_gput (page,name,value) -- tex.count["g__pdf_abspage_int"]
-% Properties[page] = Properties[page] or {}
-% Properties[page][name]=value
-% pdf.setpageresources(__pdf_backend_PageN_Resources_gpush (page))
-%end
-%
-%\end{luacode}
-\fi
 
-\ExplSyntaxOn
-%dvips
-% dvips is easy: create an object, and reference it in the bdc
-% ghostscript will then automatically replace it by a name
-% and add the name to the /Properties dict
-% special variant von accsupp https://chat.stackexchange.com/transcript/message/50831812#50831812
-
-\bool_if:nT {\sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p: }
- {
-  \cs_set_protected:Npn \__pdf_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
-   {
-     \special{ps:~mark~/#1~\__pdf_backend_object_ref:n{#2}~BDC~pdfmark}
-   }
-  \cs_set_protected:Npn \__pdf_backend_emc:
-   {
-    \special{ps:~mark~/EMC~pdfmark} %
-   }
-  \cs_new_protected:Npn \__pdf_backend_PageN_Resources_gpush:n #1 {}
- }
-
-\int_new:N  \g__pdf_backend_name_int
-%xetex has so create the entries in the /Properties manually (like the other backends)
-% use pdfbase special https://chat.stackexchange.com/transcript/message/50832016#50832016
-\sys_if_engine_xetex:T
-{
- \cs_set_protected:Npn \__pdf_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
-   {
-     \int_gincr:N \g__pdf_backend_name_int
-     \special{pdf:code~/#1/l3pdf\int_use:N\g__pdf_backend_name_int\c_space_tl BDC}
-     %\special{pdf:content~/#1/l3pdf\int_use:N\g__pdf_backend_name_int\c_space_tl BDC}
-     \special{
-        pdf:put~@resources~
-        <<
-         /Properties~
-          <<
-           /l3pdf\int_use:N\g__pdf_backend_name_int\c_space_tl
-           \__pdf_backend_object_ref:n{#2}
-          >>
-         >>
-       }
-    }
-  \cs_set_protected:Npn \__pdf_backend_emc:
-   {
-    \special{pdf:code~EMC}  %pdfbase
-    %\special{pdf:content~EMC}% accsupp
-   }
-  \cs_new_protected:Npn \__pdf_backend_PageN_Resources_gpush:n #1 {}
-}
-
-% luatex
-\sys_if_engine_luatex:T
-{
- \cs_set_protected:Npn \__pdf_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
-   {
-     \int_gincr:N \g__pdf_backend_name_int
-     \exp_args:Nx\__kernel_backend_literal_page:n
-       {/#1 ~ /l3pdf\int_use:N\g__pdf_backend_name_int\c_space_tl BDC}
-     \exp_args:Nx\tex_latelua:D
-      {
-       l3kernel.pdf.Page_Resources_Properties_gput
-        ( tex.count["g__pdf_abspage_int"],
-          "l3pdf\int_use:N\g__pdf_backend_name_int",
-          "\__pdf_backend_object_ref:n{#2}"
-        )
-      }
-   }
-  \cs_set_protected:Npn \__pdf_backend_emc:
-   {
-    \__kernel_backend_literal_page:n { EMC }
-   }
-  \cs_new_protected:Npn \__pdf_backend_PageN_Resources_gpush:n #1 {}
-}
-\makeatletter
-
-% pdflatex is the most complicated as it has to go through the aux ...
-\bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
-{
- \cs_set_protected:Npn \__pdf_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
-   {
-     \int_gincr:N \g__pdf_backend_name_int
-     \exp_args:Nx\__kernel_backend_literal_page:n
-       {/#1 ~ /l3pdf\int_use:N\g__pdf_backend_name_int\c_space_tl BDC}
-    % code to set the property ....
-    \int_gincr:N\g__pdf_resourceid_int
-    \zref@labelbylist {l3pdf\int_use:N\g__pdf_resourceid_int} {l3pdf}
-    \tl_set:Nx \l__pdf_tmpa_tl
-     {
-      \zref@extractdefault{l3pdf\int_use:N\g__pdf_resourceid_int}
-                          {pdf@abspage}
-                          {0}
-     }
-    \__pdf_tree_new:n    {backend_Page\l__pdf_tmpa_tl/Resources/Properties}
-    \exp_args:Nnx\__pdf_tree_gput:nnn
-     {backend_Page\l__pdf_tmpa_tl/Resources/Properties}
-     {l3pdf\int_use:N\g__pdf_resourceid_int}
-     {\__pdf_backend_object_ref:n{#2}}
-   }
- \cs_set_protected:Npn \__pdf_backend_emc:
-   {
-    \__kernel_backend_literal_page:n { EMC }
-   }
-
- \cs_new_protected:Npn \__pdf_backend_PageN_Resources_gpush:n #1
-  {
-   \exp_args:NNx \tex_global:D \tex_pdfpageresources:D
-   {
-    \prop_if_exist:cT  { \__pdf_tree_prop_name:n  { backend_Page#1/Resources/Properties } }
-     {
-      /Properties~<<
-       \prop_map_function:cN
-        { \__pdf_tree_prop_name:n  { backend_Page#1/Resources/Properties } } \__pdf_dict_item:nn
-       >>
-     }
-    %% add ExtGState etc
-   }
-  }
-}
-
-% for testing here
-  \cs_set_protected:Npn \__pdf_everypage_shipout_code:n #1
-  {
-   \__pdf_backend_PageN_gpush:n { #1 }
-   \__pdf_backend_PageN_Resources_gpush:n { #1 }
-  }
-\ExplSyntaxOff
 \begin{document}
 \ExplSyntaxOn
-\__pdf_backend_object_new:nn   {objA}{dict}
-\__pdf_backend_object_write:nn {objA}{/Type/Artifact}
+\pdf_object_new:nn   {objA}{dict}
+\pdf_object_write:nn {objA}{/Type/Artifact}
 
-\__pdf_backend_object_new:nn   {objB}{dict}
-\__pdf_backend_object_write:nn {objB}{/ActualText(abc)}
+\pdf_object_new:nn   {objB}{dict}
+\pdf_object_write:nn {objB}{/ActualText(abc)}
 
 \vspace*{44\baselineskip}
-\__pdf_backend_bdc:nn {Span}{objA}xxx
-\__pdf_backend_emc:
+\pdf_bdc:nn {Span}{objA}xxx
+\pdf_emc:
 \\
-\__pdf_backend_bdc:nn {Span}{objA}xxx
-\__pdf_backend_emc:
+\pdf_bdc:nn {Span}{objA}xxx
+\pdf_emc:
 \\
-\__pdf_backend_bdc:nn {Span}{objB}xxx
-\__pdf_backend_emc:
+\pdf_bdc:nn {Span}{objB}xxx
+\pdf_emc:
 
 \ExplSyntaxOff
 \end{document} 
