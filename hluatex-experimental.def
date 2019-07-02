@@ -339,14 +339,14 @@
       \pdf_object_ref:n { l__hyp_ocg_config_dict_obj }
      }
 
-     \pdf_pageresources_gput:nnn{Properties}{OCView}
-     {
-      \pdf_object_ref:n { l__hyp_ocg_view_dict_obj}
-     }
-    \pdf_pageresources_gput:nnn{Properties}{OCPrint}
-     {
-      \pdf_object_ref:n { l__hyp_ocg_print_dict_obj}
-     }
+    % \pdf_pageresources_gput:nnn{Properties}{OCView}
+%     {
+%      \pdf_object_ref:n { l__hyp_ocg_view_dict_obj}
+%     }
+%    \pdf_pageresources_gput:nnn{Properties}{OCPrint}
+%     {
+%      \pdf_object_ref:n { l__hyp_ocg_print_dict_obj}
+%     }
   }
   \Hy@AtBeginDocument{
     \def\Hy@colorlink#1{
@@ -363,12 +363,12 @@
         \color@endgroup\egroup
         \mbox{
           %this uses a named object, we really need to sort this ...
-          \pdf_bdc:nn {OC}{/OCPrint}
+          \pdf_bdc:nn {OC}{l__hyp_ocg_print_dict_obj}
           %\pdfliteral~page{/OC/OCPrint~BDC}
           \rlap{\copy0}
           \pdf_emc:
           %\pdfliteral~page{/OC/OCView~BDC}
-          \pdf_bdc:nn {OC}{/OCView}
+          \pdf_bdc:nn {OC}{l__hyp_ocg_view_dict_obj}
           \group_begin:
             \expandafter\HyColor@UseColor\Hy@ocgcolor
             \box0~
