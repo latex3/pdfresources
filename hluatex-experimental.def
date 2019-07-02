@@ -252,9 +252,10 @@
 \cs_set_eq:NN \Hy@pdfminorversion \pdf_version_minor:
 \cs_set_eq:NN \Hy@pdfmajorversion \pdf_version_major:
 
-  \ifHy@ocgcolorlinks
+\legacy_if:nT { Hy@ocgcolorlinks }
+  {
     \pdf_version_min_gset:n { 1.5 }
-  \fi
+  }
 
 % should this go into the drivers?
 % or in the pdf level?
@@ -332,8 +333,8 @@
     }
     \exp_args:Nx\pdf_catalog_OCProperties_OCGs_gput:n
      { \pdf_object_ref:n { l__hyp_ocg_view_dict_obj } }
-    \exp_args:Nx\pdf_catalog_OCProperties_OCGs_gput:n { \pdf_object_ref:n
-     { l__hyp_ocg_print_dict_obj } }
+    \exp_args:Nx\pdf_catalog_OCProperties_OCGs_gput:n
+     { \pdf_object_ref:n { l__hyp_ocg_print_dict_obj } }
     \exp_args:Nx\pdf_catalog_OCProperties_Configs_gput:n
      {
       \pdf_object_ref:n { l__hyp_ocg_config_dict_obj }
@@ -351,23 +352,23 @@
   \Hy@AtBeginDocument{
     \def\Hy@colorlink#1{
       \group_begin:
-        \ifHy@ocgcolorlinks
+        \legacy_if:nTF {Hy@ocgcolorlinks}
+        {
           \def\Hy@ocgcolor{#1}
           \setbox0=\hbox\bgroup\color@begingroup
-        \else
+        }
+        {
           \HyColor@UseColor#1
-        \fi
+        }
     }
     \def\Hy@endcolorlink{
-      \ifHy@ocgcolorlinks
+      \legacy_if:nT {Hy@ocgcolorlinks}
+       {
         \color@endgroup\egroup
         \mbox{
-          %this uses a named object, we really need to sort this ...
           \pdf_bdc:nn {OC}{l__hyp_ocg_print_dict_obj}
-          %\pdfliteral~page{/OC/OCPrint~BDC}
           \rlap{\copy0}
           \pdf_emc:
-          %\pdfliteral~page{/OC/OCView~BDC}
           \pdf_bdc:nn {OC}{l__hyp_ocg_view_dict_obj}
           \group_begin:
             \expandafter\HyColor@UseColor\Hy@ocgcolor
@@ -375,7 +376,7 @@
           \group_end:
           \pdf_emc:
         }
-      \fi
+      }
       \group_end:
     }
   }
