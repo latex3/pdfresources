@@ -36,7 +36,7 @@
 \RequirePackage{xparse,l3pdf}
 %\RequirePackage{tmpl3shipout}
 \RequirePackage{atbegshi,zref-lastpage}
-\ProvidesExplPackage {pdfresources} {2019-03-17} {0.1}
+\ProvidesExplPackage {pdfresources} {2019-07-01} {0.2}
   {experimental pdf-resource management}
 \DeclareOption { debug }
  {
@@ -471,7 +471,7 @@
  {
    \tex_directlua:D
     {
-     l3kernel._@@.backend_Page_gput
+     l3kernel.@@.backend_Page_gput
       (
        \@@_backend_luastring:n {#1},
        \@@_backend_luastring:n {#2}
@@ -483,7 +483,7 @@
   % changes a lua table with lualatex
  \cs_new_protected:Npn \@@_backend_Page_gremove:n #1
  {
-  \tex_directlua:D { l3kernel._@@.backend_Page_gremove (\@@_backend_luastring:n {#1}) }
+  \tex_directlua:D { l3kernel.@@.backend_Page_gremove (\@@_backend_luastring:n {#1}) }
  }
  % the command used in the document.
  % direct call of the primitive special with dvips/dvipdfmx
@@ -494,13 +494,13 @@
   {
    \tex_latelua:D
     {
-     l3kernel._@@.backend_PageN_gput
+     l3kernel.@@.backend_PageN_gput
       (
        tex.count["g_@@_abspage_int"],
        \@@_backend_luastring:n {#1},
        \@@_backend_luastring:n {#2}
       )
-     l3kernel._@@.backend_PageN_gpush (tex.count["g_@@_abspage_int"])
+     l3kernel.@@.backend_PageN_gpush (tex.count["g_@@_abspage_int"])
     }
   }
   %the code to push the values, used in shipout
@@ -511,7 +511,7 @@
   {
     \tex_latelua:D
     {
-     l3kernel._@@.backend_PageN_gpush (tex.count["g_@@_abspage_int"])
+     l3kernel.@@.backend_PageN_gpush (tex.count["g_@@_abspage_int"])
     }
   }
 }
@@ -1316,7 +1316,7 @@
 % setters and push commands.
 %    \begin{macrocode}
 %<*package>
-\cs_new_protected:Npn \_@@_value_dict_new:nnn #1 #2 #3
+\cs_new_protected:Npn \@@_value_dict_new:nnn #1 #2 #3
   %#1 prefix e.g. catalog
   %#2 key name, e.g. ViewerPreferences
   %#3 the command /code needed to write the value, e.g.
@@ -1358,7 +1358,7 @@
 % setters and push commands.
 %    \begin{macrocode}
 %<*package>
-\cs_new_protected:Npn \_@@_value_array_new:nnn #1 #2 #3
+\cs_new_protected:Npn \@@_value_array_new:nnn #1 #2 #3
   %#1 prefix e.g. catalog
   %#2 key name, e.g. AF
   %#3 the command /code needed to write the value, e.g.
@@ -1511,8 +1511,8 @@
 %    \begin{macrocode}
 %<*package>
 % user command: \pdf_catalog_AF_gput:n, o, x
-% push command: \_@@_value_catalog_AF_gpush:
-\_@@_value_array_new:nnn { catalog } { AF }
+% push command: \@@_value_catalog_AF_gpush:
+\@@_value_array_new:nnn { catalog } { AF }
                          {\@@_backend_catalog_gput:nn}
 %</package>
 %    \end{macrocode}
@@ -1530,9 +1530,9 @@
 %    \begin{macrocode}
 %<*package>
 % user command: \pdf_catalog_ViewerPreferences_gput:nn, no, nx
-% push command: \_@@_value_catalog_ViewerPreferences_gpush:
+% push command: \@@_value_catalog_ViewerPreferences_gpush:
 
-\_@@_value_dict_new:nnn { catalog }{ ViewerPreferences }{ \@@_backend_catalog_gput:nn }
+\@@_value_dict_new:nnn { catalog }{ ViewerPreferences }{ \@@_backend_catalog_gput:nn }
 %</package>
 %    \end{macrocode}
 % \end{macro}
@@ -1548,10 +1548,10 @@
 %    \begin{macrocode}
 %<*package>
 % user command: \pdf_catalog_OCproperties_gput:nn, no, nx /should not be used hide it???
-% push command: \_@@_value_catalog_OCproperties_gpush:
+% push command: \@@_value_catalog_OCproperties_gpush:
 
 %%% not finished ...............
-%%%\_@@_value_dict_new:nnn { catalog }{ OCproperties }{ \@@_backend_catalog_gput:nn }
+%%%\@@_value_dict_new:nnn { catalog }{ OCproperties }{ \@@_backend_catalog_gput:nn }
 
 \seq_new:N \g_@@_catalog_OCProperties_OCGs_seq
 \seq_new:N \g_@@_catalog_OCProperties_Configs_seq
@@ -1628,9 +1628,9 @@
 %    \begin{macrocode}
 %<*package>
 % user command: \pdf_catalog_OutputIntents_gput:nn, no, nx
-% push command: \_@@_value_catalog_OutputIntents_gpush:
+% push command: \@@_value_catalog_OutputIntents_gpush:
 
-\_@@_value_array_new:nnn { catalog } { OutputIntents }
+\@@_value_array_new:nnn { catalog } { OutputIntents }
                          {\@@_backend_catalog_gput:nn}
 
 %</package>
@@ -2030,7 +2030,7 @@
 \msg_info:nn{pdf}{patches}
 \RequirePackage{etoolbox}
 % code to add to the resources existing stuff in the format "/name value":
-\cs_new:Npn \_@@_split_dict_entry_aux:NNw #1 #2 /#3~#4\q_stop
+\cs_new:Npn \@@_split_dict_entry_aux:NNw #1 #2 /#3~#4\q_stop
  {
   \tl_set:Nn #1 {#3}
   \tl_set:Nn #2 {#4}
@@ -2148,42 +2148,42 @@
 %    \begin{macrocode}
 %<*lua>
 l3kernel= l3kernel or {}
-l3kernel._@@      = l3kernel._@@ or {}
-l3kernel._@@.Page = l3kernel._@@.Page or {}
-l3kernel._@@.Page.dflt = l3kernel._@@.Page.dflt or {}
+l3kernel.@@      = l3kernel.@@ or {}
+l3kernel.@@.Page = l3kernel.@@.Page or {}
+l3kernel.@@.Page.dflt = l3kernel.@@.Page.dflt or {}
 l3kernel= l3kernel or {}
-l3kernel._@@.Page.Resources = l3kernel._@@.Resources or {}
-l3kernel._@@.Page.Resources.Properties = l3kernel._@@.Page.Resources.Properties or {}
+l3kernel.@@.Page.Resources = l3kernel.@@.Resources or {}
+l3kernel.@@.Page.Resources.Properties = l3kernel.@@.Page.Resources.Properties or {}
 l3kernel.pdf= l3kernel.pdf or {} -- for "public" functions
 
-local _@@ = l3kernel._@@
+local @@ = l3kernel.@@
 local pdf = pdf
 
-local function _@@_backend_Page_gput (name,value)
- _@@.Page.dflt[name]=value
+local function @@_backend_Page_gput (name,value)
+ @@.Page.dflt[name]=value
 end
 
-local function _@@_backend_Page_gremove (name)
- _@@.Page.dflt[name]=nil
+local function @@_backend_Page_gremove (name)
+ @@.Page.dflt[name]=nil
 end
 
-local function _@@_backend_Page_gclear ()
- _@@.Page.dflt={}
+local function @@_backend_Page_gclear ()
+ @@.Page.dflt={}
 end
 
-local function _@@_backend_PageN_gput (page,name,value)
- _@@.Page[page] = _@@.Page[page] or {}
- _@@.Page[page][name]=value
+local function @@_backend_PageN_gput (page,name,value)
+ @@.Page[page] = @@.Page[page] or {}
+ @@.Page[page][name]=value
 end
 
-local function _@@_backend_PageN_gpush (page)
+local function @@_backend_PageN_gpush (page)
  local token=""
  local t = {}
- for name,value in pairs(_@@.Page.dflt) do
+ for name,value in pairs(@@.Page.dflt) do
    t[name]=value
  end
- if _@@.Page[page] then
-  for name,value in pairs(_@@.Page[page]) do
+ if @@.Page[page] then
+  for name,value in pairs(@@.Page[page]) do
    t[name] = value
   end
  end
@@ -2193,30 +2193,30 @@ local function _@@_backend_PageN_gpush (page)
  return token
 end
 
-function l3kernel._@@.backend_PageN_gput (page,name,value) -- tex.count["g_@@_abspage_int"]
- _@@_backend_PageN_gput (page,name,value)
+function l3kernel.@@.backend_PageN_gput (page,name,value) -- tex.count["g_@@_abspage_int"]
+ @@_backend_PageN_gput (page,name,value)
 end
 
-function l3kernel._@@.backend_PageN_gpush (page)
-  pdf.setpageattributes(_@@_backend_PageN_gpush (page))
+function l3kernel.@@.backend_PageN_gpush (page)
+  pdf.setpageattributes(@@_backend_PageN_gpush (page))
 end
 
-function l3kernel._@@.backend_Page_gput (name,value)
-  _@@_backend_Page_gput (name,value)
+function l3kernel.@@.backend_Page_gput (name,value)
+  @@_backend_Page_gput (name,value)
 end
 
-function l3kernel._@@.backend_Page_gremove (name)
-  _@@_backend_Page_gremove (name)
+function l3kernel.@@.backend_Page_gremove (name)
+  @@_backend_Page_gremove (name)
 end
 
-function l3kernel._@@.backend_Page_gclear ()
-  _@@_backend_Page_gclear ()
+function l3kernel.@@.backend_Page_gclear ()
+  @@_backend_Page_gclear ()
 end
 
 
-local Properties= l3kernel._@@.Page.Resources.Properties
+local Properties= l3kernel.@@.Page.Resources.Properties
 
-local function _@@_backend_PageN_Resources_gpush (page)
+local function @@_backend_PageN_Resources_gpush (page)
  local token=""
  if Properties[page] then
   for name,value in pairs(Properties[page]) do
@@ -2232,7 +2232,7 @@ end
 function l3kernel.pdf.Page_Resources_Properties_gput (page,name,value) -- tex.count["g_@@_abspage_int"]
  Properties[page] = Properties[page] or {}
  Properties[page][name]=value
- pdf.setpageresources(_@@_backend_PageN_Resources_gpush (page))
+ pdf.setpageresources(@@_backend_PageN_Resources_gpush (page))
 end
 %</lua>
 %    \end{macrocode}
