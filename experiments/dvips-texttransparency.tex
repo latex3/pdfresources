@@ -1,0 +1,32 @@
+\documentclass{article}
+
+\usepackage{lipsum,l3pdf}
+\ExplSyntaxOn
+\pdf_uncompress:
+\ExplSyntaxOff
+\begin{document}
+% \special{color push Black 0.5 .setopacityalpha} %not ok!!
+\special{background rgb 1 1 0 0.5 .setopacityalpha}
+\special{color push rgb 1 0 0 0.5 .setopacityalpha}
+\lipsum[1]
+\special{color push rgb 0 0 1}
+\lipsum[1]
+\special{color push rgb 0 0 1 1.0 .setopacityalpha}
+\lipsum[1]
+\special{color push cmyk 0.5 0 1 0 0.8 .setopacityalpha}
+\lipsum[2]
+\special{color push  gray 0.8 0.2 .setopacityalpha}
+\lipsum[1]
+\special{color pop}
+End!
+\special{color pop}
+End!
+\special{color pop}
+End!
+\special{color pop}
+End!
+\special{color pop}
+End!
+\special{background rgb 1 1 0 1 .setopacityalpha}
+
+\end{document}

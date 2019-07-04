@@ -88,9 +88,9 @@ new values are stored in a prop, and at every change the register is updated. Th
 \begin{itemize}
 \item token register, is added to the current page at shipout
 \item non-additive: A new call overwrites the content of the register.
-\item dvips syntax: 
+\item dvips syntax:
 \verb+ \special{ps: [{ThisPage}<</Rotate 90>> /PUT pdfmark}+
-\item dvipdmx syntax \verb+\special{pdf: put @thispage << /ABC /XYZ >>}+ 
+\item dvipdmx syntax \verb+\special{pdf: put @thispage << /ABC /XYZ >>}+
 \item Entries (emphasized if used/set by packages):
    \begin{enumerate}
     \item Resources (dict, see below),
@@ -168,8 +168,10 @@ It must be decided when to copy the property into pdfpageattr. Atbeginshipout?
 (perhaps should be handled as an instance for a resource dictionary, entries ExtGState,
 ColorSpace, Pattern, Shading, XObject, Font, ProcSet, Properties, see e.g. /DR entry in AcroForm).
 \begin{itemize}
-\item token register, is added to the Resources dictionary of all \emph{following} pages.
-\item non-additive: A new call overwrites the content of the register (but not automatic entries like Font or XObject).
+\item pdfmode: token register, is added to the Resources dictionary of all \emph{following} pages.
+      non-additive: A new call overwrites the content of the register (but not automatic entries like Font or XObject).
+\item xetex: can be added with a special
+\item dvips: probably only through \enquote{side-effects}
 \item Entries:
  \begin{enumerate}
  \item \emph{ExtGState} (dict)

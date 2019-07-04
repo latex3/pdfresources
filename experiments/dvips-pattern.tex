@@ -1,0 +1,40 @@
+\documentclass{standalone}
+%https://chat.stackexchange.com/transcript/message/50846964#50846964
+%define pattern prototype
+%% ps2pdf -dCompressStreams=false -dCompressPages=false -dNOSAFER dvips-pattern.ps
+
+\special{!
+  <<
+    /PatternType 1
+    /PaintType 1
+    /TilingType 1
+    /BBox [0 0 10 10]
+    /XStep 11
+    /YStep 11
+    /PaintProc {
+      pop
+      0 0 moveto
+      10 0 lineto
+      5 10 lineto
+      closepath
+  	  0.1 setlinewidth
+      stroke
+    } bind
+  >> matrix makepattern /Triang exch def
+}
+
+\begin{document}
+
+\makebox[200bp][l]{%
+  \rule{0pt}{100bp}%	
+  \special{"
+    /Pattern setcolorspace
+    Triang setcolor
+    0 0 moveto
+    200 0 lineto
+    200 100 lineto
+    0 100 lineto closepath fill
+  }%
+}
+
+\end{document}
