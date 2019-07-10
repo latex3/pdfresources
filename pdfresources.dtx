@@ -329,7 +329,7 @@
 %    \pdf_pagesattr_gremove:n
 %   }
 %   \begin{syntax}
-%     \pdf_pagesattr_gremove:n \Arg{name}
+%     \cs{pdf_pagesattr_gremove:n} \Arg{name}
 %   \end{syntax}
 %   Removes  |/|\meta{name} and its associated \meta{value} from the |/Pages| dictionary
 %   (if the name-value pair has been added by  \cs{pdf_pagesattr_gput:nn}).
@@ -624,7 +624,7 @@
 %    \pdf_pageattr_gremove:n
 %   }
 %   \begin{syntax}
-%     \pdf_pageattr_gremove:n \Arg{name}
+%     \cs{pdf_pageattr_gremove:n} \Arg{name}
 %   \end{syntax}
 %   Removes |/|\meta{name} and its associated \meta{value} added by \cs{pdf_pageattr_gput:nn}
 %   from the page dictionaries of the current and the following pages.
@@ -698,7 +698,7 @@
 %    \pdf_info_gput:nn
 %   }
 %   \begin{syntax}
-%     \pdf_info_gput:nn \Arg{name} \Arg{value}
+%     \cs{pdf_info_gput:nn} \Arg{name} \Arg{value}
 %   \end{syntax}
 %   Adds |/|\meta{name} and the \meta{value} to the info dictionary.
 %   \meta{name} should be a valid pdf name without the leading slash,
@@ -719,7 +719,7 @@
 %    \pdf_info_string_gput:nn
 %   }
 %   \begin{syntax}
-%     \pdf_info_string_gput:nn \Arg{name} \Arg{value}
+%     \cs{pdf_info_string_gput:nn} \Arg{name} \Arg{value}
 %   \end{syntax}
 %   Adds |/|\meta{name} and the \meta{value} surrounded by parentheses to the info dictionary.
 %   \meta{name} should be a valid pdf name without the leading slash,
@@ -783,19 +783,20 @@
 %    \pdf_bdc:nn
 %   }
 %   \begin{syntax}
-%     \pdf_bdc:nn \Arg{tag} \Arg{object name}
+%     \cs{pdf_bdc:nn} \Arg{tag} \Arg{object name}
 %   \end{syntax}
 %    This command adds a BDC marked content operator to the current page stream.
 %   \meta{tag} is the tag of this operator (without the leading slash),
 %   \meta{object name}  is a the name of an dictionary object reserved with
-%   \cs{pdf_object_new:nn} and filled with \cs{\pdf_object_write:n} with
+%   \cs{pdf_object_new:nn} and filled with \cs{pdf_object_write:n} with
 %   the properties of the BDC.
+%   \end{function}
 %   \begin{function}[added = 2019-06-30]
 %   {
 %    \pdf_emc:
 %   }
 %   \begin{syntax}
-%     \pdf_emc:
+%     \cs{pdf_emc:}
 %   \end{syntax}
 %    This command closes the  BDC marked content operator opened with \cs{pdf_bdc:nn}.
 %    It should be one the same page as the bdc-command.
@@ -820,11 +821,11 @@
  {
   \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
    {
-     \special{ps:~mark~/#1~\@@_backend_object_ref:n{#2}~BDC~pdfmark}
+     \special {ps:~mark~/#1~\@@_backend_object_ref:n{#2}~BDC~pdfmark}
    }
   \cs_set_protected:Npn \@@_backend_emc:
    {
-    \special{ps:~mark~/EMC~pdfmark} %
+    \special {ps:~mark~/EMC~pdfmark} %
    }
   \cs_new_protected:Npn \@@_backend_PageN_Resources_gpush:n #1 {}
  }
@@ -835,8 +836,12 @@
  \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
    {
      \int_gincr:N \g_@@_backend_name_int
-     \special{pdf:code~/#1/l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC}
-     \special{
+     \__kernel_backend_literal:x
+      {
+       pdf:code~/#1/l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC
+      }
+     \__kernel_backend_literal:x
+      {
         pdf:put~@resources~
         <<
          /Properties~
@@ -849,7 +854,7 @@
     }
   \cs_set_protected:Npn \@@_backend_emc:
    {
-    \special{pdf:code~EMC}  %pdfbase
+    \__kernel_backend_literal:n {pdf:code~EMC}  %pdfbase
    }
   \cs_new_protected:Npn \@@_backend_PageN_Resources_gpush:n #1 {}
 }
@@ -923,6 +928,7 @@
 }
 %</package>
 %    \end{macrocode}
+% \subsection{page resources / ExtGState, ColorSpace, Shading, Pattern }
 % ===================================
 %\subsubsection{pdfxform}
 % \begin{NOTE}{UF}
@@ -1091,7 +1097,7 @@
    ColorSpace,
    Pattern,
    Shading,
-   Properties
+ %  Properties
   }
 
 \prop_new:N \g_@@_pageresources_prop
