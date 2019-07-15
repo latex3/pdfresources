@@ -20,13 +20,17 @@
 \makeatletter
 %\pgfutil@addpdfresource@extgs
 %{\pdf_object_ref:n{opextgs}}
+% this works on its own, but not together with the pgf method to add a resource!!
+% breaks e.g. if there is a colorbox in the document.
 \special{pdf:pageresources<</ExtGState<</opON \c_space_tl \pdf_object_ref:n{opON}
   /opOFF\c_space_tl \pdf_object_ref:n{opOFF} >>>>}
 }
 
 \usepackage{atbegshi}
+% works but is problematic for white text, see second color box....
 %\AtBeginShipout{\AtBeginShipoutAddToBox{\special{pdf:code~/opON~gs}}}%
-\AtBeginShipout{\AtBeginShipoutAddToBox{\special{pdf:code /SPCop gs}}}%
+
+
 
 \ExplSyntaxOff
 \newtcolorbox{casestudy}{enhanced,boxrule=0pt,boxsep=0pt,colframe=red,colback=yellow,
@@ -46,4 +50,6 @@ titlerule=0pt,titlerule style={green,line width=0pt},frame hidden,
 
 \newpage
 \colorbox{mg}{bk test-2}
+
+\colorbox{mg}{\textcolor{white}{white text}}
 \end{document}
