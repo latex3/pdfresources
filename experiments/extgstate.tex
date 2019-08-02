@@ -5,6 +5,40 @@
 \ExplSyntaxOn
 \pdf_uncompress:
 \makeatletter
+\ExplSyntaxOff
+
+\begin{document}
+abc
+\special{pdf:obj @pgfextgs1 <<>>}
+\special{pdf:obj @pgfextgs2 <<>>}
+\special{pdf:put @pgfextgs1 << /bearopacity <</ca 1/CA 1>>>>}
+\special{pdf:put @pgfextgs1 << /bearopacity <</ca 1/CA 1>>>>}
+\special{pdf:put @pgfextgs1 << /bearopacity <</ca 1/CA 1>>>>}
+\special{pdf:put @pgfextgs1 << /duckopacity <</ca 0.7/CA 0.7>>>>}
+\special{pdf:put @pgfextgs1 << /duckopacity <</ca 0.5/CA 0.5>>>>}
+
+\special{pdf:put @resources
+      << /ExtGState @pgfextgs1 >>}
+
+\newpage
+%on the same page this would not be good ...
+\special{pdf:put @resources
+      << /ExtGState @pgfextgs2 >>}
+
+\special{pdf:put @pgfextgs2 << /marmotopacity <</ca 0.5/CA 0.5>>>>}
+
+
+  abc
+\end{document}
+\newpage
+\special{pdf:put @resources
+      << /ColorSpace @pgfcolor >>}
+
+xxx
+\end{document}
+
+
+
 \cs_new_protected:Npn\__pdf_backend_set_textopacity:n #1
  {\tl_show:N\current@color
    \exp_args:Nx\__kernel_backend_literal:n {color~push~\current@color\c_space_tl#1~.setopacityalpha}

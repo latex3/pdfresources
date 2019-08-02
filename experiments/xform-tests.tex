@@ -1,0 +1,141 @@
+% !Mode:: "TeX:DE:UTF-8:Main"
+\documentclass{article}
+\usepackage{l3pdf,ifxetex,tikz}
+\ExplSyntaxOn
+\pdf_uncompress:
+\ExplSyntaxOff
+%\usepackage[generic]
+%{attachfile2}
+\begin{document}
+%   \pbs_pdfxform:nnnnn
+%     #1: add pgf/tikz resources (transparency, shading)? (1|0) %dvipdfmx/xetex
+%     #2: used as PDF annotation appearance? (1|0)              %dvips/pdftex
+%     #3: additional resources                                  %all BUT dvips
+%     #4: additional dictionary entries
+%     #5: savebox number
+
+% xform: immediate or not?
+% argument: a box.
+% with dvipdfmx, xform should be in a 0-box.
+% xform attr
+% pdflatex: attr keyword
+% xform resources
+% pdflatex: resources keyword
+% pdfbase current page resource + special stuff:
+% \tl_set:Nx\l_tmpa_tl{\the\pdfpageresources~#3}\tl_trim_spaces:N\l_tmpa_tl
+
+Some Text \tikz\fill[opacity=0.5,red](0,0)rectangle(1,1);
+
+\newbox\testxform
+\savebox\testxform{Some Text \tikz\fill[opacity=0.5,red](0,0)rectangle(1,1);}
+
+\ExplSyntaxOn
+\sys_if_engine_pdftex:T
+{
+ \wd\testxform=0.5\wd\testxform
+ %Box before:\usebox\testxform \par %\showthe\pdfpageresources
+ %saving doesn't occupy space, but as it is a whatsits ...
+ % transparency needs local resources ...
+  abc\immediate\pdfxform resources {\the\pdfpageresources}
+     \testxform abc \par
+
+  xxx\pdfrefxform \pdflastxform yyy \par
+
+ Box after:\usebox\testxform \par
+
+ %we need to resave the box to get the width ...
+ \savebox\testxform{Some~Text \tikz\fill[opacity=0.5,red](0,0)rectangle(1,1);}
+  \fbox{
+ xx
+  \__pdf_backend_annotation:nnnn
+    {2\wd\testxform}
+    {3\ht\testxform}
+    {\dp\testxform}
+    {
+     /Subtype /Stamp
+     /AP << /N~\the\pdflastxform\space0~R >>
+    }
+   }
+}
+\par
+
+
+\ExplSyntaxOff
+
+%\ifxetex %occupies space!
+%xx\special{pdf:bxobj @MyStampA
+%width 280pt height 0pt depth 40pt}
+%%\tikz\draw[opacity=0.5](0,0)--(1,1);
+%\tikz\fill[opacity=0.5,red](0,0)rectangle(1,1);
+%
+%My Own Stamp
+% \special{pdf:put @resources~<</ExtGState @pgfextgs>>}
+%\special{pdf:exobj}yy
+%\fi
+
+%\newpage
+
+\ifxetex
+\savebox\testxform{Some Text \tikz\fill[opacity=0.5,red](0,0)rectangle(1,1);}
+% when saving the xform object, is should be in a zero box.
+% all dimensions must be there, or the content is typeset ...
+% and don't forget the \the!!
+% transparency resources etc must be add to the box
+abc%
+\bigskip
+Use xform: \special{pdf:uxobj @MyStamp}
+%Use as appearance:
+\fbox{
+ xx
+  \special
+  {pdf:ann
+   width  \the\dimexpr2\wd\testxform\relax\space
+   height \the\dimexpr3\ht\testxform\relax\space
+   depth  \the\dp\testxform
+   <<
+   /Type /Annot
+   /Subtype /Stamp
+   /AP << /N @MyStamp >>
+   >>
+   }
+  \phantom{\usebox\testxform}xx}
+abc 
+
+ \begin{picture}(0,0)
+  \put(0,0)
+   {
+    \special
+     {pdf:bxobj @MyStamp
+       width  \the\wd\testxform\space
+       height \the\ht\testxform\space
+       depth  \the\dp\testxform
+      }%
+    \usebox\testxform
+   \special{pdf:put @resources <</ExtGState @pgfextgs>>} %
+   \special{pdf:exobj}}
+ \end{picture}yyyy
+
+Use xform after: \special{pdf:uxobj @MyStamp}
+
+\fbox{
+ xx
+  \special
+  {pdf:ann
+   width  \the\dimexpr2\wd\testxform\relax\space
+   height \the\dimexpr3\ht\testxform\relax\space
+   depth  \the\dp\testxform
+   <<
+   /Type /Annot
+   /Subtype /Stamp
+   /AP << /N @MyStamp >>
+   >>
+   }
+  \phantom{\usebox\testxform}xx}
+abc 
+
+%\fi
+%\end{document}
+
+
+\fi
+\end{document} 
