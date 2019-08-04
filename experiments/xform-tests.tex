@@ -1,12 +1,73 @@
 % !Mode:: "TeX:DE:UTF-8:Main"
 \documentclass{article}
-\usepackage{l3pdf,ifxetex,tikz}
+\usepackage{l3pdf,ifxetex,tikz,pdfresources}
 \ExplSyntaxOn
 \pdf_uncompress:
 \ExplSyntaxOff
 %\usepackage[generic]
 %{attachfile2}
+
+\ExplSyntaxOn
+\box_new:N  \l__pdf_backend_tmpa_box
+\bool_new:N \l__pdf_backend_xform_bool 
+\sys_if_engine_pdftex:T
+{
+ \cs_new:Npn \__pdf_backend_xform_new:nnnn
+  % #1 name 
+  % #2 attributes
+  % #3 resources 
+  % #4 content, not necessarly a box! 
+  {
+   \hbox_set:Nn \l__pdf_backend_tmpa_box 
+    {
+     \bool_set_true:N \l__pdf_backend_xform_bool 
+     #4 
+    }
+   \tl_const:cx 
+     { c__pdf_backend_xform_wd_ \tl_to_str:n {#1} _tl }  
+     { \tex_the:D \box_wd:N \l__pdf_backend_tmpa_box } }                 
+   \tl_const:cx
+     { c__pdf_backend_xform_ht_ \tl_to_str:n {#1} _tl }
+     { \tex_the:D \box_ht:N \l__pdf_backend_tmpa_box } }
+   \tl_const:cx
+     { c__pdf_backend_xform_dp_ \tl_to_str:n {#1} _tl }
+     { \tex_the:D \box_dp:N \l__pdf_backend_tmpa_box } }
+   %% do we need to test if #2 and #3 are empty??  
+   \tex_immediate:D \tex_pdfxform:D
+    ~  attr      ~ { #2 }
+   %% add local properties.... !!!!!!
+   %% which resources should be default? Is an argument actually needed?    
+    ~  resources ~ { #3 }
+    \l__pdf_backend_tmpa_box   
+   \int_const:cn
+      { c__pdf_backend_xform_ \tl_to_str:n {#1} _int }
+      { \tex_pdflastxform:D } 
+  }
+  
+  \cs_new:Npn \__pdf_backend_xform_ref:n #1 %#1 name
+  { \int_use:c { c_@@_backend_xform_ \tl_to_str:n {#1} _int } ~ 0 ~ R }
+
+  \cs_new:Npn \__pdf_backend_xform_use:n #1 %#1 name
+  {
+   \tex_pdfrefxform:D  \int_use:c { c__pdf_backend_xform_ \tl_to_str:n {#1} _int }  \scan_stop:
+  }
+}
+\ExplSyntaxOff
 \begin{document}
+\ExplSyntaxOn 
+%correct g to c, is already in master ...
+\sys_if_engine_xetex:T
+{
+ \cs_set:Npn \__pdf_backend_object_ref:n #1
+   { @pdf.obj \int_use:c { c__pdf_backend_object_ \tl_to_str:n {#1} _int } }
+}
+
+%object for bdc test
+\pdf_object_new:nn   {objA}{dict}
+\pdf_object_write:nn {objA}{/Type/Artifact}
+
+
+\ExplSyntaxOff
 %   \pbs_pdfxform:nnnnn
 %     #1: add pgf/tikz resources (transparency, shading)? (1|0) %dvipdfmx/xetex
 %     #2: used as PDF annotation appearance? (1|0)              %dvips/pdftex
@@ -76,14 +137,34 @@ Some Text \tikz\fill[opacity=0.5,red](0,0)rectangle(1,1);
 %\newpage
 
 \ifxetex
-\savebox\testxform{Some Text \tikz\fill[opacity=0.5,red](0,0)rectangle(1,1);}
+\savebox\testxform{\csname pdf_bdc:nn\endcsname {Span}{objA}xxxyyy Some Text    \csname pdf_emc:\endcsname \tikz\fill[opacity=0.5,red](0,0)rectangle(1,1);}
 % when saving the xform object, is should be in a zero box.
 % all dimensions must be there, or the content is typeset ...
 % and don't forget the \the!!
 % transparency resources etc must be add to the box
 abc%
 \bigskip
-Use xform: \special{pdf:uxobj @MyStamp}
+%xobjects must be defined before use ...
+
+\begin{picture}(0,0)
+  \put(0,0)
+   {
+    \special
+     {pdf:bxobj @MyStamp
+       width  \the\wd\testxform\space
+       height \the\ht\testxform\space
+       depth  \the\dp\testxform
+      }%
+  %  \csname pdf_bdc:nn\endcsname {Span}{objA}xxx
+    \usebox\testxform
+  %  \csname pdf_emc:\endcsname
+   \special{pdf:put @resources <</ExtGState @pgfextgs>>} %
+   \special{pdf:exobj}}
+ \end{picture}yyyy
+
+Use xform: \fboxsep0pt \fbox{\makebox[\the\wd\testxform][l]{\special{pdf:uxobj @MyStamp}}}
+
+\newpage 
 %Use as appearance:
 \fbox{
  xx
@@ -99,21 +180,9 @@ Use xform: \special{pdf:uxobj @MyStamp}
    >>
    }
   \phantom{\usebox\testxform}xx}
-abc 
+abc
 
- \begin{picture}(0,0)
-  \put(0,0)
-   {
-    \special
-     {pdf:bxobj @MyStamp
-       width  \the\wd\testxform\space
-       height \the\ht\testxform\space
-       depth  \the\dp\testxform
-      }%
-    \usebox\testxform
-   \special{pdf:put @resources <</ExtGState @pgfextgs>>} %
-   \special{pdf:exobj}}
- \end{picture}yyyy
+ 
 
 Use xform after: \special{pdf:uxobj @MyStamp}
 
@@ -131,7 +200,7 @@ Use xform after: \special{pdf:uxobj @MyStamp}
    >>
    }
   \phantom{\usebox\testxform}xx}
-abc 
+abc
 
 %\fi
 %\end{document}

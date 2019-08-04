@@ -1,0 +1,43 @@
+%https://chat.stackexchange.com/transcript/message/50666032#50666032
+\documentclass{article}
+\usepackage{l3pdf}
+\ExplSyntaxOn
+\pdf_uncompress:
+\ExplSyntaxOff
+\usepackage{ocgx2}    % BDC, EMC pdfmark
+\usepackage{xsavebox} % BP, EP and SP pdfmarks for XObject generation and referencing
+
+\begin{document}
+%hm creates three sets of local properties ...
+\xsavebox{Hello}{\begin{ocg}{C}{C}{on}\fbox{Hello!}\end{ocg} \begin{ocg}{A}{A}{on}\fbox{World!}\end{ocg}}%
+
+%\xsavebox{section}{\begin{ocg}{C}{C}{on}\fbox{Hello!}\end{ocg} \begin{ocg}{A}{A}{on}\fbox{World!}\end{ocg}}%
+\begin{ocg}{A}{A}{on}
+Layer A \theHello
+\end{ocg}
+
+\begin{ocg}{B}{B}{off}
+Layer B \theHello
+\end{ocg}
+\section{abc}
+
+\theHello
+
+% Manually adding to /Resources or /Properties will break OCG- and XObject-related
+% automatic insertions!
+
+%%%%%%%%%%
+%% Bad: %%
+%%%%%%%%%%
+%\special{ps:
+%  mark {ThisPage} <</Resources << /Properties <</Foo/Bar>> >> >> /PUT pdfmark
+%}
+%
+%%%%%%%%%%%%%%%
+%% Also Bad: %%
+%%%%%%%%%%%%%%%
+%\special{ps:
+%  mark {ThisPage} <</Resources << /Foo/Bar >> >> /PUT pdfmark
+%}
+
+\end{document} 
