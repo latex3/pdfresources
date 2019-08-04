@@ -1,6 +1,9 @@
 % !Mode:: "TeX:DE:UTF-8:Main"
 \documentclass{article}
-\usepackage{l3pdf,ifxetex,tikz,pdfresources}
+\usepackage{l3pdf,ifxetex}
+\usepackage%[patches] %doesn't work currently
+{pdfresources}
+\usepackage{tikz}
 \ExplSyntaxOn
 \pdf_uncompress:
 \ExplSyntaxOff
@@ -10,9 +13,9 @@
 \ExplSyntaxOn
 \box_new:N  \l__pdf_backend_tmpa_box
 \bool_new:N \l__pdf_backend_xform_bool 
-\sys_if_engine_pdftex:T
+\bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
 {
- \cs_new:Npn \__pdf_backend_xform_new:nnnn
+ \cs_new:Npn \__pdf_backend_xform_new:nnnn #1 #2 #3 #4
   % #1 name 
   % #2 attributes
   % #3 resources 
@@ -25,13 +28,13 @@
     }
    \tl_const:cx 
      { c__pdf_backend_xform_wd_ \tl_to_str:n {#1} _tl }  
-     { \tex_the:D \box_wd:N \l__pdf_backend_tmpa_box } }                 
+     { \tex_the:D \box_wd:N \l__pdf_backend_tmpa_box }                  
    \tl_const:cx
      { c__pdf_backend_xform_ht_ \tl_to_str:n {#1} _tl }
-     { \tex_the:D \box_ht:N \l__pdf_backend_tmpa_box } }
+     { \tex_the:D \box_ht:N \l__pdf_backend_tmpa_box } 
    \tl_const:cx
      { c__pdf_backend_xform_dp_ \tl_to_str:n {#1} _tl }
-     { \tex_the:D \box_dp:N \l__pdf_backend_tmpa_box } }
+     { \tex_the:D \box_dp:N \l__pdf_backend_tmpa_box } 
    %% do we need to test if #2 and #3 are empty??  
    \tex_immediate:D \tex_pdfxform:D
     ~  attr      ~ { #2 }
@@ -43,14 +46,136 @@
       { c__pdf_backend_xform_ \tl_to_str:n {#1} _int }
       { \tex_pdflastxform:D } 
   }
-  
-  \cs_new:Npn \__pdf_backend_xform_ref:n #1 %#1 name
-  { \int_use:c { c_@@_backend_xform_ \tl_to_str:n {#1} _int } ~ 0 ~ R }
-
-  \cs_new:Npn \__pdf_backend_xform_use:n #1 %#1 name
+    %only for the test here
+  \cs_new:Npn \xxx_pdfresources: {\tex_the:D \tex_pdfpageresources:D}
+}
+\sys_if_engine_luatex:T
+{
+ \cs_new:Npn \__pdf_backend_xform_new:nnnn #1 #2 #3 #4
+  % #1 name
+  % #2 attributes
+  % #3 resources
+  % #4 content, not necessarly a box!
   {
-   \tex_pdfrefxform:D  \int_use:c { c__pdf_backend_xform_ \tl_to_str:n {#1} _int }  \scan_stop:
+   \hbox_set:Nn \l__pdf_backend_tmpa_box
+    {
+     \bool_set_true:N \l__pdf_backend_xform_bool
+     #4
+    }
+   \tl_const:cx
+     { c__pdf_backend_xform_wd_ \tl_to_str:n {#1} _tl }
+     { \tex_the:D \box_wd:N \l__pdf_backend_tmpa_box }
+   \tl_const:cx
+     { c__pdf_backend_xform_ht_ \tl_to_str:n {#1} _tl }
+     { \tex_the:D \box_ht:N \l__pdf_backend_tmpa_box }
+   \tl_const:cx
+     { c__pdf_backend_xform_dp_ \tl_to_str:n {#1} _tl }
+     { \tex_the:D \box_dp:N \l__pdf_backend_tmpa_box }
+   %% do we need to test if #2 and #3 are empty??
+   \tex_immediate:D \tex_pdfxform:D
+    ~  attr      ~ { #2 }
+   %% add local properties.... !!!!!!
+   %% which resources should be default? Is an argument actually needed?
+    ~  resources ~ { #3 }
+    \l__pdf_backend_tmpa_box
+   \int_const:cn
+      { c__pdf_backend_xform_ \tl_to_str:n {#1} _int }
+      { \tex_pdflastxform:D }
   }
+  %only for the test here
+  \cs_new:Npn \xxx_pdfresources: {\tex_the:D \tex_pdfvariable:D pageresources}
+}    
+% already in pdfresources  
+%  \cs_new:Npn \__pdf_backend_xform_ref:n #1 %#1 name
+%  \cs_new:Npn \__pdf_backend_xform_use:n #1 %#1 name
+%   \cs_new:Npn  \pdf_xform_ref:n #1 
+ 
+ \cs_new:Npn  \pdf_xform_new:nnnn #1 #2 #3 #4
+  {
+   \__pdf_backend_xform_new:nnnn { #1 } { #2 } { #3 } { #4 }
+  } 
+
+ \cs_new:Npn \pdf_xform_use:n #1
+  {
+   \__pdf_backend_xform_use:n { #1 }
+  }  
+ % hm ... 
+ \cs_new:Npn \pdf_xform_wd:n #1
+  {
+   \__dim_eval:w     
+     \tl_use:c { c__pdf_backend_xform_wd_ \tl_to_str:n {#1} _tl }
+   \__dim_eval_end:  
+  }
+ \cs_new:Npn \pdf_xform_ht:n #1
+  {
+   \dim_eval:n
+    {
+     \tl_use:c { c__pdf_backend_xform_ht_ \tl_to_str:n {#1} _tl }
+    }
+  }
+ \cs_new:Npn \pdf_xform_dp:n #1
+  {
+   \dim_eval:n
+    {
+     \tl_use:c { c__pdf_backend_xform_dp_ \tl_to_str:n {#1} _tl }
+    }
+  }    
+
+\sys_if_engine_xetex:T
+{
+\cs_new:Npn \__pdf_backend_xform_new:nnnn #1 #2 #3 #4
+  % #1 name
+  % #2 attributes
+  % #3 resources
+  % #4 content, not necessarly a box!
+ {
+  \int_gincr:N \g__pdf_backend_object_int
+  \int_const:cn
+      { c__pdf_backend_xform_ \tl_to_str:n {#1} _int }
+      { \g__pdf_backend_object_int }
+  \hbox_set:Nn \l__pdf_backend_tmpa_box
+    {
+     \bool_set_true:N \l__pdf_backend_xform_bool
+     #4
+    }
+   \tl_const:cx
+     { c__pdf_backend_xform_wd_ \tl_to_str:n {#1} _tl }
+     { \tex_the:D \box_wd:N \l__pdf_backend_tmpa_box }
+   \tl_const:cx
+     { c__pdf_backend_xform_ht_ \tl_to_str:n {#1} _tl }
+     { \tex_the:D \box_ht:N \l__pdf_backend_tmpa_box }
+   \tl_const:cx
+     { c__pdf_backend_xform_dp_ \tl_to_str:n {#1} _tl }
+     { \tex_the:D \box_dp:N \l__pdf_backend_tmpa_box }
+   \box_set_dp:Nn  \l__pdf_backend_tmpa_box { \c_zero_dim }
+   \box_set_ht:Nn  \l__pdf_backend_tmpa_box { \c_zero_dim }
+   \box_set_wd:Nn  \l__pdf_backend_tmpa_box { \c_zero_dim }
+   \__pdf_backend:n 
+    { bxobj~\__pdf_backend_xform_ref:n { #1 } 
+      ~ width  ~ \pdf_xform_wd:n { #1 }
+      ~ height ~ \pdf_xform_ht:n { #1 } 
+      ~ depth  ~ \pdf_xform_dp:n { #1 } 
+    }
+   \box_use_drop:N \l__pdf_backend_tmpa_box
+   \__pdf_backend:n {put ~ @resources ~<<#3>> }
+   \__pdf_backend:n{exobj ~ <<#2>>} 
+ }   
+ \cs_new:Npn \__pdf_backend_xform_ref:n #1
+  { @pdf.xform \int_use:c { g__pdf_backend_xform_ \tl_to_str:n {#1} _int } }
+ \cs_new:Npn \__pdf_backend_xform_use:n #1
+ {
+  \hbox_set:Nn \l__pdf_backend_tmpa_box 
+   {
+    \__pdf_backend:n 
+     {
+      uxobj~\__pdf_backend_xform_ref:n { #1 }
+     }
+   }
+   \box_set_wd:Nn  \l__pdf_backend_tmpa_box { \pdf_xform_wd:n { #1 } }
+   \box_set_ht:Nn  \l__pdf_backend_tmpa_box { \pdf_xform_ht:n { #1 } }
+   \box_set_dp:Nn  \l__pdf_backend_tmpa_box { \pdf_xform_dp:n { #1 } }
+   \box_use_drop:N \l__pdf_backend_tmpa_box  
+ }
 }
 \ExplSyntaxOff
 \begin{document}
@@ -65,7 +190,6 @@
 %object for bdc test
 \pdf_object_new:nn   {objA}{dict}
 \pdf_object_write:nn {objA}{/Type/Artifact}
-
 
 \ExplSyntaxOff
 %   \pbs_pdfxform:nnnnn
@@ -85,22 +209,24 @@
 % pdfbase current page resource + special stuff:
 % \tl_set:Nx\l_tmpa_tl{\the\pdfpageresources~#3}\tl_trim_spaces:N\l_tmpa_tl
 
-Some Text \tikz\fill[opacity=0.5,red](0,0)rectangle(1,1);
+Some Text \tikz\fill[opacity=0.5,blue](0,0)rectangle(1,1);
 
 \newbox\testxform
 \savebox\testxform{Some Text \tikz\fill[opacity=0.5,red](0,0)rectangle(1,1);}
 
 \ExplSyntaxOn
-\sys_if_engine_pdftex:T
+\bool_if:nT {\sys_if_engine_pdftex_p: || \sys_if_engine_luatex_p: }
 {
  \wd\testxform=0.5\wd\testxform
  %Box before:\usebox\testxform \par %\showthe\pdfpageresources
  %saving doesn't occupy space, but as it is a whatsits ...
  % transparency needs local resources ...
-  abc\immediate\pdfxform resources {\the\pdfpageresources}
-     \testxform abc \par
+ % abc\immediate\pdfxform resources {\the\pdfpageresources}
+%     \testxform abc \par
 
-  xxx\pdfrefxform \pdflastxform yyy \par
+ \pdf_xform_new:nnnn {test}{}{\xxx_pdfresources:}{Some~Text~ \tikz\fill[opacity=0.5,red](0,0)rectangle(1,1);}
+  
+  xxx\pdf_xform_use:n {test}\par
 
  Box after:\usebox\testxform \par
 
@@ -109,12 +235,12 @@ Some Text \tikz\fill[opacity=0.5,red](0,0)rectangle(1,1);
   \fbox{
  xx
   \__pdf_backend_annotation:nnnn
-    {2\wd\testxform}
-    {3\ht\testxform}
-    {\dp\testxform}
+    {\pdf_xform_wd:n{test}}
+    {\pdf_xform_ht:n{test}}
+    {\pdf_xform_dp:n{test}}
     {
      /Subtype /Stamp
-     /AP << /N~\the\pdflastxform\space0~R >>
+     /AP << /N~\pdf_xform_ref:n{test} >>
     }
    }
 }
@@ -137,7 +263,9 @@ Some Text \tikz\fill[opacity=0.5,red](0,0)rectangle(1,1);
 %\newpage
 
 \ifxetex
+\newsavebox\testxformA
 \savebox\testxform{\csname pdf_bdc:nn\endcsname {Span}{objA}xxxyyy Some Text    \csname pdf_emc:\endcsname \tikz\fill[opacity=0.5,red](0,0)rectangle(1,1);}
+\savebox\testxformA{\csname pdf_bdc:nn\endcsname {Span}{objA}xxxyyy Some Text    \csname pdf_emc:\endcsname \tikz\fill[opacity=0.5,red](0,0)rectangle(1,1);}
 % when saving the xform object, is should be in a zero box.
 % all dimensions must be there, or the content is typeset ...
 % and don't forget the \the!!
@@ -145,15 +273,29 @@ Some Text \tikz\fill[opacity=0.5,red](0,0)rectangle(1,1);
 abc%
 \bigskip
 %xobjects must be defined before use ...
+\ExplSyntaxOn
+\box_set_dp:Nn  \testxform { \c_zero_dim }
+\box_set_wd:Nn  \testxform { \c_zero_dim }
+\box_set_ht:Nn  \testxform { \c_zero_dim }
 
+
+A\pdf_xform_new:nnnn{MyStamp}{}{/ExtGState~@pgfextgs}
+{
+\csname pdf_bdc:nn\endcsname {Span}{objA}xxxyyy Some Text    \csname pdf_emc:\endcsname \tikz\fill[opacity=0.5,blue](0,0)rectangle(1,1);
+}B
+
+A\pdf_xform_use:n{MyStamp}B
+
+
+\ExplSyntaxOff
 \begin{picture}(0,0)
   \put(0,0)
    {
     \special
      {pdf:bxobj @MyStamp
-       width  \the\wd\testxform\space
-       height \the\ht\testxform\space
-       depth  \the\dp\testxform
+       width  \the\wd\testxformA\space
+       height \the\ht\testxformA\space
+       depth  \the\dp\testxformA
       }%
   %  \csname pdf_bdc:nn\endcsname {Span}{objA}xxx
     \usebox\testxform
@@ -162,7 +304,7 @@ abc%
    \special{pdf:exobj}}
  \end{picture}yyyy
 
-Use xform: \fboxsep0pt \fbox{\makebox[\the\wd\testxform][l]{\special{pdf:uxobj @MyStamp}}}
+Use xform: \fboxsep0pt \fbox{\makebox[\the\wd\testxformA][l]{\special{pdf:uxobj @MyStamp}}}
 
 \newpage 
 %Use as appearance:
