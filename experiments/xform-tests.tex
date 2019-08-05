@@ -17,13 +17,16 @@
   %only for the test here
   \cs_new:Npn \xxx_pdfresources: {\tex_the:D \tex_pdfpageresources:D}
 }
+
+%dvips????
+\bool_if:nT {\sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p: }
+{
+}
 \sys_if_engine_luatex:T
 {
    %only for the test here
   \cs_new:Npn \xxx_pdfresources: {\tex_the:D \tex_pdfvariable:D pageresources}
 }
-
-
 
 \sys_if_engine_xetex:T
 {
@@ -35,15 +38,15 @@
 %correct g to c, is already in master ...
 \sys_if_engine_xetex:T
 {
- \cs_set:Npn \__pdf_backend_object_ref:n #1
-   { @pdf.obj \int_use:c { c__pdf_backend_object_ \tl_to_str:n {#1} _int } }
+ %\cs_set:Npn \__pdf_backend_object_ref:n #1
+ %  { @pdf.obj \int_use:c { c__pdf_backend_object_ \tl_to_str:n {#1} _int } }
 }
 
 %object for bdc test
 \pdf_object_new:nn   {objA}{dict}
 \pdf_object_write:nn {objA}{/Type/Artifact}
 
-{\color{green}A\pdf_xform_new:nnnn{FormA}{/ABC /CDE}{}{ZZZZZZZZZZZZZZ}B}\par
+{A\pdf_xform_new:nnnn{FormA}{/ABC /CDE}{}{ZZZZZZZZZZZZZZ}B}\par
 
 C\pdf_xform_use:n{FormA}D \par
 
