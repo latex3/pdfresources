@@ -958,16 +958,18 @@
 }
 %</package>
 %    \end{macrocode}
-% \subsection{page resources / ExtGState, ColorSpace, Shading, Pattern }
-% ===================================
+%
 % \subsection{pdfxform}
 % \begin{NOTE}{UF}
 %  - As in dvi mode the xform is immediate, this is done for pdftex/luatex too. If needed
-%  a delayed version can be added later. dvips implementation is missing
+%  a delayed version can be added later.
 %  - the argument for attributes is needed to add e.g. /StructParents
 %  - it is not clear if an argument for additional resources is needed, probably they
 %    should / need to be be added automatically.
+%  - code for adding ExtGState etc to the local resource is missing, will be
+%    added when the object name is clear.
 %  - should the size be stored in dim or tl?
+%  - dvips implementation is missing for ideas: pdfbase, atfi-dvips.def,
 %  \end{NOTE}
 %  \subsubsection{pdfxform / management}
 %  \begin{function}[added = 2019-08-05]
@@ -1010,7 +1012,7 @@
 %    \pdf_xform_wd:n, \pdf_xform_ht:n, \pdf_xform_dp:n
 %   }
 %   \begin{syntax}
-%     \cs{\pdf_xform_wd:n} \Arg{name}
+%     \cs{pdf_xform_wd:n} \Arg{name}
 %   \end{syntax}
 %    These command give back the sizes of the XObject. The values are stored in tl-variables with the
 %    unit pt and  not in dimensions.
@@ -1220,8 +1222,10 @@
 }
 %</package>
 %    \end{macrocode}
-
-
+%
+% =======================================
+% \subsection{page resources / ExtGState, ColorSpace, Shading, Pattern }
+% ===================================
 % \subsection{backend / pageresources}
 % \begin{NOTE}{UF} Implementation for dvips missing (perhaps impossible ...), for xetex untested.
 % \enquote{Correct} content needed at every shipout
