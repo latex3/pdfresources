@@ -12,39 +12,39 @@
 
 \ExplSyntaxOn
 \box_new:N  \l__pdf_backend_tmpa_box
-\bool_new:N \l__pdf_backend_xform_bool 
+\bool_new:N \l__pdf_backend_xform_bool
 \bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
 {
  \cs_new:Npn \__pdf_backend_xform_new:nnnn #1 #2 #3 #4
-  % #1 name 
+  % #1 name
   % #2 attributes
-  % #3 resources 
-  % #4 content, not necessarly a box! 
+  % #3 resources
+  % #4 content, not necessarly a box!
   {
-   \hbox_set:Nn \l__pdf_backend_tmpa_box 
+   \hbox_set:Nn \l__pdf_backend_tmpa_box
     {
-     \bool_set_true:N \l__pdf_backend_xform_bool 
-     #4 
+     \bool_set_true:N \l__pdf_backend_xform_bool
+     #4
     }
-   \tl_const:cx 
-     { c__pdf_backend_xform_wd_ \tl_to_str:n {#1} _tl }  
-     { \tex_the:D \box_wd:N \l__pdf_backend_tmpa_box }                  
+   \tl_const:cx
+     { c__pdf_backend_xform_wd_ \tl_to_str:n {#1} _tl }
+     { \tex_the:D \box_wd:N \l__pdf_backend_tmpa_box }
    \tl_const:cx
      { c__pdf_backend_xform_ht_ \tl_to_str:n {#1} _tl }
-     { \tex_the:D \box_ht:N \l__pdf_backend_tmpa_box } 
+     { \tex_the:D \box_ht:N \l__pdf_backend_tmpa_box }
    \tl_const:cx
      { c__pdf_backend_xform_dp_ \tl_to_str:n {#1} _tl }
-     { \tex_the:D \box_dp:N \l__pdf_backend_tmpa_box } 
-   %% do we need to test if #2 and #3 are empty??  
+     { \tex_the:D \box_dp:N \l__pdf_backend_tmpa_box }
+   %% do we need to test if #2 and #3 are empty??
    \tex_immediate:D \tex_pdfxform:D
     ~  attr      ~ { #2 }
    %% add local properties.... !!!!!!
-   %% which resources should be default? Is an argument actually needed?    
+   %% which resources should be default? Is an argument actually needed?
     ~  resources ~ { #3 }
-    \l__pdf_backend_tmpa_box   
+    \l__pdf_backend_tmpa_box
    \int_const:cn
       { c__pdf_backend_xform_ \tl_to_str:n {#1} _int }
-      { \tex_pdflastxform:D } 
+      { \tex_pdflastxform:D }
   }
     %only for the test here
   \cs_new:Npn \xxx_pdfresources: {\tex_the:D \tex_pdfpageresources:D}
@@ -84,45 +84,40 @@
   }
   %only for the test here
   \cs_new:Npn \xxx_pdfresources: {\tex_the:D \tex_pdfvariable:D pageresources}
-}    
-% already in pdfresources  
+}
+% already in pdfresources
 %  \cs_new:Npn \__pdf_backend_xform_ref:n #1 %#1 name
 %  \cs_new:Npn \__pdf_backend_xform_use:n #1 %#1 name
-%   \cs_new:Npn  \pdf_xform_ref:n #1 
- 
+%   \cs_new:Npn  \pdf_xform_ref:n #1
+
  \cs_new:Npn  \pdf_xform_new:nnnn #1 #2 #3 #4
   {
    \__pdf_backend_xform_new:nnnn { #1 } { #2 } { #3 } { #4 }
-  } 
+  }
 
  \cs_new:Npn \pdf_xform_use:n #1
   {
    \__pdf_backend_xform_use:n { #1 }
-  }  
- % hm ... 
+  }
+ % hm ...
  \cs_new:Npn \pdf_xform_wd:n #1
   {
-   \__dim_eval:w     
      \tl_use:c { c__pdf_backend_xform_wd_ \tl_to_str:n {#1} _tl }
-   \__dim_eval_end:  
   }
  \cs_new:Npn \pdf_xform_ht:n #1
   {
-   \dim_eval:n
-    {
      \tl_use:c { c__pdf_backend_xform_ht_ \tl_to_str:n {#1} _tl }
-    }
   }
  \cs_new:Npn \pdf_xform_dp:n #1
   {
-   \dim_eval:n
-    {
      \tl_use:c { c__pdf_backend_xform_dp_ \tl_to_str:n {#1} _tl }
-    }
-  }    
+  }
 
 \sys_if_engine_xetex:T
 {
+% it needs a bit testing if it really works to set the box to 0 before the special ...
+% does it disturb viewing the xobject?
+% what happens with the resources (bdc)? (should work as they are specials too)
 \cs_new:Npn \__pdf_backend_xform_new:nnnn #1 #2 #3 #4
   % #1 name
   % #2 attributes
@@ -150,36 +145,42 @@
    \box_set_dp:Nn  \l__pdf_backend_tmpa_box { \c_zero_dim }
    \box_set_ht:Nn  \l__pdf_backend_tmpa_box { \c_zero_dim }
    \box_set_wd:Nn  \l__pdf_backend_tmpa_box { \c_zero_dim }
-   \__pdf_backend:n 
-    { bxobj~\__pdf_backend_xform_ref:n { #1 } 
-      ~ width  ~ \pdf_xform_wd:n { #1 }
-      ~ height ~ \pdf_xform_ht:n { #1 } 
-      ~ depth  ~ \pdf_xform_dp:n { #1 } 
+   \exp_args:Nx
+    \__pdf_backend:n
+    { 
+       bxobj  ~ \__pdf_backend_xform_ref:n  { #1 }
+       \c_space_tl width  ~ \pdf_xform_wd:n { #1 }
+       \c_space_tl height ~ \pdf_xform_ht:n { #1 }
+       \c_space_tl depth  ~ \pdf_xform_dp:n { #1 } 
     }
    \box_use_drop:N \l__pdf_backend_tmpa_box
-   \__pdf_backend:n {put ~ @resources ~<<#3>> }
-   \__pdf_backend:n{exobj ~ <<#2>>} 
- }   
+  \exp_args:Nx\__pdf_backend:n {put ~ @resources ~<<#3>> }
+  \exp_args:Nx\__pdf_backend:n{exobj ~<<#2>>}
+ }
+ 
  \cs_new:Npn \__pdf_backend_xform_ref:n #1
-  { @pdf.xform \int_use:c { g__pdf_backend_xform_ \tl_to_str:n {#1} _int } }
+  { @pdf.xform \int_use:c { c__pdf_backend_xform_ \tl_to_str:n {#1} _int } }
+  
  \cs_new:Npn \__pdf_backend_xform_use:n #1
  {
-  \hbox_set:Nn \l__pdf_backend_tmpa_box 
+  \hbox_set:Nn \l__pdf_backend_tmpa_box
    {
-    \__pdf_backend:n 
+    \exp_args:Nx 
+    \__pdf_backend:n
      {
-      uxobj~\__pdf_backend_xform_ref:n { #1 }
+      uxobj~ \__pdf_backend_xform_ref:n { #1 }
      }
    }
    \box_set_wd:Nn  \l__pdf_backend_tmpa_box { \pdf_xform_wd:n { #1 } }
    \box_set_ht:Nn  \l__pdf_backend_tmpa_box { \pdf_xform_ht:n { #1 } }
    \box_set_dp:Nn  \l__pdf_backend_tmpa_box { \pdf_xform_dp:n { #1 } }
-   \box_use_drop:N \l__pdf_backend_tmpa_box  
+   \box_use_drop:N \l__pdf_backend_tmpa_box 
  }
+\cs_new:Npn \xxx_pdfresources: {/ExtGState~@pgfextgs} 
 }
 \ExplSyntaxOff
 \begin{document}
-\ExplSyntaxOn 
+\ExplSyntaxOn
 %correct g to c, is already in master ...
 \sys_if_engine_xetex:T
 {
@@ -191,7 +192,27 @@
 \pdf_object_new:nn   {objA}{dict}
 \pdf_object_write:nn {objA}{/Type/Artifact}
 
+A\pdf_xform_new:nnnn{FormA}{/ABC /CDE}{}{ZZZZZZZZZZZZZZ}B\par
+
+C\pdf_xform_use:n{FormA}D \par
+
+
+E\pdf_xform_new:nnnn {FormB}{}{\xxx_pdfresources: /ABC /XYZ}
+ {
+ \csname pdf_bdc:nn\endcsname {Span}{objA}
+  Some Text    
+ \csname pdf_emc:\endcsname 
+ \quad \tikz\fill[opacity=0.5,red](0,0)rectangle(1,1);
+ \tikz\fill[opacity=1,red](0,0)rectangle(1,1);
+ }F
+ 
+\par
+
+G\pdf_xform_use:n{FormB}H 
 \ExplSyntaxOff
+
+
+\end{document}
 %   \pbs_pdfxform:nnnnn
 %     #1: add pgf/tikz resources (transparency, shading)? (1|0) %dvipdfmx/xetex
 %     #2: used as PDF annotation appearance? (1|0)              %dvips/pdftex
@@ -199,10 +220,10 @@
 %     #4: additional dictionary entries
 %     #5: savebox number
 
-% xform: immediate or not?
-% argument: a box.
+% xform: immediate or not?  -> immediate for now
+% argument: a box / content -> \pdf will use content and put in a hbox
 % with dvipdfmx, xform should be in a 0-box.
-% xform attr
+% xform attr:  
 % pdflatex: attr keyword
 % xform resources
 % pdflatex: resources keyword
@@ -224,8 +245,8 @@ Some Text \tikz\fill[opacity=0.5,blue](0,0)rectangle(1,1);
  % abc\immediate\pdfxform resources {\the\pdfpageresources}
 %     \testxform abc \par
 
- \pdf_xform_new:nnnn {test}{}{\xxx_pdfresources:}{Some~Text~ \tikz\fill[opacity=0.5,red](0,0)rectangle(1,1);}
-  
+ \pdf_xform_new:nnnn {test}{/ABC/CDE}{\xxx_pdfresources:}{Some~Text~ \tikz\fill[opacity=0.5,red](0,0)rectangle(1,1);}
+
   xxx\pdf_xform_use:n {test}\par
 
  Box after:\usebox\testxform \par
@@ -279,12 +300,13 @@ abc%
 \box_set_ht:Nn  \testxform { \c_zero_dim }
 
 
-A\pdf_xform_new:nnnn{MyStamp}{}{/ExtGState~@pgfextgs}
+A\pdf_xform_new:nnnn{MyStampB}{/StructParent~1}{/ExtGState~@pgfextgs}
 {
 \csname pdf_bdc:nn\endcsname {Span}{objA}xxxyyy Some Text    \csname pdf_emc:\endcsname \tikz\fill[opacity=0.5,blue](0,0)rectangle(1,1);
 }B
 
-A\pdf_xform_use:n{MyStamp}B
+\par
+AA\pdf_xform_use:n{MyStampB}B
 
 
 \ExplSyntaxOff
@@ -306,7 +328,7 @@ A\pdf_xform_use:n{MyStamp}B
 
 Use xform: \fboxsep0pt \fbox{\makebox[\the\wd\testxformA][l]{\special{pdf:uxobj @MyStamp}}}
 
-\newpage 
+\newpage
 %Use as appearance:
 \fbox{
  xx
@@ -324,7 +346,7 @@ Use xform: \fboxsep0pt \fbox{\makebox[\the\wd\testxformA][l]{\special{pdf:uxobj 
   \phantom{\usebox\testxform}xx}
 abc
 
- 
+
 
 Use xform after: \special{pdf:uxobj @MyStamp}
 

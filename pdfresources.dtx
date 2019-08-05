@@ -771,7 +771,7 @@
 % \begin{NOTE}{UF}
 % we still need a switch for the case that the resource should be added to
 % xform resource instead of a page resources, see pdfbase.sty
-% - xdvipdfmx: looks fine, the resource is added to the xform resource automatically 
+% - xdvipdfmx: looks fine, the resource is added to the xform resource automatically
 % \end{NOTE}
 % Entries to the /Properties dictionary in the page resources can
 % be added with dvips only through side-effect: if a bdc-mark is created dvips/ghostscript
@@ -832,6 +832,7 @@
  }
 % xetex has so create the entries in the /Properties manually (like the other backends)
 % use pdfbase special https://chat.stackexchange.com/transcript/message/50832016#50832016
+% the property is added to xform resources automatically, no need to worry about it.
 \sys_if_engine_xetex:T
 {
  \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
