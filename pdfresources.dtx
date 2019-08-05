@@ -1043,21 +1043,21 @@
   % #3 resources
   % #4 content, not necessarly a box!
   {
-   \hbox_set:Nn \l__pdf_backend_tmpa_box
+   \hbox_set:Nn \l_@@_backend_tmpa_box
     {
-     \bool_set_true:N \l__pdf_backend_xform_bool
+     \bool_set_true:N \l_@@_backend_xform_bool
      \@@_tree_gclear:n {xform/Resources/Properties}
      #4
     }
    \tl_const:cx
-     { c__pdf_backend_xform_wd_ \tl_to_str:n {#1} _tl }
-     { \tex_the:D \box_wd:N \l__pdf_backend_tmpa_box }
+     { c_@@_backend_xform_wd_ \tl_to_str:n {#1} _tl }
+     { \tex_the:D \box_wd:N \l_@@_backend_tmpa_box }
    \tl_const:cx
-     { c__pdf_backend_xform_ht_ \tl_to_str:n {#1} _tl }
-     { \tex_the:D \box_ht:N \l__pdf_backend_tmpa_box }
+     { c_@@_backend_xform_ht_ \tl_to_str:n {#1} _tl }
+     { \tex_the:D \box_ht:N \l_@@_backend_tmpa_box }
    \tl_const:cx
-     { c__pdf_backend_xform_dp_ \tl_to_str:n {#1} _tl }
-     { \tex_the:D \box_dp:N \l__pdf_backend_tmpa_box }
+     { c_@@_backend_xform_dp_ \tl_to_str:n {#1} _tl }
+     { \tex_the:D \box_dp:N \l_@@_backend_tmpa_box }
    %% do we need to test if #2 and #3 are empty??
    \tex_immediate:D \tex_pdfxform:D
     ~  attr      ~ { #2 }
@@ -1069,9 +1069,9 @@
        {\prop_count:c { \@@_tree_prop_name:n {xform/Resources/Properties} }}>{0}
        {/Properties~<<\@@_tree_map_dict_item:n {xform/Resources/Properties}>>~ #3}
      }
-    \l__pdf_backend_tmpa_box
+    \l_@@_backend_tmpa_box
    \int_const:cn
-      { c__pdf_backend_xform_ \tl_to_str:n {#1} _int }
+      { c_@@_backend_xform_ \tl_to_str:n {#1} _int }
       { \tex_pdflastxform:D }
   }
 }
