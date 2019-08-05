@@ -22,77 +22,12 @@
    %only for the test here
   \cs_new:Npn \xxx_pdfresources: {\tex_the:D \tex_pdfvariable:D pageresources}
 }
-% already in pdfresources
-%  \cs_new:Npn \__pdf_backend_xform_ref:n #1 %#1 name
-%  \cs_new:Npn \__pdf_backend_xform_use:n #1 %#1 name
-%   \cs_new:Npn  \pdf_xform_ref:n #1
 
 
 
 \sys_if_engine_xetex:T
 {
-% it needs a bit testing if it really works to set the box to 0 before the special ...
-% does it disturb viewing the xobject?
-% what happens with the resources (bdc)? (should work as they are specials too)
-\cs_new:Npn \__pdf_backend_xform_new:nnnn #1 #2 #3 #4
-  % #1 name
-  % #2 attributes
-  % #3 resources
-  % #4 content, not necessarly a box!
- {
-  \int_gincr:N \g__pdf_backend_object_int
-  \int_const:cn
-      { c__pdf_backend_xform_ \tl_to_str:n {#1} _int }
-      { \g__pdf_backend_object_int }
-  \hbox_set:Nn \l__pdf_backend_tmpa_box
-    {
-     \bool_set_true:N \l__pdf_backend_xform_bool
-     #4
-    }
-   \tl_const:cx
-     { c__pdf_backend_xform_wd_ \tl_to_str:n {#1} _tl }
-     { \tex_the:D \box_wd:N \l__pdf_backend_tmpa_box }
-   \tl_const:cx
-     { c__pdf_backend_xform_ht_ \tl_to_str:n {#1} _tl }
-     { \tex_the:D \box_ht:N \l__pdf_backend_tmpa_box }
-   \tl_const:cx
-     { c__pdf_backend_xform_dp_ \tl_to_str:n {#1} _tl }
-     { \tex_the:D \box_dp:N \l__pdf_backend_tmpa_box }
-   \box_set_dp:Nn  \l__pdf_backend_tmpa_box { \c_zero_dim }
-   \box_set_ht:Nn  \l__pdf_backend_tmpa_box { \c_zero_dim }
-   \box_set_wd:Nn  \l__pdf_backend_tmpa_box { \c_zero_dim }
-   \exp_args:Nx
-    \__pdf_backend:n
-    { 
-       bxobj  ~ \__pdf_backend_xform_ref:n  { #1 }
-       \c_space_tl width  ~ \pdf_xform_wd:n { #1 }
-       \c_space_tl height ~ \pdf_xform_ht:n { #1 }
-       \c_space_tl depth  ~ \pdf_xform_dp:n { #1 } 
-    }
-   \box_use_drop:N \l__pdf_backend_tmpa_box
-  \exp_args:Nx\__pdf_backend:n {put ~ @resources ~<<#3>> }
-  \exp_args:Nx\__pdf_backend:n{exobj ~<<#2>>}
- }
- 
- \cs_new:Npn \__pdf_backend_xform_ref:n #1
-  { @pdf.xform \int_use:c { c__pdf_backend_xform_ \tl_to_str:n {#1} _int } }
-  
- \cs_new:Npn \__pdf_backend_xform_use:n #1
- {
-  \hbox_set:Nn \l__pdf_backend_tmpa_box
-   {
-    \exp_args:Nx 
-    \__pdf_backend:n
-     {
-      uxobj~ \__pdf_backend_xform_ref:n { #1 }
-     }
-   }
-   \box_set_wd:Nn  \l__pdf_backend_tmpa_box { \pdf_xform_wd:n { #1 } }
-   \box_set_ht:Nn  \l__pdf_backend_tmpa_box { \pdf_xform_ht:n { #1 } }
-   \box_set_dp:Nn  \l__pdf_backend_tmpa_box { \pdf_xform_dp:n { #1 } }
-   \box_use_drop:N \l__pdf_backend_tmpa_box 
- }
-\cs_new:Npn \xxx_pdfresources: {/ExtGState~@pgfextgs} 
+ \cs_new:Npn \xxx_pdfresources: {/ExtGState~@pgfextgs} 
 }
 \ExplSyntaxOff
 \begin{document}
