@@ -960,29 +960,124 @@
 %    \end{macrocode}
 % \subsection{page resources / ExtGState, ColorSpace, Shading, Pattern }
 % ===================================
-%\subsubsection{pdfxform}
+% \subsection{pdfxform}
 % \begin{NOTE}{UF}
-%  As in dvi mode the xform is immediate, this is done for pdftex/luatex too. If needed
-%  a delayed version can be added later. dvips, dvipdfmx implementation is missing
+%  - As in dvi mode the xform is immediate, this is done for pdftex/luatex too. If needed
+%  a delayed version can be added later. dvips implementation is missing
+%  - the argument for attributes is needed to add e.g. /StructParents
+%  - it is not clear if an argument for additional resources is needed, probably they
+%    should / need to be be added automatically.
+%  - should the size be stored in dim or tl?
 %  \end{NOTE}
+%  \subsubsection{pdfxform / management}
+%  \begin{function}[added = 2019-08-05]
+%   {
+%    \pdf_xform_new:nnnn
+%   }
+%   \begin{syntax}
+%     \cs{pdf_xform_new:nnnn} \Arg{name} \Arg{attributes} \Arg {resources} \Arg {content}
+%   \end{syntax}
+%    This command create a new form XObject that can be as appearance or directly later.
+%    If the content contains BDC-marks it should \emph{not} be given as a
+%    previously typesetted box, but directly so that the names of the BDC-marks can be added to the
+%    resources of the xform. The content will be typeset in a hbox. The surrounding color is
+%    \emph{not} stored in the XObject but should be if wanted added
+%    e.g. with \verb+\color_select:n{.}+
+%   \end{function}
+%   \begin{function}[added = 2019-08-05]
+%   {
+%    \pdf_xform_use:n
+%   }
+%   \begin{syntax}
+%     \cs{pdf_xform_use:n} \Arg{name}
+%   \end{syntax}
+%    This command uses (typesets) a previously created form XObject.
+%    If the surrounding color is different, it is injected in the XObject.
+%   \end{function}
+%   \begin{function}[added = 2019-08-05]
+%   {
+%    \pdf_xform_wd:n, \pdf_xform_ht:n, \pdf_xform_dp:n
+%   }
+%   \begin{syntax}
+%     \cs{\pdf_xform_wd:n} \Arg{name}
+%   \end{syntax}
+%    These command give back the sizes of the XObject. The values are stored in tl-variables,
+%    not in dimensions.
+%   \end{function}
 %    \begin{macrocode}
 %<*package>
+ \cs_new:Npn  \pdf_xform_new:nnnn #1 #2 #3 #4
+  {
+   \@@_backend_xform_new:nnnn { #1 } { #2 } { #3 } { #4 }
+  }
+\cs_new:Npn \pdf_xform_use:n #1
+  {
+   \@@_backend_xform_use:n { #1 }
+  }
+ \cs_new:Npn \pdf_xform_wd:n #1
+  {
+     \tl_use:c { c_@@_backend_xform_wd_ \tl_to_str:n {#1} _tl }
+  }
+ \cs_new:Npn \pdf_xform_ht:n #1
+  {
+     \tl_use:c { c_@@_backend_xform_ht_ \tl_to_str:n {#1} _tl }
+  }
+ \cs_new:Npn \pdf_xform_dp:n #1
+  {
+     \tl_use:c { c_@@_backend_xform_dp_ \tl_to_str:n {#1} _tl }
+  }
 
-\prop_new:N \g_@@_backend_xform_prop
+%</package>
+%    \end{macrocode}
+%   \subsubsection{pdfxform / backend }
+%    \begin{macrocode}
+%<*package>
+\box_new:N  \l_@@_backend_tmpa_box
+
+%%pdftex
+\bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
+{
+ \cs_new:Npn \@@_backend_xform_new:nnnn #1 #2 #3 #4
+  % #1 name
+  % #2 attributes
+  % #3 resources
+  % #4 content, not necessarly a box!
+  {
+   \hbox_set:Nn \l__pdf_backend_tmpa_box
+    {
+     \bool_set_true:N \l__pdf_backend_xform_bool
+     \@@_tree_gclear:n {xform/Resources/Properties}
+     #4
+    }
+   \tl_const:cx
+     { c__pdf_backend_xform_wd_ \tl_to_str:n {#1} _tl }
+     { \tex_the:D \box_wd:N \l__pdf_backend_tmpa_box }
+   \tl_const:cx
+     { c__pdf_backend_xform_ht_ \tl_to_str:n {#1} _tl }
+     { \tex_the:D \box_ht:N \l__pdf_backend_tmpa_box }
+   \tl_const:cx
+     { c__pdf_backend_xform_dp_ \tl_to_str:n {#1} _tl }
+     { \tex_the:D \box_dp:N \l__pdf_backend_tmpa_box }
+   %% do we need to test if #2 and #3 are empty??
+   \tex_immediate:D \tex_pdfxform:D
+    ~  attr      ~ { #2 }
+   %% add local properties.... !!!!!!
+   %% which resources should be default? Is an argument actually needed?
+    ~  resources ~
+     {
+      \int_compare:nNnT
+       {\prop_count:c { \@@_tree_prop_name:n {xform/Resources/Properties} }}>{0}
+       {/Properties~<<\@@_tree_map_dict_item:n {xform/Resources/Properties}>>~ #3}
+     }
+    \l__pdf_backend_tmpa_box
+   \int_const:cn
+      { c__pdf_backend_xform_ \tl_to_str:n {#1} _int }
+      { \tex_pdflastxform:D }
+  }
+}
 
 \bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
 {
- \cs_new_protected:Npn \@@_backend_xform_new:nnnN #1 #2 #3 #4 %name, attr, resources, box
- {
-  \tex_immediate:D \tex_pdfxform:D~attr { #2 }~resources {#3} #4
-  \int_const:cn
-   { c_@@_backend_xform_ \tl_to_str:n {#1} _int }
-   { \tex_pdflastxform:D }
-  \prop_gput:Nnx \g_@@_backend_xform_prop {#1}
-   {
-    \tex_pdfxformname:D \int_use:c {c_@@_backend_xform_ \tl_to_str:n {#1} _int}
-   }
- }
 
 \cs_new:Npn \@@_backend_xform_use:n #1
  {
