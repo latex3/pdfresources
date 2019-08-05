@@ -67,6 +67,7 @@
    \hbox_set:Nn \l__pdf_backend_tmpa_box
     {
      \bool_set_true:N \l__pdf_backend_xform_bool
+     \__pdf_tree_gclear:n {xform/Resources/Properties}
      #4
     }
    \tl_const:cx
@@ -83,7 +84,12 @@
     ~  attr      ~ { #2 }
    %% add local properties.... !!!!!!
    %% which resources should be default? Is an argument actually needed?
-    ~  resources ~ { #3 }
+    ~  resources ~ 
+     {
+      \int_compare:nNnT
+       {\prop_count:c { \__pdf_tree_prop_name:n {xform/Resources/Properties} }}>{0}
+       {/Properties~<<\__pdf_tree_map_dict_item:n {xform/Resources/Properties}>>~ #3}
+     }
     \l__pdf_backend_tmpa_box
    \int_const:cn
       { c__pdf_backend_xform_ \tl_to_str:n {#1} _int }

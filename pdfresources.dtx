@@ -777,6 +777,7 @@
 % we still need a switch for the case that the resource should be added to
 % xform resource instead of a page resources, see pdfbase.sty
 % - xdvipdfmx: looks fine, the resource is added to the xform resource automatically
+% - pdftex should now work okay too
 % \end{NOTE}
 % Entries to the /Properties dictionary in the page resources can
 % be added with dvips only through side-effect: if a bdc-mark is created dvips/ghostscript
@@ -820,8 +821,8 @@
 %<*package>
 % pdftex and luatex (and perhaps dvips ...) need to know if there are in a
 % xform stream ...
-\bool_new:N \l__pdf_backend_xform_bool
-\@@_tree_new:n    {xform/Resources/Properties}
+\bool_new:N \l_@@_backend_xform_bool
+\@@_tree_new:n {xform/Resources/Properties}
 % dvips
 % dvips is easy: create an object, and reference it in the bdc
 % ghostscript will then automatically replace it by a name
@@ -874,9 +875,17 @@
 {
  \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
    {
-     \int_gincr:N \g_@@_backend_name_int
-     \exp_args:Nx\__kernel_backend_literal_page:n
+    \int_gincr:N \g_@@_backend_name_int
+    \exp_args:Nx\__kernel_backend_literal_page:n
        {/#1 ~ /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC}
+    \bool_if:NTF \l_@@_backend_xform_bool
+     {
+      \exp_args:Nnx\@@_tree_gput:nnn
+      {xform/Resources/Properties}
+      {l3pdf\int_use:N\g_@@_backend_name_int}
+      {\@@_backend_object_ref:n{#2}}
+     }
+     {
      \exp_args:Nx\tex_latelua:D
       {
        l3kernel.pdf.Page_Resources_Properties_gput
@@ -885,6 +894,7 @@
           "\@@_backend_object_ref:n{#2}"
         )
       }
+     }
    }
   \cs_set_protected:Npn \@@_backend_emc:
    {
@@ -904,7 +914,7 @@
        {/#1 ~ /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC}
     % code to set the property ....
     \int_gincr:N\g_@@_backend_resourceid_int
-    \bool_if:NTF \l__pdf_backend_xform_bool
+    \bool_if:NTF \l_@@_backend_xform_bool
     {
      \exp_args:Nnx\@@_tree_gput:nnn
      {xform/Resources/Properties}
