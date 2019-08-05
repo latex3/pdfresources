@@ -1,0 +1,55 @@
+% see also https://tex.stackexchange.com/questions/500025/tikz-tcolorbox-overprint-issue
+\documentclass{book}
+\usepackage[cmyk]{xcolor}
+%\usepackage[overprint]{colorspace}
+\usepackage[most]{tcolorbox}
+\usepackage{l3pdf}
+\ExplSyntaxOn
+\pdf_uncompress:
+\pdf_object_new:nn {opOFF}{dict}
+\pdf_object_new:nn {opON}{dict}
+\pdf_object_new:nn {opextgs}{dict}
+\AtBeginDocument{
+\pdf_object_write:nx {opextgs}
+ {
+  /opON \c_space_tl \pdf_object_ref:n{opON}
+  /opOFF\c_space_tl \pdf_object_ref:n{opOFF}
+ }
+\pdf_object_write:nn {opOFF}{/Type /ExtGState /op~false /OP~false /OPM~0}
+\pdf_object_write:nn {opON}{/Type /ExtGState /op~true /OP~true /OPM~1}
+\makeatletter
+%\pgfutil@addpdfresource@extgs
+%{\pdf_object_ref:n{opextgs}}
+% this works on its own, but not together with the pgf method to add a resource!!
+% breaks e.g. if there is a colorbox in the document.
+\special{pdf:pageresources<</ExtGState<</opON \c_space_tl \pdf_object_ref:n{opON}
+  /opOFF\c_space_tl \pdf_object_ref:n{opOFF} >>>>}
+}
+
+\usepackage{atbegshi}
+% works but is problematic for white text, see second color box....
+%\AtBeginShipout{\AtBeginShipoutAddToBox{\special{pdf:code~/opON~gs}}}%
+
+
+
+\ExplSyntaxOff
+\newtcolorbox{casestudy}{enhanced,boxrule=0pt,boxsep=0pt,colframe=red,colback=yellow,
+sharp corners, arc=5pt, rounded corners=southwest,left=9pt,right=0pt,top=5.5pt,bottom=3.8pt,
+toptitle=0pt,bottomtitle=0pt,lefttitle={0pt},toprule=0pt,bottomrule=0pt,leftrule=0pt,rightrule=0pt,
+width=420.56pt,after skip=0pt,before skip=0pt,
+titlerule=0pt,titlerule style={green,line width=0pt},frame hidden,
+}
+
+
+\definecolor{mg}{cmyk}{0,1,0,0}
+\definecolor{cn}{cmyk}{1,0,0,0}
+\definecolor{bk}{cmyk}{0,0,0,1}
+
+\begin{document}
+\colorbox{mg}{bk test-2}
+
+\newpage
+\colorbox{mg}{bk test-2}
+
+\colorbox{mg}{\textcolor{white}{white text}}
+\end{document}
