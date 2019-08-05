@@ -206,6 +206,11 @@
    }
  }
 
+\cs_new_protected:Npn \@@_tree_gclear:n #1
+ {
+    \prop_gclear:c  { \@@_tree_prop_name:n {#1} }
+ }
+
 
 \cs_new_protected:Npn \@@_tree_gput:nnn #1 #2 #3  %#1 path, #2 name, #3 value
  { %test if tree path is allowed here?
@@ -813,6 +818,10 @@
 % \subsubsection{bcd/Properties, backend code}
 %    \begin{macrocode}
 %<*package>
+% pdftex and luatex (and perhaps dvips ...) need to know if there are in a
+% xform stream ...
+\bool_new:N \l__pdf_backend_xform_bool
+\@@_tree_new:n    {xform/Resources/Properties}
 % dvips
 % dvips is easy: create an object, and reference it in the bdc
 % ghostscript will then automatically replace it by a name
@@ -895,6 +904,9 @@
        {/#1 ~ /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC}
     % code to set the property ....
     \int_gincr:N\g_@@_backend_resourceid_int
+    \bool_if:NTF \l__pdf_backend_xform_bool
+    {}
+    {
     \zref@labelbylist {l3pdf\int_use:N\g_@@_backend_resourceid_int} {l3pdf}
     \tl_set:Nx \l_@@_tmpa_tl
      {
@@ -907,6 +919,7 @@
      {backend_Page\l_@@_tmpa_tl/Resources/Properties}
      {l3pdf\int_use:N\g_@@_backend_resourceid_int}
      {\@@_backend_object_ref:n{#2}}
+     }
    }
  \cs_set_protected:Npn \@@_backend_emc:
    {
