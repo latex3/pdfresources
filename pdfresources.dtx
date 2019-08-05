@@ -994,26 +994,42 @@
 %    This command uses (typesets) a previously created form XObject.
 %    If the surrounding color is different, it is injected in the XObject.
 %   \end{function}
-%   \begin{function}[added = 2019-08-05]
+%   \begin{function}[EXP,added = 2019-08-05]
+%   {
+%    \pdf_xform_ref:n
+%   }
+%   \begin{syntax}
+%     \cs{pdf_xform_ref:n} \Arg{name}
+%   \end{syntax}
+%   Inserts the appropriate information to reference the \meta{xform}
+%   in for example appearance dictionaries.
+%   \end{function}
+%   \begin{function}[EXP,added = 2019-08-05]
 %   {
 %    \pdf_xform_wd:n, \pdf_xform_ht:n, \pdf_xform_dp:n
 %   }
 %   \begin{syntax}
 %     \cs{\pdf_xform_wd:n} \Arg{name}
 %   \end{syntax}
-%    These command give back the sizes of the XObject. The values are stored in tl-variables,
-%    not in dimensions.
+%    These command give back the sizes of the XObject. The values are stored in tl-variables with the
+%    unit pt and  not in dimensions.
 %   \end{function}
 %    \begin{macrocode}
 %<*package>
- \cs_new:Npn  \pdf_xform_new:nnnn #1 #2 #3 #4
+ \cs_new_protected:Npn  \pdf_xform_new:nnnn #1 #2 #3 #4
   {
    \@@_backend_xform_new:nnnn { #1 } { #2 } { #3 } { #4 }
   }
-\cs_new:Npn \pdf_xform_use:n #1
+ \cs_new_protected:Npn \pdf_xform_use:n #1
   {
    \@@_backend_xform_use:n { #1 }
   }
+% expansion?
+ \cs_new:NpN \pdf_xform_ref:n #1
+  {
+   \@@_backend_xform_ref:n { #1 }
+  }
+
  \cs_new:Npn \pdf_xform_wd:n #1
   {
      \tl_use:c { c_@@_backend_xform_wd_ \tl_to_str:n {#1} _tl }
@@ -1131,11 +1147,9 @@
  {
   \tex_pdfrefxform:D \int_use:c { c_@@_backend_xform_ \tl_to_str:n {#1} _int } \scan_stop:
  }
+
 \cs_new:Npn \@@_backend_xform_ref:n #1
   { \int_use:c { c_@@_backend_xform_ \tl_to_str:n {#1} _int } ~ 0 ~ R }
-
-\cs_new:Npn \@@_backend_xform_name_ref:n #1
-  { /Fm\prop_item:Nn \g_@@_backend_xform_prop {#1} }
 }
 
 %</package>
@@ -1443,9 +1457,7 @@
 %    \begin{macrocode}
 %<*package>
 \cs_set_eq:NN \pdf_link_margin:n \@@_backend_link_margin:n
-\cs_set_eq:NN \pdf_xform_new:nnnN \@@_backend_xform_new:nnnN
 \cs_set_eq:NN \pdf_link_last: \@@_backend_link_last:
-\cs_set_eq:NN \pdf_xform_ref:n \@@_backend_xform_ref:n
 \cs_set_eq:NN\pdf_DONTUSE_catalog_gput:nn \@@_backend_catalog_gput:nn
 %</package>
 %    \end{macrocode}
