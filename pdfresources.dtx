@@ -905,7 +905,12 @@
     % code to set the property ....
     \int_gincr:N\g_@@_backend_resourceid_int
     \bool_if:NTF \l__pdf_backend_xform_bool
-    {}
+    {
+     \exp_args:Nnx\@@_tree_gput:nnn
+     {xform/Resources/Properties}
+     {l3pdf\int_use:N\g_@@_backend_resourceid_int}
+     {\@@_backend_object_ref:n{#2}}
+    }
     {
     \zref@labelbylist {l3pdf\int_use:N\g_@@_backend_resourceid_int} {l3pdf}
     \tl_set:Nx \l_@@_tmpa_tl
@@ -919,7 +924,7 @@
      {backend_Page\l_@@_tmpa_tl/Resources/Properties}
      {l3pdf\int_use:N\g_@@_backend_resourceid_int}
      {\@@_backend_object_ref:n{#2}}
-     }
+    }
    }
  \cs_set_protected:Npn \@@_backend_emc:
    {
