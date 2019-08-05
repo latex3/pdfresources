@@ -19,44 +19,7 @@
 }
 \sys_if_engine_luatex:T
 {
- \cs_new:Npn \__pdf_backend_xform_new:nnnn #1 #2 #3 #4
-  % #1 name
-  % #2 attributes
-  % #3 resources
-  % #4 content, not necessarly a box!
-  {
-   \hbox_set:Nn \l__pdf_backend_tmpa_box
-    {
-     \bool_set_true:N \l__pdf_backend_xform_bool
-     \__pdf_tree_gclear:n {xform/Resources/Properties}
-     #4
-    }
-   \tl_const:cx
-     { c__pdf_backend_xform_wd_ \tl_to_str:n {#1} _tl }
-     { \tex_the:D \box_wd:N \l__pdf_backend_tmpa_box }
-   \tl_const:cx
-     { c__pdf_backend_xform_ht_ \tl_to_str:n {#1} _tl }
-     { \tex_the:D \box_ht:N \l__pdf_backend_tmpa_box }
-   \tl_const:cx
-     { c__pdf_backend_xform_dp_ \tl_to_str:n {#1} _tl }
-     { \tex_the:D \box_dp:N \l__pdf_backend_tmpa_box }
-   %% do we need to test if #2 and #3 are empty??
-   \tex_immediate:D \tex_pdfxform:D
-    ~  attr      ~ { #2 }
-   %% add local properties.... !!!!!!
-   %% which resources should be default? Is an argument actually needed?
-    ~  resources ~ 
-     {
-      \int_compare:nNnT
-       {\prop_count:c { \__pdf_tree_prop_name:n {xform/Resources/Properties} }}>{0}
-       {/Properties~<<\__pdf_tree_map_dict_item:n {xform/Resources/Properties}>>~ #3}
-     }
-    \l__pdf_backend_tmpa_box
-   \int_const:cn
-      { c__pdf_backend_xform_ \tl_to_str:n {#1} _int }
-      { \tex_pdflastxform:D }
-  }
-  %only for the test here
+   %only for the test here
   \cs_new:Npn \xxx_pdfresources: {\tex_the:D \tex_pdfvariable:D pageresources}
 }
 % already in pdfresources

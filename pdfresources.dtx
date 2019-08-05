@@ -1074,38 +1074,58 @@
       { c_@@_backend_xform_ \tl_to_str:n {#1} _int }
       { \tex_pdflastxform:D }
   }
-}
-
-\bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
-{
 
 \cs_new:Npn \@@_backend_xform_use:n #1
  {
   \tex_pdfrefxform:D \int_use:c { c_@@_backend_xform_ \tl_to_str:n {#1} _int } \scan_stop:
  }
 
-% should there be a test if the name exists???
 \cs_new:Npn \@@_backend_xform_ref:n #1
-  { \int_use:c { c_@@_backend_xform_ \tl_to_str:n {#1} _int } ~ 0 ~ R }
-
-\cs_new:Npn \@@_backend_xform_name_ref:n #1
-  { /Fm\prop_item:Nn \g_@@_backend_xform_prop {#1} }
+  {
+   \int_use:c { c_@@_backend_xform_ \tl_to_str:n {#1} _int } ~ 0 ~ R
+  }
 }
 
+%luatex
 %nearly identical but not completly ...
 \sys_if_engine_luatex:T
 {
- \cs_new_protected:Npn \@@_backend_xform_new:nnnN #1 #2 #3 #4 %name, attr, resources, box
- {
-  \tex_immediate:D \tex_pdfxform:D~attr { #2 }~resources {#3} #4
-  \int_const:cn
-   { c_@@_backend_xform_ \tl_to_str:n {#1} _int }
-   { \tex_pdflastxform:D }
-  \prop_gput:Nnx \g_@@_backend_xform_prop {#1}
-   {
-    \tex_pdffeedback:D~xformname  \int_use:c {c_@@_backend_xform_ \tl_to_str:n {#1} _int}
-   }
- }
+ \cs_new:Npn \@@_backend_xform_new:nnnn #1 #2 #3 #4
+  % #1 name
+  % #2 attributes
+  % #3 resources
+  % #4 content, not necessarly a box!
+  {
+   \hbox_set:Nn \l_@@_backend_tmpa_box
+    {
+     \bool_set_true:N \l_@@_backend_xform_bool
+     \@@_tree_gclear:n {xform/Resources/Properties}
+     #4
+    }
+   \tl_const:cx
+     { c_@@_backend_xform_wd_ \tl_to_str:n {#1} _tl }
+     { \tex_the:D \box_wd:N \l_@@_backend_tmpa_box }
+   \tl_const:cx
+     { c_@@_backend_xform_ht_ \tl_to_str:n {#1} _tl }
+     { \tex_the:D \box_ht:N \l_@@_backend_tmpa_box }
+   \tl_const:cx
+     { c_@@_backend_xform_dp_ \tl_to_str:n {#1} _tl }
+     { \tex_the:D \box_dp:N \l_@@_backend_tmpa_box }
+   %% do we need to test if #2 and #3 are empty??
+   \tex_immediate:D \tex_pdfxform:D
+    ~  attr      ~ { #2 }
+   %% which resources should be default? Is an argument actually needed?
+    ~  resources ~
+     {
+      \int_compare:nNnT
+       {\prop_count:c { \@@_tree_prop_name:n {xform/Resources/Properties} }}>{0}
+       {/Properties~<<\@@_tree_map_dict_item:n {xform/Resources/Properties}>>~ #3}
+     }
+    \l_@@_backend_tmpa_box
+   \int_const:cn
+      { c_@@_backend_xform_ \tl_to_str:n {#1} _int }
+      { \tex_pdflastxform:D }
+  }
 
 \cs_new:Npn \@@_backend_xform_use:n #1
  {
