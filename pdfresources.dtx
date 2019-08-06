@@ -953,6 +953,10 @@
        >>
      }
     %% add ExtGState etc
+     /ExtGState~\@@_backend_object_ref:n {PageN/Resources/ExtGState}
+     /ColorSpace~\@@_backend_object_ref:n {PageN/Resources/ColorSpace}
+     /Pattern~\@@_backend_object_ref:n {PageN/Resources/Pattern}
+     /Shading~\@@_backend_object_ref:n {PageN/Resources/Shading}
    }
   }
 }
@@ -1226,7 +1230,7 @@
 % =======================================
 % \subsection{page resources: ExtGState, ColorSpace, Shading, Pattern }
 % \begin{NOTE}{UF}
-% Only for pdf/luatex and xdvipdfmx backend/pdf-code is needed to add values to this resources.
+% Only for pdf/luatex and xdvipdfmx backend-/pdf-code is needed to add values to these resources.
 % With dvips the resources are added through high-level code (e.g. transparency), so the
 % backend/pdf commands are no-ops.
 % For every resources there is only one object. References to these objects are added to
@@ -1237,9 +1241,11 @@
 % \end{NOTE}
 % ===================================
 % \subsubsection{ page resources / backend}
+% Path: Page/Resources/ExtGState
 %    \begin{macrocode}
 %<*package>
 % backend commands the command to fill the register
+% and to push the values.
 \bool_if:nT { (\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p:) || \sys_if_engine_luatex_p: }
 {
  \cs_new_protected:Npx \@@_backend_pageresources:n #1
@@ -1251,22 +1257,48 @@
       {#1}
   }
 }
+%xdvipdfmx
+%\special{pdf:pageresources<<#1>>} doesn't work correctly with object names ...
+% https://tug.org/pipermail/dvipdfmx/2019-August/000021.html, so we use
+% \special{pdf:put @resources}
+% this must be issued on every page!
 
 \sys_if_engine_xetex:T
 {
- \cs_new_protected:Npx \@@_backend_pageresources:n #1
+ \cs_new_protected:Npn \@@_backend_pageresources:n #1
   {
-   \special{pdf:pageresources<<#1>>} %???????
+   \__pdf_backend:n {put~@resources~<<#1>>}
   }
 }
 
-%dvips missing
+% dvips unneeded, or no-op
+\bool_if:nT { \sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p: }
+{
+ \cs_new_protected:Npn \@@_backend_pageresources:n #1 {}
+}
 %</package>
 %    \end{macrocode}
 %
-%
-%
-%
+% \subsubsection{ page resources / management}
+%    \begin{macrocode}
+%<*package>
+\@@_backend_object_new:nn {Page/Resources/ExtGState} {dict}
+\@@_backend_object_new:nn {Page/Resources/ColorSpace}{dict}
+\@@_backend_object_new:nn {Page/Resources/Pattern}   {dict}
+\@@_backend_object_new:nn {Page/Resources/Shading}   {dict}
+
+\@@_tree_new:n {Page/Resources/ExtGState}
+\@@_tree_new:n {Page/Resources/ColorSpace}
+\@@_tree_new:n {Page/Resources/Pattern}
+\@@_tree_new:n {Page/Resources/Shading}
+
+% setter:  #1 is the name of the resource
+\cs_new_protected:Npn \pdf_pageresources_gput:nnn #1 #2 #3
+  {
+   \@@_tree_gput:nnn {Page/Resources/#1} { #2 }{ #3 }
+  }
+%</package>
+%    \end{macrocode}
 % \section{Management code}
 %
 %
@@ -1338,18 +1370,14 @@
 
 \prop_new:N \g_@@_pageresources_prop
 
-% the global objects
- \clist_map_inline:Nn \c_@@_pageresources_clist
-  {
-   \prop_new:c {g_@@_pageresources_#1_prop}
-   \@@_backend_object_new:nn {g_@@_pageresources_#1_obj}{dict}
-  }
+%% the global objects
+% \clist_map_inline:Nn \c_@@_pageresources_clist
+%  {
+%   \prop_new:c {g_@@_pageresources_#1_prop}
+%   \@@_backend_object_new:nn {g_@@_pageresources_#1_obj}{dict}
+%  }
 
-% setter:  #1 is the name of the resource
-\cs_new_protected:Npn \pdf_pageresources_gput:nnn #1 #2 #3
-  {
-   \prop_gput:cnn { g_@@_pageresources_#1_prop} { #2 }{ #3 }
-  }
+
 
 % local resources
 % a general bool if local resources as been used at all:
