@@ -1224,12 +1224,19 @@
 %    \end{macrocode}
 %
 % =======================================
-% \subsection{page resources / ExtGState, ColorSpace, Shading, Pattern }
-% ===================================
-% \subsection{backend / pageresources}
-% \begin{NOTE}{UF} Implementation for dvips missing (perhaps impossible ...), for xetex untested.
-% \enquote{Correct} content needed at every shipout
+% \subsection{page resources: ExtGState, ColorSpace, Shading, Pattern }
+% \begin{NOTE}{UF}
+% Only for pdf/luatex and xdvipdfmx backend/pdf-code is needed to add values to this resources.
+% With dvips the resources are added through high-level code (e.g. transparency), so the
+% backend/pdf commands are no-ops.
+% For every resources there is only one object. References to these objects are added to
+% all pages and XObjects.
+% I don't see a need to set e.g. /ColorSpace pagewise: preflight handles this fine, see experiment
+% colorspace-resources.
+% As pgf does the same, there is a need to patch it for now. Ditto colorspace.
 % \end{NOTE}
+% ===================================
+% \subsubsection{ page resources / backend}
 %    \begin{macrocode}
 %<*package>
 % backend commands the command to fill the register

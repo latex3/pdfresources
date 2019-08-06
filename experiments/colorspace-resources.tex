@@ -1,0 +1,22 @@
+\documentclass[12pt]{scrartcl}
+\usepackage{l3pdf,graphicx}
+\ExplSyntaxOn
+\pdf_uncompress:
+\ExplSyntaxOff
+\usepackage{colorspace}
+\definespotcolor{foo}{BarTone 555 GN}{.8,.2,.5,.3}
+\begin{document}
+This document uses a spot color on one page but not on the next.
+The /ColorSpace resource is identical for all pages. But preflight 
+has no problems to recognize that only page one has a spot color:
+
+\includegraphics[width=4cm]{preflight-colorspace}
+
+
+cde \textcolor{foo}{abc}
+
+\newpage
+
+cde
+
+\end{document}

@@ -8,26 +8,38 @@
 \ExplSyntaxOff
 
 \begin{document}
-abc
 \special{pdf:obj @pgfextgs1 <<>>}
-\special{pdf:obj @pgfextgs2 <<>>}
+abc 
+% not good one value overwrites the other
+%\special{pdf:pageresources <</ExtGState<< /bearopacity <</ca 1/CA 1>>>>>> }
+%\special{pdf:pageresources <</ExtGState<< /duckopacity <</ca 0.7/CA 0.7>>>>>> }
+
+%not good, is ignored
+%\special{pdf:pageresources <</ExtGState @pgfextgs1>> }
+
 \special{pdf:put @pgfextgs1 << /bearopacity <</ca 1/CA 1>>>>}
 \special{pdf:put @pgfextgs1 << /bearopacity <</ca 1/CA 1>>>>}
 \special{pdf:put @pgfextgs1 << /bearopacity <</ca 1/CA 1>>>>}
 \special{pdf:put @pgfextgs1 << /duckopacity <</ca 0.7/CA 0.7>>>>}
 \special{pdf:put @pgfextgs1 << /duckopacity <</ca 0.5/CA 0.5>>>>}
 
+%
+% this works fine, but must be done on every page. 
 \special{pdf:put @resources
       << /ExtGState @pgfextgs1 >>}
 
+% not good is ignored
+%\special{pdf:pageresources <</ExtGState @pgfextgs1>> }
+
 \newpage
-%on the same page this would not be good ...
+% repeat ...
 \special{pdf:put @resources
-      << /ExtGState @pgfextgs2 >>}
+      << /ExtGState @pgfextgs1 >>}
 
-\special{pdf:put @pgfextgs2 << /marmotopacity <</ca 0.5/CA 0.5>>>>}
+\special{pdf:put @pgfextgs1 << /marmotopacity <</ca 0.5/CA 0.5>>>>}
 
-
+% not good, only on page 2
+%\special{pdf:pageresources <</ExtGState<< /bearopacity <</ca 1/CA 1>>>>>> }
   abc
 \end{document}
 \newpage
