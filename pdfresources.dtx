@@ -132,8 +132,15 @@
 %<*package>
 %
 %   \AtEndDocument{\clearpage #1} ? (not dvi)
-%   \AtEndDvi{#1}                 ?
-\cs_new_protected:Npn \@@_backend_end_run:n #1 {} %check ...
+%   \AtEndDvi{#1}
+\bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p:}
+ {
+   \cs_new_protected:Npn \@@_backend_end_run:n #1 {\AtEndDocument{\clearpage #1}} %check ...
+ }
+\bool_if:nT {\sys_if_engine_xetex_p:}
+ {
+   \cs_new_protected:Npn \@@_backend_end_run:n #1 {} %check ...
+ }
 %</package>
 %    \end{macrocode}
 % \subsection{Shipoutcode}
@@ -219,7 +226,14 @@
     \msg_none:nnn { pdf }{ empty-value }{ /#1/#2 }
    }
    {
-    \prop_gput:cnn { \@@_tree_prop_name:n {#1} }{ #2 } { #3 }
+    \prop_if_exist:cTF
+     { \@@_tree_prop_name:n {#1} }
+     {
+      \prop_gput:cnn { \@@_tree_prop_name:n {#1} }{ #2 } { #3 }
+     }
+     {
+      \msg_error:nnn { pdf } { wrong-path } {/#1}
+     }
    }
  }
 \cs_new_protected:Npn \@@_tree_get:nnnN  #1 #2 #3
@@ -823,6 +837,15 @@
 % xform stream ...
 \bool_new:N \l_@@_backend_xform_bool
 \@@_tree_new:n {xform/Resources/Properties}
+%quite often needed
+\clist_const:Nn \c_@@_backend_pageresources_clist
+  {
+   ExtGState,
+   ColorSpace,
+   Pattern,
+   Shading,
+  }
+
 % dvips
 % dvips is easy: create an object, and reference it in the bdc
 % ghostscript will then automatically replace it by a name
@@ -868,8 +891,20 @@
    {
     \__kernel_backend_literal:n {pdf:code~EMC}  %pdfbase
    }
-  \cs_new_protected:Npn \@@_backend_PageN_Resources_gpush:n #1 {}
-}
+  % properties are handled automatically, but the other resources should be added
+  % at shipout
+  \cs_new_protected:Npn \@@_backend_PageN_Resources_gpush:n #1
+   {
+    \clist_map_inline:Nn \c_@@_backend_pageresources_clist
+    {
+     \prop_if_empty:cF { \@@_tree_prop_name:n {PageN/Resources/##1} }
+      {
+       \exp_args:Nx\__kernel_backend_literal:n
+        {pdf:put~@resources~<</##1~\@@_backend_object_ref:n {PageN/Resources/##1}>>}
+      }
+    }
+   }
+ }
 % luatex
 \sys_if_engine_luatex:T
 {
@@ -953,10 +988,10 @@
        >>
      }
     %% add ExtGState etc
-     /ExtGState~\@@_backend_object_ref:n {PageN/Resources/ExtGState}
-     /ColorSpace~\@@_backend_object_ref:n {PageN/Resources/ColorSpace}
-     /Pattern~\@@_backend_object_ref:n {PageN/Resources/Pattern}
-     /Shading~\@@_backend_object_ref:n {PageN/Resources/Shading}
+     /ExtGState  ~ \@@_backend_object_ref:n {PageN/Resources/ExtGState}
+     /ColorSpace ~ \@@_backend_object_ref:n {PageN/Resources/ColorSpace}
+     /Pattern    ~ \@@_backend_object_ref:n {PageN/Resources/Pattern}
+     /Shading    ~ \@@_backend_object_ref:n {PageN/Resources/Shading}
    }
   }
 }
@@ -1234,20 +1269,26 @@
 % With dvips the resources are added through high-level code (e.g. transparency), so the
 % backend/pdf commands are no-ops.
 % For every resources there is only one object. References to these objects are added to
-% all pages and XObjects.
+% all pages and XObjects. For pages it must for luatex and pdftex
+% be done together with the /Properties, see above.
 % I don't see a need to set e.g. /ColorSpace pagewise: preflight handles this fine, see experiment
 % colorspace-resources.
-% As pgf does the same, there is a need to patch it for now. Ditto colorspace.
+% As pgf does the same, there is a need to patch it for now. Ditto for package colorspace.
 % \end{NOTE}
 % ===================================
 % \subsubsection{ page resources / backend}
-% Path: Page/Resources/ExtGState
+% Path: PageN/Resources/ExtGState etc
 %    \begin{macrocode}
 %<*package>
 % backend commands the command to fill the register
 % and to push the values.
 \bool_if:nT { (\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p:) || \sys_if_engine_luatex_p: }
 {
+ \clist_map_inline:Nn \c_@@_backend_pageresources_clist
+  {
+   \@@_tree_new:n {PageN/Resources/#1}
+   \@@_backend_object_new:nn {PageN/Resources/#1} {dict}
+  }
  \cs_new_protected:Npx \@@_backend_pageresources:n #1
   {
     \exp_not:N \tex_global:D
@@ -1255,6 +1296,11 @@
       { \tex_pdfpageresources:D }
       { \tex_pdfvariable:D pageresources }
       {#1}
+  }
+ % values are only stored in a prop and will be output at end document.
+ \cs_new_protected:Npn \@@_backend_pageresources_gput:nnn #1 #2 #3
+  {
+   \@@_tree_gput:nnn {PageN/Resources/#1} { #2 }{ #3 }
   }
 }
 %xdvipdfmx
@@ -1265,9 +1311,21 @@
 
 \sys_if_engine_xetex:T
 {
+ %objects should not only be created but also "initialized"
+ \clist_map_inline:Nn \c_@@_backend_pageresources_clist
+  {
+    \@@_backend_object_new:nn {PageN/Resources/#1} {dict}
+    \@@_backend_object_write:nn{PageN/Resources/#1}{}
+  }
+
  \cs_new_protected:Npn \@@_backend_pageresources:n #1
   {
    \__pdf_backend:n {put~@resources~<<#1>>}
+  }
+ \cs_new_protected:Npn \@@_backend_pageresources_gput:nnn #1 #2 #3
+  {
+   %objects are not filled with \pdf_object_write as this is not additive!
+   \@@_backend:x {put~\@@_backend_object_ref:n {PageN/Resources/#1}<</#2~#3>>}
   }
 }
 
@@ -1275,6 +1333,7 @@
 \bool_if:nT { \sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p: }
 {
  \cs_new_protected:Npn \@@_backend_pageresources:n #1 {}
+ \cs_new_protected:Npn \@@_backend_pageresources_gput:nnn #1 #2 #3 {}
 }
 %</package>
 %    \end{macrocode}
@@ -1282,27 +1341,15 @@
 % \subsubsection{ page resources / management}
 %    \begin{macrocode}
 %<*package>
-\@@_backend_object_new:nn {Page/Resources/ExtGState} {dict}
-\@@_backend_object_new:nn {Page/Resources/ColorSpace}{dict}
-\@@_backend_object_new:nn {Page/Resources/Pattern}   {dict}
-\@@_backend_object_new:nn {Page/Resources/Shading}   {dict}
-
-\@@_tree_new:n {Page/Resources/ExtGState}
-\@@_tree_new:n {Page/Resources/ColorSpace}
-\@@_tree_new:n {Page/Resources/Pattern}
-\@@_tree_new:n {Page/Resources/Shading}
-
+%
 % setter:  #1 is the name of the resource
 \cs_new_protected:Npn \pdf_pageresources_gput:nnn #1 #2 #3
   {
-   \@@_tree_gput:nnn {Page/Resources/#1} { #2 }{ #3 }
+   \@@_backend_pageresources_gput:nnn {#1} { #2 }{ #3 }
   }
 %</package>
 %    \end{macrocode}
-% \section{Management code}
-%
-%
-%
+
 % \subsection{pdfpageresources /management}
 % We need code for ExtGState, ColorSpace, Pattern, Shading and Properties.
 % All are dictionaries which can receive entries from more than one source.
@@ -1359,16 +1406,8 @@
 
 % management code
 % the list of standard resources which are handle with objects
- \clist_const:Nn \c_@@_pageresources_clist
-  {
-   ExtGState,
-   ColorSpace,
-   Pattern,
-   Shading,
- %  Properties
-  }
 
-\prop_new:N \g_@@_pageresources_prop
+%\prop_new:N \g_@@_pageresources_prop
 
 %% the global objects
 % \clist_map_inline:Nn \c_@@_pageresources_clist
@@ -1383,45 +1422,45 @@
 % a general bool if local resources as been used at all:
 % saves use to map through the five resources if not
 
-\bool_new:N \g_@@_pageresources_local_bool
+%\bool_new:N \g_@@_pageresources_local_bool
 
 % setter for page wise settings:
 % #1 is the absolute page number, #2 the resource name, #3 the key, #4 the content
-\cs_new_protected:Npn \pdf_pageresources_gput:nnnn #1 #2 #3 #4
-  {
-   \prop_if_exist:cF { g_@@_pageresources_#1_#2_prop }
-    {
-     \prop_new:c { g_@@_pageresources_#1_#2_prop }
-     \@@_backend_object_new:nn {g_@@_pageresources_#1_#2_obj}{dict}
-    }
-   \prop_gput:cnn { g_@@_pageresources_#1_#2_prop} { #3 }{ #4 }
-   \bool_gset_true:N \g_@@_pageresources_local_bool
-  }
+%\cs_new_protected:Npn \pdf_pageresources_gput:nnnn #1 #2 #3 #4
+%  {
+%   \prop_if_exist:cF { g_@@_pageresources_#1_#2_prop }
+%    {
+%     \prop_new:c { g_@@_pageresources_#1_#2_prop }
+%     \@@_backend_object_new:nn {g_@@_pageresources_#1_#2_obj}{dict}
+%    }
+%   \prop_gput:cnn { g_@@_pageresources_#1_#2_prop} { #3 }{ #4 }
+%   \bool_gset_true:N \g_@@_pageresources_local_bool
+%  }
 %
 % The shipout code:
 %
 
-\cs_new_protected:Npn \@@_pageresources_shipout:n #1 %#1 the page number
- {
-  \clist_map_inline:Nn \c_@@pageresources_clist
-  {
-   \prop_if_exist:cTF { g_@@_pageresources_#1_##1_prop }
-   {
-    \prop_gput:Nnx { \g_@@_pageresources_prop } {##1}
-    {
-      \@@_backend_object_ref:n { g_@@_pageresources_#1_##1_obj }
-    }
-   }
-   {
-    \prop_gput:Nnx { \g_@@_pageresources_prop } {##1}
-    {
-      \@@_backend_object_ref:n { g_@@_pageresources_##1_obj }
-    }
-   }
-  }
-  %\prop_show:N\g_@@_pdf_pageresources_prop
-  \@@_pageresources_gpush:N \g_@@_pageresources_prop
- }
+%\cs_new_protected:Npn \@@_pageresources_shipout:n #1 %#1 the page number
+% {
+%  \clist_map_inline:Nn \c_@@pageresources_clist
+%  {
+%   \prop_if_exist:cTF { g_@@_pageresources_#1_##1_prop }
+%   {
+%    \prop_gput:Nnx { \g_@@_pageresources_prop } {##1}
+%    {
+%      \@@_backend_object_ref:n { g_@@_pageresources_#1_##1_obj }
+%    }
+%   }
+%   {
+%    \prop_gput:Nnx { \g_@@_pageresources_prop } {##1}
+%    {
+%      \@@_backend_object_ref:n { g_@@_pageresources_##1_obj }
+%    }
+%   }
+%  }
+%  %\prop_show:N\g_@@_pdf_pageresources_prop
+%  \@@_pageresources_gpush:N \g_@@_pageresources_prop
+% }
 
 %???????????????
 % shipout code missing currently
@@ -1444,39 +1483,42 @@
 \@@_backend_end_run:n
  {
    % write the global objects:
-  \clist_map_inline:Nn \c_@@_pageresources_clist
-  {
-   \exp_args:Nnx
-     \pdf_object_write:nn { g_@@_pageresources_#1_obj }
-     {
-      \prop_map_function:cN { g_@@_pageresources_#1_prop} \@@_dict_item:nn
-     }
-    }
+ % \clist_map_inline:Nn \c_@@_pageresources_clist
+%  {
+%   \exp_args:Nnx
+%     \pdf_object_write:nn { g_@@_pageresources_#1_obj }
+%     {
+%      \prop_map_function:cN { g_@@_pageresources_#1_prop} \@@_dict_item:nn
+%     }
+%    }
+  \exp_args:Nnx \@@_backend_object_write:nn
+   { PageN/Resources/ExtGState }
+   { \@@_tree_map_dict_item:n {PageN/Resources/ExtGState} }
    % write the local objects
-  \bool_if:NT \g_@@_pageresources_local_bool
-  {
-   \clist_map_inline:Nn \c_@@_pageresources_clist
-   {
-    \int_step_inline:nn {\g_shipout_page_int} %<---- isn't the lastpage number
-                                              %with \AtEndDocument when floats
-                                              %are involved
-    {%\tl_set:Nn\l_tmpa_tl{##1}\tl_show:N\l_tmpa_tl
-     \prop_if_exist:cT { g_@@_pageresources_##1_#1_prop }
-     {
-      \prop_set_eq:Nc \g_tmpa_prop { g_@@_pageresources_#1_prop}
-      \prop_map_inline:cn { g_@@_pageresources_##1_#1_prop}
-      {
-       \prop_gput:Nnn \g_tmpa_prop {####1}{####2}
-      }
-      \exp_args:Nnx
-       \pdf_object_write:nn { g_@@_pageresources_##1_#1_obj }
-       {
-        \prop_map_function:NN \g_tmpa_prop \@@_dict_item:nn
-       }
-     }
-    }
-   }
-  }
+%  \bool_if:NT \g_@@_pageresources_local_bool
+%  {
+%   \clist_map_inline:Nn \c_@@_pageresources_clist
+%   {
+%    \int_step_inline:nn {\g_shipout_page_int} %<---- isn't the lastpage number
+%                                              %with \AtEndDocument when floats
+%                                              %are involved
+%    {%\tl_set:Nn\l_tmpa_tl{##1}\tl_show:N\l_tmpa_tl
+%     \prop_if_exist:cT { g_@@_pageresources_##1_#1_prop }
+%     {
+%      \prop_set_eq:Nc \g_tmpa_prop { g_@@_pageresources_#1_prop}
+%      \prop_map_inline:cn { g_@@_pageresources_##1_#1_prop}
+%      {
+%       \prop_gput:Nnn \g_tmpa_prop {####1}{####2}
+%      }
+%      \exp_args:Nnx
+%       \pdf_object_write:nn { g_@@_pageresources_##1_#1_obj }
+%       {
+%        \prop_map_function:NN \g_tmpa_prop \@@_dict_item:nn
+%       }
+%     }
+%    }
+%   }
+%  }
  }
 
 %</package>
@@ -1526,6 +1568,8 @@
 %<*package>
 \msg_new:nnn  { pdf } { patches } { loading~patch~code }
 \msg_new:nnn  { pdf } { empty-value }{ The~value~for~#1~is~empty~and~will~be~ignored }
+\msg_new:nnn  { pdf } { wrong-path } { This~resource~path~#1~doesn't~exist~--~perhaps~a~typo? }
+
 \msg_new:nnnn { pdf } { pagesattr-changed }
  {
    The~content~of~pagesattr ~has~changed.~
