@@ -11,12 +11,20 @@
 
 \begin{document}
 aba \newpage abc\newpage
+
+x\directlua{tex.sprint(l3kernel.pdf.object_ref("PageN/Resources/ExtGState"))}x
 \ExplSyntaxOn
+
+
+
 \pdf_pageresources_gput:nnn {ExtGState}{bearopacity}{<</ca~0.7/CA~0.7>>}
+\pdf_pageresources_gput:nnn {ExtGState}{marmotopacity}{<</ca~0.4/CA~0.4>>}
 abc
 \newpage
 \pdf_pageresources_gput:nnn {ExtGState}{duckopacity}{<</ca~0.2/CA~0.2>>}
-blblbl \special {pdf:code~/duckopacity ~gs} blblblbl
+\pdf_pageresources_gput:nnn {ExtGState}{efalantopacity}{<</ca~0.8/CA~0.8>>}
+
+test% \special {pdf:code~/duckopacity ~gs} test
 \ExplSyntaxOff
 \end{document}
 
@@ -54,13 +62,13 @@ abc
 % not good, only on page 2
 %\special{pdf:pageresources <</ExtGState<< /bearopacity <</ca 1/CA 1>>>>>> }
   abc
-  
+
   \newpage
-\special{pdf:put @pgfextgs1 << /efalentopacity <</ca 0.3/CA 0.3>>>>}
+\special{pdf:put @pgfextgs1 << /efalantopacity <</ca 0.3/CA 0.3>>>>}
  \special{pdf:put @resources
       << /ExtGState @pgfextgs1 >>}
- 
-acx 
+
+acx
 \end{document}
 \newpage
 \special{pdf:put @resources

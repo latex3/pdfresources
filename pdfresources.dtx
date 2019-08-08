@@ -101,6 +101,11 @@
 % at the input?
 \cs_new:Npn \@@_dict_item:nn #1 #2 {/#1~#2~}
 
+%helper command to output a key-object ref:
+\cs_new:Npn \@@_dict_objref_item:nn #1 #2
+ {
+   /#1~\@@_backend_object_ref:n {#2}
+ }
 %</package>
 %    \end{macrocode}
 % \subsection{some zref code, needs to be replaced later}
@@ -133,7 +138,7 @@
 %
 %   \AtEndDocument{\clearpage #1} ? (not dvi)
 %   \AtEndDvi{#1}
-\bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p:}
+\bool_if:nT { (\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p:) || \sys_if_engine_luatex_p:}
  {
    \cs_new_protected:Npn \@@_backend_end_run:n #1 {\AtEndDocument{\clearpage #1}} %check ...
  }
@@ -976,6 +981,14 @@
     \__kernel_backend_literal_page:n { EMC }
    }
 
+ \cs_new:Npn \@@_backend_PageN_Resources_gpush_aux:n #1
+  {
+   \prop_if_empty:cF
+    { \@@_tree_prop_name:n {PageN/Resources/#1} }
+    {
+     \@@_dict_objref_item:nn {#1}{PageN/Resources/#1}
+    }
+  }
  \cs_new_protected:Npn \@@_backend_PageN_Resources_gpush:n #1
   {
    \exp_args:NNx \tex_global:D \tex_pdfpageresources:D
@@ -988,10 +1001,7 @@
        >>
      }
     %% add ExtGState etc
-     /ExtGState  ~ \@@_backend_object_ref:n {PageN/Resources/ExtGState}
-     /ColorSpace ~ \@@_backend_object_ref:n {PageN/Resources/ColorSpace}
-     /Pattern    ~ \@@_backend_object_ref:n {PageN/Resources/Pattern}
-     /Shading    ~ \@@_backend_object_ref:n {PageN/Resources/Shading}
+    \clist_map_function:NN \c_@@_backend_pageresources_clist \@@_backend_PageN_Resources_gpush_aux:n
    }
   }
 }
@@ -1262,32 +1272,39 @@
 %</package>
 %    \end{macrocode}
 %
-% =======================================
 % \subsection{page resources: ExtGState, ColorSpace, Shading, Pattern }
 % \begin{NOTE}{UF}
-% Only for pdf/luatex and xdvipdfmx backend-/pdf-code is needed to add values to these resources.
+% Only for pdf/luatex and xdvipdfmx backend- and pdf-code is needed to add values to these resources.
 % With dvips the resources are added through high-level code (e.g. transparency), so the
 % backend/pdf commands are no-ops.
 % For every resources there is only one object. References to these objects are added to
-% all pages and XObjects. For pages it must for luatex and pdftex
-% be done together with the /Properties, see above.
+% all pages starting from the page where the first time something has been added to the
+% resource and to all XObjects. For luatex and pdftex it must be done together
+% with the /Properties, see above.
 % I don't see a need to set e.g. /ColorSpace pagewise: preflight handles this fine, see experiment
 % colorspace-resources.
 % As pgf does the same, there is a need to patch it for now. Ditto for package colorspace.
 % \end{NOTE}
-% ===================================
-% \subsubsection{ page resources / backend}
+% \subsubsection{page resources: ExtGState, ColorSpace, Shading, Pattern / backend}
 % Path: PageN/Resources/ExtGState etc
 %    \begin{macrocode}
 %<*package>
 % backend commands the command to fill the register
 % and to push the values.
+% pdftex and luatex
 \bool_if:nT { (\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p:) || \sys_if_engine_luatex_p: }
 {
  \clist_map_inline:Nn \c_@@_backend_pageresources_clist
   {
    \@@_tree_new:n {PageN/Resources/#1}
    \@@_backend_object_new:nn {PageN/Resources/#1} {dict}
+   \cs_if_exist:NT \tex_directlua:D
+    {
+     \tex_directlua:D
+      {
+       l3kernel.@@.object["PageN/Resources/#1"]="\@@_backend_object_ref:n{PageN/Resources/#1}"
+      }
+    }
   }
  \cs_new_protected:Npx \@@_backend_pageresources:n #1
   {
@@ -1302,11 +1319,26 @@
   {
    \@@_tree_gput:nnn {PageN/Resources/#1} { #2 }{ #3 }
   }
+ % code for end of document code
+ \cs_new_protected:Npn \@@_backend_pageresources_end_run:
+ {
+  \clist_map_inline:Nn \c_@@_backend_pageresources_clist
+   {
+    %\prop_show:c{\@@_tree_prop_name:n {PageN/Resources/##1}}
+    \prop_if_empty:cF
+      { \@@_tree_prop_name:n {PageN/Resources/##1} }
+      {
+        \exp_args:Nnx \@@_backend_object_write:nn
+        { PageN/Resources/##1 }
+        { \@@_tree_map_dict_item:n {PageN/Resources/##1} }
+      }
+   }
+  }
 }
-%xdvipdfmx
-%\special{pdf:pageresources<<#1>>} doesn't work correctly with object names ...
-% https://tug.org/pipermail/dvipdfmx/2019-August/000021.html, so we use
-% \special{pdf:put @resources}
+% xdvipdfmx
+% \special{pdf:pageresources<<#1>>} doesn't work correctly with object names ...
+% https://tug.org/pipermail/dvipdfmx/2019-August/000021.html,
+% so we use \special{pdf:put @resources}
 % this must be issued on every page!
 
 \sys_if_engine_xetex:T
@@ -1314,19 +1346,21 @@
  %objects should not only be created but also "initialized"
  \clist_map_inline:Nn \c_@@_backend_pageresources_clist
   {
-    \@@_backend_object_new:nn {PageN/Resources/#1} {dict}
-    \@@_backend_object_write:nn{PageN/Resources/#1}{}
+    \@@_backend_object_new:nn   { PageN/Resources/#1 } { dict }
+    \@@_backend_object_write:nn { PageN/Resources/#1 } {}
   }
 
  \cs_new_protected:Npn \@@_backend_pageresources:n #1
   {
    \__pdf_backend:n {put~@resources~<<#1>>}
   }
+
  \cs_new_protected:Npn \@@_backend_pageresources_gput:nnn #1 #2 #3
   {
    %objects are not filled with \pdf_object_write as this is not additive!
    \@@_backend:x {put~\@@_backend_object_ref:n {PageN/Resources/#1}<</#2~#3>>}
   }
+ \cs_new_protected:Npn \@@_backend_pageresources_end_run: {}
 }
 
 % dvips unneeded, or no-op
@@ -1334,11 +1368,30 @@
 {
  \cs_new_protected:Npn \@@_backend_pageresources:n #1 {}
  \cs_new_protected:Npn \@@_backend_pageresources_gput:nnn #1 #2 #3 {}
+ \cs_new_protected:Npn \@@_backend_pageresources_end_run: {}
 }
 %</package>
 %    \end{macrocode}
 %
-% \subsubsection{ page resources / management}
+% \subsubsection{ page resources: ExtGState, ColorSpace, Shading, Pattern / management}
+% \begin{function}[added = 2019-08-08]
+%   {\pdf_pageresources_gput:nnn}
+%   \begin{syntax}
+%     \cs{pdf_pageresources_gput:nnn} \Arg{resource} \Arg{name} \Arg{value}
+%   \end{syntax}
+%   Adds |/|\meta{name} \meta{value} to the page resource \meta{resource}.
+%   \meta{resource} can be one |ExtGState|, |ColorSpace|, |Pattern| oder |Shading|.
+%   It is always stored globally. The content is written to the pdf
+%   at the end of the compilation, so values can be added, changed or removed until then.
+%   \meta{name} should be a valid pdf name without the leading slash,
+%   \meta{value} should be a valid pdf value for the resource.
+%   Any escaping or (re)encoding must be done explictly. If a \meta{name} is used twice,
+%   only the last \meta{value} set will be used.
+%   With the dvips backend the command does nothing: resources are managed by ghostscript
+%   or the distiller if e.\,g. transparency is used.
+%   The primitive commands to set the resources should not be used together with this code as
+%   the calls will overwrite each other and values will be lost.
+% \end{function}
 %    \begin{macrocode}
 %<*package>
 %
@@ -1349,128 +1402,8 @@
   }
 %</package>
 %    \end{macrocode}
-
-% \subsection{pdfpageresources /management}
-% We need code for ExtGState, ColorSpace, Pattern, Shading and Properties.
-% All are dictionaries which can receive entries from more than one source.
-% For at least ColorSpace (colorspace) and Properties (ocgx/tagpdf) there is also a need for page related
-% resources, so we have to check on every page if a local resource list for this page
-% exists. A global dictionary can be empty but as this is known only at the end of the document
-% it would require a two-pass compilation to test it and the overhead is small so we ignore this.
-% Example for ColorSpace:
-%^^A Global resources are stored in g_@@_pageresources_ColorSpace_prop
-%^^A An object {g_@@_pageresources_ColorSpace_obj} is reserved
-%^^A At the end of the document the obj is written to the pdf with the content of the prop:
-%^^A \pdf_object_write:nn { g_@@_pageresources_ColorSpace_obj }
-%^^A           {
-%^^A             \prop_map_function:cN { g_@@_pageresources_#1_prop} \@@_dict_item:nn
-%^^A           }
-%^^A local resources for page N are stored in g_@@_pageresources_N_ColorSpace_prop
-%^^A An object {g_@@_pageresources_N_ColorSpace_obj} is reserved
-%^^A At the end of the document first the global then the local property is
-%^^A added to a temporary prop:
-%^^A \prop_set_eq:Nc \g_tmpa_prop { g_@@_pageresource_ColorSpace_prop}
-%^^A \prop_map_inline:cn { g_@@_pageresource_N_ColorSpace_prop}
-%^^A {\prop_gput:Nnn \g_tmpa_prop {#1}{#2}}
-%^^A
-%^^A then obj is written to the pdf with the combined content of the global and the
-%^^A local prop:
-%^^A \pdf_object_write:nn { g_@@_pageresources_N_ColorSpace_obj }
-%^^A           {
-%^^A             \prop_map_function:cN \g_tmpa_prop \@@_dict_item:nn
-%^^A           }
-%^^A This means that local entries can overwrite global entries, it is up to the user to avoid this
-%^^A with sensible names spaces.
-%^^A At every shipout we check if g_@@_pageresource_N_ColorSpace_prop exists.
-%^^A (That's probably more effective than trying to keep a list of pages with local settings.)
-%^^A If yes we put "ColorSpace = objnum  of g_@@_pageresources_N_ColorSpace_obj" into
-%^^A \g_@@_pdf_pageresources_prop and push this into pdfpageresources
-%^^A If not we put "ColorSpace = objnum of g_@@_pageresources_ColorSpace_obj" into
-%^^A \g_@@_pageresources_prop and push this into pdfpageresources
-
-
 %    \begin{macrocode}
 %<*package>
-%message
-% lowlevel stuff
-
-
-% push a prop to the register:
- \cs_new_protected:Npn \@@_pageresources_gpush:N #1
-  {
-    \exp_args:Nx  \@@_backend_pageresources:n
-    {
-     \prop_map_function:NN #1 \@@_dict_item:nn
-    }
-  }
-
-% management code
-% the list of standard resources which are handle with objects
-
-%\prop_new:N \g_@@_pageresources_prop
-
-%% the global objects
-% \clist_map_inline:Nn \c_@@_pageresources_clist
-%  {
-%   \prop_new:c {g_@@_pageresources_#1_prop}
-%   \@@_backend_object_new:nn {g_@@_pageresources_#1_obj}{dict}
-%  }
-
-
-
-% local resources
-% a general bool if local resources as been used at all:
-% saves use to map through the five resources if not
-
-%\bool_new:N \g_@@_pageresources_local_bool
-
-% setter for page wise settings:
-% #1 is the absolute page number, #2 the resource name, #3 the key, #4 the content
-%\cs_new_protected:Npn \pdf_pageresources_gput:nnnn #1 #2 #3 #4
-%  {
-%   \prop_if_exist:cF { g_@@_pageresources_#1_#2_prop }
-%    {
-%     \prop_new:c { g_@@_pageresources_#1_#2_prop }
-%     \@@_backend_object_new:nn {g_@@_pageresources_#1_#2_obj}{dict}
-%    }
-%   \prop_gput:cnn { g_@@_pageresources_#1_#2_prop} { #3 }{ #4 }
-%   \bool_gset_true:N \g_@@_pageresources_local_bool
-%  }
-%
-% The shipout code:
-%
-
-%\cs_new_protected:Npn \@@_pageresources_shipout:n #1 %#1 the page number
-% {
-%  \clist_map_inline:Nn \c_@@pageresources_clist
-%  {
-%   \prop_if_exist:cTF { g_@@_pageresources_#1_##1_prop }
-%   {
-%    \prop_gput:Nnx { \g_@@_pageresources_prop } {##1}
-%    {
-%      \@@_backend_object_ref:n { g_@@_pageresources_#1_##1_obj }
-%    }
-%   }
-%   {
-%    \prop_gput:Nnx { \g_@@_pageresources_prop } {##1}
-%    {
-%      \@@_backend_object_ref:n { g_@@_pageresources_##1_obj }
-%    }
-%   }
-%  }
-%  %\prop_show:N\g_@@_pdf_pageresources_prop
-%  \@@_pageresources_gpush:N \g_@@_pageresources_prop
-% }
-
-%???????????????
-% shipout code missing currently
-%\hook_post_push:nn {shipout}
-%{
-% \shipout_page_add:nn { fg }
-%  {
-%   \exp_args:Nx  \@@_pageresources_shipout:n {\int_eval:n { \g_shipout_page_int }}
-%  }
-%}
 
 % doesn't work: ocg layer of float gets lost ...
 %\AtEndDocument % must perhaps be even later??
@@ -1482,43 +1415,8 @@
 %\AtEndDvi
 \@@_backend_end_run:n
  {
-   % write the global objects:
- % \clist_map_inline:Nn \c_@@_pageresources_clist
-%  {
-%   \exp_args:Nnx
-%     \pdf_object_write:nn { g_@@_pageresources_#1_obj }
-%     {
-%      \prop_map_function:cN { g_@@_pageresources_#1_prop} \@@_dict_item:nn
-%     }
-%    }
-  \exp_args:Nnx \@@_backend_object_write:nn
-   { PageN/Resources/ExtGState }
-   { \@@_tree_map_dict_item:n {PageN/Resources/ExtGState} }
-   % write the local objects
-%  \bool_if:NT \g_@@_pageresources_local_bool
-%  {
-%   \clist_map_inline:Nn \c_@@_pageresources_clist
-%   {
-%    \int_step_inline:nn {\g_shipout_page_int} %<---- isn't the lastpage number
-%                                              %with \AtEndDocument when floats
-%                                              %are involved
-%    {%\tl_set:Nn\l_tmpa_tl{##1}\tl_show:N\l_tmpa_tl
-%     \prop_if_exist:cT { g_@@_pageresources_##1_#1_prop }
-%     {
-%      \prop_set_eq:Nc \g_tmpa_prop { g_@@_pageresources_#1_prop}
-%      \prop_map_inline:cn { g_@@_pageresources_##1_#1_prop}
-%      {
-%       \prop_gput:Nnn \g_tmpa_prop {####1}{####2}
-%      }
-%      \exp_args:Nnx
-%       \pdf_object_write:nn { g_@@_pageresources_##1_#1_obj }
-%       {
-%        \prop_map_function:NN \g_tmpa_prop \@@_dict_item:nn
-%       }
-%     }
-%    }
-%   }
-%  }
+   % only pdftex??
+   \@@_backend_pageresources_end_run:
  }
 
 %</package>
@@ -2466,6 +2364,8 @@ l3kernel.@@.Page.dflt = l3kernel.@@.Page.dflt or {}
 l3kernel= l3kernel or {}
 l3kernel.@@.Page.Resources = l3kernel.@@.Resources or {}
 l3kernel.@@.Page.Resources.Properties = l3kernel.@@.Page.Resources.Properties or {}
+l3kernel.@@.object = l3kernel.@@.object or {}
+
 l3kernel.pdf= l3kernel.pdf or {} -- for "public" functions
 
 local @@ = l3kernel.@@
@@ -2545,6 +2445,15 @@ function l3kernel.pdf.Page_Resources_Properties_gput (page,name,value) -- tex.co
  Properties[page] = Properties[page] or {}
  Properties[page][name]=value
  pdf.setpageresources(@@_backend_PageN_Resources_gpush (page))
+end
+
+function l3kernel.pdf.object_ref (objname)
+ if l3kernel.@@.object[objname] then
+  local ref= l3kernel.@@.object[objname]
+  return ref
+ else
+  return "false"
+ end
 end
 %</lua>
 %    \end{macrocode}
