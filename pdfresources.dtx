@@ -1315,10 +1315,23 @@
       {#1}
   }
  % values are only stored in a prop and will be output at end document.
- \cs_new_protected:Npn \@@_backend_pageresources_gput:nnn #1 #2 #3
-  {
-   \@@_tree_gput:nnn {PageN/Resources/#1} { #2 }{ #3 }
-  }
+ \sys_if_engine_luatex:TF
+ {
+  \cs_new_protected:Npn \@@_backend_pageresources_gput:nnn #1 #2 #3
+   {
+    \@@_tree_gput:nnn {PageN/Resources/#1} { #2 }{ #3 }
+     % luatex must also trigger the lua side
+     \tex_latelua:D{l3kernel.@@.Page.Resources.#1=true}
+     \tex_latelua:D{l3kernel.pdf.Page_Resources_gpush( tex.count["g_@@_abspage_int"])}
+   }
+ }
+ {
+  \cs_new_protected:Npn \@@_backend_pageresources_gput:nnn #1 #2 #3
+   {
+    \@@_tree_gput:nnn {PageN/Resources/#1} { #2 }{ #3 }
+   }
+ }
+
  % code for end of document code
  \cs_new_protected:Npn \@@_backend_pageresources_end_run:
  {
@@ -2364,6 +2377,7 @@ l3kernel.@@.Page.dflt = l3kernel.@@.Page.dflt or {}
 l3kernel= l3kernel or {}
 l3kernel.@@.Page.Resources = l3kernel.@@.Resources or {}
 l3kernel.@@.Page.Resources.Properties = l3kernel.@@.Page.Resources.Properties or {}
+l3kernel.@@.Page.Resources.List={"ExtGState","ColorSpace","Pattern","Shading"}
 l3kernel.@@.object = l3kernel.@@.object or {}
 
 l3kernel.pdf= l3kernel.pdf or {} -- for "public" functions
@@ -2426,8 +2440,8 @@ function l3kernel.@@.backend_Page_gclear ()
 end
 
 
-local Properties= l3kernel.@@.Page.Resources.Properties
-
+local Properties  = l3kernel.@@.Page.Resources.Properties
+local ResourceList= l3kernel.@@.Page.Resources.List
 local function @@_backend_PageN_Resources_gpush (page)
  local token=""
  if Properties[page] then
@@ -2436,6 +2450,14 @@ local function @@_backend_PageN_Resources_gpush (page)
   end
   token = "/Properties <<"..token..">>"
  end
+ --  print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
+  for i,name in ipairs(ResourceList) do
+ -- print(name)
+  if l3kernel.@@.Page.Resources[name] then
+ -- print(name)
+  token = token .. "/"..name.." "..l3kernel.pdf.object_ref("PageN/Resources/"..name)
+  end
+  end
  -- add ExtGstate etc here ....
  return token
 end
@@ -2444,6 +2466,10 @@ end
 function l3kernel.pdf.Page_Resources_Properties_gput (page,name,value) -- tex.count["g_@@_abspage_int"]
  Properties[page] = Properties[page] or {}
  Properties[page][name]=value
+ pdf.setpageresources(@@_backend_PageN_Resources_gpush (page))
+end
+
+function l3kernel.pdf.Page_Resources_gpush(page)
  pdf.setpageresources(@@_backend_PageN_Resources_gpush (page))
 end
 
