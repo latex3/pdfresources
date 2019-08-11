@@ -1468,9 +1468,16 @@
  {
   \pdfextension catalog {  } openaction~goto~page #1 {#2}
  }
-
-%\input{l3pdfmode-pdf.def}
 }
+%need check ...
+\sys_if_engine_xetex:T
+{ %% unclear
+ \cs_new_protected:Nn \@@_backend_docview:nn
+  {}
+   %\__pdf_backend:n{docview << #1 >> } ????????
+}
+%\input{l3pdfmode-pdf.def}
+
 %</package>
 %    \end{macrocode}
 % \section{Management code / pdf Module}
@@ -1814,12 +1821,12 @@
   } > {0}
   {
    \@@_backend_object_new:nn   {g_@@_catalog_OCProperties_obj} {dict}
-   \seq_gpop_left:NN \g_@@_catalog_OCProperties_Configs_seq \g_tmpa_tl
+   \seq_gpop_left:NN \g_@@_catalog_OCProperties_Configs_seq \l_tmpa_tl
    \exp_args:Nnx
     \@@_backend_object_write:nn {g_@@_catalog_OCProperties_obj}
     {
      /OCGs~[\seq_use:Nn \g_@@_catalog_OCProperties_OCGs_seq {~}]
-     /D~\g_tmpa_tl~
+     /D~\l_tmpa_tl~
      \seq_if_empty:NF \g_@@_catalog_OCProperties_Configs_seq
      {
      /Configs~[\seq_use:Nn \g_@@_catalog_OCProperties_Configs_seq {~}]
@@ -2254,22 +2261,16 @@
  }
 \tl_new:N \l_@@_name_tmp_tl
 \tl_new:N \l_@@_value_tmp_tl
-\cs_generate_variant:Nn \pdf_pageresources_gput:nnnn {nnoo}
-\cs_new_protected:Npn \pdf_pageresources_split_gput:nnn  #1 #2 #3 %#1 page, #2 resources
- {
-   \@@_split_dict_entry_aux:NNw \l_@@_name_tmp_tl \l_@@_value_tmp_tl #3 \q_stop
-   \pdf_pageresources_gput:nnoo {#1}{#2}{\l_@@_name_tmp_tl}{\l_@@_value_tmp_tl}
- }
+
 
 \cs_generate_variant:Nn \pdf_pageresources_gput:nnn {noo}
 \cs_new_protected:Npn \pdf_pageresources_split_gput:nn  #1 #2  %#1  resources
  {
    \@@_split_dict_entry_aux:NNw \l_@@_name_tmp_tl \l_@@_value_tmp_tl #2 \q_stop
-   \pdf_pageresources_gput:noo {#1}{#2}{\l_@@_name_tmp_tl}{\l_@@_value_tmp_tl}
+   \pdf_pageresources_gput:noo {#1}{\l_@@_name_tmp_tl}{\l_@@_value_tmp_tl}
  }
 
-
-  %Trying to patch pgf ..
+%Trying to patch pgf ..
 \AtBeginDocument
  {
   % extgstate
