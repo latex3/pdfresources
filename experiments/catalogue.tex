@@ -1,0 +1,62 @@
+% !Mode:: "TeX:DE:UTF-8:Main"
+\documentclass{article}
+
+\usepackage{lipsum,l3pdf,xcolor,
+ pdfresources
+ }
+\ExplSyntaxOn
+\pdf_uncompress:
+
+\ExplSyntaxOff
+
+\begin{document}
+
+\ExplSyntaxOn
+xxx
+%\special{pdf: docview << /PageMode /UseThumbs >> }
+\sys_if_engine_xetex:T
+{
+\special{pdf:put @catalog << /PageLayout /SinglePage >> }
+\special{pdf:put @catalog << /PageLayout /TwoColumnRight >> }
+\special{pdf:put @catalog << /PageMode /UseThumbs >> }
+}
+
+\bool_if:nT {\sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p: }
+{
+  \special{ps:~SDict~begin~mark~{Catalog}~<</PageLayout /SinglePage>>~/PUT~pdfmark~end}
+  \special{ps:~SDict~begin~mark~{Catalog}~<</PageLayout /TwoColumnRight>>~/PUT~pdfmark~end}
+  \special{ps:~SDict~begin~mark~{Catalog}~<</PageMode  /UseThumbs>>~/PUT~pdfmark~end}
+%\pbs_special:n{~mark~{Catalog}~<<#1>>~/PUT~pdfmark}
+}
+\ExplSyntaxOff
+\end{document}
+
+Catalogue/OCProperties/OCGs                  
+                      /D 
+                      /Configs
+         /AcroForm                 dict
+         /Metadata                 stream
+         /PageMode                 name
+         /ViewerPreferences        dict
+         /OutputIntents            (array of dict)
+         /MarkInfo                 dict
+         /PageLabels               (number tree /indirect object)
+         /PageLayout               (name: one of ...)
+         /Outlines                 (dict, must be an indirect reference)
+         /Threads                  (array, must be an indirect reference)
+         /OpenAction               (array (dest) or dictionary (action))
+         /AA                       (dict, additional-actions)
+         /URI                      (dict)
+         /StructTreeRoot           (dict) relevant for tagging
+         /Lang                     (string, e.g. (de-DE))
+         /SpiderInfo               (dict)
+         /PieceInfo                (dict)
+         /Perms                    (dict, pdf 1.5, permissions)
+         /Legal                    (dict, pdf 1.5)
+         /Requirements             (array, pdf 1.7)
+         /NeedsRendering           (boolean, pdf 1.7)
+         /Extensions               (dict, pdf 2.0)
+         /DSS                      (dict, pdf 2.0)
+         /AF                       (array of dictionaries, pdf 2.0, associated files, important for accessibility)
+         /DPartRoot                (dict, pdf 2.0)         
+                     
