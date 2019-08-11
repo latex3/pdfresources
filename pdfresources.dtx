@@ -146,6 +146,11 @@
  {
    \cs_new_protected:Npn \@@_backend_end_run:n #1 {} %check ...
  }
+\bool_if:nT { (\sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p:) }
+ {
+   \cs_new_protected:Npn \@@_backend_end_run:n #1 {} %check ...
+ }
+
 %</package>
 %    \end{macrocode}
 % \subsection{Shipoutcode}
@@ -452,7 +457,7 @@
  % write to aux and store in prop with pdflatex
   \cs_new_protected:Npn \@@_backend_PageN_gput:nn #1 #2
    {
-    \int_gincr:N\g_@@_resourceid_int
+    \int_gincr:N\g_@@_backend_resourceid_int
     \zref@labelbylist {l3pdf\int_use:N\g_@@_backend_resourceid_int} {l3pdf}
     \tl_set:Nx \l_@@_tmpa_tl
      {
@@ -567,7 +572,7 @@
   % table and push it directly
   % write to aux and store in prop with pdflatex
   \cs_new_protected:Npn \@@_backend_PageN_gput:nn #1 #2
-   {\tl_set:Nn\l_tmpa_tl{#1xx#2}\tl_show:N\l_tmpa_tl
+   {
     \@@_backend_Page_primitive:n { /#1~#2 }
    }
   %the code to push the values, used in shipout
@@ -1007,6 +1012,14 @@
 }
 %</package>
 %    \end{macrocode}
+% \subsubsection{bdc / management}
+%    \begin{macrocode}
+%<*package>
+ \cs_set_eq:NN\pdf_bdc:nn\@@_backend_bdc:nn
+ \cs_set_eq:NN\pdf_emc:  \@@_backend_emc:
+%</package>
+%    \end{macrocode}
+%
 %
 % \subsection{pdfxform}
 % \begin{NOTE}{UF}
@@ -1016,7 +1029,7 @@
 %  - it is not clear if an argument for additional resources is needed, probably they
 %    should / need to be be added automatically.
 %  - code for adding ExtGState etc to the local resource is missing, will be
-%    added when the object name is clear.
+%    added when the object name is clear.!!!!!!!!!!!!
 %  - should the size be stored in dim or tl?
 %  - dvips implementation is missing for ideas: pdfbase, atfi-dvips.def,
 %  \end{NOTE}
@@ -1129,8 +1142,7 @@
    %% do we need to test if #2 and #3 are empty??
    \tex_immediate:D \tex_pdfxform:D
     ~  attr      ~ { #2 }
-   %% add local properties.... !!!!!!
-   %% which resources should be default? Is an argument actually needed?
+   %% which other resources should be default? Is an argument actually needed?
     ~  resources ~
      {
       \int_compare:nNnT
@@ -1426,6 +1438,7 @@
 % Alternative?
 %\RequirePackage{atenddvi}
 %\AtEndDvi
+%% !!!!!!!!!!!!!!!!!!!!!!!!!! sort this out, which engine does what here!!!!!!!!!
 \@@_backend_end_run:n
  {
    % only pdftex??
@@ -1434,7 +1447,8 @@
 
 %</package>
 %    \end{macrocode}
-% \subsubsection{other stuff}
+%=================================================================
+% \subsection{other stuff}
 %    \begin{macrocode}
 %<*package>
 
@@ -1444,9 +1458,6 @@
  {
   \pdfcatalog {  } openaction~goto~page #1 {#2}
  }
-
-
-%\input{l3pdfmode-pdf.def}
 }
 
 \sys_if_engine_luatex:T
@@ -1459,16 +1470,6 @@
  }
 
 %\input{l3pdfmode-pdf.def}
-}
-
-\sys_if_engine_xetex:T
-{
- %% need to be checked if resources are ok!!!!
- \cs_new_protected:Npn \@@_backend_bmc:n #1
-  {
-    \special{pdf:code~/#1~BMC}
-    %\special{pdf:content~#1~BMC}%
-  }
 }
 %</package>
 %    \end{macrocode}
@@ -1518,18 +1519,10 @@
 %<*package>
 \cs_set_eq:NN \pdf_link_margin:n \@@_backend_link_margin:n
 \cs_set_eq:NN \pdf_link_last: \@@_backend_link_last:
-\cs_set_eq:NN\pdf_DONTUSE_catalog_gput:nn \@@_backend_catalog_gput:nn
+\cs_set_eq:NN \pdf_DONTUSE_catalog_gput:nn \@@_backend_catalog_gput:nn
 %</package>
 %    \end{macrocode}
-% \subsection{BDC/EMC commands}
-% NEEDS SORTING OUT! Properties for arg 2?????
-%    \begin{macrocode}
-%<*package>
- \cs_set_eq:NN\pdf_bdc:nn\@@_backend_bdc:nn
- \cs_set_eq:NN\pdf_emc: \@@_backend_emc:
 
-%</package>
-%    \end{macrocode}
 % \subsection{generic commands}
 % \paragraph{Values that are dictionaries}
 % In a number of cases a value is a dictionary and users/packages must be able to
@@ -1891,32 +1884,33 @@
 % This mostly makes the driver commands available under the pdf module name.
 % But adds a test for empty values
 % !!!!!!!!!!!!!!!!!!!!!!
+% i don't think that this is needed ....
 %    \begin{macrocode}
 %<*package>
-\cs_new_protected:Npn \@@_pageresources_gput:nnn #1 #2 #3
- {
-  \tl_if_empty:nTF { #3 }
-  {
-   \msg_none:nnn { pdf }{ empty-value }{ Resources/#2 }
-  }
-  {
-    \@@_backend_pageresources_gput:nnn { #1 } { #2 } { #3 }
-  }
- }
-
-\cs_new_protected:Npn \@@_pageresources_gput:nnnn #1 #2 #3 #4
- {
-   \tl_if_empty:nTF { #4 }
-  {
-   \msg_none:nnn { pdf }{ empty-value }{ Resources/#3 }
-  }
-  {
-    \@@_backend_pageresources_gput:nnnn { #1 } { #2 } { #3 } { #4}
-  }
- }
-
-\cs_generate_variant:Nn \@@_pageresources_gput:nnnn {nnnx}
-\cs_generate_variant:Nn \@@_pageresources_gput:nnn {nnx}
+%\cs_new_protected:Npn \@@_pageresources_gput:nnn #1 #2 #3
+% {
+%  \tl_if_empty:nTF { #3 }
+%  {
+%   \msg_none:nnn { pdf }{ empty-value }{ Resources/#2 }
+%  }
+%  {
+%    \@@_backend_pageresources_gput:nnn { #1 } { #2 } { #3 }
+%  }
+% }
+%
+%\cs_new_protected:Npn \@@_pageresources_gput:nnnn #1 #2 #3 #4
+% {
+%   \tl_if_empty:nTF { #4 }
+%  {
+%   \msg_none:nnn { pdf }{ empty-value }{ Resources/#3 }
+%  }
+%  {
+%    \@@_backend_pageresources_gput:nnnn { #1 } { #2 } { #3 } { #4}
+%  }
+% }
+%
+%\cs_generate_variant:Nn \@@_pageresources_gput:nnnn {nnnx}
+%\cs_generate_variant:Nn \@@_pageresources_gput:nnn {nnx}
 %</package>
 %    \end{macrocode}
 
@@ -2450,15 +2444,11 @@ local function @@_backend_PageN_Resources_gpush (page)
   end
   token = "/Properties <<"..token..">>"
  end
- --  print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
   for i,name in ipairs(ResourceList) do
- -- print(name)
-  if l3kernel.@@.Page.Resources[name] then
- -- print(name)
-  token = token .. "/"..name.." "..l3kernel.pdf.object_ref("PageN/Resources/"..name)
+   if l3kernel.@@.Page.Resources[name] then
+   token = token .. "/"..name.." "..l3kernel.pdf.object_ref("PageN/Resources/"..name)
+   end
   end
-  end
- -- add ExtGstate etc here ....
  return token
 end
 
