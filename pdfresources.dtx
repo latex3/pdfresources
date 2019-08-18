@@ -1494,6 +1494,37 @@
 
 %</package>
 %    \end{macrocode}
+% \subsection{Catalog}
+% \subsubsection{Catalog / backend}
+% the backend command is already in the driver:
+% \verb+\__pdf_backend_catalog_gput:nn+
+% \subsubsection{ Catalog / management }
+% \begin{NOTE}{UF}
+% The catalog dictionary is filled by e.g. \cs{pdfcatalog}. Multiple appearances of
+% \cs{pdfcatalog} are concatenated, so one could end with multiple entries for the same value
+% with luatex and pdftex -- the other backends normally avoid this problem.
+% We therefore setup a property which is filled and executed at a sensible (not yet found) place.
+% \cs{pdfcatalog} has an option \texttt{openaction} to set the start view options.
+% This is ignored here but set in a separate command (to be in sync with other drivers).
+% /AF is even an array of dictionaries.
+% There is probably no way to test what has already been added to the catalog,
+% so doublettes can only be avoided with ``don't do it''.
+% % \end{NOTE}
+% The entries in the catalog have varying requirements regarding the
+% pdf management. Some entries (like /Lang) are simple values where the last setting should
+% win, other like /OutputIntents are dictionaries which can be filled from more than
+% one source. In some cases the values that needs to be added are not at the toplevel
+% but in some subsubdictionary. To handle this some \Arg{keys} in the following command
+% are connected with special functions.
+% \begin{function}[added = 2019-08-18]
+%   {\pdf_catalog_gput:nn}
+%   \begin{syntax}
+%     \cs{pdf_catalog_gput:nn} \Arg{key} \Arg {value}
+%   \end{syntax}
+%   This adds an entry to the catalog. \Arg{key} should be one of the following,
+%   the exact Format of \Arg{value} depends on \Arg{key}.
+% \end{function}
+
 %=================================================================
 % \subsection{other stuff}
 % \subsubsection{Openaction}
@@ -1687,18 +1718,6 @@
 %</package>
 %    \end{macrocode}
 % \subsection{The catalog}
-% The catalog dictionary is filled by e.g. \cs{pdfcatalog}. Multiple appearances of
-% \cs{pdfcatalog} are concatenated, so one could end with multiple entries.
-% We is better to avoid this. We therefore setup a
-% property which is filled and executed in one at a sensible (not yet found) place.
-% \cs{pdfcatalog} has an option \texttt{openaction} to set the start view options.
-% This is ignored here but set in a separate command (to be in sync with other drivers).
-% The entries in the catalog have varying requirements regarding the
-% pdf management. Some entries (like /Lang) are simple values where the last setting can
-% simply win, other like /OutputIntents are dictionaries which can be filled from more than
-% one source. /AF is even an array of dictionaries.
-% There is probably no way to test what has already been added to the catalog,
-% so doublettes can only be avoided with ``don't do it''.
 % \subsubsection{Simple values}
 % \enquote{Simple} values are values that can be sensibly set only once. When set a second time
 % the new value overwrites the first value. The value itself can be something simple like

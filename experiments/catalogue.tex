@@ -14,40 +14,60 @@
 
 \bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
 {
- \pdfcatalog{/Lang~(en-UK)}
+ \__pdf_backend_catalog_gput:nn {Lang}{(en-UK)}
+ %\pdfcatalog{/Lang~(en-UK)}
  % not good there should be only one ...
  %\pdfcatalog{/Lang (de-DE)}
- \pdfcatalog{/OpenAction~[\pdf_pageobject_ref:n {2}~/FitH]}
+ \exp_args:Nnx 
+ \__pdf_backend_catalog_gput:nn {Openaction}{[\pdf_pageobject_ref:n {2}~/FitH]}
+ 
+ %\pdfcatalog{/OpenAction~[\pdf_pageobject_ref:n {2}~/FitH]}
 }
 xxx
 %\special{pdf: docview << /PageMode /UseThumbs >> }
 \sys_if_engine_xetex:T
 {
-\special{pdf:put @catalog << /PageLayout /SinglePage >> }
+%\special{pdf:put @catalog << /PageLayout /SinglePage >> }
+\__pdf_backend_catalog_gput:nn {PageLayout}{/SinglePage}
 %not a problem, the second wins:
-\special{pdf:put @catalog << /Lang~(en-UK)>> }
-\special{pdf:put @catalog << /Lang~(de-DE)>> }
+%\special{pdf:put @catalog << /Lang~(en-UK)>> }
+ \__pdf_backend_catalog_gput:nn {Lang}{(en-UK)}
+%\special{pdf:put @catalog << /Lang~(de-DE)>> }
+ \__pdf_backend_catalog_gput:nn {Lang}{(de-DE)}
 %\special{pdf:put @catalog << /PageLayout /SinglePage >> }
 %\special{pdf:put @catalog << /PageLayout /TwoColumnRight >> }
 %\special{pdf:put @catalog << /PageMode /UseThumbs >> }
 %\special{pdf:docview <</OpenAction[@page2 /FitH]>>}
-\special{pdf:put @catalog <</OpenAction[\pdf_pageobject_ref:n {2}~/FitH]>>}
+%\special{pdf:put @catalog <</OpenAction[\pdf_pageobject_ref:n {2}~/FitH]>>}
+\exp_args:Nnx 
+\__pdf_backend_catalog_gput:nn {OpenAction}{[\pdf_pageobject_ref:n {2}~/FitH]}
 }
 
 \bool_if:nT {\sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p: }
 {
-  \special{ps:~SDict~begin~mark~{Catalog}~<</PageLayout /SinglePage>>~/PUT~pdfmark~end}
-  \special{ps:~SDict~begin~mark~{Catalog}~<</PageLayout /TwoColumnRight>>~/PUT~pdfmark~end}
-  \special{ps:~SDict~begin~mark~{Catalog}~<</PageMode  /UseThumbs>>~/PUT~pdfmark~end}
-  \special{ps:~SDict~begin~mark~{Catalog}~<</Lang~(en-UK)>>~/PUT~pdfmark~end}
-  \special{ps:~SDict~begin~mark~{Catalog}~<</Lang~(de-DE)>>~/PUT~pdfmark~end}
-  \special{ps:~SDict~begin~mark~{Catalog}~<</OpenAction~[\pdf_pageobject_ref:n {2}~/FitH]>>~/PUT~pdfmark~end}
+  %\special{ps:~SDict~begin~mark~{Catalog}~<</PageLayout /SinglePage>>~/PUT~pdfmark~end}
+  \__pdf_backend_catalog_gput:nn {PageLayout}{/SinglePage}
+  \__pdf_backend_catalog_gput:nn {Lang}{(en-UK)}
+  %\special{ps:~SDict~begin~mark~{Catalog}~<</PageLayout /TwoColumnRight>>~/PUT~pdfmark~end}
+  %\special{ps:~SDict~begin~mark~{Catalog}~<</PageMode  /UseThumbs>>~/PUT~pdfmark~end}
+  %\special{ps:~SDict~begin~mark~{Catalog}~<</Lang~(en-UK)>>~/PUT~pdfmark~end}
+  %\special{ps:~SDict~begin~mark~{Catalog}~<</Lang~(de-DE)>>~/PUT~pdfmark~end}
+  %\special{ps:~SDict~begin~mark~{Catalog}~<</OpenAction~[\pdf_pageobject_ref:n {2}~/FitH]>>~/PUT~pdfmark~end}
+  \exp_args:Nnx
+\__pdf_backend_catalog_gput:nn {OpenAction}{[\pdf_pageobject_ref:n {2}~/FitH]}
 %\pbs_special:n{~mark~{Catalog}~<<#1>>~/PUT~pdfmark}
 }
 
 \bool_if:NT {\sys_if_engine_luatex_p:}
 {
-\pdfextension catalog {/OpenAction~[\pdf_pageobject_ref:n {2}~/FitH]} %openaction~goto~page 2 {/FitH}
+%\pdfextension catalog {/OpenAction~[\pdf_pageobject_ref:n {2}~/FitH]} %openaction~goto~page 2 {/FitH}
+\__pdf_backend_catalog_gput:nn {Lang}{(en-UK)}
+ %\pdfcatalog{/Lang~(en-UK)}
+ % not good there should be only one ...
+ %\pdfcatalog{/Lang (de-DE)}
+ \exp_args:Nnx
+ \__pdf_backend_catalog_gput:nn {Openaction}{[\pdf_pageobject_ref:n {2}~/FitH]}
+ 
 }
 \newpage blb
 \newpage blbl
@@ -70,14 +90,16 @@ Catalog/PageMode                 name (/UseNone, /UseOutlines, /UseThumbs, /Full
        /Threads                  (objref to array)
        /DPartRoot                (dict, pdf 2.0)
        /PageLabels               (number tree /indirect object)
+       /Version                   name, eg. /1.7
        /AcroForm/NeedAppearances : boolean, single
                 /SigFlags        : Integer
                 /DA              : String
                 /Q               : Integer
                 /XFA             : stream or array
 
-single but should perhaps get
- 
+single but should perhaps get an additional user command ...
+goto page can be done with the argument "[\pdf_pageobj_ref:n{2}~/FitH]"
+
        /OpenAction               (array (dest) or dictionary (action))
 
 multiple values
@@ -86,18 +108,18 @@ prop
 1 Catalog/ViewerPreferences       e.g. /HideToolbar boolean
                                        /HideMenubar boolean
                                      ....
-\pdf_catalog:nn {MarkInfo}{{Marked}{true}}                                     
+\pdf_catalog:nn {MarkInfo}{{Marked}{true}}
 2 Catalog/MarkInfo               /Marked           boolean
                                  /UserProperties   boolean
                                  /Suspects         boolean
-\pdf_catalog:nn {AA}{{WS}{dict/objref}}                                 
+\pdf_catalog:nn {AA}{{WS}{dict/objref}}
 4 Catalog/AA                     /WC  (dict)
                                  /WS  (dict)
                                  /DS  (dict)
                                  /WP  (dict)
                                  /DP  (dict)
-                                 
-\pdf_catalog:nn {AcroForm/DR/Font} {{Name}{objref}}                                 
+
+\pdf_catalog:nn {AcroForm/DR/Font} {{Name}{objref}}
 14 Catalog/AcroForm/DR/Font
 
 
@@ -128,8 +150,8 @@ Catalog/AcroForm/DR/Font       dict from 14
 Catalog/AcroForm
 Catalog/
 
-disable direct access: 
-AcroForm    
+disable direct access:
+AcroForm
 AcroForm/DR if value = Font
 
 
