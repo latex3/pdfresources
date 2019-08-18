@@ -154,40 +154,50 @@
 %</package>
 %    \end{macrocode}
 % \subsection{references to page objects}
+% \begin{function}[added = 2019-08-18]
+%   {\pdf_pageobject_ref:n}
+%   \begin{syntax}
+%     \cs{pdf_pageobject_ref:n} \Arg{number}
+%   \end{syntax}
+%   This returns the object reference of a page object. The number is the absolute
+%   page number. The count starts with one.
+% \end{function}
 %    \begin{macrocode}
 %<*package>
 \bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p:}
 {
- \cs_new:Npn \@@_backend_pageobj_ref:n #1
+ \cs_new:Npn \@@_backend_pageobject_ref:n #1
   {
-    \tex_pdfpageref:D #1 ~ 0 ~ R
+    \tex_pdfpageref:D #1 ~ \c_space_tl 0 ~ R
   }
 }
 %luatex
 \sys_if_engine_luatex:T
  {
-  \cs_new:Npn \@@_backend_pageobj_ref:n #1
+  \cs_new:Npn \@@_backend_pageobject_ref:n #1
    {
-     \tex_pdffeedback:D~pageref #1 ~ 0 ~ R
+     \tex_pdffeedback:D~pageref #1 ~ \c_space_tl 0 ~ R
    }
  }
 %dvips
 \bool_if:nT {\sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p: }
 {
- \cs_new:Npx \@@_backend_pageobj_ref:n #1
+ \cs_new:Npn \@@_backend_pageobject_ref:n #1
   {
-    \token_to_str:N {Page#1 \token_to_str:N}
+    {Page#1}
   }
 }
 
 %xetex
 \sys_if_engine_xetex:T
  {
-  \cs_new:Npn \@@_backend_pageobj_ref:n #1
+  \cs_new:Npn \@@_backend_pageobject_ref:n #1
    {
      @page#1
    }
  }
+
+\cs_set_eq:NN \pdf_pageobject_ref:n \@@_backend_pageobject_ref:n
 %</package>
 %    \end{macrocode}
 % \subsection{Shipoutcode}
