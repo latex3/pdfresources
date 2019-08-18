@@ -10,15 +10,28 @@
 \ExplSyntaxOff
 
 \begin{document}
-
 \ExplSyntaxOn
+
+\bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
+{
+ \pdfcatalog{/Lang~(en-UK)}
+ % not good there should be only one ...
+ %\pdfcatalog{/Lang (de-DE)}
+ \pdfcatalog{/OpenAction~[\pdfpageref 2~0~R~/FitH]}
+}
 xxx
 %\special{pdf: docview << /PageMode /UseThumbs >> }
 \sys_if_engine_xetex:T
 {
 \special{pdf:put @catalog << /PageLayout /SinglePage >> }
-\special{pdf:put @catalog << /PageLayout /TwoColumnRight >> }
-\special{pdf:put @catalog << /PageMode /UseThumbs >> }
+%not a problem, the second wins:
+\special{pdf:put @catalog << /Lang~(en-UK)>> }
+\special{pdf:put @catalog << /Lang~(de-DE)>> }
+%\special{pdf:put @catalog << /PageLayout /SinglePage >> }
+%\special{pdf:put @catalog << /PageLayout /TwoColumnRight >> }
+%\special{pdf:put @catalog << /PageMode /UseThumbs >> }
+%\special{pdf:docview <</OpenAction[@page2 /FitH]>>}
+\special{pdf:put @catalog <</OpenAction[@page2 /FitH]>>}
 }
 
 \bool_if:nT {\sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p: }
@@ -26,37 +39,122 @@ xxx
   \special{ps:~SDict~begin~mark~{Catalog}~<</PageLayout /SinglePage>>~/PUT~pdfmark~end}
   \special{ps:~SDict~begin~mark~{Catalog}~<</PageLayout /TwoColumnRight>>~/PUT~pdfmark~end}
   \special{ps:~SDict~begin~mark~{Catalog}~<</PageMode  /UseThumbs>>~/PUT~pdfmark~end}
+  \special{ps:~SDict~begin~mark~{Catalog}~<</Lang~(en-UK)>>~/PUT~pdfmark~end}
+  \special{ps:~SDict~begin~mark~{Catalog}~<</Lang~(de-DE)>>~/PUT~pdfmark~end}
+  \special{ps:~SDict~begin~mark~{Catalog}~<</OpenAction~[{Page2}~/FitH]>>~/PUT~pdfmark~end}
 %\pbs_special:n{~mark~{Catalog}~<<#1>>~/PUT~pdfmark}
 }
+
+\bool_if:NT {\sys_if_engine_luatex_p:}
+{
+\pdfextension catalog {  } openaction~goto~page 2 {/FitH}
+}
+\newpage blb
+\newpage blbl
 \ExplSyntaxOff
 \end{document}
+single / exclusive
+\pdf_catalog:nn :
+Catalog/PageMode                 name (/UseNone, /UseOutlines, /UseThumbs, /FullScreen, /UseOC (PDF 1.5),/UseAttachments (PDF 1.6)
+       /Lang                     (string, e.g. (de-DE))
+       /PageLayout               (name: one of /SinglePage, /OneColumn, /TwoColumnLeft, /TwoColumnRight, /TwoPageLeft (PDF 1.5), /TwoPageRight (PDF 1.5))
+       /StructTreeRoot           obj ref / dict
+       /Metadata                 obj ref / stream
+       /NeedsRendering           (boolean, pdf 1.7, probably obsolete)
+       /SpiderInfo               (dict, objref)
+       /PieceInfo                (dict, objref)
+       /Legal                    (dict, objref)
+       /Perms                    (dict, objref, pdf 1.5, permissions)
+       /URI                      (dict)
+       /Collection               (dict)
+       /Threads                  (objref to array)
+       /DPartRoot                (dict, pdf 2.0)
+       /PageLabels               (number tree /indirect object)
+       /AcroForm/NeedAppearances : boolean, single
+                /SigFlags        : Integer
+                /DA              : String
+                /Q               : Integer
+                /XFA             : stream or array
 
-Catalogue/OCProperties/OCGs                  
-                      /D 
-                      /Configs
-         /AcroForm                 dict
-         /Metadata                 stream
-         /PageMode                 name
-         /ViewerPreferences        dict
-         /OutputIntents            (array of dict)
-         /MarkInfo                 dict
-         /PageLabels               (number tree /indirect object)
-         /PageLayout               (name: one of ...)
-         /Outlines                 (dict, must be an indirect reference)
-         /Threads                  (array, must be an indirect reference)
-         /OpenAction               (array (dest) or dictionary (action))
-         /AA                       (dict, additional-actions)
-         /URI                      (dict)
-         /StructTreeRoot           (dict) relevant for tagging
-         /Lang                     (string, e.g. (de-DE))
-         /SpiderInfo               (dict)
-         /PieceInfo                (dict)
-         /Perms                    (dict, pdf 1.5, permissions)
-         /Legal                    (dict, pdf 1.5)
-         /Requirements             (array, pdf 1.7)
-         /NeedsRendering           (boolean, pdf 1.7)
-         /Extensions               (dict, pdf 2.0)
-         /DSS                      (dict, pdf 2.0)
-         /AF                       (array of dictionaries, pdf 2.0, associated files, important for accessibility)
-         /DPartRoot                (dict, pdf 2.0)         
-                     
+single but has perhaps a specific interface:
+       /OpenAction               (array (dest) or dictionary (action))
+
+multiple values
+prop
+\pdf_catalog:nn {ViewerPreferences}{{HideToolbar}{true}}
+1 Catalog/ViewerPreferences       e.g. /HideToolbar boolean
+                                       /HideMenubar boolean
+                                     ....
+\pdf_catalog:nn {MarkInfo}{{Marked}{true}}                                     
+2 Catalog/MarkInfo               /Marked           boolean
+                                 /UserProperties   boolean
+                                 /Suspects         boolean
+\pdf_catalog:nn {AA}{{WS}{dict/objref}}                                 
+4 Catalog/AA                     /WC  (dict)
+                                 /WS  (dict)
+                                 /DS  (dict)
+                                 /WP  (dict)
+                                 /DP  (dict)
+                                 
+\pdf_catalog:nn {AcroForm/DR/Font} {{Name}{objref}}                                 
+14 Catalog/AcroForm/DR/Font
+
+
+seq
+\pdf_catalog:nn {OutputIntents}{obj ref}
+3 Catalog/OutputIntents           object ref
+5 Catalog/Requirements            object ref  pdf 1.7
+6 Catalog/AF                      object ref (dict) pdf 2.0 associated files, important for accessibility)
+7 Catalog/OCProperties/OCGs       object ref
+8 Catalog/OCProperties/Configs +D object ref, D is the first (left)
+12 Catalog/AcroForm/Fields        object ref
+13 Catalog/AcroForm/CO            object ref
+
+build
+Catalog/MarkInfo           dict from  2
+Catalog/ViewerPreferences  dict from  1 ...
+Catalog/OutputIntents      array from 3
+Catalog/AA                 dict from  4
+Catalog/Requirements       array from 5
+Catalog/AF                 array from 6
+9  Catalog/OCProperties/OCGs    array from 7
+10 Catalog/OCProperties/Configs array from 8 (2-n)
+11 Catalog/OCProperties/D       first from 8
+Catalog/OCProperties       dict from 9+10+11
+Catalog/AcroForm/Fields        array from 12
+Catalog/AcroForm/CO            array from 13
+Catalog/AcroForm/DR/Font       dict from 14
+Catalog/AcroForm
+Catalog/
+
+disable direct access: 
+AcroForm    
+AcroForm/DR if value = Font
+
+
+automatic
+Catalog/Outlines : created with pdflatex/luatex if \pdfoutline/pdfextension outline is used
+                   xelatex: \special{pdf:out, dvips similar
+Catalog/Names :    Is created automatically (along with a subdict /Dests) if
+                   \verb+\pdfdest+ with keyword names is used. No manual use/setting could be found.
+                   Contains various name trees.
+
+leave open for now
+/Extensions               (dict, pdf 2.0)
+/Dests ? difference to subdict in Names?
+/DSS                      (dict, pdf 2.0)
+/Acroform/DR/ExtGState etc probably unneeded.
+
+
+
+
+
+
+
+
+
+
+
+
+
+

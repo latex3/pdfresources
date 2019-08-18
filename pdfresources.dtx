@@ -153,6 +153,43 @@
 
 %</package>
 %    \end{macrocode}
+% \subsection{references to page objects}
+%    \begin{macrocode}
+%<*package>
+\bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p:}
+{
+ \cs_new:Npn \@@_backend_pageobj_ref:n #1
+  {
+    \tex_pdfpageref:D #1 ~ 0 ~ R
+  }
+}
+%luatex
+\sys_if_engine_luatex:T
+ {
+  \cs_new:Npn \@@_backend_pageobj_ref:n #1
+   {
+     \tex_pdffeedback:D~pageref #1 ~ 0 ~ R
+   }
+ }
+%dvips
+\bool_if:nT {\sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p: }
+{
+ \cs_new:Npx \@@_backend_pageobj_ref:n #1
+  {
+    \token_to_str:N {Page#1 \token_to_str:N}
+  }
+}
+
+%xetex
+\sys_if_engine_xetex:T
+ {
+  \cs_new:Npn \@@_backend_pageobj_ref:n #1
+   {
+     @page#1
+   }
+ }
+%</package>
+%    \end{macrocode}
 % \subsection{Shipoutcode}
 % For now -- until a expl3/kernel interface exists -- code is added with atbegshi:
 %    \begin{macrocode}
@@ -1449,6 +1486,12 @@
 %    \end{macrocode}
 %=================================================================
 % \subsection{other stuff}
+% \subsubsection{Openaction}
+% \begin{NOTE}{UF}
+% does this need a specific command???
+% the object number of the page is in \verb+\pdfpageref+, so probably it can
+% be handled along with the catalog commands.
+% \end{NOTE}
 %    \begin{macrocode}
 %<*package>
 
@@ -1471,13 +1514,19 @@
 }
 %need check ...
 \sys_if_engine_xetex:T
-{ %% unclear
+{ %%
  \cs_new_protected:Nn \@@_backend_docview:nn
-  {}
-   %\__pdf_backend:n{docview << #1 >> } ????????
+  {
+   \@@_backend:n {docview << /OpenAction[@page#1~#2]>>}
+  }
 }
-%\input{l3pdfmode-pdf.def}
-
+%dvips ????????????????
+\bool_if:nT {\sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p: }
+{
+ \cs_new_protected:Nn \@@_backend_docview:nn %#1 page number, #2 e.g. /FitH
+ {
+ }
+}
 %</package>
 %    \end{macrocode}
 % \section{Management code / pdf Module}
