@@ -24,6 +24,7 @@
 %
 %<*driver>
 \documentclass{l3doc}
+\usepackage{tabularx,array,booktabs}
 \begin{document}
   \DocInput{\jobname.dtx}
 \end{document}
@@ -91,68 +92,106 @@
 %^^A still needed:
 %^^A \pdf@strcmp??
 %^^A \pdf@escapestring?? \pdfescapestring
+% \begin{variable}{\l_@@_tmpa_prop, \l_@@_tmpa_tl }
+% Some scratch variable
 %    \begin{macrocode}
 %<*package>
-\prop_new:N\l_@@_tmpa_prop
-\tl_new:N\l_@@_tmpa_tl
-
-% helper command to output a key + value of a prop as needed in a dict.
-% I don't check if #1 or #2 is empty, imho this should be done only in the pdf layer
-% at the input?
-\cs_new:Npn \@@_dict_item:nn #1 #2 {/#1~#2~}
-
-%helper command to output a key-object ref:
-\cs_new:Npn \@@_dict_objref_item:nn #1 #2
- {
-   /#1~\@@_backend_object_ref:n {#2}
- }
+\prop_new:N \l_@@_tmpa_prop
+\tl_new:N \l_@@_tmpa_tl
 %</package>
 %    \end{macrocode}
+% \end{variable}
+% \begin{macro}{\@@_dict_item:nn,\@@_dict_objref_item:nn}
+% Command to output dict entries: The arguments are \meta{name}\meta{value} and
+% \meta{name}\meta{object name}, \meta{name} should be a valid pdf name without
+% the slash.
+% The commands don't check if the argument are empty or valid. This should be done
+% in the pdf layer at the input.
+%    \begin{macrocode}
+%<*package>
+\cs_new:Npn \@@_dict_item:nn #1 #2 { /#1~#2~ } %name,value
+
+\cs_new:Npn \@@_dict_objref_item:nn #1 #2      %name, object name
+  {
+    /#1~\@@_backend_object_ref:n { #2 }
+  }
+%</package>
+%    \end{macrocode}
+% \end{macro}
+%
 % \subsection{some zref code, needs to be replaced later}
+% \begin{variable}
+%  {\g_@@_abspage_int, \g_@@_backend_resourceid_int, \g_@@_backend_name_int}
+%  an absolute page counter, a counter to create labels for the resources, a counter
+%  to number properties in bdc marks.
 %    \begin{macrocode}
 %<*package>
 \int_new:N \g_@@_abspage_int
 \int_new:N \g_@@_backend_resourceid_int
 \int_new:N \g_@@_backend_name_int
-\zref@newlist  {l3pdf}
-\zref@newprop* {pdf@abspage} [0] {\int_use:N\g_@@_abspage_int}
-\zref@addprop  {l3pdf} {pdf@abspage}
 %</package>
 %    \end{macrocode}
+% \end{variable}
+a reference for the absolute page counter
+%    \begin{macrocode}
+%<*package>
+\zref@newlist  { l3pdf }
+\zref@newprop* { pdf@abspage } [0] { \int_use:N \g_@@_abspage_int }
+\zref@addprop  { l3pdf } { pdf@abspage }
+%</package>
+%    \end{macrocode}
+%
 % \subsection{luacode}
+% Load the lua code.
 %    \begin{macrocode}
 %<*package>
 \sys_if_engine_luatex:T
-{
- \directlua{require("pdfresources.lua")}
-}
+  {
+    \directlua { require("pdfresources.lua") }
+  }
 %</package>
 %    \end{macrocode}
+%
 % \subsection{end of run}
 % \begin{NOTE}{UF}
 % the \enquote{end-of-run} command is temporary until shipout/atendshipout code
-% is ready. dvips implementation missing. Currently a noop.
+% is ready. dvips/xetex implementation missing/currently a noop.
 % \end{NOTE}
+% \begin{macro}{\@@_backend_end_run:n}
 %    \begin{macrocode}
 %<*package>
 %
-%   \AtEndDocument{\clearpage #1} ? (not dvi)
-%   \AtEndDvi{#1}
-\bool_if:nT { (\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p:) || \sys_if_engine_luatex_p:}
- {
-   \cs_new_protected:Npn \@@_backend_end_run:n #1 {\AtEndDocument{\clearpage #1}} %check ...
- }
+%  \AtEndDocument{\clearpage #1} ? (not dvi)
+%  \AtEndDvi{#1}
+% pdftex,luatex
+\bool_if:nT
+  {
+    (\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p:)
+    ||
+    \sys_if_engine_luatex_p:
+  }
+  {
+    \cs_new_protected:Npn \@@_backend_end_run:n #1
+      {
+        \AtEndDocument{\clearpage #1} %check ...
+      }
+  }
+%xetex
 \bool_if:nT {\sys_if_engine_xetex_p:}
- {
-   \cs_new_protected:Npn \@@_backend_end_run:n #1 {} %check ...
- }
-\bool_if:nT { (\sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p:) }
- {
-   \cs_new_protected:Npn \@@_backend_end_run:n #1 {} %check ...
- }
+  {
+    \cs_new_protected:Npn \@@_backend_end_run:n #1 {} %check ...
+  }
+
+%dvips
+\bool_if:nT { \sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p: }
+  {
+    \cs_new_protected:Npn \@@_backend_end_run:n #1 {} %check ...
+  }
 
 %</package>
 %    \end{macrocode}
+% \end{macro}
+%
 % \subsection{references to page objects}
 % \begin{function}[added = 2019-08-18]
 %   {\pdf_pageobject_ref:n}
@@ -1521,10 +1560,54 @@
 %   \begin{syntax}
 %     \cs{pdf_catalog_gput:nn} \Arg{key} \Arg {value}
 %   \end{syntax}
-%   This adds an entry to the catalog. \Arg{key} should be one of the following,
-%   the exact Format of \Arg{value} depends on \Arg{key}.
+%   This adds an entry to the catalog. \Arg{key} is either a valid pdf name
+%   (without preceding slash) or a composed name which represents
+%   an entry in a subdictionary.
+%   The exact format of \Arg{value} depends on \Arg{key}.
+%
+%   \paragraph{Simple values}
+%   The values in the following tabular are \enquote{simple} in the sense that they are
+%   added as is to the catalog. If \meta{key} gets assigned two values the last one wins.
+%
+%   \medskip
+%   \noindent
+%   \begin{tabularx}{\linewidth}{ll>{\raggedright\arraybackslash}X}
+%    \bfseries Key                     &  \bfseries Value  & \bfseries Remark       \\\midrule
+%    Lang                    &  string & e.g. \texttt{(de-DE)} \\
+%    PageLayout              &  name   & one of /SinglePage, /OneColumn, /TwoColumnLeft, /TwoColumnRight, /TwoPageLeft (PDF 1.5), /TwoPageRight (PDF 1.5)) \\
+%    StructTreeRoot          &  obj ref or dict\\
+%    Metadata                &  obj ref or stream \\
+%    NeedsRendering          &  boolean &   pdf 1.7\\
+%    SpiderInfo              &  objref or dict\\
+%    PieceInfo               &  objref or dict\\
+%    Legal                   &  objref or dict\\
+%    Perms                   &  objref or dict & pdf 1.5, permissions\\
+%    URI                     &  objref or dict \\
+%    Collection              &  objref or dict\\
+%    Threads                 &  objref to an array\\
+%    DPartRoot               &  objref or dict & pdf 2.0\\
+%    PageLabels              &  objref &  number tree \\
+%    Version                 &  name   & eg. \texttt{/1.7} \\
+%   \end{tabularx}
+%   \par\medskip
 % \end{function}
+%    \begin{macrocode}
+%<*package>
+\@@_tree_new:n {Catalog}
 
+\cs_new_protected:Npn \pdf_catalog_gput:nn #1 #2 %#1 name, #2 value
+ {
+  \tl_if_empty:nTF { #2 }
+  {
+   \msg_none:nnn { pdf }{ empty-value }{ #1 }
+  }
+  {
+   % Add later: test for the names that should be handled specially
+  \prop_gput:Nnn \g_@@_catalog_prop {#1}{#2}
+  }
+ }
+%</package>
+%    \end{macrocode}
 %=================================================================
 % \subsection{other stuff}
 % \subsubsection{Openaction}
@@ -1757,19 +1840,7 @@
 % \end{function}
 % \begin{macro}{\pdf_catalog_gput:nn}
 %    \begin{macrocode}
-%<*package>
-\prop_new:N \g_@@_catalog_prop
-\cs_new_protected:Npn \pdf_catalog_gput:nn #1 #2 %#1 name, #2 value
- {
-  \tl_if_empty:nTF { #2 }
-  {
-   \msg_none:nnn { pdf }{ empty-value }{ #1 }
-  }
-  {% Add later: test for the names that should be handled specially
-  \prop_gput:Nnn \g_@@_catalog_prop {#1}{#2}
-  }
- }
-%</package>
+
 %    \end{macrocode}
 % \end{macro}
 %^^A open:  AcroForm, AA (dict, additional-actions),
