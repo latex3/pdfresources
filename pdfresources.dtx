@@ -198,68 +198,77 @@ a reference for the absolute page counter
 %   \begin{syntax}
 %     \cs{pdf_pageobject_ref:n} \Arg{number}
 %   \end{syntax}
-%   This returns the object reference of a page object. The number is the absolute
-%   page number. The count starts with one.
+%   This returns the object reference of a page object. The \Arg{number} is
+%   the absolute page number. The count starts with one.
 % \end{function}
+% \begin{macro}{ \@@_backend_pageobject_ref:n }
 %    \begin{macrocode}
 %<*package>
+%pdftex
 \bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p:}
-{
- \cs_new:Npn \@@_backend_pageobject_ref:n #1
   {
-    \tex_pdfpageref:D #1 ~ \c_space_tl 0 ~ R
+    \cs_new:Npn \@@_backend_pageobject_ref:n #1
+      {
+        \tex_pdfpageref:D #1 ~ \c_space_tl 0 ~ R
+      }
   }
-}
 %luatex
 \sys_if_engine_luatex:T
- {
-  \cs_new:Npn \@@_backend_pageobject_ref:n #1
-   {
-     \tex_pdffeedback:D~pageref #1 ~ \c_space_tl 0 ~ R
-   }
- }
+  {
+    \cs_new:Npn \@@_backend_pageobject_ref:n #1
+      {
+        \tex_pdffeedback:D~pageref #1 ~ \c_space_tl 0 ~ R
+      }
+  }
 %dvips
 \bool_if:nT {\sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p: }
-{
- \cs_new:Npn \@@_backend_pageobject_ref:n #1
   {
-    {Page#1}
+    \cs_new:Npn \@@_backend_pageobject_ref:n #1
+      {
+        {Page#1}
+      }
   }
-}
 
 %xetex
 \sys_if_engine_xetex:T
- {
-  \cs_new:Npn \@@_backend_pageobject_ref:n #1
-   {
-     @page#1
-   }
- }
+  {
+    \cs_new:Npn \@@_backend_pageobject_ref:n #1
+      {
+        @page#1
+      }
+  }
 
 \cs_set_eq:NN \pdf_pageobject_ref:n \@@_backend_pageobject_ref:n
 %</package>
 %    \end{macrocode}
+% \end{macro}
+%
 % \subsection{Shipoutcode}
+% \begin{NOTE}{UF}
 % For now -- until a expl3/kernel interface exists -- code is added with atbegshi:
+% \end{NOTE}
+% The macro contains the code that should be executed at every shipout.
+% In part the code is backend dependend
+% \begin{macro}{\@@_shipout_code:}
 %    \begin{macrocode}
 %<*package>
 \AtBeginShipout
- {
-  \AtBeginShipoutAddToBox
   {
-   \@@_shipout_code:
+    \AtBeginShipoutAddToBox
+      {
+        \@@_shipout_code:
+      }
   }
- }
 
 \cs_new_protected:Npn \@@_shipout_code:
- {
-  \int_gincr:N \g_@@_abspage_int
-  \@@_everypage_shipout_code:V \g_@@_abspage_int
-  \int_compare:nNnT { \g_@@_abspage_int }={\zref@extractdefault{LastPage}{abspage}{0}}
   {
-   \@@_lastpage_shipout_code:
+    \int_gincr:N \g_@@_abspage_int
+    \@@_everypage_shipout_code:V \g_@@_abspage_int
+    \int_compare:nNnT { \g_@@_abspage_int }={\zref@extractdefault{LastPage}{abspage}{0}}
+      {
+        \@@_lastpage_shipout_code:
+      }
   }
- }
 
 \cs_new_protected:Npn \@@_everypage_shipout_code:n #1
  {
@@ -274,7 +283,7 @@ a reference for the absolute page counter
  }
 %</package>
 %    \end{macrocode}
-%
+% \end{macro}
 % \subsection{Tree / path-Code}
 %  This is a bit experimental. Many code parts are quite similar: props are
 %  filled and output. So we define some generic commands
