@@ -284,18 +284,24 @@ a reference for the absolute page counter
 
 \cs_new_protected:Npn \@@_lastpage_shipout_code:
   {
-    \@@_Pages_gpush: 
+    \@@_Pages_gpush:
     \@@_Info_gpush:
   }
 %</package>
 %    \end{macrocode}
 % \end{macro}
-% \subsection{Tree / path-Code}
-%  This is a bit experimental. Many code parts are quite similar: props are
-%  filled and output. So we define some generic commands
-%  based on pathes. The main question will be if one can encode the different
+% \subsection{prop / path-Code}
+%  Many code parts are quite similar: props are filled and output.
+%  So we define some generic commands prop commands to ensure systematic
+%  internal names. The names are based on pathes separated by slashed.
+%  The first slash is not used in the names.
+%  \begin{NOTE}{UF}
+%  The main question will be if one can/should encode the different
 %  inner structures (array/dict) and the cases where users shouldn't fill a value
 %  but it should be done by subtrees ...
+%  \end{NOTE}
+%
+%  Currently the following names are used:
 %  \begin{verbatim}
 %  /Pages           %w,  \pagesattr
 %  /PageN           %w, N=1,..n or empty (=all pages) \pageattr
@@ -309,27 +315,36 @@ a reference for the absolute page counter
 %  /Catalog/OCProperties
 %  /Catalog/OutputIntents
 %  \end{verbatim}
+%  \begin{macro}{\@@_prop_name,\@@_prop_new:n,\@@_prop_names_seq}
 %    \begin{macrocode}
 %<*package>
-\cs_new:Npn \@@_tree_prop_name:n #1 % path name without /
+\seq_new:N \g_@@_prop_names_seq
+
+\cs_new:Npn \@@_prop_name:n #1 % path name without /
  {
    g_@@_/#1_prop
  }
 
-\cs_new_protected:Npn \@@_tree_new:n #1
+\cs_new_protected:Npn \@@_prop_new:n #1
  {
-  \prop_if_exist:cF { \@@_tree_prop_name:n {#1} }
+  \prop_if_exist:cF { \@@_prop_name:n {#1} }
    {
-    \prop_new:c  { \@@_tree_prop_name:n {#1} }
+    \prop_new:c  { \@@_prop_name:n {#1} }
+    \seq_gput_right:N \g_@@_prop_names_seq { #1 }
    }
  }
 
 \cs_new_protected:Npn \@@_tree_gclear:n #1
  {
-    \prop_gclear:c  { \@@_tree_prop_name:n {#1} }
+    \prop_gclear:c  { \@@_prop_name:n {#1} }
  }
 
-
+%</package>
+%    \end{macrocode}
+%  \end{macro}
+%  \begin{macro}{\@@_prop_name,\@@_prop_new:n,\@@_prop_names_seq}
+%    \begin{macrocode}
+%<*package>
 \cs_new_protected:Npn \@@_tree_gput:nnn #1 #2 #3  %#1 path, #2 name, #3 value
  { %test if tree path is allowed here?
   \tl_if_empty:nTF { #3 }
@@ -338,9 +353,9 @@ a reference for the absolute page counter
    }
    {
     \prop_if_exist:cTF
-     { \@@_tree_prop_name:n {#1} }
+     { \@@_prop_name:n {#1} }
      {
-      \prop_gput:cnn { \@@_tree_prop_name:n {#1} }{ #2 } { #3 }
+      \prop_gput:cnn { \@@_prop_name:n {#1} }{ #2 } { #3 }
      }
      {
       \msg_error:nnn { pdf } { wrong-path } {/#1}
@@ -349,25 +364,25 @@ a reference for the absolute page counter
  }
 \cs_new_protected:Npn \@@_tree_get:nnnN  #1 #2 #3
   {
-   \prop_get:cnN { \@@_tree_prop_name:n {#1} } { #2} #3
+   \prop_get:cnN { \@@_prop_name:n {#1} } { #2} #3
   }
 
 \cs_new_protected:Npn \@@_tree_gremove:nn #1 #2
   {
-   \prop_gremove:cn { \@@_tree_prop_name:n {#1} } { #2 }
+   \prop_gremove:cn { \@@_prop_name:n {#1} } { #2 }
   }
 
 \cs_new:Npn \@@_tree_map_dict_item:n #1
  {
-   \prop_map_function:cN { \@@_tree_prop_name:n {#1}} \@@_dict_item:nn
+   \prop_map_function:cN { \@@_prop_name:n {#1}} \@@_dict_item:nn
  }
 
 \cs_new_protected:Npn \@@_tree_merge:nnN #1 #2 #3 % merges: first #1 then optionally #2 into prop #3
  {
-   \prop_set_eq:Nc #3 { \@@_tree_prop_name:n  { #1 } }
-   \prop_if_exist:cT  { \@@_tree_prop_name:n  { #2 } }
+   \prop_set_eq:Nc #3 { \@@_prop_name:n  { #1 } }
+   \prop_if_exist:cT  { \@@_prop_name:n  { #2 } }
    {
-    \prop_map_inline:cn { \@@_tree_prop_name:n  { #2 } }
+    \prop_map_inline:cn { \@@_prop_name:n  { #2 } }
     {
       \prop_put:Nnn #3 { ##1 }{ ##2 }
     }
@@ -375,6 +390,7 @@ a reference for the absolute page counter
  }
 %</package>
 %    \end{macrocode}
+% \end{macro}
 % \section{Resources management}
 % \subsection{pdfpagesattr}
 % \subsubsection{pdfpagesattr/backend}
@@ -469,7 +485,7 @@ a reference for the absolute page counter
 % \end{function}
 %    \begin{macrocode}
 %<*package>
-\@@_tree_new:n {Pages}
+\@@_prop_new:n {Pages}
 % setter:
 %^^A documentated
 \cs_new_protected:Npn \pdf_pagesattr_gput:nn #1 #2
@@ -528,7 +544,7 @@ a reference for the absolute page counter
 %% backend commands
 % a prop for global/default settings which are used for more than
 % one page
-\@@_tree_new:n {backend_Page}
+\@@_prop_new:n {backend_Page}
 %pdflatex
 \bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
  {
@@ -566,7 +582,7 @@ a reference for the absolute page counter
                           {pdf@abspage}
                           {0}
      }
-    \@@_tree_new:n    {backend_Page\l_@@_tmpa_tl}
+    \@@_prop_new:n    {backend_Page\l_@@_tmpa_tl}
     \@@_tree_gput:nnn {backend_Page\l_@@_tmpa_tl}{#1}{#2}
    }
   %the code to push the values, used in shipout
@@ -778,7 +794,7 @@ a reference for the absolute page counter
 % \end{function}
 %    \begin{macrocode}
 %<*package>
-\@@_tree_new:n {Page}
+\@@_prop_new:n {Page}
 % setter.
 %^^A documentated
 \cs_new_protected:Npn \pdf_pageattr_gput:nn #1 #2
@@ -867,7 +883,7 @@ a reference for the absolute page counter
 % \end{function}
 %    \begin{macrocode}
 %<*package>
-\@@_tree_new:n {Info}
+\@@_prop_new:n {Info}
 
 \cs_new_protected:Npn \pdf_info_gput:nn #1 #2 %#1 key without /, #2 content
   {
@@ -892,8 +908,8 @@ a reference for the absolute page counter
 % push to the register command / issue the special
 \cs_new_protected:Npn \@@_Info_gpush:
   {
-    \prop_map_function:cN  { \@@_tree_prop_name:n {Info} } \@@_backend_info_gput:nn
-    \prop_gclear:c { \@@_tree_prop_name:n {Info} }
+    \prop_map_function:cN  { \@@_prop_name:n {Info} } \@@_backend_info_gput:nn
+    \prop_gclear:c { \@@_prop_name:n {Info} }
   }
 %</package>
 %    \end{macrocode}
@@ -947,7 +963,7 @@ a reference for the absolute page counter
 % pdftex and luatex (and perhaps dvips ...) need to know if there are in a
 % xform stream ...
 \bool_new:N \l_@@_backend_xform_bool
-\@@_tree_new:n {xform/Resources/Properties}
+\@@_prop_new:n {xform/Resources/Properties}
 %quite often needed
 \clist_const:Nn \c_@@_backend_pageresources_clist
   {
@@ -1008,7 +1024,7 @@ a reference for the absolute page counter
    {
     \clist_map_inline:Nn \c_@@_backend_pageresources_clist
     {
-     \prop_if_empty:cF { \@@_tree_prop_name:n {PageN/Resources/##1} }
+     \prop_if_empty:cF { \@@_prop_name:n {PageN/Resources/##1} }
       {
        \exp_args:Nx\__kernel_backend_literal:n
         {pdf:put~@resources~<</##1~\@@_backend_object_ref:n {PageN/Resources/##1}>>}
@@ -1075,7 +1091,7 @@ a reference for the absolute page counter
                           {pdf@abspage}
                           {0}
      }
-    \@@_tree_new:n    {backend_Page\l_@@_tmpa_tl/Resources/Properties}
+    \@@_prop_new:n    {backend_Page\l_@@_tmpa_tl/Resources/Properties}
     \exp_args:Nnx\@@_tree_gput:nnn
      {backend_Page\l_@@_tmpa_tl/Resources/Properties}
      {l3pdf\int_use:N\g_@@_backend_resourceid_int}
@@ -1090,7 +1106,7 @@ a reference for the absolute page counter
  \cs_new:Npn \@@_backend_PageN_Resources_gpush_aux:n #1
   {
    \prop_if_empty:cF
-    { \@@_tree_prop_name:n {PageN/Resources/#1} }
+    { \@@_prop_name:n {PageN/Resources/#1} }
     {
      \@@_dict_objref_item:nn {#1}{PageN/Resources/#1}
     }
@@ -1099,11 +1115,11 @@ a reference for the absolute page counter
   {
    \exp_args:NNx \tex_global:D \tex_pdfpageresources:D
    {
-    \prop_if_exist:cT  { \@@_tree_prop_name:n  { backend_Page#1/Resources/Properties } }
+    \prop_if_exist:cT  { \@@_prop_name:n  { backend_Page#1/Resources/Properties } }
      {
       /Properties~<<
        \prop_map_function:cN
-        { \@@_tree_prop_name:n  { backend_Page#1/Resources/Properties } } \@@_dict_item:nn
+        { \@@_prop_name:n  { backend_Page#1/Resources/Properties } } \@@_dict_item:nn
        >>
      }
     %% add ExtGState etc
@@ -1247,7 +1263,7 @@ a reference for the absolute page counter
     ~  resources ~
      {
       \int_compare:nNnT
-       {\prop_count:c { \@@_tree_prop_name:n {xform/Resources/Properties} }}>{0}
+       {\prop_count:c { \@@_prop_name:n {xform/Resources/Properties} }}>{0}
        {/Properties~<<\@@_tree_map_dict_item:n {xform/Resources/Properties}>>~ #3}
      }
     \l_@@_backend_tmpa_box
@@ -1299,7 +1315,7 @@ a reference for the absolute page counter
     ~  resources ~
      {
       \int_compare:nNnT
-       {\prop_count:c { \@@_tree_prop_name:n {xform/Resources/Properties} }}>{0}
+       {\prop_count:c { \@@_prop_name:n {xform/Resources/Properties} }}>{0}
        {/Properties~<<\@@_tree_map_dict_item:n {xform/Resources/Properties}>>~ #3}
      }
     \l_@@_backend_tmpa_box
@@ -1409,7 +1425,7 @@ a reference for the absolute page counter
 {
  \clist_map_inline:Nn \c_@@_backend_pageresources_clist
   {
-   \@@_tree_new:n {PageN/Resources/#1}
+   \@@_prop_new:n {PageN/Resources/#1}
    \@@_backend_object_new:nn {PageN/Resources/#1} {dict}
    \cs_if_exist:NT \tex_directlua:D
     {
@@ -1450,9 +1466,9 @@ a reference for the absolute page counter
  {
   \clist_map_inline:Nn \c_@@_backend_pageresources_clist
    {
-    %\prop_show:c{\@@_tree_prop_name:n {PageN/Resources/##1}}
+    %\prop_show:c{\@@_prop_name:n {PageN/Resources/##1}}
     \prop_if_empty:cF
-      { \@@_tree_prop_name:n {PageN/Resources/##1} }
+      { \@@_prop_name:n {PageN/Resources/##1} }
       {
         \exp_args:Nnx \@@_backend_object_write:nn
         { PageN/Resources/##1 }
@@ -1608,7 +1624,7 @@ a reference for the absolute page counter
 % \end{function}
 %    \begin{macrocode}
 %<*package>
-\@@_tree_new:n {Catalog}
+\@@_prop_new:n {Catalog}
 
 \cs_new_protected:Npn \pdf_catalog_gput:nn #1 #2 %#1 name, #2 value
  {
