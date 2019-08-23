@@ -47,7 +47,6 @@
 \bool_new:N\g_@@_patches_bool
 \DeclareOption { patches }{\bool_gset_true:N\g_@@_patches_bool}
 \ProcessOptions\relax
-%</package>
 %    \end{macrocode}
 %
 % \title{\pkg{pdfresources}}
@@ -95,10 +94,8 @@
 % \begin{variable}{\l_@@_tmpa_prop, \l_@@_tmpa_tl }
 % Some scratch variable
 %    \begin{macrocode}
-%<*package>
 \prop_new:N \l_@@_tmpa_prop
 \tl_new:N \l_@@_tmpa_tl
-%</package>
 %    \end{macrocode}
 % \end{variable}
 % \begin{macro}{\@@_dict_item:nn,\@@_dict_objref_item:nn}
@@ -108,14 +105,12 @@
 % The commands don't check if the argument are empty or valid. This should be done
 % in the pdf layer at the input.
 %    \begin{macrocode}
-%<*package>
 \cs_new:Npn \@@_dict_item:nn #1 #2 { /#1~#2~ } %name,value
 
 \cs_new:Npn \@@_dict_objref_item:nn #1 #2      %name, object name
   {
     /#1~\@@_backend_object_ref:n { #2 }
   }
-%</package>
 %    \end{macrocode}
 % \end{macro}
 %
@@ -125,31 +120,25 @@
 %  an absolute page counter, a counter to create labels for the resources, a counter
 %  to number properties in bdc marks.
 %    \begin{macrocode}
-%<*package>
 \int_new:N \g_@@_abspage_int
 \int_new:N \g_@@_backend_resourceid_int
 \int_new:N \g_@@_backend_name_int
-%</package>
 %    \end{macrocode}
 % \end{variable}
 a reference for the absolute page counter
 %    \begin{macrocode}
-%<*package>
 \zref@newlist  { l3pdf }
 \zref@newprop* { pdf@abspage } [0] { \int_use:N \g_@@_abspage_int }
 \zref@addprop  { l3pdf } { pdf@abspage }
-%</package>
 %    \end{macrocode}
 %
 % \subsection{luacode}
 % Load the lua code.
 %    \begin{macrocode}
-%<*package>
 \sys_if_engine_luatex:T
   {
     \directlua { require("pdfresources.lua") }
   }
-%</package>
 %    \end{macrocode}
 %
 % \subsection{end of run}
@@ -159,7 +148,6 @@ a reference for the absolute page counter
 % \end{NOTE}
 % \begin{macro}{\@@_backend_end_run:n}
 %    \begin{macrocode}
-%<*package>
 %
 %  \AtEndDocument{\clearpage #1} ? (not dvi)
 %  \AtEndDvi{#1}
@@ -188,7 +176,6 @@ a reference for the absolute page counter
     \cs_new_protected:Npn \@@_backend_end_run:n #1 {} %check ...
   }
 
-%</package>
 %    \end{macrocode}
 % \end{macro}
 %
@@ -203,7 +190,6 @@ a reference for the absolute page counter
 % \end{function}
 % \begin{macro}{ \@@_backend_pageobject_ref:n }
 %    \begin{macrocode}
-%<*package>
 %pdftex
 \bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p:}
   {
@@ -239,7 +225,6 @@ a reference for the absolute page counter
   }
 
 \cs_set_eq:NN \pdf_pageobject_ref:n \@@_backend_pageobject_ref:n
-%</package>
 %    \end{macrocode}
 % \end{macro}
 %
@@ -252,7 +237,6 @@ a reference for the absolute page counter
 % In part the code is backend dependant.
 % \begin{macro}{\@@_shipout_code:, \@@_everypage_shipout_code:n, \@@_lastpage_shipout_code:}
 %    \begin{macrocode}
-%<*package>
 \AtBeginShipout
   {
     \AtBeginShipoutAddToBox
@@ -287,7 +271,6 @@ a reference for the absolute page counter
     \@@_Pages_gpush:
     \@@_Info_gpush:
   }
-%</package>
 %    \end{macrocode}
 % \end{macro}
 % \subsection{prop / path-Code}
@@ -317,7 +300,6 @@ a reference for the absolute page counter
 %  \end{verbatim}
 %  \begin{macro}{\@@_prop_name,\@@_prop_new:n,\@@_prop_names_seq}
 %    \begin{macrocode}
-%<*package>
 \seq_new:N \g_@@_prop_names_seq
 
 \cs_new:Npn \@@_prop_name:n #1 % path name without /
@@ -339,12 +321,10 @@ a reference for the absolute page counter
     \prop_gclear:c  { \@@_prop_name:n {#1} }
  }
 
-%</package>
 %    \end{macrocode}
 %  \end{macro}
 %  \begin{macro}{\@@_prop_name,\@@_prop_new:n,\@@_prop_names_seq}
 %    \begin{macrocode}
-%<*package>
 \cs_new_protected:Npn \@@_tree_gput:nnn #1 #2 #3  %#1 path, #2 name, #3 value
  { %test if tree path is allowed here?
   \tl_if_empty:nTF { #3 }
@@ -388,7 +368,6 @@ a reference for the absolute page counter
     }
    }
  }
-%</package>
 %    \end{macrocode}
 % \end{macro}
 % \section{Resources management}
@@ -402,7 +381,6 @@ a reference for the absolute page counter
 %  both remove duplicate entries automatically, so there is no need to be careful.
 % \end{NOTE}
 %    \begin{macrocode}
-%<*package>
 %pdftex
 \bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p:}
 {
@@ -436,7 +414,6 @@ a reference for the absolute page counter
     \@@_backend:n{put~@pages~<<#1>>}
    }
  }
-%</package>
 %    \end{macrocode}
 % \subsubsection{pdfpagesattr/management}
 % \begin{NOTE}{UF}
@@ -484,7 +461,6 @@ a reference for the absolute page counter
 %   trying to remove it.
 % \end{function}
 %    \begin{macrocode}
-%<*package>
 \@@_prop_new:n {Pages}
 % setter:
 %^^A documentated
@@ -516,7 +492,6 @@ a reference for the absolute page counter
     }
   }
 
-%</package>
 %    \end{macrocode}
 % \subsection{pdfpageattr}
 % \subsubsection{pdfpageattr/backend}
@@ -540,7 +515,6 @@ a reference for the absolute page counter
 %  also the following pages) one need to repeat it on every shipout.
 % \end{NOTE}
 %    \begin{macrocode}
-%<*package>
 %% backend commands
 % a prop for global/default settings which are used for more than
 % one page
@@ -740,7 +714,6 @@ a reference for the absolute page counter
     \exp_args:Nx \@@_backend_Page_primitive:n { \@@_tree_map_dict_item:n {backend_Page} }
   }
 }
-%</package>
 %    \end{macrocode}
 % \subsubsection{pdfpageattr/management}
 % \begin{NOTE}{UF}
@@ -793,7 +766,6 @@ a reference for the absolute page counter
 %   set will be used. With the engine pdflatex (at least) a second compilation is needed.
 % \end{function}
 %    \begin{macrocode}
-%<*package>
 \@@_prop_new:n {Page}
 % setter.
 %^^A documentated
@@ -816,7 +788,6 @@ a reference for the absolute page counter
    \@@_backend_PageN_gput:nn { #1 }{ #2 }
   }
 
-%</package>
 %    \end{macrocode}
 % \subsection{The info dictionary}
 % \begin{NOTE}{UF}
@@ -882,7 +853,6 @@ a reference for the absolute page counter
 %   so values can be set at any time.
 % \end{function}
 %    \begin{macrocode}
-%<*package>
 \@@_prop_new:n {Info}
 
 \cs_new_protected:Npn \pdf_info_gput:nn #1 #2 %#1 key without /, #2 content
@@ -911,7 +881,6 @@ a reference for the absolute page counter
     \prop_map_function:cN  { \@@_prop_name:n {Info} } \@@_backend_info_gput:nn
     \prop_gclear:c { \@@_prop_name:n {Info} }
   }
-%</package>
 %    \end{macrocode}
 % \subsection{page resources / Properties and bdc-mark}
 % \begin{NOTE}{UF}
@@ -959,7 +928,6 @@ a reference for the absolute page counter
 % \end{function}
 % \subsubsection{bcd/Properties, backend code}
 %    \begin{macrocode}
-%<*package>
 % pdftex and luatex (and perhaps dvips ...) need to know if there are in a
 % xform stream ...
 \bool_new:N \l_@@_backend_xform_bool
@@ -1127,14 +1095,11 @@ a reference for the absolute page counter
    }
   }
 }
-%</package>
 %    \end{macrocode}
 % \subsubsection{bdc / management}
 %    \begin{macrocode}
-%<*package>
  \cs_set_eq:NN\pdf_bdc:nn\@@_backend_bdc:nn
  \cs_set_eq:NN\pdf_emc:  \@@_backend_emc:
-%</package>
 %    \end{macrocode}
 %
 %
@@ -1197,7 +1162,6 @@ a reference for the absolute page counter
 %    unit pt and  not in dimensions.
 %   \end{function}
 %    \begin{macrocode}
-%<*package>
  \cs_new_protected:Npn  \pdf_xform_new:nnnn #1 #2 #3 #4
   {
    \@@_backend_xform_new:nnnn { #1 } { #2 } { #3 } { #4 }
@@ -1225,11 +1189,9 @@ a reference for the absolute page counter
      \tl_use:c { c_@@_backend_xform_dp_ \tl_to_str:n {#1} _tl }
   }
 
-%</package>
 %    \end{macrocode}
 %   \subsubsection{pdfxform / backend }
 %    \begin{macrocode}
-%<*package>
 \box_new:N  \l_@@_backend_tmpa_box
 
 %%pdftex
@@ -1398,7 +1360,6 @@ a reference for the absolute page counter
    \box_use_drop:N \l_@@_backend_tmpa_box
  }
 }
-%</package>
 %    \end{macrocode}
 %
 % \subsection{page resources: ExtGState, ColorSpace, Shading, Pattern }
@@ -1417,7 +1378,6 @@ a reference for the absolute page counter
 % \subsubsection{page resources: ExtGState, ColorSpace, Shading, Pattern / backend}
 % Path: PageN/Resources/ExtGState etc
 %    \begin{macrocode}
-%<*package>
 % backend commands the command to fill the register
 % and to push the values.
 % pdftex and luatex
@@ -1512,7 +1472,6 @@ a reference for the absolute page counter
  \cs_new_protected:Npn \@@_backend_pageresources_gput:nnn #1 #2 #3 {}
  \cs_new_protected:Npn \@@_backend_pageresources_end_run: {}
 }
-%</package>
 %    \end{macrocode}
 %
 % \subsubsection{ page resources: ExtGState, ColorSpace, Shading, Pattern / management}
@@ -1535,17 +1494,14 @@ a reference for the absolute page counter
 %   the calls will overwrite each other and values will be lost.
 % \end{function}
 %    \begin{macrocode}
-%<*package>
 %
 % setter:  #1 is the name of the resource
 \cs_new_protected:Npn \pdf_pageresources_gput:nnn #1 #2 #3
   {
    \@@_backend_pageresources_gput:nnn {#1} { #2 }{ #3 }
   }
-%</package>
 %    \end{macrocode}
 %    \begin{macrocode}
-%<*package>
 
 % doesn't work: ocg layer of float gets lost ...
 %\AtEndDocument % must perhaps be even later??
@@ -1562,7 +1518,6 @@ a reference for the absolute page counter
    \@@_backend_pageresources_end_run:
  }
 
-%</package>
 %    \end{macrocode}
 % \subsection{Catalog}
 % \subsubsection{Catalog / backend}
@@ -1623,7 +1578,6 @@ a reference for the absolute page counter
 %   \par\medskip
 % \end{function}
 %    \begin{macrocode}
-%<*package>
 \@@_prop_new:n {Catalog}
 
 \cs_new_protected:Npn \pdf_catalog_gput:nn #1 #2 %#1 name, #2 value
@@ -1637,7 +1591,6 @@ a reference for the absolute page counter
   \prop_gput:Nnn \g_@@_catalog_prop {#1}{#2}
   }
  }
-%</package>
 %    \end{macrocode}
 %=================================================================
 % \subsection{other stuff}
@@ -1648,7 +1601,6 @@ a reference for the absolute page counter
 % be handled along with the catalog commands.
 % \end{NOTE}
 %    \begin{macrocode}
-%<*package>
 
 \bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
 {
@@ -1682,13 +1634,11 @@ a reference for the absolute page counter
  {
  }
 }
-%</package>
 %    \end{macrocode}
 % \section{Management code / pdf Module}
 %<@@=pdf>
 % \subsection{Messages}
 %    \begin{macrocode}
-%<*package>
 \msg_new:nnn  { pdf } { patches } { loading~patch~code }
 \msg_new:nnn  { pdf } { empty-value }{ The~value~for~#1~is~empty~and~will~be~ignored }
 \msg_new:nnn  { pdf } { wrong-path } { This~resource~path~#1~doesn't~exist~--~perhaps~a~typo? }
@@ -1722,16 +1672,13 @@ a reference for the absolute page counter
              { values~to~the~catalog~entry~#1~should~be~added~with~
                \token_to_str:N\pdf_catalog_ #1_gput:nn }
 
-%</package>
 %    \end{macrocode}
 % \subsection{Objects and other rather low-level stuff}
 % NEEDS REVISING!!!
 %    \begin{macrocode}
-%<*package>
 \cs_set_eq:NN \pdf_link_margin:n \@@_backend_link_margin:n
 \cs_set_eq:NN \pdf_link_last: \@@_backend_link_last:
 \cs_set_eq:NN \pdf_DONTUSE_catalog_gput:nn \@@_backend_catalog_gput:nn
-%</package>
 %    \end{macrocode}
 
 % \subsection{generic commands}
@@ -1742,7 +1689,6 @@ a reference for the absolute page counter
 % is filled and written at a suitable time. For this we use a command that setup suitable
 % setters and push commands.
 %    \begin{macrocode}
-%<*package>
 \cs_new_protected:Npn \@@_value_dict_new:nnn #1 #2 #3
   %#1 prefix e.g. catalog
   %#2 key name, e.g. ViewerPreferences
@@ -1775,7 +1721,6 @@ a reference for the absolute page counter
      }
    }
  }
-%</package>
 %    \end{macrocode}
 % \paragraph{Values that are arrays}
 % In a number of cases a value is an and users/packages must be able to
@@ -1784,7 +1729,6 @@ a reference for the absolute page counter
 % is filled and written at a suitable time. For this we use a command that setup suitable
 % setters and push commands.
 %    \begin{macrocode}
-%<*package>
 \cs_new_protected:Npn \@@_value_array_new:nnn #1 #2 #3
   %#1 prefix e.g. catalog
   %#2 key name, e.g. AF
@@ -1828,8 +1772,6 @@ a reference for the absolute page counter
    }
  }
 
-
-%</package>
 %    \end{macrocode}
 % \subsection{The catalog}
 % \subsubsection{Simple values}
@@ -1912,12 +1854,10 @@ a reference for the absolute page counter
 % \end{function}
 % \begin{macro}{\pdf_catalog_AF_gput:n}
 %    \begin{macrocode}
-%<*package>
 % user command: \pdf_catalog_AF_gput:n, o, x
 % push command: \@@_value_catalog_AF_gpush:
 \@@_value_array_new:nnn { catalog } { AF }
                          {\@@_backend_catalog_gput:nn}
-%</package>
 %    \end{macrocode}
 % \end{macro}
 % \paragraph{ViewerPreferences}
@@ -1931,12 +1871,10 @@ a reference for the absolute page counter
 % \end{function}
 % \begin{macro}{\pdf_catalog_ViewerPreferences_gput:nn}
 %    \begin{macrocode}
-%<*package>
 % user command: \pdf_catalog_ViewerPreferences_gput:nn, no, nx
 % push command: \@@_value_catalog_ViewerPreferences_gpush:
 
 \@@_value_dict_new:nnn { catalog }{ ViewerPreferences }{ \@@_backend_catalog_gput:nn }
-%</package>
 %    \end{macrocode}
 % \end{macro}
 % \paragraph{OCProperties}
@@ -1949,7 +1887,6 @@ a reference for the absolute page counter
 %  The /D entry is also a config, so it can be the first from a seq.
 %  The overall structure is nested: a dict with arrays.
 %    \begin{macrocode}
-%<*package>
 % user command: \pdf_catalog_OCproperties_gput:nn, no, nx /should not be used hide it???
 % push command: \@@_value_catalog_OCproperties_gpush:
 
@@ -2015,7 +1952,6 @@ a reference for the absolute page counter
    \@@_backend_catalog_gput:nn {OCProperties}{\@@_backend_object_ref:n {g_@@_catalog_OCProperties_obj}}
   } %----------not finished
  }
-%</package>
 %    \end{macrocode}
 % \paragraph{OutputIntents}
 % This is an array of dict/indirect references. So we need a seq to hold the items
@@ -2029,18 +1965,15 @@ a reference for the absolute page counter
 %   The referenced object must be created by the user.
 % \end{function}
 %    \begin{macrocode}
-%<*package>
 % user command: \pdf_catalog_OutputIntents_gput:nn, no, nx
 % push command: \@@_value_catalog_OutputIntents_gpush:
 
 \@@_value_array_new:nnn { catalog } { OutputIntents }
                          {\@@_backend_catalog_gput:nn}
 
-%</package>
 %    \end{macrocode}
 % \subsubsection{catalog, output}
 %    \begin{macrocode}
-%<*package>
 %\AfterEndPreamble %need to be decided ...
 \AtEndDocument
  {
@@ -2050,7 +1983,6 @@ a reference for the absolute page counter
   \@@_value_catalog_ViewerPreferences_gpush:
   \prop_map_function:NN  \g_@@_catalog_prop \@@_backend_catalog_gput:nn
  }
-%</package>
 %    \end{macrocode}
 %
 % \subsubsection{Doc View}
@@ -2058,13 +1990,11 @@ a reference for the absolute page counter
 % assume that only the equivalent of \verb+openaction~goto~page\@pdfstartpage{\@pdfstartview}+ in
 % hyperref is needed. The format of the second argument is quite unclear (slash, casing).
 %    \begin{macrocode}
-%<*package>
 \cs_new_protected:Npn \pdf_docview:nn #1 #2
  {
   \@@_backend_docview:nn {#1}{#2}
  }
 
-%</package>
 %    \end{macrocode}
 
 % \subsection{page resources}
@@ -2073,7 +2003,6 @@ a reference for the absolute page counter
 % !!!!!!!!!!!!!!!!!!!!!!
 % i don't think that this is needed ....
 %    \begin{macrocode}
-%<*package>
 %\cs_new_protected:Npn \@@_pageresources_gput:nnn #1 #2 #3
 % {
 %  \tl_if_empty:nTF { #3 }
@@ -2098,7 +2027,6 @@ a reference for the absolute page counter
 %
 %\cs_generate_variant:Nn \@@_pageresources_gput:nnnn {nnnx}
 %\cs_generate_variant:Nn \@@_pageresources_gput:nnn {nnx}
-%</package>
 %    \end{macrocode}
 
 
@@ -2108,7 +2036,6 @@ a reference for the absolute page counter
 % So we define a \cs{documentsetup} commmand which should go before \cs{documentclass}
 % \begin{macro}{\documentsetup}
 %    \begin{macrocode}
-%<*package>
 
 \NewDocumentCommand\documentsetup { m }
  {
@@ -2135,7 +2062,6 @@ a reference for the absolute page counter
    }
  }
 
-%</package>
 %    \end{macrocode}
 % \end{macro}
 
@@ -2145,9 +2071,7 @@ a reference for the absolute page counter
 % So we need a generic command to start a pdflink which allows packages to add
 % their code to the \texttt{attr} argument through hooks.
 %    \begin{macrocode}
-%<*package>
 \cs_new:Nn \@@_get_key_value:nn { #1~#2~ } %name?????
-%</package>
 %    \end{macrocode}
 % Attributes are stored in a property list. Packages can add attributes through
 % dedicated command. We assume that there will be different link types
@@ -2156,13 +2080,11 @@ a reference for the absolute page counter
 % Probably we will need some commands to fill more than one prop ...
 %
 %    \begin{macrocode}
-%<*package>
 \prop_new:N\l_@@_hook_link_begin_url_attr_prop  %\hyper@linkurl
 \prop_new:N\l_@@_hook_link_begin_file_attr_prop %\hyper@linkfile
 \prop_new:N\l_@@_hook_link_begin_run_attr_prop  %\@hyper@launch run
 \prop_new:N\l_@@_hook_link_begin_link_attr_prop %\hyper@link, \find@pdflink
 \prop_new:N\l_@@_hook_link_begin_menu_attr_prop %\Acrobatmenu
-%</package>
 %    \end{macrocode}
 %
 % High-level startlink commands that uses the stored attributes:
@@ -2170,7 +2092,6 @@ a reference for the absolute page counter
 % A link command that grabs the content as argument and inserts both
 % startlink and endlink directly (driver command is already in l3driver).
 %    \begin{macrocode}
-%<*package>
 \cs_new_protected:Nn \pdf_link_user:nnn %#1 type (url, file etc, #2 action spec, #3 link text
  {
    \seq_if_exist:cT { l_@@_hook_link_begin_#1_seq }
@@ -2198,10 +2119,8 @@ a reference for the absolute page counter
      \seq_use:cn { l_@@_hook_link_end_#1_seq }{}
     }
  }
-%</package>
 %    \end{macrocode}
 %    \begin{macrocode}
-%<*package>
 \cs_new_protected:Npn \pdf_link_begin_user:nnw #1 #2 %#1 type, #2 action spec
 {
  \seq_if_exist:cT { l_@@_hook_link_begin_#1_seq }
@@ -2238,14 +2157,12 @@ a reference for the absolute page counter
   }
   { #2 }
 }
-%</package>
 %    \end{macrocode}
 % \subsection{Destinations}
 % The command expects a lower case argument, it is up to the package to
 % ensure this.
 %
 %    \begin{macrocode}
-%<*package>
 % perhaps some manipulation of the argument will be needed to map the current
 % hyperref syntax
 % unclear currently if is this is useful for anything.
@@ -2277,14 +2194,12 @@ a reference for the absolute page counter
    }
  }
 \cs_generate_variant:Nn\pdf_destination:nn {no,nf}
-%</package>
 %    \end{macrocode}
 % \subsubsection{Endlink}
 % tagpdf needs to execute code at the end of the link to store the object reference etc.
 % So we need a hook. For now the hook is a seq: This will perhaps allows a system to
 % add and remove hooks by index. The hook depends on the type.
 %    \begin{macrocode}
-%<*package>
 \seq_new:N \l_@@_hook_link_end_url_seq
 \seq_new:N \l_@@_hook_link_end_run_seq
 \seq_new:N \l_@@_hook_link_end_file_seq
@@ -2300,18 +2215,15 @@ a reference for the absolute page counter
    }
  }
 
-%</package>
 %    \end{macrocode}
 % \subsection{Before the links}
 % Both hyperref and tagpdf wants to insert code before the \cs{pdfstartlink} so lets
 % setup hooks for this too:
 %    \begin{macrocode}
-%<*package>
 \seq_new:N \l_@@_hook_link_begin_url_seq
 \seq_new:N \l_@@_hook_link_begin_run_seq
 \seq_new:N \l_@@_hook_link_begin_file_seq
 \seq_new:N \l_@@_hook_link_begin_link_seq
-%</package>
 %    \end{macrocode}
 %
 % \section{Hook management}
@@ -2376,7 +2288,6 @@ a reference for the absolute page counter
 % \cs{l__<module>_hook_<hook-name>_prop}
 %
 %    \begin{macrocode}
-%<*package>
 \cs_new:Nn \hook_put_right:nnn
  {
   \seq_put_right:cn { l__#1_hook_#2_seq } { #3 }
@@ -2406,7 +2317,6 @@ a reference for the absolute page counter
  {
   \prop_gremove:cn { g__#1_hook_#2_prop } { #3 }
  }
-%</package>
 %    \end{macrocode}
 % \subsection{Passing external information to hooks}
 % hooks sometimes wants to know something about the arguments of the surrounding command.
@@ -2426,7 +2336,6 @@ a reference for the absolute page counter
 % ColorSpace and Pattern (Shadings are added to the xform resources and so probably
 % unproblematic for now).
 %    \begin{macrocode}
-%<*package>
 \bool_if:nT { !\g_@@_patches_bool || \sys_if_output_dvi_p:  }
  {
   \file_input_stop:
