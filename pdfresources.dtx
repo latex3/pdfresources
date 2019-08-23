@@ -125,7 +125,7 @@
 \int_new:N \g_@@_backend_name_int
 %    \end{macrocode}
 % \end{variable}
-a reference for the absolute page counter
+% a reference for the absolute page counter
 %    \begin{macrocode}
 \zref@newlist  { l3pdf }
 \zref@newprop* { pdf@abspage } [0] { \int_use:N \g_@@_abspage_int }
@@ -303,71 +303,88 @@ a reference for the absolute page counter
 \seq_new:N \g_@@_prop_names_seq
 
 \cs_new:Npn \@@_prop_name:n #1 % path name without /
- {
-   g_@@_/#1_prop
- }
+  {
+    g_@@_/#1_prop
+  }
 
 \cs_new_protected:Npn \@@_prop_new:n #1
- {
-  \prop_if_exist:cF { \@@_prop_name:n {#1} }
-   {
-    \prop_new:c  { \@@_prop_name:n {#1} }
-    \seq_gput_right:N \g_@@_prop_names_seq { #1 }
-   }
- }
-
-\cs_new_protected:Npn \@@_tree_gclear:n #1
- {
-    \prop_gclear:c  { \@@_prop_name:n {#1} }
- }
-
+  {
+    \prop_if_exist:cF { \@@_prop_name:n {#1} }
+      {
+        \prop_new:c  { \@@_prop_name:n {#1} }
+        \seq_gput_right:Nn \g_@@_prop_names_seq { #1 }
+      }
+  }
 %    \end{macrocode}
 %  \end{macro}
-%  \begin{macro}{\@@_prop_name,\@@_prop_new:n,\@@_prop_names_seq}
+
+
+%  \begin{macro}{\@@_prop_gclear,
+%                \@@_prop_gput:n,
+%                \@@_prop_get:nnN,
+%                \@@_prop_gremove:nn}
 %    \begin{macrocode}
-\cs_new_protected:Npn \@@_tree_gput:nnn #1 #2 #3  %#1 path, #2 name, #3 value
- { %test if tree path is allowed here?
-  \tl_if_empty:nTF { #3 }
-   {
-    \msg_none:nnn { pdf }{ empty-value }{ /#1/#2 }
-   }
-   {
-    \prop_if_exist:cTF
-     { \@@_prop_name:n {#1} }
-     {
-      \prop_gput:cnn { \@@_prop_name:n {#1} }{ #2 } { #3 }
-     }
-     {
-      \msg_error:nnn { pdf } { wrong-path } {/#1}
-     }
-   }
- }
-\cs_new_protected:Npn \@@_tree_get:nnnN  #1 #2 #3
+\cs_new_protected:Npn \@@_prop_gclear:n #1
   {
-   \prop_get:cnN { \@@_prop_name:n {#1} } { #2} #3
+    \prop_gclear:c  { \@@_prop_name:n {#1} }
   }
 
-\cs_new_protected:Npn \@@_tree_gremove:nn #1 #2
+\cs_new_protected:Npn \@@_prop_gput:nnn #1 #2 #3  %#1 path, #2 name, #3 value
   {
-   \prop_gremove:cn { \@@_prop_name:n {#1} } { #2 }
+    \tl_if_empty:nTF { #3 }
+      {
+        \msg_none:nnn { pdf }{ empty-value }{ /#1/#2 }
+      }
+      {
+        \prop_if_exist:cTF
+          { \@@_prop_name:n {#1} }
+          {
+            \prop_gput:cnn { \@@_prop_name:n {#1} }{ #2 } { #3 }
+          }
+          {
+            \msg_error:nnn { pdf } { wrong-path } {/#1}
+          }
+      }
   }
 
-\cs_new:Npn \@@_tree_map_dict_item:n #1
+\cs_new_protected:Npn \@@_prop_get:nnN  #1 #2 #3 %path,key,macro
+  {
+    \prop_get:cnN { \@@_prop_name:n {#1} } { #2} #3
+  }
+
+\cs_new_protected:Npn \@@_prop_gremove:nn #1 #2 %path,key
+  {
+    \prop_gremove:cn { \@@_prop_name:n {#1} } { #2 }
+  }
+
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{ \@@_prop_map_dict_item:n }
+% \cs{@@_prop_map_dict_item:n} outputs a prop as needed in a dictionary:
+%  a list of /\meta{key} \meta{value} pairs.
+%    \begin{macrocode}
+\cs_new:Npn \@@_prop_map_dict_item:n #1 %path
  {
    \prop_map_function:cN { \@@_prop_name:n {#1}} \@@_dict_item:nn
  }
+%    \end{macrocode}
+% \end{macro}
 
-\cs_new_protected:Npn \@@_tree_merge:nnN #1 #2 #3 % merges: first #1 then optionally #2 into prop #3
- {
-   \prop_set_eq:Nc #3 { \@@_prop_name:n  { #1 } }
-   \prop_if_exist:cT  { \@@_prop_name:n  { #2 } }
-   {
-    \prop_map_inline:cn { \@@_prop_name:n  { #2 } }
-    {
-      \prop_put:Nnn #3 { ##1 }{ ##2 }
-    }
-   }
- }
+% \begin{macro}{ \@@_prop_merge:nnN }
+% \cs{@@_prop_merge:nnN} merges at first the property \meta{name_1}
+%  then optionally \meta{name_2} into property |#3|.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_prop_merge:nnN #1 #2 #3
+  {
+    \prop_set_eq:Nc #3 { \@@_prop_name:n  { #1 } }
+    \prop_if_exist:cT  { \@@_prop_name:n  { #2 } }
+      {
+        \prop_map_inline:cn { \@@_prop_name:n  { #2 } }
+          {
+            \prop_put:Nnn #3 { ##1 }{ ##2 }
+          }
+      }
+  }
 %    \end{macrocode}
 % \end{macro}
 % \section{Resources management}
@@ -466,21 +483,21 @@ a reference for the absolute page counter
 %^^A documentated
 \cs_new_protected:Npn \pdf_pagesattr_gput:nn #1 #2
   {
-   \@@_tree_gput:nnn {Pages}{#1}{#2}
+   \@@_prop_gput:nnn {Pages}{#1}{#2}
   }
 
 % getter from the prop:
 %^^A documentated
 \cs_new_protected:Npn \pdf_pagesattr_get:nN #1 #2
   {
-   \@@_tree_get:nnN {Pages}{#1} #2
+   \@@_prop_get:nnN {Pages}{#1} #2
   }
 
 % remove:
 %^^A documentated
 \cs_new_protected:Npn \pdf_pagesattr_gremove:n #1
   {
-   \@@_tree_gremove:nn {Pages}{#1}
+   \@@_prop_gremove:nn {Pages}{#1}
   }
 
 % push to the register command / issue the special
@@ -488,7 +505,7 @@ a reference for the absolute page counter
   {
     \exp_args:Nx \@@_backend_Pages_primitive:n
     {
-     \@@_tree_map_dict_item:n {Pages}
+     \@@_prop_map_dict_item:n {Pages}
     }
   }
 
@@ -532,14 +549,14 @@ a reference for the absolute page counter
   % sets a lua table with lualatex
   \cs_new_protected:Npn \@@_backend_Page_gput:nn #1 #2
   {
-   \@@_tree_gput:nnn {backend_Page}{ #1 }{ #2 }
+   \@@_prop_gput:nnn {backend_Page}{ #1 }{ #2 }
   }
   % the command to remove a default value.
   % Uses a prop with pdflatex + dvi,
   % changes a lua table with lualatex
   \cs_new_protected:Npn \@@_backend_Page_gremove:n #1
   {
-   \@@_tree_gremove:nn  {backend_Page}{ #1 }
+   \@@_prop_gremove:nn  {backend_Page}{ #1 }
   }
  % the command used in the document.
  % direct call of the primitive special with dvips/dvipdfmx
@@ -557,7 +574,7 @@ a reference for the absolute page counter
                           {0}
      }
     \@@_prop_new:n    {backend_Page\l_@@_tmpa_tl}
-    \@@_tree_gput:nnn {backend_Page\l_@@_tmpa_tl}{#1}{#2}
+    \@@_prop_gput:nnn {backend_Page\l_@@_tmpa_tl}{#1}{#2}
    }
   %the code to push the values, used in shipout
   %merges the two props and then fills the register in pdflatex
@@ -565,7 +582,7 @@ a reference for the absolute page counter
   %issues the values stored in the global prop with dvi
   \cs_new_protected:Npn \@@_backend_PageN_gpush:n #1
   {
-   \@@_tree_merge:nnN {backend_Page}{backend_Page#1}\l_@@_tmpa_prop
+   \@@_prop_merge:nnN {backend_Page}{backend_Page#1}\l_@@_tmpa_prop
    \exp_args:Nx \@@_backend_Page_primitive:n
    {
     \prop_map_function:NN \l_@@_tmpa_prop \@@_dict_item:nn
@@ -648,14 +665,14 @@ a reference for the absolute page counter
   % sets a lua table with lualatex
   \cs_new_protected:Npn \@@_backend_Page_gput:nn #1 #2
   {
-   \@@_tree_gput:nnn {backend_Page}{ #1 }{ #2 }
+   \@@_prop_gput:nnn {backend_Page}{ #1 }{ #2 }
   }
   % the command to remove a default value.
   % Uses a prop with pdflatex + dvi,
   % changes a lua table with lualatex
   \cs_new_protected:Npn \@@_backend_Page_gremove:n #1
   {
-   \@@_tree_gremove:nn  {backend_Page}{ #1 }
+   \@@_prop_gremove:nn  {backend_Page}{ #1 }
   }
   % the command used in the document.
   % direct call of the primitive special with dvips/dvipdfmx
@@ -672,7 +689,7 @@ a reference for the absolute page counter
   %issues the values stored in the global prop with dvi
   \cs_new_protected:Npn \@@_backend_PageN_gpush:n #1
   {
-    \exp_args:Nx \@@_backend_Page_primitive:n { \@@_tree_map_dict_item:n {backend_Page} }
+    \exp_args:Nx \@@_backend_Page_primitive:n { \@@_prop_map_dict_item:n {backend_Page} }
   }
  }
 %dvips
@@ -687,14 +704,14 @@ a reference for the absolute page counter
   % sets a lua table with lualatex
   \cs_new_protected:Npn \@@_backend_Page_gput:nn #1 #2
   {
-   \@@_tree_gput:nnn {backend_Page}{ #1 }{ #2 }
+   \@@_prop_gput:nnn {backend_Page}{ #1 }{ #2 }
   }
   % the command to remove a default value.
   % Uses a prop with pdflatex + dvi,
   % changes a lua table with lualatex
   \cs_new_protected:Npn \@@_backend_Page_gremove:n #1
   {
-   \@@_tree_gremove:nn  {backend_Page}{ #1 }
+   \@@_prop_gremove:nn  {backend_Page}{ #1 }
   }
   % the command used in the document.
   % direct call of the primitive special with dvips/dvipdfmx
@@ -711,7 +728,7 @@ a reference for the absolute page counter
   %issues the values stored in the global prop with dvi
   \cs_new_protected:Npn \@@_backend_PageN_gpush:n #1
   {
-    \exp_args:Nx \@@_backend_Page_primitive:n { \@@_tree_map_dict_item:n {backend_Page} }
+    \exp_args:Nx \@@_backend_Page_primitive:n { \@@_prop_map_dict_item:n {backend_Page} }
   }
 }
 %    \end{macrocode}
@@ -857,7 +874,7 @@ a reference for the absolute page counter
 
 \cs_new_protected:Npn \pdf_info_gput:nn #1 #2 %#1 key without /, #2 content
   {
-   \@@_tree_gput:nnn {Info}{#1}{#2}
+   \@@_prop_gput:nnn {Info}{#1}{#2}
   }
 
 \cs_generate_variant:Nn \pdf_info_gput:nn {no}
@@ -870,7 +887,7 @@ a reference for the absolute page counter
 %  \pdfstringdef\@pdftitle{#1}%
 \cs_new_protected:Npn \pdf_info_string_gput:nn #1 #2 %#1 key without /, #2 content
   {
-   \@@_tree_gput:nnn {Info}{#1}{(#2)}
+   \@@_prop_gput:nnn {Info}{#1}{(#2)}
   }
 
 \cs_generate_variant:Nn \pdf_info_string_gput:nn {no,oo,on}
@@ -1010,7 +1027,7 @@ a reference for the absolute page counter
        {/#1 ~ /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC}
     \bool_if:NTF \l_@@_backend_xform_bool
      {
-      \exp_args:Nnx\@@_tree_gput:nnn
+      \exp_args:Nnx\@@_prop_gput:nnn
       {xform/Resources/Properties}
       {l3pdf\int_use:N\g_@@_backend_name_int}
       {\@@_backend_object_ref:n{#2}}
@@ -1046,7 +1063,7 @@ a reference for the absolute page counter
     \int_gincr:N\g_@@_backend_resourceid_int
     \bool_if:NTF \l_@@_backend_xform_bool
     {
-     \exp_args:Nnx\@@_tree_gput:nnn
+     \exp_args:Nnx\@@_prop_gput:nnn
      {xform/Resources/Properties}
      {l3pdf\int_use:N\g_@@_backend_resourceid_int}
      {\@@_backend_object_ref:n{#2}}
@@ -1060,7 +1077,7 @@ a reference for the absolute page counter
                           {0}
      }
     \@@_prop_new:n    {backend_Page\l_@@_tmpa_tl/Resources/Properties}
-    \exp_args:Nnx\@@_tree_gput:nnn
+    \exp_args:Nnx\@@_prop_gput:nnn
      {backend_Page\l_@@_tmpa_tl/Resources/Properties}
      {l3pdf\int_use:N\g_@@_backend_resourceid_int}
      {\@@_backend_object_ref:n{#2}}
@@ -1206,7 +1223,7 @@ a reference for the absolute page counter
    \hbox_set:Nn \l_@@_backend_tmpa_box
     {
      \bool_set_true:N \l_@@_backend_xform_bool
-     \@@_tree_gclear:n {xform/Resources/Properties}
+     \@@_prop_gclear:n {xform/Resources/Properties}
      #4
     }
    \tl_const:cx
@@ -1226,7 +1243,7 @@ a reference for the absolute page counter
      {
       \int_compare:nNnT
        {\prop_count:c { \@@_prop_name:n {xform/Resources/Properties} }}>{0}
-       {/Properties~<<\@@_tree_map_dict_item:n {xform/Resources/Properties}>>~ #3}
+       {/Properties~<<\@@_prop_map_dict_item:n {xform/Resources/Properties}>>~ #3}
      }
     \l_@@_backend_tmpa_box
    \int_const:cn
@@ -1258,7 +1275,7 @@ a reference for the absolute page counter
    \hbox_set:Nn \l_@@_backend_tmpa_box
     {
      \bool_set_true:N \l_@@_backend_xform_bool
-     \@@_tree_gclear:n {xform/Resources/Properties}
+     \@@_prop_gclear:n {xform/Resources/Properties}
      #4
     }
    \tl_const:cx
@@ -1278,7 +1295,7 @@ a reference for the absolute page counter
      {
       \int_compare:nNnT
        {\prop_count:c { \@@_prop_name:n {xform/Resources/Properties} }}>{0}
-       {/Properties~<<\@@_tree_map_dict_item:n {xform/Resources/Properties}>>~ #3}
+       {/Properties~<<\@@_prop_map_dict_item:n {xform/Resources/Properties}>>~ #3}
      }
     \l_@@_backend_tmpa_box
    \int_const:cn
@@ -1408,7 +1425,7 @@ a reference for the absolute page counter
  {
   \cs_new_protected:Npn \@@_backend_pageresources_gput:nnn #1 #2 #3
    {
-    \@@_tree_gput:nnn {PageN/Resources/#1} { #2 }{ #3 }
+    \@@_prop_gput:nnn {PageN/Resources/#1} { #2 }{ #3 }
      % luatex must also trigger the lua side
      \tex_latelua:D{l3kernel.@@.Page.Resources.#1=true}
      \tex_latelua:D{l3kernel.pdf.Page_Resources_gpush( tex.count["g_@@_abspage_int"])}
@@ -1417,7 +1434,7 @@ a reference for the absolute page counter
  {
   \cs_new_protected:Npn \@@_backend_pageresources_gput:nnn #1 #2 #3
    {
-    \@@_tree_gput:nnn {PageN/Resources/#1} { #2 }{ #3 }
+    \@@_prop_gput:nnn {PageN/Resources/#1} { #2 }{ #3 }
    }
  }
 
@@ -1432,7 +1449,7 @@ a reference for the absolute page counter
       {
         \exp_args:Nnx \@@_backend_object_write:nn
         { PageN/Resources/##1 }
-        { \@@_tree_map_dict_item:n {PageN/Resources/##1} }
+        { \@@_prop_map_dict_item:n {PageN/Resources/##1} }
       }
    }
   }
@@ -1588,7 +1605,7 @@ a reference for the absolute page counter
   }
   {
    % Add later: test for the names that should be handled specially
-  \prop_gput:Nnn \g_@@_catalog_prop {#1}{#2}
+  \@@_prop_gput:nnn { Catalog }{#1}{#2}
   }
  }
 %    \end{macrocode}
@@ -1981,7 +1998,7 @@ a reference for the absolute page counter
   \@@_value_catalog_AF_gpush:               %AF
   \@@_catalog_OCProperties_gpush:           %OCProperties
   \@@_value_catalog_ViewerPreferences_gpush:
-  \prop_map_function:NN  \g_@@_catalog_prop \@@_backend_catalog_gput:nn
+  %\prop_map_function:NN  \g_@@_catalog_prop \@@_backend_catalog_gput:nn %needs sorting
  }
 %    \end{macrocode}
 %
