@@ -288,9 +288,10 @@
 %  Currently the following names are used: %check, compare with \@@_prop_names_seq
 %  \begin{verbatim}
 %  /Pages           %w,  \pagesattr
-%  /backend_Page
-%  /backend_PageN
-%  /PageN           %w, N=1,..n or empty (=all pages) \pageattr
+%  /backend_Page    % consider name Page?
+%  /backend_PageN   % consider name PageN?
+%  /backend_PageN/Resources/Properties %consider name!!
+%  /PageN           %w, N=1,..n or empty (=all pages) \pageattr %used?
 %  /PageN/Resources %nw? \pageresources
 %  /PageN/Resources/ExtGState
 %  /PageN/Resources/ColorSpace
@@ -300,6 +301,7 @@
 %  /Info           %w, \pdfinfo
 %  /Catalog/OCProperties
 %  /Catalog/OutputIntents
+%  /xform/Resources/Properties
 %  \end{verbatim}
 %  \begin{macro}{\@@_prop_name,\@@_prop_new:n,\@@_prop_names_seq}
 %    \begin{macrocode}
@@ -779,7 +781,7 @@
   }
 %    \end{macrocode}
 % \end{macro}
-% 
+%
 % \subsubsection{pdfpageattr/management}
 % \begin{NOTE}{UF}
 % Open is the question if one need a command to set attribute on a page by page number.
@@ -810,11 +812,13 @@
 %   \begin{syntax}
 %     \cs{pdf_pageattr_gremove:n} \Arg{name}
 %   \end{syntax}
-%   Removes |/|\meta{name} and its associated \meta{value} added by \cs{pdf_pageattr_gput:nn}
-%   from the page dictionaries of the current and the following pages.
+%   Removes |/|\meta{name} and its associated \meta{value} added by
+%   \cs{pdf_pageattr_gput:nn} from the page dictionaries of the current
+%   and the following pages.
 %   If \meta{name} is not found no change occurs,
 %   \emph{i.e}~there is no need to test for the existence of a name before
-%   trying to remove it. It doesn't affect values set with \cs{pdf_thispageattr_gput:nn}.
+%   trying to remove it. It doesn't affect values set with
+%   \cs{pdf_thispageattr_gput:nn}.
 % \end{function}
 % \begin{function}[added = 2019-06-19]
 %   {\pdf_thispageattr_gput:nn}
@@ -828,32 +832,33 @@
 %   \meta{name} should be a valid pdf name without the leading slash,
 %   \meta{value} should be a valid pdf value. Any escaping or (re)encoding must be
 %   done explictly. If a \meta{name} is used twice, only the last \meta{value}
-%   set will be used. With the engine pdflatex (at least) a second compilation is needed.
+%   set will be used.
+%   With the engine pdflatex (at least) a second compilation is needed.
 % \end{function}
 %    \begin{macrocode}
-\@@_prop_new:n {Page}
 % setter.
 %^^A documentated
 \cs_new_protected:Npn \pdf_pageattr_gput:nn #1 #2
   {
-   \@@_backend_Page_gput:nn {#1}{#2}
+    \@@_backend_Page_gput:nn {#1}{#2}
   }
 
 % remove:
 %^^A documentated
 \cs_new_protected:Npn \pdf_pageattr_gremove:n #1
   {
-   \@@_backend_Page_gremove:n { #1 }
+    \@@_backend_Page_gremove:n { #1 }
   }
 
 % add to this page:
 %^^A documentated
 \cs_new_protected:Npn \pdf_thispageattr_gput:nn #1 #2
   {
-   \@@_backend_PageN_gput:nn { #1 }{ #2 }
+    \@@_backend_PageN_gput:nn { #1 }{ #2 }
   }
 
 %    \end{macrocode}
+%
 % \subsection{The info dictionary}
 % \begin{NOTE}{UF}
 % path: Info
@@ -871,13 +876,19 @@
 % We are outputting at the last page -- this needs a second compilation but
 % this is needed anyway.
 % \end{NOTE}
+%
 % \subsubsection{Info / backend}
-% The backend code is already in expl3. \verb+\__pdf_backend_info_gput:nn+
-% inserts one name/value pair.
+% The backend code is already in expl3.
+% \cs{@@_backend_info_gput:nn} inserts one name/value pair.
+%
 % \subsubsection{Info / management}
+% \potentialclash If the primitive commands are used additionally there will
+% be double entries in the pdf with the backend pdftex and luatex.
+% How pdf viewer handles this is unpredictable.
+%
 %  \begin{function}[added = 2019-06-22]
 %   {
-%    \pdf_info_gput:nn
+%    \pdf_info_gput:nn,\pdf_info_gput:no
 %   }
 %   \begin{syntax}
 %     \cs{pdf_info_gput:nn} \Arg{name} \Arg{value}
@@ -890,7 +901,7 @@
 %   normally sensible:
 %   \begin{verbatim}
 %   \str_set_convert:Nnnn \l_tmpa_str { Grüße }{ utf8 } {utf8/string}
-%   \pdf_info_string_gput:nn {Title}{\l_tmpa_str}
+%   \pdf_info_string_gput:no {Title}{\l_tmpa_str}
 %   \end{verbatim}
 %   If a \meta{name} is used twice, only the last \meta{value}
 %   set will be used. The info dictionary is written at the end of the compilation,
@@ -898,7 +909,8 @@
 % \end{function}
 % \begin{function}[added = 2019-06-22]
 %   {
-%    \pdf_info_string_gput:nn
+%     \pdf_info_string_gput:nn,
+%     \pdf_info_string_gput:no
 %   }
 %   \begin{syntax}
 %     \cs{pdf_info_string_gput:nn} \Arg{name} \Arg{value}
@@ -922,7 +934,7 @@
 
 \cs_new_protected:Npn \pdf_info_gput:nn #1 #2 %#1 key without /, #2 content
   {
-   \@@_prop_gput:nnn {Info}{#1}{#2}
+    \@@_prop_gput:nnn {Info}{#1}{#2}
   }
 
 \cs_generate_variant:Nn \pdf_info_gput:nn {no}
@@ -935,11 +947,16 @@
 %  \pdfstringdef\@pdftitle{#1}%
 \cs_new_protected:Npn \pdf_info_string_gput:nn #1 #2 %#1 key without /, #2 content
   {
-   \@@_prop_gput:nnn {Info}{#1}{(#2)}
+    \@@_prop_gput:nnn {Info}{#1}{(#2)}
   }
 
-\cs_generate_variant:Nn \pdf_info_string_gput:nn {no,oo,on}
-
+\cs_generate_variant:Nn \pdf_info_string_gput:nn {no}
+%    \end{macrocode}
+%
+% \begin{macro}{\@@_Info_gpush:}
+% \cs{@@_Info_gpush:} is the command that outputs the info dictionary in
+% \cs{@@_lastpage_shipout_code:}
+%    \begin{macrocode}
 % push to the register command / issue the special
 \cs_new_protected:Npn \@@_Info_gpush:
   {
@@ -947,22 +964,24 @@
     \prop_gclear:c { \@@_prop_name:n {Info} }
   }
 %    \end{macrocode}
+% \end{macro}
+%
 % \subsection{page resources / Properties and bdc-mark}
 % \begin{NOTE}{UF}
-% we still need a switch for the case that the resource should be added to
-% xform resource instead of a page resources, see pdfbase.sty
+%  we still need a switch for the case that the resource should be added to
+%  xform resource instead of a page resources, see pdfbase.sty
 % - xdvipdfmx: looks fine, the resource is added to the xform resource automatically
 % - pdftex should now work okay too
 % \end{NOTE}
 % Entries to the /Properties dictionary in the page resources can
-% be added with dvips only through side-effect: if a bdc-mark is created dvips/ghostscript
-% will automatically create the necessary objects and names.
-% To get a sensible abstraction the code does the same for the other backends: There are
-% no public commands to add values to the /Properties dictionary directly, only
-% commands to set BDC-marks.
+% be added with dvips only through side-effect: if a bdc-mark is created
+% dvips/ghostscript will automatically create the necessary objects and names.
+% To get a sensible abstraction the code does the same for the other backends:
+% There are no public commands to add values to the /Properties dictionary
+% directly, only commands to set BDC-marks.
 % \begin{function}[added = 2019-06-29]
 %   {
-%    \pdf_bdc:nn
+%     \pdf_bdc:nn
 %   }
 %   \begin{syntax}
 %     \cs{pdf_bdc:nn} \Arg{tag} \Arg{object name}
@@ -973,9 +992,9 @@
 %   \cs{pdf_object_new:nn} and filled with \cs{pdf_object_write:n} with
 %   the properties of the BDC.
 %   \end{function}
-%   \begin{function}[added = 2019-06-30]
+% \begin{function}[added = 2019-06-30]
 %   {
-%    \pdf_emc:
+%     \pdf_emc:
 %   }
 %   \begin{syntax}
 %     \cs{pdf_emc:}
@@ -991,7 +1010,18 @@
 %   \pdf_emc:
 %   \end{verbatim}
 % \end{function}
+%
 % \subsubsection{bcd/Properties, backend code}
+% \begin{macro}
+%   {
+%     \@@_backend_bdc:nn,
+%     \@@_backend_emc:,
+%     \@@_backend_PageN_Resources_gpush:n
+%   }
+% \cs{@@_backend_bdc:nn} and \cs{@@_backend_emc:} are the backend command that
+% create the bdc/emc marker and store the properties.
+% \cs{@@_backend_PageN_Resources_gpush:n} outputs the /Properties in
+% \cs{@@_everypage_shipout_code:} for the current page.
 %    \begin{macrocode}
 % pdftex and luatex (and perhaps dvips ...) need to know if there are in a
 % xform stream ...
@@ -1000,10 +1030,10 @@
 %quite often needed
 \clist_const:Nn \c_@@_backend_pageresources_clist
   {
-   ExtGState,
-   ColorSpace,
-   Pattern,
-   Shading,
+    ExtGState,
+    ColorSpace,
+    Pattern,
+    Shading,
   }
 
 % dvips
@@ -1012,166 +1042,187 @@
 % and add the name to the /Properties dict
 % special variant von accsupp https://chat.stackexchange.com/transcript/message/50831812#50831812
 \bool_if:nT {\sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p: }
- {
-  \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
-   {
-     \special {ps:~mark~/#1~\@@_backend_object_ref:n{#2}~/BDC~pdfmark}
-   }
-  \cs_set_protected:Npn \@@_backend_emc:
-   {
-    \special {ps:~mark~/EMC~pdfmark} %
-   }
-  \cs_new_protected:Npn \@@_backend_PageN_Resources_gpush:n #1 {}
- }
-% xetex has so create the entries in the /Properties manually (like the other backends)
-% use pdfbase special https://chat.stackexchange.com/transcript/message/50832016#50832016
-% the property is added to xform resources automatically, no need to worry about it.
-\sys_if_engine_xetex:T
-{
- \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
-   {
-     \int_gincr:N \g_@@_backend_name_int
-     \__kernel_backend_literal:x
+  {
+    \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
       {
-       pdf:code~/#1/l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC
+        \special {ps:~mark~/#1~\@@_backend_object_ref:n{#2}~/BDC~pdfmark}
       }
-     \__kernel_backend_literal:x
+    \cs_set_protected:Npn \@@_backend_emc:
       {
-        pdf:put~@resources~
-        <<
-         /Properties~
-          <<
-           /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl
-           \@@_backend_object_ref:n{#2}
-          >>
-         >>
-       }
-    }
+        \special {ps:~mark~/EMC~pdfmark} %
+      }
+    \cs_new_protected:Npn \@@_backend_PageN_Resources_gpush:n #1 {}
+ }
+% xetex has so create the entries in the /Properties manually
+% (like the other backends)
+% use pdfbase special
+% https://chat.stackexchange.com/transcript/message/50832016#50832016
+% the property is added to xform resources automatically,
+% no need to worry about it.
+\sys_if_engine_xetex:T
+  {
+    \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
+      {
+        \int_gincr:N \g_@@_backend_name_int
+        \__kernel_backend_literal:x
+          {
+            pdf:code~/#1/l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC
+          }
+        \__kernel_backend_literal:x
+          {
+            pdf:put~@resources~
+              <<
+                /Properties~
+                  <<
+                    /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl
+                    \@@_backend_object_ref:n{#2}
+                  >>
+              >>
+          }
+      }
+
   \cs_set_protected:Npn \@@_backend_emc:
-   {
-    \__kernel_backend_literal:n {pdf:code~EMC}  %pdfbase
-   }
+    {
+      \__kernel_backend_literal:n {pdf:code~EMC}  %pdfbase
+    }
   % properties are handled automatically, but the other resources should be added
   % at shipout
   \cs_new_protected:Npn \@@_backend_PageN_Resources_gpush:n #1
-   {
-    \clist_map_inline:Nn \c_@@_backend_pageresources_clist
     {
-     \prop_if_empty:cF { \@@_prop_name:n {PageN/Resources/##1} }
-      {
-       \exp_args:Nx\__kernel_backend_literal:n
-        {pdf:put~@resources~<</##1~\@@_backend_object_ref:n {PageN/Resources/##1}>>}
-      }
+      \clist_map_inline:Nn \c_@@_backend_pageresources_clist
+        {
+          \prop_if_empty:cF { \@@_prop_name:n {PageN/Resources/##1} }
+            {
+              \exp_args:Nx\__kernel_backend_literal:n
+                {
+                  pdf:put~@resources~
+                    <</##1~\@@_backend_object_ref:n {PageN/Resources/##1}>>
+                }
+            }
+        }
     }
-   }
  }
 % luatex
 \sys_if_engine_luatex:T
-{
- \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
-   {
-    \int_gincr:N \g_@@_backend_name_int
-    \exp_args:Nx\__kernel_backend_literal_page:n
-       {/#1 ~ /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC}
-    \bool_if:NTF \l_@@_backend_xform_bool
-     {
-      \exp_args:Nnx\@@_prop_gput:nnn
-      {xform/Resources/Properties}
-      {l3pdf\int_use:N\g_@@_backend_name_int}
-      {\@@_backend_object_ref:n{#2}}
-     }
-     {
-     \exp_args:Nx\tex_latelua:D
+  {
+    \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
       {
-       l3kernel.pdf.Page_Resources_Properties_gput
-        ( tex.count["g_@@_abspage_int"],
-          "l3pdf\int_use:N\g_@@_backend_name_int",
-          "\@@_backend_object_ref:n{#2}"
-        )
+        \int_gincr:N \g_@@_backend_name_int
+        \exp_args:Nx\__kernel_backend_literal_page:n
+          { /#1 ~ /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC }
+        \bool_if:NTF \l_@@_backend_xform_bool
+          {
+            \exp_args:Nnx\@@_prop_gput:nnn
+              { xform/Resources/Properties }
+              { l3pdf\int_use:N\g_@@_backend_name_int }
+              { \@@_backend_object_ref:n{#2} }
+          }
+          {
+            \exp_args:Nx\tex_latelua:D
+              {
+                l3kernel.pdf.Page_Resources_Properties_gput
+                  (
+                    tex.count["g_@@_abspage_int"],
+                    "l3pdf\int_use:N\g_@@_backend_name_int",
+                    "\@@_backend_object_ref:n{#2}"
+                  )
+              }
+          }
+    }
+
+    \cs_set_protected:Npn \@@_backend_emc:
+      {
+        \__kernel_backend_literal_page:n { EMC }
       }
-     }
-   }
-  \cs_set_protected:Npn \@@_backend_emc:
-   {
-    \__kernel_backend_literal_page:n { EMC }
-   }
-  \cs_new_protected:Npn \@@_backend_PageN_Resources_gpush:n #1 {}
-}
+
+    \cs_new_protected:Npn \@@_backend_PageN_Resources_gpush:n #1 {}
+  }
 
 % pdflatex is the most complicated as it has to go through the aux ...
 % !!! the push command will have to be extended to take other resources too
 \bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
-{
- \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
-   {
-     \int_gincr:N \g_@@_backend_name_int
-     \exp_args:Nx\__kernel_backend_literal_page:n
-       {/#1 ~ /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC}
-    % code to set the property ....
-    \int_gincr:N\g_@@_backend_resourceid_int
-    \bool_if:NTF \l_@@_backend_xform_bool
-    {
-     \exp_args:Nnx\@@_prop_gput:nnn
-     {xform/Resources/Properties}
-     {l3pdf\int_use:N\g_@@_backend_resourceid_int}
-     {\@@_backend_object_ref:n{#2}}
-    }
-    {
-    \zref@labelbylist {l3pdf\int_use:N\g_@@_backend_resourceid_int} {l3pdf}
-    \tl_set:Nx \l_@@_tmpa_tl
-     {
-      \zref@extractdefault{l3pdf\int_use:N\g_@@_backend_resourceid_int}
-                          {pdf@abspage}
-                          {0}
-     }
-    \@@_prop_new:n    {backend_Page\l_@@_tmpa_tl/Resources/Properties}
-    \exp_args:Nnx\@@_prop_gput:nnn
-     {backend_Page\l_@@_tmpa_tl/Resources/Properties}
-     {l3pdf\int_use:N\g_@@_backend_resourceid_int}
-     {\@@_backend_object_ref:n{#2}}
-    }
-   }
- \cs_set_protected:Npn \@@_backend_emc:
-   {
-    \__kernel_backend_literal_page:n { EMC }
-   }
+  {
+    \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
+      {
+        \int_gincr:N \g_@@_backend_name_int
+        \exp_args:Nx\__kernel_backend_literal_page:n
+          { /#1 ~ /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC }
+        % code to set the property ....
+        \int_gincr:N\g_@@_backend_resourceid_int
+        \bool_if:NTF \l_@@_backend_xform_bool
+          {
+            \exp_args:Nnx\@@_prop_gput:nnn
+              { xform/Resources/Properties }
+              { l3pdf\int_use:N\g_@@_backend_resourceid_int }
+              { \@@_backend_object_ref:n{#2} }
+          }
+          {
+            \zref@labelbylist
+              { l3pdf\int_use:N\g_@@_backend_resourceid_int }
+              { l3pdf }
+            \tl_set:Nx \l_@@_tmpa_tl
+              {
+                \zref@extractdefault
+                  { l3pdf\int_use:N\g_@@_backend_resourceid_int }
+                  {pdf@abspage}
+                  {0}
+              }
+            \@@_prop_new:n { backend_Page\l_@@_tmpa_tl/Resources/Properties }
+            \exp_args:Nnx \@@_prop_gput:nnn
+              { backend_Page\l_@@_tmpa_tl/Resources/Properties }
+              { l3pdf\int_use:N\g_@@_backend_resourceid_int }
+              { \@@_backend_object_ref:n{#2} }
+          }
+      }
 
- \cs_new:Npn \@@_backend_PageN_Resources_gpush_aux:n #1
-  {
-   \prop_if_empty:cF
-    { \@@_prop_name:n {PageN/Resources/#1} }
+  \cs_set_protected:Npn \@@_backend_emc:
     {
-     \@@_dict_objref_item:nn {#1}{PageN/Resources/#1}
+      \__kernel_backend_literal_page:n { EMC }
+    }
+
+  \cs_new:Npn \@@_backend_PageN_Resources_gpush_aux:n #1
+    {
+      \prop_if_empty:cF
+        { \@@_prop_name:n {PageN/Resources/#1} }
+        {
+          \@@_dict_objref_item:nn {#1}{PageN/Resources/#1}
+        }
+    }
+
+  \cs_new_protected:Npn \@@_backend_PageN_Resources_gpush:n #1
+    {
+       \exp_args:NNx \tex_global:D \tex_pdfpageresources:D
+         {
+           \prop_if_exist:cT
+             { \@@_prop_name:n  { backend_Page#1/Resources/Properties } }
+             {
+               /Properties~
+                 <<
+                   \prop_map_function:cN
+                     { \@@_prop_name:n  { backend_Page#1/Resources/Properties } }
+                     \@@_dict_item:nn
+                 >>
+             }
+           %% add ExtGState etc
+           \clist_map_function:NN
+             \c_@@_backend_pageresources_clist
+             \@@_backend_PageN_Resources_gpush_aux:n
+         }
     }
   }
- \cs_new_protected:Npn \@@_backend_PageN_Resources_gpush:n #1
-  {
-   \exp_args:NNx \tex_global:D \tex_pdfpageresources:D
-   {
-    \prop_if_exist:cT  { \@@_prop_name:n  { backend_Page#1/Resources/Properties } }
-     {
-      /Properties~<<
-       \prop_map_function:cN
-        { \@@_prop_name:n  { backend_Page#1/Resources/Properties } } \@@_dict_item:nn
-       >>
-     }
-    %% add ExtGState etc
-    \clist_map_function:NN \c_@@_backend_pageresources_clist \@@_backend_PageN_Resources_gpush_aux:n
-   }
-  }
-}
 %    \end{macrocode}
+% \end{macro}
+%
 % \subsubsection{bdc / management}
 %    \begin{macrocode}
- \cs_set_eq:NN\pdf_bdc:nn\@@_backend_bdc:nn
- \cs_set_eq:NN\pdf_emc:  \@@_backend_emc:
+\cs_set_eq:NN\pdf_bdc:nn\@@_backend_bdc:nn
+\cs_set_eq:NN\pdf_emc:  \@@_backend_emc:
 %    \end{macrocode}
-%
 %
 % \subsection{pdfxform}
 % \begin{NOTE}{UF}
-%  - As in dvi mode the xform is immediate, this is done for pdftex/luatex too. If needed
-%  a delayed version can be added later.
+%  - As in dvi mode the xform is immediate, this is done for pdftex/luatex too.
+%    If needed a delayed version can be added later.
 %  - the argument for attributes is needed to add e.g. /StructParents
 %  - it is not clear if an argument for additional resources is needed, probably they
 %    should / need to be be added automatically.
@@ -1180,6 +1231,7 @@
 %  - should the size be stored in dim or tl?
 %  - dvips implementation is missing for ideas: pdfbase, atfi-dvips.def,
 %  \end{NOTE}
+%
 %  \subsubsection{pdfxform / management}
 %  \begin{function}[added = 2019-08-05]
 %   {
@@ -1188,73 +1240,80 @@
 %   \begin{syntax}
 %     \cs{pdf_xform_new:nnnn} \Arg{name} \Arg{attributes} \Arg {resources} \Arg {content}
 %   \end{syntax}
-%    This command create a new form XObject that can be as appearance or directly later.
+%    This command create a new form XObject that can be used as appearance or
+%    directly later.
 %    If the content contains BDC-marks it should \emph{not} be given as a
-%    previously typesetted box, but directly so that the names of the BDC-marks can be added to the
-%    resources of the xform. The content will be typeset in a hbox. The surrounding color is
-%    \emph{not} stored in the XObject but should be if wanted added
-%    e.g. with \verb+\color_select:n{.}+
+%    previously typesetted box, but directly so that the names of the
+%    BDC-marks can be added to the resources of the xform.
+%    The content will be typeset in a hbox. With pdflatex and luatex
+%    the surrounding color is \emph{not} stored in the XObject
+%    but should be if wanted added e.g. with |\color_select:n{.}|. This keeps
+%    the option of color injection open.
 %   \end{function}
 %   \begin{function}[added = 2019-08-05]
-%   {
-%    \pdf_xform_use:n
-%   }
+%     {
+%      \pdf_xform_use:n
+%     }
 %   \begin{syntax}
 %     \cs{pdf_xform_use:n} \Arg{name}
 %   \end{syntax}
 %    This command uses (typesets) a previously created form XObject.
-%    If the surrounding color is different, it is injected in the XObject when the
-%    engine pdftex or luatex are used.
+%    If the surrounding color is different, it is injected in the XObject with the
+%    engines pdftex or luatex.
 %   \end{function}
 %   \begin{function}[EXP,added = 2019-08-05]
-%   {
-%    \pdf_xform_ref:n
-%   }
+%     {
+%       \pdf_xform_ref:n
+%     }
 %   \begin{syntax}
 %     \cs{pdf_xform_ref:n} \Arg{name}
 %   \end{syntax}
-%   Inserts the appropriate information to reference the \meta{xform}
+%   Inserts the appropriate information to reference the xform \meta{name}
 %   in for example appearance dictionaries.
 %   \end{function}
 %   \begin{function}[EXP,added = 2019-08-05]
-%   {
-%    \pdf_xform_wd:n, \pdf_xform_ht:n, \pdf_xform_dp:n
-%   }
+%     {
+%       \pdf_xform_wd:n, \pdf_xform_ht:n, \pdf_xform_dp:n
+%     }
 %   \begin{syntax}
 %     \cs{pdf_xform_wd:n} \Arg{name}
 %   \end{syntax}
 %    These command give back the sizes of the XObject. The values are stored in tl-variables with the
-%    unit pt and  not in dimensions.
+%    unit pt and not in dimensions!
 %   \end{function}
 %    \begin{macrocode}
- \cs_new_protected:Npn  \pdf_xform_new:nnnn #1 #2 #3 #4
-  {
-   \@@_backend_xform_new:nnnn { #1 } { #2 } { #3 } { #4 }
-  }
- \cs_new_protected:Npn \pdf_xform_use:n #1
-  {
-   \@@_backend_xform_use:n { #1 }
-  }
-% expansion?
- \cs_new:Npn \pdf_xform_ref:n #1
-  {
-   \@@_backend_xform_ref:n { #1 }
-  }
+  \cs_new_protected:Npn  \pdf_xform_new:nnnn #1 #2 #3 #4
+    {
+      \@@_backend_xform_new:nnnn { #1 } { #2 } { #3 } { #4 }
+    }
 
- \cs_new:Npn \pdf_xform_wd:n #1
-  {
-     \tl_use:c { c_@@_backend_xform_wd_ \tl_to_str:n {#1} _tl }
-  }
- \cs_new:Npn \pdf_xform_ht:n #1
-  {
-     \tl_use:c { c_@@_backend_xform_ht_ \tl_to_str:n {#1} _tl }
-  }
- \cs_new:Npn \pdf_xform_dp:n #1
-  {
-     \tl_use:c { c_@@_backend_xform_dp_ \tl_to_str:n {#1} _tl }
-  }
+  \cs_new_protected:Npn \pdf_xform_use:n #1
+    {
+      \@@_backend_xform_use:n { #1 }
+    }
+% expansion?
+  \cs_new:Npn \pdf_xform_ref:n #1
+    {
+      \@@_backend_xform_ref:n { #1 }
+    }
+
+  \cs_new:Npn \pdf_xform_wd:n #1
+    {
+      \tl_use:c { c_@@_backend_xform_wd_ \tl_to_str:n {#1} _tl }
+    }
+
+  \cs_new:Npn \pdf_xform_ht:n #1
+    {
+      \tl_use:c { c_@@_backend_xform_ht_ \tl_to_str:n {#1} _tl }
+    }
+
+  \cs_new:Npn \pdf_xform_dp:n #1
+    {
+      \tl_use:c { c_@@_backend_xform_dp_ \tl_to_str:n {#1} _tl }
+    }
 
 %    \end{macrocode}
+%
 %   \subsubsection{pdfxform / backend }
 %    \begin{macrocode}
 \box_new:N  \l_@@_backend_tmpa_box
