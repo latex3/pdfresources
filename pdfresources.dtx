@@ -246,10 +246,11 @@ a reference for the absolute page counter
 % \subsection{Shipoutcode}
 % \begin{NOTE}{UF}
 % For now -- until a expl3/kernel interface exists -- code is added with atbegshi:
+% The code depends currently also on zref.
 % \end{NOTE}
-% The macro contains the code that should be executed at every shipout.
-% In part the code is backend dependend
-% \begin{macro}{\@@_shipout_code:}
+% These macro contains the code that should be executed at every shipout.
+% In part the code is backend dependant.
+% \begin{macro}{\@@_shipout_code:, \@@_everypage_shipout_code:n, \@@_lastpage_shipout_code:}
 %    \begin{macrocode}
 %<*package>
 \AtBeginShipout
@@ -264,23 +265,28 @@ a reference for the absolute page counter
   {
     \int_gincr:N \g_@@_abspage_int
     \@@_everypage_shipout_code:V \g_@@_abspage_int
-    \int_compare:nNnT { \g_@@_abspage_int }={\zref@extractdefault{LastPage}{abspage}{0}}
+    \int_compare:nNnT
+      { \g_@@_abspage_int }
+      =
+      { \zref@extractdefault{LastPage}{abspage}{0} }
       {
         \@@_lastpage_shipout_code:
       }
   }
 
 \cs_new_protected:Npn \@@_everypage_shipout_code:n #1
- {
-  \@@_backend_PageN_gpush:n { #1 }
-  \@@_backend_PageN_Resources_gpush:n { #1 }
- }
+  {
+    \@@_backend_PageN_gpush:n { #1 }
+    \@@_backend_PageN_Resources_gpush:n { #1 }
+  }
+
 \cs_generate_variant:Nn \@@_everypage_shipout_code:n {V}
+
 \cs_new_protected:Npn \@@_lastpage_shipout_code:
- {
-   \@@_Pages_gpush:
-   \@@_Info_gpush:
- }
+  {
+    \@@_Pages_gpush: 
+    \@@_Info_gpush:
+  }
 %</package>
 %    \end{macrocode}
 % \end{macro}
