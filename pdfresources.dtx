@@ -41,9 +41,9 @@
 \ProvidesExplPackage {pdfresources} {2019-07-01} {0.2}
   {experimental pdf-resource management}
 \DeclareOption { debug }
- {
-  %\msg_redirect_module:nnn { pdf } { warning }{ error }
-  \msg_redirect_module:nnn { pdf } { none } { warning }
+  {
+    %\msg_redirect_module:nnn { pdf } { warning }{ error }
+    \msg_redirect_module:nnn { pdf } { none } { warning }
   }
 \bool_new:N\g_@@_patches_bool
 \DeclareOption { patches }{\bool_gset_true:N\g_@@_patches_bool}
@@ -96,12 +96,12 @@
 % Some scratch variable
 %    \begin{macrocode}
 \prop_new:N \l_@@_tmpa_prop
-\tl_new:N \l_@@_tmpa_tl
+\tl_new:N   \l_@@_tmpa_tl
 \box_new:N  \l_@@_tmpa_box
 %    \end{macrocode}
 % \end{variable}
 % \begin{macro}{\@@_dict_item:nn,\@@_dict_objref_item:nn}
-% Command to output dict entries: The arguments are \meta{name}\meta{value} and
+% Commands to output dict entries: The arguments are \meta{name}\meta{value} and
 % \meta{name}\meta{object name}, \meta{name} should be a valid pdf name without
 % the slash.
 % The commands don't check if the argument are empty or valid. This should be done
@@ -146,39 +146,38 @@
 % \subsection{shipout and end of run code}
 % \begin{NOTE}{UF}
 % the \enquote{end-of-run} command is temporary until the shipout/atendshipout hooks
-% are ready. For now -- until a expl3/kernel interface exists -- code is added with atbegshi:
-% The code depends currently also on zref.
+% are ready. For now -- until a expl3/kernel interface exists -- code is
+% added with atbegshi. The code depends currently also on zref.
+% For dvips/dvipdfmx \cs{AtEndDvi} should be checked.
+% The naming is not really correct, so we keep this in one place
+% and reflect this with uppercase ...
 % \end{NOTE}
 %
-% \begin{macro}{\@@_backend_end_run:, \@@_backend_end_run_gput:n}
-% \cs{@@_backend_end_run:} runs the code stored in
-% \cs{g_@@_backend_end_run_code_tl} at the end of the compilation.
-% \cs{@@_backend_end_run_gput:n} adds its argument to
-% \cs{g_@@_backend_end_run_code_tl}
+% \begin{macro}{\@@_BACKEND_end_run:, \@@_BACKEND_end_run_gput:n}
+% \cs{@@_BACKEND_end_run:} runs the code stored in
+% \cs{g_@@_BACKEND_end_run_code_tl} at the end of the compilation.
+% \cs{@@_BACKEND_end_run_gput:n} adds its argument to
+% \cs{g_@@_BACKEND_end_run_code_tl}
 % With pdflatex/lualatex |AtEndDocument{\clearpage|\meta{code}|}| is used,
 % so the code is executed at the first compilation.
 % To avoid that specials are lost the code is added to
-% \cs{@@_lastpage_shipout_code_tl} with dvips/dvipdfmx and so needs a
+% \cs{@@_BACKEND_lastpage_shipout_code_tl} with dvips/dvipdfmx and so needs a
 % second compilation.
 % The code shouldn't contain typesetting content and shouldn't rely on some
 % specific grouping.
 %    \begin{macrocode}
-%
-%  \AtEndDocument{\clearpage #1} (not dvi)
-%  \AtEndDvi{#1}
 %  for all:
-\tl_new:N\g_@@_backend_end_run_tl
-\tl_new:N\g_@@_backend_lastpage_shipout_tl
-\tl_new:N\g_@@_backend_thispage_shipout_tl
+\tl_new:N\g_@@_BACKEND_end_run_tl
+\tl_new:N\g_@@_BACKEND_lastpage_shipout_tl
+\tl_new:N\g_@@_BACKEND_thispage_shipout_tl
 
-\cs_new_protected:Npn \@@_backend_end_run_gput:n #1
+\cs_new_protected:Npn \@@_BACKEND_end_run_gput:n #1
   {
-    \tl_gput_right:Nn \g_@@_backend_end_run_tl { #1 }
+    \tl_gput_right:Nn \g_@@_BACKEND_end_run_tl { #1 }
   }
 
 
 % pdftex,luatex
-
 \bool_if:nT
   {
     (\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p:)
@@ -186,101 +185,104 @@
     \sys_if_engine_luatex_p:
   }
   {
-    \cs_new_protected:Npn \@@_backend_end_run:
+    \cs_new_protected:Npn \@@_BACKEND_end_run:
       {
         \AtEndDocument
           {
-            \clearpage \g_@@_backend_end_run_tl
+            \clearpage \g_@@_BACKEND_end_run_tl
           }
       }
   }
-%xetex
+%xetex check ...
 \bool_if:nT {\sys_if_engine_xetex_p:}
   {
-    \cs_new_protected:Npn \@@_backend_end_run:
+    \cs_new_protected:Npn \@@_BACKEND_end_run:
      {
-       \tl_gput_right:Nn \g_@@_backend_lastpage_shipout_tl
+       \tl_gput_right:Nn \g_@@_BACKEND_lastpage_shipout_tl
          {
-           \g_@@_backend_end_run_tl
+           \g_@@_BACKEND_end_run_tl
          }
-     } %check ...
+     }
   }
 
-%dvips
+%dvips check ...
 \bool_if:nT { \sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p: }
   {
-    \cs_new_protected:Npn \@@_backend_end_run:
+    \cs_new_protected:Npn \@@_BACKEND_end_run:
      {
-       \tl_gput_right:Nn \g_@@_backend_lastpage_shipout_tl
+       \tl_gput_right:Nn \g_@@_BACKEND_lastpage_shipout_tl
          {
-           \g_@@_backend_end_run_tl
+           \g_@@_BACKEND_end_run_tl
          }
-     } %check .
+     }
   }
 
-\@@_backend_end_run:
+\@@_BACKEND_end_run:
 
 %    \end{macrocode}
 % \end{macro}
 %
-
-% \cs{@@_backend_shipout_code:} contains the code that is executed at every shipout.
-% It contains two hooks: \cs{@@_thispage_shipout_code:} which is executed at every
-% page  and \cs{@@_lastpage_shipout_code:} which is executed only at the last page.
-% \cs{@@_lastpage_shipout_code:} needs at least two compilations.
-%
 % \begin{macro}{
-%    \@@_shipout_code:,
-%    \@@_backend_lastpage_shipout_gput:n,
-%    \@@_backend_thispage_shipout_gput:n }
+%    \@@_BACKEND_shipout_code:,
+%    \@@_BACKEND_lastpage_shipout_gput:n,
+%    \@@_BACKEND_thispage_shipout_gput:n }
+%  \cs{@@_BACKEND_shipout_code:} contains the code that is executed at every shipout.
+%  It use two hooks: \cs{g_@@_BACKEND_thispage_shipout_tl} and
+%  \cs{g_@@_BACKEND_lastpage_shipout_tl}
+%  The lastpage code relies on a label and so needs at least two compilations.
+%
 %    \begin{macrocode}
-
-\cs_new_protected:Npn \@@_backend_lastpage_shipout_gput:n #1
+\cs_new_protected:Npn \@@_BACKEND_lastpage_shipout_gput:n #1
   {
-    \tl_gput_right:Nn \g_@@_backend_lastpage_shipout_tl { #1 }
+    \tl_gput_right:Nn \g_@@_BACKEND_lastpage_shipout_tl { #1 }
   }
 
-\cs_new_protected:Npn \@@_backend_thispage_shipout_gput:n #1
+\cs_new_protected:Npn \@@_BACKEND_thispage_shipout_gput:n #1
   {
-    \tl_gput_right:Nn \g_@@_backend_thispage_shipout_tl { #1 }
+    \tl_gput_right:Nn \g_@@_BACKEND_thispage_shipout_tl { #1 }
   }
 
 \AtBeginShipout
   {
     \AtBeginShipoutAddToBox
       {
-        \@@_shipout_code:
+        \@@_BACKEND_shipout_code:
       }
   }
 
-\cs_new_protected:Npn \@@_shipout_code:
+\cs_new_protected:Npn \@@_BACKEND_shipout_code:
   {
     \int_gincr:N \g_@@_abspage_int
-    \g_@@_backend_thispage_shipout_tl
+    \g_@@_BACKEND_thispage_shipout_tl
     \int_compare:nNnT
       { \g_@@_abspage_int }
       =
       { \zref@extractdefault{LastPage}{abspage}{0} }
       {
-        \g_@@_backend_lastpage_shipout_tl
+        \g_@@_BACKEND_lastpage_shipout_tl
       }
   }
 
-\@@_backend_thispage_shipout_gput:n
+\@@_BACKEND_thispage_shipout_gput:n
   {
     \exp_args:NV \@@_backend_PageN_gpush:n           { \g_@@_abspage_int }
     \exp_args:NV \@@_backend_PageN_Resources_gpush:n { \g_@@_abspage_int }
   }
 
-
-
-\@@_backend_lastpage_shipout_gput:n
+%!!!!! check if pdftex/luatex can run some of them in the immediate end-of-run
+\@@_BACKEND_lastpage_shipout_gput:n
   {
-    \@@_Pages_gpush:
-    \@@_Info_gpush:
-    \@@_PageNResources_gpush:
+   % \@@_Pages_gpush:            %pagesattr
+   % \@@_Info_gpush:             %pdfinfo
+    \@@_PageNResources_gpush:   %ExtGState etc
   }
 
+\@@_BACKEND_end_run_gput:n
+  {
+    \@@_Pages_gpush:            %pagesattr
+    \@@_Info_gpush:             %pdfinfo
+   % \@@_PageNResources_gpush:   %ExtGState etc
+  }
 %    \end{macrocode}
 % \end{macro}
 %
@@ -329,12 +331,14 @@
       }
   }
 
-\cs_set_eq:NN \pdf_pageobject_ref:n \@@_backend_pageobject_ref:n
+\cs_new:Npn \pdf_pageobject_ref:n #1 { \@@_backend_pageobject_ref:n { #1 }}
+%
 %    \end{macrocode}
 % \end{macro}
+%
 % \subsection{prop / path-Code}
 %  Many code parts are quite similar: props are filled and output.
-%  So we define some generic commands prop commands to ensure systematic
+%  So we define some generic commands for props to ensure systematic
 %  internal names. The names are based on pathes separated by slashed.
 %  The first slash is not used in the names.
 %  \begin{NOTE}{UF}
@@ -343,12 +347,12 @@
 %  but it should be done by subtrees ...
 %  \end{NOTE}
 %
-%  Currently the following names are used: %check, compare with \@@_prop_names_seq
+%  Currently the following names are used: %!!!!! check, compare with \@@_prop_names_seq
 %  \begin{verbatim}
 %  /Pages           %w,  \pagesattr
-%  /backend_Page    % consider name Page?
-%  /backend_PageN   % consider name PageN?
-%  /backend_PageN/Resources/Properties %consider name!!
+%  /backend_Page    %!!!!! consider name Page?
+%  /backend_PageN   %!!!!! consider name PageN?
+%  /backend_PageN/Resources/Properties %!!!!! consider name!!
 %  /PageN           %w, N=1,..n or empty (=all pages) \pageattr %used?
 %  /PageN/Resources %nw? \pageresources
 %  /PageN/Resources/ExtGState
@@ -580,7 +584,7 @@
 %
 % \begin{macro}{\@@_Pages_gpush:}
 % This is the command that outputs the pagesattr. It is used
-% at the end of the document in \cs{@@_lastpage_shipout_code:}
+% at the end of the document in \cs{g_@@_BACKEND_end_run_tl}
 %    \begin{macrocode}
 % push to the register command / issue the special
 \cs_new_protected:Npn \@@_Pages_gpush:
@@ -629,7 +633,7 @@
 % \cs{@@_backend_PageN_gput:nn} adds a value to the current page.
 % \cs{@@_backend_PageN_gpush:n} merges the default and the page value and
 % adds it to the dictionary of the current page in
-% \cs{@@_thispage_shipout_code:n}.
+% \cs{g_@@_BACKEND_thispage_shipout_tl}.
 %    \begin{macrocode}
 %  backend commands
 %  a prop for global/default settings which are used for more than
@@ -898,7 +902,7 @@
 %^^A documentated
 \cs_new_protected:Npn \pdf_pageattr_gput:nn #1 #2
   {
-    \@@_backend_Page_gput:nn {#1}{#2}
+    \@@_backend_Page_gput:nn { #1 }{ #2 }
   }
 
 % remove:
@@ -946,7 +950,7 @@
 %
 %  \begin{function}[added = 2019-06-22]
 %   {
-%    \pdf_info_gput:nn,\pdf_info_gput:no
+%     \pdf_info_gput:nn, \pdf_info_gput:no
 %   }
 %   \begin{syntax}
 %     \cs{pdf_info_gput:nn} \Arg{name} \Arg{value}
@@ -1005,7 +1009,7 @@
 %  \pdfstringdef\@pdftitle{#1}%
 \cs_new_protected:Npn \pdf_info_string_gput:nn #1 #2 %#1 key without /, #2 content
   {
-    \@@_prop_gput:nnn {Info}{#1}{(#2)}
+    \@@_prop_gput:nnn { Info }{ #1 }{ (#2) }
   }
 
 \cs_generate_variant:Nn \pdf_info_string_gput:nn {no}
@@ -1079,7 +1083,7 @@
 % \cs{@@_backend_bdc:nn} and \cs{@@_backend_emc:} are the backend command that
 % create the bdc/emc marker and store the properties.
 % \cs{@@_backend_PageN_Resources_gpush:n} outputs the /Properties in
-% \cs{@@_thispage_shipout_code:} for the current page.
+% \cs{@@_BACKEND_thispage_shipout_gput:n} for the current page.
 %    \begin{macrocode}
 % pdftex and luatex (and perhaps dvips ...) need to know if there are in a
 % xform stream ...
@@ -1273,8 +1277,8 @@
 %
 % \subsubsection{bdc / management}
 %    \begin{macrocode}
-\cs_set_eq:NN\pdf_bdc:nn\@@_backend_bdc:nn
-\cs_set_eq:NN\pdf_emc:  \@@_backend_emc:
+\cs_new_protected:Npn  \pdf_bdc:nn #1 #2 { \@@_backend_bdc:nn {#1}{#2}}
+\cs_new_protected:Npn  \pdf_emc:  { \@@_backend_emc: }
 %    \end{macrocode}
 %
 % \subsection{pdfxform}
@@ -1340,35 +1344,35 @@
 %    unit pt and not in dimensions!
 %   \end{function}
 %    \begin{macrocode}
-  \cs_new_protected:Npn  \pdf_xform_new:nnnn #1 #2 #3 #4
-    {
-      \@@_backend_xform_new:nnnn { #1 } { #2 } { #3 } { #4 }
-    }
+\cs_new_protected:Npn  \pdf_xform_new:nnnn #1 #2 #3 #4
+  {
+    \@@_backend_xform_new:nnnn { #1 } { #2 } { #3 } { #4 }
+  }
 
-  \cs_new_protected:Npn \pdf_xform_use:n #1
-    {
-      \@@_backend_xform_use:n { #1 }
-    }
+\cs_new_protected:Npn \pdf_xform_use:n #1
+  {
+    \@@_backend_xform_use:n { #1 }
+  }
 % expansion?
-  \cs_new:Npn \pdf_xform_ref:n #1
-    {
-      \@@_backend_xform_ref:n { #1 }
-    }
+\cs_new:Npn \pdf_xform_ref:n #1
+  {
+    \@@_backend_xform_ref:n { #1 }
+  }
 
-  \cs_new:Npn \pdf_xform_wd:n #1
-    {
-      \tl_use:c { c_@@_backend_xform_wd_ \tl_to_str:n {#1} _tl }
-    }
+\cs_new:Npn \pdf_xform_wd:n #1
+  {
+    \tl_use:c { c_@@_backend_xform_wd_ \tl_to_str:n {#1} _tl }
+  }
 
-  \cs_new:Npn \pdf_xform_ht:n #1
-    {
-      \tl_use:c { c_@@_backend_xform_ht_ \tl_to_str:n {#1} _tl }
-    }
+\cs_new:Npn \pdf_xform_ht:n #1
+  {
+    \tl_use:c { c_@@_backend_xform_ht_ \tl_to_str:n {#1} _tl }
+  }
 
-  \cs_new:Npn \pdf_xform_dp:n #1
-    {
-      \tl_use:c { c_@@_backend_xform_dp_ \tl_to_str:n {#1} _tl }
-    }
+\cs_new:Npn \pdf_xform_dp:n #1
+  {
+    \tl_use:c { c_@@_backend_xform_dp_ \tl_to_str:n {#1} _tl }
+  }
 
 %    \end{macrocode}
 %
@@ -1707,7 +1711,8 @@
 %    \end{macrocode}
 % \end{macro}
 % \end{macro}
-% %XXXXXXXXXXX to: backend-path!!
+% !!!!! check path names (backend or not ...)
+%
 % \subsubsection{ page resources: ExtGState, ColorSpace, Shading, Pattern / management}
 % \begin{function}[added = 2019-08-08]
 %   {\pdf_pageresources_gput:nnn}
@@ -1715,60 +1720,52 @@
 %     \cs{pdf_pageresources_gput:nnn} \Arg{resource} \Arg{name} \Arg{value}
 %   \end{syntax}
 %   Adds |/|\meta{name} \meta{value} to the page resource \meta{resource}.
-%   \meta{resource} can be one |ExtGState|, |ColorSpace|, |Pattern| oder |Shading|.
-%   It is always stored globally. The content is written to the pdf
-%   at the end of the compilation, so values can be added, changed or removed until then.
+%   \meta{resource} can be |ExtGState|, |ColorSpace|, |Pattern| oder |Shading|.
+%   The values are always stored globally. The content is written to the pdf
+%   at the end of the compilation, so values can be added until then.
 %   \meta{name} should be a valid pdf name without the leading slash,
 %   \meta{value} should be a valid pdf value for the resource.
-%   Any escaping or (re)encoding must be done explictly. If a \meta{name} is used twice,
-%   only the last \meta{value} set will be used.
-%   With the dvips backend the command does nothing: resources are managed by ghostscript
-%   or the distiller if e.\,g. transparency is used.
-%   The primitive commands to set the resources should not be used together with this code as
-%   the calls will overwrite each other and values will be lost.
+%   Any escaping or (re)encoding must be done explicitly. If a \meta{name} is
+%   used twice, only the last \meta{value} set will be used.
+%
+%   With the dvips backend the command does nothing: resources are managed by
+%   ghostscript or the distiller if e.\,g. transparency is used.
+%
+%   The resources is added to all pages starting with the first where something has
+%   been added to a resources.
+%
+%   \potentialclash The primitive commands to set the resources should not be used
+%   together with this code as the calls will overwrite each other and values
+%   will be lost.
 % \end{function}
 %    \begin{macrocode}
 %
 % setter:  #1 is the name of the resource
 \cs_new_protected:Npn \pdf_pageresources_gput:nnn #1 #2 #3
   {
-   \@@_backend_PageNResources_gput:nnn {#1} { #2 }{ #3 }
+    \@@_backend_PageNResources_gput:nnn {#1} { #2 }{ #3 }
   }
 %    \end{macrocode}
-%    \begin{macrocode}
-
-% doesn't work: ocg layer of float gets lost ...
-%\AtEndDocument % must perhaps be even later??
 %
-%\RequirePackage{etoolbox}
-%\AfterEndDocument %works better
-% Alternative?
-%\RequirePackage{atenddvi}
-%\AtEndDvi
-%% !!!!!!!!!!!!!!!!!!!!!!!!!! sort this out, which engine does what here!!!!!!!!!
-\@@_backend_end_run:n
- {
-   % only pdftex??
-   %\@@_backend_PageNResources_end_run:
- }
-
-%    \end{macrocode}
 % \subsection{Catalog}
 % \subsubsection{Catalog / backend}
 % the backend command is already in the driver:
-% \verb+\__pdf_backend_catalog_gput:nn+
+% \cs{__pdf_backend_catalog_gput:nn}
+%
 % \subsubsection{ Catalog / management }
 % \begin{NOTE}{UF}
 % The catalog dictionary is filled by e.g. \cs{pdfcatalog}. Multiple appearances of
-% \cs{pdfcatalog} are concatenated, so one could end with multiple entries for the same value
-% with luatex and pdftex -- the other backends normally avoid this problem.
-% We therefore setup a property which is filled and executed at a sensible (not yet found) place.
+% \cs{pdfcatalog} are concatenated, so one could end with multiple entries
+% for the same value with luatex and pdftex -- the other backends normally
+% avoid this problem.
+% We therefore setup a property which is filled and executed at a sensible
+% (not yet found) place.
 % \cs{pdfcatalog} has an option \texttt{openaction} to set the start view options.
 % This is ignored here but set in a separate command (to be in sync with other drivers).
 % /AF is even an array of dictionaries.
 % There is probably no way to test what has already been added to the catalog,
 % so doublettes can only be avoided with ``don't do it''.
-% % \end{NOTE}
+% \end{NOTE}
 % The entries in the catalog have varying requirements regarding the
 % pdf management. Some entries (like /Lang) are simple values where the last setting should
 % win, other like /OutputIntents are dictionaries which can be filled from more than
@@ -2732,6 +2729,7 @@ local function @@_backend_PageN_gpush (page)
    t[name] = value
   end
  end
+ -- sort the table to get reliable test files.
  for name,value in pairs(t) do
   table.insert(tkeys,name)
  end
