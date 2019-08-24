@@ -408,6 +408,8 @@
 %  /Info           %w, \pdfinfo
 %  /Catalog/OCProperties
 %  /Catalog/OutputIntents
+%  /Catalog/AcroForm
+%  /Catalog/AcroForm/DR/Font
 %  /xform/Resources/Properties
 %  \end{verbatim}
 %  \begin{macro}{\@@_prop_name,\@@_prop_new:n,\@@_prop_names_seq}
@@ -1853,7 +1855,7 @@
 %    Legal                   &  objref or dict\\
 %    Metadata                &  obj ref or stream \\
 %    NeedsRendering          &  boolean       &   pdf 1.7\\
-%    OpenAction              &  array (dest) or dict (action) &
+%    OpenAction              &  array (dest) or dict (action) \\
 %    PageLabels              &  objref         &  number tree \\
 %    PageLayout              &  name   & one of /SinglePage, /OneColumn,
 %                                        /TwoColumnLeft, /TwoColumnRight,
@@ -1871,11 +1873,13 @@
 %   \end{tabularx}
 %   \par\medskip
 %
-%   The following keys add values to subdictionaries. The syntax is that the name
-%   value pair is input in a brace pair. E.g.
-%   |\pdf_catalog_gput:nn {Acroform}{{SigFlags}{3}}| or
+%   The following keys add values to subdictionaries. The syntax is that the \meta{name}
+%   \meta{value} pair is inputed in a brace pair. E.g.\\
+%   |\pdf_catalog_gput:nn {Acroform}{{SigFlags}{3}}| or\\
 %   |\pdf_catalog_gput:nn {ViewerPreferences}{{HideToolbar}{true}}|
 %
+%   \medskip
+%   \noindent
 %   \begin{tabularx}{\linewidth}{lll>{\raggedright\arraybackslash}X}
 %    \bfseries Key           &  \bfseries Subkey& \bfseries Value  & \bfseries Remark \\\midrule
 %  AA                        & WC, WS, DS, WP,DP& all dict    \\
@@ -1884,25 +1888,42 @@
 %                            &  DA             &  String\\
 %                            &  Q              &  Integer\\
 %                            &  XFA            & stream or array & pdf 1.5\\
-%  AcroForm/DR/Font          &  \meta{name}    & dict       & name is (unique) pdf name without slash  \\
+%  AcroForm/DR/Font          &  \meta{name}    & dict       & name is a pdf name without slash  \\
 %  MarkInfo                  & Marked          & boolean      \\
 %                            & UserProperties  & boolean      \\
 %                            & Suspects        & boolean      \\
-%   ViewerPreferences        & HideToolbar     & boolean        \\
+%  ViewerPreferences         & HideToolbar     & boolean        \\
 %                            & \ldots          &                \\
 % \end{tabularx}
+%
+% The following keys are dictionaries to which multiple values can be
+% assigned which are then combined in an array. The value is \emph{always}
+% an object name of an object which must have been declared previously. E.g.
+%  \begin{verbatim}
+%  \pdf_object_new:nn   {pkg@intent}{dict}
+%  \pdf_object_write:nn {pkg@intent}{...}
+%  \pdf_catalog_gput:nn {OutputIntents}{pkg@intent}
+%  \end{verbatim}
+%
+%   \medskip
+%   \noindent
+%   \begin{tabularx}{\linewidth}{l>{\raggedright\arraybackslash}X}
+%    \bfseries Key        & \bfseries Value   & \bfseries Remark \\\midrule
+%    AcroForm/Fields      & object name\\
+%    AcroForm/CO          & object name\\
+%    AF                   & object name\\
+%    OCProperties/OCGs    & object name  &if there are OCProperties, OCGs and D are required.\\
+%    OCProperties/Configs & object name \\
+%    OCProperties/D       & object name & This actually a single value.
+%                                         There can be only one default.
+%                                         If the value is set twice, the
+%                                         second wins, and the first is
+%                                         added to OCProperties/Configs.\\
+%    OutputIntents        & object name\\
+%    Requirements         & object name & pdf 1.7 \\
+%   \end{tabularx}
 % \end{function}
 %    \begin{macrocode}
-\@@_prop_new:n {Catalog}
-\@@_prop_new:n {Catalog/AcroForm}
-\@@_prop_new:n {Catalog/ViewerPreferences}
-\@@_prop_new:n {Catalog/MarkInfo}
-\@@_prop_new:n {Catalog/AA}
-\@@_prop_new:n {Catalog/AcroForm/DR/Font}
-
-%
-% \@@_prop_show:n {Catalog/AcroForm}
-
 \cs_new_protected:Npn \pdf_catalog_gput:nn #1 #2 %#1 name, #2 value
   {
     \tl_if_empty:nTF { #2 }
@@ -1911,40 +1932,134 @@
       }
       {
         \cs_if_exist:cTF
-        { @@_catalog_#1_gput:nn }
+        { @@_catalog_#1_gput:n }
         {
-          \use:c { @@_catalog_#1_gput:nn } #2
+          \use:c { @@_catalog_#1_gput:n } { #2 }
         }
         {
+          \clist_if_in:NnF \c_@@_Catalog_single_clist
+            { #1 }
+            { \msg_warning:nnn { pdf }{ catalog-unknown } { #1 }}
           \@@_prop_gput:nnn { Catalog } }{#1}{#2}
         }
   }
+%    \end{macrocode}
+% \begin{macro}{ \@@_catalog_XX_gput:n }
+% Various commands to handle subentries and special cases.
+% \begin{variable}
+%   {
+%     \c_@@_Catalog_single_clist,
+%     \c_@@_Catalog_prop_clist,
+%     \c_@@_Catalog_seq_clist,
+%     \c_@@_Catalog_special_clist
+%   }
+%  This variables hold the list of the various types of entries. With it
+%  the various gput-commands are generated.
+%    \begin{macrocode}
+\@@_prop_new:n {Catalog}
 
-\cs_new_protected:cpn { @@_catalog_AcroForm_gput:nn } #1 #2
+\clist_const:Nn \c_@@_Catalog_single_clist
   {
-    \@@_prop_gput:nnn { Catalog/AcroForm } { #1 }{ #2 }
+    Collection,
+    DPartRoot,
+    Lang,
+    Legal,
+    Metadata,
+    NeedsRendering,
+    OCProperties/D,
+    OpenAction,
+    PageLabels,
+    PageLayout,
+    Perms,
+    PieceInfo,
+    SpiderInfo,
+    StructTreeRoot,
+    Threads,
+    URI,
+    Version
   }
 
-\cs_new_protected:cpn { @@_catalog_ViewerPreferences_gput:nn } #1 #2
+\clist_const:Nn \c_@@_Catalog_prop_clist
   {
-    \@@_prop_gput:nnn { Catalog/ViewerPreferences } { #1 }{ #2 }
+    AA,
+    AcroForm,
+    AcroForm/DR/Font,
+    MarkInfo,
+    ViewerPreferences,
   }
 
-\cs_new_protected:cpn { @@_catalog_MarkInfo_gput:nn } #1 #2
+\clist_map_inline:Nn \c_@@_Catalog_prop_clist
   {
-    \@@_prop_gput:nnn { Catalog/MarkInfo } { #1 }{ #2 }
+    \@@_prop_new:n {Catalog/#1}
+    \cs_new_protected:cpn { @@_catalog_#1_gput:n } ##1
+      {
+        \@@_prop_gput:nnn { Catalog/#1 }  ##1
+      }
   }
 
-\cs_new_protected:cpn { @@_catalog_AA_gput:nn } #1 #2
+\clist_const:Nn \c_@@_Catalog_seq_clist
   {
-    \@@_prop_gput:nnn { Catalog/AA } { #1 }{ #2 }
+    AF,
+    AcroForm/Fields,
+    OCProperties/OCGs,
+    OCProperties/Configs,
+    OutputIntents,
+    Requirements
   }
 
-\cs_new_protected:cpn { @@_catalog_AcroForm/DR/Font_gput:nn } #1 #2
+\clist_map_inline:Nn \c_@@_Catalog_seq_clist
+ {
+   \seq_new:c { g_@@_/Catalog/#1_seq }
+   \cs_new_protected:cpn { @@_catalog_#1_gput:n } ##1
+     {
+       \seq_gput_right:cx { g_@@_/Catalog/#1_seq } { \pdf_object_ref:n { ##1 } }
+     }
+ }
+
+\cs_new_protected:cpn { @@_catalog_OCProperties/D_gput:n } ##1
   {
-    \@@_prop_gput:nnn { Catalog/AcroForm/DR/Font } { #1 }{ #2 }
+    \seq_gput_left:cx { g_@@_/Catalog/Configs_seq } { \pdf_object_ref:n { ##1 } }
   }
 %    \end{macrocode}
+% \end{variable}
+% \end{macro}
+%
+% \begin{macro}{...}
+% This commands build together the various parts of the catalog.
+%    \begin{macrocode}
+% Catalog/OCProperties OCGs + D is required
+\cs_new_protected:Npn\@@_catalog_OCProperties_gpush:
+  {
+    \int_compare:nNnT
+      {
+        ( \seq_count:c { g_@@_catalog_OCProperties/OCGs_seq }  )*
+        ( \seq_count:c { g_@@_catalog_OCProperties/Configs_seq } )
+      }
+      >
+      { 0 }
+      {
+        \@@_backend_object_new:nn  { g_@@_catalog_OCProperties_obj } { dict }
+        \seq_gpop_left:cN { g_@@_catalog_OCProperties/Configs_seq} \l_tmpa_tl
+        \exp_args:Nnx
+          \@@_backend_object_write:nn {g_@@_catalog_OCProperties_obj}
+            {
+              /OCGs~[ \seq_use:cn { g_@@_catalog_OCProperties/OCGs_seq } {~} ]
+              /D~\l_tmpa_tl~
+              \seq_if_empty:cF { g_@@_catalog_OCProperties/Configs_seq }
+                {
+                  /Configs~
+                  [ \seq_use:cn { g_@@_catalog_OCProperties/Configs_seq} {~} ]
+                }
+            }
+        \@@_backend_catalog_gput:nn
+          { OCProperties }
+          { \@@_backend_object_ref:n {g_@@_catalog_OCProperties_obj} }
+      }
+  }
+
+%    \end{macrocode}
+% \end{macro}
+% XXXXXXXXXXXX
 %=================================================================
 % \subsection{other stuff}
 % \subsubsection{Openaction}
