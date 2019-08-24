@@ -88,6 +88,51 @@
 % therefore depends on the driver.
 %
 % \subsection{\pkg{media9}}
+% \section{messages}
+%    \begin{macrocode}
+\msg_new:nnn  { pdf } { patches }
+              { loading~patch~code }
+\msg_new:nnn  { pdf } { empty-value }
+              { The~value~for~#1~is~empty~and~will~be~ignored }
+\msg_new:nnn  { pdf } { wrong-path }
+              { This~resource~path~#1~doesn't~exist~--~perhaps~a~typo? }
+
+\msg_new:nnnn { pdf } { pagesattr-changed }
+              {
+                The~content~of~pagesattr ~has~changed.~
+                Check~if~it~is~correct.
+              }
+              {
+                This~is~probably~due~to~some~package~or~command~using~the~
+                primitive~\token_to_str:N\pdfpagesattr\c_space_tl
+                or~an~equivalent~command~instead~of~the~expl3~interface.
+              }
+\msg_new:nnnn { pdf }{ pageattr-changed }
+              {
+                The~content~of~pageattr ~has~changed.~
+                Check~if~it~is~correct.
+              }
+              {
+                This~is~probably~due~to~some~package~or~command~using~the~
+                primitive~\token_to_str:N\pdfpageattr\c_space_tl
+                or~an~equivalent~command~instead~of~the~expl3~interface.
+              }
+\msg_new:nnn  { pdf } { setup-after-documentclass }
+              { \token_to_str:N \documentsetup\c_space_tl
+                should~be~used~only~before~\token_to_str:N\documentclass
+              }
+\msg_new:nnn  { pdf } { object-compression-disabled }
+              { object~compression~is~not~supported~in~pdf~version~#1 }
+\msg_new:nnn  { pdf } { catalog-special }
+              {
+                values~to~the~catalog~entry~#1~should~be~added~with~
+                \token_to_str:N\pdf_catalog_ #1_gput:nn
+              }
+\msg_new:nnn  { pdf } { catalog-unknown }
+              {
+                inserting~unknown~/#1~into~the~catalog
+              }
+%    \end{macrocode}
 % \section{Preparation/helper Code}
 %^^A still needed:
 %^^A \pdf@strcmp??
@@ -385,10 +430,13 @@
 %    \end{macrocode}
 %  \end{macro}
 %
-%  \begin{macro}{\@@_prop_gclear,
+%  \begin{macro}{
+%                \@@_prop_gclear,
 %                \@@_prop_gput:n,
 %                \@@_prop_get:nnN,
-%                \@@_prop_gremove:nn}
+%                \@@_prop_gremove:nn,
+%                \@@_prop_show:n
+%                }
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_prop_gclear:n #1
   {
@@ -423,6 +471,10 @@
     \prop_gremove:cn { \@@_prop_name:n {#1} } { #2 }
   }
 
+\cs_new_protected:Npn \@@_prop_show:n #1  %path
+  {
+    \prop_show:c { \@@_prop_name:n {#1} }
+  }
 %    \end{macrocode}
 % \end{macro}
 %
@@ -1750,7 +1802,7 @@
 % \subsection{Catalog}
 % \subsubsection{Catalog / backend}
 % the backend command is already in the driver:
-% \cs{__pdf_backend_catalog_gput:nn}
+% \cs{@@_backend_catalog_gput:nn}
 %
 % \subsubsection{ Catalog / management }
 % \begin{NOTE}{UF}
@@ -1765,63 +1817,133 @@
 % /AF is even an array of dictionaries.
 % There is probably no way to test what has already been added to the catalog,
 % so doublettes can only be avoided with ``don't do it''.
+% see catalogue.tex for a list of entries ...
 % \end{NOTE}
 % The entries in the catalog have varying requirements regarding the
-% pdf management. Some entries (like /Lang) are simple values where the last setting should
-% win, other like /OutputIntents are dictionaries which can be filled from more than
-% one source. In some cases the values that needs to be added are not at the toplevel
-% but in some subsubdictionary. To handle this some \Arg{keys} in the following command
+% pdf management. Some entries (like /Lang) are simple values where the last
+% setting should win, other like /OutputIntents are dictionaries which can
+% be filled from more than one source. In some cases the values that needs to be
+% added are not at the toplevel but in some subsubdictionary.
+% To handle this some \Arg{keys} in the following command
 % are connected with special functions.
 % \begin{function}[added = 2019-08-18]
 %   {\pdf_catalog_gput:nn}
 %   \begin{syntax}
 %     \cs{pdf_catalog_gput:nn} \Arg{key} \Arg {value}
 %   \end{syntax}
-%   This adds an entry to the catalog. \Arg{key} is either a valid pdf name
-%   (without preceding slash) or a composed name which represents
-%   an entry in a subdictionary.
+%   This adds an entry to the catalog. \Arg{key} is either a valid pdf
+%   \meta{name} (without preceding slash) or one of the special keys described
+%   later which represents an entry in a subdictionary.
 %   The exact format of \Arg{value} depends on \Arg{key}.
 %
 %   \paragraph{Simple values}
-%   The values in the following tabular are \enquote{simple} in the sense that they are
-%   added as is to the catalog. If \meta{key} gets assigned two values the last one wins.
+%   The values in the following tabular are \enquote{simple} in the sense
+%   that they are added as is to the catalog or a sub dictionary.
+%   If \meta{key} gets assigned two values the last one wins.
+%   There is no check that the values have the correct type and format.
+%   It is up to the user to ensure that the value does what is intended.
 %
 %   \medskip
 %   \noindent
 %   \begin{tabularx}{\linewidth}{ll>{\raggedright\arraybackslash}X}
-%    \bfseries Key                     &  \bfseries Value  & \bfseries Remark       \\\midrule
-%    Lang                    &  string & e.g. \texttt{(de-DE)} \\
-%    PageLayout              &  name   & one of /SinglePage, /OneColumn, /TwoColumnLeft, /TwoColumnRight, /TwoPageLeft (PDF 1.5), /TwoPageRight (PDF 1.5)) \\
-%    StructTreeRoot          &  obj ref or dict\\
-%    Metadata                &  obj ref or stream \\
-%    NeedsRendering          &  boolean &   pdf 1.7\\
-%    SpiderInfo              &  objref or dict\\
-%    PieceInfo               &  objref or dict\\
-%    Legal                   &  objref or dict\\
-%    Perms                   &  objref or dict & pdf 1.5, permissions\\
-%    URI                     &  objref or dict \\
+%    \bfseries Key           &  \bfseries Value  & \bfseries Remark \\\midrule
 %    Collection              &  objref or dict\\
-%    Threads                 &  objref to an array\\
 %    DPartRoot               &  objref or dict & pdf 2.0\\
-%    PageLabels              &  objref &  number tree \\
-%    Version                 &  name   & eg. \texttt{/1.7} \\
+%    Lang                    &  string & e.g. \texttt{(de-DE)} \\
+%    Legal                   &  objref or dict\\
+%    Metadata                &  obj ref or stream \\
+%    NeedsRendering          &  boolean       &   pdf 1.7\\
+%    OpenAction              &  array (dest) or dict (action) &
+%    PageLabels              &  objref         &  number tree \\
+%    PageLayout              &  name   & one of /SinglePage, /OneColumn,
+%                                        /TwoColumnLeft, /TwoColumnRight,
+%                                        /TwoPageLeft (PDF 1.5),
+%                                        /TwoPageRight (PDF 1.5)) \\
+%    Perms                   &  objref or dict & pdf 1.5, permissions\\
+%    PieceInfo               &  objref or dict\\
+%    SpiderInfo              &  objref or dict\\
+%    StructTreeRoot          &  obj ref or dict   \\
+%    Threads                 &  objref to an array\\
+%    URI                     &  objref or dict \\
+%    Version                 &  name           & eg. \texttt{/1.7} \\
+%    \meta{unknown}          &                 & an unknown \meta{name} will be
+%                                                inserted with a warning.\\
 %   \end{tabularx}
 %   \par\medskip
+%
+%   The following keys add values to subdictionaries. The syntax is that the name
+%   value pair is input in a brace pair. E.g.
+%   |\pdf_catalog_gput:nn {Acroform}{{SigFlags}{3}}| or
+%   |\pdf_catalog_gput:nn {ViewerPreferences}{{HideToolbar}{true}}|
+%
+%   \begin{tabularx}{\linewidth}{lll>{\raggedright\arraybackslash}X}
+%    \bfseries Key           &  \bfseries Subkey& \bfseries Value  & \bfseries Remark \\\midrule
+%  AA                        & WC, WS, DS, WP,DP& all dict    \\
+%  AcroFrom                  &  NeedAppearances&  boolean\\
+%                            &  SigFlags       &  Integer\\
+%                            &  DA             &  String\\
+%                            &  Q              &  Integer\\
+%                            &  XFA            & stream or array & pdf 1.5\\
+%  AcroForm/DR/Font          &  \meta{name}    & dict       & name is (unique) pdf name without slash  \\
+%  MarkInfo                  & Marked          & boolean      \\
+%                            & UserProperties  & boolean      \\
+%                            & Suspects        & boolean      \\
+%   ViewerPreferences        & HideToolbar     & boolean        \\
+%                            & \ldots          &                \\
+% \end{tabularx}
 % \end{function}
 %    \begin{macrocode}
 \@@_prop_new:n {Catalog}
+\@@_prop_new:n {Catalog/AcroForm}
+\@@_prop_new:n {Catalog/ViewerPreferences}
+\@@_prop_new:n {Catalog/MarkInfo}
+\@@_prop_new:n {Catalog/AA}
+\@@_prop_new:n {Catalog/AcroForm/DR/Font}
+
+%
+% \@@_prop_show:n {Catalog/AcroForm}
 
 \cs_new_protected:Npn \pdf_catalog_gput:nn #1 #2 %#1 name, #2 value
- {
-  \tl_if_empty:nTF { #2 }
   {
-   \msg_none:nnn { pdf }{ empty-value }{ #1 }
+    \tl_if_empty:nTF { #2 }
+      {
+        \msg_none:nnn { pdf }{ empty-value }{ #1 }
+      }
+      {
+        \cs_if_exist:cTF
+        { @@_catalog_#1_gput:nn }
+        {
+          \use:c { @@_catalog_#1_gput:nn } #2
+        }
+        {
+          \@@_prop_gput:nnn { Catalog } }{#1}{#2}
+        }
   }
+
+\cs_new_protected:cpn { @@_catalog_AcroForm_gput:nn } #1 #2
   {
-   % Add later: test for the names that should be handled specially
-  \@@_prop_gput:nnn { Catalog }{#1}{#2}
+    \@@_prop_gput:nnn { Catalog/AcroForm } { #1 }{ #2 }
   }
- }
+
+\cs_new_protected:cpn { @@_catalog_ViewerPreferences_gput:nn } #1 #2
+  {
+    \@@_prop_gput:nnn { Catalog/ViewerPreferences } { #1 }{ #2 }
+  }
+
+\cs_new_protected:cpn { @@_catalog_MarkInfo_gput:nn } #1 #2
+  {
+    \@@_prop_gput:nnn { Catalog/MarkInfo } { #1 }{ #2 }
+  }
+
+\cs_new_protected:cpn { @@_catalog_AA_gput:nn } #1 #2
+  {
+    \@@_prop_gput:nnn { Catalog/AA } { #1 }{ #2 }
+  }
+
+\cs_new_protected:cpn { @@_catalog_AcroForm/DR/Font_gput:nn } #1 #2
+  {
+    \@@_prop_gput:nnn { Catalog/AcroForm/DR/Font } { #1 }{ #2 }
+  }
 %    \end{macrocode}
 %=================================================================
 % \subsection{other stuff}
@@ -1868,42 +1990,6 @@
 %    \end{macrocode}
 % \section{Management code / pdf Module}
 %<@@=pdf>
-% \subsection{Messages}
-%    \begin{macrocode}
-\msg_new:nnn  { pdf } { patches } { loading~patch~code }
-\msg_new:nnn  { pdf } { empty-value }{ The~value~for~#1~is~empty~and~will~be~ignored }
-\msg_new:nnn  { pdf } { wrong-path } { This~resource~path~#1~doesn't~exist~--~perhaps~a~typo? }
-
-\msg_new:nnnn { pdf } { pagesattr-changed }
- {
-   The~content~of~pagesattr ~has~changed.~
-   Check~if~it~is~correct.
- }
- {
-  This~is~probably~due~to~some~package~or~command~using~the~
-  primitive~\token_to_str:N\pdfpagesattr\c_space_tl or~an~equivalent~command~
-  instead~of~the~expl3~interface.
- }
-\msg_new:nnnn { pdf }{ pageattr-changed }
- {
-   The~content~of~pageattr ~has~changed.~
-   Check~if~it~is~correct.
- }
- {
-  This~is~probably~due~to~some~package~or~command~using~the~
-  primitive~\token_to_str:N\pdfpageattr\c_space_tl or~an~equivalent~command~
-  instead~of~the~expl3~interface.
- }
-\msg_new:nnn { pdf } { setup-after-documentclass }
-  { \token_to_str:N \documentsetup\c_space_tl
-    should~be~used~only~before~\token_to_str:N\documentclass}
-\msg_new:nnn { pdf } { object-compression-disabled }
-             { object~compression~is~not~supported~in~pdf~version~#1 }
-\msg_new:nnn { pdf } { catalog-special }
-             { values~to~the~catalog~entry~#1~should~be~added~with~
-               \token_to_str:N\pdf_catalog_ #1_gput:nn }
-
-%    \end{macrocode}
 % \subsection{Objects and other rather low-level stuff}
 % NEEDS REVISING!!!
 %    \begin{macrocode}

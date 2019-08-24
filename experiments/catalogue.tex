@@ -11,16 +11,20 @@
 
 \begin{document}
 \ExplSyntaxOn
-
+\pdf_catalog_gput:nn {Lang}{(en-UK)}
+\pdf_catalog_gput:nn {Blub}{(abc)}
+\pdf_catalog_gput:nn {AcroForm} {{NeedAppearances}{True}}
+\__pdf_prop_show:n{Catalog}
+\__pdf_prop_show:n{Catalog/AcroForm}
 \bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
 {
  \__pdf_backend_catalog_gput:nn {Lang}{(en-UK)}
  %\pdfcatalog{/Lang~(en-UK)}
  % not good there should be only one ...
  %\pdfcatalog{/Lang (de-DE)}
- \exp_args:Nnx 
+ \exp_args:Nnx
  \__pdf_backend_catalog_gput:nn {Openaction}{[\pdf_pageobject_ref:n {2}~/FitH]}
- 
+
  %\pdfcatalog{/OpenAction~[\pdf_pageobject_ref:n {2}~/FitH]}
 }
 xxx
@@ -39,7 +43,7 @@ xxx
 %\special{pdf:put @catalog << /PageMode /UseThumbs >> }
 %\special{pdf:docview <</OpenAction[@page2 /FitH]>>}
 %\special{pdf:put @catalog <</OpenAction[\pdf_pageobject_ref:n {2}~/FitH]>>}
-\exp_args:Nnx 
+\exp_args:Nnx
 \__pdf_backend_catalog_gput:nn {OpenAction}{[\pdf_pageobject_ref:n {2}~/FitH]}
 }
 
@@ -67,7 +71,7 @@ xxx
  %\pdfcatalog{/Lang (de-DE)}
  \exp_args:Nnx
  \__pdf_backend_catalog_gput:nn {Openaction}{[\pdf_pageobject_ref:n {2}~/FitH]}
- 
+
 }
 \newpage blb
 \newpage blbl
@@ -91,11 +95,6 @@ Catalog/PageMode                 name (/UseNone, /UseOutlines, /UseThumbs, /Full
        /DPartRoot                (dict, pdf 2.0)
        /PageLabels               (number tree /indirect object)
        /Version                   name, eg. /1.7
-       /AcroForm/NeedAppearances : boolean, single
-                /SigFlags        : Integer
-                /DA              : String
-                /Q               : Integer
-                /XFA             : stream or array
 
 single but should perhaps get an additional user command ...
 goto page can be done with the argument "[\pdf_pageobj_ref:n{2}~/FitH]"
@@ -104,6 +103,12 @@ goto page can be done with the argument "[\pdf_pageobj_ref:n{2}~/FitH]"
 
 multiple values
 prop
+       /AcroForm/NeedAppearances : boolean, single
+                /SigFlags        : Integer
+                /DA              : String
+                /Q               : Integer
+                /XFA             : stream or array
+
 \pdf_catalog:nn {ViewerPreferences}{{HideToolbar}{true}}
 1 Catalog/ViewerPreferences       e.g. /HideToolbar boolean
                                        /HideMenubar boolean
