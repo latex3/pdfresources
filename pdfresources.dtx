@@ -143,17 +143,42 @@
   }
 %    \end{macrocode}
 %
-% \subsection{end of run}
+% \subsection{shipout and end of run code}
 % \begin{NOTE}{UF}
-% the \enquote{end-of-run} command is temporary until shipout/atendshipout code
-% is ready. dvips/xetex implementation missing/currently a noop.
+% the \enquote{end-of-run} command is temporary until the shipout/atendshipout hooks
+% are ready. For now -- until a expl3/kernel interface exists -- code is added with atbegshi:
+% The code depends currently also on zref.
 % \end{NOTE}
-% \begin{macro}{\@@_backend_end_run:n}
+%
+% \begin{macro}{\@@_backend_end_run:, \@@_backend_end_run_gput:n}
+% \cs{@@_backend_end_run:} runs the code stored in
+% \cs{g_@@_backend_end_run_code_tl} at the end of the compilation.
+% \cs{@@_backend_end_run_gput:n} adds its argument to
+% \cs{g_@@_backend_end_run_code_tl}
+% With pdflatex/lualatex |AtEndDocument{\clearpage|\meta{code}|}| is used,
+% so the code is executed at the first compilation.
+% To avoid that specials are lost the code is added to
+% \cs{@@_lastpage_shipout_code_tl} with dvips/dvipdfmx and so needs a
+% second compilation.
+% The code shouldn't contain typesetting content and shouldn't rely on some
+% specific grouping.
 %    \begin{macrocode}
 %
-%  \AtEndDocument{\clearpage #1} ? (not dvi)
+%  \AtEndDocument{\clearpage #1} (not dvi)
 %  \AtEndDvi{#1}
+%  for all:
+\tl_new:N\g_@@_backend_end_run_tl
+\tl_new:N\g_@@_backend_lastpage_shipout_tl
+\tl_new:N\g_@@_backend_thispage_shipout_tl
+
+\cs_new_protected:Npn \@@_backend_end_run_gput:n #1
+  {
+    \tl_gput_right:Nn \g_@@_backend_end_run_tl { #1 }
+  }
+
+
 % pdftex,luatex
+
 \bool_if:nT
   {
     (\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p:)
@@ -161,21 +186,99 @@
     \sys_if_engine_luatex_p:
   }
   {
-    \cs_new_protected:Npn \@@_backend_end_run:n #1
+    \cs_new_protected:Npn \@@_backend_end_run:
       {
-        \AtEndDocument{\clearpage #1} %check ...
+        \AtEndDocument
+          {
+            \clearpage \g_@@_backend_end_run_tl
+          }
       }
   }
 %xetex
 \bool_if:nT {\sys_if_engine_xetex_p:}
   {
-    \cs_new_protected:Npn \@@_backend_end_run:n #1 {} %check ...
+    \cs_new_protected:Npn \@@_backend_end_run:
+     {
+       \tl_gput_right:Nn \g_@@_backend_lastpage_shipout_tl
+         {
+           \g_@@_backend_end_run_tl
+         }
+     } %check ...
   }
 
 %dvips
 \bool_if:nT { \sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p: }
   {
-    \cs_new_protected:Npn \@@_backend_end_run:n #1 {} %check ...
+    \cs_new_protected:Npn \@@_backend_end_run:
+     {
+       \tl_gput_right:Nn \g_@@_backend_lastpage_shipout_tl
+         {
+           \g_@@_backend_end_run_tl
+         }
+     } %check .
+  }
+
+\@@_backend_end_run:
+
+%    \end{macrocode}
+% \end{macro}
+%
+
+% \cs{@@_backend_shipout_code:} contains the code that is executed at every shipout.
+% It contains two hooks: \cs{@@_thispage_shipout_code:} which is executed at every
+% page  and \cs{@@_lastpage_shipout_code:} which is executed only at the last page.
+% \cs{@@_lastpage_shipout_code:} needs at least two compilations.
+%
+% \begin{macro}{
+%    \@@_shipout_code:,
+%    \@@_backend_lastpage_shipout_gput:n,
+%    \@@_backend_thispage_shipout_gput:n }
+%    \begin{macrocode}
+
+\cs_new_protected:Npn \@@_backend_lastpage_shipout_gput:n #1
+  {
+    \tl_gput_right:Nn \g_@@_backend_lastpage_shipout_tl { #1 }
+  }
+
+\cs_new_protected:Npn \@@_backend_thispage_shipout_gput:n #1
+  {
+    \tl_gput_right:Nn \g_@@_backend_thispage_shipout_tl { #1 }
+  }
+
+\AtBeginShipout
+  {
+    \AtBeginShipoutAddToBox
+      {
+        \@@_shipout_code:
+      }
+  }
+
+\cs_new_protected:Npn \@@_shipout_code:
+  {
+    \int_gincr:N \g_@@_abspage_int
+    \g_@@_backend_thispage_shipout_tl
+    \int_compare:nNnT
+      { \g_@@_abspage_int }
+      =
+      { \zref@extractdefault{LastPage}{abspage}{0} }
+      {
+        \g_@@_backend_lastpage_shipout_tl
+      }
+  }
+
+\@@_backend_thispage_shipout_gput:n
+  {
+    \exp_args:NV \@@_backend_PageN_gpush:n           { \g_@@_abspage_int }
+    \exp_args:NV \@@_backend_PageN_Resources_gpush:n { \g_@@_abspage_int }
+  }
+
+
+
+\@@_backend_lastpage_shipout_gput:n
+  {
+    \@@_Pages_gpush:
+    \@@_Info_gpush:
+    \@@_PageNResources_gpush:
   }
 
 %    \end{macrocode}
@@ -227,53 +330,6 @@
   }
 
 \cs_set_eq:NN \pdf_pageobject_ref:n \@@_backend_pageobject_ref:n
-%    \end{macrocode}
-% \end{macro}
-%
-% \subsection{Shipoutcode}
-% \begin{NOTE}{UF}
-% For now -- until a expl3/kernel interface exists -- code is added with atbegshi:
-% The code depends currently also on zref.
-% \end{NOTE}
-% These macro contains the code that should be executed at every shipout.
-% In part the code is backend dependant.
-% \begin{macro}{\@@_shipout_code:, \@@_everypage_shipout_code:n, \@@_lastpage_shipout_code:}
-%    \begin{macrocode}
-\AtBeginShipout
-  {
-    \AtBeginShipoutAddToBox
-      {
-        \@@_shipout_code:
-      }
-  }
-
-\cs_new_protected:Npn \@@_shipout_code:
-  {
-    \int_gincr:N \g_@@_abspage_int
-    \@@_everypage_shipout_code:V \g_@@_abspage_int
-    \int_compare:nNnT
-      { \g_@@_abspage_int }
-      =
-      { \zref@extractdefault{LastPage}{abspage}{0} }
-      {
-        \@@_lastpage_shipout_code:
-      }
-  }
-
-\cs_new_protected:Npn \@@_everypage_shipout_code:n #1
-  {
-    \@@_backend_PageN_gpush:n { #1 }
-    \@@_backend_PageN_Resources_gpush:n { #1 }
-  }
-
-\cs_generate_variant:Nn \@@_everypage_shipout_code:n {V}
-
-\cs_new_protected:Npn \@@_lastpage_shipout_code:
-  {
-    \@@_Pages_gpush:
-    \@@_Info_gpush:
-    \@@_PageNResources_gpush:
-  }
 %    \end{macrocode}
 % \end{macro}
 % \subsection{prop / path-Code}
@@ -573,7 +629,7 @@
 % \cs{@@_backend_PageN_gput:nn} adds a value to the current page.
 % \cs{@@_backend_PageN_gpush:n} merges the default and the page value and
 % adds it to the dictionary of the current page in
-% \cs{@@_everypage_shipout_code:n}.
+% \cs{@@_thispage_shipout_code:n}.
 %    \begin{macrocode}
 %  backend commands
 %  a prop for global/default settings which are used for more than
@@ -956,8 +1012,8 @@
 %    \end{macrocode}
 %
 % \begin{macro}{\@@_Info_gpush:}
-% \cs{@@_Info_gpush:} is the command that outputs the info dictionary in
-% \cs{@@_lastpage_shipout_code:}
+% \cs{@@_Info_gpush:} is the command that outputs the info dictionary (currently
+% in the end-of-run hooks).
 %    \begin{macrocode}
 % push to the register command / issue the special
 \cs_new_protected:Npn \@@_Info_gpush:
@@ -1023,7 +1079,7 @@
 % \cs{@@_backend_bdc:nn} and \cs{@@_backend_emc:} are the backend command that
 % create the bdc/emc marker and store the properties.
 % \cs{@@_backend_PageN_Resources_gpush:n} outputs the /Properties in
-% \cs{@@_everypage_shipout_code:} for the current page.
+% \cs{@@_thispage_shipout_code:} for the current page.
 %    \begin{macrocode}
 % pdftex and luatex (and perhaps dvips ...) need to know if there are in a
 % xform stream ...
@@ -1651,7 +1707,7 @@
 %    \end{macrocode}
 % \end{macro}
 % \end{macro}
-% %XXXXXXXXXXX
+% %XXXXXXXXXXX to: backend-path!!
 % \subsubsection{ page resources: ExtGState, ColorSpace, Shading, Pattern / management}
 % \begin{function}[added = 2019-08-08]
 %   {\pdf_pageresources_gput:nnn}
@@ -2667,6 +2723,7 @@ end
 local function @@_backend_PageN_gpush (page)
  local token=""
  local t = {}
+ local tkeys= {}
  for name,value in pairs(@@.Page.dflt) do
    t[name]=value
  end
@@ -2676,7 +2733,11 @@ local function @@_backend_PageN_gpush (page)
   end
  end
  for name,value in pairs(t) do
-   token = token .. "/"..name.." "..value
+  table.insert(tkeys,name)
+ end
+ table.sort(tkeys)
+ for _,name in ipairs(tkeys) do
+   token = token .. "/"..name.." "..t[name]
  end
  return token
 end
@@ -2707,8 +2768,14 @@ local ResourceList= l3kernel.@@.Page.Resources.List
 local function @@_backend_PageN_Resources_gpush (page)
  local token=""
  if Properties[page] then
-  for name,value in pairs(Properties[page]) do
-   token = token .. "/"..name.." "..value
+-- we sort the table, so that the pdf test works
+  local t = {}
+  for name,value in pairs  (Properties[page]) do
+   table.insert (t,name)
+  end
+  table.sort (t)
+  for _,name in ipairs(t) do
+   token = token .. "/"..name.." ".. Properties[page][name]
   end
   token = "/Properties <<"..token..">>"
  end
