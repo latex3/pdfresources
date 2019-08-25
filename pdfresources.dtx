@@ -326,6 +326,7 @@
   {
     \@@_Pages_gpush:            %pagesattr
     \@@_Info_gpush:             %pdfinfo
+    \@@_Catalog_gpush:
    % \@@_PageNResources_gpush:   %ExtGState etc
   }
 %    \end{macrocode}
@@ -1950,9 +1951,10 @@
           \clist_if_in:NnF \c_@@_Catalog_single_clist
             { #1 }
             { \msg_warning:nnn { pdf }{ catalog-unknown } { #1 }}
-          \@@_prop_gput:nnn { Catalog } }{#1}{#2}
+          \@@_prop_gput:nnn { Catalog } {#1}{#2}
         }
-  }
+      }
+   }
 %    \end{macrocode}
 % \begin{macro}{ \@@_catalog_XX_gput:n }
 % Various commands to handle subentries and special cases.
@@ -2064,12 +2066,12 @@
          \@@_backend_object_write:nn
             { g_@@_Catalog/AA_obj }
             { \@@_prop_map_dict_item:n {Catalog/AA } }
-
-       \@@_backend_catalog_gput:nn
-         {AA}
-         {
-           \@@_backend_object_ref:n {g_@@_Catalog/AA_obj}
-         }
+       \exp_args:Nnx
+         \@@_backend_catalog_gput:nn
+           {AA}
+           {
+             \@@_backend_object_ref:n {g_@@_Catalog/AA_obj}
+           }
      }
   }
 %    \end{macrocode}
@@ -2086,32 +2088,32 @@
 % \begin{macro}{\@@_Catalog/AcroForm_gpush:}
 %    \begin{macrocode}
 \cs_new_protected:cpn { @@_Catalog/AcroForm_gpush: }
-  { %add AcroForm/Fields:
+  {
     \seq_if_empty:cF { g_@@_/Catalog/AcroForm/Fields_seq }
       {
-         \@@_backend_object_new:nn  { g_@@_Catalog/AcroForm/Fields_obj } { array }
-         \exp_args:Nnx
-           \@@_backend_object_write:nn
-             { g_@@_Catalog/AcroForm/Fields_obj }
-             { \seq_use:cn { g_@@_/Catalog/AcroForm/Fields_seq } {~} }
-         \exp_args:Nnnx
-           \@@_prop_gput:nnn
-             { Catalog/AcroForm }
-             { Fields }
-             { \@@_backend_object_ref:n { g_@@_Catalog/AcroForm/Fields_obj } }
+        \@@_backend_object_new:nn  { g_@@_Catalog/AcroForm/Fields_obj } { array }
+        \exp_args:Nnx
+          \@@_backend_object_write:nn
+            { g_@@_Catalog/AcroForm/Fields_obj }
+            { \seq_use:cn { g_@@_/Catalog/AcroForm/Fields_seq } {~} }
+        \exp_args:Nnnx
+          \@@_prop_gput:nnn
+            { Catalog/AcroForm }
+            { Fields }
+            { \@@_backend_object_ref:n { g_@@_Catalog/AcroForm/Fields_obj } }
       }
     \seq_if_empty:cF { g_@@_/Catalog/AcroForm/CO_seq }
       {
-         \@@_backend_object_new:nn  { g_@@_Catalog/AcroForm/CO_obj } { array }
-         \exp_args:Nnx
-           \@@_backend_object_write:nn
-             { g_@@_Catalog/AcroForm/CO_obj }
-             { \seq_use:cn { g_@@_/Catalog/AcroForm/CO_seq } {~} }
-         \exp_args:Nnnx
-           \@@_prop_gput:nnn
-             { Catalog/AcroForm }
-             { CO }
-             { \@@_backend_object_ref:n { g_@@_Catalog/AcroForm/CO_obj } }
+        \@@_backend_object_new:nn  { g_@@_Catalog/AcroForm/CO_obj } { array }
+        \exp_args:Nnx
+          \@@_backend_object_write:nn
+            { g_@@_Catalog/AcroForm/CO_obj }
+            { \seq_use:cn { g_@@_/Catalog/AcroForm/CO_seq } {~} }
+        \exp_args:Nnnx
+          \@@_prop_gput:nnn
+            { Catalog/AcroForm }
+            { CO }
+            { \@@_backend_object_ref:n { g_@@_Catalog/AcroForm/CO_obj } }
       }
      \prop_if_empty:cF { \@@_prop_name:n { Catalog/AcroForm/DR/Font}}
        {
@@ -2139,7 +2141,7 @@
              { DR }
              { \@@_backend_object_ref:n { g_@@_Catalog/AcroForm/DR_obj } }
        }
-     \prop_if_empty:cF { \@@_prop_name:n { Catalog/AcroForm}}
+     \prop_if_empty:cF { \@@_prop_name:n { Catalog/AcroForm} }
        {
          \@@_backend_object_new:nn { g_@@_Catalog/AcroForm_obj } {dict}
          \exp_args:Nnx
@@ -2170,12 +2172,12 @@
          \@@_backend_object_write:nn
             { g_@@_Catalog/AF_obj }
             { \seq_use:cn { g_@@_/Catalog/AF_seq } {~} }
-
-       \@@_backend_catalog_gput:nn
-         {AF}
-         {
-           \@@_backend_object_ref:n {g_@@_Catalog/AF_obj}
-         }
+       \exp_args:Nnx
+         \@@_backend_catalog_gput:nn
+           {AF}
+           {
+             \@@_backend_object_ref:n {g_@@_Catalog/AF_obj}
+           }
      }
   }
 %    \end{macrocode}
@@ -2194,12 +2196,12 @@
          \@@_backend_object_write:nn
             { g_@@_Catalog/MarkInfo_obj }
             { \@@_prop_map_dict_item:n {Catalog/MarkInfo } }
-
-       \@@_backend_catalog_gput:nn
-         {MarkInfo}
-         {
-           \@@_backend_object_ref:n {g_@@_Catalog/MarkInfo_obj}
-         }
+       \exp_args:Nnx
+         \@@_backend_catalog_gput:nn
+           {MarkInfo}
+           {
+             \@@_backend_object_ref:n {g_@@_Catalog/MarkInfo_obj}
+           }
      }
   }
 %    \end{macrocode}
@@ -2242,9 +2244,10 @@
                   [ \seq_use:cn { g_@@_Catalog/OCProperties/Configs_seq} {~} ]
                 }
             }
-        \@@_backend_catalog_gput:nn
-          { OCProperties }
-          { \@@_backend_object_ref:n {g_@@_Catalog/OCProperties_obj} }
+        \exp_args:Nnx
+          \@@_backend_catalog_gput:nn
+            { OCProperties }
+            { \@@_backend_object_ref:n {g_@@_Catalog/OCProperties_obj} }
       }
   }
 %    \end{macrocode}
@@ -2264,12 +2267,12 @@
          \@@_backend_object_write:nn
             { g_@@_Catalog/OutputIntents_obj }
             { \seq_use:cn { g_@@_/Catalog/OutputIntents_seq } {~} }
-
-       \@@_backend_catalog_gput:nn
-         {OutputIntents}
-         {
-           \@@_backend_object_ref:n {g_@@_Catalog/OutputIntents_obj}
-         }
+       \exp_args:Nnx
+         \@@_backend_catalog_gput:nn
+           {OutputIntents}
+           {
+             \@@_backend_object_ref:n {g_@@_Catalog/OutputIntents_obj}
+           }
      }
   }
 %    \end{macrocode}
@@ -2289,12 +2292,12 @@
          \@@_backend_object_write:nn
             { g_@@_Catalog/Requirements_obj }
             { \seq_use:cn { g_@@_/Catalog/Requirements_seq } {~} }
-
-       \@@_backend_catalog_gput:nn
-         {Requirements}
-         {
-           \@@_backend_object_ref:n {g_@@_Catalog/Requirements_obj}
-         }
+       \exp_args:Nnx
+         \@@_backend_catalog_gput:nn
+           {Requirements}
+           {
+             \@@_backend_object_ref:n {g_@@_Catalog/Requirements_obj}
+           }
      }
   }
 %    \end{macrocode}
@@ -2312,12 +2315,12 @@
          \@@_backend_object_write:nn
             { g_@@_Catalog/ViewerPreferences_obj }
             { \@@_prop_map_dict_item:n {Catalog/ViewerPreferences } }
-
-       \@@_backend_catalog_gput:nn
-         {ViewerPreferences}
-         {
-           \@@_backend_object_ref:n {g_@@_Catalog/ViewerPreferences_obj}
-         }
+       \exp_args:Nnx
+         \@@_backend_catalog_gput:nn
+           {ViewerPreferences}
+           {
+             \@@_backend_object_ref:n {g_@@_Catalog/ViewerPreferences_obj}
+           }
      }
   }
 %    \end{macrocode}
@@ -2366,6 +2369,8 @@
  }
 }
 %    \end{macrocode}
+%
+%
 % \section{Management code / pdf Module}
 %<@@=pdf>
 % \subsection{Objects and other rather low-level stuff}
@@ -2373,23 +2378,10 @@
 %    \begin{macrocode}
 \cs_set_eq:NN \pdf_link_margin:n \@@_backend_link_margin:n
 \cs_set_eq:NN \pdf_link_last: \@@_backend_link_last:
-\cs_set_eq:NN \pdf_DONTUSE_catalog_gput:nn \@@_backend_catalog_gput:nn
 %    \end{macrocode}
 
-% \subsection{The catalog}
-% \subsubsection{catalog, output}
-%    \begin{macrocode}
-%%\AfterEndPreamble %need to be decided ...
-%\AtEndDocument
-% {
-%  \@@_value_catalog_OutputIntents_gpush:    %OutputIntents
-%  \@@_value_catalog_AF_gpush:               %AF
-%  \@@_catalog_OCProperties_gpush:           %OCProperties
-%  \@@_value_catalog_ViewerPreferences_gpush:
-%  %\prop_map_function:NN  \g_@@_catalog_prop \@@_backend_catalog_gput:nn %needs sorting
-% }
-%    \end{macrocode}
-%
+
+
 % \subsubsection{Doc View}
 % This commands set Doc View options. This is rather crude /needs review. For now we
 % assume that only the equivalent of \verb+openaction~goto~page\@pdfstartpage{\@pdfstartview}+ in
@@ -2401,39 +2393,6 @@
  }
 
 %    \end{macrocode}
-
-% \subsection{page resources}
-% This mostly makes the driver commands available under the pdf module name.
-% But adds a test for empty values
-% !!!!!!!!!!!!!!!!!!!!!!
-% i don't think that this is needed ....
-%    \begin{macrocode}
-%\cs_new_protected:Npn \@@_pageresources_gput:nnn #1 #2 #3
-% {
-%  \tl_if_empty:nTF { #3 }
-%  {
-%   \msg_none:nnn { pdf }{ empty-value }{ Resources/#2 }
-%  }
-%  {
-%    \@@_backend_PageNResources_gput:nnn { #1 } { #2 } { #3 }
-%  }
-% }
-%
-%\cs_new_protected:Npn \@@_pageresources_gput:nnnn #1 #2 #3 #4
-% {
-%   \tl_if_empty:nTF { #4 }
-%  {
-%   \msg_none:nnn { pdf }{ empty-value }{ Resources/#3 }
-%  }
-%  {
-%    \@@_backend_PageNResources_gput:nnnn { #1 } { #2 } { #3 } { #4}
-%  }
-% }
-%
-%\cs_generate_variant:Nn \@@_pageresources_gput:nnnn {nnnx}
-%\cs_generate_variant:Nn \@@_pageresources_gput:nnn {nnx}
-%    \end{macrocode}
-
 
 % \subsection{Setting / comparing pdf versions}
 % The code assumes that the versions are two integers separated by a period.

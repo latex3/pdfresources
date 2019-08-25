@@ -10,23 +10,21 @@
 
 \begin{document}
 \ExplSyntaxOn
-\pdf_object_new:nn {fieldstest}{dict}
+
+blblb
+\pdf_object_new:nn   {fieldstest}{dict}
 \pdf_object_write:nn {fieldstest}{/field /abc}
 \pdf_catalog_gput:nn {AcroForm/Fields}{fieldstest}
 \pdf_catalog_gput:nn {AcroForm/DR/Font}{{F1}{<</A/B>>}}
 \pdf_catalog_gput:nn {AcroForm/DR/Font}{{F2}{<</C/E>>}}
 \pdf_catalog_gput:nn {Lang}{(en-UK)}
 \pdf_catalog_gput:nn {Blub}{(abc)}
-\pdf_catalog_gput:nn {AcroForm} {{NeedAppearances}{True}}
+\pdf_catalog_gput:nn {AcroForm} {{NeedAppearances}{true}}
 \pdf_catalog_gput:nn {ViewerPreferences}{{HideToolbar}{true}}
 \pdf_catalog_gput:nn {AA}{{WS}{<</blub/bla>>}}
-\use:c{__pdf_Catalog_gpush:}
 
 \ExplSyntaxOff
 \end{document}
-\use:c{__pdf_Catalog/ViewerPreferences_gpush:}
-\__pdf_prop_show:n{Catalog}
-\__pdf_prop_show:n{Catalog/AcroForm}
 \bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
 {
  \__pdf_backend_catalog_gput:nn {Lang}{(en-UK)}
