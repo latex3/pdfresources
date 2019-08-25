@@ -1870,6 +1870,7 @@
 %                                        /TwoColumnLeft, /TwoColumnRight,
 %                                        /TwoPageLeft (PDF 1.5),
 %                                        /TwoPageRight (PDF 1.5)) \\
+%    PageMode                & name  & one of /UseNone, /UseOutlines, /UseThumbs, /UseOC(PDF 1.5),UseAttachments\\
 %    Perms                   &  objref or dict & pdf 1.5, permissions\\
 %    PieceInfo               &  objref or dict\\
 %    SpiderInfo              &  objref or dict\\
@@ -1985,6 +1986,7 @@
     OpenAction,
     PageLabels,
     PageLayout,
+    PageMode,
     Perms,
     PieceInfo,
     SpiderInfo,
@@ -2352,7 +2354,7 @@
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdf_docview:nn #1 #2
   {
-    \pdf_catalog_gput:nn { Openaction }[\pdf_pageobject_ref:n {#1}~/#2]
+    \pdf_catalog_gput:nn { OpenAction }[\pdf_pageobject_ref:n {#1}~/#2]
   }
 %    \end{macrocode}
 
@@ -2489,6 +2491,43 @@
 \seq_new:N \l_@@_hook_link_begin_link_seq
 %    \end{macrocode}
 %
+% \subsection{Destinations}
+% The command expects a lower case argument, it is up to the package to
+% ensure this.
+%
+%    \begin{macrocode}
+% perhaps some manipulation of the argument will be needed to map the current
+% hyperref syntax
+% unclear currently if is this is useful for anything.
+\prop_new:N \l_@@_views_map_prop
+\prop_put:Nnn \l_@@_views_map_prop {XYZ} { xyz }
+\prop_put:Nnn \l_@@_views_map_prop {xyz} { xyz }
+\prop_put:Nnn \l_@@_views_map_prop {Fit} { fit }
+\prop_put:Nnn \l_@@_views_map_prop {fit} { fit }
+\prop_put:Nnn \l_@@_views_map_prop {FitB} { fitb }
+\prop_put:Nnn \l_@@_views_map_prop {fitb} { fitb }
+\prop_put:Nnn \l_@@_views_map_prop {FitBH} { fitbh }
+\prop_put:Nnn \l_@@_views_map_prop {fitbh} { fitbh }
+\prop_put:Nnn \l_@@_views_map_prop {FitBv} { fitbv }
+\prop_put:Nnn \l_@@_views_map_prop {fitbv} { fitbv }
+\prop_put:Nnn \l_@@_views_map_prop {FitH} { fith }
+\prop_put:Nnn \l_@@_views_map_prop {fith} { fith }
+\prop_put:Nnn \l_@@_views_map_prop {FitV} { fitv }
+\prop_put:Nnn \l_@@_views_map_prop {fitv} { fitv }
+
+\cs_new_protected:Npn \pdf_destination:nn #1 #2
+ {
+  \prop_if_in:NnTF \l_@@_views_map_prop { #2 }
+   {
+    \@@_backend_destination:nn { #1 } {  #2  }
+   }
+   {
+    % should we assume that it is a zoom value then??
+    % or should there be a third argument for this case and for other coordinates?
+   }
+ }
+\cs_generate_variant:Nn\pdf_destination:nn {no,nf}
+%    \end{macrocode}
 % \section{Document metadata}
 % We plan a \cs{DeclareDocumentMetaData} so let's start with it.
 % It should allow to set the version, to uncompress a pdf, and set the language.
