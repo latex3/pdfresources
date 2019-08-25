@@ -2449,43 +2449,7 @@
 \cs_set_eq:NN \pdf_link_last: \@@_backend_link_last:
 %    \end{macrocode}
 %
-% \subsection{Destinations}
-% The command expects a lower case argument, it is up to the package to
-% ensure this.
-%
-%    \begin{macrocode}
-% perhaps some manipulation of the argument will be needed to map the current
-% hyperref syntax
-% unclear currently if is this is useful for anything.
-\prop_new:N \l_@@_views_map_prop
-\prop_put:Nnn \l_@@_views_map_prop {XYZ} { xyz }
-\prop_put:Nnn \l_@@_views_map_prop {xyz} { xyz }
-\prop_put:Nnn \l_@@_views_map_prop {Fit} { fit }
-\prop_put:Nnn \l_@@_views_map_prop {fit} { fit }
-\prop_put:Nnn \l_@@_views_map_prop {FitB} { fitb }
-\prop_put:Nnn \l_@@_views_map_prop {fitb} { fitb }
-\prop_put:Nnn \l_@@_views_map_prop {FitBH} { fitbh }
-\prop_put:Nnn \l_@@_views_map_prop {fitbh} { fitbh }
-\prop_put:Nnn \l_@@_views_map_prop {FitBv} { fitbv }
-\prop_put:Nnn \l_@@_views_map_prop {fitbv} { fitbv }
-\prop_put:Nnn \l_@@_views_map_prop {FitH} { fith }
-\prop_put:Nnn \l_@@_views_map_prop {fith} { fith }
-\prop_put:Nnn \l_@@_views_map_prop {FitV} { fitv }
-\prop_put:Nnn \l_@@_views_map_prop {fitv} { fitv }
 
-\cs_new_protected:Npn \pdf_destination:nn #1 #2
- {
-  \prop_if_in:NnTF \l_@@_views_map_prop { #2 }
-   {
-    \@@_backend_destination:nn { #1 } {  #2  }
-   }
-   {
-    % should we assume that it is a zoom value then??
-    % or should there be a third argument for this case and for other coordinates?
-   }
- }
-\cs_generate_variant:Nn\pdf_destination:nn {no,nf}
-%    \end{macrocode}
 % \subsubsection{Endlink}
 % tagpdf needs to execute code at the end of the link to store the object reference etc.
 % So we need a hook. For now the hook is a seq: This will perhaps allows a system to
