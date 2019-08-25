@@ -1814,9 +1814,7 @@
 % for the same value with luatex and pdftex -- the other backends normally
 % avoid this problem.
 % We therefore setup a property which is filled and executed at a sensible
-% (not yet found) place.
-% \cs{pdfcatalog} has an option \texttt{openaction} to set the start view options.
-% This is ignored here but set in a separate command (to be in sync with other drivers).
+% (not fixed) place.
 % /AF is even an array of dictionaries.
 % There is probably no way to test what has already been added to the catalog,
 % so doublettes can only be avoided with ``don't do it''.
@@ -2325,73 +2323,30 @@
   }
 %    \end{macrocode}
 % \end{macro}
-% XXXXXXXXXXXX
-%=================================================================
-% \subsection{other stuff}
-% \subsubsection{Openaction}
-% \begin{NOTE}{UF}
-% does this need a specific command???
-% the object number of the page is in \verb+\pdfpageref+, so probably it can
-% be handled along with the catalog commands.
-% \end{NOTE}
+
+% \subsubsection{Doc View / Openaction}
+% \begin{function}[added = 2019-08-18]
+%   {\pdf_docview:nn}
+%   \begin{syntax}
+%     \cs{\pdf_docview:nn} \Arg{page} \Arg {view}
+%   \end{syntax}
+% This command allows to set the OpenAction array. The \meta{page}
+% is an absolute page number. \Arg{view} a string for the destination
+% without the leading slash. Examples are e.g. |XYZ left top zoom| or |Fit|.
+% The OpenAction uses (and could also be set directly with)
+% \cs{\pdf_catalog_gput:nn}.
+%
 %    \begin{macrocode}
-
-\bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
-{
- \cs_new_protected:Nn \@@_backend_docview:nn %#1 page number, #2 e.g. /FitH
- {
-  \pdfcatalog {  } openaction~goto~page #1 {#2}
- }
-}
-
-\sys_if_engine_luatex:T
-{
- %allow version 2.0 in luatex. Needs sorting out later.
- \@namedef{Hy@pdfversion@2.0}{10}%
- \cs_new_protected:Nn \@@_backend_docview:nn %#1 page number, #2 e.g. /FitH
- {
-  \pdfextension catalog {  } openaction~goto~page #1 {#2}
- }
-}
-%need check ...
-\sys_if_engine_xetex:T
-{ %%
- \cs_new_protected:Nn \@@_backend_docview:nn
+\cs_new_protected:Npn \pdf_docview:nn #1 #2
   {
-   \@@_backend:n {docview << /OpenAction[@page#1~#2]>>}
+    \pdf_catalog_gput:nn { Openaction }[\pdf_pageobject_ref:n {#1}~/#2]
   }
-}
-%dvips ????????????????
-\bool_if:nT {\sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p: }
-{
- \cs_new_protected:Nn \@@_backend_docview:nn %#1 page number, #2 e.g. /FitH
- {
- }
-}
 %    \end{macrocode}
-%
-%
-% \section{Management code / pdf Module}
-%<@@=pdf>
-% \subsection{Objects and other rather low-level stuff}
-% NEEDS REVISING!!!
+
+% ??????????
 %    \begin{macrocode}
 \cs_set_eq:NN \pdf_link_margin:n \@@_backend_link_margin:n
 \cs_set_eq:NN \pdf_link_last: \@@_backend_link_last:
-%    \end{macrocode}
-
-
-
-% \subsubsection{Doc View}
-% This commands set Doc View options. This is rather crude /needs review. For now we
-% assume that only the equivalent of \verb+openaction~goto~page\@pdfstartpage{\@pdfstartview}+ in
-% hyperref is needed. The format of the second argument is quite unclear (slash, casing).
-%    \begin{macrocode}
-\cs_new_protected:Npn \pdf_docview:nn #1 #2
- {
-  \@@_backend_docview:nn {#1}{#2}
- }
-
 %    \end{macrocode}
 
 % \subsection{Setting / comparing pdf versions}
