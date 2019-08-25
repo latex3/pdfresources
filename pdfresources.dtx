@@ -412,7 +412,7 @@
 %  /Catalog/AcroForm/DR/Font
 %  /xform/Resources/Properties
 %  \end{verbatim}
-%  \begin{macro}{\@@_prop_name,\@@_prop_new:n,\@@_prop_names_seq}
+%  \begin{macro}{\@@_prop_name:n,\@@_prop_new:n,\@@_prop_names_seq}
 %    \begin{macrocode}
 \seq_new:N \g_@@_prop_names_seq
 
@@ -1820,6 +1820,12 @@
 % There is probably no way to test what has already been added to the catalog,
 % so doublettes can only be avoided with ``don't do it''.
 % see catalogue.tex for a list of entries ...
+% Perhaps some tools to create the AF-file specification dictionaries is useful.
+% Open for now:
+% /Extensions               (dict, pdf 2.0)
+% /Dests ? difference to subdict in Names?
+% /DSS                      (dict, pdf 2.0)
+% /Acroform/DR/ExtGState etc probably unneeded.
 % \end{NOTE}
 % The entries in the catalog have varying requirements regarding the
 % pdf management. Some entries (like /Lang) are simple values where the last
@@ -1883,11 +1889,15 @@
 %   \begin{tabularx}{\linewidth}{lll>{\raggedright\arraybackslash}X}
 %    \bfseries Key           &  \bfseries Subkey& \bfseries Value  & \bfseries Remark \\\midrule
 %  AA                        & WC, WS, DS, WP,DP& all dict    \\
-%  AcroFrom                  &  NeedAppearances&  boolean\\
+%  AcroFrom                  &  NeedAppearances&  boolean & In pdf 2.0
+%                                                           NeedAppearances here is deprecated,
+%                                                           it is then required that every widget has
+%                                                           an appearance streams.\\
 %                            &  SigFlags       &  Integer\\
 %                            &  DA             &  String\\
 %                            &  Q              &  Integer\\
 %                            &  XFA            & stream or array & pdf 1.5\\
+%  AcroForm/DR               & name            &            & probably unneeded
 %  AcroForm/DR/Font          &  \meta{name}    & dict       & name is a pdf name without slash  \\
 %  MarkInfo                  & Marked          & boolean      \\
 %                            & UserProperties  & boolean      \\
@@ -1983,6 +1993,7 @@
   {
     AA,
     AcroForm,
+    AcroForm/DR,
     AcroForm/DR/Font,
     MarkInfo,
     ViewerPreferences,
@@ -2001,6 +2012,7 @@
   {
     AF,
     AcroForm/Fields,
+    AcroForm/CO,
     OCProperties/OCGs,
     OCProperties/Configs,
     OutputIntents,
@@ -2028,11 +2040,15 @@
 \cs_new_protected:Npn \@@_Catalog_gpush:
   {
     \use:c { @@_Catalog/AA_gpush:}
+    \use:c { @@_Catalog/AcroForm_gpush:}
+    \use:c { @@_Catalog/AF_gpush:}
     \use:c { @@_Catalog/MarkInfo_gpush:}
     \use:c { @@_Catalog/OCProperties_gpush:}
     \use:c { @@_Catalog/OutputIntents_gpush:}
     \use:c { @@_Catalog/Requirements_gpush:}
     \use:c { @@_Catalog/ViewerPreferences_gpush:}
+    % output the single values:
+    \prop_map_function:cN { \@@_prop_name:n {Catalog} }  \@@_backend_catalog_gput:nn
   }
 
 % \paragraph{Building catalog entries: AA}
@@ -2058,8 +2074,89 @@
   }
 %    \end{macrocode}
 % \end{macro}
+% \paragraph{Building catalog entries: AcroFrom}
+% This is the most complicated case.
+% The entries is build from
+% Catalog/AcroForm/Fields  (array),
+% Catalog/AcroForm/CO      (array),
+% Catalog/AcroForm/DR/Font (dict),
+% Catalog/AcroForm/DR (dict),
+% Catalog/AcroForm
 %
-%\paragraph{Building catalog entries: AF}
+% \begin{macro}{\@@_Catalog/AcroForm_gpush:}
+%    \begin{macrocode}
+\cs_new_protected:cpn { @@_Catalog/AcroForm_gpush: }
+  { %add AcroForm/Fields:
+    \seq_if_empty:cF { g_@@_/Catalog/AcroForm/Fields_seq }
+      {
+         \@@_backend_object_new:nn  { g_@@_Catalog/AcroForm/Fields_obj } { array }
+         \exp_args:Nnx
+           \@@_backend_object_write:nn
+             { g_@@_Catalog/AcroForm/Fields_obj }
+             { \seq_use:cn { g_@@_/Catalog/AcroForm/Fields_seq } {~} }
+         \exp_args:Nnnx
+           \@@_prop_gput:nnn
+             { Catalog/AcroForm }
+             { Fields }
+             { \@@_backend_object_ref:n { g_@@_Catalog/AcroForm/Fields_obj } }
+      }
+    \seq_if_empty:cF { g_@@_/Catalog/AcroForm/CO_seq }
+      {
+         \@@_backend_object_new:nn  { g_@@_Catalog/AcroForm/CO_obj } { array }
+         \exp_args:Nnx
+           \@@_backend_object_write:nn
+             { g_@@_Catalog/AcroForm/CO_obj }
+             { \seq_use:cn { g_@@_/Catalog/AcroForm/CO_seq } {~} }
+         \exp_args:Nnnx
+           \@@_prop_gput:nnn
+             { Catalog/AcroForm }
+             { CO }
+             { \@@_backend_object_ref:n { g_@@_Catalog/AcroForm/CO_obj } }
+      }
+     \prop_if_empty:cF { \@@_prop_name:n { Catalog/AcroForm/DR/Font}}
+       {
+         \@@_backend_object_new:nn { g_@@_Catalog/AcroForm/DR/Font_obj } {dict}
+         \exp_args:Nnx
+           \@@_backend_object_write:nn
+             { g_@@_Catalog/AcroForm/DR/Font_obj }
+             { \@@_prop_map_dict_item:n { Catalog/AcroForm/DR/Font } }
+         \exp_args:Nnnx
+           \@@_prop_gput:nnn
+             { Catalog/AcroForm/DR }
+             { Font }
+             { \@@_backend_object_ref:n { g_@@_Catalog/AcroForm/DR/Font_obj } }
+       }
+     \prop_if_empty:cF { \@@_prop_name:n { Catalog/AcroForm/DR}}
+       {
+         \@@_backend_object_new:nn { g_@@_Catalog/AcroForm/DR_obj } {dict}
+         \exp_args:Nnx
+           \@@_backend_object_write:nn
+             { g_@@_Catalog/AcroForm/DR_obj }
+             { \@@_prop_map_dict_item:n { Catalog/AcroForm/DR } }
+         \exp_args:Nnnx
+           \@@_prop_gput:nnn
+             { Catalog/AcroForm }
+             { DR }
+             { \@@_backend_object_ref:n { g_@@_Catalog/AcroForm/DR_obj } }
+       }
+     \prop_if_empty:cF { \@@_prop_name:n { Catalog/AcroForm}}
+       {
+         \@@_backend_object_new:nn { g_@@_Catalog/AcroForm_obj } {dict}
+         \exp_args:Nnx
+           \@@_backend_object_write:nn
+             { g_@@_Catalog/AcroForm_obj }
+             { \@@_prop_map_dict_item:n { Catalog/AcroForm } }
+         \exp_args:Nnnx
+           \@@_prop_gput:nnn
+             { Catalog }
+             { AcroForm }
+             { \@@_backend_object_ref:n { g_@@_Catalog/AcroForm_obj } }
+       }
+  }
+
+%    \end{macrocode}
+% \end{macro}
+% \paragraph{Building catalog entries: AF}
 % AF is an array.
 % \begin{macro}{\@@_Catalog/AF_gpush:}
 %    \begin{macrocode}
@@ -2279,204 +2376,7 @@
 \cs_set_eq:NN \pdf_DONTUSE_catalog_gput:nn \@@_backend_catalog_gput:nn
 %    \end{macrocode}
 
-% \subsection{generic commands}
-% \paragraph{Values that are dictionaries}
-% In a number of cases a value is a dictionary and users/packages must be able to
-% \emph{append} entries to this dictionary. It makes sense to create an object for this
-% and use the reference as value. For the object a prop is created, the object
-% is filled and written at a suitable time. For this we use a command that setup suitable
-% setters and push commands.
-%    \begin{macrocode}
-\cs_new_protected:Npn \@@_value_dict_new:nnn #1 #2 #3
-  %#1 prefix e.g. catalog
-  %#2 key name, e.g. ViewerPreferences
-  %#3 the command /code needed to write the value, e.g.
-  %   \@@_backend_catalog_gput:nn, or a \pdf-setter
- {
-  \prop_new:c { g_@@_value_#1_#2_prop }
-  \cs_new_protected:cpn { pdf_#1_#2_gput:nn } ##1 ##2
-   {
-    %% add test for ##1 values that have their own setter ...
-    \tl_if_empty:nTF { ##2 }
-     {
-      \msg_none:nnn { pdf }{ empty-value }{ #1_#2 }
-     }
-     {
-      \prop_gput:cnn { g_@@_value_#1_#2_prop } {##1}{##2}
-     }
-   }
-  \cs_generate_variant:cn{ pdf_#1_#2_gput:nn } {no,nx}
-  \cs_new_protected:cpn{ @@_value_#1_#2_gpush: }
-   {%\prop_show:c { g_@@_value_#1_#2_prop }
-    \prop_if_empty:cF { g_@@_value_#1_#2_prop }
-     {
-      \@@_backend_object_new:nn   { g_@@_value_#1_#2_obj } { dict }
-      \@@_backend_object_write:nx { g_@@_value_#1_#2_obj }
-       {
-        \prop_map_function:cN  { g_@@_value_#1_#2_prop } \@@_dict_item:nn
-       }
-      #3 { #2 }{ \@@_backend_object_ref:n { g_@@_value_#1_#2_obj } }
-     }
-   }
- }
-%    \end{macrocode}
-% \paragraph{Values that are arrays}
-% In a number of cases a value is an and users/packages must be able to
-% \emph{append} entries to this dictionary. It makes sense to create an object for this
-% and use the reference as value. For the object a seq is created, the object
-% is filled and written at a suitable time. For this we use a command that setup suitable
-% setters and push commands.
-%    \begin{macrocode}
-\cs_new_protected:Npn \@@_value_array_new:nnn #1 #2 #3
-  %#1 prefix e.g. catalog
-  %#2 key name, e.g. AF
-  %#3 the command /code needed to write the value, e.g.
-  %   \driver_pdf_catalog_gput:nn, or a \pdf-setter
- {
-  \seq_new:c { g_@@_value_#1_#2_seq }
-  \cs_new_protected:cpn { pdf_#1_#2_gput:n } ##1
-   {
-    \tl_if_empty:nTF { ##1 }
-     {
-      \msg_none:nnn { pdf }{ empty-value }{ #1_#2 }
-     }
-     {
-      \seq_gput_right:cn { g_@@_value_#1_#2_seq } {##1}
-     }
-   }
-  \cs_new_protected:cpn { pdf_#1_#2_gput_left:n } ##1
-   {
-    \tl_if_empty:nTF { ##1 }
-     {
-      \msg_none:nnn { pdf }{ empty-value }{ #1_#2 }
-     }
-     {
-      \seq_gput_left:cn { g_@@_value_#1_#2_seq } {##1}
-     }
-   }
-  \cs_generate_variant:cn{ pdf_#1_#2_gput:n } {o,x}
-  \cs_generate_variant:cn{ pdf_#1_#2_gput_left:n } {o,x}
-  \cs_new_protected:cpn{ @@_value_#1_#2_gpush: }
-   {%\seq_show:c { g_@@_value_#1_#2_seq }
-    \seq_if_empty:cF { g_@@_value_#1_#2_seq }
-     {
-      \@@_backend_object_new:nn   { g_@@_value_#1_#2_obj } { array }
-      \exp_args:Nnx \@@_backend_object_write:nn { g_@@_value_#1_#2_obj }
-       {
-        \seq_use:cn { g_@@_value_#1_#2_seq } {~}
-       }
-      #3 { #2 }{ \@@_backend_object_ref:n { g_@@_value_#1_#2_obj } }
-     }
-   }
- }
-
-%    \end{macrocode}
 % \subsection{The catalog}
-% \subsubsection{Simple values}
-% \enquote{Simple} values are values that can be sensibly set only once. When set a second time
-% the new value overwrites the first value. The value itself can be something simple like
-% a boolean but also a complicated dictionary.
-% Simple values can be added with \cs{pdf_catalog_gput:nn}. This will add the value to
-% a prop. The prop is then pushed to the catalog at the end of the document.
-% Entries which can be added like this are
-% \begin{description}
-% \item[Version]  a version as name, e.g. \texttt{/1.7}
-% \item[PageMode] (name: /UseNone, /UseOutlines, /UseThumbs, /FullScreen, /UseOC (PDF 1.5),
-%   /UseAttachments (PDF 1.6)
-% \item[MarkInfo] a dictionary with up to three entries, whose values are booleans (\texttt{true}
-% or \texttt{false}). The default values of all always \texttt{false}. The dictionary should be set
-% in one go by whatever package is handling tagging. Example\\
-%  \verb+<</Marked true /UserProperties true /Suspects true>>+
-%  \item[PageLayout] (name: one of /SinglePage, /OneColumn,
-%  /TwoColumnLeft, /TwoColumnRight, /TwoPageLeft (PDF 1.5), /TwoPageRight (PDF 1.5)
-%  \item[Outlines] a indirect reference (x 0 R) to an object.
-%  \item[OpenAction] array (e.g. \verb+[page /Fit]+ or dictionary \verb+<</Type /Action /S /GoTo /D /somedest>>+)
-%  \item[URI] dict, e.g. \verb+<</S/URI /URI (someurl)>>+
-%  \item[StructTreeRoot] a dict (normally an indirect reference to a dict),
-%   the package doing the tagging should create this.
-%  \item[Lang] (string, e.g. (de-DE))
-%  \item[NeedsRendering] (boolean, pdf 1.7)
-%  \item[PageLabels] dictionary containing on /Nums + array entry describing the numbering system of the pages.
-%  (done by hyperref).
-%  \item[Collection] should be added by one package only (for an example see embedfile package).
-%  \item[Metadata] only one package can add it (pdfx/hyperxmp clash here)
-%  \item[Threads] this is an indirect reference pointing to an array of dictionaries. If threads are
-%  added to a document it should be done by one package only.
-% \end{description}
-% \begin{function}[added = 2019-05-25]{\pdf_catalog_gput:nn}
-%   \begin{syntax}
-%     \cs{pdf_catalog_gput:nn} \meta{name} \meta{value}
-%   \end{syntax}
-%   Inserts \texttt{/name value} in the catalog.
-% \end{function}
-% \begin{macro}{\pdf_catalog_gput:nn}
-%    \begin{macrocode}
-
-%    \end{macrocode}
-% \end{macro}
-%^^A open:  AcroForm, AA (dict, additional-actions),
-%^^A open but unclear: Names. Is created automatically (for the Dests subdict), but no
-%^^A other use found in the texmf tree. So perhaps later.
-%^^A open not so important: Dests (only pdf 1.1, later subdict of Names), SpiderInfo (dict),
-%^^A PieceInfo (dict), (dict, pdf 1.5, permissions), Legal (dict, pdf 1.5)
-%^^A Requirements (array, pdf 1.7), Extensions (dict, pdf 2.0), DSS (dict, pdf 2.0),
-%^^A DPartRoot, (dict, pdf 2.0)
-%^^A resolved: OutputIntents, OCProperties, ViewerPreferences, AF (array of dictionaries, pdf 2.0,
-%^^A associated files, important for accessibility)
-% \subsubsection{catalog, special cases}
-% \paragraph{AcroForm}
-% AcroForm is a rather complicated case: It is a dictionary with a number of fields.
-% \begin{itemize}
-% \item the majorary are field which count as \enquote{simple}:
-% /NeedAppearances (boolean), /SigFlags (integer), /DA (string), /Q (integer),
-% /XFA (stream). From these only /NeedAppearances is actually in use. In pdf 2.0
-% /NeedAppearances is deprecated, it is then required that every widget has
-% an appearance streams.
-% \item Two fields are arrays: /Fields and /CO. New values should be \emph{added}.
-% \item /DR is a resource dictionary.
-%^^A possible implementation: Prop for the general object, seq for /Fields, /CO
-%^^A with \pdf_catalog_AcroForm_Fields_append, \pdf_catalog_AcroForm_Fields_append.
-%^^A for /DR we perhaps need a general "resource dictionary" template, that can
-%^^A be reused in other places (pageresources).
-% \end{itemize}
-% \paragraph{AF (Associated files, pdf 2.0)}
-% This is simply an array of dictionaries / indirect references to file specification
-% dictionaries. The implementation is similar to the OutputIntents later. We will
-% decide later if tools to create the file specification dictionaries are needed.
-% \begin{function}[added = 2019-05-25]{\pdf_catalog_AF_gput:n}
-%   \begin{syntax}
-%     \cs{pdf_catalog_AF_gput:n} \meta{indirect object reference}
-%   \end{syntax}
-%   Inserts the object reference in the AF entry of the catalog. The referenced
-%   object must be created by the user.
-% \end{function}
-% \begin{macro}{\pdf_catalog_AF_gput:n}
-%    \begin{macrocode}
-% user command: \pdf_catalog_AF_gput:n, o, x
-% push command: \@@_value_catalog_AF_gpush:
-\@@_value_array_new:nnn { catalog } { AF }
-                         {\@@_backend_catalog_gput:nn}
-%    \end{macrocode}
-% \end{macro}
-% \paragraph{OutputIntents}
-% This is an array of dict/indirect references. So we need a seq to hold the items
-% and some code to put it in the catalog. The user is responsable that the indirect
-% reference points to sensible objects.
-% \begin{function}[added = 2019-05-25]{\pdf_catalog_OutputIntents_gput:nn}
-%   \begin{syntax}
-%     \cs{pdf_catalog_OutputIntents_gput:nn} \meta{name}\meta{indirect object reference}
-%   \end{syntax}
-%   Inserts \texttt{/name reference} in the OutputIntents dictionay of the catalog.
-%   The referenced object must be created by the user.
-% \end{function}
-%    \begin{macrocode}
-% user command: \pdf_catalog_OutputIntents_gput:nn, no, nx
-% push command: \@@_value_catalog_OutputIntents_gpush:
-
-\@@_value_array_new:nnn { catalog } { OutputIntents }
-                         {\@@_backend_catalog_gput:nn}
-
-%    \end{macrocode}
 % \subsubsection{catalog, output}
 %    \begin{macrocode}
 %%\AfterEndPreamble %need to be decided ...

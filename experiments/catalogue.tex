@@ -10,13 +10,20 @@
 
 \begin{document}
 \ExplSyntaxOn
+\pdf_object_new:nn {fieldstest}{dict}
+\pdf_object_write:nn {fieldstest}{/field /abc}
+\pdf_catalog_gput:nn {AcroForm/Fields}{fieldstest}
+\pdf_catalog_gput:nn {AcroForm/DR/Font}{{F1}{<</A/B>>}}
+\pdf_catalog_gput:nn {AcroForm/DR/Font}{{F2}{<</C/E>>}}
 \pdf_catalog_gput:nn {Lang}{(en-UK)}
 \pdf_catalog_gput:nn {Blub}{(abc)}
 \pdf_catalog_gput:nn {AcroForm} {{NeedAppearances}{True}}
 \pdf_catalog_gput:nn {ViewerPreferences}{{HideToolbar}{true}}
 \pdf_catalog_gput:nn {AA}{{WS}{<</blub/bla>>}}
-\use:c{__pdf_Catalog/AA_gpush:}
+\use:c{__pdf_Catalog_gpush:}
 
+\ExplSyntaxOff
+\end{document}
 \use:c{__pdf_Catalog/ViewerPreferences_gpush:}
 \__pdf_prop_show:n{Catalog}
 \__pdf_prop_show:n{Catalog/AcroForm}
@@ -177,7 +184,37 @@ leave open for now
 /DSS                      (dict, pdf 2.0)
 /Acroform/DR/ExtGState etc probably unneeded.
 
-
+% \subsubsection{Simple values}
+% \enquote{Simple} values are values that can be sensibly set only once. When set a second time
+% the new value overwrites the first value. The value itself can be something simple like
+% a boolean but also a complicated dictionary.
+% Simple values can be added with \cs{pdf_catalog_gput:nn}. This will add the value to
+% a prop. The prop is then pushed to the catalog at the end of the document.
+% Entries which can be added like this are
+% \begin{description}
+% \item[Version]  a version as name, e.g. \texttt{/1.7}
+% \item[PageMode] (name: /UseNone, /UseOutlines, /UseThumbs, /FullScreen, /UseOC (PDF 1.5),
+%   /UseAttachments (PDF 1.6)
+% \item[MarkInfo] a dictionary with up to three entries, whose values are booleans (\texttt{true}
+% or \texttt{false}). The default values of all always \texttt{false}. The dictionary should be set
+% in one go by whatever package is handling tagging. Example\\
+%  \verb+<</Marked true /UserProperties true /Suspects true>>+
+%  \item[PageLayout] (name: one of /SinglePage, /OneColumn,
+%  /TwoColumnLeft, /TwoColumnRight, /TwoPageLeft (PDF 1.5), /TwoPageRight (PDF 1.5)
+%  \item[Outlines] a indirect reference (x 0 R) to an object.
+%  \item[OpenAction] array (e.g. \verb+[page /Fit]+ or dictionary \verb+<</Type /Action /S /GoTo /D /somedest>>+)
+%  \item[URI] dict, e.g. \verb+<</S/URI /URI (someurl)>>+
+%  \item[StructTreeRoot] a dict (normally an indirect reference to a dict),
+%   the package doing the tagging should create this.
+%  \item[Lang] (string, e.g. (de-DE))
+%  \item[NeedsRendering] (boolean, pdf 1.7)
+%  \item[PageLabels] dictionary containing on /Nums + array entry describing the numbering system of the pages.
+%  (done by hyperref).
+%  \item[Collection] should be added by one package only (for an example see embedfile package).
+%  \item[Metadata] only one package can add it (pdfx/hyperxmp clash here)
+%  \item[Threads] this is an indirect reference pointing to an array of dictionaries. If threads are
+%  added to a document it should be done by one package only.
+% \end{description}
 
 
 
