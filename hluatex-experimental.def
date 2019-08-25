@@ -632,7 +632,7 @@
   {
    \pdf_pagesattr_gput:nn { CropBox } { [\@pdfpagescrop] }
   }
-  \pdf_catalog_gput:nn { PageMode }{ /\@pdfpagemode }
+  \pdf_catalog_gput:nx { PageMode }{ /\@pdfpagemode }
   \tl_if_empty:NF \@baseurl
    {
     \Hy@pstringdef\Hy@pstringB{\@baseurl}%
@@ -640,13 +640,13 @@
    }
   \tl_if_empty:oF { \@pdfpagelayout }
    {
-    \pdf_catalog_gput:nn{ PageLayout }{ /\@pdfpagelayout }
+    \pdf_catalog_gput:nx{ PageLayout }{ /\@pdfpagelayout }
    }
   \tl_if_exist:NT\@pdflang
    {
     \tl_if_empty:NF\@pdflang
     {
-     \pdf_catalog_gput:nn { Lang } { (\@pdflang) }
+     \pdf_catalog_gput:nx { Lang } { (\@pdflang) }
     }
    }
   \bool_if:nF
