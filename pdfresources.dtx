@@ -26,6 +26,7 @@
 \documentclass{l3doc}
 \usepackage{tabularx,array,booktabs}
 \newcommand\potentialclash{\noindent\llap{\dbend\ }}
+\raggedbottom
 \begin{document}
   \DocInput{\jobname.dtx}
 \end{document}
@@ -848,7 +849,8 @@
       }
   %the code to push the values, used in shipout
   %merges the two props and then fills the register in pdflatex
-  %merges the two tables (the one is probably still empty) and then fills (in lua) in luatex
+  %merges the two tables (the one is probably still empty)
+  % and then fills (in lua) in luatex
   %issues the values stored in the global prop with dvi
     \cs_new_protected:Npn \@@_backend_PageN_gpush:n #1
       {
@@ -888,7 +890,8 @@
       }
   %the code to push the values, used in shipout
   %merges the two props and then fills the register in pdflatex
-  %merges the two tables (the one is probably still empty) and then fills (in lua) in luatex
+  %merges the two tables (the one is probably still empty)
+  %and then fills (in lua) in luatex
   %issues the values stored in the global prop with dvi
     \cs_new_protected:Npn \@@_backend_PageN_gpush:n #1
       {
@@ -1842,6 +1845,7 @@
 %   \meta{name} (without preceding slash) or one of the special keys described
 %   later which represents an entry in a subdictionary.
 %   The exact format of \Arg{value} depends on \Arg{key}.
+% \end{function}
 %
 %   \paragraph{Simple values}
 %   The values in the following tabular are \enquote{simple} in the sense
@@ -1931,7 +1935,8 @@
 %    OutputIntents        & object name\\
 %    Requirements         & object name & pdf 1.7 \\
 %   \end{tabularx}
-% \end{function}
+%
+%
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdf_catalog_gput:nn #1 #2 %#1 name, #2 value
   {
@@ -1941,9 +1946,9 @@
       }
       {
         \cs_if_exist:cTF
-        { @@_Catalog/#1_gput:n }
+        { @@_/Catalog/#1_gput:n }
         {
-          \use:c { @@_Catalog/#1_gput:n } { #2 }
+          \use:c { @@_/Catalog/#1_gput:n } { #2 }
         }
         {
           \clist_if_in:NnF \c_@@_Catalog_single_clist
@@ -2002,7 +2007,7 @@
 \clist_map_inline:Nn \c_@@_Catalog_prop_clist
   {
     \@@_prop_new:n {Catalog/#1}
-    \cs_new_protected:cpn { @@_Catalog/#1_gput:n } ##1
+    \cs_new_protected:cpn { @@_/Catalog/#1_gput:n } ##1
       {
         \@@_prop_gput:nnn { Catalog/#1 }  ##1
       }
@@ -2022,15 +2027,17 @@
 \clist_map_inline:Nn \c_@@_Catalog_seq_clist
  {
    \seq_new:c { g_@@_/Catalog/#1_seq }
-   \cs_new_protected:cpn { @@_Catalog/#1_gput:n } ##1
+   \cs_new_protected:cpn { @@_/Catalog/#1_gput:n } ##1
      {
        \seq_gput_right:cx { g_@@_/Catalog/#1_seq } { \pdf_object_ref:n { ##1 } }
      }
  }
 
-\cs_new_protected:cpn { @@_Catalog/OCProperties/D_gput:n } #1
+\cs_new_protected:cpn { @@_/Catalog/OCProperties/D_gput:n } #1
   {
-    \seq_gput_left:cx { g_@@_/Catalog/Configs_seq } { \pdf_object_ref:n { #1 } }
+    \seq_gput_left:cx
+      { g_@@_/Catalog/OCProperties/Configs_seq }
+      { \pdf_object_ref:n { #1 } }
   }
 %    \end{macrocode}
 % \end{macro}
@@ -2040,37 +2047,37 @@
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_Catalog_gpush:
   {
-    \use:c { @@_Catalog/AA_gpush:}
-    \use:c { @@_Catalog/AcroForm_gpush:}
-    \use:c { @@_Catalog/AF_gpush:}
-    \use:c { @@_Catalog/MarkInfo_gpush:}
-    \use:c { @@_Catalog/OCProperties_gpush:}
-    \use:c { @@_Catalog/OutputIntents_gpush:}
-    \use:c { @@_Catalog/Requirements_gpush:}
-    \use:c { @@_Catalog/ViewerPreferences_gpush:}
+    \use:c { @@_/Catalog/AA_gpush:}
+    \use:c { @@_/Catalog/AcroForm_gpush:}
+    \use:c { @@_/Catalog/AF_gpush:}
+    \use:c { @@_/Catalog/MarkInfo_gpush:}
+    \use:c { @@_/Catalog/OCProperties_gpush:}
+    \use:c { @@_/Catalog/OutputIntents_gpush:}
+    \use:c { @@_/Catalog/Requirements_gpush:}
+    \use:c { @@_/Catalog/ViewerPreferences_gpush:}
     % output the single values:
     \prop_map_function:cN { \@@_prop_name:n {Catalog} }  \@@_backend_catalog_gput:nn
   }
 %    \end{macrocode}
 % \end{macro}
 % \paragraph{Building catalog entries: AA}
-% \begin{macro}{\@@_Catalog/AA_gpush:}
+% \begin{macro}{\@@_/Catalog/AA_gpush:}
 %    \begin{macrocode}
-\cs_new_protected:cpn { @@_Catalog/AA_gpush: }
+\cs_new_protected:cpn { @@_/Catalog/AA_gpush: }
   {
     \prop_if_empty:cF
      { \@@_prop_name:n { Catalog/AA } }
      {
-       \@@_backend_object_new:nn  { g_@@_Catalog/AA_obj } { dict }
+       \@@_backend_object_new:nn  { g_@@_/Catalog/AA_obj } { dict }
        \exp_args:Nnx
          \@@_backend_object_write:nn
-            { g_@@_Catalog/AA_obj }
+            { g_@@_/Catalog/AA_obj }
             { \@@_prop_map_dict_item:n {Catalog/AA } }
        \exp_args:Nnx
          \@@_backend_catalog_gput:nn
            {AA}
            {
-             \@@_backend_object_ref:n {g_@@_Catalog/AA_obj}
+             \@@_backend_object_ref:n {g_@@_/Catalog/AA_obj}
            }
      }
   }
@@ -2079,80 +2086,80 @@
 % \paragraph{Building catalog entries: AcroFrom}
 % This is the most complicated case.
 % The entries is build from
-% Catalog/AcroForm/Fields  (array),
-% Catalog/AcroForm/CO      (array),
-% Catalog/AcroForm/DR/Font (dict),
-% Catalog/AcroForm/DR (dict),
-% Catalog/AcroForm
+% /Catalog/AcroForm/Fields  (array),
+% /Catalog/AcroForm/CO      (array),
+% /Catalog/AcroForm/DR/Font (dict),
+% /Catalog/AcroForm/DR (dict),
+% /Catalog/AcroForm
 %
-% \begin{macro}{\@@_Catalog/AcroForm_gpush:}
+% \begin{macro}{\@@_/Catalog/AcroForm_gpush:}
 %    \begin{macrocode}
-\cs_new_protected:cpn { @@_Catalog/AcroForm_gpush: }
+\cs_new_protected:cpn { @@_/Catalog/AcroForm_gpush: }
   {
     \seq_if_empty:cF { g_@@_/Catalog/AcroForm/Fields_seq }
       {
-        \@@_backend_object_new:nn  { g_@@_Catalog/AcroForm/Fields_obj } { array }
+        \@@_backend_object_new:nn  { g_@@_/Catalog/AcroForm/Fields_obj } { array }
         \exp_args:Nnx
           \@@_backend_object_write:nn
-            { g_@@_Catalog/AcroForm/Fields_obj }
+            { g_@@_/Catalog/AcroForm/Fields_obj }
             { \seq_use:cn { g_@@_/Catalog/AcroForm/Fields_seq } {~} }
         \exp_args:Nnnx
           \@@_prop_gput:nnn
             { Catalog/AcroForm }
             { Fields }
-            { \@@_backend_object_ref:n { g_@@_Catalog/AcroForm/Fields_obj } }
+            { \@@_backend_object_ref:n { g_@@_/Catalog/AcroForm/Fields_obj } }
       }
     \seq_if_empty:cF { g_@@_/Catalog/AcroForm/CO_seq }
       {
-        \@@_backend_object_new:nn  { g_@@_Catalog/AcroForm/CO_obj } { array }
+        \@@_backend_object_new:nn  { g_@@_/Catalog/AcroForm/CO_obj } { array }
         \exp_args:Nnx
           \@@_backend_object_write:nn
-            { g_@@_Catalog/AcroForm/CO_obj }
+            { g_@@_/Catalog/AcroForm/CO_obj }
             { \seq_use:cn { g_@@_/Catalog/AcroForm/CO_seq } {~} }
         \exp_args:Nnnx
           \@@_prop_gput:nnn
             { Catalog/AcroForm }
             { CO }
-            { \@@_backend_object_ref:n { g_@@_Catalog/AcroForm/CO_obj } }
+            { \@@_backend_object_ref:n { g_@@_/Catalog/AcroForm/CO_obj } }
       }
      \prop_if_empty:cF { \@@_prop_name:n { Catalog/AcroForm/DR/Font}}
        {
-         \@@_backend_object_new:nn { g_@@_Catalog/AcroForm/DR/Font_obj } {dict}
+         \@@_backend_object_new:nn { g_@@_/Catalog/AcroForm/DR/Font_obj } {dict}
          \exp_args:Nnx
            \@@_backend_object_write:nn
-             { g_@@_Catalog/AcroForm/DR/Font_obj }
+             { g_@@_/Catalog/AcroForm/DR/Font_obj }
              { \@@_prop_map_dict_item:n { Catalog/AcroForm/DR/Font } }
          \exp_args:Nnnx
            \@@_prop_gput:nnn
              { Catalog/AcroForm/DR }
              { Font }
-             { \@@_backend_object_ref:n { g_@@_Catalog/AcroForm/DR/Font_obj } }
+             { \@@_backend_object_ref:n { g_@@_/Catalog/AcroForm/DR/Font_obj } }
        }
      \prop_if_empty:cF { \@@_prop_name:n { Catalog/AcroForm/DR}}
        {
-         \@@_backend_object_new:nn { g_@@_Catalog/AcroForm/DR_obj } {dict}
+         \@@_backend_object_new:nn { g_@@_/Catalog/AcroForm/DR_obj } {dict}
          \exp_args:Nnx
            \@@_backend_object_write:nn
-             { g_@@_Catalog/AcroForm/DR_obj }
+             { g_@@_/Catalog/AcroForm/DR_obj }
              { \@@_prop_map_dict_item:n { Catalog/AcroForm/DR } }
          \exp_args:Nnnx
            \@@_prop_gput:nnn
              { Catalog/AcroForm }
              { DR }
-             { \@@_backend_object_ref:n { g_@@_Catalog/AcroForm/DR_obj } }
+             { \@@_backend_object_ref:n { g_@@_/Catalog/AcroForm/DR_obj } }
        }
      \prop_if_empty:cF { \@@_prop_name:n { Catalog/AcroForm} }
        {
-         \@@_backend_object_new:nn { g_@@_Catalog/AcroForm_obj } {dict}
+         \@@_backend_object_new:nn { g_@@_/Catalog/AcroForm_obj } {dict}
          \exp_args:Nnx
            \@@_backend_object_write:nn
-             { g_@@_Catalog/AcroForm_obj }
+             { g_@@_/Catalog/AcroForm_obj }
              { \@@_prop_map_dict_item:n { Catalog/AcroForm } }
          \exp_args:Nnnx
            \@@_prop_gput:nnn
              { Catalog }
              { AcroForm }
-             { \@@_backend_object_ref:n { g_@@_Catalog/AcroForm_obj } }
+             { \@@_backend_object_ref:n { g_@@_/Catalog/AcroForm_obj } }
        }
   }
 
@@ -2161,23 +2168,23 @@
 %
 % \paragraph{Building catalog entries: AF}
 % AF is an array.
-% \begin{macro}{\@@_Catalog/AF_gpush:}
+% \begin{macro}{\@@_/Catalog/AF_gpush:}
 %    \begin{macrocode}
-\cs_new_protected:cpn { @@_Catalog/AF_gpush: }
+\cs_new_protected:cpn { @@_/Catalog/AF_gpush: }
   {
     \seq_if_empty:cF
      { g_@@_/Catalog/AF_seq }
      {
-       \@@_backend_object_new:nn  { g_@@_Catalog/AF_obj } { array }
+       \@@_backend_object_new:nn  { g_@@_/Catalog/AF_obj } { array }
        \exp_args:Nnx
          \@@_backend_object_write:nn
-            { g_@@_Catalog/AF_obj }
+            { g_@@_/Catalog/AF_obj }
             { \seq_use:cn { g_@@_/Catalog/AF_seq } {~} }
        \exp_args:Nnx
          \@@_backend_catalog_gput:nn
            {AF}
            {
-             \@@_backend_object_ref:n {g_@@_Catalog/AF_obj}
+             \@@_backend_object_ref:n {g_@@_/Catalog/AF_obj}
            }
      }
   }
@@ -2185,23 +2192,23 @@
 % \end{macro}
 %
 % \paragraph{Building catalog entries: MarkInfo}
-% \begin{macro}{\@@_Catalog/MarkInfo_gpush:}
+% \begin{macro}{\@@_/Catalog/MarkInfo_gpush:}
 %    \begin{macrocode}
-\cs_new_protected:cpn { @@_Catalog/MarkInfo_gpush: }
+\cs_new_protected:cpn { @@_/Catalog/MarkInfo_gpush: }
   {
     \prop_if_empty:cF
      { \@@_prop_name:n { Catalog/MarkInfo } }
      {
-       \@@_backend_object_new:nn  { g_@@_Catalog/MarkInfo_obj } { dict }
+       \@@_backend_object_new:nn  { g_@@_/Catalog/MarkInfo_obj } { dict }
        \exp_args:Nnx
          \@@_backend_object_write:nn
-            { g_@@_Catalog/MarkInfo_obj }
+            { g_@@_/Catalog/MarkInfo_obj }
             { \@@_prop_map_dict_item:n {Catalog/MarkInfo } }
        \exp_args:Nnx
          \@@_backend_catalog_gput:nn
            {MarkInfo}
            {
-             \@@_backend_object_ref:n {g_@@_Catalog/MarkInfo_obj}
+             \@@_backend_object_ref:n {g_@@_/Catalog/MarkInfo_obj}
            }
      }
   }
@@ -2219,36 +2226,36 @@
 %  \end{description}
 %  The /D entry is also a config, it is the first of the seq.
 %  The overall structure is nested: a dict with arrays.
-% \begin{macro}{\@@_Catalog/OCProperties_gpush:}
+% \begin{macro}{\@@_/Catalog/OCProperties_gpush:}
 %    \begin{macrocode}
 % Catalog/OCProperties: OCGs + D is required
-\cs_new_protected:cpn { @@_Catalog/OCProperties_gpush: }
+\cs_new_protected:cpn { @@_/Catalog/OCProperties_gpush: }
   {
-    \int_compare:nNnT
+   \int_compare:nNnT
       {
-        ( \seq_count:c { g_@@_Catalog/OCProperties/OCGs_seq }  )*
-        ( \seq_count:c { g_@@_Catalog/OCProperties/Configs_seq } )
+        ( \seq_count:c { g_@@_/Catalog/OCProperties/OCGs_seq }  )*
+        ( \seq_count:c { g_@@_/Catalog/OCProperties/Configs_seq } )
       }
       >
       { 0 }
       {
-        \@@_backend_object_new:nn  { g_@@_Catalog/OCProperties_obj } { dict }
-        \seq_gpop_left:cN { g_@@_Catalog/OCProperties/Configs_seq} \l_tmpa_tl
+        \@@_backend_object_new:nn  { g_@@_/Catalog/OCProperties_obj } { dict }
+        \seq_gpop_left:cN { g_@@_/Catalog/OCProperties/Configs_seq} \l_tmpa_tl
         \exp_args:Nnx
-          \@@_backend_object_write:nn {g_@@_Catalog/OCProperties_obj}
+          \@@_backend_object_write:nn {g_@@_/Catalog/OCProperties_obj}
             {
-              /OCGs~[ \seq_use:cn { g_@@_Catalog/OCProperties/OCGs_seq } {~} ]
+              /OCGs~[ \seq_use:cn { g_@@_/Catalog/OCProperties/OCGs_seq } {~} ]
               /D~\l_tmpa_tl~
-              \seq_if_empty:cF { g_@@_Catalog/OCProperties/Configs_seq }
+              \seq_if_empty:cF { g_@@_/Catalog/OCProperties/Configs_seq }
                 {
                   /Configs~
-                  [ \seq_use:cn { g_@@_Catalog/OCProperties/Configs_seq} {~} ]
+                  [ \seq_use:cn { g_@@_/Catalog/OCProperties/Configs_seq} {~} ]
                 }
             }
         \exp_args:Nnx
           \@@_backend_catalog_gput:nn
             { OCProperties }
-            { \@@_backend_object_ref:n {g_@@_Catalog/OCProperties_obj} }
+            { \@@_backend_object_ref:n {g_@@_/Catalog/OCProperties_obj} }
       }
   }
 %    \end{macrocode}
@@ -2256,23 +2263,23 @@
 %
 % \paragraph{Building catalog entries: OutputIntents}
 % OutputIntents is an array.
-% \begin{macro}{\@@_Catalog/OutputIntents_gpush:}
+% \begin{macro}{\@@_/Catalog/OutputIntents_gpush:}
 %    \begin{macrocode}
-\cs_new_protected:cpn { @@_Catalog/OutputIntents_gpush: }
+\cs_new_protected:cpn { @@_/Catalog/OutputIntents_gpush: }
   {
     \seq_if_empty:cF
      { g_@@_/Catalog/OutputIntents_seq }
      {
-       \@@_backend_object_new:nn  { g_@@_Catalog/OutputIntents_obj } { array }
+       \@@_backend_object_new:nn  { g_@@_/Catalog/OutputIntents_obj } { array }
        \exp_args:Nnx
          \@@_backend_object_write:nn
-            { g_@@_Catalog/OutputIntents_obj }
+            { g_@@_/Catalog/OutputIntents_obj }
             { \seq_use:cn { g_@@_/Catalog/OutputIntents_seq } {~} }
        \exp_args:Nnx
          \@@_backend_catalog_gput:nn
            {OutputIntents}
            {
-             \@@_backend_object_ref:n {g_@@_Catalog/OutputIntents_obj}
+             \@@_backend_object_ref:n {g_@@_/Catalog/OutputIntents_obj}
            }
      }
   }
@@ -2281,23 +2288,23 @@
 %
 % \paragraph{Building catalog entries: Requirements}
 % Requirements  is an array.
-% \begin{macro}{\@@_Catalog/Requirements _gpush:}
+% \begin{macro}{\@@_/Catalog/Requirements _gpush:}
 %    \begin{macrocode}
-\cs_new_protected:cpn { @@_Catalog/Requirements _gpush: }
+\cs_new_protected:cpn { @@_/Catalog/Requirements _gpush: }
   {
     \seq_if_empty:cF
      { g_@@_/Catalog/Requirements _seq }
      {
-       \@@_backend_object_new:nn  { g_@@_Catalog/Requirements _obj } { array }
+       \@@_backend_object_new:nn  { g_@@_/Catalog/Requirements _obj } { array }
        \exp_args:Nnx
          \@@_backend_object_write:nn
-            { g_@@_Catalog/Requirements_obj }
+            { g_@@_/Catalog/Requirements_obj }
             { \seq_use:cn { g_@@_/Catalog/Requirements_seq } {~} }
        \exp_args:Nnx
          \@@_backend_catalog_gput:nn
            {Requirements}
            {
-             \@@_backend_object_ref:n {g_@@_Catalog/Requirements_obj}
+             \@@_backend_object_ref:n {g_@@_/Catalog/Requirements_obj}
            }
      }
   }
@@ -2305,23 +2312,23 @@
 % \end{macro}
 %
 % \paragraph{Building catalog entries: ViewerPreferences}
-% \begin{macro}{\@@_Catalog/ViewerPreferences_gpush:}
+% \begin{macro}{\@@_/Catalog/ViewerPreferences_gpush:}
 %    \begin{macrocode}
-\cs_new_protected:cpn { @@_Catalog/ViewerPreferences_gpush: }
+\cs_new_protected:cpn { @@_/Catalog/ViewerPreferences_gpush: }
   {
     \prop_if_empty:cF
      { \@@_prop_name:n { Catalog/ViewerPreferences } }
      {
-       \@@_backend_object_new:nn  { g_@@_Catalog/ViewerPreferences_obj } { dict }
+       \@@_backend_object_new:nn  { g_@@_/Catalog/ViewerPreferences_obj } { dict }
        \exp_args:Nnx
          \@@_backend_object_write:nn
-            { g_@@_Catalog/ViewerPreferences_obj }
+            { g_@@_/Catalog/ViewerPreferences_obj }
             { \@@_prop_map_dict_item:n {Catalog/ViewerPreferences } }
        \exp_args:Nnx
          \@@_backend_catalog_gput:nn
            {ViewerPreferences}
            {
-             \@@_backend_object_ref:n {g_@@_Catalog/ViewerPreferences_obj}
+             \@@_backend_object_ref:n {g_@@_/Catalog/ViewerPreferences_obj}
            }
      }
   }
@@ -2485,7 +2492,7 @@
 % \section{Document metadata}
 % We plan a \cs{DeclareDocumentMetaData} so let's start with it.
 % It should allow to set the version, to uncompress a pdf, and set the language.
-% \begin{Function}[added=2019-08-25]{\DeclareDocumentMetaData}
+% \begin{function}[added=2019-08-25]{\DeclareDocumentMetaData}
 %    \begin{macrocode}
 \NewDocumentCommand\DeclareDocumentMetaData { m }
   {
@@ -2511,7 +2518,7 @@
   }
 
 %    \end{macrocode}
-% \end{macro}
+% \end{function}
 
 % \section{Hook management}
 % hooks are commands that allow users and other packages to inject code.
