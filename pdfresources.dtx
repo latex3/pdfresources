@@ -1914,8 +1914,8 @@
 %    AF                   & object name\\
 %    OCProperties/OCGs    & object name  &if there are OCProperties, OCGs and D are required.\\
 %    OCProperties/Configs & object name \\
-%    OCProperties/D       & object name & This actually a single value.
-%                                         There can be only one default.
+%    OCProperties/D       & object name & This actually a single value as
+%                                         there can be only one default.
 %                                         If the value is set twice, the
 %                                         second wins, and the first is
 %                                         added to OCProperties/Configs.\\
@@ -1932,9 +1932,9 @@
       }
       {
         \cs_if_exist:cTF
-        { @@_catalog_#1_gput:n }
+        { @@_Catalog/#1_gput:n }
         {
-          \use:c { @@_catalog_#1_gput:n } { #2 }
+          \use:c { @@_Catalog/#1_gput:n } { #2 }
         }
         {
           \clist_if_in:NnF \c_@@_Catalog_single_clist
@@ -1991,7 +1991,7 @@
 \clist_map_inline:Nn \c_@@_Catalog_prop_clist
   {
     \@@_prop_new:n {Catalog/#1}
-    \cs_new_protected:cpn { @@_catalog_#1_gput:n } ##1
+    \cs_new_protected:cpn { @@_Catalog/#1_gput:n } ##1
       {
         \@@_prop_gput:nnn { Catalog/#1 }  ##1
       }
@@ -2010,53 +2010,219 @@
 \clist_map_inline:Nn \c_@@_Catalog_seq_clist
  {
    \seq_new:c { g_@@_/Catalog/#1_seq }
-   \cs_new_protected:cpn { @@_catalog_#1_gput:n } ##1
+   \cs_new_protected:cpn { @@_Catalog/#1_gput:n } ##1
      {
        \seq_gput_right:cx { g_@@_/Catalog/#1_seq } { \pdf_object_ref:n { ##1 } }
      }
  }
 
-\cs_new_protected:cpn { @@_catalog_OCProperties/D_gput:n } ##1
+\cs_new_protected:cpn { @@_Catalog/OCProperties/D_gput:n } #1
   {
-    \seq_gput_left:cx { g_@@_/Catalog/Configs_seq } { \pdf_object_ref:n { ##1 } }
+    \seq_gput_left:cx { g_@@_/Catalog/Configs_seq } { \pdf_object_ref:n { #1 } }
   }
 %    \end{macrocode}
 % \end{variable}
 % \end{macro}
-%
-% \begin{macro}{...}
-% This commands build together the various parts of the catalog.
+% \paragraph {Building the catalog: Push order}
+% \begin{macro}{\@@_Catalog_gpush:}
+\cs_new_protected:Npn \@@_Catalog_gpush:
+  {
+    \use:c { @@_Catalog/AA_gpush:}
+    \use:c { @@_Catalog/MarkInfo_gpush:}
+    \use:c { @@_Catalog/OCProperties_gpush:}
+    \use:c { @@_Catalog/OutputIntents_gpush:}
+    \use:c { @@_Catalog/Requirements_gpush:}
+    \use:c { @@_Catalog/ViewerPreferences_gpush:}
+  }
+
+% \paragraph{Building catalog entries: AA}
+% \begin{macro}{\@@_Catalog/AA_gpush:}
 %    \begin{macrocode}
-% Catalog/OCProperties OCGs + D is required
-\cs_new_protected:Npn\@@_catalog_OCProperties_gpush:
+\cs_new_protected:cpn { @@_Catalog/AA_gpush: }
+  {
+    \prop_if_empty:cF
+     { \@@_prop_name:n { Catalog/AA } }
+     {
+       \@@_backend_object_new:nn  { g_@@_Catalog/AA_obj } { dict }
+       \exp_args:Nnx
+         \@@_backend_object_write:nn
+            { g_@@_Catalog/AA_obj }
+            { \@@_prop_map_dict_item:n {Catalog/AA } }
+
+       \@@_backend_catalog_gput:nn
+         {AA}
+         {
+           \@@_backend_object_ref:n {g_@@_Catalog/AA_obj}
+         }
+     }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+%\paragraph{Building catalog entries: AF}
+% AF is an array.
+% \begin{macro}{\@@_Catalog/AF_gpush:}
+%    \begin{macrocode}
+\cs_new_protected:cpn { @@_Catalog/AF_gpush: }
+  {
+    \seq_if_empty:cF
+     { g_@@_/Catalog/AF_seq }
+     {
+       \@@_backend_object_new:nn  { g_@@_Catalog/AF_obj } { array }
+       \exp_args:Nnx
+         \@@_backend_object_write:nn
+            { g_@@_Catalog/AF_obj }
+            { \seq_use:cn { g_@@_/Catalog/AF_seq } {~} }
+
+       \@@_backend_catalog_gput:nn
+         {AF}
+         {
+           \@@_backend_object_ref:n {g_@@_Catalog/AF_obj}
+         }
+     }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \paragraph{Building catalog entries: MarkInfo}
+% \begin{macro}{\@@_Catalog/MarkInfo_gpush:}
+%    \begin{macrocode}
+\cs_new_protected:cpn { @@_Catalog/MarkInfo_gpush: }
+  {
+    \prop_if_empty:cF
+     { \@@_prop_name:n { Catalog/MarkInfo } }
+     {
+       \@@_backend_object_new:nn  { g_@@_Catalog/MarkInfo_obj } { dict }
+       \exp_args:Nnx
+         \@@_backend_object_write:nn
+            { g_@@_Catalog/MarkInfo_obj }
+            { \@@_prop_map_dict_item:n {Catalog/MarkInfo } }
+
+       \@@_backend_catalog_gput:nn
+         {MarkInfo}
+         {
+           \@@_backend_object_ref:n {g_@@_Catalog/MarkInfo_obj}
+         }
+     }
+  }
+%    \end{macrocode}
+% \end{macro}
+%\paragraph{Building catalog entries: OCProperties}
+%  This is a dictionary with three entries:
+%  \begin{description}
+%  \item[/OCGs] (required) An array of indirect references,
+%               access needed for more than one package.
+%  \item[/D] (required) a dict (given as an object name) to the default
+%            configuration
+%  \item[/Configs] (optional) an array of indirect references to more
+%        configurations.
+%  \end{description}
+%  The /D entry is also a config, it is the first of the seq.
+%  The overall structure is nested: a dict with arrays.
+% \begin{macro}{\@@_Catalog/OCProperties_gpush:}
+%    \begin{macrocode}
+% Catalog/OCProperties: OCGs + D is required
+\cs_new_protected:cpn { @@_Catalog/OCProperties_gpush: }
   {
     \int_compare:nNnT
       {
-        ( \seq_count:c { g_@@_catalog_OCProperties/OCGs_seq }  )*
-        ( \seq_count:c { g_@@_catalog_OCProperties/Configs_seq } )
+        ( \seq_count:c { g_@@_Catalog/OCProperties/OCGs_seq }  )*
+        ( \seq_count:c { g_@@_Catalog/OCProperties/Configs_seq } )
       }
       >
       { 0 }
       {
-        \@@_backend_object_new:nn  { g_@@_catalog_OCProperties_obj } { dict }
-        \seq_gpop_left:cN { g_@@_catalog_OCProperties/Configs_seq} \l_tmpa_tl
+        \@@_backend_object_new:nn  { g_@@_Catalog/OCProperties_obj } { dict }
+        \seq_gpop_left:cN { g_@@_Catalog/OCProperties/Configs_seq} \l_tmpa_tl
         \exp_args:Nnx
-          \@@_backend_object_write:nn {g_@@_catalog_OCProperties_obj}
+          \@@_backend_object_write:nn {g_@@_Catalog/OCProperties_obj}
             {
-              /OCGs~[ \seq_use:cn { g_@@_catalog_OCProperties/OCGs_seq } {~} ]
+              /OCGs~[ \seq_use:cn { g_@@_Catalog/OCProperties/OCGs_seq } {~} ]
               /D~\l_tmpa_tl~
-              \seq_if_empty:cF { g_@@_catalog_OCProperties/Configs_seq }
+              \seq_if_empty:cF { g_@@_Catalog/OCProperties/Configs_seq }
                 {
                   /Configs~
-                  [ \seq_use:cn { g_@@_catalog_OCProperties/Configs_seq} {~} ]
+                  [ \seq_use:cn { g_@@_Catalog/OCProperties/Configs_seq} {~} ]
                 }
             }
         \@@_backend_catalog_gput:nn
           { OCProperties }
-          { \@@_backend_object_ref:n {g_@@_catalog_OCProperties_obj} }
+          { \@@_backend_object_ref:n {g_@@_Catalog/OCProperties_obj} }
       }
   }
+%    \end{macrocode}
+% \end{macro}
+%
+% \paragraph{Building catalog entries: OutputIntents}
+% OutputIntents is an array.
+% \begin{macro}{\@@_Catalog/OutputIntents_gpush:}
+%    \begin{macrocode}
+\cs_new_protected:cpn { @@_Catalog/OutputIntents_gpush: }
+  {
+    \seq_if_empty:cF
+     { g_@@_/Catalog/OutputIntents_seq }
+     {
+       \@@_backend_object_new:nn  { g_@@_Catalog/OutputIntents_obj } { array }
+       \exp_args:Nnx
+         \@@_backend_object_write:nn
+            { g_@@_Catalog/OutputIntents_obj }
+            { \seq_use:cn { g_@@_/Catalog/OutputIntents_seq } {~} }
 
+       \@@_backend_catalog_gput:nn
+         {OutputIntents}
+         {
+           \@@_backend_object_ref:n {g_@@_Catalog/OutputIntents_obj}
+         }
+     }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \paragraph{Building catalog entries: Requirements}
+% Requirements  is an array.
+% \begin{macro}{\@@_Catalog/Requirements _gpush:}
+%    \begin{macrocode}
+\cs_new_protected:cpn { @@_Catalog/Requirements _gpush: }
+  {
+    \seq_if_empty:cF
+     { g_@@_/Catalog/Requirements _seq }
+     {
+       \@@_backend_object_new:nn  { g_@@_Catalog/Requirements _obj } { array }
+       \exp_args:Nnx
+         \@@_backend_object_write:nn
+            { g_@@_Catalog/Requirements_obj }
+            { \seq_use:cn { g_@@_/Catalog/Requirements_seq } {~} }
+
+       \@@_backend_catalog_gput:nn
+         {Requirements}
+         {
+           \@@_backend_object_ref:n {g_@@_Catalog/Requirements_obj}
+         }
+     }
+  }
+%    \end{macrocode}
+% \end{macro}
+% \paragraph{Building catalog entries: ViewerPreferences}
+% \begin{macro}{\@@_Catalog/ViewerPreferences_gpush:}
+%    \begin{macrocode}
+\cs_new_protected:cpn { @@_Catalog/ViewerPreferences_gpush: }
+  {
+    \prop_if_empty:cF
+     { \@@_prop_name:n { Catalog/ViewerPreferences } }
+     {
+       \@@_backend_object_new:nn  { g_@@_Catalog/ViewerPreferences_obj } { dict }
+       \exp_args:Nnx
+         \@@_backend_object_write:nn
+            { g_@@_Catalog/ViewerPreferences_obj }
+            { \@@_prop_map_dict_item:n {Catalog/ViewerPreferences } }
+
+       \@@_backend_catalog_gput:nn
+         {ViewerPreferences}
+         {
+           \@@_backend_object_ref:n {g_@@_Catalog/ViewerPreferences_obj}
+         }
+     }
+  }
 %    \end{macrocode}
 % \end{macro}
 % XXXXXXXXXXXX
@@ -2292,99 +2458,6 @@
                          {\@@_backend_catalog_gput:nn}
 %    \end{macrocode}
 % \end{macro}
-% \paragraph{ViewerPreferences}
-% This is a dictionary with various entries. So we setup a prop that can be filled
-% and is pushed to the catalog / an object later.
-% \begin{function}[added = 2019-05-25]{\pdf_catalog_ViewerPreferences_gput:nn}
-%   \begin{syntax}
-%     \cs{pdf_catalog_ViewerPreferences_gput:n} \meta{name}\meta{value}
-%   \end{syntax}
-%   Inserts the /name value in the ViewerPreferences dictionary.
-% \end{function}
-% \begin{macro}{\pdf_catalog_ViewerPreferences_gput:nn}
-%    \begin{macrocode}
-% user command: \pdf_catalog_ViewerPreferences_gput:nn, no, nx
-% push command: \@@_value_catalog_ViewerPreferences_gpush:
-
-\@@_value_dict_new:nnn { catalog }{ ViewerPreferences }{ \@@_backend_catalog_gput:nn }
-%    \end{macrocode}
-% \end{macro}
-% \paragraph{OCProperties}
-%  This is a dictionary with three entries:
-%  \begin{description}
-%  \item[/OCGs] (required) An array of indirect references, access needed for more than one package probably
-%  \item[/D] (required)    a dict (at best as indirect reference) to the default configuration
-%  \item[/Configs] (optional) an array of indirect references to more configurations.
-%  \end{description}
-%  The /D entry is also a config, so it can be the first from a seq.
-%  The overall structure is nested: a dict with arrays.
-%    \begin{macrocode}
-% user command: \pdf_catalog_OCproperties_gput:nn, no, nx /should not be used hide it???
-% push command: \@@_value_catalog_OCproperties_gpush:
-
-%%% not finished ...............
-%%%\@@_value_dict_new:nnn { catalog }{ OCproperties }{ \@@_backend_catalog_gput:nn }
-
-\seq_new:N \g_@@_catalog_OCProperties_OCGs_seq
-\seq_new:N \g_@@_catalog_OCProperties_Configs_seq
-
-\cs_new_protected:Npn\pdf_catalog_OCProperties_OCGs_gput:n #1
- {
-  \tl_if_empty:nTF { #1 }
-  {
-   \msg_none:nnn { pdf }{ empty-value }{ OCGs }
-  }
-  {
-   \seq_gput_right:Nn \g_@@_catalog_OCProperties_OCGs_seq { #1 }
-  }
- }
-
-\cs_new_protected:Npn\pdf_catalog_OCProperties_Configs_gput:n #1
- {
-  \tl_if_empty:nTF { #1 }
-  {
-   \msg_none:nnn { pdf }{ empty-value }{ OCProperties/Configs }
-  }
-  {
-   \seq_gput_right:Nn \g_@@_catalog_OCProperties_Configs_seq { #1 }
-  }
- }
-
-\cs_new_protected:Npn\pdf_catalog_OCProperties_Configs_default_gput:n #1
- {
-  \tl_if_empty:nTF { #1 }
-  {
-   \msg_none:nnn { pdf }{ empty-value }{ OCProperties/Configs }
-  }
-  {
-   \seq_gput_left:Nn \g_@@_catalog_OCProperties_Configs_seq {#1}
-  }
- }
-
-\cs_new_protected:Npn\@@_catalog_OCProperties_gpush:
- {
-  \int_compare:nNnT
-  {
-    (\seq_count:N \g_@@_catalog_OCProperties_OCGs_seq)*
-    (\seq_count:N \g_@@_catalog_OCProperties_Configs_seq)
-  } > {0}
-  {
-   \@@_backend_object_new:nn   {g_@@_catalog_OCProperties_obj} {dict}
-   \seq_gpop_left:NN \g_@@_catalog_OCProperties_Configs_seq \l_tmpa_tl
-   \exp_args:Nnx
-    \@@_backend_object_write:nn {g_@@_catalog_OCProperties_obj}
-    {
-     /OCGs~[\seq_use:Nn \g_@@_catalog_OCProperties_OCGs_seq {~}]
-     /D~\l_tmpa_tl~
-     \seq_if_empty:NF \g_@@_catalog_OCProperties_Configs_seq
-     {
-     /Configs~[\seq_use:Nn \g_@@_catalog_OCProperties_Configs_seq {~}]
-     }
-    }
-   \@@_backend_catalog_gput:nn {OCProperties}{\@@_backend_object_ref:n {g_@@_catalog_OCProperties_obj}}
-  } %----------not finished
- }
-%    \end{macrocode}
 % \paragraph{OutputIntents}
 % This is an array of dict/indirect references. So we need a seq to hold the items
 % and some code to put it in the catalog. The user is responsable that the indirect
@@ -2406,15 +2479,15 @@
 %    \end{macrocode}
 % \subsubsection{catalog, output}
 %    \begin{macrocode}
-%\AfterEndPreamble %need to be decided ...
-\AtEndDocument
- {
-  \@@_value_catalog_OutputIntents_gpush:    %OutputIntents
-  \@@_value_catalog_AF_gpush:               %AF
-  \@@_catalog_OCProperties_gpush:           %OCProperties
-  \@@_value_catalog_ViewerPreferences_gpush:
-  %\prop_map_function:NN  \g_@@_catalog_prop \@@_backend_catalog_gput:nn %needs sorting
- }
+%%\AfterEndPreamble %need to be decided ...
+%\AtEndDocument
+% {
+%  \@@_value_catalog_OutputIntents_gpush:    %OutputIntents
+%  \@@_value_catalog_AF_gpush:               %AF
+%  \@@_catalog_OCProperties_gpush:           %OCProperties
+%  \@@_value_catalog_ViewerPreferences_gpush:
+%  %\prop_map_function:NN  \g_@@_catalog_prop \@@_backend_catalog_gput:nn %needs sorting
+% }
 %    \end{macrocode}
 %
 % \subsubsection{Doc View}
