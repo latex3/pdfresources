@@ -183,13 +183,11 @@
 \ExplSyntaxOn
 % catalog mapped to expl3 command
 % \Hy@PutCatalog is used only in one place, so unclear if really usefull ...
-\cs_new:Npn\__hyp_put_catalog_aux:w /#1<<#2>>\q_stop
- {
-  \pdf_catalog_gput:nn {#1}{<<#2>>}
- }
+% \Hy@PutCatalog{/PageLabels<</Nums[\HyPL@Labels]>>}%
+% we simply hard code this for now until hyperref.sty itself can be adapted ...
 \cs_new:Npn\__hyp_put_catalog:n #1
  {
-  \__hyp_put_catalog_aux:w #1\q_stop
+  \pdf_catalog_gput{PageLabels}{<</Nums[\HyPL@Labels]>>}
  }
 
 \pdf@ifdraftmode
@@ -274,6 +272,9 @@
 \Hy@DisableOption{pdfversion}%
 
 %need redoing, should use the pdfresources stuff ...
+\cs_generate_variant:Nn \pdf_object_write:nn {nx}
+\cs_generate_variant:Nn \pdf_catalog_gput:nn {nx}
+
 \legacy_if:nTF {Hy@ocgcolorlinks}
  {
   \newcommand\OBJ@OCG@view {} % for the hyperref test
@@ -282,6 +283,12 @@
     \pdf_object_new:nn   { l__hyp_ocg_print_dict_obj }  { dict }
     \pdf_object_new:nn   { l__hyp_ocg_config_dict_obj } { dict }
     \pdf_object_new:nn   { l__hyp_ocg_ref_array_obj }   { array }
+    \pdf_object_write:nx { l__hyp_ocg_ref_array_obj }
+     {
+       \pdf_object_ref:n { l__hyp_ocg_view_dict_obj }
+       \c_space_tl
+       \pdf_object_ref:n { l__hyp_ocg_print_dict_obj }
+     }
 
     \pdf_object_write:nn { l__hyp_ocg_view_dict_obj }
      {
@@ -303,13 +310,9 @@
           /View  <</ViewState/OFF>>~
          >>
      }
+   \pdf_catalog_gput:nn {OCProperties/OCGs}{l__hyp_ocg_view_dict_obj}
+   \pdf_catalog_gput:nn {OCProperties/OCGs}{l__hyp_ocg_print_dict_obj}
 
-   \pdf_object_write:nx { l__hyp_ocg_ref_array_obj }
-   {
-     \pdf_object_ref:n { l__hyp_ocg_view_dict_obj }
-     \c_space_tl
-     \pdf_object_ref:n { l__hyp_ocg_print_dict_obj }
-   }
    \pdf_object_write:nx { l__hyp_ocg_config_dict_obj }
     {
       /OFF[\pdf_object_ref:n { l__hyp_ocg_print_dict_obj }]
@@ -331,23 +334,7 @@
         >>
           ]
     }
-    \exp_args:Nx\pdf_catalog_OCProperties_OCGs_gput:n
-     { \pdf_object_ref:n { l__hyp_ocg_view_dict_obj } }
-    \exp_args:Nx\pdf_catalog_OCProperties_OCGs_gput:n
-     { \pdf_object_ref:n { l__hyp_ocg_print_dict_obj } }
-    \exp_args:Nx\pdf_catalog_OCProperties_Configs_gput:n
-     {
-      \pdf_object_ref:n { l__hyp_ocg_config_dict_obj }
-     }
-
-    % \pdf_pageresources_gput:nnn{Properties}{OCView}
-%     {
-%      \pdf_object_ref:n { l__hyp_ocg_view_dict_obj}
-%     }
-%    \pdf_pageresources_gput:nnn{Properties}{OCPrint}
-%     {
-%      \pdf_object_ref:n { l__hyp_ocg_print_dict_obj}
-%     }
+    \pdf_catalog_gput:nn {OCProperties/D}{l__hyp_ocg_config_dict_obj}
   }
   \Hy@AtBeginDocument{
     \def\Hy@colorlink#1{
@@ -672,66 +659,66 @@
      \pdf_docview:nn {\@pdfstartpage} {\@pdfstartview}
    }
     \ifHy@pdftoolbar\else
-     \pdf_catalog_ViewerPreferences_gput:nn { HideToolbar } { true }
+     \pdf_catalog_gput:nn { ViewerPreferences } {{ HideToolbar } { true }}
     \fi
     \ifHy@pdfmenubar\else
-     \pdf_catalog_ViewerPreferences_gput:nn { HideMenubar } { true }
+     \pdf_catalog_gput:nn { ViewerPreferences } {{ HideMenubar } { true }}
     \fi
     \ifHy@pdfwindowui\else
-     \pdf_catalog_ViewerPreferences_gput:nn { HideWindowUI } { true }
+     \pdf_catalog_gput:nn {ViewerPreferences} {{ HideWindowUI } { true }}
     \fi
     \ifHy@pdffitwindow
-     \pdf_catalog_ViewerPreferences_gput:nn { FitWindow } { true }
+     \pdf_catalog_gput:nn { ViewerPreferences} {{ FitWindow } { true }}
     \fi
     \ifHy@pdfcenterwindow
-     \pdf_catalog_ViewerPreferences_gput:nn { CenterWindow } { true }
+     \pdf_catalog_gput:nn { ViewerPreferences } {{ CenterWindow } { true }}
     \fi
     \ifHy@pdfdisplaydoctitle
-     \pdf_catalog_ViewerPreferences_gput:nn { DisplayDocTitle } { true }
+     \pdf_catalog_gput:nn { ViewerPreferences } {{ DisplayDocTitle } { true }}
     \fi
     \tl_if_empty:NF  \@pdfnonfullscreenpagemode
     {
-     \pdf_catalog_ViewerPreferences_gput:nx { NonFullScreenPageMode } { /\@pdfnonfullscreenpagemode }
+     \pdf_catalog_gput:nx { ViewerPreferences } {{ NonFullScreenPageMode } { /\@pdfnonfullscreenpagemode }}
     }
     \tl_if_empty:NF  \@pdfdirection
     {
-     \pdf_catalog_ViewerPreferences_gput:nx { Direction } { /\@pdfdirection }
+     \pdf_catalog_gput:nx { ViewerPreferences } {{ Direction } { /\@pdfdirection }}
     }
     \tl_if_empty:NF  \@pdfviewarea
     {
-     \pdf_catalog_ViewerPreferences_gput:nx { ViewArea }{/\@pdfviewarea }
+     \pdf_catalog_gput:nx { ViewerPreferences } {{ ViewArea }{/\@pdfviewarea }}
     }
     \tl_if_empty:NF  \@pdfviewclip
     {
-     \pdf_catalog_ViewerPreferences_gput:nx { ViewClip } { /\@pdfviewclip }
+     \pdf_catalog_gput:nx { ViewerPreferences } {{ ViewClip } { /\@pdfviewclip }}
     }
     \tl_if_empty:NF  \@pdfprintarea
     {
-     \pdf_catalog_ViewerPreferences_gput:nx { PrintArea } { /\@pdfprintarea }
+     \pdf_catalog_gput:nx { ViewerPreferences }{{ PrintArea } { /\@pdfprintarea }}
     }
     \tl_if_empty:NF  \@pdfprintclip
     {
-     \pdf_catalog_ViewerPreferences_gput:nx { PrintClip } { /\@pdfprintclip }
+     \pdf_catalog_gput:nx { ViewerPreferences }{{ PrintClip } { /\@pdfprintclip }}
     }
     \tl_if_empty:NF  \@pdfprintscaling
     {
-     \pdf_catalog_ViewerPreferences_gput:nx { PrintScaling } { /\@pdfprintscaling }
+     \pdf_catalog_gput:nx { ViewerPreferences } {{ PrintScaling } { /\@pdfprintscaling }}
     }
     \tl_if_empty:NF  \@pdfduplex
     {
-     \pdf_catalog_ViewerPreferences_gput:nx { Duplex } { /\@pdfduplex }
+     \pdf_catalog_gput:nx { ViewerPreferences } {{ Duplex } { /\@pdfduplex }}
     }
     \tl_if_empty:NF \@pdfpicktraybypdfsize
     {
-     \pdf_catalog_ViewerPreferences_gput:nx { PickTrayByPDFSize } { \@pdfpicktraybypdfsize }
+     \pdf_catalog_gput:nx{ ViewerPreferences } {{ PickTrayByPDFSize } { \@pdfpicktraybypdfsize }}
     }
     \tl_if_empty:NF \@pdfprintpagerange
     {
-     \pdf_catalog_ViewerPreferences_gput:nx { PrintPageRange } {  [ \@pdfprintpagerange ] }
+     \pdf_catalog_gput:nx { ViewerPreferences } {{ PrintPageRange } {  [ \@pdfprintpagerange ] }}
     }
     \tl_if_empty:NF  \@pdfnumcopies
     {
-     \pdf_catalog_ViewerPreferences_gput:nx { NumCopies } {  \@pdfnumcopies }
+     \pdf_catalog_gput:nx { ViewerPreferences } {{ NumCopies } {  \@pdfnumcopies }}
     }
 }
 
@@ -996,7 +983,7 @@
           \fi
       }
       %%% Acroform management needs sorting out  ...
-      \pdf_DONTUSE_catalog_gput:nn{AcroForm}{\pdf_object_ref:n{l__hyp_acroform_dict_obj}}%
+   %!!!!   \pdf_DONTUSE_catalog_gput:nn{AcroForm}{\pdf_object_ref:n{l__hyp_acroform_dict_obj}}%
     }
   }
   \MakeFieldObject
