@@ -2349,12 +2349,13 @@
   }
 %    \end{macrocode}
 
-
+%=====================
 % \subsection{Higher-level link management}
 % \subsubsection{Startlink}
-% packages like ocgx2 and tagpdf wants to add code to links/annotation created by hyperref.
-% So we need a generic command to start a pdflink which allows packages to add
-% their code to the \texttt{attr} argument through hooks.
+% packages like ocgx2 and tagpdf wants to add code to links/annotation created
+% by hyperref. So we need a generic command to start a pdflink which allows
+% packages to add their code to the \texttt{attr} argument through hooks.
+% % what is is for??
 %    \begin{macrocode}
 \cs_new:Nn \@@_get_key_value:nn { #1~#2~ } %name?????
 %    \end{macrocode}
@@ -2623,82 +2624,86 @@
 % unproblematic for now).
 %    \begin{macrocode}
 \bool_if:nT { !\g_@@_patches_bool || \sys_if_output_dvi_p:  }
- {
-  \file_input_stop:
- }
+  {
+    \file_input_stop:
+  }
 \msg_info:nn{pdf}{patches}
 \RequirePackage{etoolbox}
 % code to add to the resources existing stuff in the format "/name value":
 \cs_new:Npn \@@_split_dict_entry_aux:NNw #1 #2 /#3~#4\q_stop
- {
-  \tl_set:Nn #1 {#3}
-  \tl_set:Nn #2 {#4}
- }
+  {
+    \tl_set:Nn #1 {#3}
+    \tl_set:Nn #2 {#4}
+  }
 \tl_new:N \l_@@_name_tmp_tl
 \tl_new:N \l_@@_value_tmp_tl
 
 
 \cs_generate_variant:Nn \pdf_pageresources_gput:nnn {noo}
+
 \cs_new_protected:Npn \pdf_pageresources_split_gput:nn  #1 #2  %#1  resources
- {
-   \@@_split_dict_entry_aux:NNw \l_@@_name_tmp_tl \l_@@_value_tmp_tl #2 \q_stop
-   \pdf_pageresources_gput:noo {#1}{\l_@@_name_tmp_tl}{\l_@@_value_tmp_tl}
- }
+  {
+    \@@_split_dict_entry_aux:NNw \l_@@_name_tmp_tl \l_@@_value_tmp_tl #2 \q_stop
+    \pdf_pageresources_gput:noo {#1}{\l_@@_name_tmp_tl}{\l_@@_value_tmp_tl}
+  }
 
 %Trying to patch pgf ..
 \AtBeginDocument
- {
+  {
   % extgstate
-  \cs_new:Npn \@@_patch_pgfextgs:w  #1/#2<<#3>>#4\q_stop
-   {
-    \@@_backend_PageNResources_gput:nnn {ExtGState}{#2}{<<#3>>}
-   }
+    \cs_new:Npn \@@_patch_pgfextgs:w  #1/#2<<#3>>#4\q_stop
+      {
+        \@@_backend_PageNResources_gput:nnn {ExtGState}{#2}{<<#3>>}
+      }
 
-  \def\pgf@sys@addpdfresource@extgs@plain#1
-   {
-    \exp_after:wN %for transparent which passes a command
-    \@@_patch_pgfextgs:w #1\q_stop
-   }
+    \def\pgf@sys@addpdfresource@extgs@plain#1
+      {
+        \exp_after:wN %for transparent which passes a command
+          \@@_patch_pgfextgs:w #1\q_stop
+      }
 
   % patterns
-  \cs_new:Npn \@@_patch_pgfpatterns:w  #1/#2\space#3\q_stop
-   {
-    \exp_args:Nnnx \@@_backend_PageNResources_gput:nnn {Pattern}{#2}{#3}
-   }
-  \def\pgf@sys@addpdfresource@patterns@plain#1
-   {
-    \@@_patch_pgfpatterns:w #1\q_stop
-   }
+    \cs_new:Npn \@@_patch_pgfpatterns:w  #1/#2\space#3\q_stop
+      {
+        \exp_args:Nnnx \@@_backend_PageNResources_gput:nnn {Pattern}{#2}{#3}
+      }
+    \def\pgf@sys@addpdfresource@patterns@plain#1
+      {
+        \@@_patch_pgfpatterns:w #1\q_stop
+      }
 
   %colorspace is already set when tikz is loaded:
   \cs_new:Npn \@@_patch_pgfcolorspace:w  #1/#2[#3]#4\q_stop
-   {
-    \@@_backend_PageNResources_gput:nnn {ColorSpace}{#2}{[#3]}
-   }
+    {
+      \@@_backend_PageNResources_gput:nnn {ColorSpace}{#2}{[#3]}
+    }
   \tl_if_exist:NT \pgf@sys@pgf@resource@list@colorspaces
-  {
-   \exp_last_unbraced:NV
-    \@@_patch_pgfcolorspace:w  \pgf@sys@pgf@resource@list@colorspaces\q_stop
-   \pgfutil@everybye{}
+    {
+      \exp_last_unbraced:NV
+        \@@_patch_pgfcolorspace:w  \pgf@sys@pgf@resource@list@colorspaces\q_stop
+      \pgfutil@everybye{}
+    }
   }
- }
 % transparent, we assume that pdfresource is loaded first.
 
 \AtEndPreamble
- {
-  \def\TRP@addresource
-   {
-    \@@_backend_PageNResources_gput:nnn{ExtGState}{TRP1}{<</ca~1/CA~1>>}
-   }
-  \def\transparent@use#1
   {
-   \tl_if_exist:cF{TRP#1}
-    {
-     \@@_backend_PageNResources_gput:nnn{ExtGState}{TRP#1}{<</ca~#1/CA~#1>>}
-     \tl_const:cn{TRP#1}{/TRP#1~gs}
-    }
+    \def\TRP@addresource
+      {
+        \@@_backend_PageNResources_gput:nnn{ExtGState}{TRP1}{<</ca~1/CA~1>>}
+      }
+    \def\transparent@use#1
+      {
+        \tl_if_exist:cF{TRP#1}
+          {
+            \@@_backend_PageNResources_gput:nnn
+              {ExtGState}
+              {TRP#1}
+              {<</ca~#1/CA~#1>>}
+            \tl_const:cn{TRP#1}{/TRP#1~gs}
+          }
+       }
   }
- }
 
 %colorspace.sty
 % rather difficult as no real places to inject patches
@@ -2706,34 +2711,36 @@
 % it can not be avoided to recreate the objects (and so to get duplicates)
 % as colorspace uses temporary macros whose contents is lost.
 \AtEndPreamble
-{
- \tl_if_exist:NT \spc@op
- {
-  \@@_backend_object_new:nn  {__spc_extgstate_op_false}{dict}
-  \@@_backend_object_write:nn
-   {__spc_extgstate_op_false}
-   {/Type /ExtGState~/op~false~/OP~false}
-  \pdf_pageresources_gput:nnn
-   {ExtGState}
-   {SPCko}
-   {\@@_backend_object_ref:n {__spc_extgstate_op_false}}
-  \@@_backend_object_new:nn  {__spc_extgstate_op_true0}{dict}
-  \@@_backend_object_write:nn{__spc_extgstate_op_true0}
-   {/Type /ExtGState~/op~true~/OP~true~/OPM~0}%
-  \pdf_pageresources_gput:nnn
-   {ExtGState}
-   {SPCmz}
-   {\@@_backend_object_ref:n {__spc_extgstate_op_true0}}
-  \@@_backend_object_new:nn  {__spc_extgstate_op_true1}{dict}
-  \@@_backend_object_write:nn{__spc_extgstate_op_true1}
-   {/Type /ExtGState~/op~true~/OP~true~/OPM~1}%
-  \pdf_pageresources_gput:nnn
-   {ExtGState}
-   {SPCop}
-   {\@@_backend_object_ref:n {__spc_extgstate_op_true1}}
- \def\spc@Pageresources#1{}
- }
-}
+  {
+    \tl_if_exist:NT \spc@op
+      {
+        \@@_backend_object_new:nn  {__spc_extgstate_op_false}{dict}
+        \@@_backend_object_write:nn
+          {__spc_extgstate_op_false}
+          {/Type /ExtGState~/op~false~/OP~false}
+        \pdf_pageresources_gput:nnn
+          {ExtGState}
+          {SPCko}
+          {\@@_backend_object_ref:n {__spc_extgstate_op_false}}
+        \@@_backend_object_new:nn  {__spc_extgstate_op_true0}{dict}
+        \@@_backend_object_write:nn
+          {__spc_extgstate_op_true0}
+          {/Type /ExtGState~/op~true~/OP~true~/OPM~0}%
+        \pdf_pageresources_gput:nnn
+          {ExtGState}
+          {SPCmz}
+          {\@@_backend_object_ref:n {__spc_extgstate_op_true0}}
+        \@@_backend_object_new:nn  {__spc_extgstate_op_true1}{dict}
+        \@@_backend_object_write:nn
+          {__spc_extgstate_op_true1}
+          {/Type /ExtGState~/op~true~/OP~true~/OPM~1}%
+        \pdf_pageresources_gput:nnn
+          {ExtGState}
+          {SPCop}
+          {\@@_backend_object_ref:n {__spc_extgstate_op_true1}}
+        \def\spc@Pageresources#1{}
+      }
+  }
 
 %</package>
 %    \end{macrocode}
