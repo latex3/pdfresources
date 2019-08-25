@@ -1886,23 +1886,23 @@
 %   \medskip
 %   \noindent
 %   \begin{tabularx}{\linewidth}{lll>{\raggedright\arraybackslash}X}
-%    \bfseries Key           &  \bfseries Subkey& \bfseries Value  & \bfseries Remark \\\midrule
-%  AA                        & WC, WS, DS, WP,DP& all dict    \\
+%    \bfseries Key           & \bfseries Subkey& \bfseries Value  & \bfseries Remark \\\midrule
+%  AA                        &WC, WS, DS, WP,DP& all dict    \\
 %  AcroFrom                  &  NeedAppearances&  boolean & In pdf 2.0
 %                                                           NeedAppearances here is deprecated,
 %                                                           it is then required that every widget has
 %                                                           an appearance streams.\\
 %                            &  SigFlags       &  Integer\\
-%                            &  DA             &  String\\
+%                            &  DA             &  String \\
 %                            &  Q              &  Integer\\
 %                            &  XFA            & stream or array & pdf 1.5\\
-%  AcroForm/DR               & name            &            & probably unneeded
+%  AcroForm/DR               & name            &            & probably unneeded \\
 %  AcroForm/DR/Font          &  \meta{name}    & dict       & name is a pdf name without slash  \\
 %  MarkInfo                  & Marked          & boolean      \\
 %                            & UserProperties  & boolean      \\
 %                            & Suspects        & boolean      \\
-%  ViewerPreferences         & HideToolbar     & boolean        \\
-%                            & \ldots          &                \\
+%  ViewerPreferences         & HideToolbar     & boolean      \\
+%                            & \ldots          &              \\
 % \end{tabularx}
 %
 % The following keys are dictionaries to which multiple values can be
@@ -1916,7 +1916,7 @@
 %
 %   \medskip
 %   \noindent
-%   \begin{tabularx}{\linewidth}{l>{\raggedright\arraybackslash}X}
+%   \begin{tabularx}{\linewidth}{ll>{\raggedright\arraybackslash}X}
 %    \bfseries Key        & \bfseries Value   & \bfseries Remark \\\midrule
 %    AcroForm/Fields      & object name\\
 %    AcroForm/CO          & object name\\
@@ -1954,17 +1954,17 @@
       }
    }
 %    \end{macrocode}
-% \begin{macro}{ \@@_catalog_XX_gput:n }
-% Various commands to handle subentries and special cases.
-% \begin{variable}
-%   {
-%     \c_@@_Catalog_single_clist,
-%     \c_@@_Catalog_prop_clist,
-%     \c_@@_Catalog_seq_clist,
-%     \c_@@_Catalog_special_clist
-%   }
+% \begin{variable}[added=2019-08-24]
+%     {
+%     \c_@@_Catalog_single_clist
+%      \c_@@_Catalog_prop_clist,
+%      \c_@@_Catalog_seq_clist,
+%     }
 %  This variables hold the list of the various types of entries. With it
 %  the various gput-commands are generated.
+%  \end{variable}
+%  \begin{macro}{ \@@_catalog_XX_gput:n }
+% Various commands to handle subentries and special cases.
 %    \begin{macrocode}
 \@@_prop_new:n {Catalog}
 
@@ -2033,10 +2033,11 @@
     \seq_gput_left:cx { g_@@_/Catalog/Configs_seq } { \pdf_object_ref:n { #1 } }
   }
 %    \end{macrocode}
-% \end{variable}
 % \end{macro}
+%
 % \paragraph {Building the catalog: Push order}
 % \begin{macro}{\@@_Catalog_gpush:}
+%    \begin{macrocode}
 \cs_new_protected:Npn \@@_Catalog_gpush:
   {
     \use:c { @@_Catalog/AA_gpush:}
@@ -2050,7 +2051,8 @@
     % output the single values:
     \prop_map_function:cN { \@@_prop_name:n {Catalog} }  \@@_backend_catalog_gput:nn
   }
-
+%    \end{macrocode}
+% \end{macro}
 % \paragraph{Building catalog entries: AA}
 % \begin{macro}{\@@_Catalog/AA_gpush:}
 %    \begin{macrocode}
@@ -2156,6 +2158,7 @@
 
 %    \end{macrocode}
 % \end{macro}
+%
 % \paragraph{Building catalog entries: AF}
 % AF is an array.
 % \begin{macro}{\@@_Catalog/AF_gpush:}
@@ -2300,6 +2303,7 @@
   }
 %    \end{macrocode}
 % \end{macro}
+%
 % \paragraph{Building catalog entries: ViewerPreferences}
 % \begin{macro}{\@@_Catalog/ViewerPreferences_gpush:}
 %    \begin{macrocode}
@@ -2323,18 +2327,20 @@
   }
 %    \end{macrocode}
 % \end{macro}
-
+%
 % \subsubsection{Doc View / Openaction}
+%
 % \begin{function}[added = 2019-08-18]
 %   {\pdf_docview:nn}
 %   \begin{syntax}
-%     \cs{\pdf_docview:nn} \Arg{page} \Arg {view}
+%     \cs{pdf_docview:nn} \Arg{page} \Arg {view}
 %   \end{syntax}
 % This command allows to set the OpenAction array. The \meta{page}
 % is an absolute page number. \Arg{view} a string for the destination
 % without the leading slash. Examples are e.g. |XYZ left top zoom| or |Fit|.
 % The OpenAction uses (and could also be set directly with)
-% \cs{\pdf_catalog_gput:nn}.
+% \cs{pdf_catalog_gput:nn}.
+% \end{function}
 %
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdf_docview:nn #1 #2
