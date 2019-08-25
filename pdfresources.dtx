@@ -2349,46 +2349,6 @@
   }
 %    \end{macrocode}
 
-% ??????????
-%    \begin{macrocode}
-\cs_set_eq:NN \pdf_link_margin:n \@@_backend_link_margin:n
-\cs_set_eq:NN \pdf_link_last: \@@_backend_link_last:
-%    \end{macrocode}
-
-% \subsection{Setting / comparing pdf versions}
-% The code assumes that the versions are two integers separated by a period.
-% The pdf version should be set rather early, before any object has been written.
-% So we define a \cs{documentsetup} commmand which should go before \cs{documentclass}
-% \begin{macro}{\documentsetup}
-%    \begin{macrocode}
-
-\NewDocumentCommand\documentsetup { m }
- {
-  \cs_if_eq:NNTF \documentclass \@twoclasseserror
-   {\msg_error:nn {pdf}{setup-after-documentclass }}
-   {\keys_set:nn { pdf / setup } { #1 }}
- }
-
-\keys_define:nn { pdf / setup }
- {
-  pdfversion .code:n =
-   {
-    \pdf_version_gset:n { #1 }
-    \@@_version_checks:
-   }
- }
-\cs_new_protected:Npn \@@_version_checks:
- {
-  \pdf_version_compare:NnT < { 1.5 }
-   {
-    \@@_backend_compress_objects:n {0}
-    \msg_info:nnx {pdf}{object-compression-disabled}
-    { \@@_backend_version_major:.\@@_backend_version_minor:}
-   }
- }
-
-%    \end{macrocode}
-% \end{macro}
 
 % \subsection{Higher-level link management}
 % \subsubsection{Startlink}
@@ -2483,6 +2443,12 @@
   { #2 }
 }
 %    \end{macrocode}
+%% ??????????
+%    \begin{macrocode}
+\cs_set_eq:NN \pdf_link_margin:n \@@_backend_link_margin:n
+\cs_set_eq:NN \pdf_link_last: \@@_backend_link_last:
+%    \end{macrocode}
+%
 % \subsection{Destinations}
 % The command expects a lower case argument, it is up to the package to
 % ensure this.
@@ -2551,6 +2517,37 @@
 \seq_new:N \l_@@_hook_link_begin_link_seq
 %    \end{macrocode}
 %
+% \section{Document metadata}
+% We plan a \cs{DeclareDocumentMetaData} so let's start with it.
+% It should allow to set the version, to uncompress a pdf, and set the language.
+% \begin{Function}[added=2019-08-25]{\DeclareDocumentMetaData}
+%    \begin{macrocode}
+\NewDocumentCommand\DeclareDocumentMetaData { m }
+  {
+    \cs_if_eq:NNTF \documentclass \@twoclasseserror
+      { \msg_error:nn { pdf }{ setup-after-documentclass } }
+      { \keys_set:nn  { pdf / setup } { #1 } }
+  }
+
+\keys_define:nn { pdf / setup }
+  {
+    pdfversion .code:n =
+      {
+        \pdf_version_gset:n { #1 }
+      },
+    uncompress .code:n =
+      {
+        \pdf_uncompress:
+      },
+    lang .code:n =
+      {
+        \pdf_catalog_gput:nn {Lang}{(#1)}
+      }
+  }
+
+%    \end{macrocode}
+% \end{macro}
+
 % \section{Hook management}
 % hooks are commands that allow users and other packages to inject code.
 %
