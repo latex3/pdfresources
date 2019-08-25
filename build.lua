@@ -12,3 +12,7 @@ sourcefiles =  {"*.dtx","*.ins","hluatex-experimental.def","tmpl3shipout.sty"}
 checkruns = 3
 checkengines = {"luatex","pdftex","xetex"}
 
+checkconfigs = {"build",
+                "config-noxetex"
+                }
+

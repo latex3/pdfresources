@@ -1,0 +1,30 @@
+\input{regression-test}
+\documentclass{article}
+\PassOptionsToPackage{debug}{pdfresources}
+\usepackage{pdfresources}
+
+\usepackage{hyperxmp,lipsum}
+
+\usepackage[customdriver=hluatex-experimental,
+   ocgcolorlinks,
+   pdftoolbar=false,
+   pdfauthor={Ulrike Fischer},
+   pdftitle={A test of metadata},
+   pdfnonfullscreenpagemode=UseNone,
+   pdfnumcopies=4,
+   pdfpagelayout=SinglePage]
+   {hyperref}
+
+\ExplSyntaxOn
+\pdf_object_new:nn{metadata-obj}{stream}
+\pdf_catalog_gput:nn{Metadata}{\pdf_object_ref:n{metadata-obj}}
+\ExplSyntaxOff
+
+ \begin{document}
+ blblb \lipsum
+ \ExplSyntaxOn\makeatletter
+ \hyxmp@find@metadata
+ \hyxmp@construct@packet
+ \exp_args:Nnx\pdf_object_write:nn{metadata-obj}{{/Type~/Metadata~/Subtype~/XML}{\hyxmp@xml}}%
+\ExplSyntaxOff
+\end{document}
