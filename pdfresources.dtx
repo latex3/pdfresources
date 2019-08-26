@@ -93,6 +93,8 @@
 %    \begin{macrocode}
 \msg_new:nnn  { pdf } { patches }
               { loading~patch~code }
+\msg_new:nnn  { pdf } { pgf-too-late }
+              { pgf~is~already~loaded.~Patching~not~possible.}
 \msg_new:nnn  { pdf } { empty-value }
               { The~value~for~#1~is~empty~and~will~be~ignored }
 \msg_new:nnn  { pdf } { wrong-path }
@@ -2669,12 +2671,61 @@
 % ColorSpace and Pattern (Shadings are added to the xform resources and so probably
 % unproblematic for now).
 %    \begin{macrocode}
+% patches for xetex/dvips doesn't make much sense for colorspace and
+% transparent. But pgf should be tested sometime.
+% currently only pdftex/luatex is handled here.
 \bool_if:nT { !\g_@@_patches_bool || \sys_if_output_dvi_p:  }
   {
     \file_input_stop:
   }
-\msg_info:nn{pdf}{patches}
-\RequirePackage{etoolbox} 
+\RequirePackage{etoolbox}
+\@ifpackageloaded{pgfrcs}
+ {
+  \msg_warning:nn{pdf}{pgf-too-late}
+  \file_input_stop:
+ }
+ {
+  \msg_info:nn{pdf}{patches}
+ }
+\RequirePackage{pgfrcs}
+%
+%\def\pgfutil@addpdfresource@extgs#1{\pgf@sys@addpdfresource@extgs@plain{#1}}
+%\def\pgfutil@addpdfresource@colorspaces#1{\pgf@sys@addpdfresource@colorspaces@plain{#1}}
+%\def\pgfutil@addpdfresource@patterns#1{\pgf@sys@addpdfresource@patterns@plain{#1}}
+%\def\pgfutil@setuppdfresources{\pgf@sys@setuppdfresources@plain}
+% \pgf@sys@pdf@possible@resources %used in xform
+%Trying to patch pgf ..
+\cs_new_protected:Npn \@@_pgf_sys_setuppdfresources_plain:
+  {
+   %objects are already created ...
+    \def\pgf@sys@pdf@possible@resources
+      {
+        /ColorSpace~\pdf_object_ref:n {PageN/Resources/ColorSpace}
+        /Pattern   ~\pdf_object_ref:n {PageN/Resources/Pattern}
+        /ExtGState ~\pdf_object_ref:n {PageN/Resources/ExtGState}
+      }
+    \let\pgf@sys@pdf@check@resources=\relax%
+    %not sure if needed, but perhaps the lists are used somewhere else ...
+    \let\pgf@sys@pgf@resource@list@extgs=\pgfutil@empty%
+    \let\pgf@sys@pgf@resource@list@patterns=\pgfutil@empty%
+    \let\pgf@sys@pgf@resource@list@colorspaces=\pgfutil@empty%
+    % the commands to add page resources
+    \def\pgf@sys@addpdfresource@extgs@plain##1
+      {
+        \exp_after:wN %for transparent which passes a command
+          \@@_patch_pgfextgs:w ##1\q_stop
+      }
+    \def\pgf@sys@addpdfresource@patterns@plain##1
+      {
+        \@@_patch_pgfpatterns:w ##1\q_stop
+      }
+   \def\pgf@sys@addpdfresource@colorspaces@plain##1
+      {
+        \@@_patch_pgfcolorspaces:w ##1\q_stop
+      }
+  }
+\def\pgfutil@setuppdfresources{\@@_pgf_sys_setuppdfresources_plain:}
+% helper commands as pgf doesn't pass resources as two arguments
 % code to add to the resources existing stuff in the format "/name value":
 \cs_new:Npn \@@_split_dict_entry_aux:NNw #1 #2 /#3~#4\q_stop
   {
@@ -2684,7 +2735,6 @@
 \tl_new:N \l_@@_name_tmp_tl
 \tl_new:N \l_@@_value_tmp_tl
 
-
 \cs_generate_variant:Nn \pdf_pageresources_gput:nnn {noo}
 
 \cs_new_protected:Npn \pdf_pageresources_split_gput:nn  #1 #2  %#1  resources
@@ -2693,43 +2743,20 @@
     \pdf_pageresources_gput:noo {#1}{\l_@@_name_tmp_tl}{\l_@@_value_tmp_tl}
   }
 
-%Trying to patch pgf ..
-\AtBeginDocument
+\cs_new:Npn \@@_patch_pgfextgs:w  #1/#2<<#3>>#4\q_stop
   {
-  % extgstate
-    \cs_new:Npn \@@_patch_pgfextgs:w  #1/#2<<#3>>#4\q_stop
-      {
-        \@@_backend_PageNResources_gput:nnn {ExtGState}{#2}{<<#3>>}
-      }
-
-    \def\pgf@sys@addpdfresource@extgs@plain#1
-      {
-        \exp_after:wN %for transparent which passes a command
-          \@@_patch_pgfextgs:w #1\q_stop
-      }
-
-  % patterns
-    \cs_new:Npn \@@_patch_pgfpatterns:w  #1/#2\space#3\q_stop
-      {
-        \exp_args:Nnnx \@@_backend_PageNResources_gput:nnn {Pattern}{#2}{#3}
-      }
-    \def\pgf@sys@addpdfresource@patterns@plain#1
-      {
-        \@@_patch_pgfpatterns:w #1\q_stop
-      }
-
-  %colorspace is already set when tikz is loaded:
-  \cs_new:Npn \@@_patch_pgfcolorspace:w  #1/#2[#3]#4\q_stop
-    {
-      \@@_backend_PageNResources_gput:nnn {ColorSpace}{#2}{[#3]}
-    }
-  \tl_if_exist:NT \pgf@sys@pgf@resource@list@colorspaces
-    {
-      \exp_last_unbraced:NV
-        \@@_patch_pgfcolorspace:w  \pgf@sys@pgf@resource@list@colorspaces\q_stop
-      \pgfutil@everybye{}
-    }
+    \@@_backend_PageNResources_gput:nnn {ExtGState}{#2}{<<#3>>}
   }
+\cs_new:Npn \@@_patch_pgfpatterns:w  #1/#2\space#3\q_stop
+  {
+    \exp_args:Nnnx \@@_backend_PageNResources_gput:nnn {Pattern}{#2}{#3}
+  }
+\cs_new:Npn \@@_patch_pgfcolorspaces:w  #1/#2[#3]#4\q_stop
+  {
+    \@@_backend_PageNResources_gput:nnn {ColorSpace}{#2}{[#3]}
+  }
+
+
 % transparent, we assume that pdfresource is loaded first.
 
 \AtEndPreamble
