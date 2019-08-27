@@ -1,0 +1,107 @@
+%%
+%% This is file `transparent.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% transparent.dtx  (with options: `package')
+%%
+%% This is a generated file.
+%%
+%% Project: transparent
+%% Version: 2018/11/18 v1.3
+%%
+%% Copyright (C) 2007 by
+%%    Heiko Oberdiek <heiko.oberdiek at googlemail.com>
+%%
+%% This work may be distributed and/or modified under the
+%% conditions of the LaTeX Project Public License, either
+%% version 1.3c of this license or (at your option) any later
+%% version. This version of this license is in
+%%    http://www.latex-project.org/lppl/lppl-1-3c.txt
+%% and the latest version of this license is in
+%%    http://www.latex-project.org/lppl.txt
+%% and version 1.3 or later is part of all distributions of
+%% LaTeX version 2005/12/01 or later.
+%%
+%% This work has the LPPL maintenance status "maintained".
+%%
+%% This Current Maintainer of this work is Heiko Oberdiek.
+%%
+%% This work consists of the main source file transparent.dtx
+%% and the derived files
+%%    transparent.sty, transparent.pdf, transparent.ins, transparent.drv,
+%%    transparent-example.tex.
+%%
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{new-transparent}%
+  [2019/08/27 v1.4 Transparency via pdfTeX's color stack (HO)]%
+\RequirePackage{ifpdf}
+\ifpdf
+\else
+  \PackageWarningNoLine{transparent}{%
+    Loading aborted, because pdfTeX is not running in PDF mode%
+  }%
+  \expandafter\endinput
+\fi
+\ifx\pdfextension\@undefined
+  \let\TRP@pdfcolorstackinit\pdfcolorstackinit
+  \let\TRP@pdfpageresources\pdfpageresources
+  \let\TRP@pdfcolorstack\pdfcolorstack
+\else
+  \def\TRP@pdfcolorstackinit           {\pdffeedback colorstackinit}
+  \protected\edef\TRP@pdfpageresources {\pdfvariable pageresources}
+  \protected\def\TRP@pdfcolorstack     {\pdfextension colorstack}
+\fi
+\ifcsname pdf_pageresources_gput:nnn\endcsname
+\else
+\PackageWarningNoLine{new-transparent}{%
+    Loading aborted, because pdf resource management code not found%
+  }%
+  \expandafter\endinput
+\fi
+
+\ExplSyntaxOn
+\pdf_pageresources_gput:nnn { ExtGState}{TRP1}{<</ca~1/CA~1>>}
+\cs_new_protected:Npn \__transparent_use:n #1
+ {
+   \tl_if_exist:cF { c__transparent_TRP#1_tl }
+     {
+       \pdf_pageresources_gput:nnn { ExtGState}{TRP#1}{<</ca~#1/CA~#1>>}
+       \tl_const:cn { c__transparent_TRP#1_tl }{ /TRP#1~gs }
+     }
+ }
+
+\xdef\TRP@colorstack{%
+  \TRP@pdfcolorstackinit~page~direct{/TRP1~gs}%
+}
+\newcommand*{\transparent}[1]
+  {
+    \exp_args:Nx\__transparent_use:n { \fp_eval:n{ min(max(0,#1),1)}}
+    \tl_set:Nx  \transparent@current { \fp_eval:n{ min(max(0,#1),1)}}
+    \transparent@set
+  }
+
+\def\transparent@current{/TRP1 gs}
+\def\transparent@set
+  {
+    \TRP@pdfcolorstack\TRP@colorstack~push~
+      {
+        \tl_use:c { c__transparent_TRP\transparent@current _tl }
+      }
+        \aftergroup\transparent@reset
+  }
+\ExplSyntaxOff
+\def\transparent@reset{%
+  \TRP@pdfcolorstack\TRP@colorstack pop\relax
+}
+\newcommand*{\texttransparent}[2]{%
+  \protect\leavevmode
+  \begingroup
+    \transparent{#1}%
+    #2%
+  \endgroup
+}
+\endinput
+%%
+%% End of file `transparent.sty'.
