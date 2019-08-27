@@ -2725,6 +2725,7 @@
       }
   }
 \def\pgfutil@setuppdfresources{\@@_pgf_sys_setuppdfresources_plain:}
+\AtEndPreamble{\pgfutil@setuppdfresources}
 % helper commands as pgf doesn't pass resources as two arguments
 % code to add to the resources existing stuff in the format "/name value":
 \cs_new:Npn \@@_split_dict_entry_aux:NNw #1 #2 /#3~#4\q_stop
@@ -2758,7 +2759,7 @@
 
 
 % transparent, we assume that pdfresource is loaded first.
-
+% the code does nothing is with new-transparent ...
 \AtEndPreamble
   {
     \def\TRP@addresource
