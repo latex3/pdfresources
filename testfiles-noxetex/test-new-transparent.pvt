@@ -1,16 +1,19 @@
 % !Mode:: "TeX:UTF-8:Main"
 \input{regression-test}
 \RequirePackage[enable-debug,check-declarations]{expl3}
-\RequirePackage[patches]{pdfresources}
+\RequirePackage{pdfresources}
 \DeclareDocumentMetaData{uncompress}
 \documentclass{article}
 \makeatletter
-\usepackage{transparent} 
+%\usepackage{transparent}
+\usepackage{new-transparent}
 \begin{document}
-\START
+%\START
 \ExplSyntaxOn
 \pdf_pageresources_gput:nnn{ExtGState}{duckopacity}{<</ca~0.2/CA~0.2>>}
 \ExplSyntaxOff
 \texttransparent{0.5}{xxxxxxxxxxx}
 \texttransparent{0.3}{xxxxxxxxxxx}
+\transparent{0.4} 
+%\lipsum
 \end{document} 

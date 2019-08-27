@@ -1,15 +1,15 @@
-% NOK /ExtGState 5 0 R  /ExtGState 1 0 R with luatex, pdftex is ok ... 
+% NOK /ExtGState 5 0 R  /ExtGState 1 0 R with luatex, pdftex is ok ...
 % and also two colorspace ....
-% Test doesn't make sense with xelatex/dvips as they don't 
+% Test doesn't make sense with xelatex/dvips as they don't
 % work with transparent and colorspace anyway ...
-% the patches looks ok, there are a few duplicates in the object 
+% the patches looks ok, there are a few duplicates in the object
 % but nothing harmful
 \RequirePackage[enable-debug,check-declarations]{expl3}
 \RequirePackage[patches]{pdfresources}
 \input{regression-test}
 \documentclass{article}
 
-\usepackage{tikz,transparent}
+\usepackage{tikz,new-transparent}
 \usetikzlibrary{patterns,shadings}
 \usepackage[overprint]{colorspace}
 
