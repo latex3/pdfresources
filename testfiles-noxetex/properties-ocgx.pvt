@@ -1,0 +1,74 @@
+%\input{regression-test}
+\RequirePackage[enable-debug]{expl3}
+\RequirePackage[patches]{pdfresources}
+\DeclareDocumentMetaData{uncompress}
+\documentclass{article}
+
+\usepackage[a6paper]{geometry}
+\usepackage{ocgx2}
+\usepackage{color}
+\ExplSyntaxOn
+\cs_new:Npn \__pdf_name_pbsobj:Nn #1 #2 %#1 Tl, #2 e.g. 1 0 R or @pbs@obj0 or ...
+ {
+  \__pdf_backend_name_pbsobj:Nn #1 { #2 } 
+ }
+\cs_generate_variant:Nn \exp_last_unbraced:NNn {NNx}
+\tl_new:N\l__pdf_nametmpa_tl
+\bool_if:nT {\sys_if_engine_luatex_p: || (\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p:) }
+ {
+  \cs_new:Npn \__pdf_backend_name_pbsobj:Nn #1 #2
+   { 
+     \tl_set:Nx \l__pdf_nametmpa_tl {#2}
+     \exp_last_unbraced:NNo \__pdf_split_obj_number:Nw #1 \l__pdf_nametmpa_tl\q_stop 
+   }
+  \cs_new:Npn \__pdf_split_obj_number:Nw #1 #2~0~R\q_stop {\tl_set:Nn #1{#2}}
+ }
+ 
+%xetex and dvips probably don't work without rewrite pdf_bdc or the object ref code:
+%as the object name is not a simple number. So only luatex/pdftex:
+  
+\cs_set:Npn \pbs_pdfbdc:nn #1 #2
+ { 
+   %#2 is basically an object number
+   % it looks as if pdf doesn't like it if the object is referenced through another object
+   % so we need to give the number a name so that we can use \pdf_bdc:nn
+  \__pdf_backend_name_pbsobj:Nn \l_tmpa_tl { #2} 
+  %\exp_args:Nx  \pdf_object_new:nn   {pbs@bdcobj\int_use:N\g_pbs_oc_int}{array}
+  %\exp_args:Nxx \pdf_object_write:nn {pbs@bdcobj\int_use:N\g_pbs_oc_int} {#2}
+  \int_const:cn {c__pdf_backend_object_ pbs@bdcobj\int_use:N\g_pbs_oc_int _int}{\l_tmpa_tl}
+  \exp_args:Nxx \pdf_bdc:nn {\tl_tail:n{#1}}    {pbs@bdcobj\int_use:N\g_pbs_oc_int}
+  \int_gincr:N\g_pbs_oc_int
+ }
+\cs_set_eq:NN \pbs_pdfemc: \pdf_emc: 
+\ExplSyntaxOff
+\begin{document}
+\ExplSyntaxOn\makeatletter
+\pdf_object_new:nn {testbdc}{dict}
+\pdf_object_write:nn{testbdc} {/Type /P}
+\pdf_bdc:nn {Span}{testbdc}\pdf_emc:
+
+
+\ExplSyntaxOff
+
+Some \begin{ocg}{red Layer}{red}{on}
+{\color{red}layered text.}
+\end{ocg}
+
+Some \begin{ocg}{yellow Layer}{yellow}{on}
+{\color{yellow}layered text.}
+\end{ocg}
+
+\newpage
+
+More \begin{ocg}{blue Layer}{blue}{on}
+{\color{blue}layered text.}
+\end{ocg}
+
+\begin{figure}[p]
+
+Some \begin{ocg}{red Layer}{red}{on}
+{\color{red}layered text.}
+\end{ocg}
+
+\end{figure}
+\end{document} 
