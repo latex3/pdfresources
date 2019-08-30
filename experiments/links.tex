@@ -1,0 +1,35 @@
+% !Mode:: "TeX:DE:UTF-8:Main"
+\documentclass{article}
+
+\usepackage{lipsum,l3pdf,xcolor,
+ pdfresources
+ }
+\ExplSyntaxOn
+\pdf_uncompress:
+
+\ExplSyntaxOff
+
+\begin{document}
+
+\ExplSyntaxOn
+
+ 
+ \pdf_link_user:nnn { url }
+ %xx\__pdf_backend_link_begin_user:nnw
+ %    {}
+     {
+       /Subtype /Link
+       /A<<
+         /Type/Action~
+         /S/URI~
+         /URI(www.blub.de)~
+         %\Hy@href@nextactionraw
+       >>
+       /Border[1~ 1~ 1]
+       /C[0~ 0~ 1]
+     }
+     {bbbbb}
+%\__pdf_backend_link_end:     
+
+\ExplSyntaxOff
+\end{document} 
