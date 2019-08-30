@@ -1,12 +1,12 @@
 % !Mode:: "TeX:DE:UTF-8:Main"
 
-% xetex doesn't use the hyperdestname provided by hyperref, but e.g. 
+% xetex doesn't use the hyperdestname provided by hyperref, but e.g.
 % /S/GoTo/D(0)
 % large borders in xetex are imho not our fault ...
 \RequirePackage{pdfresources}
 \DeclareDocumentMetaData{uncompress}
 
-%\input{regression-test}
+\input{regression-test}
 \documentclass{article}
 \usepackage{xcolor}
 \usepackage[customdriver=hluatex-experimental]{hyperref}
@@ -20,9 +20,9 @@
 
 \hypupdateattribute
 \begin{document}
-%\START
+\START
 abc\\
-link:\tracingmacros=1 \ref{a} \\
+link: \ref{a} \\
 url:  \url{www.blub.de}\\
 file: \href{test-pdfresources.pdf}{test file}\\
 menu: \Acrobatmenu{Find}{Find}
