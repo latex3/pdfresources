@@ -2529,6 +2529,13 @@
    }
  }
 \cs_generate_variant:Nn\pdf_destination:nn {no,nf}
+%avoid that destinations names are optimized.
+%see https://tug.org/pipermail/dvipdfmx/2019-May/000002.html
+\sys_if_engine_xetex:T
+  {
+    \__kernel_backend_literal:x { dvipdfmx:config~C~ 0x10 }
+  }
+
 %    \end{macrocode}
 % \section{Document metadata}
 % We plan a \cs{DeclareDocumentMetaData} so let's start with it.
