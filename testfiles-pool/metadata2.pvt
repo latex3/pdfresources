@@ -1,9 +1,11 @@
+%works with xetex, luatex, pdftex but dvips needs more tweeks ...
 \input{regression-test}
 \documentclass{article}
 \PassOptionsToPackage{debug}{pdfresources}
 \usepackage{pdfresources}
 
-\usepackage{hyperxmp,lipsum}
+\usepackage{hyperxmp}
+\usepackage{lipsum}
 
 \usepackage[customdriver=hluatex-experimental,
    ocgcolorlinks,
@@ -17,7 +19,7 @@
 
 \ExplSyntaxOn
 \pdf_object_new:nn{metadata-obj}{stream}
-\pdf_catalog_gput:nn{Metadata}{\pdf_object_ref:n{metadata-obj}}
+\pdf_catalog_gput:nx{Metadata}{\pdf_object_ref:n{metadata-obj}}
 \ExplSyntaxOff
 
  \begin{document}
@@ -25,6 +27,9 @@
  \ExplSyntaxOn\makeatletter
  \hyxmp@find@metadata
  \hyxmp@construct@packet
- \exp_args:Nnx\pdf_object_write:nn{metadata-obj}{{/Type~/Metadata~/Subtype~/XML}{\hyxmp@xml}}%
+ \pdf_object_write:nx {metadata-obj}{{/Type~/Metadata~/Subtype~/XML}{\hyxmp@xml}}%
+ 
+ %\pdf_object_write:nn{metadata-obj}{{/Type~/Metadata~/Subtype~/XML}{\hyxmp@xml}}%
+
 \ExplSyntaxOff
 \end{document}
