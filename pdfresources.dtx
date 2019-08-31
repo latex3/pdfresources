@@ -1215,7 +1215,7 @@
         {
           \prop_if_empty:cF { \@@_prop_name:n {PageN/Resources/##1} }
             {
-              \exp_args:Nx\__kernel_backend_literal:n
+              \__kernel_backend_literal:x
                 {
                   pdf:put~@resources~
                     <</##1~\@@_backend_object_ref:n {PageN/Resources/##1}>>
@@ -1240,7 +1240,7 @@
               { \@@_backend_object_ref:n{#2} }
           }
           {
-            \exp_args:Nx\tex_latelua:D
+            \exp_args:Nx \tex_latelua:D
               {
                 l3kernel.pdf.Page_Resources_Properties_gput
                   (
@@ -1603,19 +1603,17 @@
         \box_set_dp:Nn  \l_@@_tmpa_box { \c_zero_dim }
         \box_set_ht:Nn  \l_@@_tmpa_box { \c_zero_dim }
         \box_set_wd:Nn  \l_@@_tmpa_box { \c_zero_dim }
-        \exp_args:Nx
-          \@@_backend:n
-            {
-              bxobj  ~ \@@_backend_xform_ref:n  { #1 }
-              \c_space_tl width  ~ \pdf_xform_wd:n { #1 }
-              \c_space_tl height ~ \pdf_xform_ht:n { #1 }
-              \c_space_tl depth  ~ \pdf_xform_dp:n { #1 }
-            }
+        \@@_backend:x
+          {
+            bxobj  ~ \@@_backend_xform_ref:n  { #1 }
+            \c_space_tl width  ~ \pdf_xform_wd:n { #1 }
+            \c_space_tl height ~ \pdf_xform_ht:n { #1 }
+            \c_space_tl depth  ~ \pdf_xform_dp:n { #1 }
+          }
         \box_use_drop:N \l_@@_tmpa_box
+        \@@_backend:x {put ~ @resources ~<<#3>> }
         \exp_args:Nx
-          \@@_backend:n {put ~ @resources ~<<#3>> }
-        \exp_args:Nx
-          \@@_backend:n{exobj ~<<#2>>}
+        \@@_backend:x {exobj ~<<#2>>}
      }
 
     \cs_new:Npn \@@_backend_xform_ref:n #1
@@ -1627,8 +1625,7 @@
      {
        \hbox_set:Nn \l_@@_tmpa_box
          {
-           \exp_args:Nx
-             \@@_backend:n
+           \@@_backend:x
              {
                uxobj~ \@@_backend_xform_ref:n { #1 }
              }
@@ -1722,7 +1719,7 @@
            \prop_if_empty:cF
              { \@@_prop_name:n {PageN/Resources/##1} }
              {
-               \exp_args:Nnx \@@_backend_object_write:nn
+               \@@_backend_object_write:nx
                  { PageN/Resources/##1 }
                  { \@@_prop_map_dict_item:n {PageN/Resources/##1} }
              }
@@ -1839,7 +1836,7 @@
 % To handle this some \Arg{keys} in the following command
 % are connected with special functions.
 % \begin{function}[added = 2019-08-18]
-%   {\pdf_catalog_gput:nn}
+%   {\pdf_catalog_gput:nn, \pdf_catalog_gput:no , \pdf_catalog_gput:nx   }
 %   \begin{syntax}
 %     \cs{pdf_catalog_gput:nn} \Arg{key} \Arg {value}
 %   \end{syntax}
@@ -1961,6 +1958,7 @@
         }
       }
    }
+\cs_generate_variant:Nn \pdf_catalog_gput:nn {no,nx}
 %    \end{macrocode}
 % \begin{variable}[added=2019-08-24]
 %     {
@@ -2073,8 +2071,7 @@
      { \@@_prop_name:n { Catalog/AA } }
      {
        \@@_backend_object_new:nn  { g_@@_/Catalog/AA_obj } { dict }
-       \exp_args:Nnx
-         \@@_backend_object_write:nn
+       \@@_backend_object_write:nx
             { g_@@_/Catalog/AA_obj }
             { \@@_prop_map_dict_item:n {Catalog/AA } }
        \exp_args:Nnx
@@ -2103,8 +2100,7 @@
     \seq_if_empty:cF { g_@@_/Catalog/AcroForm/Fields_seq }
       {
         \@@_backend_object_new:nn  { g_@@_/Catalog/AcroForm/Fields_obj } { array }
-        \exp_args:Nnx
-          \@@_backend_object_write:nn
+        \@@_backend_object_write:nx
             { g_@@_/Catalog/AcroForm/Fields_obj }
             { \seq_use:cn { g_@@_/Catalog/AcroForm/Fields_seq } {~} }
         \exp_args:Nnnx
@@ -2356,8 +2352,7 @@
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdf_docview:nn #1 #2
   {
-    \exp_args:Nnx
-    \pdf_catalog_gput:nn { OpenAction }{[\pdf_pageobject_ref:n {#1}~/#2]}
+    \pdf_catalog_gput:nx { OpenAction }{[\pdf_pageobject_ref:n {#1}~/#2]}
   }
 %    \end{macrocode}
 
@@ -2421,43 +2416,43 @@
 %    \end{macrocode}
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdf_link_begin_user:nnw #1 #2 %#1 type, #2 action spec
-{
- \seq_if_exist:cT { l_@@_hook_link_begin_#1_seq }
-   {
-    \seq_use:cn { l_@@_hook_link_begin_#1_seq }{}
-   }
- \exp_args:Nxx %xetex needs expansion
- \@@_backend_link_begin_user:nnw
   {
-   \prop_if_exist:cT { l_@@_hook_link_begin_#1_attr_prop }
-    {
-     \prop_map_function:cN
-      { l_@@_hook_link_begin_#1_attr_prop }
-      \@@_get_key_value:nn
+   \seq_if_exist:cT { l_@@_hook_link_begin_#1_seq }
+     {
+      \seq_use:cn { l_@@_hook_link_begin_#1_seq }{}
      }
+   \exp_args:Nxx %xetex needs expansion
+     \@@_backend_link_begin_user:nnw
+       {
+         \prop_if_exist:cT { l_@@_hook_link_begin_#1_attr_prop }
+           {
+             \prop_map_function:cN
+               { l_@@_hook_link_begin_#1_attr_prop }
+               \@@_get_key_value:nn
+           }
+      }
+      { #2 }
   }
-  { #2 }
-}
 
 % At second one with the \texttt{goto name} argument:
 \cs_new_protected:Npn \pdf_link_begin_goto:nnw #1 #2 %#1 type, #2 destination
-{
- \seq_if_exist:cT { l_@@_hook_link_begin_#1_seq }
-   {
-    \seq_use:cn { l_@@_hook_link_begin_#1_seq }{}
-   }
- \exp_args:Nxx %xetex needs expansion
- \@@_backend_link_begin_goto:nnw
   {
-   \prop_if_exist:cT { l_@@_hook_link_begin_#1_attr_prop }
+   \seq_if_exist:cT { l_@@_hook_link_begin_#1_seq }
      {
-      \prop_map_function:cN
-      { l_@@_hook_link_begin_#1_attr_prop }
-      \@@_get_key_value:nn
+      \seq_use:cn { l_@@_hook_link_begin_#1_seq }{}
      }
+   \exp_args:Nxx %xetex needs expansion
+   \@@_backend_link_begin_goto:nnw
+    {
+     \prop_if_exist:cT { l_@@_hook_link_begin_#1_attr_prop }
+       {
+        \prop_map_function:cN
+        { l_@@_hook_link_begin_#1_attr_prop }
+        \@@_get_key_value:nn
+       }
+    }
+    { #2 }
   }
-  { #2 }
-}
 %    \end{macrocode}
 %% ??????????
 %    \begin{macrocode}
