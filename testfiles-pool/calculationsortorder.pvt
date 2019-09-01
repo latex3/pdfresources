@@ -1,9 +1,50 @@
-\input{regression-test}
+% !Mode:: "TeX:DE:UTF-8:Main"
+%\input{regression-test}
 \documentclass{article}
-\usepackage[customdriver=hluatex-experimental]{hyperref}
-
-
+\usepackage[customdriver=hluatex-experimental]
+{hyperref}
+\ExplSyntaxOn
+\pdf_uncompress:
+%\makeatletter\def\HyField@ABD@AuxAddToCoFields#1#2{%
+%    \group_begin:
+%      \Hy@safe@activestrue
+%      \let\ltx@secondoftwo\relax
+%      \ifx\HyField@cofields\ltx@empty
+%        \xdef\HyField@cofields{%
+%          \ltx@secondoftwo{#1}{~#2}%
+%        } \show\HyField@cofields
+%      \else
+%        \let\ltx@secondoftwo\relax
+%        \def\HyField@AddCoField##1##2##3{%
+%          \ifx##1\ltx@empty
+%            \ltx@secondoftwo{#1}{~#2}%
+%            \expandafter\ltx@gobble
+%          \else
+%            \ifnum\pdf@strcmp{##2}{#1}>\ltx@zero
+%              \ltx@secondoftwo{#1}{~#2}%
+%              \ltx@secondoftwo{##2}{##3}%
+%              \expandafter\expandafter\expandafter\ltx@gobble
+%            \else
+%              \ltx@secondoftwo{##2}{##3}%
+%            \fi
+%          \fi
+%          %\show\HyField@AddCoField
+%          \HyField@AddCoField
+%        }%
+%        \xdef\HyField@cofields{%
+%          \expandafter\HyField@AddCoField
+%          \HyField@cofields\ltx@empty\ltx@empty\ltx@empty
+%        }%
+%        \show\HyField@cofields
+%      \fi
+%    \group_end:
+%  }%
+%\makeatother
+\ExplSyntaxOff
 \begin{document}
+\ExplSyntaxOn
+\prop_show:N\g_hyp_AcroForm_CoFields_prop
+\ExplSyntaxOff
 \begin{Form}
 \TextField[
   maxlen=40,
@@ -13,9 +54,19 @@
     var f_gamma = this.getField("gamma2");
     event.value = f_alpha.value + f_beta.value +f_gamma.value;
   },
-   align=2,height=10pt,width=45pt,name=gamma,readonly=true,%calculatesortkey=b
+   align=2,height=10pt,width=45pt,name=gamma,readonly=true,calculatesortkey=c
    ]{Gamma}
 
+\TextField[
+  maxlen=40,
+  calculate={%
+    var f_alpha = this.getField("alpha");
+    var f_beta = this.getField("beta");
+    var f_gamma = this.getField("gamma2");
+    event.value = f_alpha.value + f_beta.value +f_gamma.value;
+  },
+   align=2,height=10pt,width=45pt,name=gamma,readonly=true,calculatesortkey=a
+   ]{Gamma}
 
 \TextField[
   maxlen=40,
@@ -24,8 +75,8 @@
     var f_beta = this.getField("beta");
     event.value = f_alpha.value + 2*f_beta.value;
   },
-   align=2,height=10pt,width=45pt,name=gamma2,readonly=true,%calculatesortkey=a
-   ]{Gamma}
+   align=2,height=10pt,width=45pt,name=gamma2,readonly=true,calculatesortkey=b
+   ]{Gamma2}
 
 \TextField[maxlen=40,align=2,height=10pt,width=45pt,name=alpha,value=0]{Alpha}
 
@@ -34,4 +85,4 @@
 
 \bigskip
 \end{Form}
-\end{document}
+\end{document} 

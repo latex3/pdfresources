@@ -1910,8 +1910,9 @@
 % \end{tabularx}
 %
 % The following keys are dictionaries to which multiple values can be
-% assigned which are then combined in an array. The value is \emph{always}
-% an object name of an object which must have been declared previously. E.g.
+% assigned which are then combined in an array. The value is -- with the exception
+% of AcroForm/Fields and AcroForm/CO an object name of an object
+% which must have been declared previously. E.g.
 %  \begin{verbatim}
 %  \pdf_object_new:nn   {pkg@intent}{dict}
 %  \pdf_object_write:nn {pkg@intent}{...}
@@ -1922,8 +1923,8 @@
 %   \noindent
 %   \begin{tabularx}{\linewidth}{ll>{\raggedright\arraybackslash}X}
 %    \bfseries Key        & \bfseries Value   & \bfseries Remark \\\midrule
-%    AcroForm/Fields      & object name\\
-%    AcroForm/CO          & object name\\
+%    AcroForm/Fields      & object reference\\
+%    AcroForm/CO          & object reference\\
 %    AF                   & object name\\
 %    OCProperties/OCGs    & object name  &if there are OCProperties, OCGs and D are required.\\
 %    OCProperties/Configs & object name \\
@@ -2018,8 +2019,6 @@
 \clist_const:Nn \c_@@_Catalog_seq_clist
   {
     AF,
-    AcroForm/Fields,
-    AcroForm/CO,
     OCProperties/OCGs,
     OCProperties/Configs,
     OutputIntents,
@@ -2034,6 +2033,16 @@
        \seq_gput_right:cx { g_@@_/Catalog/#1_seq } { \pdf_object_ref:n { ##1 } }
      }
  }
+%not from a named object 
+\clist_map_inline:nn { AcroForm/Fields, AcroForm/CO }
+  {
+    \seq_new:c { g_@@_/Catalog/#1_seq }
+    \cs_new_protected:cpn { @@_/Catalog/#1_gput:n } ##1
+      {
+        \seq_gput_right:cx { g_@@_/Catalog/#1_seq } { ##1 }
+      }
+ }
+
 
 \cs_new_protected:cpn { @@_/Catalog/OCProperties/D_gput:n } #1
   {

@@ -845,78 +845,49 @@
 
 \ExplSyntaxOn
 \def\MakeFieldObject#1#2
- {
-  \hbox_set:Nn\l_tmpa_box {#1}
-  \pdf_xform_new:nnnN { #2 }{}{} \l_tmpa_box
+  {
+    \pdf_xform_new:nnnn { #2 }{}{} { #1 }
   }%
+
 \let\HyField@afields\ltx@empty
 \let\HyField@cofields\ltx@empty
 %% UF test for old pdftex removed
-  \let\HyField@AuxAddToFields\ltx@gobble
-  \let\HyField@AuxAddToCoFields\ltx@gobbletwo
-  \def\HyField@AfterAuxOpen{\Hy@AtBeginDocument}%
+%\let\HyField@AuxAddToFields\ltx@gobble
+%\let\HyField@AuxAddToCoFields\ltx@gobbletwo
+\def\HyField@AfterAuxOpen{\Hy@AtBeginDocument}%
 
-
-  \def\HyField@ABD@AuxAddToCoFields#1#2{%
-    \group_begin:
-      \Hy@safe@activestrue
-      \let\ltx@secondoftwo\relax
-      \ifx\HyField@cofields\ltx@empty
-        \xdef\HyField@cofields{%
-          \ltx@secondoftwo{#1}{~#2}%
-        }
-      \else
-        \let\ltx@secondoftwo\relax
-        \def\HyField@AddCoField##1##2##3{%
-          \ifx##1\ltx@empty
-            \ltx@secondoftwo{#1}{~#2}%
-            \expandafter\ltx@gobble
-          \else
-            \ifnum\pdf@strcmp{##2}{#1}>\ltx@zero
-              \ltx@secondoftwo{#1}{~#2}%
-              \ltx@secondoftwo{##2}{##3}%
-              \expandafter\expandafter\expandafter\ltx@gobble
-            \else
-              \ltx@secondoftwo{##2}{##3}%
-            \fi
-          \fi
-          \HyField@AddCoField
-        }%
-        \xdef\HyField@cofields{%
-          \expandafter\HyField@AddCoField
-          \HyField@cofields\ltx@empty\ltx@empty\ltx@empty
-        }%
-      \fi
-    \group_end:
+\prop_new:N   \g_hyp_AcroForm_CoFields_prop
+\prop_new:N   \g_hyp_AcroForm_Fields_prop
+\def\HyField@AuxAddToFields#1
+  {
+    %\pdf_catalog_gput:nx { AcroForm/Fields}{ #1 }
+    \prop_gput:Nnn \g_hyp_AcroForm_Fields_prop {#1}{F}
   }%
 
-  \Hy@AtBeginDocument{%
+\def\HyField@AuxAddToCoFields #1 #2
+  {
+    \prop_gput:Nnn \g_hyp_AcroForm_CoFields_prop {a#1}{#2}
+  }
+
+\Hy@AtBeginDocument
+  {
     \if@filesw
       \immediate\write\@mainaux{%
         \string\providecommand\string\HyField@AuxAddToFields[1]{}%
-      }%
+       }%
       \immediate\write\@mainaux{%
         \string\providecommand\string\HyField@AuxAddToCoFields[2]{}%
       }%
     \fi
     \let\HyField@AfterAuxOpen\@firstofone
-    \def\HyField@AuxAddToFields#1{%
-      \xdef\HyField@afields{%
-        \ifx\HyField@afields\@empty
-        \else
-          \HyField@afields
-          \space
-        \fi
-        #1
-      }%
-    }%
-    \let\HyField@AuxAddToCoFields\HyField@ABD@AuxAddToCoFields
   }%
-  \def\HyField@AddToFields{%
-     \exp_args:Nx\HyField@@AddToFields
-      {%
-       \pdf_link_last:
-      }%
+
+\def\HyField@AddToFields
+  {
+    \exp_args:Nx\HyField@@AddToFields
+      {
+        \pdf_link_last:
+      }
     \ifx\Fld@calculate@code\ltx@empty
     \else
       \begingroup
@@ -939,11 +910,12 @@
       \Hy@temp
     \fi
   }%
-  \def\HyField@@AddToFields#1{
-    \HyField@AfterAuxOpen{%
-      \if@filesw
-        \write\@mainaux{%
-          \string\HyField@AuxAddToFields{#1}%
+
+\def\HyField@@AddToFields#1{
+  \HyField@AfterAuxOpen{%
+    \if@filesw
+      \write\@mainaux{%
+        \string\HyField@AuxAddToFields{#1}%
         }%
       \fi
     }%
@@ -953,60 +925,71 @@
 \ExplSyntaxOn
 
 \def\@Form[#1]
- {
-  \@ifundefined{textcolor}{\let\textcolor\@gobble}{}
-  \kvsetkeys{Form}{#1}
-  \pdf@ifdraftmode{}
-   {
-    \Hy@FormObjects
-    \AtVeryEndDocument
-     {
-      \pdf_object_new:nn   { l__hyp_acroform_dict_obj } {dict}
-      \pdf_object_write:nx { l__hyp_acroform_dict_obj }
+  {
+    \@ifundefined{textcolor}{\let\textcolor\@gobble}{}
+    \kvsetkeys{Form}{#1}
+    \pdf@ifdraftmode{}
       {
-        /Fields[\HyField@afields]
-        \ifx\HyField@cofields\ltx@empty
-        \else
-           /CO[\romannumeral-`\Q\HyField@cofields]%
-         \fi
-        /DR<<
-            /Font<<
-              /ZaDb~\pdf_object_ref:n {l__hyp_font_zapfdingbats_obj}~
-              /Helv~\pdf_object_ref:n {l__hyp_font_helvetica_obj}
-            >>
-          >>
-          /DA(/Helv~10~Tf~0~g)
-          \ifHy@pdfa %???????
-          \else
-            \ifHyField@NeedAppearances
-              /NeedAppearances~true%
-            \fi
-          \fi
-      }
-      %%% Acroform management needs sorting out  ...
-   %!!!!   \pdf_DONTUSE_catalog_gput:nn{AcroForm}{\pdf_object_ref:n{l__hyp_acroform_dict_obj}}%
-    }
+        \Hy@FormObjects
+        \tl_if_empty:NF\HyField@cofields
+        {
+         \show\HyField@cofields
+         %\pdf_object_new:nn   { l__hyp_acroform/co_obj } {array}
+         %\pdf_catalog_gput:nn {AcroForm/CO}{ l__hyp_acroform/co_obj }
+        }
+
+       \pdf_object_new:nn   { l__hyp_acroform/dr/font_obj }{dict}
+       \pdf_catalog_gput:nx
+         { AcroForm/DR/Font }
+         { \pdf_object_ref:n {l__hyp_acroform/dr/font_obj} }
+       \pdf_catalog_gput:nn {AcroForm}{{DA}{(/Helv~10~Tf~0~g)}}
+       %\ifHy@pdfa %???????
+       \legacy_if:nF { Hy@pdfa }
+         {
+           \legacy_if:nT { HyField@NeedAppearances }
+             {
+               \pdf_catalog_gput:nn {AcroForm}{{NeedAppearances}{true}}
+             }
+         }
+        \AtEndDocument
+          {
+            \pdf_object_write:nx
+              { l__hyp_acroform/fields_obj }
+              { \HyField@afields }
+            \tl_if_empty:NF \HyField@cofields
+              {
+                %\pdf_object_write:nx { l__hyp_acroform/co_obj } {\romannumeral-`\Q\HyField@cofields}
+              }
+            \pdf_object_write:nx { l__hyp_acroform/dr/font_obj }
+              {
+                /ZaDb~\pdf_object_ref:n {l__hyp_font_zapfdingbats_obj}~
+                /Helv~\pdf_object_ref:n {l__hyp_font_helvetica_obj}
+              }
+          }
+       }
+     \MakeFieldObject
+       {
+         \group_begin:
+         \fontfamily{pzd}
+         \fontencoding{U}
+         \fontseries{m}
+         \fontshape{n}
+         \selectfont
+         \char123
+         \group_end:
+       }
+       {__hyp_xform_Ding}
+     \MakeFieldObject
+       {
+         \fbox{\textcolor{yellow}{\textsf{Submit}}} %color?
+       }
+       {__hyp_xform_Submit}
+     \MakeFieldObject
+       {
+         \fbox{\textcolor{yellow}{\textsf{SubmitP}}} %color?
+       }
+       {__hyp_xform_SubmitP}
   }
-  \MakeFieldObject
-   {
-    \group_begin:
-      \fontfamily{pzd}
-      \fontencoding{U}
-      \fontseries{m}
-      \fontshape{n}
-      \selectfont
-      \char123
-    \group_end:
-   }{__hyp_xform_Ding}
-  \MakeFieldObject
-   {
-    \fbox{\textcolor{yellow}{\textsf{Submit}}} %color?
-   }{__hyp_xform_Submit}
-  \MakeFieldObject
-   {
-    \fbox{\textcolor{yellow}{\textsf{SubmitP}}} %color?
-   }{__hyp_xform_SubmitP}
-}
 \ExplSyntaxOff
 \let\@endForm\ltx@empty
 \let\HyAnn@AbsPageLabel\ltx@empty
