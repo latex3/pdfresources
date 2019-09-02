@@ -1488,6 +1488,26 @@
                   >>
                 ~ #3
               }
+            \prop_if_empty:cF
+              { \@@_prop_name:n {PageN/Resources/ExtGState} }
+              {
+                /ExtGState~ \pdf_object_ref:n {PageN/Resources/ExtGState}
+              }
+            \prop_if_empty:cF
+              { \@@_prop_name:n {PageN/Resources/Pattern} }
+              {
+                /Pattern~ \pdf_object_ref:n {PageN/Resources/Pattern}
+              }
+            \prop_if_empty:cF
+              { \@@_prop_name:n {PageN/Resources/Shading} }
+              {
+                /Shading~ \pdf_object_ref:n {PageN/Resources/Shading}
+              }
+            \prop_if_empty:cF
+              { \@@_prop_name:n {PageN/Resources/ColorSpace} }
+              {
+                /ColorSpace~ \pdf_object_ref:n {PageN/Resources/ColorSpace}
+              }
           }
           \l_@@_tmpa_box
        \int_const:cn
@@ -1549,6 +1569,26 @@
                     \@@_prop_map_dict_item:n {xform/Resources/Properties}
                   >>
                 ~ #3
+              }
+            \prop_if_empty:cF
+              { \@@_prop_name:n {PageN/Resources/ExtGState} }
+              {
+                /ExtGState~ \pdf_object_ref:n {PageN/Resources/ExtGState}
+              }
+            \prop_if_empty:cF
+              { \@@_prop_name:n {PageN/Resources/Pattern} }
+              {
+                /Pattern~ \pdf_object_ref:n {PageN/Resources/Pattern}
+              }
+            \prop_if_empty:cF
+              { \@@_prop_name:n {PageN/Resources/Shading} }
+              {
+                /Shading~ \pdf_object_ref:n {PageN/Resources/Shading}
+              }
+            \prop_if_empty:cF
+              { \@@_prop_name:n {PageN/Resources/ColorSpace} }
+              {
+                /ColorSpace~ \pdf_object_ref:n {PageN/Resources/ColorSpace}
               }
           }
           \l_@@_tmpa_box
@@ -1612,6 +1652,35 @@
           }
         \box_use_drop:N \l_@@_tmpa_box
         \@@_backend:x {put ~ @resources ~<<#3>> }
+        \@@_backend:x
+          {
+            put~ @resources
+              <<
+                /ExtGState~ \pdf_object_ref:n {PageN/Resources/ExtGState}
+              >>
+          }
+        \@@_backend:x
+          {
+            put~ @resources
+            <<
+              /Pattern~ \pdf_object_ref:n {PageN/Resources/Pattern}
+            >>
+          }
+        \@@_backend:x
+          {
+            put~ @resources
+            <<
+              /Shading~ \pdf_object_ref:n {PageN/Resources/Shading}
+            >>
+          }
+        \@@_backend:x
+          {
+            put~ @resources
+            <<
+              /ColorSpace~
+              \pdf_object_ref:n {PageN/Resources/ColorSpace}
+            >>
+          }
         \exp_args:Nx
         \@@_backend:x {exobj ~<<#2>>}
      }
@@ -1945,7 +2014,7 @@
       {
         \msg_none:nnn { pdf }{ empty-value }{ #1 }
       }
-      { 
+      {
         \cs_if_exist:cTF
         { @@_/Catalog/#1_gput:n }
         {
