@@ -5,46 +5,10 @@
 {hyperref}
 \ExplSyntaxOn
 \pdf_uncompress:
-%\makeatletter\def\HyField@ABD@AuxAddToCoFields#1#2{%
-%    \group_begin:
-%      \Hy@safe@activestrue
-%      \let\ltx@secondoftwo\relax
-%      \ifx\HyField@cofields\ltx@empty
-%        \xdef\HyField@cofields{%
-%          \ltx@secondoftwo{#1}{~#2}%
-%        } \show\HyField@cofields
-%      \else
-%        \let\ltx@secondoftwo\relax
-%        \def\HyField@AddCoField##1##2##3{%
-%          \ifx##1\ltx@empty
-%            \ltx@secondoftwo{#1}{~#2}%
-%            \expandafter\ltx@gobble
-%          \else
-%            \ifnum\pdf@strcmp{##2}{#1}>\ltx@zero
-%              \ltx@secondoftwo{#1}{~#2}%
-%              \ltx@secondoftwo{##2}{##3}%
-%              \expandafter\expandafter\expandafter\ltx@gobble
-%            \else
-%              \ltx@secondoftwo{##2}{##3}%
-%            \fi
-%          \fi
-%          %\show\HyField@AddCoField
-%          \HyField@AddCoField
-%        }%
-%        \xdef\HyField@cofields{%
-%          \expandafter\HyField@AddCoField
-%          \HyField@cofields\ltx@empty\ltx@empty\ltx@empty
-%        }%
-%        \show\HyField@cofields
-%      \fi
-%    \group_end:
-%  }%
-%\makeatother
+
 \ExplSyntaxOff
 \begin{document}
-\ExplSyntaxOn
-\prop_show:N\g_hyp_AcroForm_CoFields_prop
-\ExplSyntaxOff
+
 \begin{Form}
 \TextField[
   maxlen=40,

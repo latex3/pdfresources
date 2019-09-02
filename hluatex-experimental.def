@@ -838,17 +838,15 @@
 }
 \ExplSyntaxOff
 %%% UF removed old atbegshi fix
-
-%\def\@Gauge[#1]#2#3#4{% parameters, label, minimum, maximum
-%  \Hy@Message{Sorry, pdftex does not support FORM gauges}%
-%}
-
 \ExplSyntaxOn
 \def\MakeFieldObject#1#2
   {
     \pdf_xform_new:nnnn { #2 }{}{} { #1 }
   }%
 
+\prop_new:N   \g__hyp_AcroForm_CoFields_prop
+\prop_new:N   \g__hyp_AcroForm_Fields_prop
+\seq_new:N    \l__hyp_tmpa_seq
 \let\HyField@afields\ltx@empty
 \let\HyField@cofields\ltx@empty
 %% UF test for old pdftex removed
@@ -856,17 +854,18 @@
 %\let\HyField@AuxAddToCoFields\ltx@gobbletwo
 \def\HyField@AfterAuxOpen{\Hy@AtBeginDocument}%
 
-\prop_new:N   \g_hyp_AcroForm_CoFields_prop
-\prop_new:N   \g_hyp_AcroForm_Fields_prop
+% the value doesn't matter, but with a prop we avoid duplicates and it is
+% clearly faster than removing them from a sequence
 \def\HyField@AuxAddToFields#1
   {
-    %\pdf_catalog_gput:nx { AcroForm/Fields}{ #1 }
-    \prop_gput:Nnn \g_hyp_AcroForm_Fields_prop {#1}{F}
+    \prop_gput:Nnn \g__hyp_AcroForm_Fields_prop {#1}{F}
   }%
 
+%fields with empty key get a value too -- lets hope that
+%this give the expected behaviour
 \def\HyField@AuxAddToCoFields #1 #2
   {
-    \prop_gput:Nnn \g_hyp_AcroForm_CoFields_prop {a#1}{#2}
+    \prop_gput:Nnn \g__hyp_AcroForm_CoFields_prop {a#1}{#2}
   }
 
 \Hy@AtBeginDocument
@@ -902,7 +901,7 @@
                 \Fld@calculate@sortkey
                }
                {
-                \pdf_link_last:
+                 \pdf_link_last:
                }
             }
           \fi
@@ -931,41 +930,46 @@
     \pdf@ifdraftmode{}
       {
         \Hy@FormObjects
-        \tl_if_empty:NF\HyField@cofields
-        {
-         \show\HyField@cofields
-         %\pdf_object_new:nn   { l__hyp_acroform/co_obj } {array}
-         %\pdf_catalog_gput:nn {AcroForm/CO}{ l__hyp_acroform/co_obj }
-        }
-
-       \pdf_object_new:nn   { l__hyp_acroform/dr/font_obj }{dict}
+        \prop_map_inline:Nn \g__hyp_AcroForm_Fields_prop
+          {
+            \pdf_catalog_gput:nn {AcroForm/Fields}{##1}
+          }
+        \prop_if_empty:NF \g__hyp_AcroForm_CoFields_prop
+          {
+            \prop_map_inline:Nn \g__hyp_AcroForm_CoFields_prop
+              {
+                \seq_put_right:Nn \l__hyp_tmpa_seq {##1}
+              }
+            \seq_sort:Nn \l__hyp_tmpa_seq
+              {
+                \int_compare:nNnTF { \pdf@strcmp{##1}{##2} } > { 0 }
+                %\int_compare:nNnTF { \__str_if_eq:nn {#1}{#2} } > { 0 }
+                  { \sort_return_swapped: }
+                  { \sort_return_same: }
+              }
+            \seq_map_inline:Nn \l__hyp_tmpa_seq
+             {
+                \pdf_catalog_gput:nx
+                  {AcroForm/CO}
+                  {
+                    \prop_item:Nn \g__hyp_AcroForm_CoFields_prop {##1}
+                  }
+             }
+          }
        \pdf_catalog_gput:nx
          { AcroForm/DR/Font }
-         { \pdf_object_ref:n {l__hyp_acroform/dr/font_obj} }
+         { {ZaDb} {\pdf_object_ref:n {l__hyp_font_zapfdingbats_obj} } }
+       \pdf_catalog_gput:nx
+         { AcroForm/DR/Font }
+         { {Helv} {\pdf_object_ref:n {l__hyp_font_helvetica_obj} } }
        \pdf_catalog_gput:nn {AcroForm}{{DA}{(/Helv~10~Tf~0~g)}}
-       %\ifHy@pdfa %???????
-       \legacy_if:nF { Hy@pdfa }
+       \legacy_if:nF { Hy@pdfa } %?????? Standards?
          {
            \legacy_if:nT { HyField@NeedAppearances }
              {
                \pdf_catalog_gput:nn {AcroForm}{{NeedAppearances}{true}}
              }
          }
-        \AtEndDocument
-          {
-            \pdf_object_write:nx
-              { l__hyp_acroform/fields_obj }
-              { \HyField@afields }
-            \tl_if_empty:NF \HyField@cofields
-              {
-                %\pdf_object_write:nx { l__hyp_acroform/co_obj } {\romannumeral-`\Q\HyField@cofields}
-              }
-            \pdf_object_write:nx { l__hyp_acroform/dr/font_obj }
-              {
-                /ZaDb~\pdf_object_ref:n {l__hyp_font_zapfdingbats_obj}~
-                /Helv~\pdf_object_ref:n {l__hyp_font_helvetica_obj}
-              }
-          }
        }
      \MakeFieldObject
        {

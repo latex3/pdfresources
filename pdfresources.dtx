@@ -1945,7 +1945,7 @@
       {
         \msg_none:nnn { pdf }{ empty-value }{ #1 }
       }
-      {
+      { 
         \cs_if_exist:cTF
         { @@_/Catalog/#1_gput:n }
         {
@@ -2033,7 +2033,7 @@
        \seq_gput_right:cx { g_@@_/Catalog/#1_seq } { \pdf_object_ref:n { ##1 } }
      }
  }
-%not from a named object 
+%not from a named object
 \clist_map_inline:nn { AcroForm/Fields, AcroForm/CO }
   {
     \seq_new:c { g_@@_/Catalog/#1_seq }
