@@ -1357,16 +1357,17 @@
 %  \subsubsection{pdfxform / management}
 %  \begin{function}[added = 2019-08-05]
 %   {
-%    \pdf_xform_new:nnnn
+%     \pdf_xform_new:nnn
 %   }
 %   \begin{syntax}
-%     \cs{pdf_xform_new:nnnn} \Arg{name} \Arg{attributes} \Arg {resources} \Arg {content}
+%     \cs{pdf_xform_new:nnnn} \Arg{name} \Arg{attributes} \Arg {content}
 %   \end{syntax}
 %    This command create a new form XObject that can be used as appearance or
 %    directly later.
 %    If the content contains BDC-marks it should \emph{not} be given as a
 %    previously typesetted box, but directly so that the names of the
-%    BDC-marks can be added to the resources of the xform.
+%    BDC-marks can be added to the resources of the xform. The xform will automatically
+%    include the resources of the current page.
 %    The content will be typeset in a hbox. With pdflatex and luatex
 %    the surrounding color is \emph{not} stored in the XObject
 %    but should be if wanted added e.g. with |\color_select:n{.}|. This keeps
@@ -1404,9 +1405,9 @@
 %    unit pt and not in dimensions!
 %   \end{function}
 %    \begin{macrocode}
-\cs_new_protected:Npn  \pdf_xform_new:nnnn #1 #2 #3 #4
+\cs_new_protected:Npn  \pdf_xform_new:nnn #1 #2 #3
   {
-    \@@_backend_xform_new:nnnn { #1 } { #2 } { #3 } { #4 }
+    \@@_backend_xform_new:nnnn { #1 } { #2 } {  } { #3 }
   }
 
 \cs_new_protected:Npn \pdf_xform_use:n #1
@@ -1477,6 +1478,7 @@
         %% which other resources should be default? Is an argument actually needed?
           ~  resources ~
           {
+            #3
             \int_compare:nNnT
               { \prop_count:c { \@@_prop_name:n {xform/Resources/Properties} } }
               >
@@ -1486,8 +1488,8 @@
                   <<
                     \@@_prop_map_dict_item:n {xform/Resources/Properties}
                   >>
-                ~ #3
               }
+
             \prop_if_empty:cF
               { \@@_prop_name:n {PageN/Resources/ExtGState} }
               {
@@ -1559,6 +1561,7 @@
           %% which resources should be default? Is an argument actually needed?
           ~  resources ~
           {
+            #3
             \int_compare:nNnT
               {\prop_count:c { \@@_prop_name:n {xform/Resources/Properties} }}
               >
@@ -1568,7 +1571,6 @@
                   <<
                     \@@_prop_map_dict_item:n {xform/Resources/Properties}
                   >>
-                ~ #3
               }
             \prop_if_empty:cF
               { \@@_prop_name:n {PageN/Resources/ExtGState} }
@@ -1654,28 +1656,28 @@
         \@@_backend:x {put ~ @resources ~<<#3>> }
         \@@_backend:x
           {
-            put~ @resources
+            put~ @resources ~
               <<
                 /ExtGState~ \pdf_object_ref:n {PageN/Resources/ExtGState}
               >>
           }
         \@@_backend:x
           {
-            put~ @resources
+            put~ @resources ~
             <<
               /Pattern~ \pdf_object_ref:n {PageN/Resources/Pattern}
             >>
           }
         \@@_backend:x
           {
-            put~ @resources
+            put~ @resources ~
             <<
               /Shading~ \pdf_object_ref:n {PageN/Resources/Shading}
             >>
           }
         \@@_backend:x
           {
-            put~ @resources
+            put~ @resources ~
             <<
               /ColorSpace~
               \pdf_object_ref:n {PageN/Resources/ColorSpace}
@@ -2434,6 +2436,31 @@
   }
 %    \end{macrocode}
 
+\subsection{Annotation}
+% \begin{function}[added = 2019-09-05]
+%   {\pdf_annotation:nnnn}
+%   \begin{syntax}
+%     \cs{pdf_annotation:nnnn} \Arg{width} \Arg {height} \Arg{depth} \Arg {annot spec}
+%   \end{syntax}
+%   This creates an /Type/Annot object.
+% \begin{function}[added = 2019-09-05]
+%   {\pdf_annotation_last:}
+%   \begin{syntax}
+%     \cs{pdf_annotation_last:}
+%   \end{syntax}
+%   This retrieves the object reference of the last created annotation.
+%    \begin{macrocode}
+\cs_new_protected:Npn \pdf_annotation:nnnn #1 #2 #3 #4
+  {
+    \__pdf_backend_annotation:nnnn {#1}{#2}{#3}{#4}
+  }
+
+\cs_new:Npn \pdf_annotation_last:
+  {
+    \__pdf_backend_annotation_last:
+  }
+
+%
 %=====================
 % \subsection{Higher-level link management}
 % \subsubsection{Startlink}
