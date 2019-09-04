@@ -1,0 +1,72 @@
+\RequirePackage[enable-debug,check-declarations]{expl3}
+\RequirePackage[patches]{pdfresources}
+\DeclareDocumentMetaData{uncompress}
+\documentclass{article}
+\usepackage[customdriver=hluatex-experimental]{hyperref}
+\usepackage{xcolor,tikzducks,tikzlings}
+\begin{document}
+\ExplSyntaxOn
+\MakeFieldObject
+       {
+         \tikz\duck;
+       }
+       {xform_DuckCheckmark}
+\MakeFieldObject
+       {
+         \tikz\bear;
+       }
+       {xform_BearCheckmark}
+       
+ \MakeFieldObject
+       {
+         \phantom{\tikz\duck;}
+       }
+       {xform_NoDuckCheckmark}
+ \MakeFieldObject
+       {
+         \phantom{\tikz\duck;}
+       }
+       {xform_NoBearCheckmark}
+      
+\tl_new:N  \l__hyp_checkmarkappearance_tl
+\tl_set:Nn \l__hyp_checkmarkappearance_tl {  xform_DuckCheckmark }
+\tl_new:N  \l__hyp_nocheckmarkappearance_tl
+\tl_set:Nn \l__hyp_nocheckmarkappearance_tl {  xform_NoDuckCheckmark }
+\cs_generate_variant:Nn \pdf_xform_ref:n {o}   
+\makeatletter
+\def\PDFForm@Check{%
+  /Subtype/Widget%
+  ~\Fld@annotflags
+  ~\Fld@pageobjref
+  ~\Fld@annotnames
+  /FT/Btn%
+  ~\Fld@flags
+  /Q~\Fld@align
+  /BS<</W~\Fld@borderwidth /S/\Fld@borderstyle>>%
+  /AP<< /N <</Yes~\pdf_xform_ref:o{\l__hyp_checkmarkappearance_tl}
+             /Off~\pdf_xform_ref:o{\l__hyp_nocheckmarkappearance_tl}
+            >> 
+        >>  %new string /Yes is from below
+  /DA(/ZaDb~\strip@pt\Fld@charsize\space Tf%
+      \ifx\Fld@color\@empty\else\space\Fld@color\fi)%
+  /H/P%
+  \ifFld@checked /V/Yes/AS/Yes\else /V/Off/AS/Off\fi
+  \Fld@additionalactions
+}
+\ExplSyntaxOff       
+
+\begin{Form}[NeedAppearances=false]
+\LARGE\sffamily
+
+\CheckBox[name=duck]{\makebox[4cm][l]{Check the duck!}}
+
+\ExplSyntaxOn 
+\tl_set:Nn\l__hyp_checkmarkappearance_tl {xform_BearCheckmark} 
+\tl_set:Nn\l__hyp_nocheckmarkappearance_tl {xform_NoBearCheckmark}
+
+\ExplSyntaxOff
+\bigskip
+\CheckBox[name=bear]{\makebox[4cm][l]{Check the bear!}}
+
+\end{Form}
+\end{document}
