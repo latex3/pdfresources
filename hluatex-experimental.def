@@ -841,7 +841,7 @@
 \ExplSyntaxOn
 \def\MakeFieldObject#1#2
   {
-    \pdf_xform_new:nnnn { #2 }{}{} { #1 }
+    \pdf_xform_new:nnn { #2 }{} { #1 }
   }%
 
 \prop_new:N   \g__hyp_AcroForm_CoFields_prop
@@ -885,7 +885,8 @@
   {
     \exp_args:Nx\HyField@@AddToFields
       {
-        \pdf_link_last:
+        %\pdf_link_last:
+        \pdf_annotation_last:
       }
     \ifx\Fld@calculate@code\ltx@empty
     \else
@@ -901,7 +902,8 @@
                 \Fld@calculate@sortkey
                }
                {
-                 \pdf_link_last:
+                 %  \pdf_link_last:
+                 \pdf_annotation_last:
                }
             }
           \fi
@@ -1279,7 +1281,7 @@
   \def\Fld@name{#2}
   \def\Fld@default{0}
   \group_begin:
-    \def\Fld@width{\DefaultWidthofCheckBox}
+    \def\Fld@width {\DefaultWidthofCheckBox}
     \def\Fld@height{\DefaultHeightofCheckBox}
     \exp_args:No\HyField@SetKeys
      {
@@ -1287,16 +1289,21 @@
      }
     \PDFForm@Name
     \HyField@FlagsCheckBox
-    \ifFld@hidden\def\Fld@width{1sp}\fi
-    \LayoutCheckField{#2}{%
-      \mode_leave_vertical:
-      \HyAnn@AbsPageLabel
-      \Hy@escapeform\PDFForm@Check
-      \pdf_link_user:nnn
-       {widget} %perhaps we need more types
-       {\PDFForm@Check}
-       {\MakeCheckField{\Fld@width}{\Fld@height}}
-      \HyField@AddToFields
+    \legacy_if:nT { Fld@hidden }
+      {
+        \def\Fld@width{1sp}
+      }
+    \LayoutCheckField{#2}
+      {
+       \mode_leave_vertical:
+       \HyAnn@AbsPageLabel
+       \Hy@escapeform\PDFForm@Check
+       \pdf_annotation:nnnn
+         {\Fld@width}
+         {\Fld@height}
+         {0pt}
+         {\PDFForm@Check}
+       \HyField@AddToFields
     }
   \group_end:
 }

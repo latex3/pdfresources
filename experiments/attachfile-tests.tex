@@ -1,0 +1,221 @@
+% !Mode:: "TeX:DE:UTF-8:Main"
+\documentclass{article}
+\usepackage{l3pdf,ifxetex,l3color}
+\usepackage[patches]{pdfresources}
+\usepackage{tikz}
+\ExplSyntaxOn
+\pdf_uncompress:
+\ExplSyntaxOff
+\usepackage[generic]{attachfile2}
+
+\ExplSyntaxOn
+
+\ExplSyntaxOff
+\begin{document}
+\ExplSyntaxOn
+%correct g to c, is already in master ...
+\sys_if_engine_xetex:T
+{
+ %\cs_set:Npn \__pdf_backend_object_ref:n #1
+ %  { @pdf.obj \int_use:c { c__pdf_backend_object_ \tl_to_str:n {#1} _int } }
+}
+
+%object for bdc test
+\pdf_object_new:nn   {objA}{dict}
+\pdf_object_write:nn {objA}{/Type/Artifact}
+
+{A\pdf_xform_new:nnnn{FormA}{/ABC /CDE}{}{ZZZZZZZZZZZZZZ}B}\par
+
+C\pdf_xform_use:n{FormA}D \par
+
+
+{\color{red}C\pdf_xform_use:n{FormA}D} \par
+
+E\pdf_xform_new:nnnn {FormB}{}{\xxx_pdfresources: /ABC /XYZ}
+ {
+ \csname pdf_bdc:nn\endcsname {Span}{objA}
+  \color{blue}Some Text
+ \csname pdf_emc:\endcsname
+ \quad \tikz\fill[opacity=0.5,red](0,0)rectangle(1,1);
+ \tikz\fill[opacity=1,red](0,0)rectangle(1,1);
+ }F
+
+\par
+
+G\pdf_xform_use:n{FormB}H
+
+\par\bigskip
+Appeareance
+ \makebox[\pdf_xform_wd:n{FormB}][l]
+  {\__pdf_backend_annotation:nnnn
+    {\pdf_xform_wd:n{FormB}}
+    {\pdf_xform_ht:n{FormB}}
+    {\pdf_xform_dp:n{FormB}}
+    {
+     /Subtype /Stamp
+     /AP << /N~\pdf_xform_ref:n{FormB} >>
+    }
+  }xxx
+\ExplSyntaxOff
+
+
+\end{document}
+%   \pbs_pdfxform:nnnnn
+%     #1: add pgf/tikz resources (transparency, shading)? (1|0) %dvipdfmx/xetex
+%     #2: used as PDF annotation appearance? (1|0)              %dvips/pdftex
+%     #3: additional resources                                  %all BUT dvips
+%     #4: additional dictionary entries
+%     #5: savebox number
+
+% xform: immediate or not?  -> immediate for now
+% argument: a box / content -> \pdf will use content and put in a hbox
+% with dvipdfmx, xform should be in a 0-box.
+% xform attr:
+% pdflatex: attr keyword
+% xform resources
+% pdflatex: resources keyword
+% pdfbase current page resource + special stuff:
+% \tl_set:Nx\l_tmpa_tl{\the\pdfpageresources~#3}\tl_trim_spaces:N\l_tmpa_tl
+
+Some Text \tikz\fill[opacity=0.5,blue](0,0)rectangle(1,1);
+
+\newbox\testxform
+\savebox\testxform{Some Text \tikz\fill[opacity=0.5,red](0,0)rectangle(1,1);}
+
+\ExplSyntaxOn
+\bool_if:nT {\sys_if_engine_pdftex_p: || \sys_if_engine_luatex_p: }
+{
+ \wd\testxform=0.5\wd\testxform
+ %Box before:\usebox\testxform \par %\showthe\pdfpageresources
+ %saving doesn't occupy space, but as it is a whatsits ...
+ % transparency needs local resources ...
+ % abc\immediate\pdfxform resources {\the\pdfpageresources}
+%     \testxform abc \par
+
+ \pdf_xform_new:nnnn {test}{/ABC/CDE}{\xxx_pdfresources:}{Some~Text~ \tikz\fill[opacity=0.5,red](0,0)rectangle(1,1);}
+
+  xxx\pdf_xform_use:n {test}\par
+
+ Box after:\usebox\testxform \par
+
+ %we need to resave the box to get the width ...
+ \savebox\testxform{Some~Text \tikz\fill[opacity=0.5,red](0,0)rectangle(1,1);}
+  \fbox{
+ xx
+  \__pdf_backend_annotation:nnnn
+    {\pdf_xform_wd:n{test}}
+    {\pdf_xform_ht:n{test}}
+    {\pdf_xform_dp:n{test}}
+    {
+     /Subtype /Stamp
+     /AP << /N~\pdf_xform_ref:n{test} >>
+    }
+   }
+}
+\par
+
+
+\ExplSyntaxOff
+
+%\ifxetex %occupies space!
+%xx\special{pdf:bxobj @MyStampA
+%width 280pt height 0pt depth 40pt}
+%%\tikz\draw[opacity=0.5](0,0)--(1,1);
+%\tikz\fill[opacity=0.5,red](0,0)rectangle(1,1);
+%
+%My Own Stamp
+% \special{pdf:put @resources~<</ExtGState @pgfextgs>>}
+%\special{pdf:exobj}yy
+%\fi
+
+%\newpage
+
+\ifxetex
+\newsavebox\testxformA
+\savebox\testxform{\csname pdf_bdc:nn\endcsname {Span}{objA}xxxyyy Some Text    \csname pdf_emc:\endcsname \tikz\fill[opacity=0.5,red](0,0)rectangle(1,1);}
+\savebox\testxformA{\csname pdf_bdc:nn\endcsname {Span}{objA}xxxyyy Some Text    \csname pdf_emc:\endcsname \tikz\fill[opacity=0.5,red](0,0)rectangle(1,1);}
+% when saving the xform object, is should be in a zero box.
+% all dimensions must be there, or the content is typeset ...
+% and don't forget the \the!!
+% transparency resources etc must be add to the box
+abc%
+\bigskip
+%xobjects must be defined before use ...
+\ExplSyntaxOn
+\box_set_dp:Nn  \testxform { \c_zero_dim }
+\box_set_wd:Nn  \testxform { \c_zero_dim }
+\box_set_ht:Nn  \testxform { \c_zero_dim }
+
+
+A\pdf_xform_new:nnnn{MyStampB}{/StructParent~1}{/ExtGState~@pgfextgs}
+{
+\csname pdf_bdc:nn\endcsname {Span}{objA}xxxyyy Some Text    \csname pdf_emc:\endcsname \tikz\fill[opacity=0.5,blue](0,0)rectangle(1,1);
+}B
+
+\par
+AA\pdf_xform_use:n{MyStampB}B
+
+
+\ExplSyntaxOff
+\begin{picture}(0,0)
+  \put(0,0)
+   {
+    \special
+     {pdf:bxobj @MyStamp
+       width  \the\wd\testxformA\space
+       height \the\ht\testxformA\space
+       depth  \the\dp\testxformA
+      }%
+  %  \csname pdf_bdc:nn\endcsname {Span}{objA}xxx
+    \usebox\testxform
+  %  \csname pdf_emc:\endcsname
+   \special{pdf:put @resources <</ExtGState @pgfextgs>>} %
+   \special{pdf:exobj}}
+ \end{picture}yyyy
+
+Use xform: \fboxsep0pt \fbox{\makebox[\the\wd\testxformA][l]{\special{pdf:uxobj @MyStamp}}}
+
+\newpage
+%Use as appearance:
+\fbox{
+ xx
+  \special
+  {pdf:ann
+   width  \the\dimexpr2\wd\testxform\relax\space
+   height \the\dimexpr3\ht\testxform\relax\space
+   depth  \the\dp\testxform
+   <<
+   /Type /Annot
+   /Subtype /Stamp
+   /AP << /N @MyStamp >>
+   >>
+   }
+  \phantom{\usebox\testxform}xx}
+abc
+
+
+
+Use xform after: \special{pdf:uxobj @MyStamp}
+
+\fbox{
+ xx
+  \special
+  {pdf:ann
+   width  \the\dimexpr2\wd\testxform\relax\space
+   height \the\dimexpr3\ht\testxform\relax\space
+   depth  \the\dp\testxform
+   <<
+   /Type /Annot
+   /Subtype /Stamp
+   /AP << /N @MyStamp >>
+   >>
+   }
+  \phantom{\usebox\testxform}xx}
+abc
+
+%\fi
+%\end{document}
+
+
+\fi
+\end{document} 
