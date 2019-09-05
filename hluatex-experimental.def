@@ -924,6 +924,10 @@
 
 \ExplSyntaxOff
 \ExplSyntaxOn
+\tl_new:N  \l__hyp_CheckmarkYes_tl
+\tl_set:Nn \l__hyp_CheckmarkYes_tl {  __hyp_xform_CheckMarkYes }
+\tl_new:N  \l__hyp_CheckmarkOff_tl
+\tl_set:Nn \l__hyp_CheckmarkOff_tl {  __hyp_xform_CheckMarkOff }
 
 \def\@Form[#1]
   {
@@ -987,6 +991,30 @@
        {__hyp_xform_Ding}
      \MakeFieldObject
        {
+         \group_begin:
+         \fontfamily{pzd}
+         \fontencoding{U}
+         \fontseries{m}
+         \fontshape{n}
+         \selectfont
+         \char51
+         \group_end:
+       }
+       {__hyp_xform_CheckMarkYes}
+     \MakeFieldObject
+       {
+        \group_begin:
+         \fontfamily{pzd}
+         \fontencoding{U}
+         \fontseries{m}
+         \fontshape{n}
+         \selectfont
+         \fbox{\char55} %perhaps xetex needs some small glyph ..
+         \group_end:
+       }
+       {__hyp_xform_CheckMarkOff}
+     \MakeFieldObject
+       {
          \fbox{\textcolor{yellow}{\textsf{Submit}}} %color?
        }
        {__hyp_xform_Submit}
@@ -1000,30 +1028,34 @@
 \let\@endForm\ltx@empty
 \let\HyAnn@AbsPageLabel\ltx@empty
 \let\Fld@pageobjref\ltx@empty
-\ltx@IfUndefined{pdfpageref}{%
-}{%
-  \ltx@ifpackageloaded{zref-abspage}{%
-    \newcount\HyAnn@Count
-    \HyAnn@Count=\ltx@zero
-    \def\HyAnn@AbsPageLabel{%
-      \global\advance\HyAnn@Count by\ltx@one
-      \zref@labelbyprops{HyAnn@\the\HyAnn@Count}{abspage}%
-      \zref@refused{HyAnn@\the\HyAnn@Count}%
-    }%
-    \def\Fld@pageobjref{%
-      \zref@ifrefundefined{HyAnn@\the\HyAnn@Count}{%
-      }{%
-        \zref@ifrefcontainsprop{HyAnn@\the\HyAnn@Count}{abspage}{%
-          /P \pdfpageref
-          \zref@extractdefault{HyAnn@\the\HyAnn@Count}{abspage}{1} %
-          \space 0 R%
-        }{%
-        }%
-      }%
-    }%
-  }{%
+
+\ExplSyntaxOn
+\newcount\HyAnn@Count
+\HyAnn@Count=\ltx@zero
+\def\HyAnn@AbsPageLabel
+  {
+    \global\advance\HyAnn@Count by\ltx@one
+    %\zref@labelbyprops{HyAnn@\the\HyAnn@Count}{abspage}%
+    \zref@labelbylist {HyAnn@\the\HyAnn@Count} {l3pdf}
+    \zref@refused{HyAnn@\the\HyAnn@Count}%
   }%
-}
+\def\Fld@pageobjref
+  {
+    \zref@ifrefundefined{HyAnn@\the\HyAnn@Count}
+      {}
+      {
+        \zref@ifrefcontainsprop{HyAnn@\the\HyAnn@Count}{pdf@abspage}
+          {
+            /P~\pdf_pageobject_ref:n
+                 {
+                   \zref@extractdefault{HyAnn@\the\HyAnn@Count}{pdf@abspage}{1} %
+                 }
+          }
+          {}
+       }
+  }
+
+\ExplSyntaxOff
 \ExplSyntaxOn
 %% check if the attr should be set through
 %% hooks.
@@ -1284,9 +1316,9 @@
     \def\Fld@width {\DefaultWidthofCheckBox}
     \def\Fld@height{\DefaultHeightofCheckBox}
     \exp_args:No\HyField@SetKeys
-     {
-      \DefaultOptionsofCheckBox,#1
-     }
+      {
+        \DefaultOptionsofCheckBox,#1
+      }
     \PDFForm@Name
     \HyField@FlagsCheckBox
     \legacy_if:nT { Fld@hidden }
@@ -1295,85 +1327,86 @@
       }
     \LayoutCheckField{#2}
       {
-       \mode_leave_vertical:
-       \HyAnn@AbsPageLabel
-       \Hy@escapeform\PDFForm@Check
-       \pdf_annotation:nnnn
-         {\Fld@width}
-         {\Fld@height}
-         {0pt}
-         {\PDFForm@Check}
-       \HyField@AddToFields
-    }
+        \mode_leave_vertical:
+        \HyAnn@AbsPageLabel
+        \Hy@escapeform\PDFForm@Check
+        \pdf_annotation:nnnn
+          {\Fld@width}
+          {\Fld@height}
+          {0pt} %is this correct?
+          {\PDFForm@Check}
+        \HyField@AddToFields %check if this works with xelatex ...
+      }
   \group_end:
 }
 \ExplSyntaxOff
 
 %hm. Should a luatex driver use type1 fonts in fields????
 \ExplSyntaxOn
-\def\Hy@FormObjects{%
-  \pdf_object_new:nn   {l__hyp_encoding_pdfdoc_obj } { dict }
-  \pdf_object_new:nn   {l__hyp_font_zapfdingbats_obj } { dict }
-  \pdf_object_new:nn   {l__hyp_font_helvetica_obj } { dict }
-  \pdf_object_write:nx {l__hyp_encoding_pdfdoc_obj }
-   {
-      /Type/Encoding
-      /Differences[
-        24/breve/caron/circumflex/dotaccent/hungarumlaut/ogonek
+\def\Hy@FormObjects
+  {
+    \pdf_object_new:nn   {l__hyp_encoding_pdfdoc_obj }   { dict }
+    \pdf_object_new:nn   {l__hyp_font_zapfdingbats_obj } { dict }
+    \pdf_object_new:nn   {l__hyp_font_helvetica_obj }    { dict }
+    \pdf_object_write:nx {l__hyp_encoding_pdfdoc_obj }
+      {
+        /Type/Encoding
+        /Differences[
+          24/breve/caron/circumflex/dotaccent/hungarumlaut/ogonek
           /ring/tilde
-        \c_space_tl
-        39/quotesingle
-        \c_space_tl
-        96/grave %
-        \iow_newline:
-        128/bullet/dagger/daggerdbl/ellipsis/emdash/endash/florin
-           /fraction/guilsinglleft/guilsinglright/minus/perthousand
-           /quotedblbase/quotedblleft/quotedblright/quoteleft
-           /quoteright/quotesinglbase/trademark/fi/fl/Lslash/OE
-           /Scaron/Ydieresis/Zcaron/dotlessi/lslash/oe/scaron/zcaron
-        \iow_newline:
-        164/currency
-        \c_space_tl
-        166/brokenbar
-        \c_space_tl
-        168/dieresis/copyright/ordfeminine
-        \c_space_tl
-        172/logicalnot/.notdef/registered/macron/degree/plusminus
-           /twosuperior/threesuperior/acute/mu
-        \c_space_tl
-        183/periodcentered/cedilla/onesuperior/ordmasculine
-        \c_space_tl
-        188/onequarter/onehalf/threequarters
-        \iow_newline:
-        192/Agrave/Aacute/Acircumflex/Atilde/Adieresis/Aring/AE
-           /Ccedilla/Egrave/Eacute/Ecircumflex/Edieresis/Igrave
-           /Iacute/Icircumflex/Idieresis/Eth/Ntilde/Ograve/Oacute
-           /Ocircumflex/Otilde/Odieresis/multiply/Oslash/Ugrave
-           /Uacute/Ucircumflex/Udieresis/Yacute/Thorn/germandbls
-           /agrave/aacute/acircumflex/atilde/adieresis/aring/ae
-           /ccedilla/egrave/eacute/ecircumflex/edieresis/igrave
-           /iacute/icircumflex/idieresis/eth/ntilde/ograve/oacute
-           /ocircumflex/otilde/odieresis/divide/oslash/ugrave
-           /uacute/ucircumflex/udieresis/yacute/thorn/ydieresis
-      ]
-  }
-  \pdf_object_write:nn {l__hyp_font_zapfdingbats_obj }
-   {
-      /Type/Font
-      /Subtype/Type1
-      /Name/ZaDb
-      /BaseFont/ZapfDingbats
-   }
-  \pdf_object_write:nx {l__hyp_font_helvetica_obj }
-   {
-      /Type/Font
-      /Subtype/Type1
-      /Name/Helv
-      /BaseFont/Helvetica
-      /Encoding~\pdf_object_ref:n { l__hyp_encoding_pdfdoc_obj }
-   }
+          \c_space_tl
+          39/quotesingle
+          \c_space_tl
+          96/grave %
+          \iow_newline:
+          128/bullet/dagger/daggerdbl/ellipsis/emdash/endash/florin
+          /fraction/guilsinglleft/guilsinglright/minus/perthousand
+          /quotedblbase/quotedblleft/quotedblright/quoteleft
+          /quoteright/quotesinglbase/trademark/fi/fl/Lslash/OE
+          /Scaron/Ydieresis/Zcaron/dotlessi/lslash/oe/scaron/zcaron
+          \iow_newline:
+          164/currency
+          \c_space_tl
+          166/brokenbar
+          \c_space_tl
+          168/dieresis/copyright/ordfeminine
+          \c_space_tl
+          172/logicalnot/.notdef/registered/macron/degree/plusminus
+          /twosuperior/threesuperior/acute/mu
+          \c_space_tl
+          183/periodcentered/cedilla/onesuperior/ordmasculine
+          \c_space_tl
+          188/onequarter/onehalf/threequarters
+          \iow_newline:
+          192/Agrave/Aacute/Acircumflex/Atilde/Adieresis/Aring/AE
+          /Ccedilla/Egrave/Eacute/Ecircumflex/Edieresis/Igrave
+          /Iacute/Icircumflex/Idieresis/Eth/Ntilde/Ograve/Oacute
+          /Ocircumflex/Otilde/Odieresis/multiply/Oslash/Ugrave
+          /Uacute/Ucircumflex/Udieresis/Yacute/Thorn/germandbls
+          /agrave/aacute/acircumflex/atilde/adieresis/aring/ae
+          /ccedilla/egrave/eacute/ecircumflex/edieresis/igrave
+          /iacute/icircumflex/idieresis/eth/ntilde/ograve/oacute
+          /ocircumflex/otilde/odieresis/divide/oslash/ugrave
+          /uacute/ucircumflex/udieresis/yacute/thorn/ydieresis
+         ]
+      }
+    \pdf_object_write:nn {l__hyp_font_zapfdingbats_obj }
+      {
+        /Type/Font
+        /Subtype/Type1
+        /Name/ZaDb
+        /BaseFont/ZapfDingbats
+      }
+    \pdf_object_write:nx {l__hyp_font_helvetica_obj }
+      {
+        /Type/Font
+        /Subtype/Type1
+        /Name/Helv
+        /BaseFont/Helvetica
+        /Encoding~\pdf_object_ref:n { l__hyp_encoding_pdfdoc_obj }
+      }
   \global\let\Hy@FormObjects\relax
-}
+  }
 \ExplSyntaxOff
 \providecommand*{\Fld@pageobjref}{}
 \ifcsname pdf@escapestring\endcsname
@@ -1502,37 +1535,59 @@
     /TM(\Fld@mappingname)%
   \fi
 }
-\def\PDFForm@Check{%
-  /Subtype/Widget%
-  \Fld@annotflags
-  \Fld@pageobjref
-  \Fld@annotnames
-  /FT/Btn%
-  \Fld@flags
-  /Q \Fld@align
-  /BS<</W \Fld@borderwidth /S/\Fld@borderstyle>>%
-  /AP<< /N <</Yes<<>>>> >>  %new string /Yes is from below
-  /MK<<%
-    \ifnum\Fld@rotation=\z@
-    \else
-      /R \Fld@rotation
-    \fi
-    \ifx\Fld@bordercolor\relax
-    \else
-      /BC[\Fld@bordercolor]%
-    \fi
-    \ifx\Fld@bcolor\relax
-    \else
-      /BG[\Fld@bcolor]%
-    \fi
+\ExplSyntaxOn
+\def\PDFForm@Check
+  {
+    /Subtype/Widget
+    ~\Fld@annotflags
+    ~\Fld@pageobjref
+    ~\Fld@annotnames
+    /FT/Btn
+   \Fld@flags
+   /Q~\Fld@align
+   /BS<</W~\Fld@borderwidth /S/\Fld@borderstyle>>
+   /AP
+     <<
+      /N
+        <<
+          /Yes~\pdf_xform_ref:o{\l__hyp_CheckmarkYes_tl}
+          /Off~\pdf_xform_ref:o{\l__hyp_CheckmarkOff_tl}
+        >>
+    >>
+  /MK<<
+    \int_compare:nNnF {\Fld@rotation}={0}
+      {
+        /R~\Fld@rotation
+      }
+    \tl_if_empty:NF\Fld@bordercolor
+      {
+        /BC[\Fld@bordercolor]
+      }
+    \tl_if_empty:NF\Fld@bcolor
+      {
+        /BG[\Fld@bcolor]
+      }
     /CA(\Hy@escapestring{\Fld@cbsymbol})%
-  >>%
-  /DA(/ZaDb \strip@pt\Fld@charsize\space Tf%
-      \ifx\Fld@color\@empty\else\space\Fld@color\fi)%
-  /H/P%
-  \ifFld@checked /V/Yes/AS/Yes\else /V/Off/AS/Off\fi
+  >>
+  /DA
+    (
+      /ZaDb~\strip@pt\Fld@charsize\c_space_tl Tf
+      \tl_if_empty:NF \Fld@color
+        {
+          \c_space_tl \Fld@color
+        }
+    )
+  /H/P
+  \legacy_if:nTF {Fld@checked}
+    {
+      /V/Yes /AS/Yes
+    }
+    {
+      /V/Off /AS/Off
+    }
   \Fld@additionalactions
 }
+\ExplSyntaxOff
 \ifHy@pdfa
 \else
   \def\PDFForm@Push{%

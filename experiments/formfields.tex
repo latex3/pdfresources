@@ -1,0 +1,54 @@
+% !Mode:: "TeX:DE:UTF-8:Main"
+\RequirePackage[enable-debug,check-declarations]{expl3}
+\RequirePackage[patches]{pdfresources}
+\DeclareDocumentMetaData{uncompress}
+\documentclass{article}
+\usepackage[customdriver=hluatex-experimental]{hyperref}
+\usepackage{xcolor,tikzducks,tikzlings,graphics}
+\begin{document}
+\ExplSyntaxOn
+\MakeFieldObject
+       {
+         \fbox{\tikz\duck;}
+       }
+       {xform_DuckCheckmark}
+\MakeFieldObject
+       {
+         \fbox{\tikz\bear;}
+       }
+       {xform_BearCheckmark}
+
+ \MakeFieldObject
+       {
+         \phantom{\tikz\duck;}
+       }
+       {xform_NoDuckCheckmark}
+ \MakeFieldObject
+       {
+         \phantom{\tikz\bear;}
+       }
+       {xform_NoBearCheckmark}
+
+\ExplSyntaxOff
+
+\begin{Form}[NeedAppearances=false]
+
+\LARGE\sffamily 
+\CheckBox[name=check]{\makebox[4cm][l]{Check the mark!}}
+
+\bigskip
+\ExplSyntaxOn
+\tl_set:Nn \l__hyp_CheckmarkYes_tl {  xform_DuckCheckmark }
+\tl_set:Nn \l__hyp_CheckmarkOff_tl {  xform_NoDuckCheckmark }
+\ExplSyntaxOff
+\CheckBox[name=duck]{\makebox[4cm][l]{Check the duck!}}
+
+\ExplSyntaxOn
+\tl_set:Nn\l__hyp_CheckmarkYes_tl {xform_BearCheckmark}
+\tl_set:Nn\l__hyp_CheckmarkOff_tl {xform_NoBearCheckmark}
+\ExplSyntaxOff
+\bigskip
+\CheckBox[name=bear]{\makebox[4cm][l]{Check the bear!}}
+
+\end{Form}
+\end{document}
