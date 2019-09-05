@@ -168,11 +168,12 @@
 % \begin{variable}
 %  {\g_@@_abspage_int, \g_@@_backend_resourceid_int, \g_@@_backend_name_int}
 %  an absolute page counter, a counter to create labels for the resources, a counter
-%  to number properties in bdc marks.
+%  to number properties in bdc marks, a counter for the \cs{pdfpageref} implementation.
 %    \begin{macrocode}
 \int_new:N \g_@@_abspage_int
 \int_new:N \g_@@_backend_resourceid_int
 \int_new:N \g_@@_backend_name_int
+\int_new:N \g_@@_backend_page_int
 %    \end{macrocode}
 % \end{variable}
 % a reference for the absolute page counter
@@ -1420,6 +1421,8 @@
     \@@_backend_xform_ref:n { #1 }
   }
 
+\cs_generate_variant:Nn \pdf_xform_ref:n {o}
+
 \cs_new:Npn \pdf_xform_wd:n #1
   {
     \tl_use:c { c_@@_backend_xform_wd_ \tl_to_str:n {#1} _tl }
@@ -1645,6 +1648,7 @@
         \box_set_dp:Nn  \l_@@_tmpa_box { \c_zero_dim }
         \box_set_ht:Nn  \l_@@_tmpa_box { \c_zero_dim }
         \box_set_wd:Nn  \l_@@_tmpa_box { \c_zero_dim }
+        \mode_leave_vertical: %needed, the xform disappears without it.
         \@@_backend:x
           {
             bxobj  ~ \@@_backend_xform_ref:n  { #1 }
