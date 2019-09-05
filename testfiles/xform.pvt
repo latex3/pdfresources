@@ -7,11 +7,11 @@
 text
 \ExplSyntaxOn
 
-\pdf_xform_new:nnnn  {myxformA}{/yyy~(bla)}{/bbb~(x)}{yyyyy}
+\pdf_xform_new:nnn  {myxformA}{/yyy~(bla)}{yyyyy}
 
 \pdf_pageresources_gput:nnn {ExtGState}{bearopacity}{<</ca~0.7/CA~0.7>>}
 
-\pdf_xform_new:nnnn  {myxform}{/yyy~(bla)}{/bbb~(x)}{xxxxxxxxxx}
+\pdf_xform_new:nnn  {myxform}{/yyy~(bla)}{xxxxxxxxxx}
 
 \pdf_xform_use:n {myxform}~\pdf_xform_use:n {myxformA}
 some~text~
