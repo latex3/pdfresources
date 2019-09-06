@@ -6,10 +6,10 @@
 \RequirePackage{pdfresources}
 \DeclareDocumentMetaData{uncompress}
 
-\input{regression-test}
+%\input{regression-test}
 \documentclass{article}
 \usepackage{xcolor}
-\usepackage[customdriver=hluatex-experimental]{hyperref}
+\usepackage[customdriver=hgeneric-experimental]{hyperref}
 
 \hypersetup{
  urlbordercolor=blue,
@@ -20,9 +20,9 @@
 
 \hypupdateattribute
 \begin{document}
-\START
+%\START
 abc\\
-link: \ref{a} \\
+link:\tracingmacros=1 \ref{a} \\
 url:  \url{www.blub.de}\\
 file: \href{test-pdfresources.pdf}{test file}\\
 menu: \Acrobatmenu{Find}{Find}

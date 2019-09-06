@@ -8,7 +8,7 @@ module  = "pdfresources"
 
 installfiles = {"*.sty","*.cls","*.def","*.lua"}
 sourcefiles =  {"*.dtx","*.ins",
-                "hluatex-experimental.def",
+                "hgeneric-experimental.def",
                 "tmpl3shipout.sty",
                 "newpackages/new-transparent.sty"}
 
@@ -16,6 +16,7 @@ checkruns = 3
 checkengines = {"luatex","pdftex","xetex"}
 
 checkconfigs = {"build",
-                "config-noxetex"
+                "config-noxetex",
+                "config-luatex"
                 }
 

@@ -9,12 +9,11 @@
 
 %don't compress pdf:
 \ExplSyntaxOn
-\driver_pdf_compresslevel:n {0}
-\driver_pdf_objects_disable:
+\pdf_uncompress:
 \ExplSyntaxOff
 \usepackage{xcolor}
 
-\usepackage[customdriver=hluatex-experimental,pdfview=Fith]{hyperref}
+\usepackage[customdriver=hgeneric-experimental,pdfview=Fith]{hyperref}
 
 
 \hypupdateattribute

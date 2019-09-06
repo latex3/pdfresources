@@ -7,11 +7,10 @@
 
 %don't compress pdf:
 \ExplSyntaxOn
-\driver_pdf_compresslevel:n {0}
-\driver_pdf_objects_disable:
+\pdf_uncompress:
 \ExplSyntaxOff
 \usepackage{xcolor}
-\usepackage[customdriver=hluatex-experimental]{hyperref}
+\usepackage[customdriver=hgeneric-experimental]{hyperref}
 
 \hypersetup{
  urlbordercolor=blue,
@@ -19,7 +18,7 @@
  menubordercolor=brown,
  filebordercolor=yellow,
  pdfborder={1 1 1}}
- 
+
 \hypupdateattribute
 \begin{document}
 
