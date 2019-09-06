@@ -1693,6 +1693,7 @@
   \Fld@additionalactions
 }
 \ExplSyntaxOn
+% Does an appeareance dict make sense here?
 \def\PDFForm@Text
   {
     /Subtype/Widget
@@ -1703,33 +1704,44 @@
     ~\Fld@flags
     /Q~\Fld@align
     /BS<</W~\Fld@borderwidth\c_space_tl /S /\Fld@borderstyle>>
-   \ifcase0\ifnum\Fld@rotation=\z@   \else 1\fi
-           \ifx\Fld@bordercolor\relax\else 1\fi
-           \ifx\Fld@bcolor\relax     \else 1\fi
-           \c_space_tl
-   \else
-     /MK<<%
-      \ifnum\Fld@rotation=\z@
-      \else
-        /R~\Fld@rotation
-      \fi
-      \ifx\Fld@bordercolor\relax
-      \else
-        /BC[\Fld@bordercolor]%
-      \fi
-      \ifx\Fld@bcolor\relax
-      \else
-        /BG[\Fld@bcolor]%
-      \fi
-    >>%
-  \fi
-  /DA(/Helv~\strip@pt\Fld@charsize\c_space_tl Tf%
-      \ifx\Fld@color\@empty\else\c_space_tl\Fld@color\fi)%
-  /DV(\Hy@escapestring{\Fld@default})%
-  /V(\Hy@escapestring{\Fld@value})%
-  \Fld@additionalactions
-  \ifnum\Fld@maxlen>\z@/MaxLen~\Fld@maxlen \fi
-}
+   \bool_if:nT
+     {
+        !\int_compare_p:nNn {\Fld@rotation} = {0}
+       ||
+        \tl_if_exist_p:N \Fld@bordercolor
+       ||
+        \tl_if_exist_p:N \Fld@bcolor
+     }
+     {
+       /MK
+         <<
+           \int_compare:nNnF {\Fld@rotation} = {0}
+             {
+               /R~\Fld@rotation
+             }
+           \tl_if_exist:NT \Fld@bordercolor
+             {
+               /BC[\Fld@bordercolor]
+             }
+           \tl_if_exist:NT \Fld@bcolor
+             {
+               /BG[\Fld@bcolor]
+             }
+        >>
+     }
+   /DA
+     (
+       /Helv~\strip@pt\Fld@charsize\c_space_tl Tf
+       \tl_if_empty:NF {\c_space_tl\Fld@color}
+     )
+   /DV(\Hy@escapestring{\Fld@default})
+   /V(\Hy@escapestring{\Fld@value})
+   ~\Fld@additionalactions
+   \int_compare:nNnT { \Fld@maxlen}>{0}
+     {
+       /MaxLen~\Fld@maxlen
+     }
+  }
 \ExplSyntaxOff
 \def\PDFForm@Submit{%
   /Subtype/Widget%

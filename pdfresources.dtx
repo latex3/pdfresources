@@ -337,7 +337,12 @@
 % \end{macro}
 %
 % \subsection{references to page objects}
-% \begin{function}[added = 2019-08-18]
+% \begin{NOTE}{UF}
+% a reference to the current page would be useful, but difficult to
+% abstract in a sensible way. With xetex it is simply @thispage, but the other
+% engines are unclear.
+% \end{NOTE}
+% \begin{function}[EXP, added = 2019-08-18]
 %   {\pdf_pageobject_ref:n}
 %   \begin{syntax}
 %     \cs{pdf_pageobject_ref:n} \Arg{number}
@@ -382,6 +387,11 @@
   }
 
 \cs_new:Npn \pdf_pageobject_ref:n #1 { \@@_backend_pageobject_ref:n { #1 }}
+
+\cs_new_protected:Npn \pdf_thispageobject_ref:N #1
+ {
+
+ }
 %
 %    \end{macrocode}
 % \end{macro}
