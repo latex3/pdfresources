@@ -4,35 +4,39 @@
 \DeclareDocumentMetaData{uncompress}
 \documentclass{article}
 \usepackage[customdriver=hgeneric-experimental]{hyperref}
-\usepackage{xcolor,tikzducks,tikzlings,graphics}
+%\usepackage{xcolor,tikzducks,tikzlings,graphics}
 \begin{document}
-\ExplSyntaxOn
-\MakeFieldObject
-       {
-         \fbox{\tikz\duck;}
-       }
-       {xform_DuckCheckmark}
-\MakeFieldObject
-       {
-         \fbox{\tikz\bear;}
-       }
-       {xform_BearCheckmark}
-
- \MakeFieldObject
-       {
-         \phantom{\tikz\duck;}
-       }
-       {xform_NoDuckCheckmark}
- \MakeFieldObject
-       {
-         \phantom{\tikz\bear;}
-       }
-       {xform_NoBearCheckmark}
-
-\ExplSyntaxOff
+%\ExplSyntaxOn
+%\MakeFieldObject
+%       {
+%         \fbox{\tikz\duck;}
+%       }
+%       {xform_DuckCheckmark}
+%\MakeFieldObject
+%       {
+%         \fbox{\tikz\bear;}
+%       }
+%       {xform_BearCheckmark}
+%
+% \MakeFieldObject
+%       {
+%         \phantom{\tikz\duck;}
+%       }
+%       {xform_NoDuckCheckmark}
+% \MakeFieldObject
+%       {
+%         \phantom{\tikz\bear;}
+%       }
+%       {xform_NoBearCheckmark}
+%
+%\ExplSyntaxOff
 
 \begin{Form}[NeedAppearances=false]
 
+\TextField[name=text]{Insert Text}
+
+\end{Form}
+\end{document}
 
 \LARGE\sffamily
 \CheckBox[name=check]{\makebox[4cm][l]{Check the mark!}}

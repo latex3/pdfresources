@@ -1084,12 +1084,17 @@
       \leavevmode
       \HyAnn@AbsPageLabel
       \Hy@escapeform\PDFForm@Text
-      \pdf_link_user:nnn
-       {widget} %perhaps we need more types??
-       {\PDFForm@Text}
-       {
-       \MakeTextField{\Fld@width}{\Fld@height}
-       }
+      \pdf_annotation:nnnn
+          {\Fld@width}
+          {\Fld@height}
+          {0pt} %is this correct?
+          {\PDFForm@Text}
+     % \pdf_link_user:nnn
+%       {widget} %perhaps we need more types??
+%       {\PDFForm@Text}
+%       {
+%       \MakeTextField{\Fld@width}{\Fld@height}
+%       }
       \HyField@AddToFields
     }%
   \endgroup
@@ -1687,24 +1692,26 @@
   \fi
   \Fld@additionalactions
 }
-\def\PDFForm@Text{%
-  /Subtype/Widget%
-  \Fld@annotflags
-  \Fld@pageobjref
-  \Fld@annotnames
-  /FT/Tx%
-  \Fld@flags
-  /Q \Fld@align
-  /BS<</W \Fld@borderwidth\space /S /\Fld@borderstyle>>%
-  \ifcase0\ifnum\Fld@rotation=\z@   \else 1\fi
-          \ifx\Fld@bordercolor\relax\else 1\fi
-          \ifx\Fld@bcolor\relax     \else 1\fi
-          \space
-  \else
-    /MK<<%
+\ExplSyntaxOn
+\def\PDFForm@Text
+  {
+    /Subtype/Widget
+    ~\Fld@annotflags
+    ~\Fld@pageobjref
+    ~\Fld@annotnames
+    /FT/Tx
+    ~\Fld@flags
+    /Q~\Fld@align
+    /BS<</W~\Fld@borderwidth\c_space_tl /S /\Fld@borderstyle>>
+   \ifcase0\ifnum\Fld@rotation=\z@   \else 1\fi
+           \ifx\Fld@bordercolor\relax\else 1\fi
+           \ifx\Fld@bcolor\relax     \else 1\fi
+           \c_space_tl
+   \else
+     /MK<<%
       \ifnum\Fld@rotation=\z@
       \else
-        /R \Fld@rotation
+        /R~\Fld@rotation
       \fi
       \ifx\Fld@bordercolor\relax
       \else
@@ -1716,13 +1723,14 @@
       \fi
     >>%
   \fi
-  /DA(/Helv \strip@pt\Fld@charsize\space Tf%
-      \ifx\Fld@color\@empty\else\space\Fld@color\fi)%
+  /DA(/Helv~\strip@pt\Fld@charsize\c_space_tl Tf%
+      \ifx\Fld@color\@empty\else\c_space_tl\Fld@color\fi)%
   /DV(\Hy@escapestring{\Fld@default})%
   /V(\Hy@escapestring{\Fld@value})%
   \Fld@additionalactions
-  \ifnum\Fld@maxlen>\z@/MaxLen \Fld@maxlen \fi
+  \ifnum\Fld@maxlen>\z@/MaxLen~\Fld@maxlen \fi
 }
+\ExplSyntaxOff
 \def\PDFForm@Submit{%
   /Subtype/Widget%
   \Fld@annotflags
