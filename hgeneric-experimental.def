@@ -24,7 +24,7 @@
   {hyp}
   {pdfversion-disabled}
   { This~hyperref~driver~ignores~the~pdfversion~key!\\
-    Set~the~pdfversion~in~\token_to_str:N \documentsetup}
+    Set~the~pdfversion~in~\token_to_str:N \DeclareDocumentMetaData}
 
 \msg_new:nnn
   {hyp}
@@ -989,6 +989,18 @@
          \group_end:
        }
        {__hyp_xform_Ding}
+    \MakeFieldObject
+       {
+         \group_begin:
+         \fontfamily{pzd}
+         \fontencoding{U}
+         \fontseries{m}
+         \fontshape{n}
+         \selectfont
+         \phantom{\char123}
+         \group_end:
+       }
+       {__hyp_xform_DingOff}
      \MakeFieldObject
        {
          \group_begin:
@@ -1009,7 +1021,7 @@
          \fontseries{m}
          \fontshape{n}
          \selectfont
-         \fbox{\char55} %perhaps xetex needs some small glyph ..
+         \phantom{\char51} %perhaps xetex needs some small glyph ..
          \group_end:
        }
        {__hyp_xform_CheckMarkOff}
@@ -1089,17 +1101,11 @@
           {\Fld@height}
           {0pt} %is this correct?
           {\PDFForm@Text}
-     % \pdf_link_user:nnn
-%       {widget} %perhaps we need more types??
-%       {\PDFForm@Text}
-%       {
-%       \MakeTextField{\Fld@width}{\Fld@height}
-%       }
       \HyField@AddToFields
     }%
   \endgroup
 }
-
+\providecommand\@curropt{}
 \def\@ChoiceMenu[#1]#2#3{% parameters, label, choices
   \def\Fld@name{#2}
   \let\Fld@default\relax
@@ -1111,13 +1117,13 @@
     \@tempdima\z@
     \clist_map_variable:nNn { #3 } \@curropt
     %\@for\@curropt:=#3\do
-    {%
-      \expandafter\Fld@checkequals\@curropt==\\%
-      \Hy@StepCount\Fld@menulength
-      \settowidth{\@tempdimb}{\@currDisplay}%
-      \ifdim\@tempdimb>\@tempdima\@tempdima\@tempdimb\fi
-    }%
-    \advance\@tempdima by 15\p@
+      {%
+        \expandafter\Fld@checkequals\@curropt==\\%
+        \Hy@StepCount\Fld@menulength
+        \settowidth{\@tempdimb}{\@currDisplay}%
+        \ifdim\@tempdimb>\@tempdima\@tempdima\@tempdimb\fi
+      }%
+    \advance\@tempdima by~15\p@
     \begingroup
       \HyField@SetKeys{#1}
     \edef\x{\endgroup
@@ -1161,8 +1167,8 @@
           \ifFld@combo
           \else
             \@tempdima=\the\Fld@menulength\Fld@charsize
-            \advance\@tempdima by \Fld@borderwidth bp %
-            \advance\@tempdima by \Fld@borderwidth bp %
+            \advance\@tempdima by~\Fld@borderwidth bp %
+            \advance\@tempdima by~\Fld@borderwidth bp %
             \edef\Fld@height{\the\@tempdima}%
           \fi
           \@@Listbox{#3}%
@@ -1171,9 +1177,11 @@
     }%
   \endgroup
 }
-
+\tl_new:N  \l__hyp_RadioYes_tl
+\tl_set:Nn \l__hyp_RadioYes_tl { __hyp_xform_Ding }
 \def\@@Radio#1{%
-  \Fld@listcount=0 %
+  \Fld@listcount=0~%
+  %\show\Fld@default
   \EdefEscapeName\Fld@default{\Fld@default}%
   \clist_map_variable:nNn { #1 } \@curropt
   %\@for\@curropt:=#1\do
@@ -1185,19 +1193,22 @@
     \leavevmode
     \HyAnn@AbsPageLabel
     \Hy@escapeform\PDFForm@Radio
-    \pdf_link_user:nnn
-      {widget} %perhaps we need more types??
+    \pdf_annotation:nnnn
+      {\Fld@width}
+      {\Fld@height}
+      {0pt} %is this correct?
       {
         \PDFForm@Radio
         /AP
          <<
          /N
           <<
-          /\@currValue\c_space_tl \pdf_xform_ref:n {__hyp_xform_Ding}
+          /\@currValue\c_space_tl \pdf_xform_ref:o {__hyp_xform_Ding}
+          %/Off \c_space_tl \pdf_xform_ref:n {__hyp_xform_DingOff} %hm
           >>
          >>
       }
-      {  \MakeRadioField{\Fld@width}{\Fld@height} }
+      {\fbox{  \MakeRadioField{\Fld@width}{\Fld@height}} }
      \int_compare:nNnT { \Fld@listcount} = { 1 }
       { \HyField@AddToFields }
     \c_space_tl % deliberate space between radio buttons
@@ -1657,19 +1668,21 @@
   \Fld@choices
   \Fld@additionalactions
 }
-\def\PDFForm@Radio{%
-  /Subtype/Widget%
-  \Fld@annotflags
-  \Fld@pageobjref
-  \Fld@annotnames
-  /FT/Btn%
-  \Fld@flags
-  /H/P%
-  /BS<</W \Fld@borderwidth/S/\Fld@borderstyle>>%
-  /MK<<%
+\ExplSyntaxOn
+\def\PDFForm@Radio
+  {
+    /Subtype/Widget
+    ~\Fld@annotflags
+    ~\Fld@pageobjref
+    ~\Fld@annotnames
+    /FT/Btn
+   \Fld@flags
+   /H/P
+   /BS<</W~\Fld@borderwidth/S/\Fld@borderstyle>>
+   /MK<<
     \ifnum\Fld@rotation=\z@
     \else
-      /R \Fld@rotation
+      /R~\Fld@rotation
     \fi
     \ifx\Fld@bordercolor\relax
     \else
@@ -1679,19 +1692,20 @@
     \else
       /BG[\Fld@bcolor]%
     \fi
-    /CA(\Hy@escapestring{\Fld@radiosymbol})%
-  >>%
-  /DA(/ZaDb \strip@pt\Fld@charsize\space Tf%
+     /CA(\Hy@escapestring{\Fld@radiosymbol})%
+    >>
+    /DA(/ZaDb~\strip@pt\Fld@charsize\space Tf%
       \ifx\Fld@color\@empty\else\space\Fld@color\fi)%
-  \ifx\Fld@default\@empty
+   \ifx\Fld@default\@empty
     /V/Off%
     /DV/Off%
-  \else
-   /V/\Fld@default
-   /DV/\Fld@default
-  \fi
-  \Fld@additionalactions
-}
+   \else
+    /V/\Fld@default
+    /DV/\Fld@default
+   \fi
+   \Fld@additionalactions
+ }
+\ExplSyntaxOff
 \ExplSyntaxOn
 % Does an appeareance dict make sense here?
 \def\PDFForm@Text
