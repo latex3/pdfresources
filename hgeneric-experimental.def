@@ -1250,15 +1250,20 @@
      }
      {
       \HyField@FlagsPushButton
-      \ifFld@hidden\def\Fld@width{1sp}\fi
+      \legacy_if:nT {Fld@hidden}
+        {
+          \def\Fld@width{1sp}
+        }
       \LayoutPushButtonField
        {
         \mode_leave_vertical:
         \HyAnn@AbsPageLabel
         \Hy@escapeform\PDFForm@Push
-        \pdf_link_user:nnn
-         {widget} %perhaps we need more types
-         {\PDFForm@Push}
+        \pdf_annotation:nnnn
+          {\Fld@width}
+          {\Fld@height}
+          {0pt} %is this correct?
+          {\PDFForm@Push}
          {\MakeButtonField{#2}}
         \HyField@AddToFields
        }
@@ -1268,31 +1273,36 @@
 
 \def\@Submit[#1]#2
  {
-  \def\Fld@width{\DefaultWidthofSubmit}
-  \def\Fld@height{\DefaultHeightofSubmit}
-  \group_begin:
-   \exp_args:No\HyField@SetKeys
-    {
-      \DefaultOptionsofSubmit,#1
-    }
-    \HyField@FlagsPushButton
-    \HyField@FlagsSubmit
-    \ifFld@hidden\def\Fld@width{1sp}\fi
+   \def\Fld@width {\DefaultWidthofSubmit}
+   \def\Fld@height{\DefaultHeightofSubmit}
+   \group_begin:
+     \exp_args:No\HyField@SetKeys
+       {
+         \DefaultOptionsofSubmit,#1
+       }
+   \HyField@FlagsPushButton
+   \HyField@FlagsSubmit
+   \legacy_if:nT { Fld@hidden }
+     {
+       \def\Fld@width{1sp}
+     }
     \mode_leave_vertical:
     \HyAnn@AbsPageLabel
     \Hy@escapeform\PDFForm@Submit
-    \pdf_link_user:nnn
-      {widget} %perhaps more types needed
+   \pdf_annotation:nnnn
+      {\Fld@width}
+      {\Fld@height}
+      {0pt} %is this correct?
       {
         \PDFForm@Submit
-       /AP<<
+        /AP<<
           /N~\pdf_xform_ref:n {__hyp_xform_Submit}~
           /D~\pdf_xform_ref:n {__hyp_xform_SubmitP}
          >>
        }
       { \MakeButtonField{#2} }
-    \HyField@AddToFields
-  \group_end:
+      \HyField@AddToFields
+    \group_end:
  }
 
 \def\@Reset[#1]#2
@@ -1604,36 +1614,43 @@
   \Fld@additionalactions
 }
 \ExplSyntaxOff
-\ifHy@pdfa
-\else
-  \def\PDFForm@Push{%
-    /Subtype/Widget%
-    \Fld@annotflags
-    \Fld@pageobjref
-    \Fld@annotnames
-    /FT/Btn%
-    \Fld@flags
-    /H/P%
-    /BS<</W \Fld@borderwidth/S/\Fld@borderstyle>>%
-    \ifcase0\ifnum\Fld@rotation=\z@   \else 1\fi
-            \ifx\Fld@bordercolor\relax\else 1\fi
-            \space
-    \else
-      /MK<<%
-        \ifnum\Fld@rotation=\z@
-        \else
-          /R \Fld@rotation
-        \fi
-        \ifx\Fld@bordercolor\relax
-        \else
-          /BC[\Fld@bordercolor]%
-        \fi
-      >>%
-    \fi
-    /A<</S/JavaScript/JS(\Hy@escapestring{\Fld@onclick@code})>>%
-    \Fld@additionalactions
-  }%
-\fi
+\ExplSyntaxOn
+\legacy_if:nF { Hy@pdfa }
+  {
+   \def\PDFForm@Push
+     {
+       /Subtype/Widget
+       ~\Fld@annotflags
+       ~\Fld@pageobjref
+       ~\Fld@annotnames
+       /FT/Btn
+       ~\Fld@flags
+       /H/P
+       /BS<</W~\Fld@borderwidth/S/\Fld@borderstyle>>
+       \bool_if:nT
+         {
+           !\int_compare_p:nNn {\Fld@rotation} = {0}
+          ||
+           \tl_if_exist_p:N \Fld@bordercolor
+         }
+         {
+           /MK
+             <<
+               \int_compare:nNnF {\Fld@rotation} = {0}
+                 {
+                   /R~\Fld@rotation
+                 }
+               \tl_if_exist:NT \Fld@bordercolor
+                 {
+                   /BC[\Fld@bordercolor]
+                 }
+             >>
+          }
+       /A<</S/JavaScript/JS(\Hy@escapestring{\Fld@onclick@code})>>
+       \Fld@additionalactions
+     }
+  }
+\ExplSyntaxOff
 \def\PDFForm@List{%
   /Subtype/Widget%
   \Fld@annotflags
@@ -1757,6 +1774,7 @@
      }
   }
 \ExplSyntaxOff
+
 \def\PDFForm@Submit{%
   /Subtype/Widget%
   \Fld@annotflags
