@@ -37,14 +37,15 @@
   {PDF/A:~Reset~action~is~prohibited}
 
 %% I require the bookmark package to get rid of some of the bookmarks code.
-\AtEndOfPackage{% so that we are later than KOMA ...
-\AtBeginDocument
- {
-  \ltx@ifpackageloaded{bookmark}
-   {}
-   {\msg_error:nn {hyp}{missing-bookmark-package}}
- }}
-
+% but the testing code doesn't work.
+% !!!!!!!!!!!!!!!!!!!!! to do !!!!!!!!!!!!!!!!!!!!!
+%\Hy@AtEndOfPackage{% so that we are later than KOMA ...
+%\AtBeginDocument
+% {
+%  \ltx@ifpackageloaded{bookmark}
+%   {}
+%   {\msg_error:nn {hyp}{missing-bookmark-package}}
+% }}
 % booleans for the (some) option keys. As hyperref disables them it is okay to set them here,
 % hypersetup  can't interfere
 %%% pdfa key:
@@ -1101,6 +1102,7 @@
           {\Fld@height}
           {0pt} %is this correct?
           {\PDFForm@Text}
+      \MakeTextField{\Fld@width}{\Fld@height}
       \HyField@AddToFields
     }%
   \endgroup
@@ -1259,12 +1261,13 @@
         \mode_leave_vertical:
         \HyAnn@AbsPageLabel
         \Hy@escapeform\PDFForm@Push
+        \hbox_set:Nn \l_tmpa_box { \MakeButtonField {#2}}
         \pdf_annotation:nnnn
-          {\Fld@width}
-          {\Fld@height}
-          {0pt} %is this correct?
+          {\box_wd:N\l_tmpa_box}
+          {\box_ht:N\l_tmpa_box}
+          {\box_dp:N\l_tmpa_box} %is this correct?
           {\PDFForm@Push}
-         {\MakeButtonField{#2}}
+         {\box_use:N\l_tmpa_box}
         \HyField@AddToFields
        }
       }
@@ -1289,10 +1292,11 @@
     \mode_leave_vertical:
     \HyAnn@AbsPageLabel
     \Hy@escapeform\PDFForm@Submit
-   \pdf_annotation:nnnn
-      {\Fld@width}
-      {\Fld@height}
-      {0pt} %is this correct?
+    \hbox_set:Nn \l_tmpa_box { \MakeButtonField {#2}}
+    \pdf_annotation:nnnn
+      {\box_wd:N\l_tmpa_box}
+      {\box_ht:N\l_tmpa_box}
+      {\box_dp:N\l_tmpa_box} %is this correct?
       {
         \PDFForm@Submit
         /AP<<
@@ -1300,7 +1304,7 @@
           /D~\pdf_xform_ref:n {__hyp_xform_SubmitP}
          >>
        }
-      { \MakeButtonField{#2} }
+      { \box_use:N\l_tmpa_box }
       \HyField@AddToFields
     \group_end:
  }
