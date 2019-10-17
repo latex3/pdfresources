@@ -1125,6 +1125,17 @@
 %   \cs{pdf_object_new:nn} and filled with \cs{pdf_object_write:n} with
 %   the properties of the BDC.
 %   \end{function}
+% \begin{function}[added = 2019-10-17]
+%   {
+%     \pdf_bmc:n
+%   }
+%   \begin{syntax}
+%     \cs{pdf_bmc:n} \Arg{tag}
+%   \end{syntax}
+%    This command created a BMC marked content operator. The argument is the
+%    tag without the leading slash. It can be e.g. used for simple artifact
+%    markers.
+%
 % \begin{function}[added = 2019-06-30]
 %   {
 %     \pdf_emc:
@@ -1148,11 +1159,13 @@
 % \begin{macro}
 %   {
 %     \@@_backend_bdc:nn,
+%     \@@_backend_bmc:n,
 %     \@@_backend_emc:,
 %     \@@_backend_PageN_Resources_gpush:n
 %   }
-% \cs{@@_backend_bdc:nn} and \cs{@@_backend_emc:} are the backend command that
-% create the bdc/emc marker and store the properties.
+% \cs{@@_backend_bdc:nn}, \cs{\@@_backend_bmc:n} and \cs{@@_backend_emc:}
+%  are the backend command that
+%  create the bdc/emc marker and store the properties.
 % \cs{@@_backend_PageN_Resources_gpush:n} outputs the /Properties in
 % \cs{@@_BACKEND_thispage_shipout_gput:n} for the current page.
 %    \begin{macrocode}
@@ -1184,6 +1197,10 @@
       {
         \special {ps:~mark~/EMC~pdfmark} %
       }
+    \cs_set_protected:Npn \@@_backend_bmc:n #1
+      {
+        \special {ps:~mark~/#1~/BMC~pdfmark} %
+      }
     \cs_new_protected:Npn \@@_backend_PageN_Resources_gpush:n #1 {}
  }
 % xetex has so create the entries in the /Properties manually
@@ -1213,7 +1230,10 @@
               >>
           }
       }
-
+ \cs_set_protected:Npn \@@_backend_bmc:n #1
+    {
+      \__kernel_backend_literal:n {pdf:code~/#1~BMC}  %pdfbase
+    }
   \cs_set_protected:Npn \@@_backend_emc:
     {
       \__kernel_backend_literal:n {pdf:code~EMC}  %pdfbase
@@ -1262,7 +1282,10 @@
               }
           }
     }
-
+   \cs_set_protected:Npn \@@_backend_bmc:n #1
+      {
+        \__kernel_backend_literal_page:n { /#1~BMC }
+      }
     \cs_set_protected:Npn \@@_backend_emc:
       {
         \__kernel_backend_literal_page:n { EMC }
@@ -1307,7 +1330,10 @@
               { \@@_backend_object_ref:n{#2} }
           }
       }
-
+  \cs_set_protected:Npn \@@_backend_bmc:n #1
+    {
+      \__kernel_backend_literal_page:n { /#1~BMC }
+    }
   \cs_set_protected:Npn \@@_backend_emc:
     {
       \__kernel_backend_literal_page:n { EMC }
@@ -1349,6 +1375,7 @@
 % \subsubsection{bdc / management}
 %    \begin{macrocode}
 \cs_new_protected:Npn  \pdf_bdc:nn #1 #2 { \@@_backend_bdc:nn {#1}{#2}}
+\cs_new_protected:Npn  \pdf_bmc:n #1 { \@@_backend_bmc:n {#1}}
 \cs_new_protected:Npn  \pdf_emc:  { \@@_backend_emc: }
 %    \end{macrocode}
 %
