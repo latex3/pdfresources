@@ -1125,6 +1125,19 @@
 %   \cs{pdf_object_new:nn} and filled with \cs{pdf_object_write:n} with
 %   the properties of the BDC.
 %   \end{function}
+% \begin{function}[added = 2019-18-10]
+%   {
+%     \pdf_bdc:n
+%   }
+%   \begin{syntax}
+%     \cs{pdf_bdc:nn} \Arg{tag}
+%   \end{syntax}
+%    This command adds a BDC marked content operator to the current page stream.
+%   \meta{tag} is the tag of this operator (without the leading slash).
+%   As object this commands uses the last anonymous dictionary object created with
+%   \cs{pdf_object_now:nn}. It lies in the responsability of the user that the last
+%   object is the wanted one.
+%   \end{function}
 % \begin{function}[added = 2019-10-17]
 %   {
 %     \pdf_bmc:n
@@ -1159,6 +1172,7 @@
 % \begin{macro}
 %   {
 %     \@@_backend_bdc:nn,
+%     \@@_backend_bdc:n,
 %     \@@_backend_bmc:n,
 %     \@@_backend_emc:,
 %     \@@_backend_PageN_Resources_gpush:n
@@ -1193,6 +1207,10 @@
       {
         \special {ps:~mark~/#1~\@@_backend_object_ref:n{#2}~/BDC~pdfmark}
       }
+    \cs_set_protected:Npn \@@_backend_bdc:n #1  % #1 eg. Span,
+      {
+        \special {ps:~mark~/#1~\@@_backend_object_last:~/BDC~pdfmark}
+      }
     \cs_set_protected:Npn \@@_backend_emc:
       {
         \special {ps:~mark~/EMC~pdfmark} %
@@ -1226,6 +1244,25 @@
                   <<
                     /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl
                     \@@_backend_object_ref:n{#2}
+                  >>
+              >>
+          }
+      }
+    \cs_set_protected:Npn \@@_backend_bdc:n #1  % #1 eg. Span
+      {
+        \int_gincr:N \g_@@_backend_name_int
+        \__kernel_backend_literal:x
+          {
+            pdf:code~/#1/l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC
+          }
+        \__kernel_backend_literal:x
+          {
+            pdf:put~@resources~
+              <<
+                /Properties~
+                  <<
+                    /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl
+                    \@@_backend_object_last:
                   >>
               >>
           }
@@ -1282,6 +1319,30 @@
               }
           }
     }
+    \cs_set_protected:Npn \@@_backend_bdc:n #1% #1 eg. Span
+      {
+        \int_gincr:N \g_@@_backend_name_int
+        \exp_args:Nx\__kernel_backend_literal_page:n
+          { /#1 ~ /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC }
+        \bool_if:NTF \l_@@_backend_xform_bool
+          {
+            \exp_args:Nnx\@@_prop_gput:nnn
+              { xform/Resources/Properties }
+              { l3pdf\int_use:N\g_@@_backend_name_int }
+              { \@@_backend_object_last: }
+          }
+          {
+            \exp_args:Nx \tex_latelua:D
+              {
+                l3kernel.pdf.Page_Resources_Properties_gput
+                  (
+                    tex.count["g_@@_abspage_int"],
+                    "l3pdf\int_use:N\g_@@_backend_name_int",
+                    "\@@_backend_object_last:"
+                  )
+              }
+          }
+    }
    \cs_set_protected:Npn \@@_backend_bmc:n #1
       {
         \__kernel_backend_literal_page:n { /#1~BMC }
@@ -1330,6 +1391,38 @@
               { \@@_backend_object_ref:n{#2} }
           }
       }
+    \cs_set_protected:Npn \@@_backend_bdc:n #1% #1 eg. Span
+      {
+        \int_gincr:N \g_@@_backend_name_int
+        \exp_args:Nx\__kernel_backend_literal_page:n
+          { /#1 ~ /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC }
+        % code to set the property ....
+        \int_gincr:N\g_@@_backend_resourceid_int
+        \bool_if:NTF \l_@@_backend_xform_bool
+          {
+            \exp_args:Nnx\@@_prop_gput:nnn
+              { xform/Resources/Properties }
+              { l3pdf\int_use:N\g_@@_backend_resourceid_int }
+              { \@@_backend_object_last: }
+          }
+          {
+            \zref@labelbylist
+              { l3pdf\int_use:N\g_@@_backend_resourceid_int }
+              { l3pdf }
+            \tl_set:Nx \l_@@_tmpa_tl
+              {
+                \zref@extractdefault
+                  { l3pdf\int_use:N\g_@@_backend_resourceid_int }
+                  {pdf@abspage}
+                  {0}
+              }
+            \@@_prop_new:n { backend_Page\l_@@_tmpa_tl/Resources/Properties }
+            \exp_args:Nnx \@@_prop_gput:nnn
+              { backend_Page\l_@@_tmpa_tl/Resources/Properties }
+              { l3pdf\int_use:N\g_@@_backend_resourceid_int }
+              { \@@_backend_object_last: }
+          }
+      }
   \cs_set_protected:Npn \@@_backend_bmc:n #1
     {
       \__kernel_backend_literal_page:n { /#1~BMC }
@@ -1375,6 +1468,7 @@
 % \subsubsection{bdc / management}
 %    \begin{macrocode}
 \cs_new_protected:Npn  \pdf_bdc:nn #1 #2 { \@@_backend_bdc:nn {#1}{#2}}
+\cs_new_protected:Npn  \pdf_bdc:n #1  { \@@_backend_bdc:n {#1}}
 \cs_new_protected:Npn  \pdf_bmc:n #1 { \@@_backend_bmc:n {#1}}
 \cs_new_protected:Npn  \pdf_emc:  { \@@_backend_emc: }
 %    \end{macrocode}
