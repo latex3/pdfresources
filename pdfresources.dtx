@@ -478,6 +478,7 @@
       }
   }
 
+\cs_generate_variant:Nn \@@_prop_gput:nnn {nxx}
 \cs_new_protected:Npn \@@_prop_get:nnN  #1 #2 #3 %path,key,macro
   {
     \prop_get:cnN { \@@_prop_name:n {#1} } { #2} #3
@@ -1130,7 +1131,7 @@
 %     \pdf_bdc:n
 %   }
 %   \begin{syntax}
-%     \cs{pdf_bdc:nn} \Arg{tag}
+%     \cs{pdf_bdc:n} \Arg{tag}
 %   \end{syntax}
 %    This command adds a BDC marked content operator to the current page stream.
 %   \meta{tag} is the tag of this operator (without the leading slash).
@@ -1326,7 +1327,7 @@
           { /#1 ~ /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC }
         \bool_if:NTF \l_@@_backend_xform_bool
           {
-            \exp_args:Nnx\@@_prop_gput:nnn
+            \@@_prop_gput:nxx
               { xform/Resources/Properties }
               { l3pdf\int_use:N\g_@@_backend_name_int }
               { \@@_backend_object_last: }
@@ -1385,7 +1386,7 @@
                   {0}
               }
             \@@_prop_new:n { backend_Page\l_@@_tmpa_tl/Resources/Properties }
-            \exp_args:Nnx \@@_prop_gput:nnn
+            \@@_prop_gput:nnn
               { backend_Page\l_@@_tmpa_tl/Resources/Properties }
               { l3pdf\int_use:N\g_@@_backend_resourceid_int }
               { \@@_backend_object_ref:n{#2} }
@@ -1400,7 +1401,7 @@
         \int_gincr:N\g_@@_backend_resourceid_int
         \bool_if:NTF \l_@@_backend_xform_bool
           {
-            \exp_args:Nnx\@@_prop_gput:nnn
+            \@@_prop_gput:nxx
               { xform/Resources/Properties }
               { l3pdf\int_use:N\g_@@_backend_resourceid_int }
               { \@@_backend_object_last: }
@@ -1417,10 +1418,11 @@
                   {0}
               }
             \@@_prop_new:n { backend_Page\l_@@_tmpa_tl/Resources/Properties }
-            \exp_args:Nnx \@@_prop_gput:nnn
+            \@@_prop_gput:nxx
               { backend_Page\l_@@_tmpa_tl/Resources/Properties }
               { l3pdf\int_use:N\g_@@_backend_resourceid_int }
               { \@@_backend_object_last: }
+            %\@@_prop_show:n { backend_Page\l_@@_tmpa_tl/Resources/Properties }
           }
       }
   \cs_set_protected:Npn \@@_backend_bmc:n #1
