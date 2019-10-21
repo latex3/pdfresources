@@ -1304,71 +1304,76 @@
           /D~\pdf_xform_ref:n {__hyp_xform_SubmitP}
          >>
        }
-      { \box_use:N\l_tmpa_box }
       \HyField@AddToFields
+      \box_use:N\l_tmpa_box
+
     \group_end:
  }
 
 \def\@Reset[#1]#2
  {
-  \def\Fld@width{\DefaultWidthofReset}
-  \def\Fld@height{\DefaultHeightofReset}
-  \group_begin:
-    \exp_args:No\HyField@SetKeys
-     {
-       \DefaultOptionsofReset,#1
-     }
-    \mode_leave_vertical:
-    \bool_if:NTF \l__hyp_pdfa_bool
-     {
-      \msg_error:nn { hyp }{ pdfa-no-reset-button }
-      \MakeButtonField{#2}
-     }
-     {
-      \HyField@FlagsPushButton
-      \ifFld@hidden\def\Fld@width{1sp}\fi
-      \HyAnn@AbsPageLabel
-      \Hy@escapeform\PDFForm@Reset
-      \pdf_link_user:nnn
-       {widget} %perhaps more types needed
-       {\PDFForm@Reset}
-       {\MakeButtonField{#2}}
-      \HyField@AddToFields
-     }
-  \group_end:
-}
+   \def\Fld@width {\DefaultWidthofReset}
+   \def\Fld@height{\DefaultHeightofReset}
+   \group_begin:
+     \exp_args:No\HyField@SetKeys
+       {
+         \DefaultOptionsofReset,#1
+       }
+     \mode_leave_vertical:
+     \bool_if:NTF \l__hyp_pdfa_bool
+       {
+         \msg_error:nn { hyp }{ pdfa-no-reset-button }
+         \MakeButtonField{#2}
+       }
+       {
+         \HyField@FlagsPushButton
+         \legacy_if:nT { Fld@hidden }
+           { \def\Fld@width{1sp} }
+         \HyAnn@AbsPageLabel
+         \Hy@escapeform\PDFForm@Reset
+         \hbox_set:Nn \l_tmpa_box { \MakeButtonField {#2}}
+         \pdf_annotation:nnnn
+           {\box_wd:N\l_tmpa_box}
+           {\box_ht:N\l_tmpa_box}
+           {\box_dp:N\l_tmpa_box} %is this correct?
+           { \PDFForm@Reset }
+         \HyField@AddToFields
+         \box_use:N \l_tmpa_box
+       }
+    \group_end:
+  }
 
 \def\@CheckBox[#1]#2
- {% parameters, label
-  \def\Fld@name{#2}
-  \def\Fld@default{0}
-  \group_begin:
-    \def\Fld@width {\DefaultWidthofCheckBox}
-    \def\Fld@height{\DefaultHeightofCheckBox}
-    \exp_args:No\HyField@SetKeys
-      {
-        \DefaultOptionsofCheckBox,#1
-      }
-    \PDFForm@Name
-    \HyField@FlagsCheckBox
-    \legacy_if:nT { Fld@hidden }
-      {
-        \def\Fld@width{1sp}
-      }
-    \LayoutCheckField{#2}
-      {
-        \mode_leave_vertical:
-        \HyAnn@AbsPageLabel
-        \Hy@escapeform\PDFForm@Check
-        \pdf_annotation:nnnn
-          {\Fld@width}
-          {\Fld@height}
-          {0pt} %is this correct?
-          {\PDFForm@Check}
-        \HyField@AddToFields %check if this works with xelatex ...
-      }
-  \group_end:
-}
+  {% parameters, label
+    \def\Fld@name{#2}
+    \def\Fld@default{0}
+    \group_begin:
+      \def\Fld@width {\DefaultWidthofCheckBox}
+      \def\Fld@height{\DefaultHeightofCheckBox}
+      \exp_args:No\HyField@SetKeys
+        {
+          \DefaultOptionsofCheckBox,#1
+        }
+      \PDFForm@Name
+      \HyField@FlagsCheckBox
+      \legacy_if:nT { Fld@hidden }
+        {
+          \def\Fld@width{1sp}
+        }
+      \LayoutCheckField{#2}
+        {
+          \mode_leave_vertical:
+          \HyAnn@AbsPageLabel
+          \Hy@escapeform\PDFForm@Check
+          \pdf_annotation:nnnn
+            {\Fld@width}
+            {\Fld@height}
+            {0pt} %is this correct?
+            {\PDFForm@Check}
+          \HyField@AddToFields %check if this works with xelatex ...
+        }
+    \group_end:
+  }
 \ExplSyntaxOff
 
 %hm. Should a luatex driver use type1 fonts in fields????
