@@ -1125,8 +1125,8 @@
 %   \meta{object name}  is a the name of an dictionary object reserved with
 %   \cs{pdf_object_new:nn} and filled with \cs{pdf_object_write:n} with
 %   the properties of the BDC.
-%   \end{function}
-% \begin{function}[added = 2019-18-10]
+% \end{function}
+% \begin{function}[added = 2019-10-18]
 %   {
 %     \pdf_bdc:n
 %   }
@@ -1138,7 +1138,7 @@
 %   As object this commands uses the last anonymous dictionary object created with
 %   \cs{pdf_object_now:nn}. It lies in the responsability of the user that the last
 %   object is the wanted one.
-%   \end{function}
+% \end{function}
 % \begin{function}[added = 2019-10-17]
 %   {
 %     \pdf_bmc:n
@@ -1149,7 +1149,7 @@
 %    This command created a BMC marked content operator. The argument is the
 %    tag without the leading slash. It can be e.g. used for simple artifact
 %    markers.
-%
+% \end{function}
 % \begin{function}[added = 2019-06-30]
 %   {
 %     \pdf_emc:
@@ -2580,12 +2580,14 @@
 %     \cs{pdf_annotation:nnnn} \Arg{width} \Arg {height} \Arg{depth} \Arg {annot spec}
 %   \end{syntax}
 %   This creates an /Type/Annot object.
+% \end{function}
 % \begin{function}[added = 2019-09-05]
 %   {\pdf_annotation_last:}
 %   \begin{syntax}
 %     \cs{pdf_annotation_last:}
 %   \end{syntax}
 %   This retrieves the object reference of the last created annotation.
+% \end{function}
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdf_annotation:nnnn #1 #2 #3 #4
   {
