@@ -1,0 +1,39 @@
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{l3pdf}
+\ExplSyntaxOn
+\pdf_uncompress:
+\ExplSyntaxOff
+\usepackage{atbegshi}
+\directlua{attrtable={} attrtable.rotate=0}
+\makeatletter
+\AtBeginShipout
+  {
+    \AtBeginShipoutAddToBox
+     {
+      \latelua{attrtable.rotate=\ifodd\c@page -90 \else 90\fi}
+     }
+
+    \AtBeginShipoutAddToBoxForeground
+      {
+        \latelua{pdf.setpageattributes ("/Rotate ".. attrtable.rotate)}
+      }
+  }
+
+\begin{document}\makeatletter
+some text
+
+\begin{figure}
+%\latelua{pdf.setpageattribute("/Rotate 90")}
+%\latelua{pdf.setpageattribute("/Rotate \ifodd\c@page -90 \else 90\fi")}
+%\latelua{attrtable.rotate=\ifodd\c@page -90 \else 90\fi}
+\rotatebox{90}{\resizebox{15cm}{!}{linksherum}}
+\end{figure}
+
+\begin{figure}
+%\latelua{pdf.setpageattributes("/Rotate -90")}
+%\latelua{pdf.setpageattributes("/Rotate \ifodd\c@page -90 \else 90\fi")}
+\rotatebox{-90}{\resizebox{15cm}{!}{rechtsherum}}
+\end{figure}
+
+\end{document}

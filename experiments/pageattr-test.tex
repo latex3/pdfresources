@@ -1,0 +1,47 @@
+% !Mode:: "TeX:DE:UTF-8:Main"
+\documentclass{article}
+\usepackage{pdfresources}
+\ExplSyntaxOn
+\pdf_uncompress:
+\ExplSyntaxOff
+\begin{document}
+\ExplSyntaxOn\makeatletter
+\protected\def\rotatepage{\ifnum\c@page =3 90\else 0 \fi}
+\pdf_pageattr_gput:nn {Rotate}{\rotatepage}
+\ExplSyntaxOff
+
+text \newpage test \newpage test \newpage test
+\end{document}
+
+\documentclass{report}
+\usepackage{iftex}
+
+\begin{document}
+abc
+\begin{figure}[!p]
+some text \rule{1cm}{0.6\textheight}
+\iftutex
+ \ifluatex
+  \latelua{pdf.setpageattributes("/Rotate \ifodd\value{page} 90 \else -90\fi")}
+ \else
+  \special{pdf: put @thispage <</Rotate -90>>}
+ \fi
+\else
+\global\pdfpageattr{/Rotate -90} %affects page 1
+\fi
+\end{figure}
+
+\begin{figure}[!p]
+some text \rule{1cm}{0.6\textheight}
+\iftutex
+ \ifluatex
+  \latelua{pdf.setpageattributes("/Rotate \ifodd\value{page} 90 \else -90\fi")}
+ \else
+
+  \special{pdf: put @thispage <</Rotate 90>>}
+ \fi
+\else
+\global\pdfpageattr{/Rotate 90}   %affects page 1
+\fi
+\end{figure}
+\end{document} 
