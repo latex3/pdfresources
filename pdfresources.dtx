@@ -1120,7 +1120,7 @@
 % - pdftex should now work okay too
 % \end{NOTE}
 % Entries to the /Properties dictionary in the page resources can
-% be added with dvips only through side-effect: if a bdc-mark is created
+% be added with dvips only through side-effects: if a bdc-mark is created
 % dvips/ghostscript will automatically create the necessary objects and names.
 % To get a sensible abstraction the code does the same for the other backends:
 % There are no public commands to add values to the /Properties dictionary
@@ -1234,7 +1234,7 @@
       }
     \cs_new_protected:Npn \@@_backend_PageN_Resources_gpush:n #1 {}
  }
-% xetex has so create the entries in the /Properties manually
+% xetex has to create the entries in the /Properties manually
 % (like the other backends)
 % use pdfbase special
 % https://chat.stackexchange.com/transcript/message/50832016#50832016
@@ -1256,7 +1256,7 @@
                 /Properties~
                   <<
                     /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl
-                    \@@_backend_object_ref:n{#2}
+                    \@@_backend_object_ref:n { #2 }
                   >>
               >>
           }
@@ -1318,7 +1318,7 @@
             \exp_args:Nnx\@@_prop_gput:nnn
               { xform/Resources/Properties }
               { l3pdf\int_use:N\g_@@_backend_name_int }
-              { \@@_backend_object_ref:n{#2} }
+              { \@@_backend_object_ref:n { #2 } }
           }
           {
             \exp_args:Nx \tex_latelua:D
@@ -1327,7 +1327,7 @@
                   (
                     tex.count["g_@@_abspage_int"],
                     "l3pdf\int_use:N\g_@@_backend_name_int",
-                    "\@@_backend_object_ref:n{#2}"
+                    "\@@_backend_object_ref:n { #2 }"
                   )
               }
           }
@@ -1384,7 +1384,7 @@
             \exp_args:Nnx\@@_prop_gput:nnn
               { xform/Resources/Properties }
               { l3pdf\int_use:N\g_@@_backend_resourceid_int }
-              { \@@_backend_object_ref:n{#2} }
+              { \@@_backend_object_ref:n { #2 } }
           }
           {
             \zref@labelbylist
@@ -1451,7 +1451,7 @@
       \prop_if_empty:cF
         { \@@_prop_gname:n {PageN/Resources/#1} }
         {
-          \@@_dict_objref_item:nn {#1}{PageN/Resources/#1}
+          \@@_dict_objref_item:nn { #1 }{PageN/Resources/#1}
         }
     }
 
@@ -1481,9 +1481,9 @@
 %
 % \subsubsection{bdc / management}
 %    \begin{macrocode}
-\cs_new_protected:Npn  \pdf_bdc:nn #1 #2 { \@@_backend_bdc:nn {#1}{#2}}
-\cs_new_protected:Npn  \pdf_bdc:n #1  { \@@_backend_bdc:n {#1}}
-\cs_new_protected:Npn  \pdf_bmc:n #1 { \@@_backend_bmc:n {#1}}
+\cs_new_protected:Npn  \pdf_bdc:nn #1 #2 { \@@_backend_bdc:nn { #1 }{ #2 } }
+\cs_new_protected:Npn  \pdf_bdc:n #1  { \@@_backend_bdc:n { #1 } }
+\cs_new_protected:Npn  \pdf_bmc:n #1 { \@@_backend_bmc:n { #1 } }
 \cs_new_protected:Npn  \pdf_emc:  { \@@_backend_emc: }
 %    \end{macrocode}
 %
@@ -1547,8 +1547,8 @@
 %   \begin{syntax}
 %     \cs{pdf_xform_wd:n} \Arg{name}
 %   \end{syntax}
-%    These command give back the sizes of the XObject. The values are stored in tl-variables with the
-%    unit pt and not in dimensions!
+%    These command give back the sizes of the XObject. The values are stored in
+%    tl-variables with the unit pt and not in dimensions!
 %   \end{function}
 %    \begin{macrocode}
 \cs_new_protected:Npn  \pdf_xform_new:nnn #1 #2 #3
@@ -1570,17 +1570,17 @@
 
 \cs_new:Npn \pdf_xform_wd:n #1
   {
-    \tl_use:c { c_@@_backend_xform_wd_ \tl_to_str:n {#1} _tl }
+    \tl_use:c { c_@@_backend_xform_wd_ \tl_to_str:n { #1 } _tl }
   }
 
 \cs_new:Npn \pdf_xform_ht:n #1
   {
-    \tl_use:c { c_@@_backend_xform_ht_ \tl_to_str:n {#1} _tl }
+    \tl_use:c { c_@@_backend_xform_ht_ \tl_to_str:n { #1 } _tl }
   }
 
 \cs_new:Npn \pdf_xform_dp:n #1
   {
-    \tl_use:c { c_@@_backend_xform_dp_ \tl_to_str:n {#1} _tl }
+    \tl_use:c { c_@@_backend_xform_dp_ \tl_to_str:n { #1 } _tl }
   }
 
 %    \end{macrocode}
@@ -1869,8 +1869,8 @@
 % all pages starting from the page where the first time something has been added to the
 % resource and to all XObjects. For luatex and pdftex it must be done together
 % with the /Properties, see above.
-% I don't see a need to set e.g. /ColorSpace pagewise: preflight handles this fine, see experiment
-% colorspace-resources.
+% I don't see a need to set e.g. /ColorSpace pagewise: preflight handles this
+% fine, see experiment colorspace-resources.
 % As pgf does the same, there is a need to patch it for now. Ditto for package colorspace.
 % \end{NOTE}
 % \subsubsection{page resources: ExtGState, ColorSpace, Shading, Pattern / backend}
@@ -2110,18 +2110,22 @@
 %   \medskip
 %   \noindent
 %   \begin{tabularx}{\linewidth}{lll>{\raggedright\arraybackslash}X}
-%    \bfseries Key           & \bfseries Subkey& \bfseries Value  & \bfseries Remark \\\midrule
+%    \bfseries Key           & \bfseries Subkey& \bfseries Value  & \bfseries Remark
+%    \\\midrule
 %  AA                        &WC, WS, DS, WP,DP& all dict    \\
 %  AcroFrom                  &  NeedAppearances&  boolean & In pdf 2.0
-%                                                           NeedAppearances here is deprecated,
-%                                                           it is then required that every widget has
+%                                                           NeedAppearances
+%                                                           is deprecated,
+%                                                           it is then required
+%                                                           that every widget has
 %                                                           an appearance streams.\\
 %                            &  SigFlags       &  Integer\\
 %                            &  DA             &  String \\
 %                            &  Q              &  Integer\\
 %                            &  XFA            & stream or array & pdf 1.5\\
 %  AcroForm/DR               & name            &            & probably unneeded \\
-%  AcroForm/DR/Font          &  \meta{name}    & dict       & name is a pdf name without slash  \\
+%  AcroForm/DR/Font          &  \meta{name}    & dict       & name is a pdf name
+%                                                             without slash  \\
 %  MarkInfo                  & Marked          & boolean      \\
 %                            & UserProperties  & boolean      \\
 %                            & Suspects        & boolean      \\
@@ -2175,7 +2179,7 @@
           \clist_if_in:NnF \c_@@_Catalog_single_clist
             { #1 }
             { \msg_warning:nnn { pdf }{ catalog-unknown } { #1 }}
-          \@@_prop_gput:nnn { Catalog } {#1}{#2}
+          \@@_prop_gput:nnn { Catalog } { #1 }{ #2 }
         }
       }
    }
