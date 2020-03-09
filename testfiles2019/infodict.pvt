@@ -1,0 +1,19 @@
+\PassOptionsToPackage{enable-debug,check-declarations}{expl3}
+\RequirePackage[debug]{pdfresources}
+\input{regression-test}
+\documentclass{article}
+\ExplSyntaxOn
+\sys_if_engine_pdftex:TF
+{
+ \str_set_convert:Nnnn \l_tmpa_str { Grüße }{ utf8 } {utf8/string}
+}
+{
+ \str_set_convert:Nnnn \l_tmpa_str { Grüße }{  } {utf8/string}
+} 
+\pdf_info_string_gput:no {Title}{\l_tmpa_str}
+\pdf_info_string_gput:nn {Author}{Some~Author}
+\ExplSyntaxOff
+\begin{document}
+\START
+some text
+\end{document} 
