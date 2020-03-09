@@ -993,7 +993,7 @@
   {
     \@@_backend_Page_gput:nn { #1 }{ #2 }
   }
-  
+
 \cs_generate_variant:Nn \pdf_pageattr_gput:nn {nx}
 % remove:
 %^^A documentated
@@ -1042,7 +1042,7 @@
 %
 %  \begin{function}[added = 2019-06-22]
 %   {
-%     \pdf_info_gput:nn, \pdf_info_gput:no
+%     \pdf_info_gput:nn
 %   }
 %   \begin{syntax}
 %     \cs{pdf_info_gput:nn} \Arg{name} \Arg{value}
@@ -1051,12 +1051,6 @@
 %   \meta{name} should be a valid pdf name without the leading slash,
 %   \meta{value} should be a valid pdf value. Any escaping or (re)encoding must be
 %   done explictly.
-%   The info dictionary expects utf8 in the strings, so a conversion like this is
-%   normally sensible:
-%   \begin{verbatim}
-%   \str_set_convert:Nnnn \l_tmpa_str { Grüße }{ utf8 } {utf8/string}
-%   \pdf_info_string_gput:no {Title}{\l_tmpa_str}
-%   \end{verbatim}
 %   If a \meta{name} is used twice, only the last \meta{value}
 %   set will be used. The info dictionary is written at the end of the compilation,
 %   so values can be set at any time.
@@ -1088,10 +1082,8 @@
 
 \cs_new_protected:Npn \pdf_info_gput:nn #1 #2 %#1 key without /, #2 content
   {
-    \@@_prop_gput:nnn {Info}{#1}{#2}
+    \@@_prop_gput:nnn {Info}{ #1 }{ #2 }
   }
-
-\cs_generate_variant:Nn \pdf_info_gput:nn {no}
 
 %  should #2 be inside a some escaping command? (no)
 %  hyperref passes them through
