@@ -3,6 +3,7 @@
 % xetex doesn't use the hyperdestname provided by hyperref, but e.g.
 % /S/GoTo/D(0)
 % large borders in xetex are imho not our fault ...
+\input{regression-test}
 \RequirePackage{pdfresources}
 \DeclareDocumentMetaData{uncompress}
 
@@ -22,7 +23,7 @@
 \begin{document}
 %\START
 abc\\
-link:\tracingmacros=1 \ref{a} \\
+link: \ref{a} \\
 url:  \url{www.blub.de}\\
 file: \href{test-pdfresources.pdf}{test file}\\
 menu: \Acrobatmenu{Find}{Find}
