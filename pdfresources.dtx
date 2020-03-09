@@ -388,10 +388,11 @@
 
 \cs_new:Npn \pdf_pageobject_ref:n #1 { \@@_backend_pageobject_ref:n { #1 }}
 
-\cs_new_protected:Npn \pdf_thispageobject_ref:N #1
- {
-
- }
+%% no idea here, so ...
+%\cs_new_protected:Npn \pdf_thispageobject_ref:N #1
+% {
+%
+% }
 %
 %    \end{macrocode}
 % \end{macro}
@@ -400,14 +401,14 @@
 %  Many code parts are quite similar: props are filled and output.
 %  So we define some generic commands for props to ensure systematic
 %  internal names. The names are based on pathes separated by slashed.
-%  The first slash is not used in the names.
+%  The first slash is not used in the names. All props are global.
 %  \begin{NOTE}{UF}
 %  The main question will be if one can/should encode the different
 %  inner structures (array/dict) and the cases where users shouldn't fill a value
 %  but it should be done by subtrees ...
 %  \end{NOTE}
 %
-%  Currently the following names are used: %!!!!! check, compare with \@@_prop_names_seq
+%  Currently the following names are used: %!!!!! check, compare with \g_@@_prop_names_seq
 %  \begin{verbatim}
 %  /Pages           %w,  \pagesattr
 %  /backend_Page    %!!!!! consider name Page?
@@ -421,26 +422,31 @@
 %  /PageN/Resources/Shading
 %  /PageN/Resources/Properties
 %  /Info           %w, \pdfinfo
+%  /Catalog
+%  /Catalog/AA
 %  /Catalog/OCProperties
 %  /Catalog/OutputIntents
 %  /Catalog/AcroForm
+%  /Catalog/AcroForm/DR
 %  /Catalog/AcroForm/DR/Font
+%  /Catalog/MarkInfo
+%  /Catalog/ViewerPreferences
 %  /xform/Resources/Properties
 %  \end{verbatim}
-%  \begin{macro}{\@@_prop_name:n,\@@_prop_new:n,\@@_prop_names_seq}
+%  \begin{macro}{\@@_prop_gname:n,\@@_prop_new:n,\g_@@_prop_names_seq}
 %    \begin{macrocode}
 \seq_new:N \g_@@_prop_names_seq
 
-\cs_new:Npn \@@_prop_name:n #1 % path name without /
+\cs_new:Npn \@@_prop_gname:n #1 % path name without the leading /
   {
     g_@@_/#1_prop
   }
 
 \cs_new_protected:Npn \@@_prop_new:n #1
   {
-    \prop_if_exist:cF { \@@_prop_name:n {#1} }
+    \prop_if_exist:cF { \@@_prop_gname:n { #1 } }
       {
-        \prop_new:c  { \@@_prop_name:n {#1} }
+        \prop_new:c  { \@@_prop_gname:n { #1 } }
         \seq_gput_right:Nn \g_@@_prop_names_seq { #1 }
       }
   }
@@ -457,7 +463,7 @@
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_prop_gclear:n #1
   {
-    \prop_gclear:c  { \@@_prop_name:n {#1} }
+    \prop_gclear:c  { \@@_prop_gname:n { #1 } }
   }
 
 \cs_new_protected:Npn \@@_prop_gput:nnn #1 #2 #3  %#1 path, #2 name, #3 value
@@ -468,12 +474,12 @@
       }
       {
         \prop_if_exist:cTF
-          { \@@_prop_name:n {#1} }
+          { \@@_prop_gname:n { #1 } }
           {
-            \prop_gput:cnn { \@@_prop_name:n {#1} }{ #2 } { #3 }
+            \prop_gput:cnn { \@@_prop_gname:n { #1 } }{ #2 } { #3 }
           }
           {
-            \msg_error:nnn { pdf } { wrong-path } {/#1}
+            \msg_error:nnn { pdf } { wrong-path } { /#1 }
           }
       }
   }
@@ -481,17 +487,17 @@
 \cs_generate_variant:Nn \@@_prop_gput:nnn {nxx}
 \cs_new_protected:Npn \@@_prop_get:nnN  #1 #2 #3 %path,key,macro
   {
-    \prop_get:cnN { \@@_prop_name:n {#1} } { #2} #3
+    \prop_get:cnN { \@@_prop_gname:n { #1 } } { #2 } #3
   }
 
 \cs_new_protected:Npn \@@_prop_gremove:nn #1 #2 %path,key
   {
-    \prop_gremove:cn { \@@_prop_name:n {#1} } { #2 }
+    \prop_gremove:cn { \@@_prop_gname:n { #1 } } { #2 }
   }
 
 \cs_new_protected:Npn \@@_prop_show:n #1  %path
   {
-    \prop_show:c { \@@_prop_name:n {#1} }
+    \prop_show:c { \@@_prop_gname:n { #1 } }
   }
 %    \end{macrocode}
 % \end{macro}
@@ -502,23 +508,23 @@
 %    \begin{macrocode}
 \cs_new:Npn \@@_prop_map_dict_item:n #1 %path
   {
-    \prop_map_function:cN { \@@_prop_name:n {#1}} \@@_dict_item:nn
+    \prop_map_function:cN { \@@_prop_gname:n { #1 } } \@@_dict_item:nn
   }
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{ \@@_prop_merge:nnN }
-% \cs{@@_prop_merge:nnN} merges at first the property \meta{name_1}
+% \begin{macro}{ \@@_prop_gmerge:nnN }
+% \cs{@@_prop_gmerge:nnN} merges at first the property \meta{name_1}
 %  then optionally \meta{name_2} into property |#3|.
 %    \begin{macrocode}
-\cs_new_protected:Npn \@@_prop_merge:nnN #1 #2 #3
+\cs_new_protected:Npn \@@_prop_gmerge:nnN #1 #2 #3
   {
-    \prop_set_eq:Nc #3 { \@@_prop_name:n  { #1 } }
-    \prop_if_exist:cT  { \@@_prop_name:n  { #2 } }
+    \prop_gset_eq:Nc #3 { \@@_prop_gname:n  { #1 } }
+    \prop_if_exist:cT  { \@@_prop_gname:n  { #2 } }
       {
-        \prop_map_inline:cn { \@@_prop_name:n  { #2 } }
+        \prop_map_inline:cn { \@@_prop_gname:n  { #2 } }
           {
-            \prop_put:Nnn #3 { ##1 }{ ##2 }
+            \prop_gput:Nnn #3 { ##1 }{ ##2 }
           }
       }
   }
@@ -757,7 +763,7 @@
   %issues the values stored in the global prop with dvi
   \cs_new_protected:Npn \@@_backend_PageN_gpush:n #1
     {
-      \@@_prop_merge:nnN {backend_Page}{backend_Page#1}\l_@@_tmpa_prop
+      \@@_prop_gmerge:nnN {backend_Page}{backend_Page#1}\l_@@_tmpa_prop
       \exp_args:Nx \@@_backend_Page_primitive:n
         {
           \prop_map_function:NN \l_@@_tmpa_prop \@@_dict_item:nn
@@ -1094,8 +1100,8 @@
 % push to the register command / issue the special
 \cs_new_protected:Npn \@@_Info_gpush:
   {
-    \prop_map_function:cN  { \@@_prop_name:n {Info} } \@@_backend_info_gput:nn
-    \prop_gclear:c { \@@_prop_name:n {Info} }
+    \prop_map_function:cN  { \@@_prop_gname:n {Info} } \@@_backend_info_gput:nn
+    \prop_gclear:c { \@@_prop_gname:n {Info} }
   }
 %    \end{macrocode}
 % \end{macro}
@@ -1282,7 +1288,7 @@
     {
       \clist_map_inline:Nn \c_@@_backend_PageNResources_clist
         {
-          \prop_if_empty:cF { \@@_prop_name:n {PageN/Resources/##1} }
+          \prop_if_empty:cF { \@@_prop_gname:n {PageN/Resources/##1} }
             {
               \__kernel_backend_literal:x
                 {
@@ -1437,7 +1443,7 @@
   \cs_new:Npn \@@_backend_PageN_Resources_gpush_aux:n #1
     {
       \prop_if_empty:cF
-        { \@@_prop_name:n {PageN/Resources/#1} }
+        { \@@_prop_gname:n {PageN/Resources/#1} }
         {
           \@@_dict_objref_item:nn {#1}{PageN/Resources/#1}
         }
@@ -1448,12 +1454,12 @@
        \exp_args:NNx \tex_global:D \tex_pdfpageresources:D
          {
            \prop_if_exist:cT
-             { \@@_prop_name:n  { backend_Page#1/Resources/Properties } }
+             { \@@_prop_gname:n  { backend_Page#1/Resources/Properties } }
              {
                /Properties~
                  <<
                    \prop_map_function:cN
-                     { \@@_prop_name:n  { backend_Page#1/Resources/Properties } }
+                     { \@@_prop_gname:n  { backend_Page#1/Resources/Properties } }
                      \@@_dict_item:nn
                  >>
              }
@@ -1616,7 +1622,7 @@
           {
             #3
             \int_compare:nNnT
-              { \prop_count:c { \@@_prop_name:n {xform/Resources/Properties} } }
+              { \prop_count:c { \@@_prop_gname:n {xform/Resources/Properties} } }
               >
               { 0 }
               {
@@ -1627,22 +1633,22 @@
               }
 
             \prop_if_empty:cF
-              { \@@_prop_name:n {PageN/Resources/ExtGState} }
+              { \@@_prop_gname:n {PageN/Resources/ExtGState} }
               {
                 /ExtGState~ \pdf_object_ref:n {PageN/Resources/ExtGState}
               }
             \prop_if_empty:cF
-              { \@@_prop_name:n {PageN/Resources/Pattern} }
+              { \@@_prop_gname:n {PageN/Resources/Pattern} }
               {
                 /Pattern~ \pdf_object_ref:n {PageN/Resources/Pattern}
               }
             \prop_if_empty:cF
-              { \@@_prop_name:n {PageN/Resources/Shading} }
+              { \@@_prop_gname:n {PageN/Resources/Shading} }
               {
                 /Shading~ \pdf_object_ref:n {PageN/Resources/Shading}
               }
             \prop_if_empty:cF
-              { \@@_prop_name:n {PageN/Resources/ColorSpace} }
+              { \@@_prop_gname:n {PageN/Resources/ColorSpace} }
               {
                 /ColorSpace~ \pdf_object_ref:n {PageN/Resources/ColorSpace}
               }
@@ -1699,7 +1705,7 @@
           {
             #3
             \int_compare:nNnT
-              {\prop_count:c { \@@_prop_name:n {xform/Resources/Properties} }}
+              {\prop_count:c { \@@_prop_gname:n {xform/Resources/Properties} }}
               >
               { 0 }
               {
@@ -1709,22 +1715,22 @@
                   >>
               }
             \prop_if_empty:cF
-              { \@@_prop_name:n {PageN/Resources/ExtGState} }
+              { \@@_prop_gname:n {PageN/Resources/ExtGState} }
               {
                 /ExtGState~ \pdf_object_ref:n {PageN/Resources/ExtGState}
               }
             \prop_if_empty:cF
-              { \@@_prop_name:n {PageN/Resources/Pattern} }
+              { \@@_prop_gname:n {PageN/Resources/Pattern} }
               {
                 /Pattern~ \pdf_object_ref:n {PageN/Resources/Pattern}
               }
             \prop_if_empty:cF
-              { \@@_prop_name:n {PageN/Resources/Shading} }
+              { \@@_prop_gname:n {PageN/Resources/Shading} }
               {
                 /Shading~ \pdf_object_ref:n {PageN/Resources/Shading}
               }
             \prop_if_empty:cF
-              { \@@_prop_name:n {PageN/Resources/ColorSpace} }
+              { \@@_prop_gname:n {PageN/Resources/ColorSpace} }
               {
                 /ColorSpace~ \pdf_object_ref:n {PageN/Resources/ColorSpace}
               }
@@ -1925,7 +1931,7 @@
        \clist_map_inline:Nn \c_@@_backend_PageNResources_clist
          {
            \prop_if_empty:cF
-             { \@@_prop_name:n {PageN/Resources/##1} }
+             { \@@_prop_gname:n {PageN/Resources/##1} }
              {
                \@@_backend_object_write:nx
                  { PageN/Resources/##1 }
@@ -2275,7 +2281,7 @@
     \use:c { @@_/Catalog/Requirements_gpush:}
     \use:c { @@_/Catalog/ViewerPreferences_gpush:}
     % output the single values:
-    \prop_map_function:cN { \@@_prop_name:n {Catalog} }  \@@_backend_catalog_gput:nn
+    \prop_map_function:cN { \@@_prop_gname:n {Catalog} }  \@@_backend_catalog_gput:nn
   }
 %    \end{macrocode}
 % \end{macro}
@@ -2285,7 +2291,7 @@
 \cs_new_protected:cpn { @@_/Catalog/AA_gpush: }
   {
     \prop_if_empty:cF
-     { \@@_prop_name:n { Catalog/AA } }
+     { \@@_prop_gname:n { Catalog/AA } }
      {
        \@@_backend_object_new:nn  { g_@@_/Catalog/AA_obj } { dict }
        \@@_backend_object_write:nx
@@ -2339,7 +2345,7 @@
             { CO }
             { \@@_backend_object_ref:n { g_@@_/Catalog/AcroForm/CO_obj } }
       }
-     \prop_if_empty:cF { \@@_prop_name:n { Catalog/AcroForm/DR/Font}}
+     \prop_if_empty:cF { \@@_prop_gname:n { Catalog/AcroForm/DR/Font}}
        {
          \@@_backend_object_new:nn { g_@@_/Catalog/AcroForm/DR/Font_obj } {dict}
          \exp_args:Nnx
@@ -2352,7 +2358,7 @@
              { Font }
              { \@@_backend_object_ref:n { g_@@_/Catalog/AcroForm/DR/Font_obj } }
        }
-     \prop_if_empty:cF { \@@_prop_name:n { Catalog/AcroForm/DR}}
+     \prop_if_empty:cF { \@@_prop_gname:n { Catalog/AcroForm/DR}}
        {
          \@@_backend_object_new:nn { g_@@_/Catalog/AcroForm/DR_obj } {dict}
          \exp_args:Nnx
@@ -2365,7 +2371,7 @@
              { DR }
              { \@@_backend_object_ref:n { g_@@_/Catalog/AcroForm/DR_obj } }
        }
-     \prop_if_empty:cF { \@@_prop_name:n { Catalog/AcroForm} }
+     \prop_if_empty:cF { \@@_prop_gname:n { Catalog/AcroForm} }
        {
          \@@_backend_object_new:nn { g_@@_/Catalog/AcroForm_obj } {dict}
          \exp_args:Nnx
@@ -2414,7 +2420,7 @@
 \cs_new_protected:cpn { @@_/Catalog/MarkInfo_gpush: }
   {
     \prop_if_empty:cF
-     { \@@_prop_name:n { Catalog/MarkInfo } }
+     { \@@_prop_gname:n { Catalog/MarkInfo } }
      {
        \@@_backend_object_new:nn  { g_@@_/Catalog/MarkInfo_obj } { dict }
        \exp_args:Nnx
@@ -2534,7 +2540,7 @@
 \cs_new_protected:cpn { @@_/Catalog/ViewerPreferences_gpush: }
   {
     \prop_if_empty:cF
-     { \@@_prop_name:n { Catalog/ViewerPreferences } }
+     { \@@_prop_gname:n { Catalog/ViewerPreferences } }
      {
        \@@_backend_object_new:nn  { g_@@_/Catalog/ViewerPreferences_obj } { dict }
        \exp_args:Nnx
