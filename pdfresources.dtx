@@ -121,7 +121,7 @@
                 or~an~equivalent~command~instead~of~the~expl3~interface.
               }
 \msg_new:nnn  { pdf } { setup-after-documentclass }
-              { \token_to_str:N \documentsetup\c_space_tl
+              { \token_to_str:N \DeclareDocumentMetaData \c_space_tl
                 should~be~used~only~before~\token_to_str:N\documentclass
               }
 \msg_new:nnn  { pdf } { object-compression-disabled }
@@ -141,7 +141,7 @@
 %^^A \pdf@strcmp??
 %^^A \pdf@escapestring?? \pdfescapestring
 % \begin{variable}{\l_@@_tmpa_prop, \l_@@_tmpa_tl }
-% Some scratch variable
+% Some scratch variables
 %    \begin{macrocode}
 \prop_new:N \l_@@_tmpa_prop
 \tl_new:N   \l_@@_tmpa_tl
@@ -152,10 +152,10 @@
 % Commands to output dict entries: The arguments are \meta{name}\meta{value} and
 % \meta{name}\meta{object name}, \meta{name} should be a valid pdf name without
 % the slash.
-% The commands don't check if the argument are empty or valid. This should be done
+% The commands don't check if the arguments are empty or valid. This should be done
 % in the pdf layer at the input.
 %    \begin{macrocode}
-\cs_new:Npn \@@_dict_item:nn #1 #2 { /#1~#2~ } %name,value
+\cs_new:Npn \@@_dict_item:nn #1 #2 { /#1~#2~ } %name, value
 
 \cs_new:Npn \@@_dict_objref_item:nn #1 #2      %name, object name
   {
@@ -166,7 +166,7 @@
 %
 % \subsection{some zref code, needs to be replaced later}
 % \begin{variable}
-%  {\g_@@_abspage_int, \g_@@_backend_resourceid_int, \g_@@_backend_name_int}
+%  {\g_@@_abspage_int, \g_@@_backend_resourceid_int, \g_@@_backend_name_int, \g_@@_backend_page_int}
 %  an absolute page counter, a counter to create labels for the resources, a counter
 %  to number properties in bdc marks, a counter for the \cs{pdfpageref} implementation.
 %    \begin{macrocode}
@@ -199,7 +199,7 @@
 % added with atbegshi. The code depends currently also on zref.
 % For dvips/dvipdfmx \cs{AtEndDvi} should be checked.
 % The naming is not really correct, so we keep this in one place
-% and reflect this with uppercase ...
+% and reflect uses uppercase until better names are found.
 % \end{NOTE}
 %
 % \begin{macro}{\@@_BACKEND_end_run:, \@@_BACKEND_end_run_gput:n}
