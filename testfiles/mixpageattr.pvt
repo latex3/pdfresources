@@ -1,0 +1,28 @@
+\PassOptionsToPackage{enable-debug,check-declarations}{expl3}
+\RequirePackage[debug]{pdfresources}
+\input{regression-test}
+\documentclass{article}
+\usepackage{fancyhdr,zref-user}
+\pagestyle{fancy}
+\ExplSyntaxOn \makeatletter
+\lfoot{\pdf_pageattr_gput:nx {Rotate}{\ifodd\c@page -90\else 90 \fi}}
+\ExplSyntaxOff
+\usepackage{kantlipsum}
+\begin{document}
+%\START
+some text \kant
+\kant \kant
+
+\ExplSyntaxOn
+\begin{figure}%[p]
+\zlabel{a}\label{a}
+\pdf_thispageattr_gput:nx{Rotate}{90}
+\Huge
+code~is~on~page~\thepage\par
+float~is~on~page~\zpageref{a}\par
+%\rule{1cm}{10cm}
+\end{figure}
+\kant
+\ExplSyntaxOff
+
+\end{document}
