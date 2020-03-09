@@ -16,6 +16,8 @@ checkruns = 3
 
 if string.find(status.banner,"2019") then
   print("TL2019")
+  testfiledir="./testfiles2019"
+  TL2019bool=true
 else 
   -- tl2020
   print("TL2020 or later")
