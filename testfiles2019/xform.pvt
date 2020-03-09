@@ -1,0 +1,24 @@
+% !Mode:: "TeX:DE:UTF-8:Main"
+\input{regression-test}
+\documentclass{article}
+\usepackage{pdfresources}
+\begin{document}
+\START
+text
+\ExplSyntaxOn
+
+\pdf_xform_new:nnn  {myxformA}{/yyy~(bla)}{yyyyy}
+
+\pdf_pageresources_gput:nnn {ExtGState}{bearopacity}{<</ca~0.7/CA~0.7>>}
+
+\pdf_xform_new:nnn  {myxform}{/yyy~(bla)}{xxxxxxxxxx}
+
+\pdf_xform_use:n {myxform}~\pdf_xform_use:n {myxformA}
+some~text~
+\pdf_xform_use:n {myxform}
+~
+~\pdf_xform_ref:n {myxform}
+%~\pdf_xform_name_ref:n {myxform}
+%\prop_show:N\g__pdf_xform_prop
+\ExplSyntaxOff
+\end{document} 
