@@ -1,0 +1,26 @@
+\PassOptionsToPackage{enable-debug,check-declarations}{expl3}
+\RequirePackage[debug]{pdfresources}
+\DeclareDocumentMetaData
+ {
+   pdfversion=2.0, %not so good with pdftex ...
+   lang=de-DE,
+   uncompress
+ }
+\input{regression-test}
+\documentclass{article}
+\ExplSyntaxOn
+%senseless values ...
+\pdf_info_gput:nn{CreationDate}{(0)}
+\pdf_info_gput:nn{ModDate}{(0)}
+\pdf_object_new:nn   {filespec1}{dict}
+\pdf_object_write:nn {filespec1} {/Type /Filespec /UF (example1.pdf)}
+\pdf_object_new:nn   {filespec2}{dict}
+\pdf_object_write:nn {filespec2} {/Type /Filespec /UF (example2.pdf)}
+
+\pdf_catalog_gput:nn {AF} {filespec1}
+\pdf_catalog_gput:nn {AF} {filespec2}
+\ExplSyntaxOff
+\begin{document}
+\START
+some text
+\end{document} 

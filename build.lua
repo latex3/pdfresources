@@ -23,8 +23,10 @@ else
   print("TL2020 or later")
 
   specialformats = specialformats or {}
-  specialformats["latex"] = specialformats["latex"] or {
-    luatex = {binary="luahbtex",format = "lualatex"}
+  specialformats["latex"] = specialformats["latex"] or 
+   {
+    luatex   = {binary="luahbtex",format = "lualatex"},
+    dvipsbat = {binary="l3builddvips",format = ""}
     }
 end
 
@@ -32,6 +34,7 @@ checkengines = {"luatex","pdftex","xetex"}
 
 checkconfigs = {"build",
                 "config-noxetex",
-                "config-luatex"
+                "config-luatex",
+                -- "config-dvips" -- works currently only locally
                 }
 
