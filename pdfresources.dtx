@@ -2796,12 +2796,13 @@
  {
   \prop_if_in:NnTF \l_@@_views_map_prop { #2 }
    {
-    \exp_args:No %xetex?
-    \@@_backend_destination:nn { #1 } {  #2  }
+    \exp_args:Nox %xetex?
+    \@@_backend_destination:nn { #1 } { \prop_item:Nn \l_@@_views_map_prop {#2} }
    }
    {
     % should we assume that it is a zoom value then??
     % or should there be a third argument for this case and for other coordinates?
+    % at least we need a warning ...
    }
  }
 \cs_generate_variant:Nn\pdf_destination:nn {no,nf}
@@ -2843,7 +2844,8 @@
 
 %    \end{macrocode}
 % \end{function}
-
+%^^A the following is used in the experimental driver
+%^^A but it is unclear if is should stay / how the syntax should be
 % \section{Hook management}
 % hooks are commands that allow users and other packages to inject code.
 %
@@ -2944,6 +2946,7 @@
 % documentated interface through e.g. tl-variables. It should be also clear which
 % variables are read-only and which can be changed by the hook code.
 %
+% %%%%%%%%END HOOK
 %
 % \section{Patches}
 % This code is temporary! It tries to patch commands of other packages which
