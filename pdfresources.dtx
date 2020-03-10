@@ -2089,7 +2089,8 @@
 %                                        /TwoColumnLeft, /TwoColumnRight,
 %                                        /TwoPageLeft (PDF 1.5),
 %                                        /TwoPageRight (PDF 1.5)) \\
-%    PageMode                & name  & one of /UseNone, /UseOutlines, /UseThumbs, /UseOC(PDF 1.5),UseAttachments\\
+%    PageMode                & name  & one of /UseNone, /UseOutlines, /UseThumbs,
+%                                    /UseOC(PDF 1.5),UseAttachments\\
 %    Perms                   &  objref or dict & pdf 1.5, permissions\\
 %    PieceInfo               &  objref or dict\\
 %    SpiderInfo              &  objref or dict\\
@@ -2102,8 +2103,8 @@
 %   \end{tabularx}
 %   \par\medskip
 %
-%   The following keys add values to subdictionaries. The syntax is that the \meta{name}
-%   \meta{value} pair is inputed in a brace pair. E.g.\\
+%   The following keys add values to subdictionaries. The syntax is that the
+%   \meta{name}  \meta{value} pair is inputed in a brace pair. E.g.\\
 %   |\pdf_catalog_gput:nn {Acroform}{{SigFlags}{3}}| or\\
 %   |\pdf_catalog_gput:nn {ViewerPreferences}{{HideToolbar}{true}}|
 %
@@ -2187,7 +2188,7 @@
 %    \end{macrocode}
 % \begin{variable}[added=2019-08-24]
 %     {
-%     \c_@@_Catalog_single_clist
+%      \c_@@_Catalog_single_clist
 %      \c_@@_Catalog_prop_clist,
 %      \c_@@_Catalog_seq_clist,
 %     }
@@ -2282,14 +2283,14 @@
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_Catalog_gpush:
   {
-    \use:c { @@_/Catalog/AA_gpush:}
-    \use:c { @@_/Catalog/AcroForm_gpush:}
-    \use:c { @@_/Catalog/AF_gpush:}
-    \use:c { @@_/Catalog/MarkInfo_gpush:}
-    \use:c { @@_/Catalog/OCProperties_gpush:}
-    \use:c { @@_/Catalog/OutputIntents_gpush:}
-    \use:c { @@_/Catalog/Requirements_gpush:}
-    \use:c { @@_/Catalog/ViewerPreferences_gpush:}
+    \use:c { @@_/Catalog/AA_gpush: }
+    \use:c { @@_/Catalog/AcroForm_gpush: }
+    \use:c { @@_/Catalog/AF_gpush: }
+    \use:c { @@_/Catalog/MarkInfo_gpush: }
+    \use:c { @@_/Catalog/OCProperties_gpush: }
+    \use:c { @@_/Catalog/OutputIntents_gpush: }
+    \use:c { @@_/Catalog/Requirements_gpush: }
+    \use:c { @@_/Catalog/ViewerPreferences_gpush: }
     % output the single values:
     \prop_map_function:cN { \@@_prop_gname:n {Catalog} }  \@@_backend_catalog_gput:nn
   }
@@ -2306,12 +2307,12 @@
        \@@_backend_object_new:nn  { g_@@_/Catalog/AA_obj } { dict }
        \@@_backend_object_write:nx
             { g_@@_/Catalog/AA_obj }
-            { \@@_prop_map_dict_item:n {Catalog/AA } }
+            { \@@_prop_map_dict_item:n { Catalog/AA } }
        \exp_args:Nnx
          \@@_backend_catalog_gput:nn
            {AA}
            {
-             \@@_backend_object_ref:n {g_@@_/Catalog/AA_obj}
+             \@@_backend_object_ref:n { g_@@_/Catalog/AA_obj }
            }
      }
   }
@@ -2537,7 +2538,7 @@
          \@@_backend_catalog_gput:nn
            {Requirements}
            {
-             \@@_backend_object_ref:n {g_@@_/Catalog/Requirements_obj}
+             \@@_backend_object_ref:n { g_@@_/Catalog/Requirements_obj }
            }
      }
   }
@@ -2571,8 +2572,10 @@
 % \subsubsection{Doc View / Openaction}
 % \begin{NOTE}{UF}
 %   /OpenAction can be an array:
-%   /OpenAction [5 0 R /Fit] or an action << /S /GoTo /D [ 7 0 R /Fit ] >>
-%  The implementation belows allows only the first. The second could be set directly.
+%   |/OpenAction [5 0 R /Fit]| or an action: |<< /S /GoTo /D [ 7 0 R /Fit ] >>|.
+%  The implementation belows allows only the first. It is not quite clear, if
+%  this is sensible (and if a special docview command is needed at all).
+%  The second could be set directly.
 % \end{NOTE}
 %
 % \begin{function}[added = 2019-08-18]
@@ -2595,6 +2598,11 @@
 %    \end{macrocode}
 %
 %\subsection{Annotation}
+%\subsubsection{Annotation / backend}
+% The backend commands are already in the driver:
+% \cs{@@_backend_annotation:nnnn} and \cs{@@_backend_annotation_last:}
+%
+% \subsubsection{ Catalog / management }
 % \begin{function}[added = 2019-09-05]
 %   {\pdf_annotation:nnnn}
 %   \begin{syntax}
@@ -2607,18 +2615,21 @@
 %   \begin{syntax}
 %     \cs{pdf_annotation_last:}
 %   \end{syntax}
-%   This retrieves the object reference of the last created annotation.
+%   This retrieves the object reference of the last annotation created.
 % \end{function}
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdf_annotation:nnnn #1 #2 #3 #4
   {
-    \__pdf_backend_annotation:nnnn {#1}{#2}{#3}{#4}
+    \@@_backend_annotation:nnnn {#1}{#2}{#3}{#4}
   }
 
 \cs_new:Npn \pdf_annotation_last:
   {
-    \__pdf_backend_annotation_last:
+    \@@_backend_annotation_last:
   }
+
+
+
 
 %
 %=====================
