@@ -949,7 +949,7 @@
 %   Any escaping or (re)encoding must be done explictly. Some backends expand the
 %   value but this should not be relied on.
 %   To avoid problems with the asynchronous page breaking
-%   the command should be used after \newpages, or in the header,
+%   the command should be used after \cs{newpage}, or in the header,
 %   and better not in float.
 %   The value is assigned directly and is always stored globally.
 %   If a \meta{name} is used twice, only the last \meta{value}
@@ -2769,9 +2769,49 @@
 %    \end{macrocode}
 %
 % \subsection{Destinations}
-% The command expects a lower case argument, it is up to the package to
-% ensure this.
+% \begin{NOTE}{UF}
+% I'm unsure about the backend code of the rectangle (FitR) variant. Should it
+% really typeset a box???
+% I'm also unsure if \cs{pdf_destination:nn} should really allow
+% a type and an integer as second argument. Perhaps a \cs{pdf_destination_zoom:nn}
+% would be better??
+% \end{NOTE}
+% Destinations are \enquote{anchors} for links. The commands here
+% create named destinations. The pdf\LaTeX{} primitive doesn't support all
+% variants described in the pdf reference. The backend code expect lower case
+% arguments, but we add support for the casing of hyperref and the pdf reference.
 %
+% \begin{tabular}{llll}
+% Type & status    & input    &remark \\\hline
+% /Fit & supported & fit, Fit \\%
+% /FitH& supported & fith, FitH \\
+% /FitH \emph{top} & not supported\\
+% /FitV & supported& fitv, FitV\\
+% /FitV \emph{left} & not supported\\
+% /FitB & supported & fitb, FitB\\
+% /FitBH & supported & fitbh, FitBH\\
+% /FitBH \emph{top}& not supported\\
+% /FitBV & supported & fitbv, FitBV\\
+% /FitBV \emph{left} & not supported\\
+% /FitR \emph{left bottom right top} & supported & ????????\\
+% /XYZ \emph{left} \emph{top} NULL & supported & xyz, XYZ &left, top are automatic\\
+% /XYZ \emph{left} \emph{top} zoom & supported & integer (percent) &left, top are automatic\\
+% \end{tabular}
+%
+% \begin{function}[added = 2020-03-10]
+%   {\pdf_destination:nn}
+%   \begin{syntax}
+%     \cs{pdf_destination:nn} \Arg{name} \Arg {type or integer}
+%   \end{syntax}
+%   This creates a destination
+% \end{function}
+% \begin{function}[added = 2020-03-10]
+%   {\pdf_destination_fitr:nn}
+%   \begin{syntax}
+%     \cs{pdf_destination_fitr:nn} \Arg{name} \Arg {content}
+%   \end{syntax}
+%   This outputs a box and creates a destination encompassing this box.
+% \end{function}
 %    \begin{macrocode}
 % perhaps some manipulation of the argument will be needed to map the current
 % hyperref syntax
@@ -2800,13 +2840,22 @@
     \@@_backend_destination:nn { #1 } { \prop_item:Nn \l_@@_views_map_prop {#2} }
    }
    {
+    \exp_args:No %xetex?
+    \@@_backend_destination:nn { #1 } { #2 }
     % should we assume that it is a zoom value then??
     % or should there be a third argument for this case and for other coordinates?
     % at least we need a warning ...
    }
  }
 \cs_generate_variant:Nn\pdf_destination:nn {no,nf}
+
+\cs_new_protected:Npn \pdf_destination_fitr:nn #1 #2 %#1 name, #2 box content
+ {
+   \__pdf_backend_destination_rectangle:nn { #1 }{ #2 }
+ }
+
 %avoid that destinations names are optimized.
+% is this still needed??
 %see https://tug.org/pipermail/dvipdfmx/2019-May/000002.html
 \sys_if_engine_xetex:T
   {
