@@ -1,0 +1,20 @@
+\input{regression-test}
+\documentclass{article}
+\usepackage{pdfresources}
+\ExplSyntaxOn
+\pdf_uncompress:
+\ExplSyntaxOff
+\begin{document}
+\START 
+% just to avoid to have to escape every space ...
+\def\testcontent{/Subtype/Widget/F 4/T(abc)/FT/Tx/Q 0/BS<</W 1 /S /S>>/MK<</BC[1 0 0]/BG[1 1 1]>>/DA(/Helv 10 Tf 0 0 0 rg)/DV()/V()}
+\ExplSyntaxOn
+\cs_generate_variant:Nn \pdf_annotation:nnnn {nnno}
+xx\pdf_annotation:nnno
+          {1cm}
+          {1cm}
+          {0pt} 
+          {\testcontent}
+\ExplSyntaxOff
+xxyyzzww
+\end{document}
