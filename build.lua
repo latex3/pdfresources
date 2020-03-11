@@ -26,7 +26,6 @@ else
   specialformats["latex"] = specialformats["latex"] or 
    {
     luatex     = {binary="luahbtex",format = "lualatex"},
-    dvipsbat   = {binary="l3builddvips",format = ""},
     latexdvips = {binary="latex.exe",format = ""}
     }
 end
