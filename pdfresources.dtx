@@ -2628,20 +2628,14 @@
     \@@_backend_annotation_last:
   }
 
-
-
-
+%    \end{macrocode}
 %
-%=====================
 % \subsection{Higher-level link management}
 % \subsubsection{Startlink}
-% packages like ocgx2 and tagpdf wants to add code to links/annotation created
-% by hyperref. So we need a generic command to start a pdflink which allows
+% Packages like hyperref, ocgx2 and tagpdf all wants to add code
+% to links/annotation. So we need a generic command to start a link which allows
 % packages to add their code to the \texttt{attr} argument through hooks.
-% % what is is for??
-%    \begin{macrocode}
-\cs_new:Nn \@@_get_key_value:nn { #1~#2~ } %name?????
-%    \end{macrocode}
+%
 % Attributes are stored in a property list. Packages can add attributes through
 % dedicated command. We assume that there will be different link types
 % (url, file, run, link, is a cite type needed??\ldots)
@@ -2676,7 +2670,7 @@
      {
       \prop_map_function:cN
        { l_@@_hook_link_begin_#1_attr_prop }
-       \@@_get_key_value:nn
+       \@@_dict_item:nn
       }
     }
     {
@@ -2704,7 +2698,7 @@
            {
              \prop_map_function:cN
                { l_@@_hook_link_begin_#1_attr_prop }
-               \@@_get_key_value:nn
+               \@@_dict_item:nn
            }
       }
       { #2 }
@@ -2719,18 +2713,17 @@
      }
    \exp_args:Nxx %xetex needs expansion
    \@@_backend_link_begin_goto:nnw
-    {
-     \prop_if_exist:cT { l_@@_hook_link_begin_#1_attr_prop }
-       {
-        \prop_map_function:cN
-        { l_@@_hook_link_begin_#1_attr_prop }
-        \@@_get_key_value:nn
-       }
-    }
+     {
+       \prop_if_exist:cT { l_@@_hook_link_begin_#1_attr_prop }
+         {
+           \prop_map_function:cN
+             { l_@@_hook_link_begin_#1_attr_prop }
+             \@@_dict_item:nn
+         }
+     }
     { #2 }
   }
 %    \end{macrocode}
-%% ??????????
 %    \begin{macrocode}
 \cs_set_eq:NN \pdf_link_margin:n \@@_backend_link_margin:n
 \cs_set_eq:NN \pdf_link_last: \@@_backend_link_last:
@@ -2749,13 +2742,13 @@
 \seq_new:N \l_@@_hook_link_end_menu_seq
 
 \cs_new_protected:Nn \pdf_link_end:n %#1 type, e.g. url
- {
-  \@@_backend_link_end:
-  \seq_if_exist:cT {l_@@_hook_link_end_#1_seq}
-   {
-    \seq_use:cn { l_@@_hook_link_end_#1_seq }{}
-   }
- }
+  {
+    \@@_backend_link_end:
+    \seq_if_exist:cT {l_@@_hook_link_end_#1_seq}
+      {
+        \seq_use:cn { l_@@_hook_link_end_#1_seq }{}
+      }
+  }
 
 %    \end{macrocode}
 % \subsection{Before the links}
@@ -2772,7 +2765,7 @@
 % \begin{NOTE}{UF}
 % I'm unsure about the backend code of the rectangle (FitR) variant. Should it
 % really typeset a box???
-% I'm also unsure if \cs{pdf_destination:nn} should really allow
+% I'm also unsure if \cs{pdf_destination:nn} should really allow both
 % a type and an integer as second argument. Perhaps a \cs{pdf_destination_zoom:nn}
 % would be better??
 % \end{NOTE}
@@ -2808,9 +2801,9 @@
 %   or an integer representing a  scale factor in percent.
 % \end{function}
 % \begin{function}[added = 2020-03-10]
-%   {\pdf_destination_fitr:nn}
+%   {\pdf_destination_box:nn}
 %   \begin{syntax}
-%     \cs{pdf_destination_fitr:nn} \Arg{name} \Arg {content}
+%     \cs{pdf_destination_box:nn} \Arg{name} \Arg {content}
 %   \end{syntax}
 %   This stores the content in a hbox, outputs the box and
 %   creates a destination with |FitR| type encompassing this box.
@@ -2852,9 +2845,9 @@
  }
 \cs_generate_variant:Nn\pdf_destination:nn {no,nf}
 
-\cs_new_protected:Npn \pdf_destination_fitr:nn #1 #2 %#1 name, #2 box content
+\cs_new_protected:Npn \pdf_destination_box:nn #1 #2 %#1 name, #2 box content
  {
-   \__pdf_backend_destination_rectangle:nn { #1 }{ #2 }
+   \__pdf_backend_destination_box:nn { #1 }{ #2 } %new name!!
  }
 
 %avoid that destinations names are optimized.
@@ -2869,6 +2862,9 @@
 % \section{Document metadata}
 % We plan a \cs{DeclareDocumentMetaData} so let's start with it.
 % It should allow to set the version, to uncompress a pdf, and set the language.
+% \begin{NOTE}{UF}
+% how to setup a backend/driver key? Can it be copied from expl3?
+% \end{NOTE}
 % \begin{function}[added=2019-08-25]{\DeclareDocumentMetaData}
 %    \begin{macrocode}
 \NewDocumentCommand\DeclareDocumentMetaData { m }

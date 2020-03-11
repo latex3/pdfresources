@@ -64,22 +64,22 @@
     \hook_put:nnnn
      { pdf }
      { link_begin_url_attr }
-     { /F }{ 4 } %
+     { F }{ 4 } %
 
     \hook_put:nnnn
      { pdf }
      { link_begin_link_attr }
-     { /F } { 4 }
+     { F } { 4 }
 
      \hook_put:nnnn
      { pdf }
      { link_begin_file_attr }
-     { /F } { 4 }
+     { F } { 4 }
 
      \hook_put:nnnn
      { pdf }
      { link_begin_menu_attr }
-     { /F } { 4 }
+     { F } { 4 }
    }
 }
 % variants of hyperref commands to get attributes in the prop
@@ -93,24 +93,24 @@
    {
     \tl_if_empty:NTF \@pdfborder
      {
-      \hook_remove:nnn { pdf } { link_begin_##1_attr } { /Border }
+      \hook_remove:nnn { pdf } { link_begin_##1_attr } { Border }
      }
      {
       \hook_put:nnnn
        { pdf }
        { link_begin_##1_attr }
-       { /Border }
+       { Border }
        { [\@pdfborder] }
      }
     \tl_if_empty:NTF \@pdfborderstyle
      {
-      \hook_remove:nnn  { pdf }{ link_begin_##1_attr } { /BS }
+      \hook_remove:nnn  { pdf }{ link_begin_##1_attr } { BS }
      }
      {
       \hook_put:nnnn
       { pdf }
       { link_begin_##1_attr }
-      { /BS }
+      { BS }
       { <<\@pdfborderstyle>> }
      }
    }
@@ -122,13 +122,13 @@
    {
     \tl_if_empty:NTF \@pdfhighlight
      {
-      \hook_remove:nnn { pdf } { link_begin_##1_attr }{ /H }
+      \hook_remove:nnn { pdf } { link_begin_##1_attr }{ H }
      }
      {
       \hook_put:nnnn
       { pdf }
       { link_begin_##1_attr }
-      { /H }
+      { H }
       { \@pdfhighlight }
      }
   }
@@ -143,11 +143,11 @@
      \hook_put:nnnn
       { pdf }
       { link_begin_##1_attr }
-      { /C }
+      { C }
       { [\tl_use:c {@##1bordercolor}] }
     }
     {
-     \hook_remove:nnn { pdf } { link_begin_##1_attr } { /C }
+     \hook_remove:nnn { pdf } { link_begin_##1_attr } { C }
     }
    }
   }
@@ -487,13 +487,13 @@
     \hook_put:nnnn
      { pdf }
      { link_begin_link_attr }
-     { /C }{ [\tl_use:c { @#1bordercolor }] } %do I need to expand?? seems not
+     { C }{ [\tl_use:c { @#1bordercolor }] } %do I need to expand?? seems not
    }
    {
     \hook_remove:nnn
      { pdf }
      { link_begin_link_attr }
-     { /C }
+     { C }
    }
   \find@pdflink{#1}{#2}% #1=color type
 }
@@ -514,13 +514,13 @@
     \hook_put:nnnn
      { pdf }
      { link_begin_link_attr }
-     { /C }{ [\tl_use:c { @#1bordercolor }] } %do I need to expand?? seems not
+     { C }{ [\tl_use:c { @#1bordercolor }] } %do I need to expand?? seems not
    }
    {
     \hook_remove:nnn
      { pdf }
      { link_begin_link_attr }
-     { /C }
+     { C }
    }
   \find@pdflink{#1}{#2}#3\Hy@xspace@end
   \close@EXPpdflink { link }
