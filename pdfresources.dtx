@@ -2793,7 +2793,7 @@
 % /FitBH \emph{top}& not supported\\
 % /FitBV & supported & fitbv, FitBV\\
 % /FitBV \emph{left} & not supported\\
-% /FitR \emph{left bottom right top} & supported & ????????\\
+% /FitR \emph{left bottom right top} & supported in part& typesets a box\\
 % /XYZ \emph{left} \emph{top} NULL & supported & xyz, XYZ &left, top are automatic\\
 % /XYZ \emph{left} \emph{top} zoom & supported & integer (percent) &left, top are automatic\\
 % \end{tabular}
@@ -2803,14 +2803,17 @@
 %   \begin{syntax}
 %     \cs{pdf_destination:nn} \Arg{name} \Arg {type or integer}
 %   \end{syntax}
-%   This creates a destination
+%   This creates a destination. \Arg {type or Integer} can be one of |Fit|, |FitH|,
+%   |FitV|, |FitB|, |FitBH|, |FitBV|, |XYZ| and the lower case variants,
+%   or an integer representing a  scale factor in percent.
 % \end{function}
 % \begin{function}[added = 2020-03-10]
 %   {\pdf_destination_fitr:nn}
 %   \begin{syntax}
 %     \cs{pdf_destination_fitr:nn} \Arg{name} \Arg {content}
 %   \end{syntax}
-%   This outputs a box and creates a destination encompassing this box.
+%   This stores the content in a hbox, outputs the box and
+%   creates a destination with |FitR| type encompassing this box.
 % \end{function}
 %    \begin{macrocode}
 % perhaps some manipulation of the argument will be needed to map the current
