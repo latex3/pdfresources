@@ -2,10 +2,14 @@
 \documentclass{article}
 \usepackage{pdfresources}
 \ExplSyntaxOn
-\pdf_uncompress:
+%%% for reproducible tests:
+\pdf_info_gput:nn{CreationDate}{(D:20200202111111+01'00')}
+\pdf_info_gput:nn{ModDate}{(D:20200202111111+01'00')}
+\pdf_info_gput:nn{Creator}{(l3build test)}
+%%%%%
 \ExplSyntaxOff
 \begin{document}
-\START 
+\START
 % just to avoid to have to escape every space ...
 \def\testcontent{/Subtype/Widget/F 4/T(abc)/FT/Tx/Q 0/BS<</W 1 /S /S>>/MK<</BC[1 0 0]/BG[1 1 1]>>/DA(/Helv 10 Tf 0 0 0 rg)/DV()/V()}
 \ExplSyntaxOn
@@ -13,8 +17,8 @@
 xx\pdf_annotation:nnno
           {1cm}
           {1cm}
-          {0pt} 
+          {0pt}
           {\testcontent}
 \ExplSyntaxOff
 xxyyzzww
-\end{document}
+\end{document} 

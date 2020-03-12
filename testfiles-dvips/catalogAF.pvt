@@ -1,5 +1,12 @@
 \PassOptionsToPackage{enable-debug,check-declarations}{expl3}
 \RequirePackage[debug]{pdfresources}
+\ExplSyntaxOn
+%%% for reproducible tests:
+\pdf_info_gput:nn{CreationDate}{(D:20200202111111+01'00')}
+\pdf_info_gput:nn{ModDate}{(D:20200202111111+01'00')}
+\pdf_info_gput:nn{Creator}{(l3build test)}
+%%%%%
+\ExplSyntaxOff
 \DeclareDocumentMetaData
  {
    pdfversion=2.0, %not so good with pdftex ...
@@ -9,9 +16,6 @@
 \input{regression-test}
 \documentclass{article}
 \ExplSyntaxOn
-%senseless values ...
-\pdf_info_gput:nn{CreationDate}{(0)}
-\pdf_info_gput:nn{ModDate}{(0)}
 \pdf_object_new:nn   {filespec1}{dict}
 \pdf_object_write:nn {filespec1} {/Type /Filespec /UF (example1.pdf)}
 \pdf_object_new:nn   {filespec2}{dict}
