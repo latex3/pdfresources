@@ -1,0 +1,62 @@
+\PassOptionsToPackage{enable-debug,check-declarations}{expl3}
+\RequirePackage[debug]{pdfresources}
+\DeclareDocumentMetaData
+ {
+   pdfversion=2.0, %
+   lang=de-DE,
+   uncompress
+ }
+\ExplSyntaxOn
+%%% for reproducible tests:
+\pdf_info_gput:nn{CreationDate}{(D:20200202111111+01'00')}
+\pdf_info_gput:nn{ModDate}{(D:20200202111111+01'00')}
+\pdf_info_gput:nn{Creator}{(l3build test)}
+%%%%%
+\ExplSyntaxOff 
+\input{regression-test}
+\documentclass{article}
+\usepackage{xcolor}
+\usepackage[customdriver=hgeneric-experimental]{hyperref}
+\hypersetup{urlcolor=red,pdfborder={1 1 1},linkbordercolor=yellow}
+\hypupdateattribute
+
+%add hooks:
+\ExplSyntaxOn\makeatletter
+\hook_put_left:nnn
+ { pdf }
+ { link_begin_url }
+ {
+  begin~url
+ }
+\hook_put:nnnn
+ { pdf }
+ { link_begin_url_attr }
+ { StructParent }
+ { 123 }
+\hook_put_right:nnn
+ { pdf }
+ { link_end_url }
+ {
+   end~url
+ }
+
+\hook_put:nnnn
+ { pdf }
+ { link_begin_url_attr }
+ { Contents }
+ { (url) }
+
+\hook_put:nnnn
+ { pdf }
+ { link_begin_link_attr }
+ { Contents }
+ { (ref) }
+
+\ExplSyntaxOff
+\begin{document}
+\href{www.dante.de}{link}
+
+\section{section}\label{test}
+\ref{test}
+
+\end{document}
