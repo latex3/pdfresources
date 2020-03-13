@@ -65,30 +65,29 @@
 % \date{Released 2019-03-04}
 %
 % \maketitle
-% \section{Existing resource usage}
+% \section{Introduction}
+% When creating a pdf a number of objects, dictionaries and entries to
+% dictionaries must be created. The \LaTeX{} format currently contains no
+% support for theses tasks. It either relies on the binaries to do the job,
+% or on external packages using the primitives of the binaries. These
+% approach is problematic for two reasons: packages trying to set the same resources
+% can clash, and as the primitives differ between the various binaries and backend with
+% which \LaTeX{} is used all packages have to write and maintain \enquote{driver} files
+% for the various backends.
 %
-% \subsection{\pkg{hyperref}}
+% The project here tries to resolve this situation by providing interfaces to
+% the various resources and objects in a backend independant way.
 %
-% \subsection{\pkg{pgf}}
+% The supported backends are pdflatex, lualatex, (x)dvipdfmx (latex, xelatex)
+% and dvips with ps2pdf (not completly yet). dvips with distiller could work too
+% but is untested.
 %
-% In \pkg{pgf}, resource management is set up in the file |pgfutil-common.tex|.
-% This then provides three functions for adding to the resources, all of which
-% are objects:
-% \begin{itemize}
-%   \item \cs{pgfutil@addpdfresource@extgs}: Extended graphics state
-%   \item \cs{pgfutil@addpdfresource@colorspaces}: Color spaces
-%   \item \cs{pgfutil@addpdfresource@patterns}: Patterns
-% \end{itemize}
+% That the interfaces are backend independant doesn't mean that the results and even
+% the compilation behaviour is identical. The backends are too different to allow
+% this. Some backends expand arguments e.g. in a \cs{special} while other don't.
+% Some backends can insert a resource at the first compilation, while another uses
+% the aux-file and a label and so needs at least two.
 %
-% These resource dictionaries are used by adding entries in a cumulative sense;
-% the macro layer deals with ensuring that each entry is only given once. Note
-% that the objects themselves must be given only once for each page.
-%
-% To support these functions, there are a series of set-up macros which install
-% these resources. That has to take place for every page: the exact route
-% therefore depends on the driver.
-%
-% \subsection{\pkg{media9}}
 % \section{messages}
 %    \begin{macrocode}
 \msg_new:nnn  { pdf } { patches }
@@ -1031,11 +1030,11 @@
 % this is needed anyway.
 % \end{NOTE}
 %
-% \subsubsection{Info / backend}
+% \subsubsection{info/backend}
 % The backend code is already in expl3.
 % \cs{@@_backend_info_gput:nn} inserts one name/value pair.
 %
-% \subsubsection{Info / management}
+% \subsubsection{info/management}
 % \potentialclash If the primitive commands are used additionally there will
 % be double entries in the pdf with the backend pdftex and luatex.
 % How pdf viewer handles this is unpredictable.
@@ -1112,7 +1111,7 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \subsection{page resources / Properties and bdc-mark}
+% \subsection{page resources:  Properties and bdc-mark}
 % \begin{NOTE}{UF}
 %  we still need a switch for the case that the resource should be added to
 %  xform resource instead of a page resources, see pdfbase.sty
@@ -1181,7 +1180,7 @@
 %   \end{verbatim}
 % \end{function}
 %
-% \subsubsection{bcd/Properties, backend code}
+% \subsubsection{bdc and Properties/backend}
 % \begin{macro}
 %   {
 %     \@@_backend_bdc:nn,
@@ -1479,7 +1478,7 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \subsubsection{bdc / management}
+% \subsubsection{bdc and Properties/management}
 %    \begin{macrocode}
 \cs_new_protected:Npn  \pdf_bdc:nn #1 #2 { \@@_backend_bdc:nn { #1 }{ #2 } }
 \cs_new_protected:Npn  \pdf_bdc:n #1  { \@@_backend_bdc:n { #1 } }
@@ -1500,7 +1499,7 @@
 %  - dvips implementation is missing for ideas: pdfbase, atfi-dvips.def,
 %  \end{NOTE}
 %
-%  \subsubsection{pdfxform / management}
+%  \subsubsection{pdfxform/management}
 %  \begin{function}[added = 2019-08-05]
 %   {
 %     \pdf_xform_new:nnn
@@ -1585,7 +1584,7 @@
 
 %    \end{macrocode}
 %
-%   \subsubsection{pdfxform / backend }
+%   \subsubsection{pdfxform/backend }
 %  \begin{macro}{ \@@_backend_xform_new:nnnn }
 %  \begin{arguments}
 %  \item name
@@ -1873,7 +1872,7 @@
 % fine, see experiment colorspace-resources.
 % As pgf does the same, there is a need to patch it for now. Ditto for package colorspace.
 % \end{NOTE}
-% \subsubsection{page resources: ExtGState, ColorSpace, Shading, Pattern / backend}
+% \subsubsection{page resources: ExtGState, ColorSpace, Shading, Pattern/backend}
 % Path: PageN/Resources/ExtGState etc. The actual output of the resources is handled
 % together with the bdc/Properties. Here is only special code.
 % \begin{macro}{\@@_backend_PageNResources_gput:nnn}
@@ -1990,7 +1989,7 @@
 % \end{macro}
 % !!!!! check path names (backend or not ...)
 %
-% \subsubsection{ page resources: ExtGState, ColorSpace, Shading, Pattern / management}
+% \subsubsection{ page resources: ExtGState, ColorSpace, Shading, Pattern/management}
 % \begin{function}[added = 2019-08-08]
 %   {\pdf_pageresources_gput:nnn}
 %   \begin{syntax}
@@ -2025,11 +2024,11 @@
 %    \end{macrocode}
 %
 % \subsection{Catalog}
-% \subsubsection{Catalog / backend}
+% \subsubsection{Catalog/backend}
 % the backend command is already in the driver:
 % \cs{@@_backend_catalog_gput:nn}
 %
-% \subsubsection{ Catalog / management }
+% \subsubsection{ Catalog/management }
 % \begin{NOTE}{UF}
 % The catalog dictionary is filled by e.g. \cs{pdfcatalog}. Multiple appearances of
 % \cs{pdfcatalog} are concatenated, so one could end with multiple entries
@@ -2569,7 +2568,7 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \subsubsection{Doc View / Openaction}
+% \subsubsection{Doc View/Openaction}
 % \begin{NOTE}{UF}
 %   /OpenAction can be an array:
 %   |/OpenAction [5 0 R /Fit]| or an action: |<< /S /GoTo /D [ 7 0 R /Fit ] >>|.
@@ -2598,11 +2597,11 @@
 %    \end{macrocode}
 %
 %\subsection{Annotation}
-%\subsubsection{Annotation / backend}
+%\subsubsection{Annotation/backend}
 % The backend commands are already in the driver:
 % \cs{@@_backend_annotation:nnnn} and \cs{@@_backend_annotation_last:}
 %
-% \subsubsection{ Catalog / management }
+% \subsubsection{Annotation/management }
 % \begin{function}[added = 2019-09-05]
 %   {\pdf_annotation:nnnn}
 %   \begin{syntax}
@@ -2630,7 +2629,7 @@
 
 %    \end{macrocode}
 %
-% \subsection{Higher-level link management}
+% \subsection{Links}\label{sec:links}
 % Packages like hyperref, ocgx2 and tagpdf all wants to add code
 % to links/annotation. So we need commands to start and end a link which allows
 % packages to add their code through hooks. There are three places in a link where
@@ -2683,7 +2682,7 @@
 %    \end{macrocode}
 
 
-% \subsubsection{Startlink}
+% \subsubsection{Links/management}
 % \begin{function}[added = 2020-03-12]{ \pdf_link_user:nnn }
 %   \begin{syntax}
 %     \cs{pdf_link_user:nnn} \Arg{type} \Arg{user action spec} \Arg{link text}
@@ -2916,8 +2915,8 @@
     \exp_args:No %xetex?
     \@@_backend_destination:nn { #1 } { #2 }
     % should we assume that it is a zoom value then??
+    % should we test that it is really a number?
     % or should there be a third argument for this case and for other coordinates?
-    % at least we need a warning ...
    }
  }
 \cs_generate_variant:Nn\pdf_destination:nn {no,nf}
@@ -2938,7 +2937,8 @@
 %    \end{macrocode}
 % \section{Document metadata}
 % We plan a \cs{DeclareDocumentMetaData} so let's start with it.
-% It should allow to set the version, to uncompress a pdf, and set the language.
+% It should for the begin allow to set the version, to uncompress a pdf,
+% and set the language.
 % \begin{NOTE}{UF}
 % how to setup a backend/driver key? Can it be copied from expl3?
 % \end{NOTE}
@@ -2972,7 +2972,11 @@
 %^^A the following is used in the experimental driver
 %^^A but it is unclear if is should stay / how the syntax should be
 % \section{Hook management}
-% hooks are commands that allow users and other packages to inject code.
+% hooks are commands that allow users and other packages to inject code. In the
+% pdfresources project hooks are used for links (see section \label{sec:links}).
+% Some tools are need to add code and values to these hooks. The following
+% contains some code currently used in some experiments and some general remarks.
+% It should be move to some hook package. 
 %
 % \subsection{hooks with token lists}
 %  Hook code can be stored in a simple token list variable (tl). An example is e.g.
@@ -3077,13 +3081,32 @@
 % This code is temporary! It tries to patch commands of other packages which
 % fills pdfresources too, to remove clashes and test if everything works as expected.
 % This code should disappear when packages adapt to the central interfaces.
-% \subsection{pgf}
-% For the pageresources we need to avoid that pgf interferes in ExtGState,
+%
+% \subsection{\pkg{pgf}}
+%
+% In \pkg{pgf}, resource management is set up in the file |pgfutil-common.tex|.
+% This then provides three functions for adding to the resources, all of which
+% are objects:
+% \begin{itemize}
+%   \item \cs{pgfutil@addpdfresource@extgs}: Extended graphics state
+%   \item \cs{pgfutil@addpdfresource@colorspaces}: Color spaces
+%   \item \cs{pgfutil@addpdfresource@patterns}: Patterns
+% \end{itemize}
+%
+% These resource dictionaries are used by adding entries in a cumulative sense;
+% the macro layer deals with ensuring that each entry is only given once. Note
+% that the objects themselves must be given only once for each page.
+%
+% To support these functions, there are a series of set-up macros which install
+% these resources. That has to take place for every page: the exact route
+% therefore depends on the driver.
+%
+% For the pageresources project we need to avoid that pgf interferes in ExtGState,
 % ColorSpace and Pattern (Shadings are added to the xform resources and so probably
 % unproblematic for now).
 %    \begin{macrocode}
 % patches for xetex/dvips doesn't make much sense for colorspace and
-% transparent. But pgf should be tested sometime.
+% transparent. But pgf should be tested sometimes.
 % currently only pdftex/luatex is handled here.
 \bool_if:nT { !\g_@@_patches_bool || \sys_if_output_dvi_p:  }
   {
@@ -3168,9 +3191,11 @@
     \@@_backend_PageNResources_gput:nnn {ColorSpace}{#2}{[#3]}
   }
 
-
+%    \end{macrocode}
+% \subsection{\pkg{transparent}}
 % transparent, we assume that pdfresource is loaded first.
 % the code does nothing is with new-transparent ...
+%    \begin{macrocode}
 \AtEndPreamble
   {
     \def\TRP@addresource
@@ -3189,12 +3214,13 @@
           }
        }
   }
-
-%colorspace.sty
-% rather difficult as no real places to inject patches
+%    \end{macrocode}
+% \subsection{\pkg{colorspace}}
+% This is rather difficult as no real places to inject patches
 % at first a try to avoid that it's ExtGState is missing:
 % it can not be avoided to recreate the objects (and so to get duplicates)
 % as colorspace uses temporary macros whose contents is lost.
+%    \begin{macrocode}
 \AtEndPreamble
   {
     \tl_if_exist:NT \spc@op
@@ -3226,7 +3252,8 @@
         \def\spc@Pageresources#1{}
       }
   }
-
+%    \end{macrocode}
+%    \begin{macrocode}
 %</package>
 %    \end{macrocode}
 % \subsection{lua code for lualatex}
