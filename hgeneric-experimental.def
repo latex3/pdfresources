@@ -386,21 +386,13 @@
  % default:
 \pdf_link_margin:n { 1pt }
 
-\providecommand*\@pdfview{XYZ}
-\str_set:Nx\@pdfview{\str_lower_case:f {\@pdfview}}
-
-%redefine to get lowercase pdfview:
-\def\calculate@pdfview#1~#2\\{%
-  \str_set:Nx\@pdfview{\str_lower_case:f {#1}}
-  \ifx\\#2\\%
-    \def\@pdfviewparams{~-32768}%
-  \else
-    \def\@pdfviewparams{~#2}%
-  \fi
-}
 
 \ExplSyntaxOff
+
+\providecommand*\@pdfview{XYZ}
+
 \newcommand\Hy@pstringDest{}
+
 \Hy@WrapperDef\new@pdflink#1{%
   \ifhmode
     \@savsf\spacefactor
@@ -417,10 +409,12 @@
 \let\pdf@endanchor\@empty
 
 \ExplSyntaxOn
-\def\Hy@DestName#1#2
- {
-  \pdf_destination:nf {#1}{#2}
- }
+
+\cs_new_protected:Npn \Hy@DestName #1 #2
+  {
+    \pdf_destination:nf {#1}{#2}
+  }
+
 \ExplSyntaxOff
 \providecommand*\@pdfborder{0 0 1}
 \providecommand*\@pdfborderstyle{}
@@ -439,44 +433,37 @@
       \expandafter\HyperDestNameFilter\expandafter{\Hy@testname}%
     }%
   \fi
-  \Hy@StartlinkName{%
-    %\ifHy@pdfa /F 4\fi
-%    \Hy@setpdfborder
-%    \Hy@setpdfhighlight
-%    \ifx\CurrentBorderColor\relax
-%    \else
-%      /C[\CurrentBorderColor]%
-%    \fi
-  }\Hy@testname
+  \Hy@StartlinkName{}%
+  \Hy@testname
   \expandafter\Hy@colorlink\csname @#1color\endcsname
 }
 
 \ExplSyntaxOn
-\def\Hy@StartlinkName#1#2
- {
-  \pdf_link_begin_goto:nnw { link } { #2 } %%%
- }
+\cs_new_protected:Npn \Hy@StartlinkName #1 #2
+  {
+    \pdf_link_begin_goto:nnw { link } { #2 }
+  }
+
+%experiment end link code
+\cs_new_protected:Npn \close@EXPpdflink #1
+  {
+    \Hy@endcolorlink
+    \Hy@VerboseLinkStop
+    \pdf_link_end:n { #1 }
+  }
 
 
-\def\close@EXPpdflink#1{%
-  \Hy@endcolorlink
-  \Hy@VerboseLinkStop
-  \pdf_link_end:n { #1 }
-}
-
-%\def\close@pdflink{%
-%  \Hy@endcolorlink
-%  \Hy@VerboseLinkStop
-%  \pdfendlink
-%}
 \ExplSyntaxOff
+
 \def\hyper@anchor#1{%
   \new@pdflink{#1}\anchor@spot\pdf@endanchor
 }
+
 \def\hyper@anchorstart#1{%
   \new@pdflink{#1}%
   \Hy@activeanchortrue
 }
+
 \def\hyper@anchorend{%
   \pdf@endanchor
   \Hy@activeanchorfalse
@@ -485,31 +472,34 @@
 \ExplSyntaxOn
 % #1 is for the color only: found {cite} and {link}
 % #2 is the destination find@pdflink uses then named link
-\def\hyper@linkstart#1#2{%
-  \Hy@VerboseLinkStart{#1}{#2}% only for debug
-  \tl_if_exist:cTF            %or test for blank??
-   { @#1bordercolor }
-   {
-    \hook_put:nnnn
-     { pdf }
-     { link_begin_link_attr }
-     { C }{ [\tl_use:c { @#1bordercolor }] } %do I need to expand?? seems not
-   }
-   {
-    \hook_remove:nnn
-     { pdf }
-     { link_begin_link_attr }
-     { C }
-   }
-  \find@pdflink{#1}{#2}% #1=color type
-}
+
+\cs_new_protected:Npn \hyper@linkstart #1 #2
+  {
+    \Hy@VerboseLinkStart{#1}{#2}% only for debug
+    % is this still needed or are the hooks handled elsewhere??
+    \tl_if_exist:cTF            % or test for blank??
+      { @#1bordercolor }
+      {
+        \hook_put:nnnn
+          { pdf }
+          { link_begin_link_attr }
+          { C }{ [\tl_use:c { @#1bordercolor }] } %do I need to expand?? seems not
+      }
+      {
+        \hook_remove:nnn
+          { pdf }
+          { link_begin_link_attr }
+          { C }
+      }
+    \find@pdflink{#1}{#2}% #1=color type
+  }
 
 % the endlink muss have the same type as the start?
-% probably always link works
-\def\hyper@linkend
- {
-  \close@EXPpdflink { link }
- }
+% probably always link works ? But what is with my hooks???
+\cs_new_protected:Npn \hyper@linkend
+  {
+    \close@EXPpdflink { link }
+  }
 
 \def\hyper@link#1#2#3
  {
