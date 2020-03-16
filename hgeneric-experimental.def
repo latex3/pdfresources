@@ -10,7 +10,6 @@
   Hyperref driver for luaTeX]
 \RequirePackage{xparse,etoolbox}
 \RequirePackage{pdfresources}
-%%\Hy@VersionCheck{hluatex.def}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \ExplSyntaxOn
 %% messages, should later (with more drivers) go somewhere more generic ...
@@ -85,11 +84,10 @@
 % variants of hyperref commands to get attributes in the prop
 % these are (temporary) commands to fill various attributes (color, border style) in
 % the hooks for links from the hyperref keys.
-\clist_const:Nn \c__hyp_link_types_clist { url , file , run , link, menu }
 
 \def\Hy@EXPsetpdfborder
  {
- \clist_map_inline:Nn \c__hyp_link_types_clist
+ \seq_map_inline:Nn \c_pdf_link_types_seq
    {
     \tl_if_empty:NTF \@pdfborder
      {
@@ -118,7 +116,7 @@
 
 \def\Hy@EXPsetpdfhighlight
  {
-  \clist_map_inline:Nn \c__hyp_link_types_clist
+  \seq_map_inline:Nn \c_pdf_link_types_seq
    {
     \tl_if_empty:NTF \@pdfhighlight
      {
@@ -136,7 +134,7 @@
 
 \def\Hy@EXPsetbordercolor
   {
-   \clist_map_inline:Nn \c__hyp_link_types_clist
+   \seq_map_inline:Nn \c_pdf_link_types_seq
    {
     \tl_if_exist:cTF { @##1bordercolor }
     {
