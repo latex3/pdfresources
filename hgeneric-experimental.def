@@ -6,10 +6,11 @@
 %%
 
 \ProvidesFile{hgeneric-experimental.def}
-  [2019/07/01 v0.4 %
+  [2020/03/16 v0.5 %
   Hyperref driver for luaTeX]
 \RequirePackage{xparse,etoolbox}
 \RequirePackage{pdfresources}
+\chardef\Hy@VersionChecked=1 %don't check the version!
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \ExplSyntaxOn
 %% messages, should later (with more drivers) go somewhere more generic ...
@@ -470,6 +471,8 @@
 }
 
 \ExplSyntaxOn
+% hyper@linkstart/ \hyper@linkend is used for
+% footnotemarks, toc and natbib-cites
 % #1 is for the color only: found {cite} and {link}
 % #2 is the destination find@pdflink uses then named link
 
