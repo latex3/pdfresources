@@ -15,25 +15,25 @@
 %% messages, should later (with more drivers) go somewhere more generic ...
 \prop_gput:Nnn \g_msg_module_name_prop { hyp }{ hyperref }
 \msg_new:nnn
-  {hyp}
-  {missing-bookmark-package}
-  { The~bookmark~package~is~required~for~this~hyperref~driver!}
+  { hyp }
+  { missing-bookmark-package }
+  { The~bookmark~package~is~required~for~this~hyperref~driver! }
 
 \msg_new:nnn
-  {hyp}
-  {pdfversion-disabled}
+  { hyp }
+  { pdfversion-disabled }
   { This~hyperref~driver~ignores~the~pdfversion~key!\\
-    Set~the~pdfversion~in~\token_to_str:N \DeclareDocumentMetaData}
+    Set~the~pdfversion~in~\token_to_str:N \DeclareDocumentMetaData }
 
 \msg_new:nnn
-  {hyp}
-  {pdfa-no-push-button}
-  {PDF/A:~Push~button~with~JavaScript~is~prohibited}
+  { hyp }
+  { pdfa-no-push-button }
+  { PDF/A:~Push~button~with~JavaScript~is~prohibited }
 
 \msg_new:nnn
-  {hyp}
-  {pdfa-no-reset-button}
-  {PDF/A:~Reset~action~is~prohibited}
+  { hyp }
+  { pdfa-no-reset-button }
+  { PDF/A:~Reset~action~is~prohibited }
 
 %% I require the bookmark package to get rid of some of the bookmarks code.
 % but the testing code doesn't work.
@@ -50,152 +50,142 @@
 %%% pdfa key:
 \bool_new:N \l__hyp_pdfa_bool
 \ifHy@pdfa
- \bool_set_true:N \l__hyp_pdfa_bool
+  \bool_set_true:N \l__hyp_pdfa_bool
 \fi
 
 
 % this need sorting out later. pdf standards should be handled outside the driver.
 % pdfa forces the flag /F 4 in some places.
 \AtBeginDocument
-{
-  \bool_if:NT \l__hyp_pdfa_bool
   {
-    \hook_put:nnnn
-     { pdf }
-     { link_begin_url_attr }
-     { F }{ 4 } %
+    \bool_if:NT \l__hyp_pdfa_bool
+      {
+        \hook_put:nnnn
+          { pdf }
+          { link_begin_url_attr }
+          { F }
+          { 4 }
 
-    \hook_put:nnnn
-     { pdf }
-     { link_begin_link_attr }
-     { F } { 4 }
+        \hook_put:nnnn
+          { pdf }
+          { link_begin_link_attr }
+          { F }
+          { 4 }
 
-     \hook_put:nnnn
-     { pdf }
-     { link_begin_file_attr }
-     { F } { 4 }
+        \hook_put:nnnn
+          { pdf }
+          { link_begin_file_attr }
+          { F }
+          { 4 }
 
-     \hook_put:nnnn
-     { pdf }
-     { link_begin_menu_attr }
-     { F } { 4 }
-   }
-}
+        \hook_put:nnnn
+          { pdf }
+          { link_begin_menu_attr }
+          { F }
+          { 4 }
+      }
+  }
+
 % variants of hyperref commands to get attributes in the prop
 % these are (temporary) commands to fill various attributes (color, border style) in
 % the hooks for links from the hyperref keys.
 
-\def\Hy@EXPsetpdfborder
- {
- \seq_map_inline:Nn \c_pdf_link_types_seq
-   {
-    \tl_if_empty:NTF \@pdfborder
-     {
-      \hook_remove:nnn { pdf } { link_begin_##1_attr } { Border }
-     }
-     {
-      \hook_put:nnnn
-       { pdf }
-       { link_begin_##1_attr }
-       { Border }
-       { [\@pdfborder] }
-     }
-    \tl_if_empty:NTF \@pdfborderstyle
-     {
-      \hook_remove:nnn  { pdf }{ link_begin_##1_attr } { BS }
-     }
-     {
-      \hook_put:nnnn
-      { pdf }
-      { link_begin_##1_attr }
-      { BS }
-      { <<\@pdfborderstyle>> }
-     }
-   }
- }
-
-\def\Hy@EXPsetpdfhighlight
- {
-  \seq_map_inline:Nn \c_pdf_link_types_seq
-   {
-    \tl_if_empty:NTF \@pdfhighlight
-     {
-      \hook_remove:nnn { pdf } { link_begin_##1_attr }{ H }
-     }
-     {
-      \hook_put:nnnn
-      { pdf }
-      { link_begin_##1_attr }
-      { H }
-      { \@pdfhighlight }
-     }
-  }
- }
-
-\def\Hy@EXPsetbordercolor
+%pdfborder, pdfborderstyle
+\cs_new_protected:Npn \Hy@EXPsetpdfborder
   {
-   \seq_map_inline:Nn \c_pdf_link_types_seq
-   {
-    \tl_if_exist:cTF { @##1bordercolor }
-    {
-     \hook_put:nnnn
-      { pdf }
-      { link_begin_##1_attr }
-      { C }
-      { [\tl_use:c {@##1bordercolor}] }
-    }
-    {
-     \hook_remove:nnn { pdf } { link_begin_##1_attr } { C }
-    }
-   }
+    \seq_map_inline:Nn \c_pdf_link_types_seq
+      {
+        \tl_if_empty:NTF \@pdfborder
+          {
+            \hook_remove:nnn { pdf } { link_begin_##1_attr } { Border }
+          }
+          {
+            \hook_put:nnnn
+              { pdf }
+              { link_begin_##1_attr }
+              { Border }
+              { [\@pdfborder] }
+          }
+        \tl_if_empty:NTF \@pdfborderstyle
+          {
+            \hook_remove:nnn  { pdf }{ link_begin_##1_attr } { BS }
+          }
+          {
+            \hook_put:nnnn
+              { pdf }
+              { link_begin_##1_attr }
+              { BS }
+              { <<\@pdfborderstyle>> }
+          }
+      }
   }
 
-% for now we are updating the attribute manually after \hypersetup
+% highlight
+\cs_new_protected:Npn \Hy@EXPsetpdfhighlight
+  {
+    \seq_map_inline:Nn \c_pdf_link_types_seq
+      {
+        \tl_if_empty:NTF \@pdfhighlight
+          {
+            \hook_remove:nnn { pdf } { link_begin_##1_attr }{ H }
+          }
+          {
+            \hook_put:nnnn
+              { pdf }
+              { link_begin_##1_attr }
+              { H }
+              { \@pdfhighlight }
+         }
+     }
+  }
+
+% bordercolor
+\cs_new_protected:Npn \Hy@EXPsetbordercolor
+  {
+    \seq_map_inline:Nn \c_pdf_link_types_seq
+      {
+        \tl_if_exist:cTF { @##1bordercolor }
+          {
+            \hook_put:nnnn
+             { pdf }
+             { link_begin_##1_attr }
+             { C }
+             { [\tl_use:c {@##1bordercolor}] }
+          }
+          {
+            \hook_remove:nnn { pdf } { link_begin_##1_attr } { C }
+          }
+     }
+  }
+
+% for now we are updating the attributes manually after \hypersetup
 % some better method must be found
 \NewDocumentCommand\hypupdateattribute { }
-{
- \Hy@EXPsetpdfborder
- \Hy@EXPsetpdfhighlight
- \Hy@EXPsetbordercolor
-}
-\ExplSyntaxOff
+ {
+   \Hy@EXPsetpdfborder
+   \Hy@EXPsetpdfhighlight
+   \Hy@EXPsetbordercolor
+ }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%only used in test if version can be set
-%\protected\def\pdflastannot      {\numexpr\pdffeedback lastannot\relax}
-%\protected\def\pdflastobj        {\numexpr\pdffeedback lastobj\relax}
-
-%\protected\def\pdfliteral        {\pdfextension literal}
-
-%\protected\edef\pdfpageattr            {\pdfvariable pageattr}
-
-%\protected\edef\pdfpageresources       {\pdfvariable pageresources}
-%\protected\edef\pdfpagesattr           {\pdfvariable pagesattr}
-
-
-%\protected\def\pdfstartlink      {\pdfextension startlink }
-%\protected\def\pdfendlink        {\pdfextension endlink\relax}
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\ExplSyntaxOn
 % catalog mapped to expl3 command
 % \Hy@PutCatalog is used only in one place, so unclear if really usefull ...
 % \Hy@PutCatalog{/PageLabels<</Nums[\HyPL@Labels]>>}%
 % we simply hard code this for now until hyperref.sty itself can be adapted ...
 \cs_new:Npn\__hyp_put_catalog:n #1
- {
-  \pdf_catalog_gput{PageLabels}{<</Nums[\HyPL@Labels]>>}
- }
+  {
+    \pdf_catalog_gput{PageLabels}{<</Nums[\HyPL@Labels]>>}
+  }
 
-\pdf@ifdraftmode
- {
-  \let\Hy@PutCatalog \use_none:n
- }
- {
-  \let\Hy@PutCatalog \__hyp_put_catalog:n
- }
+\pdf@ifdraftmode %from pdftexcmds replace??
+  {
+    \let\Hy@PutCatalog \use_none:n
+  }
+  {
+    \let\Hy@PutCatalog \__hyp_put_catalog:n
+  }
 
 \ExplSyntaxOff
 
@@ -213,39 +203,60 @@
     \HyPL@SetPageLabels
   }%
 \fi
+
 %UF replace Hy@pstringdef definition.
+
 \ExplSyntaxOn
 \cs_new:Npn \__hyp_pstringdef:Nn #1 #2
-{
- \group_begin:
- \char_set_catcode_other:N \~
- \char_set_active_eq:NN \~ \c_tilde_str
- \char_set_catcode_active:N \~
- \exp_args:NNx % or only o?
- \str_gset_convert:Nnnn \g_tmpa_str {#2}{}{utf8/string} %utf8 because of hyperref
- \group_end:
- \str_set_eq:NN#1 \g_tmpa_str
-}
+  {
+    \group_begin:
+    \char_set_catcode_other:N \~
+    \char_set_active_eq:NN \~ \c_tilde_str
+    \char_set_catcode_active:N \~
+    \exp_args:NNx % or only o?
+    \str_gset_convert:Nnnn \g_tmpa_str {#2}{}{utf8/string} %utf8 because of hyperref
+    \group_end:
+    \str_set_eq:NN#1 \g_tmpa_str
+  }
 \cs_set_eq:NN\Hy@pstringdef \__hyp_pstringdef:Nn
 \ExplSyntaxOff
-%  \def\Hy@pstringdef#1#2{%
-%    \begingroup
-%      \edef~{\string~}%
-%      \xdef\Hy@gtemp{\pdf@escapestring{#2}}%
-%    \endgroup
-%    \let#1\Hy@gtemp
-%  }%
-\providecommand*{\XR@ext}{pdf}
-\Hy@setbreaklinks{true}
-\def\HyPat@ObjRef{%
-  [0-9]*[1-9][0-9]* 0 R%
-}
 
 
-%\edef\Hy@pdfminorversion{\pdfvariable minorversion}%
-%\edef\Hy@pdfmajorversion{\pdfvariable majorversion}%
+
+
+\providecommand*{\XR@ext}{pdf} %ok as default for all drivers we want to support, should probably go into hyperref
+\Hy@setbreaklinks{true}        %also for dvips??
 
 \ExplSyntaxOn
+\str_case:VnF \c_sys_backend_str
+ {
+   { pdfmode }
+   {
+     \def\HyPat@ObjRef
+      {
+       [0-9]*[1-9][0-9]*~0~R
+      }
+   }
+   { dvipdfmx }
+   {
+     \def\HyPat@ObjRef
+      {
+        @[^~]+
+      }
+   }
+   { xdvipdfmx }
+   {
+     \def\HyPat@ObjRef
+      {
+        @[^~]+
+      }
+   }
+ }
+ { %also set in hyperref sty, so probably not needed.
+   \def\HyPat@ObjRef/{.+}
+ }
+
+%we force the setting of pdfversion in \DeclareDocumentMetaData
 \cs_set_eq:NN \Hy@pdfminorversion \pdf_version_minor:
 \cs_set_eq:NN \Hy@pdfmajorversion \pdf_version_major:
 
@@ -254,129 +265,126 @@
     \pdf_version_min_gset:n { 1.5 }
   }
 
-% should this go into the drivers?
-% or in the pdf level?
-% set pdfversion / needs adaption to major version!!!
-
 \legacy_if:nT { Hy@setpdfversion }
  {
     \msg_warning:nn { hyp }{ pdfversion-disabled }
  }
- \edef\Hy@pdfversion
-  { % this will need revision when pdf version stuff is better sorted
-   \int_compare:nNnTF { \pdf_version_minor: } = { 2 }
-    { 10 }
-    {\pdf_version_minor:}
-  }
+
+
 \Hy@DisableOption{pdfversion}%
 
-%need redoing, should use the pdfresources stuff ...
 \cs_generate_variant:Nn \pdf_object_write:nn {nx}
 \cs_generate_variant:Nn \pdf_catalog_gput:nn {nx}
 
+%ocg colorlinks should be done as in ocgx. This here
+% are boxes ...
 \legacy_if:nTF {Hy@ocgcolorlinks}
- {
-  \newcommand\OBJ@OCG@view {} % for the hyperref test
-  \pdf@ifdraftmode{}{
-    \pdf_object_new:nn   { l__hyp_ocg_view_dict_obj }   { dict }
-    \pdf_object_new:nn   { l__hyp_ocg_print_dict_obj }  { dict }
-    \pdf_object_new:nn   { l__hyp_ocg_config_dict_obj } { dict }
-    \pdf_object_new:nn   { l__hyp_ocg_ref_array_obj }   { array }
-    \pdf_object_write:nx { l__hyp_ocg_ref_array_obj }
-     {
-       \pdf_object_ref:n { l__hyp_ocg_view_dict_obj }
-       \c_space_tl
-       \pdf_object_ref:n { l__hyp_ocg_print_dict_obj }
-     }
-
-    \pdf_object_write:nn { l__hyp_ocg_view_dict_obj }
-     {
-        /Type/OCG
-        /Name(View)
-        /Usage
-         <<
-          /Print <</PrintState/OFF>>~
-          /View  <</ViewState/ON  >>~
-         >>
-     }
-    \pdf_object_write:nn { l__hyp_ocg_print_dict_obj }
-     {
-        /Type/OCG
-        /Name(Print)
-        /Usage
-         <<
-          /Print <</PrintState/ON>>~
-          /View  <</ViewState/OFF>>~
-         >>
-     }
-   \pdf_catalog_gput:nn {OCProperties/OCGs}{l__hyp_ocg_view_dict_obj}
-   \pdf_catalog_gput:nn {OCProperties/OCGs}{l__hyp_ocg_print_dict_obj}
-
-   \pdf_object_write:nx { l__hyp_ocg_config_dict_obj }
-    {
-      /OFF[\pdf_object_ref:n { l__hyp_ocg_print_dict_obj }]
-      /AS[
-        <<
-         /Event/View
-         /OCGs\c_space_tl \pdf_object_ref:n { l__hyp_ocg_ref_array_obj }
-         /Category[/View]
-        >>
-        <<
-         /Event/Print
-         /OCGs\c_space_tl \pdf_object_ref:n { l__hyp_ocg_ref_array_obj }
-         /Category[/Print]
-        >>
-        <<
-         /Event/Export
-         /OCGs\c_space_tl \pdf_object_ref:n { l__hyp_ocg_ref_array_obj }
-         /Category[/Print]
-        >>
-          ]
+  {
+    \newcommand\OBJ@OCG@view {} % for the hyperref test
+    \pdf@ifdraftmode
+      {}
+      {
+        \pdf_object_new:nn   { l__hyp_ocg_view_dict_obj }   { dict }
+        \pdf_object_new:nn   { l__hyp_ocg_print_dict_obj }  { dict }
+        \pdf_object_new:nn   { l__hyp_ocg_config_dict_obj } { dict }
+        \pdf_object_new:nn   { l__hyp_ocg_ref_array_obj }   { array }
+        \pdf_object_write:nx { l__hyp_ocg_ref_array_obj }
+          {
+            \pdf_object_ref:n { l__hyp_ocg_view_dict_obj }
+            \c_space_tl
+            \pdf_object_ref:n { l__hyp_ocg_print_dict_obj }
+          }
+        \pdf_object_write:nn { l__hyp_ocg_view_dict_obj }
+          {
+            /Type/OCG
+            /Name(View)
+            /Usage
+             <<
+              /Print <</PrintState/OFF>>~
+              /View  <</ViewState/ON  >>~
+             >>
+          }
+        \pdf_object_write:nn { l__hyp_ocg_print_dict_obj }
+          {
+            /Type/OCG
+            /Name(Print)
+            /Usage
+             <<
+              /Print <</PrintState/ON>>~
+              /View  <</ViewState/OFF>>~
+             >>
+          }
+       \pdf_catalog_gput:nn { OCProperties/OCGs }{ l__hyp_ocg_view_dict_obj }
+       \pdf_catalog_gput:nn { OCProperties/OCGs }{ l__hyp_ocg_print_dict_obj }
+       \pdf_object_write:nx { l__hyp_ocg_config_dict_obj }
+         {
+           /OFF[\pdf_object_ref:n { l__hyp_ocg_print_dict_obj }]
+           /AS[
+             <<
+              /Event/View
+              /OCGs\c_space_tl \pdf_object_ref:n { l__hyp_ocg_ref_array_obj }
+              /Category[/View]
+             >>
+             <<
+              /Event/Print
+              /OCGs\c_space_tl \pdf_object_ref:n { l__hyp_ocg_ref_array_obj }
+              /Category[/Print]
+             >>
+             <<
+              /Event/Export
+              /OCGs\c_space_tl \pdf_object_ref:n { l__hyp_ocg_ref_array_obj }
+              /Category[/Print]
+             >>
+              ]
+         }
+       \pdf_catalog_gput:nn { OCProperties/D }{ l__hyp_ocg_config_dict_obj }
     }
-    \pdf_catalog_gput:nn {OCProperties/D}{l__hyp_ocg_config_dict_obj}
-  }
-  \Hy@AtBeginDocument{
-    \def\Hy@colorlink#1{
-      \group_begin:
-        \legacy_if:nTF {Hy@ocgcolorlinks}
-        {
-          \def\Hy@ocgcolor{#1}
-          \setbox0=\hbox\bgroup\color@begingroup
-        }
-        {
-          \HyColor@UseColor#1
-        }
-    }
-    \def\Hy@endcolorlink{
-      \legacy_if:nT {Hy@ocgcolorlinks}
-       {
-        \color@endgroup\egroup
-        \mbox{
-          \pdf_bdc:nn {OC}{l__hyp_ocg_print_dict_obj}
-          \rlap{\copy0}
-          \pdf_emc:
-          \pdf_bdc:nn {OC}{l__hyp_ocg_view_dict_obj}
-          \group_begin:
-            \expandafter\HyColor@UseColor\Hy@ocgcolor
-            \box0~
-          \group_end:
-          \pdf_emc:
-        }
+    \Hy@AtBeginDocument
+      {
+        \def\Hy@colorlink#1
+          {
+            \group_begin:
+            \legacy_if:nTF {Hy@ocgcolorlinks}
+              {
+                \def\Hy@ocgcolor{#1}
+                \setbox0=\hbox\bgroup\color@begingroup
+              }
+              {
+                \HyColor@UseColor#1
+              }
+          }
+        \def\Hy@endcolorlink
+         {
+           \legacy_if:nT {Hy@ocgcolorlinks}
+             {
+               \color@endgroup\egroup
+               \mbox
+                 {
+                   \pdf_bdc:nn {OC}{l__hyp_ocg_print_dict_obj}
+                   \rlap{\copy0}
+                   \pdf_emc:
+                   \pdf_bdc:nn {OC}{l__hyp_ocg_view_dict_obj}
+                   \group_begin:
+                   \expandafter\HyColor@UseColor\Hy@ocgcolor
+                   \box0~
+                   \group_end:
+                   \pdf_emc:
+                }
+             }
+           \group_end:
+         }
       }
-      \group_end:
-    }
-  }
- }
- {
-  \Hy@DisableOption{ocgcolorlinks}
- }
+   }
+   {
+     \Hy@DisableOption{ocgcolorlinks}
+   }
 
-\def\setpdflinkmargin#1
- {
-   \pdf_link_margin:n { #1 }
- }
+\cs_new_protected:Npn \setpdflinkmargin #1
+  {
+    \pdf_link_margin:n { #1 }
+  }
  % default:
- \pdf_link_margin:n { 1pt}
+\pdf_link_margin:n { 1pt }
 
 \providecommand*\@pdfview{XYZ}
 \str_set:Nx\@pdfview{\str_lower_case:f {\@pdfview}}
