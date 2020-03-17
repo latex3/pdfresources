@@ -436,7 +436,7 @@
   \fi
   \Hy@StartlinkName{}%
   \Hy@testname
-  \expandafter\Hy@colorlink\csname @#1color\endcsname
+  \expandafter\Hy@colorlink\csname @linkcolor\endcsname
 }
 
 \ExplSyntaxOn
@@ -479,22 +479,7 @@
 \cs_new_protected:Npn \hyper@linkstart #1 #2
   {
     \Hy@VerboseLinkStart{#1}{#2}% only for debug
-    % is this still needed or are the hooks handled elsewhere??
-    \tl_if_exist:cTF            % or test for blank??
-      { @#1bordercolor }
-      {
-        \hook_put:nnnn
-          { pdf }
-          { link_begin_link_attr }
-          { C }{ [\tl_use:c { @#1bordercolor }] } %do I need to expand?? seems not
-      }
-      {
-        \hook_remove:nnn
-          { pdf }
-          { link_begin_link_attr }
-          { C }
-      }
-    \find@pdflink{#1}{#2}% #1=color type
+    \find@pdflink{link}{#2}% #1=color type (fix), #2=destination name
   }
 
 % the endlink muss have the same type as the start?
@@ -507,21 +492,7 @@
 \def\hyper@link#1#2#3
  {
   \Hy@VerboseLinkStart{#1}{#2}
-  \tl_if_exist:cTF
-   { @#1bordercolor }
-   {
-    \hook_put:nnnn
-     { pdf }
-     { link_begin_link_attr }
-     { C }{ [\tl_use:c { @#1bordercolor }] } %do I need to expand?? seems not
-   }
-   {
-    \hook_remove:nnn
-     { pdf }
-     { link_begin_link_attr }
-     { C }
-   }
-  \find@pdflink{#1}{#2}#3\Hy@xspace@end
+  \find@pdflink{link}{#2}#3\Hy@xspace@end
   \close@EXPpdflink { link }
 }
 \ExplSyntaxOff
