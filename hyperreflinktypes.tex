@@ -1,0 +1,22 @@
+\hyper@linkstart : 
+   in hyperref.sty!
+   two arguments!
+   first : color (will ignore it ...)
+   second: destination name
+   \hyper@linkstart{link}{\Hy@footnote@currentHref}
+   \hyper@linkstart{cite}{cite.#1}%        
+   \hyper@linkstart{link}{\Hy@tocdestname} (toc)
+
+ internal command 
+  \find@pdflink{#1}{#2}
+  ->  \pdf_link_begin_goto:nnw { link } { #2 }
+      \expandafter\Hy@colorlink\csname @#1color\endcsname
+      
+\hyper@link
+   three arguments, basically \hyper@linkstart/\hyperlinkend with
+   content as third argument. 
+   Used in \hyper@link@ - > 
+    \hyper@@link[cite]
+    \hyper@@link[link]
+    #1 either link or cite     
+ 
