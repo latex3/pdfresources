@@ -4,7 +4,7 @@
 %% meant to test the use of the commands
 %% from pdfresources.sty
 %%
-
+%% drivers are loaded in line 4745 in hyperref.sty.
 \ProvidesFile{hgeneric-experimental.def}
   [2020/03/16 v0.5 %
   Hyperref driver for luaTeX]
@@ -48,6 +48,21 @@
 % }}
 % booleans for the (some) option keys. As hyperref disables them it is okay to set them here,
 % hypersetup  can't interfere
+
+%%%%%%%%%%%%%%%%
+% defaults, will perhaps need some sorting and be checked if they are sensible for all backends
+%%%%%%%%%%%%%%%
+\providecommand*{\XR@ext}{pdf} %ok as default for all drivers we want to support, should probably go into hyperref
+\Hy@setbreaklinks{true}        %also for dvips??
+
+% checked dvips, luatex, xetex, dvipdfm: values are identical:
+\providecommand*\@pdfborder{0~0~1}
+\providecommand*\@pdfborderstyle{}
+% unicode ...
+\HyPsd@LoadUnicode
+\Hy@unicodetrue
+\let\HyPsd@pdfencoding\HyPsd@pdfencoding@unicode
+
 %%% pdfa key:
 \bool_new:N \l__hyp_pdfa_bool
 \ifHy@pdfa
@@ -91,7 +106,8 @@
 % these are (temporary) commands to fill various attributes (color, border style) in
 % the hooks for links from the hyperref keys.
 
-%pdfborder, pdfborderstyle
+% pdfborder, pdfborderstyle
+
 \cs_new_protected:Npn \Hy@EXPsetpdfborder
   {
     \seq_map_inline:Nn \c_pdf_link_types_seq
@@ -171,13 +187,41 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\ExplSyntaxOff
+% page labels.
+%% current implemention in hyperref/hyperref drivers
+% xetex: hxetex line 80-110
+%        \HyPL@StorePageLabel writes to the aux-file
+%        at begin document (after reading the aux)
+%        \HyPL@SetPageLabels is called (defined in hyperref.sty after the driver
+%        loading)
+%        which calls \Hy@PutCatalog{/PageLabels<</Nums[\HyPL@Labels]>>}%
+% dvips  identical to xetex, line 60 to 90 in pdfmark.def
+% dvipdfm identical to xetex
+% pdftex \HyPL@StorePageLabel stores in \HyPL@Labels in the first compilation
+%        \AtVeryEndDocument \HyPL@SetPageLabels is called.
+% luatex identical to pdftex
+% The code in hyperref inspects \thepage and tries to figure out
+% the numbering system and the prefix. E.g. A-\arabic{page} is correctly split.
+% If the counter can not be identified hyperref generates only /P entries with the
+% whole content.
+%% new implementation
+% pdftex/luatex
+% \AtVeryEndDocument is too late for pdflatex/lualatex the catalog is already pushed
+% out. So we update the catalog entry when storing the page label.
+% we do not try to avoid the "useless" pagelabel entry /PageLabels <</Nums[0<</S/D>>]>>
+% (but it would be possible), we also don't test for empty \thepage, hyperref seems to
+% handle this fine and the pdf is valid.
+
+\ExplSyntaxOn
+
 % catalog mapped to expl3 command
-% \Hy@PutCatalog is used only in one place, so unclear if really usefull ...
-% \Hy@PutCatalog{/PageLabels<</Nums[\HyPL@Labels]>>}%
+% \Hy@PutCatalog is used only in one place but we
+% we need this for the dvips/xetex route for the page labels.
 % we simply hard code this for now until hyperref.sty itself can be adapted ...
 \cs_new:Npn\__hyp_put_catalog:n #1
   {
-    \pdf_catalog_gput{PageLabels}{<</Nums[\HyPL@Labels]>>}
+    \pdf_catalog_gput:nx {PageLabels}{<</Nums[\HyPL@Labels]>>}
   }
 
 \pdf@ifdraftmode %from pdftexcmds replace??
@@ -188,22 +232,62 @@
     \let\Hy@PutCatalog \__hyp_put_catalog:n
   }
 
+\legacy_if:nT { Hy@pdfpagelabels }
+  {
+    \sys_if_output_pdf:TF
+      { %pdflatex,lualatex
+        \def\HyPL@StorePageLabel#1
+          {
+            \toks@\expandafter{\HyPL@Labels}
+            \xdef\HyPL@Labels
+              {
+                \the\toks@
+                \the\Hy@abspage<<#1>>
+              }
+            \pdf_catalog_gput:nx {PageLabels}{<</Nums[\HyPL@Labels]>>}
+          }
+      }
+      { %xetex, dvips, dvipdfmx
+        \def\HyPL@StorePageLabel#1
+          {
+            \legacy_if:nT { @filesw }
+              {
+                \begingroup
+                \edef\Hy@tempa{\the\Hy@abspage<<#1>>}
+                \immediate\write\@mainaux
+                  {
+                    \string\HyPL@Entry{\Hy@tempa}
+                  }
+                \endgroup
+              }
+          }
+        \Hy@AtBeginDocument
+          {
+            \legacy_if:nT { @filesw }
+              {
+                \immediate\write\@mainaux
+                   {
+                     \string\providecommand\string*\string\HyPL@Entry[1]{}
+                   }
+              }
+            \ifx\HyPL@Labels\@empty
+              \Hy@WarningNoLine{Rerun to get /PageLabels entry}%
+            \else
+              \HyPL@SetPageLabels
+            \fi
+            \let\HyPL@Entry\@gobble
+           }
+         \def\HyPL@Entry#1
+           {
+             \expandafter\gdef\expandafter\HyPL@Labels\expandafter
+               {
+                  \HyPL@Labels
+                  #1
+               }
+           }
+      }
+  }
 \ExplSyntaxOff
-
-
-\ifHy@pdfpagelabels
-  \def\HyPL@StorePageLabel#1{%
-    \toks@\expandafter{\HyPL@Labels}%
-    \xdef\HyPL@Labels{%
-      \the\toks@
-      \the\Hy@abspage<<#1>>%
-    }%
-  }%
-  \RequirePackage{atveryend}[2009/12/07]%
-  \AtVeryEndDocument{%
-    \HyPL@SetPageLabels
-  }%
-\fi
 
 %UF replace Hy@pstringdef definition.
 
@@ -225,8 +309,6 @@
 
 
 
-\providecommand*{\XR@ext}{pdf} %ok as default for all drivers we want to support, should probably go into hyperref
-\Hy@setbreaklinks{true}        %also for dvips??
 
 \ExplSyntaxOn
 \str_case:VnF \c_sys_backend_str
@@ -384,7 +466,8 @@
   {
     \pdf_link_margin:n { #1 }
   }
- % default:
+
+% default:
 \pdf_link_margin:n { 1pt }
 
 
@@ -394,7 +477,7 @@
 
 \newcommand\Hy@pstringDest{}
 
-\Hy@WrapperDef\new@pdflink#1{%
+\Hy@WrapperDef\new@pdflink#1{% #1 is a destination name.
   \ifhmode
     \@savsf\spacefactor
   \fi
@@ -411,14 +494,12 @@
 
 \ExplSyntaxOn
 
-\cs_new_protected:Npn \Hy@DestName #1 #2
+\cs_new_protected:Npn \Hy@DestName #1 #2 % #1= name #2= fit options
   {
     \pdf_destination:nf {#1}{#2}
   }
 
 \ExplSyntaxOff
-\providecommand*\@pdfborder{0 0 1}
-\providecommand*\@pdfborderstyle{}
 \def\Hy@undefinedname{UNDEFINED}
 \def\find@pdflink#1#2{%
   \leavevmode

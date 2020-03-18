@@ -1,0 +1,14 @@
+\input{regression-test}
+\documentclass{article}
+\usepackage{l3pdf}
+\ExplSyntaxOn
+\sys_if_engine_pdftex:T {\usepackage[LGR]{fontenc}}
+\pdf_uncompress:
+\ExplSyntaxOff
+\usepackage[pdfpagelabels=true,customdriver=hgeneric-experimental
+]{hyperref}
+
+\renewcommand\thepage{λέγ\arabic{page}}
+\begin{document}
+abc \newpage abc \newpage abc  \newpage \pagenumbering{roman} abc  \newpage \pagenumbering{Roman}\setcounter{page}{5} abc
+\end{document}
