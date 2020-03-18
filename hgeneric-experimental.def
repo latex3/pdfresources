@@ -4,7 +4,7 @@
 %% meant to test the use of the commands
 %% from pdfresources.sty
 %%
-%% drivers are loaded in line 4745 in hyperref.sty.
+%% drivers are loaded in line 4745 in hyperref.sty in a \Hy@AtEndOfPackage command.
 \ProvidesFile{hgeneric-experimental.def}
   [2020/03/16 v0.5 %
   Hyperref driver for luaTeX]
@@ -62,6 +62,11 @@
 \HyPsd@LoadUnicode
 \Hy@unicodetrue
 \let\HyPsd@pdfencoding\HyPsd@pdfencoding@unicode
+
+% variants
+\cs_generate_variant:Nn \pdf_object_write:nn {nx}
+\cs_generate_variant:Nn \pdf_catalog_gput:nn {nx}
+
 
 %%% pdfa key:
 \bool_new:N \l__hyp_pdfa_bool
@@ -187,7 +192,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\ExplSyntaxOff
+
 % page labels.
 %% current implemention in hyperref/hyperref drivers
 % xetex: hxetex line 80-110
@@ -213,8 +218,6 @@
 % (but it would be possible), we also don't test for empty \thepage, hyperref seems to
 % handle this fine and the pdf is valid.
 
-\ExplSyntaxOn
-
 % catalog mapped to expl3 command
 % \Hy@PutCatalog is used only in one place but we
 % we need this for the dvips/xetex route for the page labels.
@@ -236,61 +239,55 @@
   {
     \sys_if_output_pdf:TF
       { %pdflatex,lualatex
-        \def\HyPL@StorePageLabel#1
+        \cs_set_protected:Npn \HyPL@StorePageLabel #1
           {
-            \toks@\expandafter{\HyPL@Labels}
-            \xdef\HyPL@Labels
-              {
-                \the\toks@
-                \the\Hy@abspage<<#1>>
-              }
-            \pdf_catalog_gput:nx {PageLabels}{<</Nums[\HyPL@Labels]>>}
+            \tl_gput_right:Nx \HyPL@Labels { \the\Hy@abspage<<#1>> }
+            \pdf_catalog_gput:nx { PageLabels }{ <</Nums[\HyPL@Labels]>> }
           }
       }
       { %xetex, dvips, dvipdfmx
-        \def\HyPL@StorePageLabel#1
+        \cs_set_protected:Npn \HyPL@StorePageLabel #1
           {
             \legacy_if:nT { @filesw }
               {
-                \begingroup
-                \edef\Hy@tempa{\the\Hy@abspage<<#1>>}
-                \immediate\write\@mainaux
-                  {
-                    \string\HyPL@Entry{\Hy@tempa}
-                  }
-                \endgroup
+                 \iow_now:Nx\@mainaux
+                   {
+                      \exp_not:N \HyPL@Entry{\the\Hy@abspage<<#1>>}
+                   }
               }
           }
         \Hy@AtBeginDocument
           {
             \legacy_if:nT { @filesw }
               {
-                \immediate\write\@mainaux
+                \iow_now:Nn \@mainaux
                    {
-                     \string\providecommand\string*\string\HyPL@Entry[1]{}
+                      \providecommand*\HyPL@Entry[1]{}
                    }
               }
-            \ifx\HyPL@Labels\@empty
-              \Hy@WarningNoLine{Rerun to get /PageLabels entry}%
-            \else
-              \HyPL@SetPageLabels
-            \fi
-            \let\HyPL@Entry\@gobble
+            \tl_if_empty:NTF \HyPL@Labels
+              {
+                \Hy@WarningNoLine{Rerun~to~get~/PageLabels~entry}
+              }
+              {
+                \HyPL@SetPageLabels
+              }
+              \cs_set_eq:NN \HyPL@Entry \use_none:n
            }
-         \def\HyPL@Entry#1
+         \cs_set_protected:Npn \HyPL@Entry #1
            {
-             \expandafter\gdef\expandafter\HyPL@Labels\expandafter
-               {
-                  \HyPL@Labels
-                  #1
-               }
+              \tl_gset:No \HyPL@Labels
+                {
+                   \HyPL@Labels
+                   #1
+                }
            }
       }
   }
 \ExplSyntaxOff
 
 %UF replace Hy@pstringdef definition.
-
+%% !! check the conversion through the drivers!
 \ExplSyntaxOn
 \cs_new:Npn \__hyp_pstringdef:Nn #1 #2
   {
@@ -305,9 +302,6 @@
   }
 \cs_set_eq:NN\Hy@pstringdef \__hyp_pstringdef:Nn
 \ExplSyntaxOff
-
-
-
 
 
 \ExplSyntaxOn
@@ -355,9 +349,6 @@
 
 
 \Hy@DisableOption{pdfversion}%
-
-\cs_generate_variant:Nn \pdf_object_write:nn {nx}
-\cs_generate_variant:Nn \pdf_catalog_gput:nn {nx}
 
 %ocg colorlinks should be done as in ocgx. This here
 % are boxes ...
