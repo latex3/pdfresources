@@ -35,6 +35,6 @@ checkengines = {"luatex","pdftex","xetex"}
 checkconfigs = {"build",
                 "config-noxetex",
                 "config-luatex",
-                -- "config-dvips" -- works currently only locally
+                "config-dvips" 
                 }
 
