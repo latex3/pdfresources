@@ -63,6 +63,9 @@
 \Hy@unicodetrue
 \let\HyPsd@pdfencoding\HyPsd@pdfencoding@unicode
 
+\providecommand*\@pdfview{XYZ}
+
+%%%%%%%%%%
 % variants
 \cs_generate_variant:Nn \pdf_object_write:nn {nx}
 \cs_generate_variant:Nn \pdf_catalog_gput:nn {nx}
@@ -312,6 +315,9 @@
 
 
 \ExplSyntaxOn
+%these patterns are used in hyperref checks.
+%it is unclear if they are really useful and if a backend support is
+%needed.
 \str_case:VnF \c_sys_backend_str
  {
    { pdfmode }
@@ -357,7 +363,7 @@
 
 \Hy@DisableOption{pdfversion}%
 
-%ocg colorlinks should be done as in ocgx. This here
+% ocg colorlinks should be done as in ocgx. This here
 % are boxes ...
 \legacy_if:nTF {Hy@ocgcolorlinks}
   {
@@ -468,11 +474,9 @@
 % default:
 \pdf_link_margin:n { 1pt }
 
-
 \ExplSyntaxOff
 
-\providecommand*\@pdfview{XYZ}
-
+\ExplSyntaxOn
 \newcommand\Hy@pstringDest{}
 
 \Hy@WrapperDef\new@pdflink#1{% #1 is a destination name.
@@ -482,7 +486,8 @@
   \Hy@SaveLastskip
   \Hy@VerboseAnchor{#1}%
   \Hy@pstringdef\Hy@pstringDest{\HyperDestNameFilter{#1}}%
-  \Hy@DestName\Hy@pstringDest\@pdfview
+  %\Hy@DestName\Hy@pstringDest\@pdfview
+  \pdf_destination:nf { \Hy@pstringDest } { \@pdfview } %types??
   \Hy@RestoreLastskip
   \ifhmode
     \spacefactor\@savsf
@@ -490,12 +495,13 @@
 }
 \let\pdf@endanchor\@empty
 
+\ExplSyntaxOff
 \ExplSyntaxOn
 
-\cs_new_protected:Npn \Hy@DestName #1 #2 % #1= name #2= fit options
-  {
-    \pdf_destination:nf {#1}{#2}
-  }
+%\cs_new_protected:Npn \Hy@DestName #1 #2 % #1= name #2= fit options
+%  {
+%    \pdf_destination:nf {#1}{#2}
+%  }
 
 \ExplSyntaxOff
 \def\Hy@undefinedname{UNDEFINED}
