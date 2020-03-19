@@ -3,7 +3,7 @@ Internal links
 %%%%%%%%%%%%%%%%%
 
 \hyper@linkstart :
-   defined in driver, 
+   defined in driver,
    used in hyperref.sty!
    two arguments!
    first : color (will ignore it ...)
@@ -26,20 +26,20 @@ Internal links
     \hyper@@link[cite]
     \hyper@@link[link]
     #1 either link or cite
-    
+
 %%%%%%%%%%%%%%%%%%%%%
 
 \hyper@anchor, \hyper@anchorstart, \hyper@anchorend :
   defined in driver,
   used in hyperref.sty
-  one argument: destination name    
+  one argument: destination name
+  
+  \hyper@anchor assumes that the outside caller correctly sets \anchor@spot (and the outside callers assume that \hyper@anchor set \anchor@spot.) 
   
   Uses
   \hyper@anchorstart{Doc-Start}\hyper@anchorend
   \hyper@anchorstart{\@currentHref}\hyper@anchorend in \hyper@refstepcounter and various environments
-  inside the definition of \hyper@@anchor: \hyper@@anchor is used in various environments where text is involved and
-  typically in combination with nesting. (Very) old version of hyperref.dtx suggest that anchorcolor which does nothing
-  now was involved here.
+  inside the definition of \hyper@@anchor: \hyper@@anchor (defined in hyperref) is used in various environments where text is involved and typically in combination with nesting. (Very) old version of hyperref.dtx suggests that anchorcolor which does nothing now was involved here.
   \def\hypertarget#1#2{%
   \ifHy@nesting
     \hyper@@anchor{#1}{#2}%
@@ -47,21 +47,21 @@ Internal links
     \hyper@@anchor{#1}{\relax}#2%
   \fi
 }
-  
+
   Internalcommand
-   \new@pdflink #1 
+   \new@pdflink #1
    defined in driver
    used only in driver
    argument is destination name, "Fit" argument is got through \@pdfview
 
 
-%%%% 
+%%%%
 nesting
 
 The documentation writes about "nesting":
 Allows links to be nested; no drivers currently support this.
 
 All places in the code where \ifHy@nesting is used are about anchors, not links.
-\ifHy@nesting is false in all drivers, so actually nowhere the true code is used. 
+\ifHy@nesting is false in all drivers, so actually nowhere the true code is used.
 
-It is unclear if nesting can be used, and what use it would have.
+It is unclear if nesting can be used, and what use it would have. 

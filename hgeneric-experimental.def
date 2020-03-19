@@ -36,6 +36,13 @@
   { pdfa-no-reset-button }
   { PDF/A:~Reset~action~is~prohibited }
 
+\msg_new:nnn
+  { hyp }
+  { empty-destination-name }
+  {
+    Empty~destination~name,\\
+            using~`#1'
+  }
 %% I require the bookmark package to get rid of some of the bookmarks code.
 % but the testing code doesn't work.
 % !!!!!!!!!!!!!!!!!!!!! to do !!!!!!!!!!!!!!!!!!!!!
@@ -300,17 +307,16 @@
     \char_set_catcode_active:N \~
     \sys_if_engine_pdftex:TF
       { %pdftex. Should we assume utf8 or allow other input encodings?
-        \exp_args:NNx % or only o?
-          \str_gset_convert:Nnnn \g_tmpa_str {#2}{utf8}{utf8/string} %utf8 because of hyperref
+        \str_gset_convert:Nnnn \g_tmpa_str {#2}{utf8}{utf8/string} %utf8 because of hyperref
       }
       { %luatex,xetex
-        \exp_args:NNx % or only o?
-          \str_gset_convert:Nnnn \g_tmpa_str {#2}{}{utf8/string} %utf8 because of hyperref
+        \str_gset_convert:Nnnn \g_tmpa_str {#2}{}{utf8/string} %utf8 because of hyperref
       }
     \group_end:
     \str_set_eq:NN#1 \g_tmpa_str
   }
-\cs_set_eq:NN\Hy@pstringdef \__hyp_pstringdef:Nn
+\cs_generate_variant:Nn \__hyp_pstringdef:Nn {No,Nx}
+\cs_set_eq:NN\Hy@pstringdef \__hyp_pstringdef:Nx
 \ExplSyntaxOff
 
 
@@ -478,21 +484,18 @@
 
 \ExplSyntaxOn
 \newcommand\Hy@pstringDest{}
+\tl_new:N \__hyp_pdfstring_tmp_tl
 
-\Hy@WrapperDef\new@pdflink#1{% #1 is a destination name.
-  \ifhmode
-    \@savsf\spacefactor
-  \fi
-  \Hy@SaveLastskip
-  \Hy@VerboseAnchor{#1}%
-  \Hy@pstringdef\Hy@pstringDest{\HyperDestNameFilter{#1}}%
-  %\Hy@DestName\Hy@pstringDest\@pdfview
-  \pdf_destination:nf { \Hy@pstringDest } { \@pdfview } %types??
-  \Hy@RestoreLastskip
-  \ifhmode
-    \spacefactor\@savsf
-  \fi
-}
+\Hy@WrapperDef\new@pdflink#1 % #1 is a destination name.
+  {
+    \mode_if_horizontal:T { \@savsf\spacefactor }
+    \Hy@SaveLastskip      %defined in hyperref
+    \Hy@VerboseAnchor{#1} %define in hyperref, for debugging
+    \__hyp_pstringdef:Nx  \__hyp_pdfstring_tmp_tl { \HyperDestNameFilter{#1} } %
+    \exp_args:NV \pdf_destination:nf { \__hyp_pdfstring_tmp_tl } { \@pdfview } %
+    \Hy@RestoreLastskip
+    \mode_if_horizontal:T { \spacefactor\@savsf }
+  }
 \let\pdf@endanchor\@empty
 
 \ExplSyntaxOff
@@ -503,32 +506,34 @@
 %    \pdf_destination:nf {#1}{#2}
 %  }
 
-\ExplSyntaxOff
-\def\Hy@undefinedname{UNDEFINED}
-\def\find@pdflink#1#2{%
-  \leavevmode
-  \protected@edef\Hy@testname{#2}%
-  \ifx\Hy@testname\@empty
-    \Hy@Warning{%
-      Empty destination name,\MessageBreak
-      using `\Hy@undefinedname'%
-    }%
-    \let\Hy@testname\Hy@undefinedname
-  \else
-    \Hy@pstringdef\Hy@testname{%
-      \expandafter\HyperDestNameFilter\expandafter{\Hy@testname}%
-    }%
-  \fi
-  \Hy@StartlinkName{}%
-  \Hy@testname
-  \expandafter\Hy@colorlink\csname @linkcolor\endcsname
-}
+%\ExplSyntaxOff
+\tl_const:Nn \c__hyp_destname_undefined_tl {UNDEFINED}
+\tl_new:N \l__hyp_destname_tmpa_tl
+
+\def\find@pdflink#1#2
+  {%
+    \mode_leave_vertical:
+    \protected@edef\l__hyp_destname_tmpa_tl {#2}
+    \tl_if_empty:NTF \l__hyp_destname_tmpa_tl
+      {
+        \msg_warning:nnx { hyp } { empty-destination-name } { \c__hyp_destname_undefined_tl }
+        \tl_set_eq:NN \l__hyp_destname_tmpa_tl \c__hyp_destname_undefined_tl
+      }
+      { %I hope this is right ...
+        \__hyp_pstringdef:Nx \l__hyp_destname_tmpa_tl
+          {
+            \exp_args:No \HyperDestNameFilter { \l__hyp_destname_tmpa_tl }
+          }
+    %\Hy@pstringdef\Hy@testname{%
+    %  \expandafter\HyperDestNameFilter\expandafter{\Hy@testname}%
+    %}%
+     }
+     \exp_args:Nno
+       \pdf_link_begin_goto:nnw { link } { \l__hyp_destname_tmpa_tl }
+         \Hy@colorlink\@linkcolor
+  }
 
 \ExplSyntaxOn
-\cs_new_protected:Npn \Hy@StartlinkName #1 #2
-  {
-    \pdf_link_begin_goto:nnw { link } { #2 }
-  }
 
 %experiment end link code
 \cs_new_protected:Npn \close@EXPpdflink #1
