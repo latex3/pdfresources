@@ -295,8 +295,15 @@
     \char_set_catcode_other:N \~
     \char_set_active_eq:NN \~ \c_tilde_str
     \char_set_catcode_active:N \~
-    \exp_args:NNx % or only o?
-    \str_gset_convert:Nnnn \g_tmpa_str {#2}{}{utf8/string} %utf8 because of hyperref
+    \sys_if_engine_pdftex:TF
+      { %pdftex. Should we assume utf8 or allow other input encodings?
+        \exp_args:NNx % or only o?
+          \str_gset_convert:Nnnn \g_tmpa_str {#2}{utf8}{utf8/string} %utf8 because of hyperref
+      }
+      { %luatex,xetex
+        \exp_args:NNx % or only o?
+          \str_gset_convert:Nnnn \g_tmpa_str {#2}{}{utf8/string} %utf8 because of hyperref
+      }
     \group_end:
     \str_set_eq:NN#1 \g_tmpa_str
   }
