@@ -2,6 +2,7 @@
 \documentclass{article}
 \usepackage{l3pdf}
 \ExplSyntaxOn
+\usepackage{pdfresources}
 \sys_if_engine_pdftex:T {\usepackage[LGR]{fontenc}}
 \pdf_uncompress:
 \ExplSyntaxOff
@@ -10,5 +11,10 @@
 
 \renewcommand\thepage{λέγ\arabic{page}}
 \begin{document}
+\ExplSyntaxOn
+\pdf_info_gput:nn{CreationDate}{(D:20200202111111+01'00')}
+\pdf_info_gput:nn{ModDate}{(D:20200202111111+01'00')}
+\pdf_info_gput:nn{Creator}{(l3build test)}
+\ExplSyntaxOff
 abc \newpage abc \newpage abc  \newpage \pagenumbering{roman} abc  \newpage \pagenumbering{Roman}\setcounter{page}{5} abc
 \end{document}
