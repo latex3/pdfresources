@@ -341,10 +341,7 @@
   }
 \cs_generate_variant:Nn \__hyp_pstringdef:Nn {No,Nx}
 \cs_set_eq:NN\Hy@pstringdef \__hyp_pstringdef:Nx
-\ExplSyntaxOff
 
-
-\ExplSyntaxOn
 %these patterns are used in hyperref checks.
 %it is unclear if they are really useful and if a backend support is
 %needed.
@@ -504,9 +501,6 @@
 % default:
 \pdf_link_margin:n { 1pt }
 
-\ExplSyntaxOff
-
-\ExplSyntaxOn
 \newcommand\Hy@pstringDest{}
 \tl_new:N \l__hyp_pdfstring_tmp_tl
 
@@ -522,8 +516,7 @@
   }
 \let\pdf@endanchor\@empty
 
-\ExplSyntaxOff
-\ExplSyntaxOn
+
 
 %\cs_new_protected:Npn \Hy@DestName #1 #2 % #1= name #2= fit options
 %  {
@@ -587,25 +580,24 @@
 % #1 is for the color only: found {cite} and {link}
 % #2 is the destination find@pdflink uses then named link
 
-\cs_new_protected:Npn \hyper@linkstart #1 #2
+\cs_new_protected:Npn \hyper@linkstart #1 #2 %#1 ignored, #2=destination name
   {
     \Hy@VerboseLinkStart{#1}{#2}% only for debug
-    \__hyp_link_dest_begin:nw {#2}% #1=color type (fix), #2=destination name
+    \__hyp_link_dest_begin:nw {#2}%
   }
 
-% the endlink muss have the same type as the start?
-% probably always link works ? But what is with my hooks???
 \cs_new_protected:Npn \hyper@linkend
   {
     \__hyp_link_dest_end:
     \Hy@VerboseLinkStop
   }
 
-\def\hyper@link#1#2#3
+\cs_new_protected:Npn \hyper@link #1 #2 #3 %#1 ignored, #2=destination name, #3 content
  {
   \Hy@VerboseLinkStart{#1}{#2}
   \__hyp_link_dest_begin:nw {#2}#3\Hy@xspace@end
   \__hyp_link_dest_end:
+  \Hy@VerboseLinkStop
 }
 \ExplSyntaxOff
 
