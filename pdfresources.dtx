@@ -2,7 +2,7 @@
 %
 %% File: pdfresources.dtx
 %
-% Copyright (C) 2019 The LaTeX3 Project
+% Copyright (C) 2019-2020 The LaTeX3 Project
 %
 % It may be distributed and/or modified under the conditions of the
 % LaTeX Project Public License (LPPL), either version 1.3c of this
@@ -76,14 +76,14 @@
 % for the various backends.
 %
 % The project here tries to resolve this situation by providing interfaces to
-% the various resources and objects in a backend independant way.
+% the various resources and objects in a backend independent way.
 %
 % The supported backends are pdflatex, lualatex, (x)dvipdfmx (latex, xelatex)
-% and dvips with ps2pdf (not completly yet). dvips with distiller could work too
+% and dvips with ps2pdf (not completely yet). dvips with distiller could work too
 % but is untested.
 %
-% That the interfaces are backend independant doesn't mean that the results and even
-% the compilation behaviour is identical. The backends are too different to allow
+% That the interfaces are backend independent doesn't mean that the results and even
+% the compilation behavior is identical. The backends are too different to allow
 % this. Some backends expand arguments e.g. in a \cs{special} while other don't.
 % Some backends can insert a resource at the first compilation, while another uses
 % the aux-file and a label and so needs at least two.
@@ -400,7 +400,7 @@
 % \subsection{prop / path-Code}
 %  Many code parts are quite similar: props are filled and output.
 %  So we define some generic commands for props to ensure systematic
-%  internal names. The names are based on pathes separated by slashed.
+%  internal names. The names are based on paths separated by slashed.
 %  The first slash is not used in the names. All props are global.
 %  \begin{NOTE}{UF}
 %  The main question will be if one can/should encode the different
@@ -604,7 +604,7 @@
 %   removed until then.
 %   \meta{name} should be a valid pdf name without the leading slash,
 %   \meta{value} should be a valid pdf value. Any escaping or (re)encoding must
-%   be done explictly. Some backends expand the value but this should not be
+%   be done explicitly. Some backends expand the value but this should not be
 %   relied on. If a \meta{name} is used twice, only the last \meta{value}
 %   set will be used.
 %
@@ -655,7 +655,7 @@
   }
 
 % remove:
-%^^A documentated
+%^^A documented
 \cs_new_protected:Npn \pdf_pagesattr_gremove:n #1
   {
     \@@_prop_gremove:nn {Pages}{ #1 }
@@ -682,7 +682,7 @@
 % \begin{NOTE}{UF}
 %  path: Page
 %  The engines differ a lot here: pdflatex and lualatex uses a register while with
-%  dvips/dvipdfmx a one-shot-special ist used. So for pdflatex and lualatex code
+%  dvips/dvipdfmx a one-shot-special is used. So for pdflatex and lualatex code
 %  to assemble the content of the register is needed. Specials are used at shipout,
 %  the registers is set directly. With lualatex one can use
 %  \cs{latelua} to delay the setting, with pdflatex one has to use a shipout hook.
@@ -695,7 +695,7 @@
 %  not to do harm).
 %  dvipdfmx syntax: \special{pdf: put @thispage << /Rotate 90 >>}, like dvips has an in-built
 %  management code.
-%  Both change only the current page, so to get the pdftex behaviour (which sets
+%  Both change only the current page, so to get the pdftex behavior (which sets
 %  also the following pages) one need to repeat it on every shipout.
 % \end{NOTE}
 % \begin{macro}{\@@_backend_Page_primitive:n,
@@ -945,7 +945,7 @@
 %   current page and the following pages. The current page means the page on which
 %   the command is executed. \meta{name} should be a valid pdf name
 %   without the leading slash, \meta{value} should be a valid pdf value.
-%   Any escaping or (re)encoding must be done explictly. Some backends expand the
+%   Any escaping or (re)encoding must be done explicitly. Some backends expand the
 %   value but this should not be relied on.
 %   To avoid problems with the asynchronous page breaking
 %   the command should be used after \cs{newpage}, or in the header,
@@ -981,7 +981,7 @@
 %   \cs{pdf_pageattr_gput:nn} it will overwrite it for this page.
 %   \meta{name} should be a valid pdf name without the leading slash,
 %   \meta{value} should be a valid pdf value. Any escaping or (re)encoding must be
-%   done explictly. If a \meta{name} is used twice, only the last \meta{value}
+%   done explicitly. If a \meta{name} is used twice, only the last \meta{value}
 %   set will be used.
 %   With the engine pdflatex (at least) a second compilation is needed.
 % \end{function}
@@ -1017,12 +1017,12 @@
 % path: Info
 % The info dictionary is filled by e.g. \cs{pdfinfo}. Multiple appearances of
 % \cs{pdfinfo} are concatenated, so one could end with multiple /Title or /Author entries.
-% It is then viewer dependant which one is showed, so it is better to avoid this.
+% It is then viewer dependent which one is showed, so it is better to avoid this.
 % We therefore setup a property which is filled and written to the info
 % directory in one go. According to hyperref a few odd drivers (hvtex, dvipsone, dviwind)
 % don't support arbitrary keys, but this should be handle elsewhere. Most entries are
 % strings so there is a special command for this. As entries with empty content
-% should be omited we add a test. The string command should perhaps escape the argument,
+% should be omitted we add a test. The string command should perhaps escape the argument,
 % but for now we are assuming that the argument is pdf safe.
 % hyperref writes to the info dictionary at the shipout of the first page --
 % probably to catch the  case that \cs{title} is issued after the begin of the document.
@@ -1049,7 +1049,7 @@
 %   Adds |/|\meta{name} and the \meta{value} to the info dictionary.
 %   \meta{name} should be a valid pdf name without the leading slash,
 %   \meta{value} should be a valid pdf value. Any escaping or (re)encoding must be
-%   done explictly.
+%   done explicitly.
 %   If a \meta{name} is used twice, only the last \meta{value}
 %   set will be used. The info dictionary is written at the end of the compilation,
 %   so values can be set at any time.
@@ -1065,7 +1065,7 @@
 %   Adds |/|\meta{name} and the \meta{value} surrounded by parentheses to the info dictionary.
 %   \meta{name} should be a valid pdf name without the leading slash,
 %   \meta{value} should be a valid content of pdf string. Any escaping or (re)encoding must be
-%   done explictly.
+%   done explicitly.
 %   The info dictionary expects utf8 in the strings, so a conversion like this is
 %   normally sensible:
 %   \begin{verbatim}
@@ -1147,7 +1147,7 @@
 %    This command adds a BDC marked content operator to the current page stream.
 %   \meta{tag} is the tag of this operator (without the leading slash).
 %   As object this commands uses the last anonymous dictionary object created with
-%   \cs{pdf_object_now:nn}. It lies in the responsability of the user that the last
+%   \cs{pdf_object_now:nn}. It lies in the responsibility of the user that the last
 %   object is the wanted one.
 % \end{function}
 % \begin{function}[added = 2019-10-17]
@@ -1492,7 +1492,7 @@
 %    If needed a delayed version can be added later.
 %  - the argument for attributes is needed to add e.g. /StructParents
 %  - it is not clear if an argument for additional resources is needed, probably they
-%    should / need to be be added automatically.
+%    should / need to be added automatically.
 %  - code for adding ExtGState etc to the local resource is missing, will be
 %    added when the object name is clear.!!!!!!!!!!!!
 %  - should the size be stored in dim or tl?
@@ -1510,7 +1510,7 @@
 %    This command create a new form XObject that can be used as appearance or
 %    directly later.
 %    If the content contains BDC-marks it should \emph{not} be given as a
-%    previously typesetted box, but directly so that the names of the
+%    previously typeset box, but directly so that the names of the
 %    BDC-marks can be added to the resources of the xform. The xform will automatically
 %    include the resources of the current page.
 %    The content will be typeset in a hbox. With pdflatex and luatex
@@ -1601,7 +1601,7 @@
     % #1 name
     % #2 attributes
     % #3 resources
-    % #4 content, not necessarly a box!
+    % #4 content, not necessarily a box!
       {
         \hbox_set:Nn \l_@@_tmpa_box
           {
@@ -1678,14 +1678,14 @@
   }
 
 %luatex
-%nearly identical but not completly ...
+%nearly identical but not completely ...
 \sys_if_engine_luatex:T
   {
     \cs_new:Npn \@@_backend_xform_new:nnnn #1 #2 #3 #4
     % #1 name
     % #2 attributes
     % #3 resources
-    % #4 content, not necessarly a box!
+    % #4 content, not necessarily a box!
       {
         \hbox_set:Nn \l_@@_tmpa_box
           {
@@ -1769,7 +1769,7 @@
     % #1 name
     % #2 attributes
     % #3 resources
-    % #4 content, not necessarly a box!
+    % #4 content, not necessarily a box!
       {
         \int_gincr:N \g_@@_backend_object_int
         \int_const:cn
@@ -1868,7 +1868,7 @@
 % all pages starting from the page where the first time something has been added to the
 % resource and to all XObjects. For luatex and pdftex it must be done together
 % with the /Properties, see above.
-% I don't see a need to set e.g. /ColorSpace pagewise: preflight handles this
+% I don't see a need to set e.g. /ColorSpace page wise: preflight handles this
 % fine, see experiment colorspace-resources.
 % As pgf does the same, there is a need to patch it for now. Ditto for package colorspace.
 % \end{NOTE}
@@ -1883,7 +1883,7 @@
 % \item value
 % \end{arguments}
 % \begin{macro}{\@@_PageNResources_gpush:}
-% This pushes out the objects. It is a noop with xdvipdfmx and dvips.
+% This pushes out the objects. It is a no-op with xdvipdfmx and dvips.
 %    \begin{macrocode}
 % backend commands the command to fill the register
 % and to push the values.
@@ -2038,7 +2038,7 @@
 % (not fixed) place.
 % /AF is even an array of dictionaries.
 % There is probably no way to test what has already been added to the catalog,
-% so doublettes can only be avoided with ``don't do it''.
+% so doublets can only be avoided with ``don't do it''.
 % see catalogue.tex for a list of entries ...
 % Perhaps some tools to create the AF-file specification dictionaries is useful.
 % Open for now:
@@ -2051,7 +2051,7 @@
 % pdf management. Some entries (like /Lang) are simple values where the last
 % setting should win, other like /OutputIntents are dictionaries which can
 % be filled from more than one source. In some cases the values that needs to be
-% added are not at the toplevel but in some subsubdictionary.
+% added are not at the top-level but in some subsubdictionary.
 % To handle this some \Arg{keys} in the following command
 % are connected with special functions.
 % \begin{function}[added = 2019-08-18]
@@ -2192,7 +2192,7 @@
 %      \c_@@_Catalog_seq_clist,
 %     }
 %  This variables hold the list of the various types of entries. With it
-%  the various gput-commands are generated.
+%  the various \verb=_gput= commands are generated.
 %  \end{variable}
 %  \begin{macro}{ \@@_catalog_XX_gput:n }
 % Various commands to handle subentries and special cases.
@@ -2572,7 +2572,7 @@
 % \begin{NOTE}{UF}
 %   /OpenAction can be an array:
 %   |/OpenAction [5 0 R /Fit]| or an action: |<< /S /GoTo /D [ 7 0 R /Fit ] >>|.
-%  The implementation belows allows only the first. It is not quite clear, if
+%  The implementation below allows only the first. It is not quite clear, if
 %  this is sensible (and if a special docview command is needed at all).
 %  The second could be set directly.
 % \end{NOTE}
@@ -2667,7 +2667,7 @@
 % menu |\Acrobatmenu|
 % \end{NOTE}
 % \begin{variable}[added = 2020-03-12]{ \c_pdf_link_types_seq }
-% This constand sequence contains the list of currently supported link types
+% This constant sequence contains the list of currently supported link types
 % for which hooks exist.
 % \end{variable}
 %
@@ -3075,7 +3075,7 @@
 % E.g. a hook in \cs{@startsection} perhaps needs the current section level or
 % if it is a run-in or display sectioning. Using \#-arguments in the hook is possible
 % but rather fragile. It is probably better if the surrounding command offers a
-% documentated interface through e.g. tl-variables. It should be also clear which
+% documented interface through e.g. tl-variables. It should be also clear which
 % variables are read-only and which can be changed by the hook code.
 %
 % %%%%%%%%END HOOK
