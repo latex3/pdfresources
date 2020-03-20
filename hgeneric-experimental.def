@@ -21,6 +21,7 @@
 %% \g__hyp_AcroForm_CoFields_prop
 %% \g__hyp_AcroForm_Fields_prop
 %% \l__hyp_tmpa_seq
+%% \l__hyp_tmpa_box
 %% \l__hyp_CheckmarkYes_tl
 %% \l__hyp_CheckmarkOff_tl
 %% \l__hyp_RadioYes_tl
@@ -101,6 +102,8 @@
 \cs_generate_variant:Nn \pdf_object_write:nn {nx}
 \cs_generate_variant:Nn \pdf_catalog_gput:nn {nx}
 
+% tmp
+\box_new:N \l__hyp_tmpa_box
 
 %%% pdfa key:
 \bool_new:N \l__hyp_pdfa_bool
@@ -461,7 +464,7 @@
             \legacy_if:nTF {Hy@ocgcolorlinks}
               {
                 \def\Hy@ocgcolor{#1}
-                \setbox0=\hbox\bgroup\color@begingroup
+                \hbox_set:Nw \l__hyp_tmpa_box
               }
               {
                 \HyColor@UseColor#1
@@ -471,16 +474,16 @@
          {
            \legacy_if:nT {Hy@ocgcolorlinks}
              {
-               \color@endgroup\egroup
+               \hbox_set_end:
                \mbox
                  {
                    \pdf_bdc:nn {OC}{l__hyp_ocg_print_dict_obj}
-                   \rlap{\copy0}
+                   \hbox_overlap_right:n { \box_use:N \l__hyp_tmpa_box }
                    \pdf_emc:
                    \pdf_bdc:nn {OC}{l__hyp_ocg_view_dict_obj}
                    \group_begin:
                    \expandafter\HyColor@UseColor\Hy@ocgcolor
-                   \box0~
+                   \box_use_drop:N \l__hyp_tmpa_box
                    \group_end:
                    \pdf_emc:
                 }
