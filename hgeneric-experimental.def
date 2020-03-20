@@ -7,8 +7,9 @@
 %% drivers are loaded in line 4745 in hyperref.sty in a \Hy@AtEndOfPackage command.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% list of new internal commands
-%% \__hyp_link_begin_goto:nw : start command for links to internal destination
+%% \__hyp_link_dest_begin:nw : start command for links to internal destination
 %%                             replaces \find@pdflink
+%% \__hyp_link_dest_end:
 %% \__hyp_pagelabels_gput:n : puts pagelabels in the catalog.
 %% \__hyp_pstringdef:Nn     : replaces Hy@pstringdef, converts n to pdfstring and stores in N
 %%                            naming??
@@ -534,7 +535,7 @@
 \tl_new:N \l__hyp_destname_tmpa_tl
 
 %\def\find@pdflink#1#2
-\cs_new_protected:Npn \__hyp_link_begin_goto:nw #1
+\cs_new_protected:Npn \__hyp_link_dest_begin:nw #1
   {
     \mode_leave_vertical:
     \protected@edef\l__hyp_destname_tmpa_tl { #1 }
@@ -557,14 +558,10 @@
          \Hy@colorlink\@linkcolor
   }
 
-\ExplSyntaxOn
-
-%experiment end link code
-\cs_new_protected:Npn \close@EXPpdflink #1
+\cs_new_protected:Npn \__hyp_link_dest_end:
   {
     \Hy@endcolorlink
-    \Hy@VerboseLinkStop
-    \pdf_link_end:n { #1 }
+    \pdf_link_end:n { link }
   }
 
 
@@ -593,21 +590,22 @@
 \cs_new_protected:Npn \hyper@linkstart #1 #2
   {
     \Hy@VerboseLinkStart{#1}{#2}% only for debug
-    \__hyp_link_begin_goto:nw {#2}% #1=color type (fix), #2=destination name
+    \__hyp_link_dest_begin:nw {#2}% #1=color type (fix), #2=destination name
   }
 
 % the endlink muss have the same type as the start?
 % probably always link works ? But what is with my hooks???
 \cs_new_protected:Npn \hyper@linkend
   {
-    \close@EXPpdflink { link }
+    \__hyp_link_dest_end:
+    \Hy@VerboseLinkStop
   }
 
 \def\hyper@link#1#2#3
  {
   \Hy@VerboseLinkStart{#1}{#2}
-  \__hyp_link_begin_goto:nw {#2}#3\Hy@xspace@end
-  \close@EXPpdflink { link }
+  \__hyp_link_dest_begin:nw {#2}#3\Hy@xspace@end
+  \__hyp_link_dest_end:
 }
 \ExplSyntaxOff
 
