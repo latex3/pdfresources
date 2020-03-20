@@ -490,10 +490,10 @@
   {
     \mode_if_horizontal:T { \@savsf\spacefactor }
     \Hy@SaveLastskip      %defined in hyperref
-    \Hy@VerboseAnchor{#1} %define in hyperref, for debugging
+    \Hy@VerboseAnchor{#1} %defined in hyperref, for debugging
     \__hyp_pstringdef:Nx  \__hyp_pdfstring_tmp_tl { \HyperDestNameFilter{#1} } %
     \exp_args:NV \pdf_destination:nf { \__hyp_pdfstring_tmp_tl } { \@pdfview } %
-    \Hy@RestoreLastskip
+    \Hy@RestoreLastskip   %defined in hyperref
     \mode_if_horizontal:T { \spacefactor\@savsf }
   }
 \let\pdf@endanchor\@empty
