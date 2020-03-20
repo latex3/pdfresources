@@ -1,0 +1,37 @@
+\input{regression-test}
+\documentclass{article}
+\usepackage{xcolor}
+\usepackage[verbose,ocgcolorlinks,customdriver=hgeneric-experimental]
+{hyperref}
+
+\hypupdateattribute
+\begin{document}
+\section{hyperref colors / colorlinks}\label{sec}
+
+\begin{tabular}{lll}
+ default color               & example   \\\hline\\
+ \textcolor{red}{red, linkcolor}  & \ref{sec} \\\\
+ \textcolor{green}{green, citecolor}& \cite{cite} \\\\
+ \textcolor{cyan}{cyan, filecolor} & \href{example-image.pdf}{file}\\\\
+ \textcolor{magenta}{magenta, urlcolor}& \url{https://www.latex-project.org/}\\\\
+ \textcolor{red}{red, menucolor}  & \Acrobatmenu{View}{View Something}\\\\
+ \textcolor{cyan}{cyan, runcolor}  &  \href{run:sumatra}{run something}
+\end{tabular}
+
+\section{hyperref colors / border }
+\makeatletter\def\@pdfborder{1 1 1} \def\HyColor@UseColor#1{}\makeatother
+
+\begin{tabular}{lll}
+ default color                    & example   \\\hline\\
+ \textcolor{red}{red, linkbordercolor}  & \ref{sec} \\\\
+ \textcolor{green}{green, citebordercolor}& \cite{cite} \\\\
+ \textcolor{teal}{teal, filebordercolor} & \href{example-image.pdf}{file}\\\\
+ \textcolor[rgb]{0,1,1}{rgb 0,1,1, urlbordercolor}& \url{https://www.latex-project.org/}\\\\
+ \textcolor{red}{red, menubordercolor}  & \Acrobatmenu{View}{View Something}\\\\
+ \textcolor[rgb]{0,0.7,0.7}{rgb 0,0.7,0.7, runbordercolor}  &  \href{run:sumatra}{run something}
+\end{tabular}
+
+\begin{thebibliography}{99}
+\bibitem{cite} some text
+\end{thebibliography}
+\end{document} 
