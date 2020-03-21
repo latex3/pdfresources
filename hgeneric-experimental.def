@@ -604,30 +604,38 @@
 \cs_new_protected:Npn \hyper@linkurl #1 #2  %#1:link text #2: URI,
   {
     \group_begin:
-    \__hyp_pstringdef:Nn \l__hyp_uri_tmpa_tl { #2 }
-    \hyper@chars
+    \__hyp_pstringdef:Nx \l__hyp_uri_tmpa_tl { #2 }
+    %hyper@chars, unneeded as used only once
+    \cs_set_eq:NN \# \c_hash_str
+    \cs_set_eq:NN \% \c_percent_str
+    \Hy@safe@activestrue
     \mode_leave_vertical:
+    %Subtype and A could probably also be handled with hooks if needed
+    %but checks for all drivers should be done then.
     \pdf_link_user:nnn { url }
-     {
-       /Subtype /Link
-       /A<<
-         /Type/Action~
-         /S/URI~
-         /URI(\Hy@pstringURI)~
-         \ifHy@href@ismap
-           /IsMap~true~
-         \fi
-         \Hy@href@nextactionraw
-       >>
-    }
-    {
-     \Hy@colorlink
-     \@urlcolor#1\Hy@xspace@end
-     \Hy@endcolorlink
-     \Hy@VerboseLinkStop
-    }
-  \group_end:
-}
+      {
+        /Subtype /Link
+        /A
+          <<
+            % the action dictionary has no hook!
+            /Type/Action~
+            /S/URI~
+            /URI(\l__hyp_uri_tmpa_tl)~
+            \ifHy@href@ismap
+              /IsMap~true%
+            \fi
+            \Hy@href@nextactionraw
+          >>
+      }
+      {
+        \Hy@colorlink\@urlcolor
+        #1
+        \Hy@xspace@end
+        \Hy@endcolorlink
+        \Hy@VerboseLinkStop %where is the start??
+      }
+    \group_end:
+  }
 \ExplSyntaxOff
 
 \ExplSyntaxOn
