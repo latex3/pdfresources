@@ -10,18 +10,20 @@
 %% \__hyp_link_dest_begin:nw : start command for links to internal destination
 %%                             replaces \find@pdflink
 %% \__hyp_link_dest_end:
+%% \__hyp_destination:n     :  sets an anchor, replaces \new@pdflink
 %% \__hyp_PageLabels_gpush: : puts pagelabels in the catalog, used on every storing
 %% \__hyp_pstringdef:Nn     : replaces Hy@pstringdef, converts n to pdfstring and stores in N
 %%                            naming??
 %% \__hyp_info_generate_addons: what did this do??
 %% list of new variables
 %% \l__hyp_pdfa_bool : for pdfa option (unclear if it will stay)
-%% \l__hyp_pdfstring_tmp_tl
 %% \c__hyp_destname_undefined_tl
 %% \g__hyp_AcroForm_CoFields_prop
 %% \g__hyp_AcroForm_Fields_prop
 %% \l__hyp_tmpa_seq
 %% \l__hyp_tmpa_box
+%% \l__hyp_tmpa_tl
+%% \l__hyp_destname_tmpa_tl
 %% \l__hyp_CheckmarkYes_tl
 %% \l__hyp_CheckmarkOff_tl
 %% \l__hyp_RadioYes_tl
@@ -97,6 +99,8 @@
 
 \providecommand*\@pdfview{XYZ}
 
+\pdf_link_margin:n { 1pt }
+
 %%%%%%%%%%
 % variants
 \cs_generate_variant:Nn \pdf_object_write:nn {nx}
@@ -104,7 +108,14 @@
 
 % tmp
 \box_new:N \l__hyp_tmpa_box
+\tl_new:N  \l__hyp_tmpa_tl
+\tl_new:N  \l__hyp_destname_tmpa_tl %needed?
 
+% const
+\tl_const:Nn \c__hyp_destname_undefined_tl {UNDEFINED}
+
+
+% bools
 %%% pdfa key:
 \bool_new:N \l__hyp_pdfa_bool
 \ifHy@pdfa
@@ -322,11 +333,8 @@
            }
       }
   }
-\ExplSyntaxOff
 
-%UF replace Hy@pstringdef definition.
-%% !! check the conversion through the drivers!
-\ExplSyntaxOn
+%replace Hy@pstringdef definition.
 \cs_new:Npn \__hyp_pstringdef:Nn #1 #2
   {
     \group_begin:
@@ -344,6 +352,8 @@
     \str_set_eq:NN#1 \g_tmpa_str
   }
 \cs_generate_variant:Nn \__hyp_pstringdef:Nn {No,Nx}
+
+% can go when all occurences in the driver have been replaced. 
 \cs_set_eq:NN\Hy@pstringdef \__hyp_pstringdef:Nx
 
 %these patterns are used in hyperref checks.
@@ -502,43 +512,29 @@
     \pdf_link_margin:n { #1 }
   }
 
-% default:
-\pdf_link_margin:n { 1pt }
+% internal definitions for anchors (destinations) and links to destinations.
 
-\newcommand\Hy@pstringDest{}
-\tl_new:N \l__hyp_pdfstring_tmp_tl
-
-\Hy@WrapperDef\new@pdflink#1 % #1 is a destination name.
+\Hy@WrapperDef \__hyp_destination:n #1 % #1 is a destination name.
   {
     \mode_if_horizontal:T { \@savsf\spacefactor }
     \Hy@SaveLastskip      %defined in hyperref
     \Hy@VerboseAnchor{#1} %defined in hyperref, for debugging
-    \__hyp_pstringdef:Nx  \l__hyp_pdfstring_tmp_tl { \HyperDestNameFilter{#1} } %
-    \exp_args:NV \pdf_destination:nf { \l__hyp_pdfstring_tmp_tl } { \@pdfview } %
+    \__hyp_pstringdef:Nx  \l__hyp_tmpa_tl { \HyperDestNameFilter{#1} } %
+    \exp_args:NV \pdf_destination:nf { \l__hyp_tmpa_tl } { \@pdfview } %
     \Hy@RestoreLastskip   %defined in hyperref
     \mode_if_horizontal:T { \spacefactor\@savsf }
   }
-\let\pdf@endanchor\@empty
 
-
-
-%\cs_new_protected:Npn \Hy@DestName #1 #2 % #1= name #2= fit options
-%  {
-%    \pdf_destination:nf {#1}{#2}
-%  }
-
-%\ExplSyntaxOff
-\tl_const:Nn \c__hyp_destname_undefined_tl {UNDEFINED}
-\tl_new:N \l__hyp_destname_tmpa_tl
-
-%\def\find@pdflink#1#2
 \cs_new_protected:Npn \__hyp_link_dest_begin:nw #1
   {
     \mode_leave_vertical:
-    \protected@edef\l__hyp_destname_tmpa_tl { #1 }
+    \protected@edef \l__hyp_destname_tmpa_tl { #1 }
     \tl_if_empty:NTF \l__hyp_destname_tmpa_tl
       {
-        \msg_warning:nnx { hyp } { empty-destination-name } { \c__hyp_destname_undefined_tl }
+        \msg_warning:nnx
+          { hyp }
+          { empty-destination-name }
+          { \c__hyp_destname_undefined_tl }
         \tl_set_eq:NN \l__hyp_destname_tmpa_tl \c__hyp_destname_undefined_tl
       }
       { %I hope this is right ...
@@ -546,13 +542,10 @@
           {
             \exp_args:No \HyperDestNameFilter { \l__hyp_destname_tmpa_tl }
           }
-    %\Hy@pstringdef\Hy@testname{%
-    %  \expandafter\HyperDestNameFilter\expandafter{\Hy@testname}%
-    %}%
-     }
-     \exp_args:Nno
-       \pdf_link_begin_goto:nnw { link } { \l__hyp_destname_tmpa_tl }
-         \Hy@colorlink\@linkcolor
+      }
+    \exp_args:Nno
+      \pdf_link_begin_goto:nnw { link } { \l__hyp_destname_tmpa_tl }
+        \Hy@colorlink\@linkcolor
   }
 
 \cs_new_protected:Npn \__hyp_link_dest_end:
@@ -561,28 +554,37 @@
     \pdf_link_end:n { link }
   }
 
+%% hyperref commands for destinations (anchor) and links to destinations
 
-\ExplSyntaxOff
+\cs_new_protected:Npn \hyper@anchor #1
+  {
+    \__hyp_destination:n {#1}\anchor@spot
+  }
 
-\def\hyper@anchor#1{%
-  \new@pdflink{#1}\anchor@spot\pdf@endanchor
-}
+\cs_new_protected:Npn \hyper@anchorstart#1
+  {
+    \__hyp_destination:n {#1}
+    \Hy@activeanchortrue
+  }
 
-\def\hyper@anchorstart#1{%
-  \new@pdflink{#1}%
-  \Hy@activeanchortrue
-}
+\cs_new_protected:Npn \hyper@anchorend
+  {
+    \Hy@activeanchorfalse
+  }
 
-\def\hyper@anchorend{%
-  \pdf@endanchor
-  \Hy@activeanchorfalse
-}
 
-\ExplSyntaxOn
 % hyper@linkstart/ \hyper@linkend is used for
 % footnotemarks, toc and natbib-cites
 % #1 is for the color only: found {cite} and {link}
-% #2 is the destination find@pdflink uses then named link
+% #2 is the destination name
+
+\cs_new_protected:Npn \hyper@link #1 #2 #3 %#1 ignored, #2=destination name, #3 content
+ {
+  \Hy@VerboseLinkStart{#1}{#2}
+  \__hyp_link_dest_begin:nw {#2}#3\Hy@xspace@end
+  \__hyp_link_dest_end:
+  \Hy@VerboseLinkStop
+}
 
 \cs_new_protected:Npn \hyper@linkstart #1 #2 %#1 ignored, #2=destination name
   {
@@ -596,17 +598,6 @@
     \Hy@VerboseLinkStop
   }
 
-\cs_new_protected:Npn \hyper@link #1 #2 #3 %#1 ignored, #2=destination name, #3 content
- {
-  \Hy@VerboseLinkStart{#1}{#2}
-  \__hyp_link_dest_begin:nw {#2}#3\Hy@xspace@end
-  \__hyp_link_dest_end:
-  \Hy@VerboseLinkStop
-}
-\ExplSyntaxOff
-
-\let\CurrentBorderColor\@linkbordercolor
-\ExplSyntaxOn
 %% this command is used for \url
 \def\hyper@linkurl#1#2{%#1:link text #2: URI,
   \group_begin:
