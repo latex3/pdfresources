@@ -24,6 +24,7 @@
 %% \l__hyp_tmpa_box
 %% \l__hyp_tmpa_tl
 %% \l__hyp_destname_tmpa_tl
+%% \l__hyp_uri_tmpa_tl
 %% \l__hyp_CheckmarkYes_tl
 %% \l__hyp_CheckmarkOff_tl
 %% \l__hyp_RadioYes_tl
@@ -110,6 +111,7 @@
 \box_new:N \l__hyp_tmpa_box
 \tl_new:N  \l__hyp_tmpa_tl
 \tl_new:N  \l__hyp_destname_tmpa_tl %needed?
+\tl_new:N  \l__hyp_uri_tmpa_tl
 
 % const
 \tl_const:Nn \c__hyp_destname_undefined_tl {UNDEFINED}
@@ -353,7 +355,7 @@
   }
 \cs_generate_variant:Nn \__hyp_pstringdef:Nn {No,Nx}
 
-% can go when all occurences in the driver have been replaced. 
+% can go when all occurences in the driver have been replaced.
 \cs_set_eq:NN\Hy@pstringdef \__hyp_pstringdef:Nx
 
 %these patterns are used in hyperref checks.
@@ -599,9 +601,10 @@
   }
 
 %% this command is used for \url
-\def\hyper@linkurl#1#2{%#1:link text #2: URI,
-  \group_begin:
-    \Hy@pstringdef\Hy@pstringURI{#2}%
+\cs_new_protected:Npn \hyper@linkurl #1 #2  %#1:link text #2: URI,
+  {
+    \group_begin:
+    \__hyp_pstringdef:Nn \l__hyp_uri_tmpa_tl { #2 }
     \hyper@chars
     \mode_leave_vertical:
     \pdf_link_user:nnn { url }

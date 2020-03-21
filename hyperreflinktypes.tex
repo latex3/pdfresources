@@ -65,3 +65,13 @@ All places in the code where \ifHy@nesting is used are about anchors, not links.
 \ifHy@nesting is false in all drivers, so actually nowhere the true code is used.
 
 It is unclear if nesting can be used, and what use it would have. 
+
+%%%
+\hyper@linkurl:
+2 arguments: #1 the link text, #2 the URI
+defined in the driver
+used in hyperref inside
+ \@hyper@launch run
+ \url@
+ \@hyper@readexternallink
+ \@hyper@linkfile file
