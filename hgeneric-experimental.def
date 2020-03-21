@@ -10,7 +10,7 @@
 %% \__hyp_link_dest_begin:nw : start command for links to internal destination
 %%                             replaces \find@pdflink
 %% \__hyp_link_dest_end:
-%% \__hyp_pagelabels_gput:n : puts pagelabels in the catalog.
+%% \__hyp_PageLabels_gpush: : puts pagelabels in the catalog, used on every storing
 %% \__hyp_pstringdef:Nn     : replaces Hy@pstringdef, converts n to pdfstring and stores in N
 %%                            naming??
 %% \__hyp_info_generate_addons: what did this do??
@@ -259,17 +259,18 @@
 % \Hy@PutCatalog is used only in one place but we
 % we need this for the dvips/xetex route for the page labels.
 % we simply hard code this for now until hyperref.sty itself can be adapted ...
-\cs_new:Npn\__hyp_pagelabels_gput:n #1
+\cs_new_protected:Npn\__hyp_PageLabels_gpush:
   {
     \pdf_catalog_gput:nx {PageLabels}{<</Nums[\HyPL@Labels]>>}
   }
+
 
 \pdf@ifdraftmode %from pdftexcmds replace??
   {
     \let\Hy@PutCatalog \use_none:n
   }
   {
-    \let\Hy@PutCatalog \__hyp_pagelabels_gput:n
+    \def\Hy@PutCatalog #1 { \__hyp_PageLabels_gpush: }
   }
 
 \legacy_if:nT { Hy@pdfpagelabels }
@@ -279,7 +280,7 @@
         \cs_set_protected:Npn \HyPL@StorePageLabel #1
           {
             \tl_gput_right:Nx \HyPL@Labels { \the\Hy@abspage<<#1>> }
-            \pdf_catalog_gput:nx { PageLabels }{ <</Nums[\HyPL@Labels]>> }
+            \__hyp_PageLabels_gpush:
           }
       }
       { %xetex, dvips, dvipdfmx
