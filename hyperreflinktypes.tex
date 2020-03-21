@@ -13,7 +13,7 @@ Internal links
    \hyper@linkstart{link}{\Hy@tocdestname} (toc)
 
  internal command
-  \find@pdflink{#1}{#2}
+  \find@pdflink{#1}{#2} --> new name: \__hyp_link_dest_begin:nw
    defined in driver,
    used only in driver
   ->  \pdf_link_begin_goto:nnw { link } { #2 }
@@ -33,9 +33,9 @@ Internal links
   defined in driver,
   used in hyperref.sty
   one argument: destination name
-  
-  \hyper@anchor assumes that the outside caller correctly sets \anchor@spot (and the outside callers assume that \hyper@anchor set \anchor@spot.) 
-  
+
+  \hyper@anchor assumes that the outside caller correctly sets \anchor@spot (and the outside callers assume that \hyper@anchor set \anchor@spot.)
+
   Uses
   \hyper@anchorstart{Doc-Start}\hyper@anchorend
   \hyper@anchorstart{\@currentHref}\hyper@anchorend in \hyper@refstepcounter and various environments
