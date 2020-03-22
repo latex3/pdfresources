@@ -1,0 +1,18 @@
+\input{regression-test}
+\documentclass{article}
+
+\usepackage{l3pdf}
+\ExplSyntaxOn
+\pdf_uncompress:
+\ExplSyntaxOff
+\usepackage[customdriver=hgeneric-experimental]{hyperref}
+
+\begin{document}
+\ExplSyntaxOn
+\pdf_info_gput:nn{CreationDate}{(D:20200202111111+01'00')}
+\pdf_info_gput:nn{ModDate}{(D:20200202111111+01'00')}
+\pdf_info_gput:nn{Creator}{(l3build test)}
+\ExplSyntaxOff
+\href{blub.pdf#destination}{pdf}
+
+\end{document}

@@ -75,12 +75,15 @@ used in hyperref inside
  \url@
  \@hyper@readexternallink
  \@hyper@linkfile file
- 
- 
- \hyper@linkfile 
- 3 arguments
+
+
+ \hyper@linkfile
+ 3 arguments: anchor text, filename, destination inside the target
+ (the destination is the text after a #: \href{blub.pdf#destination})
  defined in the driver
  used in hyperref in
  \@hyper@linkfile file:#1\\#2#3#4
- 
- true: \Hy@IfStringEndsWith{xyz.abc}{abc}{yes}{no}
+ creates a GoToR action, so only used if the target is a pdf
+ hyperref checks if the file ends with pdf (\XR@ext) or has no extentions.
+
+ (true: \Hy@IfStringEndsWith{xyz.abc}{abc}{yes}{no}) 

@@ -1,0 +1,14 @@
+\input{regression-test}
+\documentclass{article}
+
+\usepackage{l3pdf}
+\ExplSyntaxOn
+\pdf_uncompress:
+\ExplSyntaxOff
+\usepackage[customdriver=hgeneric-experimental]{hyperref}
+
+\begin{document}
+
+\href{blub.pdf#destination}{pdf}
+
+\end{document}

@@ -25,6 +25,7 @@
 %% \l__hyp_tmpa_tl
 %% \l__hyp_destname_tmpa_tl
 %% \l__hyp_uri_tmpa_tl
+%% \l__hyp_filename_tmpa_tl
 %% \l__hyp_CheckmarkYes_tl
 %% \l__hyp_CheckmarkOff_tl
 %% \l__hyp_RadioYes_tl
@@ -112,6 +113,7 @@
 \tl_new:N  \l__hyp_tmpa_tl
 \tl_new:N  \l__hyp_destname_tmpa_tl %needed?
 \tl_new:N  \l__hyp_uri_tmpa_tl
+\tl_new:N  \l__hyp_filename_tmpa_tl
 
 % const
 \tl_const:Nn \c__hyp_destname_undefined_tl {UNDEFINED}
@@ -639,39 +641,40 @@
 \ExplSyntaxOff
 
 \ExplSyntaxOn
-%file links (need to find out when exactly it is used ...)
-\def\hyper@linkfile#1#2#3{% anchor text, filename, linkname
-  \group_begin:
-    \def\Hy@pstringF{#2}%
-    \Hy@CleanupFile\Hy@pstringF
-    \Hy@pstringdef\Hy@pstringF\Hy@pstringF
-    \Hy@pstringdef\Hy@pstringD{#3}
+%file links to pdfs. See test-filelinks.pdf for a few example.
+\cs_new_protected:Npn \hyper@linkfile #1 #2 #3 % anchor text, filename, destname
+  {
+    \group_begin:
+    \tl_set:Nn \l__hyp_filename_tmpa_tl { #2 }
+    \Hy@CleanupFile \l__hyp_filename_tmpa_tl
+    \__hyp_pstringdef:No \l__hyp_filename_tmpa_tl { \l__hyp_filename_tmpa_tl }
+    \__hyp_pstringdef:Nn \l__hyp_destname_tmpa_tl { #3 }
     \Hy@MakeRemoteAction
     \mode_leave_vertical:
-    \pdf_link_user:nnn
-     { file }
-     {
-       /Subtype /Link
-       /A<<
-          /F(\Hy@pstringF)
+    \pdf_link_user:nnn %expansion??
+      { file }
+      {
+        /Subtype /Link
+        /A<<
+          /F( \l__hyp_filename_tmpa_tl )
           /S/GoToR
           \Hy@SetNewWindow
           \ifx\\#3\\
             /D[\Hy@href@page\@pdfremotestartview]
           \else
-            /D(\Hy@pstringD)
+            /D( \l__hyp_destname_tmpa_tl )
           \fi
           \Hy@href@nextactionraw
         >>
-     }
-     {
-       \Hy@colorlink
-        \@filecolor#1\Hy@xspace@end
-       \Hy@endcolorlink
-       \Hy@VerboseLinkStop
-     }
-  \group_end:
-}
+      }
+      {
+        \Hy@colorlink\@filecolor
+        #1\Hy@xspace@end
+        \Hy@endcolorlink
+        \Hy@VerboseLinkStop %where is the start??
+      }
+    \group_end:
+  }
 \ExplSyntaxOff
 
 \ExplSyntaxOn
