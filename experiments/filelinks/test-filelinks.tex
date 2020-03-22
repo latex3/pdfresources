@@ -1,0 +1,167 @@
+% !Mode:: "TeX:DE:UTF-8:Main"
+\documentclass[landscape]{article}
+\usepackage[margin=2cm]{geometry}
+\usepackage{l3pdf}
+\ExplSyntaxOn
+\pdf_uncompress:
+\ExplSyntaxOff
+\usepackage[pdfnewwindow]{hyperref}
+\begin{filecontents}{mwe.tex}
+\documentclass{article}
+\begin{document}hello\end{document}
+\end{filecontents}
+\begin{filecontents}{txt.txt}
+some text
+some text
+\end{filecontents}
+\renewcommand\arraystretch{2}
+
+\begin{document}
+% (GoToR)
+% absolute path
+%/Subtype/Link/A<</F(/c/texlive/2020/texmf-dist/doc/latex/base/doc.pdf)/S/GoToR/D[0/Fit]>>
+\noindent
+\begin{tabular}{lllll}
+Argument & result type & Link & Test AR & Test Sumatra\\ \hline 
+file:/c/texlive/2020/texmf-dist/doc/latex/base/doc.pdf
+&
+%
+GoToR
+&
+\href{file:/c/texlive/2020/texmf-dist/doc/latex/base/doc.pdf}{pdf}
+& works 
+& fails
+\\
+/c/texlive/2020/texmf-dist/doc/latex/base/doc.pdf
+&
+GoToR 
+&
+\href{/c/texlive/2020/texmf-dist/doc/latex/base/doc.pdf}{pdf} 
+& works 
+& fails
+\\
+mwe.pdf
+&
+GoToR
+&
+%relative path
+% /Subtype/Link/A<</F(mwe.pdf)/S/GoToR/D[0/Fit]>>
+\href{mwe.pdf}{pdf}
+&
+works
+&
+works
+\\
+../extgstate.pdf
+&
+GoToR
+&
+%relative path
+% /Subtype/Link/A<</F(../extgstate.pdf)/S/GoToR/D[0/Fit]>>
+\href{../extgstate.pdf}{pdf}
+&
+works
+&
+works
+\\
+file:/c/texlive/2020/texmf-dist/doc/latex/base/changes.tex
+&
+URI
+%URI(file:/c/texlive/2020/texmf-dist/doc/latex/base/changes.tex)
+&
+\href{file:/c/texlive/2020/texmf-dist/doc/latex/base/changes.tex}{tex}
+&fails
+&fails
+\\
+/c/texlive/2020/texmf-dist/doc/latex/base/changes.tex
+&
+URI
+&
+\href{/c/texlive/2020/texmf-dist/doc/latex/base/changes.tex}{absolute tex}
+& fails
+& fails
+\\
+c:/texlive/2020/texmf-dist/doc/latex/base/changes.tex
+&
+URI
+&
+\href{c:/texlive/2020/texmf-dist/doc/latex/base/changes.tex}{absolute tex}
+& fails
+& fails
+\\
+%relative
+mwe.tex
+&
+URI 
+&
+\href{mwe.tex}{relative tex}
+&works 
+&fails
+\\
+%relative
+../../memo.txt
+&
+URI
+&
+\href{../../memo.txt}{relative tex}
+&works
+&fails
+\\
+%txt file
+file:/c/texlive/2020/release-texlive.txt
+&
+URI
+% /URI(file:/c/texlive/2020/release-texlive.txt)
+&
+\href{file:/c/texlive/2020/release-texlive.txt}{absolute txt}
+& fails
+& fails 
+\\
+c:/texlive/2020/release-texlive.txt
+&
+URI
+% URI(c:/texlive/2020/release-texlive.txt)
+&
+\href{c:/texlive/2020/release-texlive.txt}{absolute txt}
+& works
+& fails
+\\
+/c/texlive/2020/release-texlive.txt 
+&
+URI 
+% /URI(/c/texlive/2020/release-texlive.txt)
+&
+\href{/c/texlive/2020/release-texlive.txt}{absolute txt}
+& fails
+& fails\\
+txt.txt
+&
+URI 
+% /URI(txt.txt)
+&
+\href{txt.txt}{relative txt}
+& works
+& fails \\
+run:test-utf8.tex 
+&
+Launch
+&
+\href{run:mwe.tex}{run tex}
+&
+works
+&
+fails\\
+run:/c/texlive/2020/release-texlive.txt
+&
+Launch
+&
+\href{run:/c/texlive/2020/release-texlive.txt}{run abs txt}
+&
+works
+&
+fails\\
+ 
+\end{tabular}
+
+
+\end{document} 
