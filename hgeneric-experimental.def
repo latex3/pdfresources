@@ -26,6 +26,7 @@
 %% \l__hyp_destname_tmpa_tl
 %% \l__hyp_uri_tmpa_tl
 %% \l__hyp_filename_tmpa_tl
+%% \l__hyp_para_tmpa_tl
 %% \l__hyp_CheckmarkYes_tl
 %% \l__hyp_CheckmarkOff_tl
 %% \l__hyp_RadioYes_tl
@@ -114,7 +115,7 @@
 \tl_new:N  \l__hyp_destname_tmpa_tl %needed?
 \tl_new:N  \l__hyp_uri_tmpa_tl
 \tl_new:N  \l__hyp_filename_tmpa_tl
-
+\tl_new:N  \l__hyp_para_tmpa_tl
 % const
 \tl_const:Nn \c__hyp_destname_undefined_tl {UNDEFINED}
 
@@ -675,40 +676,50 @@
       }
     \group_end:
   }
-\ExplSyntaxOff
 
-\ExplSyntaxOn
 % use by run links xxxxxxxxxxx
+%define \hyper@linklaunch for naming consistency
 \use:x
   { % filename, anchor text, linkname
     \cs_set_protected:Npn \exp_not:N \@hyper@launch run \c_colon_str ##1 \exp_not:N \\ ##2 ##3
   }
-%\def\@hyper@launch run:#1\\#2#3 % filename, anchor text linkname
+  {
+    \hyper@linklaunch {#1}{#2}{#3}
+  }
+
+\cs_new_protected:Npn \hyper@linklaunch #1 #2 #3 % filename, anchor text, Parameters
  {
   \group_begin:
-    \Hy@pstringdef\Hy@pstringF{#1}%
-    \Hy@pstringdef\Hy@pstringP{#3}%
+    \__hyp_pstringdef:Nn \l__hyp_filename_tmpa_tl { #1 }
+    \__hyp_pstringdef:Nn \l__hyp_para_tmpa_tl     { #3 }
+    %\Hy@pstringdef\Hy@pstringF{#1}%
+    %\Hy@pstringdef\Hy@pstringP{#3}%
     \mode_leave_vertical:
-    \pdf_link_user:nnn
+    \pdf_link_user:nnn %expansion?
      { run }
      {
-      /Subtype /Link
-      /A<<
-          /F(\Hy@pstringF)
+       /Subtype /Link
+       /A<<
+          /F( \l__hyp_filename_tmpa_tl )
           /S/Launch
           \Hy@SetNewWindow
-          \ifx\\#3\\
-          \else
-            /Win<</P(\Hy@pstringP)/F(\Hy@pstringF)>>
-          \fi
+          \bool_if:nF
+            {
+              \tl_if_empty_p:N \l__hyp_para_tmpa_tl
+              ||
+              \pdf_version_compare_p:Nn > {1.9}
+            }
+            {
+              /Win<</P(\l__hyp_para_tmpa_tl)/F(\l__hyp_filename_tmpa_tl)>>
+            }
           \Hy@href@nextactionraw
-        >>
+         >>
       }
       {
-       \Hy@colorlink
-        \@runcolor#2\Hy@xspace@end
-       \Hy@endcolorlink
-       \Hy@VerboseLinkStop
+        \Hy@colorlink\@runcolor
+        #2\Hy@xspace@end
+        \Hy@endcolorlink
+        \Hy@VerboseLinkStop
       }
   \group_end:
 }

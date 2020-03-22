@@ -67,16 +67,17 @@ All places in the code where \ifHy@nesting is used are about anchors, not links.
 It is unclear if nesting can be used, and what use it would have.
 
 %%% external links
+%
 \hyper@linkurl:
 2 arguments: #1 the link text, #2 the URI
 defined in the driver
 used in hyperref inside
- \@hyper@launch run
+ \@hyper@launch run %not really as \@hyper@launch is redefined
  \url@
  \@hyper@readexternallink
  \@hyper@linkfile file
 
-
+%
  \hyper@linkfile
  3 arguments: anchor text, filename, destination inside the target
  (the destination is the text after a #: \href{blub.pdf#destination})
@@ -85,5 +86,15 @@ used in hyperref inside
  \@hyper@linkfile file:#1\\#2#3#4
  creates a GoToR action, so only used if the target is a pdf
  hyperref checks if the file ends with pdf (\XR@ext) or has no extentions.
-
  (true: \Hy@IfStringEndsWith{xyz.abc}{abc}{yes}{no}) 
+ 
+ % 
+ \@hyper@launch run:#1\\#2#3
+ defined both in hyperref and in the drivers.
+ has a delimited argument. The orginal definition in hyperref is based on
+ \hyper@linkurl, the definition in the drivers seems to be an extension.
+ used in \@hyper@readexternallink.
+ For naming consistency it would make sense to define a \hyper@linklaunch which is used by 
+ \@hyper@launch. 
+ See for syntax https://tex.stackexchange.com/a/245098/2388
+ 
