@@ -1,0 +1,29 @@
+\documentclass{article}
+\usepackage{xcolor}
+\usepackage[customdriver=hgeneric-experimental]{hyperref}
+\hypupdateattribute
+\ExplSyntaxOn
+\pdf_uncompress:
+\ExplSyntaxOff
+\begin{document}
+
+\ExplSyntaxOn
+\hook_put:nnnn
+          { pdf }
+          { link_begin_url_attr }
+          { F }
+          { 4 }
+\hook_put:nnnn
+          { pdf }
+          { link_begin_url_attr }
+          { AP }
+          { << /N~\pdf_xform_ref:n{Form} >> }
+\pdf_xform_new:nnn {Form}{}
+ {
+  \colorbox{red}{\phantom{\nolinkurl{https://www.https://www.latex-project.org/}}}
+ }
+\par
+\ExplSyntaxOff
+
+\url{https://www.https://www.latex-project.org/}
+\end{document}

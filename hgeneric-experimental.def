@@ -73,6 +73,12 @@
     Empty~destination~name,\\
             using~`#1'
   }
+\msg_new:nnn
+  { hyp }
+  { unknown-key }
+  {
+    unknown~key~#2~of~module~’#1’~set~to~’#3’.
+  }
 %% I require the bookmark package to get rid of some of the bookmarks code.
 % but the testing code doesn't work.
 % !!!!!!!!!!!!!!!!!!!!! to do !!!!!!!!!!!!!!!!!!!!!
@@ -108,6 +114,7 @@
 % variants
 \cs_generate_variant:Nn \pdf_object_write:nn {nx}
 \cs_generate_variant:Nn \pdf_catalog_gput:nn {nx}
+\cs_generate_variant:Nn \pdf_pagesattr_gput:nn {nx} %not really needed but one shouldn't rely on side effects
 
 % tmp
 \box_new:N \l__hyp_tmpa_box
@@ -719,45 +726,100 @@
         \Hy@colorlink\@runcolor
         #2\Hy@xspace@end
         \Hy@endcolorlink
-        \Hy@VerboseLinkStop
+        \Hy@VerboseLinkStop %where is the start??
       }
   \group_end:
 }
 
 
-%this needs central management in the kernel
-\def\PDF@SetupDoc{
-  \tl_if_empty:NF\@pdfpagescrop
+%this needs central management in the kernel and changes in hyperref.
+%with pdfresources most attributes can be set directly, there is not need
+%to delay to the begin of the doc.
+%as a first step hypersetup is overwritten to set (some) keys with expl3.
+\cs_set_protected:Npn \hypersetup #1
   {
-   \pdf_pagesattr_gput:nn { CropBox } { [\@pdfpagescrop] }
+     \kvsetkeys{Hyp}{#1} %for now
+     \keys_set:nn { hyp / setup }{ #1 }
   }
-  \pdf_catalog_gput:nx { PageMode }{ /\@pdfpagemode }
-  \tl_if_empty:NF \@baseurl
-   {
-    \Hy@pstringdef\Hy@pstringB{\@baseurl}%
-    \pdf_catalog_gput:nn { URI }{ <</Base(\Hy@pstringB)>> }
-   }
-  \tl_if_empty:oF { \@pdfpagelayout }
-   {
-    \pdf_catalog_gput:nx{ PageLayout }{ /\@pdfpagelayout }
-   }
-  \tl_if_exist:NT\@pdflang
-   {
-    \tl_if_empty:NF\@pdflang
+% for now unknown keys should only give warnings.
+\keys_define:nn { hyp / setup }
+  {
+    unknown .code:n =
     {
-     \pdf_catalog_gput:nx { Lang } { (\@pdflang) }
+      \msg_warning:nnxxx { hyp } { unknown-key }
+      { hyp~/~setup }{ \l_keys_key_str } { #1 }
     }
-   }
-  \bool_if:nF
-   {
-    \tl_if_empty_p:N \@pdfstartpage
-    ||
-    \tl_if_empty_p:N \@pdfstartview
-   }
-   {
-     \exp_args:Noo
-     \pdf_docview:nn {\@pdfstartpage} {\tl_tail:N\@pdfstartview}
-   }
+  }
+
+% This means that the following keys should better be set only in hypersetup and
+% not in the package options (they still could work, but ...)
+% baseurl       (default: empty)
+% pdflang       (default: empty, should be better set in DeclareDocumentMetaData)
+% pdfpagelayout (default:not set, TwoPageLeft,TwoPageRight are 1.5 but we don't test)
+% pdfpagemode   (default: UseNone or UseOutlines, bookmark should do the second)
+% pdfpagescrop  (default: empty/do nothing)
+
+\keys_define:nn { hyp / setup }
+ {
+   ,baseurl       .code:n =
+     {
+       \__hyp_pstringdef:No \l__hyp_tmpa_tl {#1}%
+        \tl_if_empty:NF \l__hyp_tmpa_tl %remove if empty??
+          {
+             \pdf_catalog_gput:nx { URI }{ <</Base ( \l__hyp_tmpa_tl )>> }
+          }
+     }
+   ,baseurl       .value_required:n = true
+   ,pdflang       .code:n =  { \pdf_catalog_gput:nx { Lang } { (#1) } }
+   ,pdfpagelayout .choices:nn =
+     { SinglePage, OneColumn, TwoColumnLeft, TwoColumnRight, TwoPageLeft, TwoPageRight}
+     { \pdf_catalog_gput:nx { PageLayout }{ /#1 } }
+   ,pdfpagemode   .code:n = { \pdf_catalog_gput:nx { PageMode }{ /#1 } }
+   ,pdfpagemode   .value_required:n = true
+   ,pdfpagemode   .initial:n  = { UseOutlines } %for now ...
+   ,pdfpagescrop  .code:n = { \pdf_pagesattr_gput:nx { CropBox } { [#1] } }
+   ,pdfpagescrop  .value_required:n = true
+   ,pdftoolbar    .choices:nn =
+     { true, false }
+     { \pdf_catalog_gput:nn { ViewerPreferences } {{ HideToolbar } { #1 }} }
+   ,pdftoolbar    .default:n = true
+ }
+
+
+
+\cs_set_protected:Npn \PDF@SetupDoc
+  {
+    %\tl_if_empty:NF\@pdfpagescrop
+%      {
+%        \pdf_pagesattr_gput:nn { CropBox } { [\@pdfpagescrop] }
+%      }
+%    \pdf_catalog_gput:nx { PageMode }{ /\@pdfpagemode }
+%    \tl_if_empty:NF \@baseurl
+%      {
+%        \__hyp_pstringdef:No \l__hyp_tmpa_tl {\@baseurl}%
+%        \pdf_catalog_gput:nx { URI }{ <</Base ( \l__hyp_tmpa_tl )>> }
+%      }
+ %   \tl_if_empty:oF { \@pdfpagelayout }
+%      {
+%        \pdf_catalog_gput:nx { PageLayout }{ /\@pdfpagelayout }
+%      }
+%    \tl_if_exist:NT\@pdflang
+%      {
+%        \tl_if_empty:NF\@pdflang
+%          {
+%            \pdf_catalog_gput:nx { Lang } { (\@pdflang) }
+%          }
+%      }
+    \bool_if:nF
+      {
+        \tl_if_empty_p:N \@pdfstartpage
+        ||
+        \tl_if_empty_p:N \@pdfstartview
+      }
+      {
+        \exp_args:Noo
+        \pdf_docview:nn {\@pdfstartpage} {\tl_tail:N\@pdfstartview}
+      }
     \ifHy@pdftoolbar\else
      \pdf_catalog_gput:nn { ViewerPreferences } {{ HideToolbar } { true }}
     \fi
