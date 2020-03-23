@@ -3,8 +3,15 @@
 \usepackage[customdriver=hgeneric-experimental]{hyperref}
 
 \begin{document}
+\ExplSyntaxOn
+%%% for reproducible tests:
+\pdf_info_gput:nn{CreationDate}{(D:20200202111111+01'00')}
+\pdf_info_gput:nn{ModDate}{(D:20200202111111+01'00')}
+\pdf_info_gput:nn{Creator}{(l3build test)}
+%%%%%
+\ExplSyntaxOff
 \href[ismap=true]{https://www.latex-project.org#abc~xyz}{xxxxx}
 
 \href{https://www.latex-project.org#abc~xyz}{xxxxx}
 
-\end{document}
+\end{document} 
