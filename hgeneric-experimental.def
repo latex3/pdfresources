@@ -764,7 +764,10 @@
    ,baseurl       .code:n =
      {
        \__hyp_pstringdef:No \l__hyp_tmpa_tl {#1}%
-        \tl_if_empty:NF \l__hyp_tmpa_tl %remove if empty??
+        \tl_if_empty:NTF \l__hyp_tmpa_tl %remove if empty??
+          {
+             \pdf_catalog_gremove:n { URI }
+          }
           {
              \pdf_catalog_gput:nx { URI }{ <</Base ( \l__hyp_tmpa_tl )>> }
           }
