@@ -6,14 +6,15 @@
 \usepackage{hyperxmp,lipsum}
 
 \usepackage[customdriver=hgeneric-experimental,
-   ocgcolorlinks,
-   pdftoolbar=false,
+   ocgcolorlinks]
+   {hyperref}
+
+\hypersetup{  pdftoolbar=false,
    pdfauthor={Ulrike Fischer},
    pdftitle={A test of metadata},
    pdfnonfullscreenpagemode=UseNone,
    pdfnumcopies=4,
-   pdfpagelayout=SinglePage]
-   {hyperref}
+   pdfpagelayout=SinglePage}   
 
 \ExplSyntaxOn
 \pdf_object_new:nn{metadata-obj}{stream}
