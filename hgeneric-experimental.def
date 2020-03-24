@@ -774,6 +774,8 @@
    ,pdfpagelayout .choices:nn =
      { SinglePage, OneColumn, TwoColumnLeft, TwoColumnRight, TwoPageLeft, TwoPageRight}
      { \pdf_catalog_gput:nx { PageLayout }{ /#1 } }
+   ,pdfpagelayout / .code:n =
+     { \pdf_catalog_gremove:n { PageLayout } }
    ,pdfpagemode   .code:n = { \pdf_catalog_gput:nx { PageMode }{ /#1 } }
    ,pdfpagemode   .value_required:n = true
    ,pdfpagemode   .initial:n  = { UseOutlines } %for now ...
