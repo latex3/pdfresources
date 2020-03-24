@@ -776,8 +776,16 @@
    ,pdfcenterwindow / false .code:n =
      { \pdf_catalog_gremove:n { ViewerPreferences / CenterWindow } }
    ,pdfcenterwindow / true .code:n =
-     { \pdf_catalog_gput:nn { ViewerPreferences } {{ CenterWindow } { true }} }
+     { \pdf_catalog_gput:nn { ViewerPreferences } {{ CenterWindow }{ true }} }
    ,pdfcenterwindow    .default:n = true
+   ,pdfdirection    .choice:
+   ,pdfdirection / L2R .code:n =
+     { \pdf_catalog_gput:nn { ViewerPreferences } {{ Direction }{ /L2R }} }
+   ,pdfdirection / R2L .code:n =
+     { \pdf_catalog_gput:nn { ViewerPreferences } {{ Direction }{ /R2L }} }
+   ,pdfdirection /  .code:n =
+     { \pdf_catalog_gremove:n { ViewerPreferences / Direction } }
+   ,pdfmenubar    .default:n = true
    ,pdfdisplaydoctitle    .choice:
    ,pdfdisplaydoctitle / false .code:n =
      { \pdf_catalog_gremove:n { ViewerPreferences / DisplayDocTitle } }
@@ -878,10 +886,6 @@
         \exp_args:Noo
         \pdf_docview:nn {\@pdfstartpage} {\tl_tail:N\@pdfstartview}
       }
-    \tl_if_empty:NF  \@pdfdirection
-    {
-     \pdf_catalog_gput:nx { ViewerPreferences } {{ Direction } { /\@pdfdirection }}
-    }
     \tl_if_empty:NF  \@pdfviewarea
     {
      \pdf_catalog_gput:nx { ViewerPreferences } {{ ViewArea }{/\@pdfviewarea }}
