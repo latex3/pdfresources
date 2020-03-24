@@ -455,7 +455,7 @@
 %
 %  \begin{macro}{
 %                \@@_prop_gclear,
-%                \@@_prop_gput:n,
+%                \@@_prop_gput:nnn,
 %                \@@_prop_get:nnN,
 %                \@@_prop_gremove:nn,
 %                \@@_prop_show:n
@@ -2102,6 +2102,7 @@
 %   \end{tabularx}
 %   \par\medskip
 %
+%   \paragraph{Catalog entries with subdictionaries}
 %   The following keys add values to subdictionaries. The syntax is that the
 %   \meta{name}  \meta{value} pair is inputed in a brace pair. E.g.\\
 %   |\pdf_catalog_gput:nn {Acroform}{{SigFlags}{3}}| or\\
@@ -2133,6 +2134,22 @@
 %                            & \ldots          &              \\
 % \end{tabularx}
 %
+%   These rather simple entries can be removed again with the following command:
+%   \begin{function}[added = 2020-03-23]
+%   {\pdf_catalog_gremove:n }
+%   \begin{syntax}
+%     \cs{pdf_catalog_gremove:n}  \Arg{key}
+%   \end{syntax}
+%   This removes an entry from the catalog for the variants above.
+%   described in the following paragraph. In some cases removing such an entry
+%   can be needed if some default value set by a packages interferes with
+%   defaults set by the user in the pdf viewer.
+%   \Arg{key} is either a simple key or a key/subkey combination. Examples
+%   | \pdf_catalog_gremove:n { PageMode } |\\
+%   | \pdf_catalog_gremove:n { ViewerPreferences/HideToolbar } |
+%   \end{function}
+%
+% \paragraph{Catalog entries with multiple values in arrays}
 % The following keys are dictionaries to which multiple values can be
 % assigned which are then combined in an array. The value is -- with the exception
 % of AcroForm/Fields and AcroForm/CO an object name of an object
@@ -2184,6 +2201,20 @@
       }
    }
 \cs_generate_variant:Nn \pdf_catalog_gput:nn {no,nx}
+\cs_new_protected:Npn \pdf_catalog_gremove:n #1 %#1 name
+  {
+    \seq_set_split:Nnn \l_tmpa_seq { / } { #1 }
+    \int_compare:nNnTF { 1 } = {\seq_count:N \l_tmpa_seq }
+     {
+       \@@_prop_gremove:nn { Catalog } { #1 }
+     }
+     {
+       \seq_pop_right:NN \l_tmpa_seq \tl_tmpa_tl
+       \exp_args:Nxx \@@_prop_gremove:nn
+         { Catalog/\seq_use:Nn\l_tmpa_seq { / } }
+         { \tl_tmpa_tl }
+     }
+  }
 %    \end{macrocode}
 % \begin{variable}[added=2019-08-24]
 %     {
