@@ -75,6 +75,27 @@
   }
 \msg_new:nnn
   { hyp }
+  { ignore-deprecated-or-unknown-option-in-pdf-version }
+  {
+    Option~`#1'~is~unknown~or~deprecated~in~pdf~version~#2\\
+    Ignored.
+  }
+\msg_new:nnn
+  { hyp }
+  { ignore-deprecated-or-unknown-value-in-pdf-version }
+  {
+    Value~`#1'~is~unknown~or~deprecated~in~pdf~version~#2\\
+    Ignored.
+  }
+\msg_new:nnn
+  { hyp }
+  { replace-deprecated-or-unknown-value-in-pdf-version }
+  {
+    Value~`#1'~is~unknown~or~deprecated~in~pdf~version~#2\\
+    Value~`#3'~is used instead.
+  }
+\msg_new:nnn
+  { hyp }
   { unknown-key }
   {
     unknown~key~#2~of~module~’#1’~set~to~’#3’.
@@ -776,13 +797,17 @@
    ,pdfcenterwindow / false .code:n =
      { \pdf_catalog_gremove:n { ViewerPreferences / CenterWindow } }
    ,pdfcenterwindow / true .code:n =
-     { \pdf_catalog_gput:nn { ViewerPreferences } {{ CenterWindow }{ true }} }
+     {
+       \pdf_catalog_gput:nn   { ViewerPreferences } {{ CenterWindow }{ true }}
+     }
    ,pdfcenterwindow    .default:n = true
    ,pdfdirection    .choice:
    ,pdfdirection / L2R .code:n =
-     { \pdf_catalog_gput:nn { ViewerPreferences } {{ Direction }{ /L2R }} }
+     { \pdf_catalog_gput:nn   { ViewerPreferences } {{ Direction }{ /L2R }} }
    ,pdfdirection / R2L .code:n =
-     { \pdf_catalog_gput:nn { ViewerPreferences } {{ Direction }{ /R2L }} }
+     {
+       \pdf_catalog_gput:nn   { ViewerPreferences } {{ Direction }{ /R2L }}
+     }
    ,pdfdirection /  .code:n =
      { \pdf_catalog_gremove:n { ViewerPreferences / Direction } }
    ,pdfmenubar    .default:n = true
@@ -790,13 +815,17 @@
    ,pdfdisplaydoctitle / false .code:n =
      { \pdf_catalog_gremove:n { ViewerPreferences / DisplayDocTitle } }
    ,pdfdisplaydoctitle / true .code:n =
-     { \pdf_catalog_gput:nn { ViewerPreferences } {{ DisplayDocTitle } { true }} }
+     {
+       \pdf_catalog_gput:nn   { ViewerPreferences } {{ DisplayDocTitle } { true }}
+     }
    ,pdfdisplaydoctitle    .default:n = true
    ,pdffitwindow    .choice:
    ,pdffitwindow / false .code:n =
      { \pdf_catalog_gremove:n { ViewerPreferences / FitWindow } }
    ,pdffitwindow / true .code:n =
-     { \pdf_catalog_gput:nn { ViewerPreferences } {{ FitWindow } { true }} }
+     {
+       \pdf_catalog_gput:nn   { ViewerPreferences } {{ FitWindow } { true }}
+     }
    ,pdffitwindow    .default:n = true
    ,pdflang       .code:n =
           {
@@ -812,12 +841,14 @@
    ,pdfmenubar / true .code:n =
      { \pdf_catalog_gremove:n { ViewerPreferences / HideMenubar } }
    ,pdfmenubar / false .code:n =
-     { \pdf_catalog_gput:nn { ViewerPreferences } {{ HideMenubar } { true }} }
+     {
+       \pdf_catalog_gput:nn   { ViewerPreferences } {{ HideMenubar } { true }}
+     }
    ,pdfmenubar    .default:n = true
    ,pdfnonfullscreenpagemode   .choices:nn =
      { UseNone, UseOutlines, UseThumbs, FullScreen, UseOC } %pdf 1.5
      {
-       \pdf_catalog_gput:nx {ViewerPreferences }{{NonFullScreenPageMode}{/#1}}
+       \pdf_catalog_gput:nx   { ViewerPreferences } {{NonFullScreenPageMode}{/#1}}
      }
    ,pdfnonfullscreenpagemode / UseAttachments .code:n =
      {
@@ -862,13 +893,34 @@
    ,pdftoolbar / true .code:n =
      { \pdf_catalog_gremove:n { ViewerPreferences / HideToolbar } }
    ,pdftoolbar / false .code:n =
-     { \pdf_catalog_gput:nn { ViewerPreferences } {{ HideToolbar } { true }} }
+     {
+       \pdf_catalog_gput:nn  { ViewerPreferences } {{ HideToolbar } { true }}
+     }
    ,pdftoolbar    .default:n = true
+   ,pdfviewarea    .choices:nn =
+     { MediaBox, CropBox, BleedBox, TrimBox, ArtBox }
+     {
+       \pdf_version_compare:NnTF < {2.0}
+         {
+           \pdf_catalog_gput:nx { ViewerPreferences } {{ ViewArea } { /#1 }}
+         }
+         {
+           \msg_warning:nnxx
+             {hyp}
+             {ignore-deprecated-or-unknown-option-in-pdf-version}
+             {pdfviewarea}
+             {\pdf_version:}
+         }
+     }%
+   ,pdfviewarea /  .code:n =
+     { \pdf_catalog_gremove:n { ViewerPreferences / ViewArea } }
    ,pdfwindowui    .choice:
    ,pdfwindowui / true .code:n =
      { \pdf_catalog_gremove:n { ViewerPreferences / HideWindowUI } }
    ,pdfwindowui / false .code:n =
-     { \pdf_catalog_gput:nn { ViewerPreferences } {{ HideWindowUI } { true }} }
+     {
+       \pdf_catalog_gput:nn { ViewerPreferences } {{ HideWindowUI } { true }}
+     }
    ,pdfwindowui    .default:n = true
  }
 
@@ -886,10 +938,6 @@
         \exp_args:Noo
         \pdf_docview:nn {\@pdfstartpage} {\tl_tail:N\@pdfstartview}
       }
-    \tl_if_empty:NF  \@pdfviewarea
-    {
-     \pdf_catalog_gput:nx { ViewerPreferences } {{ ViewArea }{/\@pdfviewarea }}
-    }
     \tl_if_empty:NF  \@pdfviewclip
     {
      \pdf_catalog_gput:nx { ViewerPreferences } {{ ViewClip } { /\@pdfviewclip }}
