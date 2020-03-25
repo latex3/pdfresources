@@ -77,22 +77,22 @@
   { hyp }
   { ignore-deprecated-or-unknown-option-in-pdf-version }
   {
-    Option~`#1'~is~unknown~or~deprecated~in~pdf~version~#2\\
-    Ignored.
+    Option~`#1'~is~unknown~or~deprecated~in\\
+    pdf~version~#2.~Ignored.
   }
 \msg_new:nnn
   { hyp }
   { ignore-deprecated-or-unknown-value-in-pdf-version }
   {
-    Value~`#1'~is~unknown~or~deprecated~in~pdf~version~#2\\
-    Ignored.
+    Value~`#1'~is~unknown~or~deprecated~in\\
+    pdf~version~#2.~Ignored.
   }
 \msg_new:nnn
   { hyp }
   { replace-deprecated-or-unknown-value-in-pdf-version }
   {
-    Value~`#1'~is~unknown~or~deprecated~in~pdf~version~#2\\
-    Value~`#3'~is used instead.
+    Value~`#1'~is~unknown~or~deprecated~in\\
+    pdf~version~#2. Value~`#3'~is used instead.
   }
 \msg_new:nnn
   { hyp }
@@ -810,6 +810,23 @@
      }
    ,pdfdirection /  .code:n =
      { \pdf_catalog_gremove:n { ViewerPreferences / Direction } }
+   ,pdfduplex    .choices:nn =
+     {Simplex, DuplexFlipShortEdge, DuplexFlipLongEdge}
+     {
+       \pdf_version_compare:NnTF > {1.6}
+         {
+           \pdf_catalog_gput:nx { ViewerPreferences } {{ PrintDuplex } { /#1 }}
+         }
+         {
+           \msg_warning:nnxx
+             {hyp}
+             {ignore-deprecated-or-unknown-option-in-pdf-version}
+             {pdfduplex}
+             {\pdf_version:}
+         }
+     }%
+   ,pdfprintclip /  .code:n =
+     { \pdf_catalog_gremove:n { ViewerPreferences / PrintClip } }
    ,pdfmenubar    .default:n = true
    ,pdfdisplaydoctitle    .choice:
    ,pdfdisplaydoctitle / false .code:n =
@@ -889,6 +906,57 @@
            \pdf_pagesattr_gput:nx { CropBox } { [#1] }
          }
      }
+   ,pdfprintarea    .choices:nn =
+     { MediaBox, CropBox, BleedBox, TrimBox, ArtBox }
+     {
+       \pdf_version_compare:NnTF < {2.0}
+         {
+           \pdf_catalog_gput:nx { ViewerPreferences } {{ PrintArea } { /#1 }}
+         }
+         {
+           \msg_warning:nnxx
+             {hyp}
+             {ignore-deprecated-or-unknown-option-in-pdf-version}
+             {pdfprintarea}
+             {\pdf_version:}
+         }
+     }%
+   ,pdfprintarea /  .code:n =
+     { \pdf_catalog_gremove:n { ViewerPreferences / PrintArea } }
+   ,pdfprintclip    .choices:nn =
+     { MediaBox, CropBox, BleedBox, TrimBox, ArtBox }
+     {
+       \pdf_version_compare:NnTF < {2.0}
+         {
+           \pdf_catalog_gput:nx { ViewerPreferences } {{ PrintClip } { /#1 }}
+         }
+         {
+           \msg_warning:nnxx
+             {hyp}
+             {ignore-deprecated-or-unknown-option-in-pdf-version}
+             {pdfprintclip}
+             {\pdf_version:}
+         }
+     }%
+   ,pdfprintclip /  .code:n =
+     { \pdf_catalog_gremove:n { ViewerPreferences / PrintClip } }
+   ,pdfprintscaling    .choices:nn =
+     { None, AppDefault }
+     {
+       \pdf_version_compare:NnTF > {1.5}
+         {
+           \pdf_catalog_gput:nx { ViewerPreferences } {{ PrintScaling } { /#1 }}
+         }
+         {
+           \msg_warning:nnxx
+             {hyp}
+             {ignore-deprecated-or-unknown-option-in-pdf-version}
+             {pdfprintscaling}
+             {\pdf_version:}
+         }
+     }%
+   ,pdfprintclip /  .code:n =
+     { \pdf_catalog_gremove:n { ViewerPreferences / PrintClip } }
    ,pdftoolbar    .choice:
    ,pdftoolbar / true .code:n =
      { \pdf_catalog_gremove:n { ViewerPreferences / HideToolbar } }
@@ -914,6 +982,23 @@
      }%
    ,pdfviewarea /  .code:n =
      { \pdf_catalog_gremove:n { ViewerPreferences / ViewArea } }
+   ,pdfviewclip    .choices:nn =
+     { MediaBox, CropBox, BleedBox, TrimBox, ArtBox }
+     {
+       \pdf_version_compare:NnTF < {2.0}
+         {
+           \pdf_catalog_gput:nx { ViewerPreferences } {{ ViewClip } { /#1 }}
+         }
+         {
+           \msg_warning:nnxx
+             {hyp}
+             {ignore-deprecated-or-unknown-option-in-pdf-version}
+             {pdfviewclip}
+             {\pdf_version:}
+         }
+     }%
+   ,pdfviewclip /  .code:n =
+     { \pdf_catalog_gremove:n { ViewerPreferences / ViewClip } }
    ,pdfwindowui    .choice:
    ,pdfwindowui / true .code:n =
      { \pdf_catalog_gremove:n { ViewerPreferences / HideWindowUI } }
@@ -938,26 +1023,6 @@
         \exp_args:Noo
         \pdf_docview:nn {\@pdfstartpage} {\tl_tail:N\@pdfstartview}
       }
-    \tl_if_empty:NF  \@pdfviewclip
-    {
-     \pdf_catalog_gput:nx { ViewerPreferences } {{ ViewClip } { /\@pdfviewclip }}
-    }
-    \tl_if_empty:NF  \@pdfprintarea
-    {
-     \pdf_catalog_gput:nx { ViewerPreferences }{{ PrintArea } { /\@pdfprintarea }}
-    }
-    \tl_if_empty:NF  \@pdfprintclip
-    {
-     \pdf_catalog_gput:nx { ViewerPreferences }{{ PrintClip } { /\@pdfprintclip }}
-    }
-    \tl_if_empty:NF  \@pdfprintscaling
-    {
-     \pdf_catalog_gput:nx { ViewerPreferences } {{ PrintScaling } { /\@pdfprintscaling }}
-    }
-    \tl_if_empty:NF  \@pdfduplex
-    {
-     \pdf_catalog_gput:nx { ViewerPreferences } {{ Duplex } { /\@pdfduplex }}
-    }
     \tl_if_empty:NF \@pdfpicktraybypdfsize
     {
      \pdf_catalog_gput:nx{ ViewerPreferences } {{ PickTrayByPDFSize } { \@pdfpicktraybypdfsize }}
