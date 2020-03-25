@@ -42,24 +42,12 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{new-bookmark}%
   [2020-03-25 experimental version of v1.28 PDF bookmarks (HO)]%
-\begingroup\expandafter\expandafter\expandafter\endgroup
-\expandafter\ifx\csname numexpr\endcsname\relax
-  \def\BKM@CalcExpr#1#2#3#4{%
-    \begingroup
-      \count@=#2\relax
-      \advance\count@ by#3#4\relax
-      \edef\x{\endgroup
-        \def\noexpand#1{\the\count@}%
-      }%
-    \x
-  }%
-\else
-  \def\BKM@CalcExpr#1#2#3#4{%
+%etex is fine ...
+\def\BKM@CalcExpr#1#2#3#4{%
     \edef#1{%
       \the\numexpr#2#3#4\relax
     }%
   }%
-\fi
 \def\BKM@EscapeName#1{%
   \ifx#1\@empty
   \else
@@ -568,14 +556,6 @@
         {BKM}{#1}%
   }%
 }
-\BKM@DefineDriverKey{pdftex}
-\BKM@DefineDriverKey{dvips}
-\BKM@DefineDriverKey{dvipsone}
-\BKM@DefineDriverKey{textures}
-\BKM@DefineDriverKey{dvipdfm}
-\BKM@DefineDriverKey{dvipdfmx}
-\BKM@DefineDriverKey{xetex}
-\BKM@DefineDriverKey{vtex}
 \define@key{BKM}{dvipdfmx-outline-open}[true]{%
   \expandafter\ifx\csname if#1\expandafter\endcsname
                   \csname iftrue\endcsname
@@ -587,24 +567,11 @@
 \g@addto@macro\BKM@DisableOptions{%
   \DisableKeyvalOption{BKM}{dvipdfmx-outline-open}%
 }
-\def\bookmark@driver{\BKM@driver}
 \InputIfFileExists{bookmark.cfg}{}{}
-\providecommand*{\BookmarkDriverDefault}{dvips}
 \ifpdf
-  \def\BKM@driver{pdftex}%
   \ifx\pdfoutline\@undefined
     \ifx\pdfextension\@undefined\else
       \protected\def\pdfoutline{\pdfextension outline }
-    \fi
-  \fi
-\else
-  \ifxetex
-    \def\BKM@driver{dvipdfm}%
-  \else
-    \ifvtex
-      \def\BKM@driver{vtex}%
-    \else
-      \edef\BKM@driver{\BookmarkDriverDefault}%
     \fi
   \fi
 \fi
@@ -641,66 +608,9 @@
     \BKM@DvipdfmxOutlineOpentrue
   \fi
 }
-\def\BKM@temp{dvipdfmx}%
-\ifx\BKM@temp\BKM@driver
-  \def\BKM@driver{dvipdfm}%
-\fi
-\def\BKM@temp{pdftex}%
-\ifpdf
-  \ifx\BKM@temp\BKM@driver
-  \else
-    \PackageWarningNoLine{bookmark}{%
-      Wrong driver `\BKM@driver', using `pdftex' instead%
-    }%
-    \let\BKM@driver\BKM@temp
-  \fi
-\else
-  \ifx\BKM@temp\BKM@driver
-    \PackageError{bookmark}{%
-      Wrong driver, pdfTeX is not running in PDF mode.\MessageBreak
-      Package loading is aborted%
-    }\@ehc
-    \expandafter\expandafter\expandafter\endinput
-  \fi
-  \def\BKM@temp{dvipdfm}%
-  \ifxetex
-    \ifx\BKM@temp\BKM@driver
-    \else
-      \PackageWarningNoLine{bookmark}{%
-        Wrong driver `\BKM@driver',\MessageBreak
-        using `dvipdfm' for XeTeX instead%
-      }%
-      \let\BKM@driver\BKM@temp
-    \fi
-  \else
-    \def\BKM@temp{vtex}%
-    \ifvtex
-      \ifx\BKM@temp\BKM@driver
-      \else
-        \PackageWarningNoLine{bookmark}{%
-          Wrong driver `\BKM@driver',\MessageBreak
-          using `vtex' for VTeX instead%
-        }%
-        \let\BKM@driver\BKM@temp
-      \fi
-    \else
-      \ifx\BKM@temp\BKM@driver
-        \PackageError{bookmark}{%
-          Wrong driver, VTeX is not running in PDF mode.\MessageBreak
-          Package loading is aborted%
-        }\@ehc
-        \expandafter\expandafter\expandafter\endinput
-      \fi
-    \fi
-  \fi
-\fi
-\InputIfFileExists{bkm-generic.def}{}{%
-  \PackageError{bookmark}{%
-    Unsupported driver `\BKM@driver'.\MessageBreak
-    Package loading is aborted%
-  }\@ehc
-  \endinput
-}
+
+\InputIfFileExists{bkm-generic.def}{}{}
+
 \let\pdfbookmark\ltx@undefined
 \newcommand*{\pdfbookmark}[3][0]{%
   \bookmark[level=#1,dest={#3.#1}]{#2}%
