@@ -10,7 +10,9 @@ installfiles = {"*.sty","*.cls","*.def","*.lua"}
 sourcefiles =  {"*.dtx","*.ins",
                 "hgeneric-experimental.def",
                 "tmpl3shipout.sty",
-                "newpackages/new-transparent.sty"}
+                "newpackages/new-transparent.sty",
+                "newpackages/new-bookmark.sty",
+                "newpackages/bkm-generic.def"}
 
 checkruns = 3
 
