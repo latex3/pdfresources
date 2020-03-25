@@ -877,6 +877,26 @@
            \pdf_catalog_gput:nn {ViewerPreferences }{{NonFullScreenPageMode}{/UseAttachments}}
          }
      }
+   ,pdfnumcopies .code:n =
+     {
+       \pdf_version_compare:NnTF > {1.6}
+         {
+           \tl_empty:nTF
+             {
+               \pdf_catalog_gremove:n { ViewerPreferences / NumCopies }
+             }
+             {
+               \pdf_catalog_gput:nn {ViewerPreferences }{{NumCopies}{~#1}}
+             }
+         }
+         {
+           \msg_warning:nnxx
+             {hyp}
+             {ignore-deprecated-or-unknown-option-in-pdf-version}
+             {pdfnumcopies}
+             {\pdf_version:}
+         }
+     }
    ,pdfpagelayout .choices:nn =
      { SinglePage, OneColumn, TwoColumnLeft, TwoColumnRight, TwoPageLeft, TwoPageRight}
      { \pdf_catalog_gput:nx { PageLayout }{ /#1 } }
@@ -887,12 +907,16 @@
      { \pdf_catalog_gput:nx { PageMode }{ /#1 } }
    ,pdfpagemode / UseAttachments .code:n =
      {
-       \pdf_version_compare:NnTF < {1.6}
-         {
-           %message
-         }
+       \pdf_version_compare:NnTF > {1.5}
          {
            \pdf_catalog_gput:nx { PageMode }{ /UseAttachments }
+         }
+         {
+           \msg_warning:nnxx
+             {hyp}
+             {ignore-deprecated-or-unknown-value-in-pdf-version}
+             {UseAttachments}
+             {\pdf_version:}
          }
      }
    ,pdfpagemode   .initial:n  = { UseOutlines } %for now ...
@@ -905,6 +929,43 @@
          {
            \pdf_pagesattr_gput:nx { CropBox } { [#1] }
          }
+     }
+   ,pdfpicktraybypdfsize    .choice:
+   ,pdfpicktraybypdfsize / true .code:n =
+     {
+       \pdf_version_compare:NnTF > {1.6}
+         {
+           \pdf_catalog_gput:nn
+             { ViewerPreferences }
+             {{ PickTrayByPDFSize } { true }}
+         }
+         {
+           \msg_warning:nnxx
+             {hyp}
+             {ignore-deprecated-or-unknown-option-in-pdf-version}
+             {pdfpicktraybypdfsize}
+             {\pdf_version:}
+         }
+     }
+   ,pdfpicktraybypdfsize / false .code:n =
+     {
+       \pdf_version_compare:NnTF > {1.6}
+         {
+           \pdf_catalog_gput:nn
+             { ViewerPreferences }
+             {{ PickTrayByPDFSize } { false }}
+         }
+         {
+           \msg_warning:nnxx
+             {hyp}
+             {ignore-deprecated-or-unknown-option-in-pdf-version}
+             {pdfpicktraybypdfsize}
+             {\pdf_version:}
+         }
+     }
+   ,pdfpicktraybypdfsize /  .code:n =
+     {
+       \pdf_catalog_gremove:nn  { ViewerPreferences/PickTrayByPDFSize }
      }
    ,pdfprintarea    .choices:nn =
      { MediaBox, CropBox, BleedBox, TrimBox, ArtBox }
@@ -940,6 +1001,28 @@
      }%
    ,pdfprintclip /  .code:n =
      { \pdf_catalog_gremove:n { ViewerPreferences / PrintClip } }
+   ,pdfprintpagerange .code:n =
+     {
+       \pdf_version_compare:NnTF > {1.6}
+         {
+           \tl_if_empty:nTF { #1}
+             {
+               \pdf_catalog_gremove:n { ViewerPreferences / PrintPageRange }
+             }
+             {
+               \pdf_catalog_gput:nx
+                 { ViewerPreferences }
+                 {{PrintPageRange}{[#1]}}
+             }
+          }
+          {
+            \msg_warning:nnxx
+              {hyp}
+              {ignore-deprecated-or-unknown-option-in-pdf-version}
+              {pdfprintpagerange}
+              {\pdf_version:}
+          }
+     }
    ,pdfprintscaling    .choices:nn =
      { None, AppDefault }
      {
@@ -955,8 +1038,8 @@
              {\pdf_version:}
          }
      }%
-   ,pdfprintclip /  .code:n =
-     { \pdf_catalog_gremove:n { ViewerPreferences / PrintClip } }
+   ,pdfprintscaling /  .code:n =
+     { \pdf_catalog_gremove:n { ViewerPreferences / PrintScaling } }
    ,pdftoolbar    .choice:
    ,pdftoolbar / true .code:n =
      { \pdf_catalog_gremove:n { ViewerPreferences / HideToolbar } }
@@ -1023,18 +1106,7 @@
         \exp_args:Noo
         \pdf_docview:nn {\@pdfstartpage} {\tl_tail:N\@pdfstartview}
       }
-    \tl_if_empty:NF \@pdfpicktraybypdfsize
-    {
-     \pdf_catalog_gput:nx{ ViewerPreferences } {{ PickTrayByPDFSize } { \@pdfpicktraybypdfsize }}
-    }
-    \tl_if_empty:NF \@pdfprintpagerange
-    {
-     \pdf_catalog_gput:nx { ViewerPreferences } {{ PrintPageRange } {  [ \@pdfprintpagerange ] }}
-    }
-    \tl_if_empty:NF  \@pdfnumcopies
-    {
-     \pdf_catalog_gput:nx { ViewerPreferences } {{ NumCopies } {  \@pdfnumcopies }}
-    }
+
 }
 
 
