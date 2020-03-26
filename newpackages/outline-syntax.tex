@@ -1,38 +1,111 @@
-dvipdfmx /Count is created automatically, so mainly the actions and options must be handled.
-\bookmarks writes out the needed \special directly. 
+ p: \pdfoutline\BKM@attr\BKM@action
+                count\ifBKM@DO@open\else-\fi\BKM@x@childs
+                {\BKM@DO@title}%
+                
+   \BKM@attr: attr{/F \BKM@DO@flags /C[\BKM@DO@color]}              
 
- \special{pdf:%
-        out 
+d:  \BKM@write{[}%
+    \BKM@write{/Title(\BKM@DO@title)}%
+    \ifnum\BKM@x@childs>\z@
+      \BKM@write{/Count \ifBKM@DO@open\else-\fi\BKM@x@childs}%
+    \fi
+    \ifx\BKM@attr\@empty
+    \else
+      \BKM@write{\BKM@attr}%
+    \fi
+    \BKM@write{\BKM@action}%
+    \BKM@write{/OUT pdfmark}%
+    
+  \BKM@attr: /F \BKM@DO@flags /C[\BKM@DO@color]
+    
+e.g. 
+[ /Title(\376\377\000f\000i\000r\000s\000t\000p\000a\000g\000e)
+/C[1 0 0]
+/Action<</Subtype/Named/N/FirstPage>>
+/OUT pdfmark 
+
+[
+/Title(\376\377\000a\000b\000c)
+/Count -3
+/Action/GoTo/Dest(section.1)cvn
+/OUT pdfmark
+
+   
+ x: \special{pdf:%
+        out
         [] OR [-] %depending is open or not
-        \BKM@abslevel %current level. Must be equal or one off to previous level
+        \BKM@abslevel %current level. Must be equal or if larger one off to previous level
         <<
          /Title(\BKM@title)%
-        
+
          /C[\BKM@color] %color, optional
-        
+
          /F \BKM@FLAGS  % flags, optional
 
-         \BKM@action    % action. 
-            -> {/Dest[@page\BKM@page/\BKM@view]}
-            -> /D[\BKM@page/\BKM@view]
-            -> /D(\BKM@dest)
-            -> /A<</S/URI /URI(\BKM@uri) >>
-            -> /A<<\BKM@rawaction>>
-            -> /A<</S/Named/N/\BKM@named>>%
-            -> /A<</S/GoTo /D(\BKM@dest)>>%
-            -> /A<</S/GoToR/F(\BKM@gotor)\BKM@action >>%            
+         \BKM@action    % action.
         >>%
       }%
+
+[
+/Title(\376\377\000a\000b\000c)
+/Action/GoTo/Dest(subsection.1.1)cvn
+/OUT pdfmark
+
+
+p: goto page1{/Fit}
+d: /Action/GoTo/Page 1 /View[/Fit]%
+x: /Dest[@page1/Fit]
+
+p: goto page\BKM@DO@page{/\BKM@DO@view} 
+d: /Action/GoTo/Page \BKM@DO@page/View[/\BKM@DO@view]
+x: /Dest[@page\BKM@page/\BKM@view]
+
+uri:
+p: user{<</S/URI/URI(\BKM@DO@uri)>>}
+d: /Action<</Subtype/URI/URI(\BKM@DO@uri)>>%
+x:  /A<</S/URI/URI(\BKM@uri)>>%
+
+rawaction (should not be used, as clearly driver dependant
+p:  user{<<\BKM@DO@rawaction>>}%
+d:  /Action<<\BKM@DO@rawaction>>
+x: /A<<\BKM@rawaction>>
+
+Named
+p: user{<</S/Named/N/\BKM@DO@named>>}
+d: /Action<</Subtype/Named/N/\BKM@DO@named>>%
+x: /A<</S/Named/N/\BKM@named>>%
+
+p: \BKM@DefGotoNameAction\BKM@action\BKM@DO@dest ?
+d: /Action/GoTo /Dest(\BKM@DO@dest)cvn%
+x: /A<< /S/GoTo/D(\BKM@dest) >>%
+
+for gotor:
+p: /D[\BKM@DO@page/\BKM@DO@view]
+d: /Page \BKM@DO@page /View[/\BKM@DO@view]%
+x: {/D[\BKM@page/\BKM@view]}
+
+p: /D(\BKM@DO@dest)
+d: /Dest(\BKM@DO@dest)cvn%
+x: /D(\BKM@dest)
+
+gotor
+p: user{ <</S/GoToR/F(\BKM@DO@gotor)\BKM@action>>%
+d: /Action/GoToR/File(\BKM@DO@gotor)\BKM@action
+x: /A<</S/GoToR/F(\BKM@gotor)\BKM@action>>%
+ 
+dvipdfmx /Count is created automatically, so mainly the actions and options must be handled.
+\bookmarks writes out the needed \special directly.
 
 dvips writes out at the end a header file, jobname.out.ps, which is referenced with \special{header=#1}%
   count must done by the document, so every \bookmark creates a BKM@<id> command which stores {parent,level,count}.
   Childs update the count of their parent. Beside this every \bookmark writes the info with the destination (and more) to the aux-file as
   a command \BKM@entry. When the auxfile is read at end document these \BKM@entry writes the header file.
-  
-pdflatex,luatex: similar to dvips, only that \BKM@entry uses \pdfoutline directly.    
 
-
-Catalog 
+pdflatex,luatex: similar to dvips, only that \BKM@entry uses \pdfoutline directly.
+ 
+    
+    
+Catalog
    /Outlines 56 0 R
              56 0 obj
              <<
@@ -61,7 +134,7 @@ Catalog
                  /Next 30 0 R
                  >>
                  endobj
-               
+
                33 0 obj
                <<
                /Title 34 0 R
@@ -71,11 +144,11 @@ Catalog
                /Next 36 0 R
                >>
                endobj
-               
-               
-Action types 
 
-/Type /Action /S XXXX /Next XXX 
+
+Action types
+
+/Type /Action /S XXXX /Next XXX
 
 GoTo  : /D  (goto action is the same as /Dest)
 
@@ -97,7 +170,7 @@ Sound: /Sound, /Volume,/Synchronous,/Repeat,/Mix
 Movie: deprecated in 2.0
 
 Hide: /T, /H
- Set an annotation’s Hidden flag. 
+ Set an annotation’s Hidden flag.
 
 Named /N (e.g. /N /NextPage)
 
@@ -120,4 +193,4 @@ Rendition
 Trans
 (PDF 1.5) Updates the display of a document, using a transition dictionary.
 “Transition Actions” on page 670
-GoTo3DView               
+GoTo3DView
