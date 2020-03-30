@@ -584,15 +584,15 @@
             \exp_args:No \HyperDestNameFilter { \l__hyp_destname_tmpa_tl }
           }
       }
-    \exp_args:Nno
-      \pdf_link_begin_goto:nnw { GoTo } { \l__hyp_destname_tmpa_tl }
+    \exp_args:No
+      \pdf_link_goto_begin:nw  { \l__hyp_destname_tmpa_tl }
         \Hy@colorlink\@linkcolor
   }
 
 \cs_new_protected:Npn \__hyp_link_dest_end:
   {
     \Hy@endcolorlink
-    \pdf_link_end:n { GoTo }
+    \pdf_link_goto_end:
   }
 
 %% hyperref commands for destinations (anchor) and links to destinations
