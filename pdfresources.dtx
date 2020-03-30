@@ -2678,7 +2678,8 @@
 % ordering.
 %
 % The code assumes that there will be different link types
-% (currently url, file, run, link, menu) and that
+% (currently URI, GoToR, Launch, GoTo, Named, hyperref uses the names
+%  url,file,run,link,menu) and that
 % links of the same type share the \emph{attr spec} and also the same begin/end
 % code. The list of link types need to stay restricted and well documented so that
 % all packages know which types they have to handle. It is stored in a constant
@@ -2704,7 +2705,7 @@
 %
 %    \begin{macrocode}
 
-\seq_const_from_clist:Nn \c_pdf_link_types_seq { url , file , run , link, menu }
+\seq_const_from_clist:Nn \c_pdf_link_types_seq { URI , GoToR , Launch , GoTo, Named }
 
 \seq_map_inline:Nn \c_pdf_link_types_seq
  {
@@ -2727,7 +2728,7 @@
 %  hook of type \Arg{type} are inserted as \emph{attr spec} and the code in
 %  the begin and end hook is executed  before and after the link. As example
 %  \begin{verbatim}
-%    \pdf_link_user:nnn { url }
+%    \pdf_link_user:nnn { URI }
 %     {
 %       /Subtype /Link
 %       /A<<
@@ -2741,7 +2742,7 @@
 % \end{function}
 %
 %    \begin{macrocode}
-\cs_new_protected:Nn \pdf_link_user:nnn %#1 type (url, file etc),
+\cs_new_protected:Nn \pdf_link_user:nnn %#1 type (URI, GoTo etc),
                                         %#2 action spec, #3 link text
   {
     \seq_if_exist:cT { l_@@_hook_link_begin_#1_seq }
@@ -2790,7 +2791,7 @@
 %  hook of type \meta{type} are inserted as \emph{attr spec} and the code in
 %  the begin and end hook is executed  before and after the link. As example
 %  \begin{verbatim}
-%    \pdf_link_begin_user:nnw { url }
+%    \pdf_link_begin_user:nnw { URI }
 %     {
 %       /Subtype /Link
 %       /A<<
@@ -2800,7 +2801,7 @@
 %       >>
 %     }
 %     link text
-%    \pdf_link_end:n { url }
+%    \pdf_link_end:n { URI }
 %    \end{verbatim}
 % \end{function}
 %    \begin{macrocode}

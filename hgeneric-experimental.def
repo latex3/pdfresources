@@ -155,6 +155,14 @@
   \bool_set_true:N \l__hyp_pdfa_bool
 \fi
 
+\prop_const_from_keyval:Nn \c__hyp_map_linktypes_prop
+  {
+    URI   = url,
+    GoTo  = link,
+    GoToR = file,
+    Named = menu,
+    Launch= run
+  }
 
 % this need sorting out later. pdf standards should be handled outside the driver.
 % pdfa forces the flag /F 4 in some places.
@@ -164,25 +172,25 @@
       {
         \hook_put:nnnn
           { pdf }
-          { link_begin_url_attr }
+          { link_begin_URI_attr }
           { F }
           { 4 }
 
         \hook_put:nnnn
           { pdf }
-          { link_begin_link_attr }
+          { link_begin_GoTo_attr }
           { F }
           { 4 }
 
         \hook_put:nnnn
           { pdf }
-          { link_begin_file_attr }
+          { link_begin_GoToR_attr }
           { F }
           { 4 }
 
         \hook_put:nnnn
           { pdf }
-          { link_begin_menu_attr }
+          { link_begin_Named_attr }
           { F }
           { 4 }
       }
@@ -247,13 +255,13 @@
   {
     \seq_map_inline:Nn \c_pdf_link_types_seq
       {
-        \tl_if_exist:cTF { @##1bordercolor }
+        \tl_if_exist:cTF { @\prop_item:Nn\c__hyp_map_linktypes_prop{##1}bordercolor }
           {
             \hook_put:nnnn
              { pdf }
              { link_begin_##1_attr }
              { C }
-             { [\tl_use:c {@##1bordercolor}] }
+             { [\tl_use:c {@\prop_item:Nn\c__hyp_map_linktypes_prop{##1}bordercolor}] }
           }
           {
             \hook_remove:nnn { pdf } { link_begin_##1_attr } { C }
@@ -577,14 +585,14 @@
           }
       }
     \exp_args:Nno
-      \pdf_link_begin_goto:nnw { link } { \l__hyp_destname_tmpa_tl }
+      \pdf_link_begin_goto:nnw { GoTo } { \l__hyp_destname_tmpa_tl }
         \Hy@colorlink\@linkcolor
   }
 
 \cs_new_protected:Npn \__hyp_link_dest_end:
   {
     \Hy@endcolorlink
-    \pdf_link_end:n { link }
+    \pdf_link_end:n { GoTo }
   }
 
 %% hyperref commands for destinations (anchor) and links to destinations
@@ -643,7 +651,7 @@
     \mode_leave_vertical:
     %Subtype and A could probably also be handled with hooks if needed
     %but checks for all drivers should be done then.
-    \pdf_link_user:nnn { url }
+    \pdf_link_user:nnn { URI }
       {
         /Subtype /Link
         /A
@@ -681,7 +689,7 @@
     \Hy@MakeRemoteAction
     \mode_leave_vertical:
     \pdf_link_user:nnn %expansion??
-      { file }
+      { GoToR }
       {
         /Subtype /Link
         /A<<
@@ -724,7 +732,7 @@
     %\Hy@pstringdef\Hy@pstringP{#3}%
     \mode_leave_vertical:
     \pdf_link_user:nnn %expansion?
-     { run }
+     { Launch }
      {
        /Subtype /Link
        /A<<
@@ -886,7 +894,7 @@
                \pdf_catalog_gremove:n { ViewerPreferences / NumCopies }
              }
              {
-               \pdf_catalog_gput:nn {ViewerPreferences }{{NumCopies}{~#1}}
+               \pdf_catalog_gput:nn {ViewerPreferences }{{NumCopies}{#1}}
              }
          }
          {
@@ -1203,7 +1211,7 @@
   \Hy@Acrobatmenu{#1}{#2}{%
     \mode_leave_vertical:
     \EdefEscapeName\Hy@temp@menu{#1}%
-    \pdf_link_user:nnn { menu }
+    \pdf_link_user:nnn { Named }
       {
        /Subtype /Link
        /A<<
