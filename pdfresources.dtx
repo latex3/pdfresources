@@ -2633,6 +2633,10 @@
 % \cs{@@_backend_annotation:nnnn} and \cs{@@_backend_annotation_last:}
 %
 % \subsubsection{Annotation/management }
+% \begin{NOTE}{UF}
+% regarding naming and relation of annotation commands see
+% https://github.com/FrankMittelbach/AccessiblePDF/issues/73
+% \end{NOTE}
 % \begin{function}[added = 2019-09-05]
 %   {\pdf_annotation:nnnn}
 %   \begin{syntax}
@@ -2640,12 +2644,22 @@
 %   \end{syntax}
 %   This creates an /Type/Annot object.
 % \end{function}
+% \begin{function}[added = 2020-03-30]
+%   {\pdf_annotation:nnnnn}
+%   \begin{syntax}
+%     \cs{pdf_annotation:nnnn} \Arg{type} \Arg{width} \Arg{height} \Arg{depth} \Arg{annot spec}
+%   \end{syntax}
+%   This creates an /Type/Annot object, which uses the |type-attr| hook in the attributes.
+%   This allows to create for example a link annotation which shares border settings
+%   with other links. \Arg{type} should e.g. be |link_URI|.
+% \end{function}
 % \begin{function}[added = 2019-09-05]
 %   {\pdf_annotation_last:}
 %   \begin{syntax}
 %     \cs{pdf_annotation_last:}
 %   \end{syntax}
-%   This retrieves the object reference of the last annotation created.
+%   This retrieves the object reference of the last annotation created. This is not
+%   available with xetex.
 % \end{function}
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdf_annotation:nnnn #1 #2 #3 #4
@@ -2657,6 +2671,22 @@
   {
     \@@_backend_annotation_last:
   }
+
+\cs_new_protected:Npn \pdf_annotation:nnnnn #1 #2 #3 #4 #5
+  {
+    \exp_args:Nx
+    \@@_backend_annotation:nnnn {#2}{#3}{#4}
+      {
+        \prop_if_exist:cT { l_@@_hook_#1_attr_prop }
+          {
+            \prop_map_function:cN
+              { l_@@_hook_#1_attr_prop }
+              \@@_dict_item:nn
+          }
+        #5
+      }
+  }
+
 
 %    \end{macrocode}
 %
