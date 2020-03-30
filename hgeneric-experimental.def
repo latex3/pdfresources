@@ -172,25 +172,25 @@
       {
         \hook_put:nnnn
           { pdf }
-          { link_begin_URI_attr }
+          { link_URI_attr }
           { F }
           { 4 }
 
         \hook_put:nnnn
           { pdf }
-          { link_begin_GoTo_attr }
+          { link_GoTo_attr }
           { F }
           { 4 }
 
         \hook_put:nnnn
           { pdf }
-          { link_begin_GoToR_attr }
+          { link_GoToR_attr }
           { F }
           { 4 }
 
         \hook_put:nnnn
           { pdf }
-          { link_begin_Named_attr }
+          { link_Named_attr }
           { F }
           { 4 }
       }
@@ -208,23 +208,23 @@
       {
         \tl_if_empty:NTF \@pdfborder
           {
-            \hook_remove:nnn { pdf } { link_begin_##1_attr } { Border }
+            \hook_remove:nnn { pdf } { link_##1_attr } { Border }
           }
           {
             \hook_put:nnnn
               { pdf }
-              { link_begin_##1_attr }
+              { link_##1_attr }
               { Border }
               { [\@pdfborder] }
           }
         \tl_if_empty:NTF \@pdfborderstyle
           {
-            \hook_remove:nnn  { pdf }{ link_begin_##1_attr } { BS }
+            \hook_remove:nnn  { pdf }{ link_##1_attr } { BS }
           }
           {
             \hook_put:nnnn
               { pdf }
-              { link_begin_##1_attr }
+              { link_##1_attr }
               { BS }
               { <<\@pdfborderstyle>> }
           }
@@ -238,12 +238,12 @@
       {
         \tl_if_empty:NTF \@pdfhighlight
           {
-            \hook_remove:nnn { pdf } { link_begin_##1_attr }{ H }
+            \hook_remove:nnn { pdf } { link_##1_attr }{ H }
           }
           {
             \hook_put:nnnn
               { pdf }
-              { link_begin_##1_attr }
+              { link_##1_attr }
               { H }
               { \@pdfhighlight }
          }
@@ -259,12 +259,12 @@
           {
             \hook_put:nnnn
              { pdf }
-             { link_begin_##1_attr }
+             { link_##1_attr }
              { C }
              { [\tl_use:c {@\prop_item:Nn\c__hyp_map_linktypes_prop{##1}bordercolor}] }
           }
           {
-            \hook_remove:nnn { pdf } { link_begin_##1_attr } { C }
+            \hook_remove:nnn { pdf } { link_##1_attr } { C }
           }
      }
   }

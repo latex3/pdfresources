@@ -17,31 +17,31 @@
 \ExplSyntaxOn\makeatletter
 \hook_put_left:nnn
  { pdf }
- { link_begin_URI }
+ { link_URI_begin }
  {
   begin~url
  }
 \hook_put:nnnn
  { pdf }
- { link_begin_URI_attr }
+ { link_URI_attr }
  { StructParent }
  { 123 }
 \hook_put_right:nnn
  { pdf }
- { link_end_URI }
+ { link_URI_end }
  {
    end~url
  }
 
 \hook_put:nnnn
  { pdf }
- { link_begin_URI_attr }
+ { link_URI_attr }
  { Contents }
  { (url) }
 
 \hook_put:nnnn
  { pdf }
- { link_begin_GoTo_attr }
+ { link_GoTo_attr }
  { Contents }
  { (ref) }
 
