@@ -100,6 +100,16 @@
   {
     unknown~key~#2~of~module~’#1’~set~to~’#3’.
   }
+\msg_new:nnn
+  { hyp }
+  { unknown-choice }
+  {
+    Value~'#3'~is~invalid~for~key~'#1'.\\
+    The~key~accepts~only~the~choices\\
+    \clist_map_function:nN { #2 }\__hyp_clist_display:n
+    An~empty~value~removes~the~setting.
+  }
+\cs_new:Npn \__hyp_clist_display:n #1 {*~#1\\}
 %% I require the bookmark package to get rid of some of the bookmarks code.
 % but the testing code doesn't work.
 % !!!!!!!!!!!!!!!!!!!!! to do !!!!!!!!!!!!!!!!!!!!!
@@ -818,6 +828,11 @@
      }
    ,pdfdirection /  .code:n =
      { \pdf_catalog_gremove:n { ViewerPreferences / Direction } }
+   ,pdfdirection / unknown .code:n =
+       \msg_error:nnxxx { hyp } { unknown-choice }
+         { pdfdirection } % Name of choice key
+         { L2R , R2L } % Valid choices
+         { \exp_not:n {#1} }, % Invalid choice given
    ,pdfduplex    .choices:nn =
      {Simplex, DuplexFlipShortEdge, DuplexFlipLongEdge}
      {
