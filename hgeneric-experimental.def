@@ -167,9 +167,14 @@
 \tl_new:N  \l__hyp_uri_tmpa_tl
 \tl_new:N  \l__hyp_filename_tmpa_tl
 \tl_new:N  \l__hyp_para_tmpa_tl
+\int_new:N \l__hyp_tmpa_int
+
 % const
 \tl_const:Nn \c__hyp_destname_undefined_tl {UNDEFINED}
 
+%variables
+\tl_new:N  \g__hyp_pdfstartpage_tl
+\tl_new:N  \g__hyp_pdfstartview_tl
 
 % bools
 %%% pdfa key:
@@ -186,6 +191,22 @@
     Named = menu,
     Launch= run
   }
+
+%regex for destinations
+\regex_const:Nn \c__hyp_dest_view_regex
+  {
+    \A\ *
+     (XYZ (\ +\d+|\d*\.\d+){0,3}
+     |
+     (Fit|FitB)
+     |
+     (FitH|FitV|FitBH|FitBV)(\ +\d+|\d*\.\d+){1}
+     |
+     FitR (\ +\d+|\d*\.\d+){4}
+     )
+     \ *\Z
+  }
+
 
 % this need sorting out later. pdf standards should be handled outside the driver.
 % pdfa forces the flag /F 4 in some places.
@@ -1158,6 +1179,38 @@
          { None, AppDefault }
          { \exp_not:n {#1} }
      }
+   % pdfstartpage is special as it shares code with pdfstartview
+   ,pdfstartpage .code:n =
+     {
+       \tl_gset:Nx \g__hyp_pdfstartpage_tl { #1 }
+       \bool_if:nTF
+         { \tl_if_empty_p:N \g__hyp_pdfstartpage_tl || \tl_if_empty_p:N \g__hyp_pdfstartview_tl }
+         {
+           \pdf_catalog_gremove:n { OpenAction }
+         }
+         {
+           \pdf_catalog_gput:nx { OpenAction }
+             {
+               [\pdf_pageobject_ref:n {\g__hyp_pdfstartpage_tl}~/\g__hyp_pdfstartview_tl]
+             }
+         }
+     }
+   ,pdfstartview .code:n =
+     {
+       \tl_gset:Nx \g__hyp_pdfstartview_tl { #1 }
+       \bool_if:nTF
+         { \tl_if_empty_p:N \g__hyp_pdfstartpage_tl || \tl_if_empty_p:N \g__hyp_pdfstartview_tl }
+         {
+           \pdf_catalog_gremove:n { OpenAction }
+         }
+         {
+           \pdf_catalog_gput:nx { OpenAction }
+             {
+               [\pdf_pageobject_ref:n {\g__hyp_pdfstartpage_tl}~/\g__hyp_pdfstartview_tl]
+             }
+         }
+     }
+   ,pdfstartview .initial:n = Fit
    ,pdftoolbar    .choice:
    ,pdftoolbar / true .code:n =
      { \pdf_catalog_gremove:n { ViewerPreferences / HideToolbar } }
@@ -1244,16 +1297,16 @@
 
 \cs_set_protected:Npn \PDF@SetupDoc
   {
-    \bool_if:nF
-      {
-        \tl_if_empty_p:N \@pdfstartpage
-        ||
-        \tl_if_empty_p:N \@pdfstartview
-      }
-      {
-        \exp_args:Noo
-        \pdf_docview:nn {\@pdfstartpage} {\tl_tail:N\@pdfstartview}
-      }
+    %\bool_if:nF
+%      {
+%        \tl_if_empty_p:N \@pdfstartpage
+%        ||
+%        \tl_if_empty_p:N \@pdfstartview
+%      }
+%      {
+%        \exp_args:Noo
+%        \pdf_docview:nn {\@pdfstartpage} {\tl_tail:N\@pdfstartview}
+%      }
 }
 
 
