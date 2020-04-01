@@ -110,6 +110,18 @@
     An~empty~value~removes~the~setting.
   }
 
+\msg_new:nnn
+  { hyp }
+  { no-bool }
+  {
+    Value~'#2'~is~invalid~for~key~'#1'.\\
+    The~key~accepts~only~the~choices\\
+    *~true\\
+    *~false \\
+    *~and~an~empty~value~which~removes~the~setting.\\
+    No~value~is~equivalent~to~using~`true`.
+  }
+
 \cs_new:Npn \__hyp_clist_display:n #1 {*~#1\\}
 %% I require the bookmark package to get rid of some of the bookmarks code.
 % but the testing code doesn't work.
@@ -819,6 +831,14 @@
      {
        \pdf_catalog_gput:nn   { ViewerPreferences } {{ CenterWindow }{ true }}
      }
+   ,pdfcenterwindow /  .code:n =
+     { \pdf_catalog_gremove:n { ViewerPreferences / CenterWindow } }
+   ,pdfcenterwindow / unknown .code:n =
+     {
+       \msg_warning:nnxx { hyp } { no-bool }
+         { pdfcenterwindow }
+         { \exp_not:n {#1} }
+     }
    ,pdfcenterwindow    .default:n = true
    ,pdfdirection    .choice:
    ,pdfdirection / L2R .code:n =
@@ -836,6 +856,14 @@
          { L2R , R2L }
          { \exp_not:n {#1} }
      }
+   ,pdfdisplaydoctitle    .choice:
+   ,pdfdisplaydoctitle / false .code:n =
+     { \pdf_catalog_gremove:n { ViewerPreferences / DisplayDocTitle } }
+   ,pdfdisplaydoctitle / true .code:n =
+     {
+       \pdf_catalog_gput:nn   { ViewerPreferences } {{ DisplayDocTitle } { true }}
+     }
+   ,pdfdisplaydoctitle    .default:n = true
    ,pdfduplex    .choices:nn =
      {Simplex, DuplexFlipShortEdge, DuplexFlipLongEdge}
      {
@@ -860,17 +888,6 @@
          { Simplex, DuplexFlipShortEdge, DuplexFlipLongEdge }
          { \exp_not:n {#1} }
      }
-   ,pdfprintclip /  .code:n =
-     { \pdf_catalog_gremove:n { ViewerPreferences / PrintClip } }
-   ,pdfmenubar    .default:n = true
-   ,pdfdisplaydoctitle    .choice:
-   ,pdfdisplaydoctitle / false .code:n =
-     { \pdf_catalog_gremove:n { ViewerPreferences / DisplayDocTitle } }
-   ,pdfdisplaydoctitle / true .code:n =
-     {
-       \pdf_catalog_gput:nn   { ViewerPreferences } {{ DisplayDocTitle } { true }}
-     }
-   ,pdfdisplaydoctitle    .default:n = true
    ,pdffitwindow    .choice:
    ,pdffitwindow / false .code:n =
      { \pdf_catalog_gremove:n { ViewerPreferences / FitWindow } }
@@ -878,7 +895,15 @@
      {
        \pdf_catalog_gput:nn   { ViewerPreferences } {{ FitWindow } { true }}
      }
+   ,pdffitwindow /  .code:n =
+     { \pdf_catalog_gremove:n { ViewerPreferences / FitWindow } }
    ,pdffitwindow    .default:n = true
+   ,pdffitwindow / unknown .code:n =
+     {
+       \msg_warning:nnxx { hyp } { no-bool }
+         { pdffitwindow }
+         { \exp_not:n {#1} }
+     }
    ,pdflang       .code:n =
           {
             \tl_if_empty:nTF { #1 }
@@ -896,7 +921,15 @@
      {
        \pdf_catalog_gput:nn   { ViewerPreferences } {{ HideMenubar } { true }}
      }
+   ,pdfmenubar /  .code:n =
+     { \pdf_catalog_gremove:n { ViewerPreferences / HideMenubar } }
    ,pdfmenubar    .default:n = true
+   ,pdfmenubar / unknown .code:n =
+     {
+       \msg_warning:nnxx { hyp } { no-bool }
+         { pdfmenubar }
+         { \exp_not:n {#1} }
+     }
    ,pdfnonfullscreenpagemode   .choices:nn =
      { UseNone, UseOutlines, UseThumbs, FullScreen, UseOC } %pdf 1.5
      {
@@ -1025,6 +1058,12 @@
      {
        \pdf_catalog_gremove:nn  { ViewerPreferences/PickTrayByPDFSize }
      }
+   ,pdfpicktraybypdfsize / unknown .code:n =
+     {
+       \msg_warning:nnxx { hyp } { no-bool }
+         { picktraybypdfsize }
+         { \exp_not:n {#1} }
+     }
    ,pdfprintarea    .choices:nn =
      { MediaBox, CropBox, BleedBox, TrimBox, ArtBox }
      {
@@ -1086,14 +1125,14 @@
                  { ViewerPreferences }
                  {{PrintPageRange}{[#1]}}
              }
-          }
-          {
+         }
+         {
             \msg_warning:nnxx
               {hyp}
               {ignore-deprecated-or-unknown-option-in-pdf-version}
               {pdfprintpagerange}
               {\pdf_version:}
-          }
+         }
      }
    ,pdfprintscaling    .choices:nn =
      { None, AppDefault }
@@ -1126,7 +1165,15 @@
      {
        \pdf_catalog_gput:nn  { ViewerPreferences } {{ HideToolbar } { true }}
      }
+   ,pdftoolbar / true .code:n =
+     { \pdf_catalog_gremove:n { ViewerPreferences / HideToolbar } }
    ,pdftoolbar    .default:n = true
+   ,pdftoolbar / unknown .code:n =
+     {
+       \msg_warning:nnxx { hyp } { no-bool }
+         { pdftoolbar }
+         { \exp_not:n {#1} }
+     }
    ,pdfviewarea    .choices:nn =
      { MediaBox, CropBox, BleedBox, TrimBox, ArtBox }
      {
@@ -1181,6 +1228,14 @@
    ,pdfwindowui / false .code:n =
      {
        \pdf_catalog_gput:nn { ViewerPreferences } {{ HideWindowUI } { true }}
+     }
+   ,pdfwindowui /  .code:n =
+     { \pdf_catalog_gremove:n { ViewerPreferences / HideWindowUI } }
+   ,pdfwindowui / unknown .code:n =
+     {
+       \msg_warning:nnxx { hyp } { no-bool }
+         { pdfwindowui }
+         { \exp_not:n {#1} }
      }
    ,pdfwindowui    .default:n = true
  }
