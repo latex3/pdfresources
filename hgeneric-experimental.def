@@ -109,6 +109,7 @@
     \clist_map_function:nN { #2 }\__hyp_clist_display:n
     An~empty~value~removes~the~setting.
   }
+
 \cs_new:Npn \__hyp_clist_display:n #1 {*~#1\\}
 %% I require the bookmark package to get rid of some of the bookmarks code.
 % but the testing code doesn't work.
@@ -829,10 +830,12 @@
    ,pdfdirection /  .code:n =
      { \pdf_catalog_gremove:n { ViewerPreferences / Direction } }
    ,pdfdirection / unknown .code:n =
-       \msg_error:nnxxx { hyp } { unknown-choice }
-         { pdfdirection } % Name of choice key
-         { L2R , R2L } % Valid choices
-         { \exp_not:n {#1} }, % Invalid choice given
+     {
+       \msg_warning:nnxxx { hyp } { unknown-choice }
+         { pdfdirection }
+         { L2R , R2L }
+         { \exp_not:n {#1} }
+     }
    ,pdfduplex    .choices:nn =
      {Simplex, DuplexFlipShortEdge, DuplexFlipLongEdge}
      {
@@ -848,6 +851,15 @@
              {\pdf_version:}
          }
      }%
+   ,pdfduplex /  .code:n =
+     { \pdf_catalog_gremove:n { ViewerPreferences / PrintDuplex } }
+   ,pdfduplex / unknown .code:n =
+     {
+       \msg_warning:nnxxx { hyp } { unknown-choice }
+         { pdfduplex }
+         { Simplex, DuplexFlipShortEdge, DuplexFlipLongEdge }
+         { \exp_not:n {#1} }
+     }
    ,pdfprintclip /  .code:n =
      { \pdf_catalog_gremove:n { ViewerPreferences / PrintClip } }
    ,pdfmenubar    .default:n = true
@@ -900,6 +912,15 @@
            \pdf_catalog_gput:nn {ViewerPreferences }{{NonFullScreenPageMode}{/UseAttachments}}
          }
      }
+   ,pdfnonfullscreenpagemode /  .code:n =
+     { \pdf_catalog_gremove:n { ViewerPreferences / NonFullScreenPageMode } }
+   ,pdfnonfullscreenpagemode / unknown .code:n =
+     {
+       \msg_warning:nnxxx { hyp } { unknown-choice }
+         { pdfnonfullscreenpagemode }
+         { UseNone, UseOutlines, UseThumbs, FullScreen, UseOC, UseAttachments (PDF 1.6) }
+         { \exp_not:n {#1} }
+     }
    ,pdfnumcopies .code:n =
      {
        \pdf_version_compare:NnTF > {1.6}
@@ -925,6 +946,13 @@
      { \pdf_catalog_gput:nx { PageLayout }{ /#1 } }
    ,pdfpagelayout / .code:n =
      { \pdf_catalog_gremove:n { PageLayout } }
+   ,pdfpagelayout / unknown .code:n =
+     {
+       \msg_warning:nnxxx { hyp } { unknown-choice }
+         { pdfpagelayout }
+         { SinglePage, OneColumn, TwoColumnLeft, TwoColumnRight, TwoPageLeft, TwoPageRight }
+         { \exp_not:n {#1} }
+     }
    ,pdfpagemode   .choices:nn =
      { UseNone, UseOutlines, UseThumbs, FullScreen, UseOC } %pdf 1.5
      { \pdf_catalog_gput:nx { PageMode }{ /#1 } }
@@ -943,6 +971,13 @@
          }
      }
    ,pdfpagemode   .initial:n  = { UseOutlines } %for now ...
+   ,pdfpagemode / unknown .code:n =
+     {
+       \msg_warning:nnxxx { hyp } { unknown-choice }
+         { pdfpagemode }
+         { UseNone, UseOutlines, UseThumbs, FullScreen, UseOC, UseAttachments (PDF 1.6) }
+         { \exp_not:n {#1} }
+     }
    ,pdfpagescrop  .code:n =
      {
        \tl_if_empty:nTF %or blank?
@@ -1007,6 +1042,13 @@
      }%
    ,pdfprintarea /  .code:n =
      { \pdf_catalog_gremove:n { ViewerPreferences / PrintArea } }
+   ,pdfprintarea / unknown .code:n =
+     {
+       \msg_warning:nnxxx { hyp } { unknown-choice }
+         { pdfprintarea }
+         { MediaBox, CropBox, BleedBox, TrimBox, ArtBox }
+         { \exp_not:n {#1} }
+     }
    ,pdfprintclip    .choices:nn =
      { MediaBox, CropBox, BleedBox, TrimBox, ArtBox }
      {
@@ -1024,6 +1066,13 @@
      }%
    ,pdfprintclip /  .code:n =
      { \pdf_catalog_gremove:n { ViewerPreferences / PrintClip } }
+   ,pdfprintclip / unknown .code:n =
+     {
+       \msg_warning:nnxxx { hyp } { unknown-choice }
+         { pdfprintclip }
+         { MediaBox, CropBox, BleedBox, TrimBox, ArtBox }
+         { \exp_not:n {#1} }
+     }
    ,pdfprintpagerange .code:n =
      {
        \pdf_version_compare:NnTF > {1.6}
@@ -1063,6 +1112,13 @@
      }%
    ,pdfprintscaling /  .code:n =
      { \pdf_catalog_gremove:n { ViewerPreferences / PrintScaling } }
+   ,pdfprintscaling / unknown .code:n =
+     {
+       \msg_warning:nnxxx { hyp } { unknown-choice }
+         { pdfprintarea }
+         { None, AppDefault }
+         { \exp_not:n {#1} }
+     }
    ,pdftoolbar    .choice:
    ,pdftoolbar / true .code:n =
      { \pdf_catalog_gremove:n { ViewerPreferences / HideToolbar } }
@@ -1088,6 +1144,13 @@
      }%
    ,pdfviewarea /  .code:n =
      { \pdf_catalog_gremove:n { ViewerPreferences / ViewArea } }
+   ,pdfviewarea / unknown .code:n =
+     {
+       \msg_warning:nnxxx { hyp } { unknown-choice }
+         { pdfviewarea }
+         { MediaBox, CropBox, BleedBox, TrimBox, ArtBox }
+         { \exp_not:n {#1} }
+     }
    ,pdfviewclip    .choices:nn =
      { MediaBox, CropBox, BleedBox, TrimBox, ArtBox }
      {
@@ -1105,6 +1168,13 @@
      }%
    ,pdfviewclip /  .code:n =
      { \pdf_catalog_gremove:n { ViewerPreferences / ViewClip } }
+   ,pdfviewclip / unknown .code:n =
+     {
+       \msg_warning:nnxxx { hyp } { unknown-choice }
+         { pdfviewclip }
+         { MediaBox, CropBox, BleedBox, TrimBox, ArtBox }
+         { \exp_not:n {#1} }
+     }
    ,pdfwindowui    .choice:
    ,pdfwindowui / true .code:n =
      { \pdf_catalog_gremove:n { ViewerPreferences / HideWindowUI } }
