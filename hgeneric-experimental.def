@@ -196,17 +196,17 @@
 \regex_const:Nn \c__hyp_dest_view_regex
   {
     \A\ *
-     (XYZ (\ +\d+|\d*\.\d+){0,3}
-     |
-     (Fit|FitB)
-     |
-     (FitH|FitV|FitBH|FitBV)(\ +\d+|\d*\.\d+){1}
-     |
-     FitR (\ +\d+|\d*\.\d+){4}
+     (?:
+      (?:XYZ (?:\ +(?:(?:\d+|\d*\.\d+)|null)){0,3})
+      |
+      (?:Fit|FitB)
+      |
+      (?:(?:FitH|FitV|FitBH|FitBV)(?:\ +(?:\d+|\d*\.\d+)|null)??)
+      |
+      (?:FitR (?:\ +\d+|\d*\.\d+){4})
      )
      \ *\Z
   }
-
 
 % this need sorting out later. pdf standards should be handled outside the driver.
 % pdfa forces the flag /F 4 in some places.
