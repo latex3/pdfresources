@@ -408,7 +408,7 @@
 %  but it should be done by subtrees ...
 %  \end{NOTE}
 %
-%  Currently the following names are used: ^^A!!!!! check, compare with g_@@_prop_names_seq
+%  Currently the following names are used: ^^A!!!!! check, compare with g_@@_prop_gnames_seq
 %  \begin{verbatim}
 %  /Pages           %w,  \pagesattr
 %  /backend_Page    %!!!!! consider name Page?
@@ -433,8 +433,9 @@
 %  /Catalog/ViewerPreferences
 %  /xform/Resources/Properties
 %  \end{verbatim}
-%  \begin{macro}{\@@_prop_gname:n,\@@_prop_new:n,\g_@@_prop_names_seq}
+%  \begin{macro}{\@@_prop_gname:n,\@@_prop_gnew:n,\g_@@_prop_gnames_seq,\g_@@_prop_names_seq}
 %    \begin{macrocode}
+\seq_new:N \g_@@_prop_gnames_seq
 \seq_new:N \g_@@_prop_names_seq
 
 \cs_new:Npn \@@_prop_gname:n #1 % path name without the leading /
@@ -442,11 +443,26 @@
     g_@@_/#1_prop
   }
 
-\cs_new_protected:Npn \@@_prop_new:n #1
+\cs_new:Npn \@@_prop_name:n #1 % path name without the leading /
+  {
+    l_@@_/#1_prop
+  }
+
+
+\cs_new_protected:Npn \@@_prop_gnew:n #1
   {
     \prop_if_exist:cF { \@@_prop_gname:n { #1 } }
       {
         \prop_new:c  { \@@_prop_gname:n { #1 } }
+        \seq_gput_right:Nn \g_@@_prop_gnames_seq { #1 }
+      }
+  }
+
+\cs_new_protected:Npn \@@_prop_new:n #1
+  {
+    \prop_if_exist:cF { \@@_prop_name:n { #1 } }
+      {
+        \prop_new:c  { \@@_prop_name:n { #1 } }
         \seq_gput_right:Nn \g_@@_prop_names_seq { #1 }
       }
   }
@@ -455,15 +471,24 @@
 %
 %  \begin{macro}{
 %                \@@_prop_gclear,
+%                \@@_prop_clear,
 %                \@@_prop_gput:nnn,
+%                \@@_prop_put:nnn,
+%                \@@_prop_gget:nnN,
 %                \@@_prop_get:nnN,
 %                \@@_prop_gremove:nn,
-%                \@@_prop_show:n
+%                \@@_prop_remove:nn,
+%                \@@_prop_gshow:n
 %                }
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_prop_gclear:n #1
   {
     \prop_gclear:c  { \@@_prop_gname:n { #1 } }
+  }
+
+\cs_new_protected:Npn \@@_prop_clear:n #1
+  {
+    \prop_clear:c  { \@@_prop_name:n { #1 } }
   }
 
 \cs_new_protected:Npn \@@_prop_gput:nnn #1 #2 #3  %#1 path, #2 name, #3 value
@@ -484,10 +509,33 @@
       }
   }
 
+\cs_new_protected:Npn \@@_prop_put:nnn #1 #2 #3  %#1 path, #2 name, #3 value
+  {
+    \tl_if_empty:nTF { #3 }
+      {
+        \msg_none:nnn { pdf }{ empty-value }{ /#1/#2 }
+      }
+      {
+        \prop_if_exist:cTF
+          { \@@_prop_name:n { #1 } }
+          {
+            \prop_put:cnn { \@@_prop_name:n { #1 } }{ #2 } { #3 }
+          }
+          {
+            \msg_error:nnn { pdf } { wrong-path } { /#1 }
+          }
+      }
+  }
+
 \cs_generate_variant:Nn \@@_prop_gput:nnn {nxx}
-\cs_new_protected:Npn \@@_prop_get:nnN  #1 #2 #3 %path,key,macro
+
+\cs_new_protected:Npn \@@_prop_gget:nnN  #1 #2 #3 %path,key,macro
   {
     \prop_get:cnN { \@@_prop_gname:n { #1 } } { #2 } #3
+  }
+\cs_new_protected:Npn \@@_prop_get:nnN  #1 #2 #3 %path,key,macro
+  {
+    \prop_get:cnN { \@@_prop_name:n { #1 } } { #2 } #3
   }
 
 \cs_new_protected:Npn \@@_prop_gremove:nn #1 #2 %path,key
@@ -495,7 +543,12 @@
     \prop_gremove:cn { \@@_prop_gname:n { #1 } } { #2 }
   }
 
-\cs_new_protected:Npn \@@_prop_show:n #1  %path
+\cs_new_protected:Npn \@@_prop_remove:nn #1 #2 %path,key
+  {
+    \prop_gremove:cn { \@@_prop_name:n { #1 } } { #2 }
+  }
+
+\cs_new_protected:Npn \@@_prop_gshow:n #1  %path
   {
     \prop_show:c { \@@_prop_gname:n { #1 } }
   }
@@ -532,6 +585,42 @@
 % \end{macro}
 %
 % \section{Resources management}
+% \subsection{User interface pdfdict}
+% \begin{NOTE}{UF}
+% How to differentiate between global and local dicts?
+% g_Catalog?
+% l_Annot?
+% \end{NOTE}
+% \begin{function}[added = 2020-04-06]
+%   {\pdfdict_gput:nnn, \pdfdict_gput:nnn, }
+%   \begin{syntax}
+%     \cs{pdfdict_gput:nnn} \Arg{global Dict} \Arg{name} \Arg{value}\\
+%     \cs{pdfdict_put:nnn}  \Arg{local Dict} \Arg{name} \Arg{value}
+%   \end{syntax}
+% This functions put \Arg{name} \Arg{value} either globally or locally in properties.
+% \Arg{global dict} and \Arg{local dict} are
+% symbolic names for various PDF dictionaries. \Arg{name} should a valid PDF name without
+% the starting slash, \Arg{value} should be a valid PDF value for this name in the
+% target dictionary. The pdf resource management code predefines a large number of
+% symbolic names for important dictionaries and will write the stored values
+% at the right time to the pdf. The backend code works with all major engines but not necessarly
+% in the same way. Most importantly the expansion behaviour of the backends differ.
+% One shouldn't neither rely on \Arg{name} \Arg{value} to be expanded nor not expanded
+% by the backend commands.
+%
+% \end{function}
+%    \begin{macrocode}
+\cs_new_protected:Npn \pdfdict_gput:nnn #1 #2 #3
+  {
+     \@@_prop_gput:nnn { #1 }{ #2 }{ #3 }
+  }
+
+\cs_new_protected:Npn \pdfdict_put:nnn #1 #2 #3
+  {
+     \@@_prop_put:nnn { #1 }{ #2 }{ #3 }
+  }
+
+%    \end{macrocode}
 % \subsection{pdfpagesattr}
 % \subsubsection{pdfpagesattr/backend}
 % \begin{NOTE}{UF}
@@ -639,7 +728,7 @@
 %   trying to remove it.
 % \end{function}
 %    \begin{macrocode}
-\@@_prop_new:n {Pages}
+\@@_prop_gnew:n {Pages}
 % setter:
 %^^A documentated
 \cs_new_protected:Npn \pdf_pagesattr_gput:nn #1 #2
@@ -651,7 +740,7 @@
 %^^A documentated
 \cs_new_protected:Npn \pdf_pagesattr_get:nN #1 #2
   {
-    \@@_prop_get:nnN {Pages}{ #1 } #2
+    \@@_prop_gget:nnN {Pages}{ #1 } #2
   }
 
 % remove:
@@ -718,7 +807,7 @@
 %  backend commands
 %  a prop for global/default settings which are used for more than
 %  one page
-\@@_prop_new:n {backend_Page}
+\@@_prop_gnew:n {backend_Page}
 
 %pdflatex
 \bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
@@ -758,7 +847,7 @@
             {pdf@abspage}
             {0}
         }
-      \@@_prop_new:n    {backend_Page\l_@@_tmpa_tl}
+      \@@_prop_gnew:n    {backend_Page\l_@@_tmpa_tl}
       \@@_prop_gput:nnn {backend_Page\l_@@_tmpa_tl}{ #1 }{ #2 }
     }
   %the code to push the values, used in shipout
@@ -1077,7 +1166,7 @@
 %   so values can be set at any time.
 % \end{function}
 %    \begin{macrocode}
-\@@_prop_new:n {Info}
+\@@_prop_gnew:n {Info}
 
 \cs_new_protected:Npn \pdf_info_gput:nn #1 #2 %#1 key without /, #2 content
   {
@@ -1198,7 +1287,7 @@
 % pdftex and luatex (and perhaps dvips ...) need to know if there are in a
 % xform stream ...
 \bool_new:N \l_@@_backend_xform_bool
-\@@_prop_new:n {xform/Resources/Properties}
+\@@_prop_gnew:n {xform/Resources/Properties}
 %quite often needed
 \clist_const:Nn \c_@@_backend_PageNResources_clist
   {
@@ -1396,7 +1485,7 @@
                   {pdf@abspage}
                   {0}
               }
-            \@@_prop_new:n { backend_Page\l_@@_tmpa_tl/Resources/Properties }
+            \@@_prop_gnew:n { backend_Page\l_@@_tmpa_tl/Resources/Properties }
             \@@_prop_gput:nxx
               { backend_Page\l_@@_tmpa_tl/Resources/Properties }
               { l3pdf\int_use:N\g_@@_backend_resourceid_int }
@@ -1428,12 +1517,12 @@
                   {pdf@abspage}
                   {0}
               }
-            \@@_prop_new:n { backend_Page\l_@@_tmpa_tl/Resources/Properties }
+            \@@_prop_gnew:n { backend_Page\l_@@_tmpa_tl/Resources/Properties }
             \@@_prop_gput:nxx
               { backend_Page\l_@@_tmpa_tl/Resources/Properties }
               { l3pdf\int_use:N\g_@@_backend_resourceid_int }
               { \@@_backend_object_last: }
-            %\@@_prop_show:n { backend_Page\l_@@_tmpa_tl/Resources/Properties }
+            %\@@_prop_gshow:n { backend_Page\l_@@_tmpa_tl/Resources/Properties }
           }
       }
   \cs_set_protected:Npn \@@_backend_bmc:n #1
@@ -1897,7 +1986,7 @@
   { %create the props and backend objects:
     \clist_map_inline:Nn \c_@@_backend_PageNResources_clist
       {
-        \@@_prop_new:n {PageN/Resources/#1}
+        \@@_prop_gnew:n {PageN/Resources/#1}
         \@@_backend_object_new:nn {PageN/Resources/#1} {dict}
         \cs_if_exist:NT \tex_directlua:D
           {
@@ -2228,7 +2317,7 @@
 %  \begin{macro}{ \@@_catalog_XX_gput:n }
 % Various commands to handle subentries and special cases.
 %    \begin{macrocode}
-\@@_prop_new:n {Catalog}
+\@@_prop_gnew:n {Catalog}
 
 \clist_const:Nn \c_@@_Catalog_single_clist
   {
@@ -2264,7 +2353,7 @@
 
 \clist_map_inline:Nn \c_@@_Catalog_prop_clist
   {
-    \@@_prop_new:n {Catalog/#1}
+    \@@_prop_gnew:n {Catalog/#1}
     \cs_new_protected:cpn { @@_/Catalog/#1_gput:n } ##1
       {
         \@@_prop_gput:nnn { Catalog/#1 }  ##1
