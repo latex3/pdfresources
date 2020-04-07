@@ -492,7 +492,7 @@
 %                \@@_prop_clear,
 %                \@@_prop_put:nnn,
 %                \@@_prop_get:nnN,
-%                \@@_prop_gremove:nn,
+%                \@@_prop_remove:nn,
 %                \@@_prop_remove:nn,
 %                \@@_prop_show:n
 %                }
@@ -505,25 +505,6 @@
            { \@@_prop_Xname:n { #1 } }
   }
 
-
-%global
-\cs_new_protected:Npn \@@_prop_ORIgput:nnn #1 #2 #3  %#1 path, #2 name, #3 value
-  {
-    \tl_if_empty:nTF { #3 }
-      {
-        \msg_none:nnn { pdf }{ empty-value }{ /#1/#2 }
-      }
-      {
-        \prop_if_exist:cTF
-          { \@@_prop_gname:n { #1 } }
-          {
-            \prop_gput:cnn { \@@_prop_gname:n { #1 } }{ #2 } { #3 }
-          }
-          {
-            \msg_error:nnn { pdf } { wrong-path } { /#1 }
-          }
-      }
-  }
 
 %local + global
 \cs_new_protected:Npn \@@_prop_put:nnn #1 #2 #3  %#1 path, #2 name, #3 value
@@ -545,12 +526,6 @@
       }
   }
 
-%new both:
-%\cs_new_protected:Npn \@@_prop_put:nnnn #1 #2 #3 #4  %#1 g #2 path, #3 name, #4 value
-%  {
-%    \use:c { @@_prop_\tl_use:c{c_@@_/#2_g_tl}put:nnn }
-%         { #2 } { #3 } { #4 }
-%  }
 
 \cs_generate_variant:Nn \@@_prop_put:nnn {nxx}
 
@@ -564,21 +539,16 @@
       { #2 } #3
   }
 
-
-%
-\cs_new_protected:Npn \@@_prop_gremove:nn #1 #2 %path,key
-  {
-    \prop_gremove:cn { \@@_prop_gname:n { #1 } } { #2 }
-  }
-
+% local / global
 \cs_new_protected:Npn \@@_prop_remove:nn #1 #2 %path,key
   {
-    \prop_gremove:cn { \@@_prop_name:n { #1 } } { #2 }
+    \use:c { prop_\@@_prop_get_g:n{#1}remove:cn }
+           { \@@_prop_Xname:n { #1 } } { #2 }
   }
 
 \cs_new_protected:Npn \@@_prop_show:n #1  %path
   {
-    \prop_show:c { \use:c{ @@_prop_\tl_use:c{c_@@_/#1_g_tl}name:n } { #1 } }
+    \prop_show:c { \use:c{ @@_prop_\@@_prop_get_g:n{#1}name:n } { #1 } }
   }
 %    \end{macrocode}
 % \end{macro}
@@ -687,7 +657,7 @@
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdfdict_gremove:nn #1 #2
   {
-    \@@_prop_gremove:nn { #1 }{ #2 }
+    \@@_prop_remove:nn { #1 }{ #2 }
   }
 
 
@@ -820,7 +790,7 @@
 %^^A documented
 \cs_new_protected:Npn \pdf_pagesattr_gremove:n #1
   {
-    \@@_prop_gremove:nn {Pages}{ #1 }
+    \@@_prop_remove:nn {Pages}{ #1 }
   }
 %    \end{macrocode}
 %
@@ -902,7 +872,7 @@
   % changes a lua table with lualatex
   \cs_new_protected:Npn \@@_backend_Page_gremove:n #1
     {
-      \@@_prop_gremove:nn  {backend_Page}{ #1 }
+      \@@_prop_remove:nn  {backend_Page}{ #1 }
     }
  % the command used in the document.
  % direct call of the primitive special with dvips/dvipdfmx
@@ -1025,7 +995,7 @@
   % changes a lua table with lualatex
     \cs_new_protected:Npn \@@_backend_Page_gremove:n #1
       {
-        \@@_prop_gremove:nn  {backend_Page}{ #1 }
+        \@@_prop_remove:nn  {backend_Page}{ #1 }
       }
   % the command used in the document.
   % direct call of the primitive special with dvips/dvipdfmx
@@ -1066,7 +1036,7 @@
   % changes a lua table with lualatex
     \cs_new_protected:Npn \@@_backend_Page_gremove:n #1
       {
-        \@@_prop_gremove:nn  {backend_Page}{ #1 }
+        \@@_prop_remove:nn  {backend_Page}{ #1 }
       }
   % the command used in the document.
   % direct call of the primitive special with dvips/dvipdfmx
@@ -2368,11 +2338,11 @@
     \seq_set_split:Nnn \l_tmpa_seq { / } { #1 }
     \int_compare:nNnTF { 1 } = {\seq_count:N \l_tmpa_seq }
      {
-       \@@_prop_gremove:nn { Catalog } { #1 }
+       \@@_prop_remove:nn { Catalog } { #1 }
      }
      {
        \seq_pop_right:NN \l_tmpa_seq \tl_tmpa_tl
-       \exp_args:Nxx \@@_prop_gremove:nn
+       \exp_args:Nxx \@@_prop_remove:nn
          { Catalog/\seq_use:Nn\l_tmpa_seq { / } }
          { \tl_tmpa_tl }
      }
