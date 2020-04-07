@@ -493,7 +493,6 @@
 %                \@@_prop_put:nnn,
 %                \@@_prop_get:nnN,
 %                \@@_prop_remove:nn,
-%                \@@_prop_remove:nn,
 %                \@@_prop_show:n
 %                }
 %    \begin{macrocode}
@@ -546,6 +545,7 @@
            { \@@_prop_Xname:n { #1 } } { #2 }
   }
 
+% local / global
 \cs_new_protected:Npn \@@_prop_show:n #1  %path
   {
     \prop_show:c { \use:c{ @@_prop_\@@_prop_get_g:n{#1}name:n } { #1 } }
@@ -559,7 +559,7 @@
 %    \begin{macrocode}
 \cs_new:Npn \@@_prop_map_dict_item:n #1 %path
   {
-    \prop_map_function:cN { \@@_prop_gname:n { #1 } } \@@_dict_item:nn
+    \prop_map_function:cN { \@@_prop_Xname:n { #1 } } \@@_dict_item:nn
   }
 %    \end{macrocode}
 % \end{macro}
