@@ -438,32 +438,62 @@
 \seq_new:N \g_@@_prop_gnames_seq
 \seq_new:N \g_@@_prop_names_seq
 
+% to retried global status from pathes
+\cs_new:Npn \@@_prop_get_g:n #1 % path name without the leading /
+  {
+    c_@@_/#1_g_tl
+  }
+
+%global
 \cs_new:Npn \@@_prop_gname:n #1 % path name without the leading /
   {
     g_@@_/#1_prop
   }
 
+%local
 \cs_new:Npn \@@_prop_name:n #1 % path name without the leading /
   {
     l_@@_/#1_prop
   }
 
+%new: both
+\cs_new:Npn \@@_prop_name:nn #1 #2 % g/l / path name without the leading /
+  {
+    #1_@@_/#2_prop
+  }
 
+
+
+%global
 \cs_new_protected:Npn \@@_prop_gnew:n #1
   {
-    \prop_if_exist:cF { \@@_prop_gname:n { #1 } }
+    \prop_if_exist:cF {  \@@_prop_gname:n { #1 }  }
       {
+        \tl_const:cn { c_@@_/#1_g_tl } { g }
         \prop_new:c  { \@@_prop_gname:n { #1 } }
         \seq_gput_right:Nn \g_@@_prop_gnames_seq { #1 }
       }
   }
 
+%local
 \cs_new_protected:Npn \@@_prop_new:n #1
   {
-    \prop_if_exist:cF { \@@_prop_name:n { #1 } }
+    \prop_if_exist:cF {  \@@_prop_name:n { #1 }  }
       {
+        \tl_const:cn { c_@@_/#1_g_tl } {  }
         \prop_new:c  { \@@_prop_name:n { #1 } }
         \seq_gput_right:Nn \g_@@_prop_names_seq { #1 }
+      }
+  }
+
+%new: both
+\cs_new_protected:Npn \@@_prop_new:nn #1 #2
+  {
+    \prop_if_exist:cF {  \@@_prop_name:nn  { #1 } { #2 }  }
+      {
+        \tl_const:cn { c_@@_/#2_g_tl } { #1 }
+        \prop_new:c  { \@@_prop_name:nn  { #1 } { #2 } }
+        \seq_gput_right:cn  { g_@@_prop_#1names_seq } { #2 }
       }
   }
 %    \end{macrocode}
@@ -481,16 +511,26 @@
 %                \@@_prop_gshow:n
 %                }
 %    \begin{macrocode}
+% global
 \cs_new_protected:Npn \@@_prop_gclear:n #1
   {
     \prop_gclear:c  { \@@_prop_gname:n { #1 } }
   }
 
+%local
 \cs_new_protected:Npn \@@_prop_clear:n #1
   {
     \prop_clear:c  { \@@_prop_name:n { #1 } }
   }
 
+% new both:
+\cs_new_protected:Npn \@@_prop_clear:nn #1 #2
+  {
+    \use:c { prop_\tl_use:c{c_@@_/#2_g_tl}clear:c }
+      { \@@_prop_name:nn { #1 } { #2 } }
+  }
+
+%global
 \cs_new_protected:Npn \@@_prop_gput:nnn #1 #2 #3  %#1 path, #2 name, #3 value
   {
     \tl_if_empty:nTF { #3 }
@@ -509,6 +549,7 @@
       }
   }
 
+%local
 \cs_new_protected:Npn \@@_prop_put:nnn #1 #2 #3  %#1 path, #2 name, #3 value
   {
     \tl_if_empty:nTF { #3 }
@@ -525,6 +566,13 @@
             \msg_error:nnn { pdf } { wrong-path } { /#1 }
           }
       }
+  }
+
+%new both:
+\cs_new_protected:Npn \@@_prop_put:nnnn #1 #2 #3 #4  %#1 g #2 path, #3 name, #4 value
+  {
+    \use:c { @@_prop_\tl_use:c{c_@@_/#2_g_tl}put:nnn }
+         { #2 } { #3 } { #4 }
   }
 
 \cs_generate_variant:Nn \@@_prop_gput:nnn {nxx}
@@ -594,20 +642,20 @@
 % \begin{function}[added = 2020-04-06]
 %   {\pdfdict_gput:nnn, \pdfdict_gput:nnn, }
 %   \begin{syntax}
-%     \cs{pdfdict_gput:nnn} \Arg{global Dict} \Arg{name} \Arg{value}\\
-%     \cs{pdfdict_put:nnn}  \Arg{local Dict} \Arg{name} \Arg{value}
+%     \cs{pdfdict_gput:nnn} \Arg{global dict} \Arg{name} \Arg{value}\\
+%     \cs{pdfdict_put:nnn}  \Arg{local dict} \Arg{name} \Arg{value}
 %   \end{syntax}
-% This functions put \Arg{name} \Arg{value} either globally or locally in properties.
+% This functions put \Arg{name} \Arg{value} either globally or locally in property lists.
 % \Arg{global dict} and \Arg{local dict} are
-% symbolic names for various PDF dictionaries. \Arg{name} should a valid PDF name without
+% symbolic names for the property lists. \Arg{name} should be a valid PDF name without
 % the starting slash, \Arg{value} should be a valid PDF value for this name in the
-% target dictionary. The pdf resource management code predefines a large number of
+% target dictionary. The PDF resource management code predefines a large number of
 % symbolic names for important dictionaries and will write the stored values
-% at the right time to the pdf. The backend code works with all major engines but not necessarly
+% at the right time to the PDF. The predefined symbolic names are described below.
+% The code works with all major engines but not necessarly
 % in the same way. Most importantly the expansion behaviour of the backends differ.
-% One shouldn't neither rely on \Arg{name} \Arg{value} to be expanded nor not expanded
+% So one should neither rely on \Arg{name} \Arg{value} to be expanded nor not expanded
 % by the backend commands.
-%
 % \end{function}
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdfdict_gput:nnn #1 #2 #3
@@ -621,8 +669,58 @@
   }
 
 %    \end{macrocode}
-% \subsection{pdfpagesattr}
-% \subsubsection{pdfpagesattr/backend}
+% \begin{function}[added = 2020-04-07]
+%   {\pdfdict_get:nn, \pdfdict_gget:nn }
+%   \begin{syntax}
+%     \cs{pdfdict_gget:nnN} \Arg{global dict} \Arg{name} \meta{tl var} \\
+%     \cs{pdfdict_get:nnN}  \Arg{local dict} \Arg{name} \meta{tl var}
+%   \end{syntax}
+%   Recovers the \meta{value} stored by \cs{pdfdict_gput:nnn} or
+%   \cs{pdfdict_put:nnn}  for
+%   \meta{name} and places this in the \meta{token list
+%   variable}. If \meta{name} is not found
+%   then the \meta{token list variable} is set
+%   to the special marker \cs{q_no_value}. The \meta{token list
+%   variable} is set within the current \TeX{} group.
+%\end{function}
+%    \begin{macrocode}
+\cs_new_protected:Npn \pdfdict_gget:nnN #1 #2 #3
+  {
+    \@@_prop_gget:nnN {#1}{ #2 } #3
+  }
+
+\cs_new_protected:Npn \pdfdict_get:nnN #1 #2 #3
+  {
+    \@@_prop_get:nnN {#1}{ #2 } #3
+  }
+%    \end{macrocode}
+% \begin{function}[added = 2020-04-07]
+%   {
+%     \pdfdict_gremove:nn, \pdfdict_remove:nn,
+%   }
+%   \begin{syntax}
+%     \cs{pdf_pagesattr_gremove:n} \Arg{global dict} \Arg{name}\\
+%     \cs{pdf_pagesattr_remove:n} \Arg{local dict} \Arg{name}\\
+%   \end{syntax}
+%   Removes  |/|\meta{name} and its associated \meta{value} from the \Arg{global dict}
+%   or \Arg{local dict} (if the name-value pair has been added by
+%   \cs{pdfdict_gput:nnn} or \cs{pdfdict_put:nnn}).
+%   If \meta{name} is not found no change occurs,
+%   \emph{i.e}~there is no need to test for the existence of a name before
+%   trying to remove it.
+% \end{function}
+%    \begin{macrocode}
+\cs_new_protected:Npn \pdfdict_gremove:nn #1 #2
+  {
+    \@@_prop_gremove:nn { #1 }{ #2 }
+  }
+
+
+%    \end{macrocode}
+% \subsection{pdfdict \enquote{Pages} (pdfpagesattr)}
+% The content of the property list associated with this pdfdict is written to the
+% /Pages object.
+% \subsubsection{pdfdict \enquote{Pages} pdfpagesattr/backend}
 % \begin{NOTE}{UF}
 %  path: Pages
 %  pdfpagesattr is a single token register which is used at the end of the compilation.
