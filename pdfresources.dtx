@@ -490,7 +490,6 @@
 %
 %  \begin{macro}{
 %                \@@_prop_clear,
-%                \@@_prop_gput:nnn,
 %                \@@_prop_put:nnn,
 %                \@@_prop_get:nnN,
 %                \@@_prop_gremove:nn,
@@ -498,11 +497,6 @@
 %                \@@_prop_show:n
 %                }
 %    \begin{macrocode}
-% global
-\cs_new_protected:Npn \@@_prop_OLDclear:n #1
-  {
-    \prop_gclear:c  { \@@_prop_gname:n { #1 } }
-  }
 
 %local + global
 \cs_new_protected:Npn \@@_prop_clear:n #1
@@ -513,7 +507,7 @@
 
 
 %global
-\cs_new_protected:Npn \@@_prop_gput:nnn #1 #2 #3  %#1 path, #2 name, #3 value
+\cs_new_protected:Npn \@@_prop_ORIgput:nnn #1 #2 #3  %#1 path, #2 name, #3 value
   {
     \tl_if_empty:nTF { #3 }
       {
@@ -531,7 +525,7 @@
       }
   }
 
-%local
+%local + global
 \cs_new_protected:Npn \@@_prop_put:nnn #1 #2 #3  %#1 path, #2 name, #3 value
   {
     \tl_if_empty:nTF { #3 }
@@ -540,9 +534,10 @@
       }
       {
         \prop_if_exist:cTF
-          { \@@_prop_name:n { #1 } }
+          { \@@_prop_Xname:n { #1 } }
           {
-            \prop_put:cnn { \@@_prop_name:n { #1 } }{ #2 } { #3 }
+            \use:c { prop_\@@_prop_get_g:n{#1}put:cnn }
+              { \@@_prop_Xname:n { #1 } }{ #2 } { #3 }
           }
           {
             \msg_error:nnn { pdf } { wrong-path } { /#1 }
@@ -551,13 +546,13 @@
   }
 
 %new both:
-\cs_new_protected:Npn \@@_prop_put:nnnn #1 #2 #3 #4  %#1 g #2 path, #3 name, #4 value
-  {
-    \use:c { @@_prop_\tl_use:c{c_@@_/#2_g_tl}put:nnn }
-         { #2 } { #3 } { #4 }
-  }
+%\cs_new_protected:Npn \@@_prop_put:nnnn #1 #2 #3 #4  %#1 g #2 path, #3 name, #4 value
+%  {
+%    \use:c { @@_prop_\tl_use:c{c_@@_/#2_g_tl}put:nnn }
+%         { #2 } { #3 } { #4 }
+%  }
 
-\cs_generate_variant:Nn \@@_prop_gput:nnn {nxx}
+\cs_generate_variant:Nn \@@_prop_put:nnn {nxx}
 
 
 %global/local version
@@ -645,7 +640,7 @@
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdfdict_gput:nnn #1 #2 #3
   {
-     \@@_prop_gput:nnn { #1 }{ #2 }{ #3 }
+     \@@_prop_put:nnn { #1 }{ #2 }{ #3 }
   }
 
 \cs_new_protected:Npn \pdfdict_put:nnn #1 #2 #3
@@ -811,7 +806,7 @@
 %^^A documentated
 \cs_new_protected:Npn \pdf_pagesattr_gput:nn #1 #2
   {
-    \@@_prop_gput:nnn {Pages}{ #1 }{ #2 }
+    \@@_prop_put:nnn {Pages}{ #1 }{ #2 }
   }
 
 % getter from the prop:
@@ -900,7 +895,7 @@
   % sets a lua table with lualatex
   \cs_new_protected:Npn \@@_backend_Page_gput:nn #1 #2 %key,value
     {
-      \@@_prop_gput:nnn {backend_Page}{ #1 }{ #2 }
+      \@@_prop_put:nnn {backend_Page}{ #1 }{ #2 }
     }
   % the command to remove a default value.
   % Uses a prop with pdflatex + dvi,
@@ -926,7 +921,7 @@
             {0}
         }
       \@@_prop_gnew:n    {backend_Page\l_@@_tmpa_tl}
-      \@@_prop_gput:nnn {backend_Page\l_@@_tmpa_tl}{ #1 }{ #2 }
+      \@@_prop_put:nnn {backend_Page\l_@@_tmpa_tl}{ #1 }{ #2 }
     }
   %the code to push the values, used in shipout
   %merges the two props and then fills the register in pdflatex
@@ -1023,7 +1018,7 @@
   % sets a lua table with lualatex
     \cs_new_protected:Npn \@@_backend_Page_gput:nn #1 #2
       {
-        \@@_prop_gput:nnn {backend_Page}{ #1 }{ #2 }
+        \@@_prop_put:nnn {backend_Page}{ #1 }{ #2 }
       }
   % the command to remove a default value.
   % Uses a prop with pdflatex + dvi,
@@ -1064,7 +1059,7 @@
   % sets a lua table with lualatex
     \cs_new_protected:Npn \@@_backend_Page_gput:nn #1 #2
       {
-        \@@_prop_gput:nnn {backend_Page}{ #1 }{ #2 }
+        \@@_prop_put:nnn {backend_Page}{ #1 }{ #2 }
       }
   % the command to remove a default value.
   % Uses a prop with pdflatex + dvi,
@@ -1248,7 +1243,7 @@
 
 \cs_new_protected:Npn \pdf_info_gput:nn #1 #2 %#1 key without /, #2 content
   {
-    \@@_prop_gput:nnn {Info}{ #1 }{ #2 }
+    \@@_prop_put:nnn {Info}{ #1 }{ #2 }
   }
 
 %  should #2 be inside a some escaping command? (no)
@@ -1259,7 +1254,7 @@
 %  \pdfstringdef\@pdftitle{#1}%
 \cs_new_protected:Npn \pdf_info_string_gput:nn #1 #2 %#1 key without /, #2 content
   {
-    \@@_prop_gput:nnn { Info }{ #1 }{ (#2) }
+    \@@_prop_put:nnn { Info }{ #1 }{ (#2) }
   }
 
 \cs_generate_variant:Nn \pdf_info_string_gput:nn {no}
@@ -1481,7 +1476,7 @@
           { /#1 ~ /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC }
         \bool_if:NTF \l_@@_backend_xform_bool
           {
-            \exp_args:Nnx\@@_prop_gput:nnn
+            \exp_args:Nnx\@@_prop_put:nnn
               { xform/Resources/Properties }
               { l3pdf\int_use:N\g_@@_backend_name_int }
               { \@@_backend_object_ref:n { #2 } }
@@ -1505,7 +1500,7 @@
           { /#1 ~ /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC }
         \bool_if:NTF \l_@@_backend_xform_bool
           {
-            \@@_prop_gput:nxx
+            \@@_prop_put:nxx
               { xform/Resources/Properties }
               { l3pdf\int_use:N\g_@@_backend_name_int }
               { \@@_backend_object_last: }
@@ -1547,7 +1542,7 @@
         \int_gincr:N\g_@@_backend_resourceid_int
         \bool_if:NTF \l_@@_backend_xform_bool
           {
-            \@@_prop_gput:nxx
+            \@@_prop_put:nxx
               { xform/Resources/Properties }
               { l3pdf\int_use:N\g_@@_backend_resourceid_int }
               { \@@_backend_object_ref:n { #2 } }
@@ -1564,7 +1559,7 @@
                   {0}
               }
             \@@_prop_gnew:n { backend_Page\l_@@_tmpa_tl/Resources/Properties }
-            \@@_prop_gput:nxx
+            \@@_prop_put:nxx
               { backend_Page\l_@@_tmpa_tl/Resources/Properties }
               { l3pdf\int_use:N\g_@@_backend_resourceid_int }
               { \@@_backend_object_ref:n{#2} }
@@ -1579,7 +1574,7 @@
         \int_gincr:N\g_@@_backend_resourceid_int
         \bool_if:NTF \l_@@_backend_xform_bool
           {
-            \@@_prop_gput:nxx
+            \@@_prop_put:nxx
               { xform/Resources/Properties }
               { l3pdf\int_use:N\g_@@_backend_resourceid_int }
               { \@@_backend_object_last: }
@@ -1596,7 +1591,7 @@
                   {0}
               }
             \@@_prop_gnew:n { backend_Page\l_@@_tmpa_tl/Resources/Properties }
-            \@@_prop_gput:nxx
+            \@@_prop_put:nxx
               { backend_Page\l_@@_tmpa_tl/Resources/Properties }
               { l3pdf\int_use:N\g_@@_backend_resourceid_int }
               { \@@_backend_object_last: }
@@ -2081,7 +2076,7 @@
       {
         \cs_new_protected:Npn \@@_backend_PageNResources_gput:nnn #1 #2 #3
           {
-            \@@_prop_gput:nnn {PageN/Resources/#1} { #2 }{ #3 }
+            \@@_prop_put:nnn {PageN/Resources/#1} { #2 }{ #3 }
             % luatex must also trigger the lua side
             \tex_latelua:D{l3kernel.@@.Page.Resources.#1=true}
             \tex_latelua:D
@@ -2093,7 +2088,7 @@
       { %pdftex
         \cs_new_protected:Npn \@@_backend_PageNResources_gput:nnn #1 #2 #3
           {
-            \@@_prop_gput:nnn {PageN/Resources/#1} { #2 }{ #3 }
+            \@@_prop_put:nnn {PageN/Resources/#1} { #2 }{ #3 }
           }
       }
 
@@ -2363,7 +2358,7 @@
           \clist_if_in:NnF \c_@@_Catalog_single_clist
             { #1 }
             { \msg_warning:nnn { pdf }{ catalog-unknown } { #1 }}
-          \@@_prop_gput:nnn { Catalog } { #1 }{ #2 }
+          \@@_prop_put:nnn { Catalog } { #1 }{ #2 }
         }
       }
    }
@@ -2434,7 +2429,7 @@
     \@@_prop_gnew:n {Catalog/#1}
     \cs_new_protected:cpn { @@_/Catalog/#1_gput:n } ##1
       {
-        \@@_prop_gput:nnn { Catalog/#1 }  ##1
+        \@@_prop_put:nnn { Catalog/#1 }  ##1
       }
   }
 
@@ -2535,7 +2530,7 @@
             { g_@@_/Catalog/AcroForm/Fields_obj }
             { \seq_use:cn { g_@@_/Catalog/AcroForm/Fields_seq } {~} }
         \exp_args:Nnnx
-          \@@_prop_gput:nnn
+          \@@_prop_put:nnn
             { Catalog/AcroForm }
             { Fields }
             { \@@_backend_object_ref:n { g_@@_/Catalog/AcroForm/Fields_obj } }
@@ -2548,7 +2543,7 @@
             { g_@@_/Catalog/AcroForm/CO_obj }
             { \seq_use:cn { g_@@_/Catalog/AcroForm/CO_seq } {~} }
         \exp_args:Nnnx
-          \@@_prop_gput:nnn
+          \@@_prop_put:nnn
             { Catalog/AcroForm }
             { CO }
             { \@@_backend_object_ref:n { g_@@_/Catalog/AcroForm/CO_obj } }
@@ -2561,7 +2556,7 @@
              { g_@@_/Catalog/AcroForm/DR/Font_obj }
              { \@@_prop_map_dict_item:n { Catalog/AcroForm/DR/Font } }
          \exp_args:Nnnx
-           \@@_prop_gput:nnn
+           \@@_prop_put:nnn
              { Catalog/AcroForm/DR }
              { Font }
              { \@@_backend_object_ref:n { g_@@_/Catalog/AcroForm/DR/Font_obj } }
@@ -2574,7 +2569,7 @@
              { g_@@_/Catalog/AcroForm/DR_obj }
              { \@@_prop_map_dict_item:n { Catalog/AcroForm/DR } }
          \exp_args:Nnnx
-           \@@_prop_gput:nnn
+           \@@_prop_put:nnn
              { Catalog/AcroForm }
              { DR }
              { \@@_backend_object_ref:n { g_@@_/Catalog/AcroForm/DR_obj } }
@@ -2587,7 +2582,7 @@
              { g_@@_/Catalog/AcroForm_obj }
              { \@@_prop_map_dict_item:n { Catalog/AcroForm } }
          \exp_args:Nnnx
-           \@@_prop_gput:nnn
+           \@@_prop_put:nnn
              { Catalog }
              { AcroForm }
              { \@@_backend_object_ref:n { g_@@_/Catalog/AcroForm_obj } }
