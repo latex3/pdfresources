@@ -433,7 +433,8 @@
 %  /Catalog/ViewerPreferences
 %  /xform/Resources/Properties
 %  \end{verbatim}
-%  \begin{macro}{\@@_prop_gname:n,\@@_prop_gnew:n,\g_@@_prop_gnames_seq,\g_@@_prop_names_seq}
+%  \begin{macro}{\@@_prop_get_g:n,\@@_prop_gname:n,\@@_prop_name:n,
+%   \@@_prop_gnew:n,\@@_prop_new:n,\g_@@_prop_gnames_seq,\g_@@_prop_names_seq}
 %    \begin{macrocode}
 \seq_new:N \g_@@_prop_gnames_seq
 \seq_new:N \g_@@_prop_names_seq
@@ -441,7 +442,7 @@
 % to retried global status from pathes
 \cs_new:Npn \@@_prop_get_g:n #1 % path name without the leading /
   {
-    c_@@_/#1_g_tl
+    \tl_use:c {c_@@_/#1_g_tl}
   }
 
 %global
@@ -456,13 +457,11 @@
     l_@@_/#1_prop
   }
 
-%new: both
-\cs_new:Npn \@@_prop_name:nn #1 #2 % g/l / path name without the leading /
+%  hm, a bit unclear, can this work? How is expansion?
+\cs_new:Npn \@@_prop_Xname:n #1 % path name without the leading /
   {
-    #1_@@_/#2_prop
+    \use:c { @@_prop_\@@_prop_get_g:n{#1}name:n } { #1 }
   }
-
-
 
 %global
 \cs_new_protected:Npn \@@_prop_gnew:n #1
@@ -486,49 +485,32 @@
       }
   }
 
-%new: both
-\cs_new_protected:Npn \@@_prop_new:nn #1 #2
-  {
-    \prop_if_exist:cF {  \@@_prop_name:nn  { #1 } { #2 }  }
-      {
-        \tl_const:cn { c_@@_/#2_g_tl } { #1 }
-        \prop_new:c  { \@@_prop_name:nn  { #1 } { #2 } }
-        \seq_gput_right:cn  { g_@@_prop_#1names_seq } { #2 }
-      }
-  }
 %    \end{macrocode}
 %  \end{macro}
 %
 %  \begin{macro}{
-%                \@@_prop_gclear,
 %                \@@_prop_clear,
 %                \@@_prop_gput:nnn,
 %                \@@_prop_put:nnn,
-%                \@@_prop_gget:nnN,
 %                \@@_prop_get:nnN,
 %                \@@_prop_gremove:nn,
 %                \@@_prop_remove:nn,
-%                \@@_prop_gshow:n
+%                \@@_prop_show:n
 %                }
 %    \begin{macrocode}
 % global
-\cs_new_protected:Npn \@@_prop_gclear:n #1
+\cs_new_protected:Npn \@@_prop_OLDclear:n #1
   {
     \prop_gclear:c  { \@@_prop_gname:n { #1 } }
   }
 
-%local
+%local + global
 \cs_new_protected:Npn \@@_prop_clear:n #1
   {
-    \prop_clear:c  { \@@_prop_name:n { #1 } }
+    \use:c { prop_\@@_prop_get_g:n{#1}clear:c }
+           { \@@_prop_Xname:n { #1 } }
   }
 
-% new both:
-\cs_new_protected:Npn \@@_prop_clear:nn #1 #2
-  {
-    \use:c { prop_\tl_use:c{c_@@_/#2_g_tl}clear:c }
-      { \@@_prop_name:nn { #1 } { #2 } }
-  }
 
 %global
 \cs_new_protected:Npn \@@_prop_gput:nnn #1 #2 #3  %#1 path, #2 name, #3 value
@@ -577,15 +559,18 @@
 
 \cs_generate_variant:Nn \@@_prop_gput:nnn {nxx}
 
-\cs_new_protected:Npn \@@_prop_gget:nnN  #1 #2 #3 %path,key,macro
-  {
-    \prop_get:cnN { \@@_prop_gname:n { #1 } } { #2 } #3
-  }
+
+%global/local version
+
 \cs_new_protected:Npn \@@_prop_get:nnN  #1 #2 #3 %path,key,macro
   {
-    \prop_get:cnN { \@@_prop_name:n { #1 } } { #2 } #3
+    \prop_get:cnN
+      { \use:c{ @@_prop_\tl_use:c{c_@@_/#1_g_tl}name:n } { #1 } }
+      { #2 } #3
   }
 
+
+%
 \cs_new_protected:Npn \@@_prop_gremove:nn #1 #2 %path,key
   {
     \prop_gremove:cn { \@@_prop_gname:n { #1 } } { #2 }
@@ -596,9 +581,9 @@
     \prop_gremove:cn { \@@_prop_name:n { #1 } } { #2 }
   }
 
-\cs_new_protected:Npn \@@_prop_gshow:n #1  %path
+\cs_new_protected:Npn \@@_prop_show:n #1  %path
   {
-    \prop_show:c { \@@_prop_gname:n { #1 } }
+    \prop_show:c { \use:c{ @@_prop_\tl_use:c{c_@@_/#1_g_tl}name:n } { #1 } }
   }
 %    \end{macrocode}
 % \end{macro}
@@ -670,13 +655,11 @@
 
 %    \end{macrocode}
 % \begin{function}[added = 2020-04-07]
-%   {\pdfdict_get:nn, \pdfdict_gget:nn }
+%   {\pdfdict_get:nn }
 %   \begin{syntax}
-%     \cs{pdfdict_gget:nnN} \Arg{global dict} \Arg{name} \meta{tl var} \\
-%     \cs{pdfdict_get:nnN}  \Arg{local dict} \Arg{name} \meta{tl var}
+%     \cs{pdfdict_get:nnN}  \Arg{dict} \Arg{name} \meta{tl var}
 %   \end{syntax}
-%   Recovers the \meta{value} stored by \cs{pdfdict_gput:nnn} or
-%   \cs{pdfdict_put:nnn}  for
+%   Recovers the \meta{value} stored by \cs{pdfdict_put:nnn} for
 %   \meta{name} and places this in the \meta{token list
 %   variable}. If \meta{name} is not found
 %   then the \meta{token list variable} is set
@@ -684,15 +667,12 @@
 %   variable} is set within the current \TeX{} group.
 %\end{function}
 %    \begin{macrocode}
-\cs_new_protected:Npn \pdfdict_gget:nnN #1 #2 #3
-  {
-    \@@_prop_gget:nnN {#1}{ #2 } #3
-  }
 
 \cs_new_protected:Npn \pdfdict_get:nnN #1 #2 #3
   {
     \@@_prop_get:nnN {#1}{ #2 } #3
   }
+
 %    \end{macrocode}
 % \begin{function}[added = 2020-04-07]
 %   {
@@ -838,7 +818,7 @@
 %^^A documentated
 \cs_new_protected:Npn \pdf_pagesattr_get:nN #1 #2
   {
-    \@@_prop_gget:nnN {Pages}{ #1 } #2
+    \@@_prop_get:nnN {Pages}{ #1 } #2
   }
 
 % remove:
@@ -1620,7 +1600,7 @@
               { backend_Page\l_@@_tmpa_tl/Resources/Properties }
               { l3pdf\int_use:N\g_@@_backend_resourceid_int }
               { \@@_backend_object_last: }
-            %\@@_prop_gshow:n { backend_Page\l_@@_tmpa_tl/Resources/Properties }
+            %\@@_prop_show:n { backend_Page\l_@@_tmpa_tl/Resources/Properties }
           }
       }
   \cs_set_protected:Npn \@@_backend_bmc:n #1
@@ -1793,7 +1773,7 @@
         \hbox_set:Nn \l_@@_tmpa_box
           {
             \bool_set_true:N \l_@@_backend_xform_bool
-            \@@_prop_gclear:n {xform/Resources/Properties}
+            \@@_prop_clear:n {xform/Resources/Properties}
             #4
           }
         %store the dimensions
@@ -1877,7 +1857,7 @@
         \hbox_set:Nn \l_@@_tmpa_box
           {
             \bool_set_true:N \l_@@_backend_xform_bool
-            \@@_prop_gclear:n {xform/Resources/Properties}
+            \@@_prop_clear:n {xform/Resources/Properties}
             #4
           }
         \tl_const:cx
