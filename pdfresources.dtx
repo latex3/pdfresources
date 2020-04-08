@@ -160,21 +160,6 @@
 \box_new:N  \l_@@_tmpa_box
 %    \end{macrocode}
 % \end{variable}
-% \begin{macro}{\@@_dict_item:nn,\@@_dict_objref_item:nn}
-% Commands to output dict entries: The arguments are \meta{name}\meta{value} and
-% \meta{name}\meta{object name}, \meta{name} should be a valid pdf name without
-% the slash.
-% The commands don't check if the arguments are empty or valid. This should be done
-% in the pdf layer at the input.
-%    \begin{macrocode}
-\cs_new:Npn \@@_dict_item:nn #1 #2 { /#1~#2~ } %name, value
-
-\cs_new:Npn \@@_dict_objref_item:nn #1 #2      %name, object name
-  {
-    /#1~\@@_backend_object_ref:n { #2 }
-  }
-%    \end{macrocode}
-% \end{macro}
 %
 % \subsection{some zref code, needs to be replaced later}
 % \begin{variable}
@@ -445,6 +430,22 @@
 %  /Catalog/ViewerPreferences
 %  /xform/Resources/Properties
 %  \end{verbatim}
+% \begin{macro}{\@@_dict_item:nn,\@@_dict_objref_item:nn}
+% Commands to output dict entries: The arguments are \meta{name}\meta{value} and
+% \meta{name}\meta{object name}, \meta{name} should be a valid pdf name without
+% the slash.
+% The commands don't check if the arguments are empty or valid. This should be done
+% in the pdf layer at the input.
+%    \begin{macrocode}
+\cs_new:Npn \@@_dict_item:nn #1 #2 { /#1~#2~ } %name, value
+
+\cs_new:Npn \@@_dict_objref_item:nn #1 #2      %name, object name
+  {
+    /#1~\@@_backend_object_ref:n { #2 }
+  }
+%    \end{macrocode}
+% \end{macro}
+
 %  \begin{macro}{\@@_prop_get_g:n,\@@_prop_gname:n,\@@_prop_name:n,
 %   \@@_prop_gnew:n,\@@_prop_new:n,\g_@@_prop_gnames_seq,\g_@@_prop_names_seq}
 %    \begin{macrocode}
