@@ -1329,29 +1329,29 @@
   \pdf@ifdraftmode{}{
     \Hy@UseMaketitleInfos %get Title/Author from \title if pdfusetitle is true
     \__hyp_info_generate_addons:
-    \pdf_info_string_gput:no
-      {Author} {\@pdfauthor}
-    \pdf_info_string_gput:no
-      {Title}  {\@pdftitle}
-    \pdf_info_string_gput:no
-      {Subject}{\@pdfsubject}
-    \pdf_info_string_gput:no
-      {Creator}{\@pdfcreator}
-    \pdf_info_string_gput:no
-      {CreationDate}{\@pdfcreationdate}
-    \pdf_info_string_gput:no
-      {ModDate}{\@pdfmoddate}
+    \pdfdict_put:nnx {Info}
+      {Author} {(\@pdfauthor)}
+    \pdfdict_put:nnx {Info}
+      {Title}  {(\@pdftitle)}
+    \pdfdict_put:nnx {Info}
+      {Subject}{(\@pdfsubject)}
+    \pdfdict_put:nnx {Info}
+      {Creator}{(\@pdfcreator)}
+    \pdfdict_put:nnx {Info}
+      {CreationDate}{(\@pdfcreationdate)}
+    \pdfdict_put:nnx {Info}
+      {ModDate}{(\@pdfmoddate)}
     \tl_if_exist:NT \@pdfproducer %special, as \relax is default
       {
-       \pdf_info_string_gput:no
-        {Producer}{\@pdfproducer}
+       \pdfdict_put:nnx {Info}
+        {Producer}{(\@pdfproducer)}
       }
-    \pdf_info_string_gput:no
-      {Keywords}{\@pdfkeywords}
+    \pdfdict_put:nnx {Info}
+      {Keywords}{(\@pdfkeywords)}
     \tl_if_empty:NF
        \@pdftrapped
        {
-        \pdf_info_gput:nn
+        \pdfdict_put:nnx {Info}
         {Trapped}{/\@pdftrapped}
        }
     }

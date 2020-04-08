@@ -9,9 +9,9 @@
 }
 {
  \str_set_convert:Nnnn \l_tmpa_str { Grüße }{  } {utf8/string}
-} 
-\pdf_info_string_gput:no {Title}{\l_tmpa_str}
-\pdf_info_string_gput:nn {Author}{Some~Author}
+}
+\pdfdict_put:nnx {Info} {Title}{(\l_tmpa_str)}
+\pdfdict_put:nnx {Info} {Author}{(Some~Author)}
 \ExplSyntaxOff
 \begin{document}
 \START

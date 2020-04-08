@@ -39,7 +39,7 @@
 \RequirePackage{xparse,l3pdf}
 %\RequirePackage{tmpl3shipout}
 \RequirePackage{atbegshi,zref-lastpage}
-\ProvidesExplPackage {pdfresources} {2020-03-15} {0.4}
+\ProvidesExplPackage {pdfresources} {2020-04-08} {0.5}
   {experimental pdf-resource management}
 \DeclareOption { debug }
   {
@@ -810,9 +810,9 @@
 % but with dvips/dvipdfmx this would disable removing entries.
 % So we issue the push code only at the end of the document.
 % \end{NOTE}
-% \begin{function}{}
+% \begin{function}{pdfdict: Pages (global)}
 %   \begin{syntax}
-%     \cs{pdfdict_put:nnn} { Pages }\Arg{name} \Arg{value}
+%     \cs{pdfdict_put:nnn} \{Pages\} \Arg{name} \Arg{value}
 %   \end{syntax}
 %
 %   Adds |/|\meta{name} \meta{value} to the |/Pages| dictionary.
@@ -1183,7 +1183,7 @@
 
 %    \end{macrocode}
 %
-% \subsection{The info dictionary}
+% \subsection{pdfdict: \enquote{Info} (pdfinfo)}
 % \begin{NOTE}{UF}
 % path: Info
 % The info dictionary is filled by e.g. \cs{pdfinfo}. Multiple appearances of
@@ -1201,11 +1201,11 @@
 % this is needed anyway.
 % \end{NOTE}
 %
-% \subsubsection{info/backend}
+% \subsubsection{\enquote{Info}/backend}
 % The backend code is already in expl3.
 % \cs{@@_backend_info_gput:nn} inserts one name/value pair.
 %
-% \subsubsection{info/management}
+% \subsubsection{\enquote{Info}/management}
 % \potentialclash If the primitive commands are used additionally there will
 % be double entries in the pdf with the backend pdftex and luatex.
 % How pdf viewer handles this is unpredictable.
@@ -1250,10 +1250,10 @@
 %    \begin{macrocode}
 \@@_dict_gnew:n {Info}
 
-\cs_new_protected:Npn \pdf_info_gput:nn #1 #2 %#1 key without /, #2 content
-  {
-    \@@_dict_put:nnn {Info}{ #1 }{ #2 }
-  }
+%\cs_new_protected:Npn \pdf_info_gput:nn #1 #2 %#1 key without /, #2 content
+%  {
+%    \@@_dict_put:nnn {Info}{ #1 }{ #2 }
+%  }
 
 %  should #2 be inside a some escaping command? (no)
 %  hyperref passes them through
@@ -1261,12 +1261,12 @@
 %  \HyPsd@XeTeXBigCharstrue
 %  \HyPsd@PrerenderUnicode{#1}%
 %  \pdfstringdef\@pdftitle{#1}%
-\cs_new_protected:Npn \pdf_info_string_gput:nn #1 #2 %#1 key without /, #2 content
-  {
-    \@@_dict_put:nnn { Info }{ #1 }{ (#2) }
-  }
-
-\cs_generate_variant:Nn \pdf_info_string_gput:nn {no}
+%\cs_new_protected:Npn \pdf_info_string_gput:nn #1 #2 %#1 key without /, #2 content
+%  {
+%    \@@_dict_put:nnn { Info }{ #1 }{ (#2) }
+%  }
+%
+%\cs_generate_variant:Nn \pdf_info_string_gput:nn {no}
 %    \end{macrocode}
 %
 % \begin{macro}{\@@_Info_gpush:}
