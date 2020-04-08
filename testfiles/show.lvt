@@ -1,0 +1,15 @@
+\input{regression-test}
+\documentclass{article}
+\usepackage{pdfresources}
+\usepackage[customdriver=hgeneric-experimental]{hyperref}
+\begin{document}
+\START
+\showoutput
+abbb
+\ExplSyntaxOn
+\pdfdict_show:n{Catalog}
+\pdfdict_show:n{Info}
+\pdfdict_if_exist:nTF {blub}{true}{false}
+\pdfdict_if_exist:nTF {Info}{true}{false}
+\ExplSyntaxOff
+\end{document}

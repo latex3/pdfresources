@@ -690,6 +690,18 @@
     \__pdf_dict_show:Nn \msg_show:nnxxxx
   }
 %    \end{macrocode}
+% \begin{function}[EXP, pTF,added = 2020-04-08]
+%   {\pdfdict_if_exist:n }
+%   \begin{syntax}
+%     \cs{pdfdict_if_exist:n}  \Arg{dictionary}
+%   \end{syntax}
+%   This tests if the dictionary exists.
+%\end{function}
+%    \begin{macrocode}
+\prg_new_eq_conditional:NNn \pdfdict_if_exist:n \@@_prop_if_exist:n
+  { TF , T , F , p }
+
+%    \end{macrocode}
 % \begin{function}[added = 2020-04-07]
 %   {\pdfdict_get:nn }
 %   \begin{syntax}
