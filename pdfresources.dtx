@@ -394,18 +394,18 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \subsection{prop / path-Code}
-%  Many code parts are quite similar: props are filled and output.
-%  So we define some generic commands for props to ensure systematic
+% \subsection{dict / path-Code}
+%  Many code parts are quite similar: property lists for dictionaries are filled and output.
+%  So we define some generic commands to ensure systematic
 %  internal names. The names are based on paths separated by slashed.
-%  The first slash is not used in the names. All props are global.
+%  The first slash is not used in the names.
 %  \begin{NOTE}{UF}
 %  The main question will be if one can/should encode the different
 %  inner structures (array/dict) and the cases where users shouldn't fill a value
 %  but it should be done by subtrees ...
 %  \end{NOTE}
 %
-%  Currently the following names are used: ^^A!!!!! check, compare with g_@@_prop_gnames_seq
+%  Currently the following names are used: ^^A!!!!! check, compare with g_@@_dict_gnames_seq
 %  \begin{verbatim}
 %  /Pages           %w,  \pagesattr
 %  /backend_Page    %!!!!! consider name Page?
@@ -445,15 +445,14 @@
   }
 %    \end{macrocode}
 % \end{macro}
-
-%  \begin{macro}{\@@_prop_get_g:n,\@@_prop_gname:n,\@@_prop_name:n,
-%   \@@_prop_gnew:n,\@@_prop_new:n,\g_@@_prop_gnames_seq,\g_@@_prop_names_seq}
+%  \begin{macro}{\@@_dict_get_g:n,\@@_dict_gname:n,\@@_dict_name:n,
+%   \@@_dict_gnew:n,\@@_dict_new:n,\g_@@_dict_gnames_seq,\g_@@_dict_names_seq}
 %    \begin{macrocode}
-\seq_new:N \g_@@_prop_gnames_seq
-\seq_new:N \g_@@_prop_names_seq
+\seq_new:N \g_@@_dict_gnames_seq
+\seq_new:N \g_@@_dict_names_seq
 
 % to retried global status from pathes
-\cs_new:Npn \@@_prop_get_g:n #1 % path name without the leading /
+\cs_new:Npn \@@_dict_get_g:n #1 % path name without the leading /
   {
    \tl_if_exist:cT {c_@@_/#1_g_tl}
      {
@@ -462,13 +461,13 @@
   }
 
 %global
-\cs_new:Npn \@@_prop_gname:n #1 % path name without the leading /
+\cs_new:Npn \@@_dict_gname:n #1 % path name without the leading /
   {
     g_@@_/#1_prop
   }
 
 %local
-\cs_new:Npn \@@_prop_name:n #1 % path name without the leading /
+\cs_new:Npn \@@_dict_name:n #1 % path name without the leading /
   {
     l_@@_/#1_prop
   }
@@ -478,35 +477,35 @@
 %  it falls back to prop_name if the path doesn't exist.
 %  Can this lead to confusion?
 %
-\cs_new:Npn \@@_prop_Xname:n #1 % path name without the leading /
+\cs_new:Npn \@@_dict_Xname:n #1 % path name without the leading /
   {
-    \use:c { @@_prop_\@@_prop_get_g:n{#1}name:n } { #1 }
+    \use:c { @@_dict_\@@_dict_get_g:n{#1}name:n } { #1 }
   }
 
 %global
-\cs_new_protected:Npn \@@_prop_gnew:n #1
+\cs_new_protected:Npn \@@_dict_gnew:n #1
   {
-    \prop_if_exist:cF {  \@@_prop_gname:n { #1 }  }
+    \prop_if_exist:cF {  \@@_dict_gname:n { #1 }  }
       {
         \tl_const:cn { c_@@_/#1_g_tl } { g }
-        \prop_new:c  { \@@_prop_gname:n { #1 } }
-        \seq_gput_right:Nn \g_@@_prop_gnames_seq { #1 }
+        \prop_new:c  { \@@_dict_gname:n { #1 } }
+        \seq_gput_right:Nn \g_@@_dict_gnames_seq { #1 }
       }
   }
 
 %local
-\cs_new_protected:Npn \@@_prop_new:n #1
+\cs_new_protected:Npn \@@_dict_new:n #1
   {
-    \prop_if_exist:cF {  \@@_prop_name:n { #1 }  }
+    \prop_if_exist:cF {  \@@_dict_name:n { #1 }  }
       {
         \tl_const:cn { c_@@_/#1_g_tl } {  }
-        \prop_new:c  { \@@_prop_name:n { #1 } }
-        \seq_gput_right:Nn \g_@@_prop_names_seq { #1 }
+        \prop_new:c  { \@@_dict_name:n { #1 } }
+        \seq_gput_right:Nn \g_@@_dict_names_seq { #1 }
       }
   }
 
 % test existence
-\prg_new_conditional:Npnn \@@_prop_if_exist:n #1 { p , T , F , TF }
+\prg_new_conditional:Npnn \@@_dict_if_exist:n #1 { p , T , F , TF }
   {
     \tl_if_exist:cTF
       { c_@@_/#1_g_tl }
@@ -518,24 +517,24 @@
 %  \end{macro}
 %
 %  \begin{macro}{
-%                \@@_prop_clear,
-%                \@@_prop_put:nnn,
-%                \@@_prop_get:nnN,
-%                \@@_prop_remove:nn,
-%                \@@_prop_show:n
+%                \@@_dict_clear,
+%                \@@_dict_put:nnn,
+%                \@@_dict_get:nnN,
+%                \@@_dict_remove:nn,
+%                \@@_dict_show:n
 %                }
 %    \begin{macrocode}
 
 %local + global
-\cs_new_protected:Npn \@@_prop_clear:n #1
+\cs_new_protected:Npn \@@_dict_clear:n #1
   {
-    \use:c { prop_\@@_prop_get_g:n{#1}clear:c }
-           { \@@_prop_Xname:n { #1 } }
+    \use:c { prop_\@@_dict_get_g:n{#1}clear:c }
+           { \@@_dict_Xname:n { #1 } }
   }
 
 
 %local + global
-\cs_new_protected:Npn \@@_prop_put:nnn #1 #2 #3  %#1 path, #2 name, #3 value
+\cs_new_protected:Npn \@@_dict_put:nnn #1 #2 #3  %#1 path, #2 name, #3 value
   {
     \tl_if_empty:nTF { #3 }
       {
@@ -543,10 +542,10 @@
       }
       {
         \prop_if_exist:cTF
-          { \@@_prop_Xname:n { #1 } }
+          { \@@_dict_Xname:n { #1 } }
           {
-            \use:c { prop_\@@_prop_get_g:n{#1}put:cnn }
-              { \@@_prop_Xname:n { #1 } }{ #2 } { #3 }
+            \use:c { prop_\@@_dict_get_g:n{#1}put:cnn }
+              { \@@_dict_Xname:n { #1 } }{ #2 } { #3 }
           }
           {
             \msg_error:nnn { pdf } { wrong-path } { /#1 }
@@ -555,71 +554,71 @@
   }
 
 
-\cs_generate_variant:Nn \@@_prop_put:nnn {nxx}
+\cs_generate_variant:Nn \@@_dict_put:nnn {nxx}
 
 
 %local + global
 
-\cs_new_protected:Npn \@@_prop_get:nnN  #1 #2 #3 %path,key,macro
+\cs_new_protected:Npn \@@_dict_get:nnN  #1 #2 #3 %path,key,macro
   {
     \prop_get:cnN
-      { \use:c{ @@_prop_\tl_use:c{c_@@_/#1_g_tl}name:n } { #1 } }
+      { \use:c{ @@_dict_\tl_use:c{c_@@_/#1_g_tl}name:n } { #1 } }
       { #2 } #3
   }
 
 % local / global
-\cs_new_protected:Npn \@@_prop_remove:nn #1 #2 %path,key
+\cs_new_protected:Npn \@@_dict_remove:nn #1 #2 %path,key
   {
-    \use:c { prop_\@@_prop_get_g:n{#1}remove:cn }
-           { \@@_prop_Xname:n { #1 } } { #2 }
+    \use:c { prop_\@@_dict_get_g:n{#1}remove:cn }
+           { \@@_dict_Xname:n { #1 } } { #2 }
   }
 
 
-\cs_new_protected:Npn \__pdf_dict_show:Nn #1#2
+\cs_new_protected:Npn \@@_dict_show:Nn #1#2
   {
-    \prop_if_exist:cTF { \__pdf_prop_Xname:n { #2 } }
+    \prop_if_exist:cTF { \@@_dict_Xname:n { #2 } }
       {
          #1
            { pdfdict } { show-dict }
            { \tl_to_str:n {#2} }
-           { \prop_map_function:cN {\__pdf_prop_Xname:n { #2 }} \msg_show_item:nn }
+           { \prop_map_function:cN {\@@_dict_Xname:n { #2 }} \msg_show_item:nn }
            { } { }
       }
       {
         #1 { pdfdict } { unknown-dict } {#2}{}{}{}
       }
   }
-\cs_new_protected:Npn \@@_prop_show:n #1  %path
+\cs_new_protected:Npn \@@_dict_show:n #1  %path
   {
-    \prop_show:c { \use:c{ @@_prop_\@@_prop_get_g:n{#1}name:n } { #1 } }
+    \prop_show:c { \use:c{ @@_dict_\@@_dict_get_g:n{#1}name:n } { #1 } }
   }
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{ \@@_prop_map_dict_item:n }
-% \cs{@@_prop_map_dict_item:n} outputs a prop as needed in a dictionary:
+% \begin{macro}{ \@@_dict_map_dict_item:n }
+% \cs{@@_dict_map_dict_item:n} outputs a prop as needed in a dictionary:
 %  a list of /\meta{key} \meta{value} pairs.
 %    \begin{macrocode}
 %local + global
 %!! Xname must be replaced later!
-\cs_new:Npn \@@_prop_map_dict_item:n #1 %path
+\cs_new:Npn \@@_dict_map_dict_item:n #1 %path
   {
-    \prop_map_function:cN { \@@_prop_Xname:n { #1 } } \@@_dict_item:nn
+    \prop_map_function:cN { \@@_dict_Xname:n { #1 } } \@@_dict_item:nn
   }
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{ \@@_prop_gmerge:nnN }
-% \cs{@@_prop_gmerge:nnN} merges at first the property \meta{name_1}
+% \begin{macro}{ \@@_dict_gmerge:nnN }
+% \cs{@@_dict_gmerge:nnN} merges at first the property \meta{name_1}
 %  then optionally \meta{name_2} into property |#3|.
 %    \begin{macrocode}
 % only used globally imho so leaving the global version only for now
-\cs_new_protected:Npn \@@_prop_gmerge:nnN #1 #2 #3
+\cs_new_protected:Npn \@@_dict_gmerge:nnN #1 #2 #3
   {
-    \prop_gset_eq:Nc #3 { \@@_prop_gname:n  { #1 } }
-    \prop_if_exist:cT  { \@@_prop_gname:n  { #2 } }
+    \prop_gset_eq:Nc #3 { \@@_dict_gname:n  { #1 } }
+    \prop_if_exist:cT  { \@@_dict_gname:n  { #2 } }
       {
-        \prop_map_inline:cn { \@@_prop_gname:n  { #2 } }
+        \prop_map_inline:cn { \@@_dict_gname:n  { #2 } }
           {
             \prop_gput:Nnn #3 { ##1 }{ ##2 }
           }
@@ -673,7 +672,7 @@
 
 \cs_new_protected:Npn \pdfdict_put:nnn #1 #2 #3
   {
-     \@@_prop_put:nnn { #1 }{ #2 }{ #3 }
+     \@@_dict_put:nnn { #1 }{ #2 }{ #3 }
   }
 
 %    \end{macrocode}
@@ -688,7 +687,7 @@
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdfdict_show:n
   {
-    \__pdf_dict_show:Nn \msg_show:nnxxxx
+    \@@_dict_show:Nn \msg_show:nnxxxx
   }
 %    \end{macrocode}
 % \begin{function}[EXP, pTF,added = 2020-04-08]
@@ -699,7 +698,7 @@
 %   This tests if the dictionary exists.
 %\end{function}
 %    \begin{macrocode}
-\prg_new_eq_conditional:NNn \pdfdict_if_exist:n \@@_prop_if_exist:n
+\prg_new_eq_conditional:NNn \pdfdict_if_exist:n \@@_dict_if_exist:n
   { TF , T , F , p }
 
 %    \end{macrocode}
@@ -719,7 +718,7 @@
 
 \cs_new_protected:Npn \pdfdict_get:nnN #1 #2 #3
   {
-    \@@_prop_get:nnN {#1}{ #2 } #3
+    \@@_dict_get:nnN {#1}{ #2 } #3
   }
 
 %    \end{macrocode}
@@ -740,7 +739,7 @@
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdfdict_remove:nn #1 #2
   {
-    \@@_prop_remove:nn { #1 }{ #2 }
+    \@@_dict_remove:nn { #1 }{ #2 }
   }
 
 
@@ -854,26 +853,26 @@
 %   trying to remove it.
 % \end{function}
 %    \begin{macrocode}
-\@@_prop_gnew:n {Pages}
+\@@_dict_gnew:n {Pages}
 % setter:
 %^^A documentated
 \cs_new_protected:Npn \pdf_pagesattr_gput:nn #1 #2
   {
-    \@@_prop_put:nnn {Pages}{ #1 }{ #2 }
+    \@@_dict_put:nnn {Pages}{ #1 }{ #2 }
   }
 
 % getter from the prop:
 %^^A documentated
 \cs_new_protected:Npn \pdf_pagesattr_get:nN #1 #2
   {
-    \@@_prop_get:nnN {Pages}{ #1 } #2
+    \@@_dict_get:nnN {Pages}{ #1 } #2
   }
 
 % remove:
 %^^A documented
 \cs_new_protected:Npn \pdf_pagesattr_gremove:n #1
   {
-    \@@_prop_remove:nn {Pages}{ #1 }
+    \@@_dict_remove:nn {Pages}{ #1 }
   }
 %    \end{macrocode}
 %
@@ -886,7 +885,7 @@
   {
     \exp_args:Nx \@@_backend_Pages_primitive:n
       {
-        \@@_prop_map_dict_item:n {Pages}
+        \@@_dict_map_dict_item:n {Pages}
       }
   }
 
@@ -933,7 +932,7 @@
 %  backend commands
 %  a prop for global/default settings which are used for more than
 %  one page
-\@@_prop_gnew:n {backend_Page}
+\@@_dict_gnew:n {backend_Page}
 
 %pdflatex
 \bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
@@ -948,14 +947,14 @@
   % sets a lua table with lualatex
   \cs_new_protected:Npn \@@_backend_Page_gput:nn #1 #2 %key,value
     {
-      \@@_prop_put:nnn {backend_Page}{ #1 }{ #2 }
+      \@@_dict_put:nnn {backend_Page}{ #1 }{ #2 }
     }
   % the command to remove a default value.
   % Uses a prop with pdflatex + dvi,
   % changes a lua table with lualatex
   \cs_new_protected:Npn \@@_backend_Page_gremove:n #1
     {
-      \@@_prop_remove:nn  {backend_Page}{ #1 }
+      \@@_dict_remove:nn  {backend_Page}{ #1 }
     }
  % the command used in the document.
  % direct call of the primitive special with dvips/dvipdfmx
@@ -973,8 +972,8 @@
             {pdf@abspage}
             {0}
         }
-      \@@_prop_gnew:n    {backend_Page\l_@@_tmpa_tl}
-      \@@_prop_put:nnn {backend_Page\l_@@_tmpa_tl}{ #1 }{ #2 }
+      \@@_dict_gnew:n    {backend_Page\l_@@_tmpa_tl}
+      \@@_dict_put:nnn {backend_Page\l_@@_tmpa_tl}{ #1 }{ #2 }
     }
   %the code to push the values, used in shipout
   %merges the two props and then fills the register in pdflatex
@@ -982,7 +981,7 @@
   %issues the values stored in the global prop with dvi
   \cs_new_protected:Npn \@@_backend_PageN_gpush:n #1
     {
-      \@@_prop_gmerge:nnN {backend_Page}{backend_Page#1}\g_@@_tmpa_prop
+      \@@_dict_gmerge:nnN {backend_Page}{backend_Page#1}\g_@@_tmpa_prop
       \exp_args:Nx \@@_backend_Page_primitive:n
         {
           \prop_map_function:NN \g_@@_tmpa_prop \@@_dict_item:nn
@@ -1071,14 +1070,14 @@
   % sets a lua table with lualatex
     \cs_new_protected:Npn \@@_backend_Page_gput:nn #1 #2
       {
-        \@@_prop_put:nnn {backend_Page}{ #1 }{ #2 }
+        \@@_dict_put:nnn {backend_Page}{ #1 }{ #2 }
       }
   % the command to remove a default value.
   % Uses a prop with pdflatex + dvi,
   % changes a lua table with lualatex
     \cs_new_protected:Npn \@@_backend_Page_gremove:n #1
       {
-        \@@_prop_remove:nn  {backend_Page}{ #1 }
+        \@@_dict_remove:nn  {backend_Page}{ #1 }
       }
   % the command used in the document.
   % direct call of the primitive special with dvips/dvipdfmx
@@ -1097,7 +1096,7 @@
     \cs_new_protected:Npn \@@_backend_PageN_gpush:n #1
       {
         \exp_args:Nx \@@_backend_Page_primitive:n
-          { \@@_prop_map_dict_item:n {backend_Page} }
+          { \@@_dict_map_dict_item:n {backend_Page} }
       }
   }
 %dvips
@@ -1112,14 +1111,14 @@
   % sets a lua table with lualatex
     \cs_new_protected:Npn \@@_backend_Page_gput:nn #1 #2
       {
-        \@@_prop_put:nnn {backend_Page}{ #1 }{ #2 }
+        \@@_dict_put:nnn {backend_Page}{ #1 }{ #2 }
       }
   % the command to remove a default value.
   % Uses a prop with pdflatex + dvi,
   % changes a lua table with lualatex
     \cs_new_protected:Npn \@@_backend_Page_gremove:n #1
       {
-        \@@_prop_remove:nn  {backend_Page}{ #1 }
+        \@@_dict_remove:nn  {backend_Page}{ #1 }
       }
   % the command used in the document.
   % direct call of the primitive special with dvips/dvipdfmx
@@ -1138,7 +1137,7 @@
     \cs_new_protected:Npn \@@_backend_PageN_gpush:n #1
       {
         \exp_args:Nx \@@_backend_Page_primitive:n
-          { \@@_prop_map_dict_item:n {backend_Page} }
+          { \@@_dict_map_dict_item:n {backend_Page} }
       }
   }
 %    \end{macrocode}
@@ -1292,11 +1291,11 @@
 %   so values can be set at any time.
 % \end{function}
 %    \begin{macrocode}
-\@@_prop_gnew:n {Info}
+\@@_dict_gnew:n {Info}
 
 \cs_new_protected:Npn \pdf_info_gput:nn #1 #2 %#1 key without /, #2 content
   {
-    \@@_prop_put:nnn {Info}{ #1 }{ #2 }
+    \@@_dict_put:nnn {Info}{ #1 }{ #2 }
   }
 
 %  should #2 be inside a some escaping command? (no)
@@ -1307,7 +1306,7 @@
 %  \pdfstringdef\@pdftitle{#1}%
 \cs_new_protected:Npn \pdf_info_string_gput:nn #1 #2 %#1 key without /, #2 content
   {
-    \@@_prop_put:nnn { Info }{ #1 }{ (#2) }
+    \@@_dict_put:nnn { Info }{ #1 }{ (#2) }
   }
 
 \cs_generate_variant:Nn \pdf_info_string_gput:nn {no}
@@ -1320,8 +1319,8 @@
 % push to the register command / issue the special
 \cs_new_protected:Npn \@@_Info_gpush:
   {
-    \prop_map_function:cN  { \@@_prop_gname:n {Info} } \@@_backend_info_gput:nn
-    \prop_gclear:c { \@@_prop_gname:n {Info} }
+    \prop_map_function:cN  { \@@_dict_gname:n {Info} } \@@_backend_info_gput:nn
+    \prop_gclear:c { \@@_dict_gname:n {Info} }
   }
 %    \end{macrocode}
 % \end{macro}
@@ -1413,7 +1412,7 @@
 % pdftex and luatex (and perhaps dvips ...) need to know if there are in a
 % xform stream ...
 \bool_new:N \l_@@_backend_xform_bool
-\@@_prop_gnew:n {xform/Resources/Properties}
+\@@_dict_gnew:n {xform/Resources/Properties}
 %quite often needed
 \clist_const:Nn \c_@@_backend_PageNResources_clist
   {
@@ -1508,7 +1507,7 @@
     {
       \clist_map_inline:Nn \c_@@_backend_PageNResources_clist
         {
-          \prop_if_empty:cF { \@@_prop_gname:n {PageN/Resources/##1} }
+          \prop_if_empty:cF { \@@_dict_gname:n {PageN/Resources/##1} }
             {
               \__kernel_backend_literal:x
                 {
@@ -1529,7 +1528,7 @@
           { /#1 ~ /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC }
         \bool_if:NTF \l_@@_backend_xform_bool
           {
-            \exp_args:Nnx\@@_prop_put:nnn
+            \exp_args:Nnx\@@_dict_put:nnn
               { xform/Resources/Properties }
               { l3pdf\int_use:N\g_@@_backend_name_int }
               { \@@_backend_object_ref:n { #2 } }
@@ -1553,7 +1552,7 @@
           { /#1 ~ /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC }
         \bool_if:NTF \l_@@_backend_xform_bool
           {
-            \@@_prop_put:nxx
+            \@@_dict_put:nxx
               { xform/Resources/Properties }
               { l3pdf\int_use:N\g_@@_backend_name_int }
               { \@@_backend_object_last: }
@@ -1595,7 +1594,7 @@
         \int_gincr:N\g_@@_backend_resourceid_int
         \bool_if:NTF \l_@@_backend_xform_bool
           {
-            \@@_prop_put:nxx
+            \@@_dict_put:nxx
               { xform/Resources/Properties }
               { l3pdf\int_use:N\g_@@_backend_resourceid_int }
               { \@@_backend_object_ref:n { #2 } }
@@ -1611,8 +1610,8 @@
                   {pdf@abspage}
                   {0}
               }
-            \@@_prop_gnew:n { backend_Page\l_@@_tmpa_tl/Resources/Properties }
-            \@@_prop_put:nxx
+            \@@_dict_gnew:n { backend_Page\l_@@_tmpa_tl/Resources/Properties }
+            \@@_dict_put:nxx
               { backend_Page\l_@@_tmpa_tl/Resources/Properties }
               { l3pdf\int_use:N\g_@@_backend_resourceid_int }
               { \@@_backend_object_ref:n{#2} }
@@ -1627,7 +1626,7 @@
         \int_gincr:N\g_@@_backend_resourceid_int
         \bool_if:NTF \l_@@_backend_xform_bool
           {
-            \@@_prop_put:nxx
+            \@@_dict_put:nxx
               { xform/Resources/Properties }
               { l3pdf\int_use:N\g_@@_backend_resourceid_int }
               { \@@_backend_object_last: }
@@ -1643,12 +1642,12 @@
                   {pdf@abspage}
                   {0}
               }
-            \@@_prop_gnew:n { backend_Page\l_@@_tmpa_tl/Resources/Properties }
-            \@@_prop_put:nxx
+            \@@_dict_gnew:n { backend_Page\l_@@_tmpa_tl/Resources/Properties }
+            \@@_dict_put:nxx
               { backend_Page\l_@@_tmpa_tl/Resources/Properties }
               { l3pdf\int_use:N\g_@@_backend_resourceid_int }
               { \@@_backend_object_last: }
-            %\@@_prop_show:n { backend_Page\l_@@_tmpa_tl/Resources/Properties }
+            %\@@_dict_show:n { backend_Page\l_@@_tmpa_tl/Resources/Properties }
           }
       }
   \cs_set_protected:Npn \@@_backend_bmc:n #1
@@ -1663,7 +1662,7 @@
   \cs_new:Npn \@@_backend_PageN_Resources_gpush_aux:n #1
     {
       \prop_if_empty:cF
-        { \@@_prop_gname:n {PageN/Resources/#1} }
+        { \@@_dict_gname:n {PageN/Resources/#1} }
         {
           \@@_dict_objref_item:nn { #1 }{PageN/Resources/#1}
         }
@@ -1674,12 +1673,12 @@
        \exp_args:NNx \tex_global:D \tex_pdfpageresources:D
          {
            \prop_if_exist:cT
-             { \@@_prop_gname:n  { backend_Page#1/Resources/Properties } }
+             { \@@_dict_gname:n  { backend_Page#1/Resources/Properties } }
              {
                /Properties~
                  <<
                    \prop_map_function:cN
-                     { \@@_prop_gname:n  { backend_Page#1/Resources/Properties } }
+                     { \@@_dict_gname:n  { backend_Page#1/Resources/Properties } }
                      \@@_dict_item:nn
                  >>
              }
@@ -1821,7 +1820,7 @@
         \hbox_set:Nn \l_@@_tmpa_box
           {
             \bool_set_true:N \l_@@_backend_xform_bool
-            \@@_prop_clear:n {xform/Resources/Properties}
+            \@@_dict_clear:n {xform/Resources/Properties}
             #4
           }
         %store the dimensions
@@ -1842,33 +1841,33 @@
           {
             #3
             \int_compare:nNnT
-              { \prop_count:c { \@@_prop_gname:n {xform/Resources/Properties} } }
+              { \prop_count:c { \@@_dict_gname:n {xform/Resources/Properties} } }
               >
               { 0 }
               {
                 /Properties~
                   <<
-                    \@@_prop_map_dict_item:n {xform/Resources/Properties}
+                    \@@_dict_map_dict_item:n {xform/Resources/Properties}
                   >>
               }
 
             \prop_if_empty:cF
-              { \@@_prop_gname:n {PageN/Resources/ExtGState} }
+              { \@@_dict_gname:n {PageN/Resources/ExtGState} }
               {
                 /ExtGState~ \pdf_object_ref:n {PageN/Resources/ExtGState}
               }
             \prop_if_empty:cF
-              { \@@_prop_gname:n {PageN/Resources/Pattern} }
+              { \@@_dict_gname:n {PageN/Resources/Pattern} }
               {
                 /Pattern~ \pdf_object_ref:n {PageN/Resources/Pattern}
               }
             \prop_if_empty:cF
-              { \@@_prop_gname:n {PageN/Resources/Shading} }
+              { \@@_dict_gname:n {PageN/Resources/Shading} }
               {
                 /Shading~ \pdf_object_ref:n {PageN/Resources/Shading}
               }
             \prop_if_empty:cF
-              { \@@_prop_gname:n {PageN/Resources/ColorSpace} }
+              { \@@_dict_gname:n {PageN/Resources/ColorSpace} }
               {
                 /ColorSpace~ \pdf_object_ref:n {PageN/Resources/ColorSpace}
               }
@@ -1905,7 +1904,7 @@
         \hbox_set:Nn \l_@@_tmpa_box
           {
             \bool_set_true:N \l_@@_backend_xform_bool
-            \@@_prop_clear:n {xform/Resources/Properties}
+            \@@_dict_clear:n {xform/Resources/Properties}
             #4
           }
         \tl_const:cx
@@ -1925,32 +1924,32 @@
           {
             #3
             \int_compare:nNnT
-              {\prop_count:c { \@@_prop_gname:n {xform/Resources/Properties} }}
+              {\prop_count:c { \@@_dict_gname:n {xform/Resources/Properties} }}
               >
               { 0 }
               {
                 /Properties~
                   <<
-                    \@@_prop_map_dict_item:n {xform/Resources/Properties}
+                    \@@_dict_map_dict_item:n {xform/Resources/Properties}
                   >>
               }
             \prop_if_empty:cF
-              { \@@_prop_gname:n {PageN/Resources/ExtGState} }
+              { \@@_dict_gname:n {PageN/Resources/ExtGState} }
               {
                 /ExtGState~ \pdf_object_ref:n {PageN/Resources/ExtGState}
               }
             \prop_if_empty:cF
-              { \@@_prop_gname:n {PageN/Resources/Pattern} }
+              { \@@_dict_gname:n {PageN/Resources/Pattern} }
               {
                 /Pattern~ \pdf_object_ref:n {PageN/Resources/Pattern}
               }
             \prop_if_empty:cF
-              { \@@_prop_gname:n {PageN/Resources/Shading} }
+              { \@@_dict_gname:n {PageN/Resources/Shading} }
               {
                 /Shading~ \pdf_object_ref:n {PageN/Resources/Shading}
               }
             \prop_if_empty:cF
-              { \@@_prop_gname:n {PageN/Resources/ColorSpace} }
+              { \@@_dict_gname:n {PageN/Resources/ColorSpace} }
               {
                 /ColorSpace~ \pdf_object_ref:n {PageN/Resources/ColorSpace}
               }
@@ -2112,7 +2111,7 @@
   { %create the props and backend objects:
     \clist_map_inline:Nn \c_@@_backend_PageNResources_clist
       {
-        \@@_prop_gnew:n {PageN/Resources/#1}
+        \@@_dict_gnew:n {PageN/Resources/#1}
         \@@_backend_object_new:nn {PageN/Resources/#1} {dict}
         \cs_if_exist:NT \tex_directlua:D
           {
@@ -2129,7 +2128,7 @@
       {
         \cs_new_protected:Npn \@@_backend_PageNResources_gput:nnn #1 #2 #3
           {
-            \@@_prop_put:nnn {PageN/Resources/#1} { #2 }{ #3 }
+            \@@_dict_put:nnn {PageN/Resources/#1} { #2 }{ #3 }
             % luatex must also trigger the lua side
             \tex_latelua:D{l3kernel.@@.Page.Resources.#1=true}
             \tex_latelua:D
@@ -2141,7 +2140,7 @@
       { %pdftex
         \cs_new_protected:Npn \@@_backend_PageNResources_gput:nnn #1 #2 #3
           {
-            \@@_prop_put:nnn {PageN/Resources/#1} { #2 }{ #3 }
+            \@@_dict_put:nnn {PageN/Resources/#1} { #2 }{ #3 }
           }
       }
 
@@ -2151,11 +2150,11 @@
        \clist_map_inline:Nn \c_@@_backend_PageNResources_clist
          {
            \prop_if_empty:cF
-             { \@@_prop_gname:n {PageN/Resources/##1} }
+             { \@@_dict_gname:n {PageN/Resources/##1} }
              {
                \@@_backend_object_write:nx
                  { PageN/Resources/##1 }
-                 { \@@_prop_map_dict_item:n {PageN/Resources/##1} }
+                 { \@@_dict_map_dict_item:n {PageN/Resources/##1} }
              }
         }
      }
@@ -2177,7 +2176,7 @@
 
     \cs_new_protected:Npn \@@_backend_PageNResources:n #1
       {
-        \__pdf_backend:n {put~@resources~<<#1>>}
+        \@@_backend:n {put~@resources~<<#1>>}
       }
 
     \cs_new_protected:Npn \@@_backend_PageNResources_gput:nnn #1 #2 #3
@@ -2411,7 +2410,7 @@
           \clist_if_in:NnF \c_@@_Catalog_single_clist
             { #1 }
             { \msg_warning:nnn { pdf }{ catalog-unknown } { #1 }}
-          \@@_prop_put:nnn { Catalog } { #1 }{ #2 }
+          \@@_dict_put:nnn { Catalog } { #1 }{ #2 }
         }
       }
    }
@@ -2421,11 +2420,11 @@
     \seq_set_split:Nnn \l_tmpa_seq { / } { #1 }
     \int_compare:nNnTF { 1 } = {\seq_count:N \l_tmpa_seq }
      {
-       \@@_prop_remove:nn { Catalog } { #1 }
+       \@@_dict_remove:nn { Catalog } { #1 }
      }
      {
        \seq_pop_right:NN \l_tmpa_seq \tl_tmpa_tl
-       \exp_args:Nxx \@@_prop_remove:nn
+       \exp_args:Nxx \@@_dict_remove:nn
          { Catalog/\seq_use:Nn\l_tmpa_seq { / } }
          { \tl_tmpa_tl }
      }
@@ -2443,7 +2442,7 @@
 %  \begin{macro}{ \@@_catalog_XX_gput:n }
 % Various commands to handle subentries and special cases.
 %    \begin{macrocode}
-\@@_prop_gnew:n {Catalog}
+\@@_dict_gnew:n {Catalog}
 
 \clist_const:Nn \c_@@_Catalog_single_clist
   {
@@ -2479,10 +2478,10 @@
 
 \clist_map_inline:Nn \c_@@_Catalog_prop_clist
   {
-    \@@_prop_gnew:n {Catalog/#1}
+    \@@_dict_gnew:n {Catalog/#1}
     \cs_new_protected:cpn { @@_/Catalog/#1_gput:n } ##1
       {
-        \@@_prop_put:nnn { Catalog/#1 }  ##1
+        \@@_dict_put:nnn { Catalog/#1 }  ##1
       }
   }
 
@@ -2537,7 +2536,7 @@
     \use:c { @@_/Catalog/Requirements_gpush: }
     \use:c { @@_/Catalog/ViewerPreferences_gpush: }
     % output the single values:
-    \prop_map_function:cN { \@@_prop_gname:n {Catalog} }  \@@_backend_catalog_gput:nn
+    \prop_map_function:cN { \@@_dict_gname:n {Catalog} }  \@@_backend_catalog_gput:nn
   }
 %    \end{macrocode}
 % \end{macro}
@@ -2547,12 +2546,12 @@
 \cs_new_protected:cpn { @@_/Catalog/AA_gpush: }
   {
     \prop_if_empty:cF
-     { \@@_prop_gname:n { Catalog/AA } }
+     { \@@_dict_gname:n { Catalog/AA } }
      {
        \@@_backend_object_new:nn  { g_@@_/Catalog/AA_obj } { dict }
        \@@_backend_object_write:nx
             { g_@@_/Catalog/AA_obj }
-            { \@@_prop_map_dict_item:n { Catalog/AA } }
+            { \@@_dict_map_dict_item:n { Catalog/AA } }
        \exp_args:Nnx
          \@@_backend_catalog_gput:nn
            {AA}
@@ -2583,7 +2582,7 @@
             { g_@@_/Catalog/AcroForm/Fields_obj }
             { \seq_use:cn { g_@@_/Catalog/AcroForm/Fields_seq } {~} }
         \exp_args:Nnnx
-          \@@_prop_put:nnn
+          \@@_dict_put:nnn
             { Catalog/AcroForm }
             { Fields }
             { \@@_backend_object_ref:n { g_@@_/Catalog/AcroForm/Fields_obj } }
@@ -2596,46 +2595,46 @@
             { g_@@_/Catalog/AcroForm/CO_obj }
             { \seq_use:cn { g_@@_/Catalog/AcroForm/CO_seq } {~} }
         \exp_args:Nnnx
-          \@@_prop_put:nnn
+          \@@_dict_put:nnn
             { Catalog/AcroForm }
             { CO }
             { \@@_backend_object_ref:n { g_@@_/Catalog/AcroForm/CO_obj } }
       }
-     \prop_if_empty:cF { \@@_prop_gname:n { Catalog/AcroForm/DR/Font}}
+     \prop_if_empty:cF { \@@_dict_gname:n { Catalog/AcroForm/DR/Font}}
        {
          \@@_backend_object_new:nn { g_@@_/Catalog/AcroForm/DR/Font_obj } {dict}
          \exp_args:Nnx
            \@@_backend_object_write:nn
              { g_@@_/Catalog/AcroForm/DR/Font_obj }
-             { \@@_prop_map_dict_item:n { Catalog/AcroForm/DR/Font } }
+             { \@@_dict_map_dict_item:n { Catalog/AcroForm/DR/Font } }
          \exp_args:Nnnx
-           \@@_prop_put:nnn
+           \@@_dict_put:nnn
              { Catalog/AcroForm/DR }
              { Font }
              { \@@_backend_object_ref:n { g_@@_/Catalog/AcroForm/DR/Font_obj } }
        }
-     \prop_if_empty:cF { \@@_prop_gname:n { Catalog/AcroForm/DR}}
+     \prop_if_empty:cF { \@@_dict_gname:n { Catalog/AcroForm/DR}}
        {
          \@@_backend_object_new:nn { g_@@_/Catalog/AcroForm/DR_obj } {dict}
          \exp_args:Nnx
            \@@_backend_object_write:nn
              { g_@@_/Catalog/AcroForm/DR_obj }
-             { \@@_prop_map_dict_item:n { Catalog/AcroForm/DR } }
+             { \@@_dict_map_dict_item:n { Catalog/AcroForm/DR } }
          \exp_args:Nnnx
-           \@@_prop_put:nnn
+           \@@_dict_put:nnn
              { Catalog/AcroForm }
              { DR }
              { \@@_backend_object_ref:n { g_@@_/Catalog/AcroForm/DR_obj } }
        }
-     \prop_if_empty:cF { \@@_prop_gname:n { Catalog/AcroForm} }
+     \prop_if_empty:cF { \@@_dict_gname:n { Catalog/AcroForm} }
        {
          \@@_backend_object_new:nn { g_@@_/Catalog/AcroForm_obj } {dict}
          \exp_args:Nnx
            \@@_backend_object_write:nn
              { g_@@_/Catalog/AcroForm_obj }
-             { \@@_prop_map_dict_item:n { Catalog/AcroForm } }
+             { \@@_dict_map_dict_item:n { Catalog/AcroForm } }
          \exp_args:Nnnx
-           \@@_prop_put:nnn
+           \@@_dict_put:nnn
              { Catalog }
              { AcroForm }
              { \@@_backend_object_ref:n { g_@@_/Catalog/AcroForm_obj } }
@@ -2676,13 +2675,13 @@
 \cs_new_protected:cpn { @@_/Catalog/MarkInfo_gpush: }
   {
     \prop_if_empty:cF
-     { \@@_prop_gname:n { Catalog/MarkInfo } }
+     { \@@_dict_gname:n { Catalog/MarkInfo } }
      {
        \@@_backend_object_new:nn  { g_@@_/Catalog/MarkInfo_obj } { dict }
        \exp_args:Nnx
          \@@_backend_object_write:nn
             { g_@@_/Catalog/MarkInfo_obj }
-            { \@@_prop_map_dict_item:n {Catalog/MarkInfo } }
+            { \@@_dict_map_dict_item:n {Catalog/MarkInfo } }
        \exp_args:Nnx
          \@@_backend_catalog_gput:nn
            {MarkInfo}
@@ -2796,13 +2795,13 @@
 \cs_new_protected:cpn { @@_/Catalog/ViewerPreferences_gpush: }
   {
     \prop_if_empty:cF
-     { \@@_prop_gname:n { Catalog/ViewerPreferences } }
+     { \@@_dict_gname:n { Catalog/ViewerPreferences } }
      {
        \@@_backend_object_new:nn  { g_@@_/Catalog/ViewerPreferences_obj } { dict }
        \exp_args:Nnx
          \@@_backend_object_write:nn
             { g_@@_/Catalog/ViewerPreferences_obj }
-            { \@@_prop_map_dict_item:n {Catalog/ViewerPreferences } }
+            { \@@_dict_map_dict_item:n {Catalog/ViewerPreferences } }
        \exp_args:Nnx
          \@@_backend_catalog_gput:nn
            {ViewerPreferences}
@@ -3210,7 +3209,7 @@
 
 \cs_new_protected:Npn \pdf_destination_box:nn #1 #2 %#1 name, #2 box content
  {
-   \__pdf_backend_destination_box:nn { #1 }{ #2 } %new name!!
+   \@@_backend_destination_box:nn { #1 }{ #2 } %new name!!
  }
 
 %avoid that destinations names are optimized.
