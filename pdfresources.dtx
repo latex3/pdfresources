@@ -676,6 +676,7 @@
      \@@_dict_put:nnn { #1 }{ #2 }{ #3 }
   }
 
+\cs_generate_variant:Nn \pdfdict_put:nnn {nnx}
 %    \end{macrocode}
 % \begin{function}[added = 2020-04-08]
 %   {\pdfdict_show:n }
@@ -732,7 +733,8 @@
 %   \end{syntax}
 %   Removes  |/|\meta{name} and its associated \meta{value} from the \Arg{dictionary}
 %   or \Arg{local dict} (if the name-value pair has been added by
-%   \cs{pdfdict_put:nnn}).
+%   \cs{pdfdict_put:nnn}). The removal is local for local dictionaries, and global
+%   for global dictionaries.
 %   If \meta{name} is not found no change occurs,
 %   \emph{i.e}~there is no need to test for the existence of a name before
 %   trying to remove it.
@@ -746,8 +748,8 @@
 
 %    \end{macrocode}
 % \subsection{pdfdict \enquote{Pages} (pdfpagesattr)}
-% The content of the property list associated with this pdfdict is written to the
-% /Pages object.
+% The content of the property list associated with this dictionary name is written to the
+% /Pages object. This replaces \cs{pdfpagesattr}. This dictionary is global.
 % \subsubsection{pdfdict \enquote{Pages} pdfpagesattr/backend}
 % \begin{NOTE}{UF}
 %  path: Pages
@@ -801,18 +803,18 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \subsubsection{pdfpagesattr/management}
+% \subsubsection{pdfdict \enquote{Pages}  (pdfpagesattr)/management}
 % \begin{NOTE}{UF}
 % The register is normally used only a few times in a document, so it would be
 % okay to update the register/add the special at every change,
 % but with dvips/dvipdfmx this would disable removing entries.
 % So we issue the push code only at the end of the document.
 % \end{NOTE}
-% \begin{function}[added = 2019-06-04]
-%   {\pdf_pagesattr_gput:nn}
+% \begin{function}{}
 %   \begin{syntax}
-%     \cs{pdf_pagesattr_gput:nn} \Arg{name} \Arg{value}
+%     \cs{pdfdict_put:nnn} { Pages }\Arg{name} \Arg{value}
 %   \end{syntax}
+%
 %   Adds |/|\meta{name} \meta{value} to the |/Pages| dictionary.
 %   It is always stored globally. The content is written to the pdf
 %   at the end of the compilation, so values can be added, changed or
@@ -827,58 +829,12 @@
 %   in pdftex and luatex overwrite values added with the primitive commands.
 %   Package authors should use the management commands instead.
 % \end{function}
-% \begin{function}[added = 2019-06-04]
-%   {\pdf_pagesattr_get:nN}
-%   \begin{syntax}
-%     \cs{pdf_pagesattr_get:nN} \Arg{name} \meta{tl var}
-%   \end{syntax}
-%   Recovers the \meta{value} stored by \cs{pdf_pagesattr_gput:nn} for
-%   \meta{name} and places this in the \meta{token list
-%   variable}. If \meta{name} is not found
-%   then the \meta{token list variable} is set
-%   to the special marker \cs{q_no_value}. The \meta{token list
-%   variable} is set within the current \TeX{} group.
-% \end{function}
-% \begin{function}[added = 2019-06-04]
-%   {
-%     \pdf_pagesattr_gremove:n
-%   }
-%   \begin{syntax}
-%     \cs{pdf_pagesattr_gremove:n} \Arg{name}
-%   \end{syntax}
-%   Removes  |/|\meta{name} and its associated \meta{value} from the |/Pages|
-%   dictionary (if the name-value pair has been added by
-%   \cs{pdf_pagesattr_gput:nn}).
-%   If \meta{name} is not found no change occurs,
-%   \emph{i.e}~there is no need to test for the existence of a name before
-%   trying to remove it.
-% \end{function}
 %    \begin{macrocode}
 \@@_dict_gnew:n {Pages}
-% setter:
-%^^A documentated
-\cs_new_protected:Npn \pdf_pagesattr_gput:nn #1 #2
-  {
-    \@@_dict_put:nnn {Pages}{ #1 }{ #2 }
-  }
-
-% getter from the prop:
-%^^A documentated
-\cs_new_protected:Npn \pdf_pagesattr_get:nN #1 #2
-  {
-    \@@_dict_get:nnN {Pages}{ #1 } #2
-  }
-
-% remove:
-%^^A documented
-\cs_new_protected:Npn \pdf_pagesattr_gremove:n #1
-  {
-    \@@_dict_remove:nn {Pages}{ #1 }
-  }
 %    \end{macrocode}
 %
 % \begin{macro}{\@@_Pages_gpush:}
-% This is the command that outputs the pagesattr. It is used
+% This is the command that outputs the Pages dictionary. It is used
 % at the end of the document in \cs{g_@@_BACKEND_end_run_tl}
 %    \begin{macrocode}
 % push to the register command / issue the special

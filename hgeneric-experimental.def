@@ -158,7 +158,7 @@
 % variants
 \cs_generate_variant:Nn \pdf_object_write:nn {nx}
 \cs_generate_variant:Nn \pdf_catalog_gput:nn {nx}
-\cs_generate_variant:Nn \pdf_pagesattr_gput:nn {nx} %not really needed but one shouldn't rely on side effects
+%\cs_generate_variant:Nn \pdf_pagesattr_gput:nn {nx} %not really needed but one shouldn't rely on side effects
 
 % tmp
 \box_new:N \l__hyp_tmpa_box
@@ -1036,10 +1036,10 @@
      {
        \tl_if_empty:nTF %or blank?
          {
-           \pdf_pagesattr_gremove:n { CropBox }
+           \pdfdict_remove:nn {Pages} { CropBox }
          }
          {
-           \pdf_pagesattr_gput:nx { CropBox } { [#1] }
+           \pdfdict_put:nnx {Pages} { CropBox } { [#1] }
          }
      }
    ,pdfpicktraybypdfsize    .choice:
@@ -1195,7 +1195,7 @@
              }
          }
      }
-   ,pdfstartpage .initial:n =1 
+   ,pdfstartpage .initial:n =1
    ,pdfstartview .code:n =
      {
        \tl_gset:Nx \g__hyp_pdfstartview_tl { #1 }
