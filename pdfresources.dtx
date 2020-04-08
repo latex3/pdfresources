@@ -1210,12 +1210,12 @@
 % be double entries in the pdf with the backend pdftex and luatex.
 % How pdf viewer handles this is unpredictable.
 %
-%  \begin{function}[added = 2019-06-22]
+%  \begin{function}
 %   {
-%     \pdf_info_gput:nn
+%     pdfdict: Info (global)
 %   }
 %   \begin{syntax}
-%     \cs{pdf_info_gput:nn} \Arg{name} \Arg{value}
+%     \cs{pdfdict_put:nnn} \{Info\} \Arg{name} \Arg{value}
 %   \end{syntax}
 %   Adds |/|\meta{name} and the \meta{value} to the info dictionary.
 %   \meta{name} should be a valid pdf name without the leading slash,
@@ -1224,49 +1224,15 @@
 %   If a \meta{name} is used twice, only the last \meta{value}
 %   set will be used. The info dictionary is written at the end of the compilation,
 %   so values can be set at any time.
-% \end{function}
-% \begin{function}[added = 2019-06-22]
-%   {
-%     \pdf_info_string_gput:nn,
-%     \pdf_info_string_gput:no
-%   }
-%   \begin{syntax}
-%     \cs{pdf_info_string_gput:nn} \Arg{name} \Arg{value}
-%   \end{syntax}
-%   Adds |/|\meta{name} and the \meta{value} surrounded by parentheses to the info dictionary.
-%   \meta{name} should be a valid pdf name without the leading slash,
-%   \meta{value} should be a valid content of pdf string. Any escaping or (re)encoding must be
-%   done explicitly.
 %   The info dictionary expects utf8 in the strings, so a conversion like this is
 %   normally sensible:
 %   \begin{verbatim}
 %   \str_set_convert:Nnnn \l_tmpa_str { Grüße }{ utf8 } {utf8/string}
-%   \pdf_info_string_gput:no {Title}{\l_tmpa_str}
+%   \pdfdict_put:nx {Title}{(\l_tmpa_str)}
 %   \end{verbatim}
-%   If a \meta{name} is used twice, only the last \meta{value}
-%   set will be used. The info dictionary is written at the end of the compilation,
-%   so values can be set at any time.
 % \end{function}
 %    \begin{macrocode}
 \@@_dict_gnew:n {Info}
-
-%\cs_new_protected:Npn \pdf_info_gput:nn #1 #2 %#1 key without /, #2 content
-%  {
-%    \@@_dict_put:nnn {Info}{ #1 }{ #2 }
-%  }
-
-%  should #2 be inside a some escaping command? (no)
-%  hyperref passes them through
-%  \HyXeTeX@CheckUnicode
-%  \HyPsd@XeTeXBigCharstrue
-%  \HyPsd@PrerenderUnicode{#1}%
-%  \pdfstringdef\@pdftitle{#1}%
-%\cs_new_protected:Npn \pdf_info_string_gput:nn #1 #2 %#1 key without /, #2 content
-%  {
-%    \@@_dict_put:nnn { Info }{ #1 }{ (#2) }
-%  }
-%
-%\cs_generate_variant:Nn \pdf_info_string_gput:nn {no}
 %    \end{macrocode}
 %
 % \begin{macro}{\@@_Info_gpush:}
@@ -2194,8 +2160,8 @@
   }
 %    \end{macrocode}
 %
-% \subsection{Catalog}
-% \subsubsection{Catalog/backend}
+% \subsection{pdfdict: \enquote{Catalog}}
+% \subsubsection{\enquote{Catalog}/backend}
 % the backend command is already in the driver:
 % \cs{@@_backend_catalog_gput:nn}
 %
