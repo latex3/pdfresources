@@ -134,6 +134,18 @@
               {
                 inserting~unknown~/#1~into~the~catalog
               }
+% pdfdict module
+\msg_new:nnn  { pdfdict } { show-dict }
+  {
+    The~\tl_if_empty:cTF {c_@@_/#1_g_tl}{local}{global}~dictionary~'#1'~
+    \tl_if_empty:nTF {#2}
+      { is~empty \\>~ . }
+      { contains~the~pairs~(without~outer~braces): #2 . }
+  }
+\msg_new:nnn  { pdfdict } { unknown-dict }
+  {
+    The~dictionary~'#1'~is~not~declared.
+  }
 %    \end{macrocode}
 % \section{Preparation/helper Code}
 %^^A still needed:
@@ -442,7 +454,10 @@
 % to retried global status from pathes
 \cs_new:Npn \@@_prop_get_g:n #1 % path name without the leading /
   {
-    \tl_use:c {c_@@_/#1_g_tl}
+   \tl_if_exist:cT {c_@@_/#1_g_tl}
+     {
+      \tl_use:c {c_@@_/#1_g_tl}
+     }
   }
 
 %global
@@ -457,7 +472,11 @@
     l_@@_/#1_prop
   }
 
+
 %  hm, a bit unclear, can this work? How is expansion?
+%  it falls back to prop_name if the path doesn't exist.
+%  Can this lead to confusion?
+%
 \cs_new:Npn \@@_prop_Xname:n #1 % path name without the leading /
   {
     \use:c { @@_prop_\@@_prop_get_g:n{#1}name:n } { #1 }
@@ -483,6 +502,15 @@
         \prop_new:c  { \@@_prop_name:n { #1 } }
         \seq_gput_right:Nn \g_@@_prop_names_seq { #1 }
       }
+  }
+
+% test existence
+\prg_new_conditional:Npnn \@@_prop_if_exist:n #1 { p , T , F , TF }
+  {
+    \tl_if_exist:cTF
+      { c_@@_/#1_g_tl }
+      { \prg_return_true: }
+      { \prg_return_false: }
   }
 
 %    \end{macrocode}
@@ -529,7 +557,7 @@
 \cs_generate_variant:Nn \@@_prop_put:nnn {nxx}
 
 
-%global/local version
+%local + global
 
 \cs_new_protected:Npn \@@_prop_get:nnN  #1 #2 #3 %path,key,macro
   {
@@ -545,7 +573,21 @@
            { \@@_prop_Xname:n { #1 } } { #2 }
   }
 
-% local / global
+
+\cs_new_protected:Npn \__pdf_dict_show:Nn #1#2
+  {
+    \prop_if_exist:cTF { \__pdf_prop_Xname:n { #2 } }
+      {
+         #1
+           { pdfdict } { show-dict }
+           { \tl_to_str:n {#2} }
+           { \prop_map_function:cN {\__pdf_prop_Xname:n { #2 }} \msg_show_item:nn }
+           { } { }
+      }
+      {
+        #1 { pdfdict } { unknown-dict } {#2}{}{}{}
+      }
+  }
 \cs_new_protected:Npn \@@_prop_show:n #1  %path
   {
     \prop_show:c { \use:c{ @@_prop_\@@_prop_get_g:n{#1}name:n } { #1 } }
@@ -557,6 +599,8 @@
 % \cs{@@_prop_map_dict_item:n} outputs a prop as needed in a dictionary:
 %  a list of /\meta{key} \meta{value} pairs.
 %    \begin{macrocode}
+%local + global
+%!! Xname must be replaced later!
 \cs_new:Npn \@@_prop_map_dict_item:n #1 %path
   {
     \prop_map_function:cN { \@@_prop_Xname:n { #1 } } \@@_dict_item:nn
@@ -568,6 +612,7 @@
 % \cs{@@_prop_gmerge:nnN} merges at first the property \meta{name_1}
 %  then optionally \meta{name_2} into property |#3|.
 %    \begin{macrocode}
+% only used globally imho so leaving the global version only for now
 \cs_new_protected:Npn \@@_prop_gmerge:nnN #1 #2 #3
   {
     \prop_gset_eq:Nc #3 { \@@_prop_gname:n  { #1 } }
@@ -584,34 +629,46 @@
 %
 % \section{Resources management}
 % \subsection{User interface pdfdict}
+% Many features of a PDF are set by adding key-value pair
+% to specific PDF dictionaries. The following commands offer an interface to
+% these dictionaries. They unify a number of primitives like the pdftex
+% registers \cs{pdfcatalog}, \cs{pdfpagesattr}, \cs{pdfinfo}
+% in a backend independant way.
 % \begin{NOTE}{UF}
 % How to differentiate between global and local dicts?
-% g_Catalog?
-% l_Annot?
+% global: upper case: Catalog, Pages.
+% local:  lower case: annot/link/URI.
 % \end{NOTE}
 % \begin{function}[added = 2020-04-06]
-%   {\pdfdict_gput:nnn, \pdfdict_gput:nnn, }
+%   {\pdfdict_put:nnn}
 %   \begin{syntax}
-%     \cs{pdfdict_gput:nnn} \Arg{global dict} \Arg{name} \Arg{value}\\
-%     \cs{pdfdict_put:nnn}  \Arg{local dict} \Arg{name} \Arg{value}
+%     \cs{pdfdict_put:nnn} \Arg{dictionary} \Arg{name} \Arg{value}
 %   \end{syntax}
-% This functions put \Arg{name} \Arg{value} either globally or locally in property lists.
-% \Arg{global dict} and \Arg{local dict} are
-% symbolic names for the property lists. \Arg{name} should be a valid PDF name without
+% This functions put \Arg{name} \Arg{value} either globally or locally in internal
+% property lists.
+% \Arg{dictionary} is a symbolic names for the property list.
+% \Arg{name} should be a valid PDF name without
 % the starting slash, \Arg{value} should be a valid PDF value for this name in the
 % target dictionary. The PDF resource management code predefines a large number of
 % symbolic names for important dictionaries and will write the stored values
 % at the right time to the PDF. The predefined symbolic names are described below.
+% By convention, dictionaries with starting with an uppercase letter are always stored
+% globally (e.g. \texttt{Catalog} or \texttt{Info}, lowercase letters indicates
+% dictionaries that respect \TeX-groups -- this is e.g. used for dictionaries used in
+% local objects like links.
+%
 % The code works with all major engines but not necessarly
-% in the same way. Most importantly the expansion behaviour of the backends differ.
-% So one should neither rely on \Arg{name} \Arg{value} to be expanded nor not expanded
+% in the same way. Most importantly
+% \begin{itemize}
+% \item the expansion behaviour of the backends can differ. Some backends expand a
+% value always fully when writing to the PDF, with other command names could end as strings
+% in the PDF. So one should neither rely on \Arg{name} \Arg{value} to be expanded nor not expanded
 % by the backend commands.
+% \item The number of compilations needed can differ between the engines and backends.
+% Some engines has to use labels and the aux-file to setup the dictionaries.
+% \end{itemize}
 % \end{function}
 %    \begin{macrocode}
-\cs_new_protected:Npn \pdfdict_gput:nnn #1 #2 #3
-  {
-     \@@_prop_put:nnn { #1 }{ #2 }{ #3 }
-  }
 
 \cs_new_protected:Npn \pdfdict_put:nnn #1 #2 #3
   {
@@ -619,10 +676,24 @@
   }
 
 %    \end{macrocode}
+% \begin{function}[added = 2020-04-08]
+%   {\pdfdict_show:n }
+%   \begin{syntax}
+%     \cs{pdfdict_show:n}  \Arg{dictionary}
+%   \end{syntax}
+%   This shows the content of \Arg{dictionary} in the log and on the terminal.
+%   It also shows if  \Arg{dictionary} is a local or a global dictionary.
+%\end{function}
+%    \begin{macrocode}
+\cs_new_protected:Npn \pdfdict_show:n
+  {
+    \__pdf_dict_show:Nn \msg_show:nnxxxx
+  }
+%    \end{macrocode}
 % \begin{function}[added = 2020-04-07]
 %   {\pdfdict_get:nn }
 %   \begin{syntax}
-%     \cs{pdfdict_get:nnN}  \Arg{dict} \Arg{name} \meta{tl var}
+%     \cs{pdfdict_get:nnN}  \Arg{dictionary} \Arg{name} \meta{tl var}
 %   \end{syntax}
 %   Recovers the \meta{value} stored by \cs{pdfdict_put:nnn} for
 %   \meta{name} and places this in the \meta{token list
@@ -641,21 +712,20 @@
 %    \end{macrocode}
 % \begin{function}[added = 2020-04-07]
 %   {
-%     \pdfdict_gremove:nn, \pdfdict_remove:nn,
+%     \pdfdict_remove:nn,
 %   }
 %   \begin{syntax}
-%     \cs{pdf_pagesattr_gremove:n} \Arg{global dict} \Arg{name}\\
-%     \cs{pdf_pagesattr_remove:n} \Arg{local dict} \Arg{name}\\
+%     \cs{pdfdict_remove:n} \Arg{dictionary} \Arg{name}
 %   \end{syntax}
-%   Removes  |/|\meta{name} and its associated \meta{value} from the \Arg{global dict}
+%   Removes  |/|\meta{name} and its associated \meta{value} from the \Arg{dictionary}
 %   or \Arg{local dict} (if the name-value pair has been added by
-%   \cs{pdfdict_gput:nnn} or \cs{pdfdict_put:nnn}).
+%   \cs{pdfdict_put:nnn}).
 %   If \meta{name} is not found no change occurs,
 %   \emph{i.e}~there is no need to test for the existence of a name before
 %   trying to remove it.
 % \end{function}
 %    \begin{macrocode}
-\cs_new_protected:Npn \pdfdict_gremove:nn #1 #2
+\cs_new_protected:Npn \pdfdict_remove:nn #1 #2
   {
     \@@_prop_remove:nn { #1 }{ #2 }
   }
