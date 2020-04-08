@@ -146,6 +146,8 @@
   {
     The~dictionary~'#1'~is~not~declared.
   }
+\msg_new:nnn  { pdfdict } { empty-value }
+              { The~value~for~#1~is~empty~and~will~be~ignored }
 %    \end{macrocode}
 % \section{Preparation/helper Code}
 %^^A still needed:
@@ -538,17 +540,16 @@
   {
     \tl_if_empty:nTF { #3 }
       {
-        \msg_none:nnn { pdf }{ empty-value }{ /#1/#2 }
+        \msg_none:nnn { pdfdict }{ empty-value }{ /#1/#2 }
       }
       {
-        \prop_if_exist:cTF
-          { \@@_dict_Xname:n { #1 } }
+        \@@_dict_if_exist:nTF { #1 }
           {
             \use:c { prop_\@@_dict_get_g:n{#1}put:cnn }
               { \@@_dict_Xname:n { #1 } }{ #2 } { #3 }
           }
           {
-            \msg_error:nnn { pdf } { wrong-path } { /#1 }
+            \msg_error:nnn { pdfdict } { unknown-dict } { /#1 }
           }
       }
   }
