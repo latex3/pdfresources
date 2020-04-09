@@ -357,7 +357,7 @@
 % we simply hard code this for now until hyperref.sty itself can be adapted ...
 \cs_new_protected:Npn\__hyp_PageLabels_gpush:
   {
-    \pdf_catalog_gput:nx {PageLabels}{<</Nums[\HyPL@Labels]>>}
+    \pdfdict_put:nnx {Catalog} {PageLabels}{<</Nums[\HyPL@Labels]>>}
   }
 
 
@@ -839,21 +839,25 @@
        \__hyp_pstringdef:No \l__hyp_tmpa_tl {#1}%
         \tl_if_empty:NTF \l__hyp_tmpa_tl
           {
-             \pdf_catalog_gremove:n { URI }
+             \pdfdict_remove:nn {Catalog} { URI }
           }
           {
-             \pdf_catalog_gput:nx { URI }{ <</Base ( \l__hyp_tmpa_tl )>> }
+             \pdfdict_put:nnx {Catalog} { URI }{ <</Base ( \l__hyp_tmpa_tl )>> }
           }
      }
    ,pdfcenterwindow    .choice:
    ,pdfcenterwindow / false .code:n =
-     { \pdf_catalog_gremove:n { ViewerPreferences / CenterWindow } }
+     {
+       \pdfdict_remove:nn {Catalog / ViewerPreferences }{ CenterWindow }
+     }
    ,pdfcenterwindow / true .code:n =
      {
-       \pdf_catalog_gput:nn   { ViewerPreferences } {{ CenterWindow }{ true }}
+       \pdfdict_put:nnn {Catalog / ViewerPreferences } { CenterWindow }{ true }
      }
    ,pdfcenterwindow /  .code:n =
-     { \pdf_catalog_gremove:n { ViewerPreferences / CenterWindow } }
+     {
+       \pdfdict_remove:nn {Catalog / ViewerPreferences }{ CenterWindow }
+     }
    ,pdfcenterwindow / unknown .code:n =
      {
        \msg_warning:nnxx { hyp } { no-bool }
@@ -863,13 +867,17 @@
    ,pdfcenterwindow    .default:n = true
    ,pdfdirection    .choice:
    ,pdfdirection / L2R .code:n =
-     { \pdf_catalog_gput:nn   { ViewerPreferences } {{ Direction }{ /L2R }} }
+     {
+       \pdfdict_put:nnn {Catalog / ViewerPreferences } { Direction }{ /L2R }
+     }
    ,pdfdirection / R2L .code:n =
      {
-       \pdf_catalog_gput:nn   { ViewerPreferences } {{ Direction }{ /R2L }}
+       \pdfdict_put:nnn {Catalog / ViewerPreferences } { Direction }{ /R2L }
      }
    ,pdfdirection /  .code:n =
-     { \pdf_catalog_gremove:n { ViewerPreferences / Direction } }
+     {
+       \pdfdict_remove:nn {Catalog / ViewerPreferences } { Direction }
+     }
    ,pdfdirection / unknown .code:n =
      {
        \msg_warning:nnxxx { hyp } { unknown-choice }
@@ -879,10 +887,12 @@
      }
    ,pdfdisplaydoctitle    .choice:
    ,pdfdisplaydoctitle / false .code:n =
-     { \pdf_catalog_gremove:n { ViewerPreferences / DisplayDocTitle } }
+     {
+       \pdfdict_remove:nn {Catalog / ViewerPreferences } { DisplayDocTitle }
+     }
    ,pdfdisplaydoctitle / true .code:n =
      {
-       \pdf_catalog_gput:nn   { ViewerPreferences } {{ DisplayDocTitle } { true }}
+       \pdfdict_put:nnn {Catalog / ViewerPreferences } { DisplayDocTitle } { true }
      }
    ,pdfdisplaydoctitle    .default:n = true
    ,pdfduplex    .choices:nn =
@@ -890,7 +900,8 @@
      {
        \pdf_version_compare:NnTF > {1.6}
          {
-           \pdf_catalog_gput:nx { ViewerPreferences } {{ PrintDuplex } { /#1 }}
+           \pdfdict_put:nnn {Catalog / ViewerPreferences }
+             { PrintDuplex } { /#1 }
          }
          {
            \msg_warning:nnxx
@@ -901,7 +912,9 @@
          }
      }%
    ,pdfduplex /  .code:n =
-     { \pdf_catalog_gremove:n { ViewerPreferences / PrintDuplex } }
+     {
+       \pdfdict_remove:nn {Catalog / ViewerPreferences } { PrintDuplex }
+     }
    ,pdfduplex / unknown .code:n =
      {
        \msg_warning:nnxxx { hyp } { unknown-choice }
@@ -911,13 +924,17 @@
      }
    ,pdffitwindow    .choice:
    ,pdffitwindow / false .code:n =
-     { \pdf_catalog_gremove:n { ViewerPreferences / FitWindow } }
+     {
+       \pdfdict_remove:nn {Catalog / ViewerPreferences }  { FitWindow }
+     }
    ,pdffitwindow / true .code:n =
      {
-       \pdf_catalog_gput:nn   { ViewerPreferences } {{ FitWindow } { true }}
+       \pdfdict_put:nnn {Catalog / ViewerPreferences } { FitWindow } { true }
      }
    ,pdffitwindow /  .code:n =
-     { \pdf_catalog_gremove:n { ViewerPreferences / FitWindow } }
+     {
+       \pdfdict_remove:nn {Catalog / ViewerPreferences } { FitWindow }
+     }
    ,pdffitwindow    .default:n = true
    ,pdffitwindow / unknown .code:n =
      {
@@ -929,21 +946,26 @@
           {
             \tl_if_empty:nTF { #1 }
               {
-                \pdf_catalog_gremove:n { Lang }
+                \pdfdict_remove:nn {Catalog} { Lang }
               }
               {
-                \pdf_catalog_gput:nx { Lang } { (#1) }
+                \pdfdict_put:nnx {Catalog} { Lang } { (#1) }
               }
           }
    ,pdfmenubar    .choice:
    ,pdfmenubar / true .code:n =
-     { \pdf_catalog_gremove:n { ViewerPreferences / HideMenubar } }
+     {
+       \pdfdict_remove:nn {Catalog / ViewerPreferences } { HideMenubar }
+     }
    ,pdfmenubar / false .code:n =
      {
-       \pdf_catalog_gput:nn   { ViewerPreferences } {{ HideMenubar } { true }}
+       \pdfdict_put:nn {Catalog / ViewerPreferences }
+          { HideMenubar } { true }
      }
    ,pdfmenubar /  .code:n =
-     { \pdf_catalog_gremove:n { ViewerPreferences / HideMenubar } }
+     {
+       \pdfdict_remove:nn {Catalog / ViewerPreferences } { HideMenubar }
+     }
    ,pdfmenubar    .default:n = true
    ,pdfmenubar / unknown .code:n =
      {
@@ -954,7 +976,8 @@
    ,pdfnonfullscreenpagemode   .choices:nn =
      { UseNone, UseOutlines, UseThumbs, FullScreen, UseOC } %pdf 1.5
      {
-       \pdf_catalog_gput:nx   { ViewerPreferences } {{NonFullScreenPageMode}{/#1}}
+       \pdfdict_put:nnx {Catalog / ViewerPreferences }
+         { NonFullScreenPageMode} {/#1}
      }
    ,pdfnonfullscreenpagemode / UseAttachments .code:n =
      {
@@ -963,11 +986,14 @@
            %message
          }
          {
-           \pdf_catalog_gput:nn {ViewerPreferences }{{NonFullScreenPageMode}{/UseAttachments}}
+           \pdfdict_put:nnx {Catalog / ViewerPreferences }
+             {NonFullScreenPageMode}{/UseAttachments}
          }
      }
    ,pdfnonfullscreenpagemode /  .code:n =
-     { \pdf_catalog_gremove:n { ViewerPreferences / NonFullScreenPageMode } }
+     {
+       \pdfdict_remove:nn {Catalog / ViewerPreferences } { NonFullScreenPageMode }
+     }
    ,pdfnonfullscreenpagemode / unknown .code:n =
      {
        \msg_warning:nnxxx { hyp } { unknown-choice }
@@ -981,10 +1007,11 @@
          {
            \tl_empty:nTF
              {
-               \pdf_catalog_gremove:n { ViewerPreferences / NumCopies }
+               \pdfdict_remove:nn {Catalog / ViewerPreferences } { NumCopies }
              }
              {
-               \pdf_catalog_gput:nn {ViewerPreferences }{{NumCopies}{#1}}
+               \pdfdict_put:nnx {Catalog / ViewerPreferences }
+                 {NumCopies}{#1}
              }
          }
          {
@@ -997,9 +1024,9 @@
      }
    ,pdfpagelayout .choices:nn =
      { SinglePage, OneColumn, TwoColumnLeft, TwoColumnRight, TwoPageLeft, TwoPageRight}
-     { \pdf_catalog_gput:nx { PageLayout }{ /#1 } }
+     { \pdfdict_put:nnx {Catalog} { PageLayout }{ /#1 } }
    ,pdfpagelayout / .code:n =
-     { \pdf_catalog_gremove:n { PageLayout } }
+     { \pdfdict_remove:nn {Catalog} { PageLayout } }
    ,pdfpagelayout / unknown .code:n =
      {
        \msg_warning:nnxxx { hyp } { unknown-choice }
@@ -1009,12 +1036,12 @@
      }
    ,pdfpagemode   .choices:nn =
      { UseNone, UseOutlines, UseThumbs, FullScreen, UseOC } %pdf 1.5
-     { \pdf_catalog_gput:nx { PageMode }{ /#1 } }
+     { \pdfdict_put:nnx {Catalog} { PageMode }{ /#1 } }
    ,pdfpagemode / UseAttachments .code:n =
      {
        \pdf_version_compare:NnTF > {1.5}
          {
-           \pdf_catalog_gput:nx { PageMode }{ /UseAttachments }
+           \pdfdict_put:nnx {Catalog} { PageMode }{ /UseAttachments }
          }
          {
            \msg_warning:nnxx
@@ -1047,9 +1074,8 @@
      {
        \pdf_version_compare:NnTF > {1.6}
          {
-           \pdf_catalog_gput:nn
-             { ViewerPreferences }
-             {{ PickTrayByPDFSize } { true }}
+           \pdfdict_put:nnn {Catalog / ViewerPreferences }
+             { PickTrayByPDFSize } { true }
          }
          {
            \msg_warning:nnxx
@@ -1063,9 +1089,8 @@
      {
        \pdf_version_compare:NnTF > {1.6}
          {
-           \pdf_catalog_gput:nn
-             { ViewerPreferences }
-             {{ PickTrayByPDFSize } { false }}
+           \pdfdict_put:nnn {Catalog / ViewerPreferences }
+             { PickTrayByPDFSize } { false }
          }
          {
            \msg_warning:nnxx
@@ -1077,7 +1102,7 @@
      }
    ,pdfpicktraybypdfsize /  .code:n =
      {
-       \pdf_catalog_gremove:nn  { ViewerPreferences/PickTrayByPDFSize }
+       \pdfdict_remove:nn {Catalog / ViewerPreferences } { PickTrayByPDFSize }
      }
    ,pdfpicktraybypdfsize / unknown .code:n =
      {
@@ -1090,7 +1115,8 @@
      {
        \pdf_version_compare:NnTF < {2.0}
          {
-           \pdf_catalog_gput:nx { ViewerPreferences } {{ PrintArea } { /#1 }}
+           \pdfdict_put:nnx {Catalog / ViewerPreferences }
+             { PrintArea } { /#1 }
          }
          {
            \msg_warning:nnxx
@@ -1101,7 +1127,7 @@
          }
      }%
    ,pdfprintarea /  .code:n =
-     { \pdf_catalog_gremove:n { ViewerPreferences / PrintArea } }
+     { \pdfdict_remove:nn {Catalog / ViewerPreferences } { PrintArea } }
    ,pdfprintarea / unknown .code:n =
      {
        \msg_warning:nnxxx { hyp } { unknown-choice }
@@ -1114,7 +1140,8 @@
      {
        \pdf_version_compare:NnTF < {2.0}
          {
-           \pdf_catalog_gput:nx { ViewerPreferences } {{ PrintClip } { /#1 }}
+           \pdfdict_put:nnx {Catalog / ViewerPreferences }
+             { PrintClip } { /#1 }
          }
          {
            \msg_warning:nnxx
@@ -1125,7 +1152,9 @@
          }
      }%
    ,pdfprintclip /  .code:n =
-     { \pdf_catalog_gremove:n { ViewerPreferences / PrintClip } }
+     {
+       \pdfdict_remove:nn {Catalog / ViewerPreferences } { PrintClip }
+     }
    ,pdfprintclip / unknown .code:n =
      {
        \msg_warning:nnxxx { hyp } { unknown-choice }
@@ -1139,12 +1168,12 @@
          {
            \tl_if_empty:nTF { #1}
              {
-               \pdf_catalog_gremove:n { ViewerPreferences / PrintPageRange }
+               \pdfdict_remove:nn {Catalog / ViewerPreferences }
+                 { PrintPageRange }
              }
              {
-               \pdf_catalog_gput:nx
-                 { ViewerPreferences }
-                 {{PrintPageRange}{[#1]}}
+              \pdfdict_put:nnx {Catalog / ViewerPreferences }
+                 {PrintPageRange}{[#1]}
              }
          }
          {
@@ -1160,7 +1189,8 @@
      {
        \pdf_version_compare:NnTF > {1.5}
          {
-           \pdf_catalog_gput:nx { ViewerPreferences } {{ PrintScaling } { /#1 }}
+           \pdfdict_put:nnx {Catalog / ViewerPreferences }
+             { PrintScaling } { /#1 }
          }
          {
            \msg_warning:nnxx
@@ -1171,7 +1201,9 @@
          }
      }%
    ,pdfprintscaling /  .code:n =
-     { \pdf_catalog_gremove:n { ViewerPreferences / PrintScaling } }
+     {
+       \pdfdict_remove:nn {Catalog / ViewerPreferences } {PrintScaling }
+     }
    ,pdfprintscaling / unknown .code:n =
      {
        \msg_warning:nnxxx { hyp } { unknown-choice }
@@ -1186,10 +1218,10 @@
        \bool_if:nTF
          { \tl_if_empty_p:N \g__hyp_pdfstartpage_tl || \tl_if_empty_p:N \g__hyp_pdfstartview_tl }
          {
-           \pdf_catalog_gremove:n { OpenAction }
+           \pdfdict_remove:nn {Catalog} { OpenAction }
          }
          {
-           \pdf_catalog_gput:nx { OpenAction }
+           \pdfdict_put:nnx {Catalog} { OpenAction }
              {
                [\pdf_pageobject_ref:n {\g__hyp_pdfstartpage_tl}~/\g__hyp_pdfstartview_tl]
              }
@@ -1202,10 +1234,10 @@
        \bool_if:nTF
          { \tl_if_empty_p:N \g__hyp_pdfstartpage_tl || \tl_if_empty_p:N \g__hyp_pdfstartview_tl }
          {
-           \pdf_catalog_gremove:n { OpenAction }
+           \pdfdict_remove:nn {Catalog} { OpenAction }
          }
          {
-           \pdf_catalog_gput:nx { OpenAction }
+           \pdfdict_put:nnx {Catalog} { OpenAction }
              {
                [\pdf_pageobject_ref:n {\g__hyp_pdfstartpage_tl}~/\g__hyp_pdfstartview_tl]
              }
@@ -1214,13 +1246,18 @@
    ,pdfstartview .initial:n = Fit
    ,pdftoolbar    .choice:
    ,pdftoolbar / true .code:n =
-     { \pdf_catalog_gremove:n { ViewerPreferences / HideToolbar } }
+     {
+       \pdfdict_remove:nn {Catalog / ViewerPreferences } { HideToolbar }
+     }
    ,pdftoolbar / false .code:n =
      {
-       \pdf_catalog_gput:nn  { ViewerPreferences } {{ HideToolbar } { true }}
+       \pdfdict_put:nnn {Catalog / ViewerPreferences }
+         { HideToolbar } { true }
      }
    ,pdftoolbar / true .code:n =
-     { \pdf_catalog_gremove:n { ViewerPreferences / HideToolbar } }
+     {
+       \pdfdict_remove:nn {Catalog / ViewerPreferences } { HideToolbar }
+     }
    ,pdftoolbar    .default:n = true
    ,pdftoolbar / unknown .code:n =
      {
@@ -1233,7 +1270,8 @@
      {
        \pdf_version_compare:NnTF < {2.0}
          {
-           \pdf_catalog_gput:nx { ViewerPreferences } {{ ViewArea } { /#1 }}
+           \pdfdict_put:nnn {Catalog / ViewerPreferences }
+             { ViewArea } { /#1 }
          }
          {
            \msg_warning:nnxx
@@ -1244,7 +1282,9 @@
          }
      }%
    ,pdfviewarea /  .code:n =
-     { \pdf_catalog_gremove:n { ViewerPreferences / ViewArea } }
+     {
+       \pdfdict_remove:nn {Catalog / ViewerPreferences } { ViewArea }
+     }
    ,pdfviewarea / unknown .code:n =
      {
        \msg_warning:nnxxx { hyp } { unknown-choice }
@@ -1257,7 +1297,8 @@
      {
        \pdf_version_compare:NnTF < {2.0}
          {
-           \pdf_catalog_gput:nx { ViewerPreferences } {{ ViewClip } { /#1 }}
+           \pdfdict_put:nnn {Catalog / ViewerPreferences }
+             { ViewClip } { /#1 }
          }
          {
            \msg_warning:nnxx
@@ -1268,7 +1309,9 @@
          }
      }%
    ,pdfviewclip /  .code:n =
-     { \pdf_catalog_gremove:n { ViewerPreferences / ViewClip } }
+     {
+       \pdfdict_remove:nn {Catalog / ViewerPreferences } { ViewClip }
+     }
    ,pdfviewclip / unknown .code:n =
      {
        \msg_warning:nnxxx { hyp } { unknown-choice }
@@ -1278,13 +1321,18 @@
      }
    ,pdfwindowui    .choice:
    ,pdfwindowui / true .code:n =
-     { \pdf_catalog_gremove:n { ViewerPreferences / HideWindowUI } }
+     {
+       \pdfdict_remove:nn {Catalog / ViewerPreferences } { HideWindowUI }
+     }
    ,pdfwindowui / false .code:n =
      {
-       \pdf_catalog_gput:nn { ViewerPreferences } {{ HideWindowUI } { true }}
+       \pdfdict_put:nnn {Catalog / ViewerPreferences }
+          { HideWindowUI } { true }
      }
    ,pdfwindowui /  .code:n =
-     { \pdf_catalog_gremove:n { ViewerPreferences / HideWindowUI } }
+     {
+       \pdfdict_remove:nn {Catalog / ViewerPreferences } {HideWindowUI }
+     }
    ,pdfwindowui / unknown .code:n =
      {
        \msg_warning:nnxx { hyp } { no-bool }
@@ -1549,18 +1597,17 @@
                   }
              }
           }
-       \pdf_catalog_gput:nx
-         { AcroForm/DR/Font }
-         { {ZaDb} {\pdf_object_ref:n {l__hyp_font_zapfdingbats_obj} } }
-       \pdf_catalog_gput:nx
-         { AcroForm/DR/Font }
-         { {Helv} {\pdf_object_ref:n {l__hyp_font_helvetica_obj} } }
-       \pdf_catalog_gput:nn {AcroForm}{{DA}{(/Helv~10~Tf~0~g)}}
+       \pdfdict_put:nnx {Catalog / AcroForm/DR/Font }
+         {ZaDb} {\pdf_object_ref:n {l__hyp_font_zapfdingbats_obj} }
+       \pdfdict_put:nnx {Catalog / AcroForm/DR/Font }
+         {Helv} {\pdf_object_ref:n {l__hyp_font_helvetica_obj} }
+       \pdfdict_put:nnx {Catalog /AcroForm}
+         {DA}{(/Helv~10~Tf~0~g)}
        \legacy_if:nF { Hy@pdfa } %?????? Standards?
          {
            \legacy_if:nT { HyField@NeedAppearances }
              {
-               \pdf_catalog_gput:nn {AcroForm}{{NeedAppearances}{true}}
+               \pdfdict_put:nnx {Catalog / AcroForm }{NeedAppearances}{true}
              }
          }
        }

@@ -7,21 +7,21 @@
 \begin{document}
 \START
 \ExplSyntaxOn
-\pdf_catalog_gput:nn {Lang}{(de-De)}
-\pdf_catalog_gput:nn {PageLayout}{/SinglePage}
-\pdf_catalog_gput:nn {MarkInfo}{{Marked}{True}}
-\pdf_catalog_gput:nn {ViewerPreferences}{{HideToolbar}{true}}
-\pdf_catalog_gput:nn {AcroForm/DR/Font}{{Name}{<</ABC/CDE>>}}
-\pdf_catalog_gput:nn {AcroForm/DR/Font}{{NameB}{<</ABC/CDE>>}}
+\pdfdict_put:nnn {Catalog }                   {Lang}        {(de-De)}
+\pdfdict_put:nnn {Catalog }                   {PageLayout}  {/SinglePage}
+\pdfdict_put:nnn {Catalog / MarkInfo}         {Marked}      {True}
+\pdfdict_put:nnn {Catalog / ViewerPreferences}{HideToolbar} {true}
+\pdfdict_put:nnn {Catalog / AcroForm/DR/Font} {Name}       {<</ABC/CDE>>}
+\pdfdict_put:nnn {Catalog / AcroForm/DR/Font} {NameB}      {<</ABC/CDE>>}
 \pdfdict_show:n {Catalog}
 \pdfdict_show:n {Catalog/ViewerPreferences}
 \pdfdict_show:n {Catalog/MarkInfo}
 \pdfdict_show:n {Catalog/AcroForm/DR/Font}
-\pdf_catalog_gremove:n{ViewerPreferences/HideToolbar}
-\pdf_catalog_gremove:n{PageMode}
-\pdf_catalog_gremove:n{PageLayout}
-\pdf_catalog_gremove:n{MarkInfo/Marked}
-\pdf_catalog_gremove:n{AcroForm/DR/Font/Name}
+\pdfdict_remove:nn {Catalog / ViewerPreferences } {HideToolbar}
+\pdfdict_remove:nn {Catalog }                     {PageMode}
+\pdfdict_remove:nn {Catalog }                     {PageLayout}
+\pdfdict_remove:nn {Catalog / MarkInfo }          {Marked }
+\pdfdict_remove:nn {Catalog / AcroForm/DR/Font}   {Name}
 \pdfdict_show:n {Catalog}
 \pdfdict_show:n {Catalog/ViewerPreferences}
 \pdfdict_show:n {Catalog/MarkInfo}
