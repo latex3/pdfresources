@@ -320,15 +320,15 @@
 %!!!!! check if pdftex/luatex can run some of them in the immediate end-of-run
 \@@_BACKEND_lastpage_shipout_gput:n
   {
-   % \@@_Pages_gpush:            %pagesattr
-   % \@@_Info_gpush:             %pdfinfo
+   % \@@_dict_Pages_gpush:            %pagesattr
+   % \@@_dict_Info_gpush:             %pdfinfo
     \@@_PageNResources_gpush:   %ExtGState etc
   }
 
 \@@_BACKEND_end_run_gput:n
   {
-    \@@_Pages_gpush:            %pagesattr
-    \@@_Info_gpush:             %pdfinfo
+    \@@_dict_Pages_gpush:            %pagesattr
+    \@@_dict_Info_gpush:             %pdfinfo
     \@@_dict_Catalog_gpush:
    % \@@_PageNResources_gpush:   %ExtGState etc
   }
@@ -843,12 +843,12 @@
 \@@_dict_gnew:n {Pages}
 %    \end{macrocode}
 %
-% \begin{macro}{\@@_Pages_gpush:}
+% \begin{macro}{\@@_dict_Pages_gpush:}
 % This is the command that outputs the Pages dictionary. It is used
 % at the end of the document in \cs{g_@@_BACKEND_end_run_tl}
 %    \begin{macrocode}
 % push to the register command / issue the special
-\cs_new_protected:Npn \@@_Pages_gpush:
+\cs_new_protected:Npn \@@_dict_Pages_gpush:
   {
     \exp_args:Nx \@@_backend_Pages_primitive:n
       {
@@ -1169,6 +1169,9 @@
 %    \begin{macrocode}
 % setter.
 %^^A documentated
+\@@_dict_gnew:n { Page }
+\@@_dict_gnew:n { ThisPage }
+
 \cs_new_protected:Npn \pdf_pageattr_gput:nn #1 #2
   {
     \@@_backend_Page_gput:nn { #1 }{ #2 }
@@ -1245,12 +1248,12 @@
 \@@_dict_gnew:n {Info}
 %    \end{macrocode}
 %
-% \begin{macro}{\@@_Info_gpush:}
-% \cs{@@_Info_gpush:} is the command that outputs the info dictionary (currently
+% \begin{macro}{\@@_dict_Info_gpush:}
+% \cs{@@_dict_Info_gpush:} is the command that outputs the info dictionary (currently
 % in the end-of-run hooks).
 %    \begin{macrocode}
 % push to the register command / issue the special
-\cs_new_protected:Npn \@@_Info_gpush:
+\cs_new_protected:Npn \@@_dict_Info_gpush:
   {
     \prop_map_function:cN  { \@@_dict_gname:n {Info} } \@@_backend_info_gput:nn
     \prop_gclear:c { \@@_dict_gname:n {Info} }
