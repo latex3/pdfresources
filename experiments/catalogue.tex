@@ -14,15 +14,26 @@
 blblb
 \pdf_object_new:nn   {fieldstest}{dict}
 \pdf_object_write:nn {fieldstest}{/field /abc}
-\pdf_catalog_gput:nn {AcroForm/Fields}{fieldstest}
-\pdf_catalog_gput:nn {AcroForm/DR/Font}{{F1}{<</A/B>>}}
-\pdf_catalog_gput:nn {AcroForm/DR/Font}{{F2}{<</C/E>>}}
-\pdf_catalog_gput:nn {Lang}{(en-UK)}
-\pdf_catalog_gput:nn {Blub}{(abc)}
-\pdf_catalog_gput:nn {AcroForm} {{NeedAppearances}{true}}
-\pdf_catalog_gput:nn {ViewerPreferences}{{HideToolbar}{true}}
-\pdf_catalog_gput:nn {AA}{{WS}{<</blub/bla>>}}
 
+\pdf_object_new:nn   {intent}{dict}
+\pdf_object_write:nn {intent}{
+    /Info (Uncoated FOGRA29 (ISO 12647-2:2004))
+    /OutputCondition(Offset print according to ISO/DIS 12647-2:2003)
+    /OutputConditionIdentifier (FOGRA29)
+    /RegistryName(http://www.color.org)
+    /S /GTS_PDFX
+    /Type /OutputIntent}
+\pdfdict_put:nnx {Catalog/AcroForm}{Fields}{\pdf_object_ref:n { fieldstest }}
+\pdfdict_put:nnn {Catalog/AcroForm/DR/Font}{F1}{<</A/B>>}
+\pdfdict_put:nnn {Catalog/AcroForm/DR/Font}{F2}{<</C/E>>}
+\pdfdict_put:nnn {Catalog} {Lang}{(en-UK)}
+\pdfdict_put:nnn {Catalog} {Blub}{(abc)}
+%\pdfdict_put:nnn {Catalog / AcroForm} {NeedAppearances}{true}
+\pdfdict_put:nnn {Catalog/ViewerPreferences}{HideToolbar}{true}
+\pdfdict_put:nnn {Catalog/AA}{WS}{<</blub/bla>>}
+
+\pdfdict_put:nnn {Catalog} {OutputIntents}{intent}
+\pdfdict_put:nnn {Catalog} {OutputIntents}{intent}
 \ExplSyntaxOff
 \end{document}
 \bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }

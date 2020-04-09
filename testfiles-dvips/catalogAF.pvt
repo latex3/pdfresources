@@ -21,8 +21,8 @@
 \pdf_object_new:nn   {filespec2}{dict}
 \pdf_object_write:nn {filespec2} {/Type /Filespec /UF (example2.pdf)}
 
-\pdf_catalog_gput:nn {AF} {filespec1}
-\pdf_catalog_gput:nn {AF} {filespec2}
+\pdfdict_put:nnn { Catalog } {AF} {filespec1}
+\pdfdict_put:nnn { Catalog } {AF} {filespec2}
 \ExplSyntaxOff
 \begin{document}
 \START

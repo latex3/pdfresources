@@ -545,8 +545,13 @@
       {
         \@@_dict_if_exist:nTF { #1 }
           {
-            \use:c { prop_\@@_dict_get_g:n{#1}put:cnn }
-              { \@@_dict_Xname:n { #1 } }{ #2 } { #3 }
+            \cs_if_exist:cTF
+              { @@_dict_/#1/#2_\@@_dict_get_g:n{#1}put:n }
+              { \use:c {@@_dict_/#1/#2_\@@_dict_get_g:n{#1}put:n} {#3} } %special handler
+              {
+                \use:c { prop_\@@_dict_get_g:n{#1}put:cnn }
+                  { \@@_dict_Xname:n { #1 } }{ #2 } { #3 }
+              }
           }
           {
             \msg_error:nnn { pdfdict } { unknown-dict } { /#1 }
@@ -554,12 +559,6 @@
       }
   }
 
-%special handler for the catalog, need to check arguments (path/name
-%    \cs_if_exist:cTF
-%     { @@_/Catalog/#1_gput:n }
-%        {
-%          \use:c { @@_/Catalog/#1_gput:n } { #2 }
-%        }
 
 \cs_generate_variant:Nn \@@_dict_put:nnn {nxx}
 
@@ -2171,7 +2170,7 @@
 % the backend command is already in the driver:
 % \cs{@@_backend_catalog_gput:nn}
 %
-% \subsubsection{ Catalog/management }
+% \subsubsection{ pdfdict: \enquote{Catalog} \& subdirectories /management }
 % \begin{NOTE}{UF}
 % The catalog dictionary is filled by e.g. \cs{pdfcatalog}. Multiple appearances of
 % \cs{pdfcatalog} are concatenated, so one could end with multiple entries
@@ -2190,13 +2189,18 @@
 % /DSS                      (dict, pdf 2.0)
 % /Acroform/DR/ExtGState etc probably unneeded.
 % \end{NOTE}
+% The catalog is a central dictionary in a PDF with a number of sub dictionaries.
+% Entries to the top level of the catalog can be added with
+% |\pdfdict_put:nnn {Catalog}|\Arg{Name}\Arg{Value}.
+% Entries to sub dictionaries by using one of the pathes described later in the first
+% argument.
 % The entries in the catalog have varying requirements regarding the
 % pdf management. Some entries (like /Lang) are simple values where the last
 % setting should win, other like /OutputIntents are dictionaries which can
 % be filled from more than one source. In some cases the values that needs to be
 % added are not at the top-level but in some subsubdictionary.
-% To handle this some \Arg{keys} in the following command
-% are connected with special functions.
+% To handle this some pathes use internal special handlers.
+
 % \begin{function}[added = 2019-08-18]
 %   {\pdf_catalog_gput:nn, \pdf_catalog_gput:no , \pdf_catalog_gput:nx   }
 %   \begin{syntax}
@@ -2208,17 +2212,20 @@
 %   The exact format of \Arg{value} depends on \Arg{key}.
 % \end{function}
 %
-%   \paragraph{Simple values}
-%   The values in the following tabular are \enquote{simple} in the sense
-%   that they are added as is to the catalog or a sub dictionary.
-%   If \meta{key} gets assigned two values the last one wins.
+%   \paragraph{Entries of the top level of the catalog}
+%   The Names in the following tabular are entries that are added to the
+%   top level of the catalog.
+%
+%   If \meta{Name} gets assigned two values the last one wins.
 %   There is no check that the values have the correct type and format.
 %   It is up to the user to ensure that the value does what is intended.
+%
+%   Example: |\pdfdict_put:nnn {Catalog}{PageMode}{/UseNone}|
 %
 %   \medskip
 %   \noindent
 %   \begin{tabularx}{\linewidth}{ll>{\raggedright\arraybackslash}X}
-%    \bfseries Key           &  \bfseries Value  & \bfseries Remark \\\midrule
+%    \bfseries Name           &  \bfseries Value  & \bfseries Remark \\\midrule
 %    Collection              &  objref or dict\\
 %    DPartRoot               &  objref or dict & pdf 2.0\\
 %    Lang                    &  string & e.g. \texttt{(de-DE)} \\
@@ -2245,19 +2252,21 @@
 %   \end{tabularx}
 %   \par\medskip
 %
-%   \paragraph{Catalog entries with subdictionaries}
-%   The following keys add values to subdictionaries. The syntax is that the
-%   \meta{name}  \meta{value} pair is inputed in a brace pair. E.g.\\
-%   |\pdf_catalog_gput:nn {Acroform}{{SigFlags}{3}}| or\\
-%   |\pdf_catalog_gput:nn {ViewerPreferences}{{HideToolbar}{true}}|
+%   \paragraph{Simple entries in subdictionaries of the catalog}
+%   The following dictionaries have been predeclared and allow to
+%   add values to the respective subdictionaries of the catalog. The
+%   names of the dictionaries follow the naming in PDF reference.
+%   If \meta{Name} gets assigned two values the last one wins.
+%
+%   Example: |\pdfdict_put:nnn {Catalog/MarkInfo}{Marked}{true}|
 %
 %   \medskip
 %   \noindent
 %   \begin{tabularx}{\linewidth}{lll>{\raggedright\arraybackslash}X}
-%    \bfseries Key           & \bfseries Subkey& \bfseries Value  & \bfseries Remark
+%    \bfseries Dictionary    & \bfseries Names & \bfseries Value  & \bfseries Remark
 %    \\\midrule
-%  AA                        &WC, WS, DS, WP,DP& all dict    \\
-%  AcroFrom                  &  NeedAppearances&  boolean & In pdf 2.0
+%    Catalog/AA              &WC, WS, DS, WP,DP& all dict    \\
+%    Catalog/AcroFrom        &  NeedAppearances&  boolean & In pdf 2.0
 %                                                           NeedAppearances
 %                                                           is deprecated,
 %                                                           it is then required
@@ -2266,35 +2275,23 @@
 %                            &  SigFlags       &  Integer\\
 %                            &  DA             &  String \\
 %                            &  Q              &  Integer\\
-%                            &  XFA            & stream or array & pdf 1.5\\
-%  AcroForm/DR               & name            &            & probably unneeded \\
-%  AcroForm/DR/Font          &  \meta{name}    & dict       & name is a pdf name
-%                                                             without slash  \\
-%  MarkInfo                  & Marked          & boolean      \\
+%                            &  XFA            &  stream or array & pdf 1.5\\
+%  Catalog/AcroForm/DR       & \meta{name}     &            & probably unneeded \\
+%  Catalog/AcroForm/DR/Font  & \meta{name}     & dict       & \\
+%  Catalog/MarkInfo          & Marked          & boolean      \\
 %                            & UserProperties  & boolean      \\
 %                            & Suspects        & boolean      \\
-%  ViewerPreferences         & HideToolbar     & boolean      \\
-%                            & \ldots          &              \\
+%  Catalog/ViewerPreferences & HideToolbar     & boolean      \\
+%                            & Direction       & /R2L or /L2R
+%                            & \ldots          &              & many more, see the reference \\
 % \end{tabularx}
 %
-%   These rather simple entries can be removed again with the following command:
-%   \begin{function}[added = 2020-03-23]
-%   {\pdf_catalog_gremove:n }
-%   \begin{syntax}
-%     \cs{pdf_catalog_gremove:n}  \Arg{key}
-%   \end{syntax}
-%   This removes an entry from the catalog for the variants above.
-%   described in the following paragraph. In some cases removing such an entry
-%   can be needed if some default value set by a packages interferes with
-%   defaults set by the user in the pdf viewer.
-%   \Arg{key} is either a simple key or a key/subkey combination. Examples
-%   | \pdf_catalog_gremove:n { PageMode } |\\
-%   | \pdf_catalog_gremove:n { ViewerPreferences/HideToolbar } |
-%   \end{function}
 %
 % \paragraph{Catalog entries with multiple values in arrays}
-% The following keys are dictionaries to which multiple values can be
-% assigned which are then combined in an array. The value is -- with the exception
+% The following entries are special: Their values are arrays and
+% it must be possible to append to such arrays. This means that a new
+% call to set this value doesn't replace the value but appends it.
+% The value is -- with the exception
 % of AcroForm/Fields and AcroForm/CO an object name of an object
 % which must have been declared previously. E.g.
 %  \begin{verbatim}
@@ -2305,20 +2302,20 @@
 %
 %   \medskip
 %   \noindent
-%   \begin{tabularx}{\linewidth}{ll>{\raggedright\arraybackslash}X}
-%    \bfseries Key        & \bfseries Value   & \bfseries Remark \\\midrule
-%    AcroForm/Fields      & object reference\\
-%    AcroForm/CO          & object reference\\
-%    AF                   & object name\\
-%    OCProperties/OCGs    & object name  &if there are OCProperties, OCGs and D are required.\\
-%    OCProperties/Configs & object name \\
-%    OCProperties/D       & object name & This actually a single value as
+%   \begin{tabularx}{\linewidth}{lll>{\raggedright\arraybackslash}X}
+%    \bfseries Dictionary &\bfseries Name        & \bfseries Value   & \bfseries Remark \\\midrule
+%    Catalog/AcroForm     & Fields               & object reference\\
+%    Catalog/AcroForm     & CO                   & object reference\\
+%    Catalog              & AF                   & object name\\
+%    Catalog/OCProperties & OCGs                 & object name  &if there are OCProperties, OCGs and D are required.\\
+%    Catalog/OCProperties & Configs              & object name \\
+%    Catalog/OCProperties & D                    & object name & This actually a single value as
 %                                         there can be only one default.
 %                                         If the value is set twice, the
 %                                         second wins, and the first is
 %                                         added to OCProperties/Configs.\\
-%    OutputIntents        & object name\\
-%    Requirements         & object name & pdf 1.7 \\
+%    Catalog              & OutputIntents        & object name\\
+%    Catalog              & Requirements         & object name & pdf 1.7 \\
 %   \end{tabularx}
 %
 %
@@ -2408,11 +2405,11 @@
 \clist_map_inline:Nn \c_@@_Catalog_prop_clist
   {
     \@@_dict_gnew:n {Catalog/#1}
-%    \cs_new_protected:cpn { @@_/Catalog/#1_gput:n } ##1
-%      {
-%        \@@_dict_put:nnn { Catalog/#1 }  ##1
-%      }
   }
+
+% special cases
+\@@_dict_gnew:n { Catalog / AcroForm }
+\@@_dict_gnew:n { Catalog / OCProperties }
 
 \clist_const:Nn \c_@@_Catalog_seq_clist
   {
@@ -2423,29 +2420,33 @@
     Requirements
   }
 
+
+
 \clist_map_inline:Nn \c_@@_Catalog_seq_clist
  {
-   \seq_new:c { g_@@_/Catalog/#1_seq }
-   \cs_new_protected:cpn { @@_/Catalog/#1_gput:n } ##1
+   \seq_new:c { g_@@_dict_/Catalog/#1_seq } % new name later
+   \cs_new_protected:cpn { @@_dict_/Catalog/#1_gput:n } ##1
      {
-       \seq_gput_right:cx { g_@@_/Catalog/#1_seq } { \pdf_object_ref:n { ##1 } }
+       \seq_gput_right:cx { g_@@_dict_/Catalog/#1_seq } { \pdf_object_ref:n { ##1 } }
      }
  }
+
 %not from a named object
+
 \clist_map_inline:nn { AcroForm/Fields, AcroForm/CO }
   {
-    \seq_new:c { g_@@_/Catalog/#1_seq }
-    \cs_new_protected:cpn { @@_/Catalog/#1_gput:n } ##1
+    \seq_new:c { g_@@_dict_/Catalog/#1_seq } % new name later
+    \cs_new_protected:cpn { @@_dict_/Catalog/#1_gput:n } ##1
       {
-        \seq_gput_right:cx { g_@@_/Catalog/#1_seq } { ##1 }
+        \seq_gput_right:cx { g_@@_dict_/Catalog/#1_seq } { ##1 }
       }
  }
 
 
-\cs_new_protected:cpn { @@_/Catalog/OCProperties/D_gput:n } #1
+\cs_new_protected:cpn { @@_dict_/Catalog/OCProperties/D_gput:n } #1
   {
     \seq_gput_left:cx
-      { g_@@_/Catalog/OCProperties/Configs_seq }
+      { g_@@_dict_/Catalog/OCProperties/Configs_seq }
       { \pdf_object_ref:n { #1 } }
   }
 %    \end{macrocode}
@@ -2477,15 +2478,15 @@
     \prop_if_empty:cF
      { \@@_dict_gname:n { Catalog/AA } }
      {
-       \@@_backend_object_new:nn  { g_@@_/Catalog/AA_obj } { dict }
+       \@@_backend_object_new:nn  { g_@@_dict_/Catalog/AA_obj } { dict }
        \@@_backend_object_write:nx
-            { g_@@_/Catalog/AA_obj }
+            { g_@@_dict_/Catalog/AA_obj }
             { \@@_dict_map_dict_item:n { Catalog/AA } }
        \exp_args:Nnx
          \@@_backend_catalog_gput:nn
            {AA}
            {
-             \@@_backend_object_ref:n { g_@@_/Catalog/AA_obj }
+             \@@_backend_object_ref:n { g_@@_dict_/Catalog/AA_obj }
            }
      }
   }
@@ -2504,69 +2505,69 @@
 %    \begin{macrocode}
 \cs_new_protected:cpn { @@_/Catalog/AcroForm_gpush: }
   {
-    \seq_if_empty:cF { g_@@_/Catalog/AcroForm/Fields_seq }
+    \seq_if_empty:cF { g_@@_dict_/Catalog/AcroForm/Fields_seq }
       {
-        \@@_backend_object_new:nn  { g_@@_/Catalog/AcroForm/Fields_obj } { array }
+        \@@_backend_object_new:nn  { g_@@_dict_/Catalog/AcroForm/Fields_obj } { array }
         \@@_backend_object_write:nx
-            { g_@@_/Catalog/AcroForm/Fields_obj }
-            { \seq_use:cn { g_@@_/Catalog/AcroForm/Fields_seq } {~} }
+            { g_@@_dict_/Catalog/AcroForm/Fields_obj }
+            { \seq_use:cn { g_@@_dict_/Catalog/AcroForm/Fields_seq } {~} }
         \exp_args:Nnnx
-          \@@_dict_put:nnn
-            { Catalog/AcroForm }
+          \prop_gput:cnn %we have to use \prop here to avoid the handler ...
+            { \__pdf_dict_Xname:n { Catalog/AcroForm } }
             { Fields }
-            { \@@_backend_object_ref:n { g_@@_/Catalog/AcroForm/Fields_obj } }
+            { \@@_backend_object_ref:n { g_@@_dict_/Catalog/AcroForm/Fields_obj } }
       }
-    \seq_if_empty:cF { g_@@_/Catalog/AcroForm/CO_seq }
+    \seq_if_empty:cF { g_@@_dict_/Catalog/AcroForm/CO_seq }
       {
-        \@@_backend_object_new:nn  { g_@@_/Catalog/AcroForm/CO_obj } { array }
+        \@@_backend_object_new:nn  { g_@@_dict_/Catalog/AcroForm/CO_obj } { array }
         \exp_args:Nnx
           \@@_backend_object_write:nn
-            { g_@@_/Catalog/AcroForm/CO_obj }
-            { \seq_use:cn { g_@@_/Catalog/AcroForm/CO_seq } {~} }
+            { g_@@_dict_/Catalog/AcroForm/CO_obj }
+            { \seq_use:cn { g_@@_dict_/Catalog/AcroForm/CO_seq } {~} }
         \exp_args:Nnnx
-          \@@_dict_put:nnn
-            { Catalog/AcroForm }
+          \prop_gput:cnn %we have to use \prop here to avoid the handler ...
+            { \__pdf_dict_Xname:n { Catalog/AcroForm } }
             { CO }
-            { \@@_backend_object_ref:n { g_@@_/Catalog/AcroForm/CO_obj } }
+            { \@@_backend_object_ref:n { g_@@_dict_/Catalog/AcroForm/CO_obj } }
       }
      \prop_if_empty:cF { \@@_dict_gname:n { Catalog/AcroForm/DR/Font}}
        {
-         \@@_backend_object_new:nn { g_@@_/Catalog/AcroForm/DR/Font_obj } {dict}
+         \@@_backend_object_new:nn { g_@@_dict_/Catalog/AcroForm/DR/Font_obj } {dict}
          \exp_args:Nnx
            \@@_backend_object_write:nn
-             { g_@@_/Catalog/AcroForm/DR/Font_obj }
+             { g_@@_dict_/Catalog/AcroForm/DR/Font_obj }
              { \@@_dict_map_dict_item:n { Catalog/AcroForm/DR/Font } }
          \exp_args:Nnnx
-           \@@_dict_put:nnn
-             { Catalog/AcroForm/DR }
+           \prop_gput:cnn %we have to use \prop here to avoid the handler ...
+             { \__pdf_dict_Xname:n { Catalog/AcroForm/DR } }
              { Font }
-             { \@@_backend_object_ref:n { g_@@_/Catalog/AcroForm/DR/Font_obj } }
+             { \@@_backend_object_ref:n { g_@@_dict_/Catalog/AcroForm/DR/Font_obj } }
        }
      \prop_if_empty:cF { \@@_dict_gname:n { Catalog/AcroForm/DR}}
        {
-         \@@_backend_object_new:nn { g_@@_/Catalog/AcroForm/DR_obj } {dict}
+         \@@_backend_object_new:nn { g_@@_dict_/Catalog/AcroForm/DR_obj } {dict}
          \exp_args:Nnx
            \@@_backend_object_write:nn
-             { g_@@_/Catalog/AcroForm/DR_obj }
+             { g_@@_dict_/Catalog/AcroForm/DR_obj }
              { \@@_dict_map_dict_item:n { Catalog/AcroForm/DR } }
          \exp_args:Nnnx
-           \@@_dict_put:nnn
-             { Catalog/AcroForm }
+           \prop_gput:cnn %we have to use \prop here to avoid the handler ...
+             { \__pdf_dict_Xname:n { Catalog/AcroForm } }
              { DR }
-             { \@@_backend_object_ref:n { g_@@_/Catalog/AcroForm/DR_obj } }
+             { \@@_backend_object_ref:n { g_@@_dict_/Catalog/AcroForm/DR_obj } }
        }
      \prop_if_empty:cF { \@@_dict_gname:n { Catalog/AcroForm} }
        {
-         \@@_backend_object_new:nn { g_@@_/Catalog/AcroForm_obj } {dict}
+         \@@_backend_object_new:nn { g_@@_dict_/Catalog/AcroForm_obj } {dict}
          \exp_args:Nnx
            \@@_backend_object_write:nn
-             { g_@@_/Catalog/AcroForm_obj }
+             { g_@@_dict_/Catalog/AcroForm_obj }
              { \@@_dict_map_dict_item:n { Catalog/AcroForm } }
          \exp_args:Nnnx
            \@@_dict_put:nnn
              { Catalog }
              { AcroForm }
-             { \@@_backend_object_ref:n { g_@@_/Catalog/AcroForm_obj } }
+             { \@@_backend_object_ref:n { g_@@_dict_/Catalog/AcroForm_obj } }
        }
   }
 
@@ -2580,18 +2581,18 @@
 \cs_new_protected:cpn { @@_/Catalog/AF_gpush: }
   {
     \seq_if_empty:cF
-     { g_@@_/Catalog/AF_seq }
+     { g_@@_dict_/Catalog/AF_seq }
      {
-       \@@_backend_object_new:nn  { g_@@_/Catalog/AF_obj } { array }
+       \@@_backend_object_new:nn  { g_@@_dict_/Catalog/AF_obj } { array }
        \exp_args:Nnx
          \@@_backend_object_write:nn
-            { g_@@_/Catalog/AF_obj }
-            { \seq_use:cn { g_@@_/Catalog/AF_seq } {~} }
+            { g_@@_dict_/Catalog/AF_obj }
+            { \seq_use:cn { g_@@_dict_/Catalog/AF_seq } {~} }
        \exp_args:Nnx
          \@@_backend_catalog_gput:nn
            {AF}
            {
-             \@@_backend_object_ref:n {g_@@_/Catalog/AF_obj}
+             \@@_backend_object_ref:n {g_@@_dict_/Catalog/AF_obj}
            }
      }
   }
@@ -2606,16 +2607,16 @@
     \prop_if_empty:cF
      { \@@_dict_gname:n { Catalog/MarkInfo } }
      {
-       \@@_backend_object_new:nn  { g_@@_/Catalog/MarkInfo_obj } { dict }
+       \@@_backend_object_new:nn  { g_@@_dict_/Catalog/MarkInfo_obj } { dict }
        \exp_args:Nnx
          \@@_backend_object_write:nn
-            { g_@@_/Catalog/MarkInfo_obj }
+            { g_@@_dict_/Catalog/MarkInfo_obj }
             { \@@_dict_map_dict_item:n {Catalog/MarkInfo } }
        \exp_args:Nnx
          \@@_backend_catalog_gput:nn
            {MarkInfo}
            {
-             \@@_backend_object_ref:n {g_@@_/Catalog/MarkInfo_obj}
+             \@@_backend_object_ref:n {g_@@_dict_/Catalog/MarkInfo_obj}
            }
      }
   }
@@ -2640,29 +2641,29 @@
   {
    \int_compare:nNnT
       {
-        ( \seq_count:c { g_@@_/Catalog/OCProperties/OCGs_seq }  )*
-        ( \seq_count:c { g_@@_/Catalog/OCProperties/Configs_seq } )
+        ( \seq_count:c { g_@@_dict_/Catalog/OCProperties/OCGs_seq }  )*
+        ( \seq_count:c { g_@@_dict_/Catalog/OCProperties/Configs_seq } )
       }
       >
       { 0 }
       {
-        \@@_backend_object_new:nn  { g_@@_/Catalog/OCProperties_obj } { dict }
-        \seq_gpop_left:cN { g_@@_/Catalog/OCProperties/Configs_seq} \l_tmpa_tl
+        \@@_backend_object_new:nn  { g_@@_dict_/Catalog/OCProperties_obj } { dict }
+        \seq_gpop_left:cN { g_@@_dict_/Catalog/OCProperties/Configs_seq} \l_tmpa_tl
         \exp_args:Nnx
-          \@@_backend_object_write:nn {g_@@_/Catalog/OCProperties_obj}
+          \@@_backend_object_write:nn {g_@@_dict_/Catalog/OCProperties_obj}
             {
-              /OCGs~[ \seq_use:cn { g_@@_/Catalog/OCProperties/OCGs_seq } {~} ]
+              /OCGs~[ \seq_use:cn { g_@@_dict_/Catalog/OCProperties/OCGs_seq } {~} ]
               /D~\l_tmpa_tl~
-              \seq_if_empty:cF { g_@@_/Catalog/OCProperties/Configs_seq }
+              \seq_if_empty:cF { g_@@_dict_/Catalog/OCProperties/Configs_seq }
                 {
                   /Configs~
-                  [ \seq_use:cn { g_@@_/Catalog/OCProperties/Configs_seq} {~} ]
+                  [ \seq_use:cn { g_@@_dict_/Catalog/OCProperties/Configs_seq} {~} ]
                 }
             }
         \exp_args:Nnx
           \@@_backend_catalog_gput:nn
             { OCProperties }
-            { \@@_backend_object_ref:n {g_@@_/Catalog/OCProperties_obj} }
+            { \@@_backend_object_ref:n {g_@@_dict_/Catalog/OCProperties_obj} }
       }
   }
 %    \end{macrocode}
@@ -2675,18 +2676,18 @@
 \cs_new_protected:cpn { @@_/Catalog/OutputIntents_gpush: }
   {
     \seq_if_empty:cF
-     { g_@@_/Catalog/OutputIntents_seq }
+     { g_@@_dict_/Catalog/OutputIntents_seq }
      {
-       \@@_backend_object_new:nn  { g_@@_/Catalog/OutputIntents_obj } { array }
+       \@@_backend_object_new:nn  { g_@@_dict_/Catalog/OutputIntents_obj } { array }
        \exp_args:Nnx
          \@@_backend_object_write:nn
-            { g_@@_/Catalog/OutputIntents_obj }
-            { \seq_use:cn { g_@@_/Catalog/OutputIntents_seq } {~} }
+            { g_@@_dict_/Catalog/OutputIntents_obj }
+            { \seq_use:cn { g_@@_dict_/Catalog/OutputIntents_seq } {~} }
        \exp_args:Nnx
          \@@_backend_catalog_gput:nn
            {OutputIntents}
            {
-             \@@_backend_object_ref:n {g_@@_/Catalog/OutputIntents_obj}
+             \@@_backend_object_ref:n {g_@@_dict_/Catalog/OutputIntents_obj}
            }
      }
   }
@@ -2700,18 +2701,18 @@
 \cs_new_protected:cpn { @@_/Catalog/Requirements _gpush: }
   {
     \seq_if_empty:cF
-     { g_@@_/Catalog/Requirements _seq }
+     { g_@@_dict_/Catalog/Requirements _seq }
      {
-       \@@_backend_object_new:nn  { g_@@_/Catalog/Requirements _obj } { array }
+       \@@_backend_object_new:nn  { g_@@_dict_/Catalog/Requirements _obj } { array }
        \exp_args:Nnx
          \@@_backend_object_write:nn
-            { g_@@_/Catalog/Requirements_obj }
-            { \seq_use:cn { g_@@_/Catalog/Requirements_seq } {~} }
+            { g_@@_dict_/Catalog/Requirements_obj }
+            { \seq_use:cn { g_@@_dict_/Catalog/Requirements_seq } {~} }
        \exp_args:Nnx
          \@@_backend_catalog_gput:nn
            {Requirements}
            {
-             \@@_backend_object_ref:n { g_@@_/Catalog/Requirements_obj }
+             \@@_backend_object_ref:n { g_@@_dict_/Catalog/Requirements_obj }
            }
      }
   }
@@ -2726,16 +2727,16 @@
     \prop_if_empty:cF
      { \@@_dict_gname:n { Catalog/ViewerPreferences } }
      {
-       \@@_backend_object_new:nn  { g_@@_/Catalog/ViewerPreferences_obj } { dict }
+       \@@_backend_object_new:nn  { g_@@_dict_/Catalog/ViewerPreferences_obj } { dict }
        \exp_args:Nnx
          \@@_backend_object_write:nn
-            { g_@@_/Catalog/ViewerPreferences_obj }
+            { g_@@_dict_/Catalog/ViewerPreferences_obj }
             { \@@_dict_map_dict_item:n {Catalog/ViewerPreferences } }
        \exp_args:Nnx
          \@@_backend_catalog_gput:nn
            {ViewerPreferences}
            {
-             \@@_backend_object_ref:n {g_@@_/Catalog/ViewerPreferences_obj}
+             \@@_backend_object_ref:n {g_@@_dict_/Catalog/ViewerPreferences_obj}
            }
      }
   }

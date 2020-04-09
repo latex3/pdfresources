@@ -26,8 +26,8 @@
        /ViewState/ON
       >>
     >>}
-    
-    
+
+
 \pdf_object_new:nn {ocg2}{dict}
 \pdf_object_write:nn {ocg2}
  {/Type/OCG
@@ -48,10 +48,10 @@
  {
   /OFF /Blabla
  }
-  
-\pdf_catalog_gput:nn {OCProperties/OCGs}{ocg1}
-\pdf_catalog_gput:nn {OCProperties/OCGs}{ocg2}
-\pdf_catalog_gput:nn {OCProperties/D}{ocgd}
+
+\pdfdict_put:nnn { Catalog / OCProperties } {OCGs}{ocg1}
+\pdfdict_put:nnn { Catalog / OCProperties } {OCGs}{ocg2}
+\pdfdict_put:nnn { Catalog / OCProperties } {D}{ocgd}
 
 \ExplSyntaxOff
 
