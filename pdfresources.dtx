@@ -128,7 +128,7 @@
 \msg_new:nnn  { pdf } { catalog-special }
               {
                 values~to~the~catalog~entry~#1~should~be~added~with~
-                \token_to_str:N\pdf_catalog_ #1_gput:nn
+                \token_to_str:N\pdfdict_put:nnn
               }
 \msg_new:nnn  { pdf } { catalog-unknown }
               {
@@ -329,7 +329,7 @@
   {
     \@@_Pages_gpush:            %pagesattr
     \@@_Info_gpush:             %pdfinfo
-    \@@_Catalog_gpush:
+    \@@_dict_Catalog_gpush:
    % \@@_PageNResources_gpush:   %ExtGState etc
   }
 %    \end{macrocode}
@@ -2189,30 +2189,19 @@
 % /DSS                      (dict, pdf 2.0)
 % /Acroform/DR/ExtGState etc probably unneeded.
 % \end{NOTE}
-% The catalog is a central dictionary in a PDF with a number of sub dictionaries.
+% The catalog is a central dictionary in a PDF with a number of subdictionaries.
 % Entries to the top level of the catalog can be added with
 % |\pdfdict_put:nnn {Catalog}|\Arg{Name}\Arg{Value}.
-% Entries to sub dictionaries by using one of the pathes described later in the first
-% argument.
+% Entries to subdictionaries by using in the first
+% argument one of the pathes described later.
 % The entries in the catalog have varying requirements regarding the
 % pdf management. Some entries (like /Lang) are simple values where the last
 % setting should win, other like /OutputIntents are dictionaries which can
 % be filled from more than one source. In some cases the values that needs to be
-% added are not at the top-level but in some subsubdictionary.
+% added are not at the top-level but in some subsubdictionary or are actually part
+% of an array.
 % To handle this some pathes use internal special handlers.
-
-% \begin{function}[added = 2019-08-18]
-%   {\pdf_catalog_gput:nn, \pdf_catalog_gput:no , \pdf_catalog_gput:nx   }
-%   \begin{syntax}
-%     \cs{pdf_catalog_gput:nn} \Arg{key} \Arg{value}
-%   \end{syntax}
-%   This adds an entry to the catalog. \Arg{key} is either a valid pdf
-%   \meta{name} (without preceding slash) or one of the special keys described
-%   later which represents an entry in a subdictionary.
-%   The exact format of \Arg{value} depends on \Arg{key}.
-% \end{function}
-%
-%   \paragraph{Entries of the top level of the catalog}
+%   \paragraph{Entries at the top level of the catalog}
 %   The Names in the following tabular are entries that are added to the
 %   top level of the catalog.
 %
@@ -2292,12 +2281,12 @@
 % it must be possible to append to such arrays. This means that a new
 % call to set this value doesn't replace the value but appends it.
 % The value is -- with the exception
-% of AcroForm/Fields and AcroForm/CO an object name of an object
+% of AcroForm/Fields and AcroForm/CO -- an object name of an object
 % which must have been declared previously. E.g.
 %  \begin{verbatim}
 %  \pdf_object_new:nn   {pkg@intent}{dict}
 %  \pdf_object_write:nn {pkg@intent}{...}
-%  \pdf_catalog_gput:nn {OutputIntents}{pkg@intent}
+%  \pdfdict_put:nn  {Catalog} {OutputIntents}{pkg@intent}
 %  \end{verbatim}
 %
 %   \medskip
@@ -2319,48 +2308,11 @@
 %   \end{tabularx}
 %
 %
-%    \begin{macrocode}
-\cs_new_protected:Npn \pdf_catalog_gput:nn #1 #2 %#1 name, #2 value
-  {
-    \tl_if_empty:nTF { #2 }
-      {
-        \msg_none:nnn { pdf }{ empty-value }{ #1 }
-      }
-      {
-        \cs_if_exist:cTF
-        { @@_/Catalog/#1_gput:n }
-        {
-          \use:c { @@_/Catalog/#1_gput:n } { #2 }
-        }
-        {
-          \clist_if_in:NnF \c_@@_Catalog_single_clist
-            { #1 }
-            { \msg_warning:nnn { pdf }{ catalog-unknown } { #1 }}
-          \@@_dict_put:nnn { Catalog } { #1 }{ #2 }
-        }
-      }
-   }
-\cs_generate_variant:Nn \pdf_catalog_gput:nn {no,nx}
-\cs_new_protected:Npn \pdf_catalog_gremove:n #1 %#1 name
-  {
-    \seq_set_split:Nnn \l_tmpa_seq { / } { #1 }
-    \int_compare:nNnTF { 1 } = {\seq_count:N \l_tmpa_seq }
-     {
-       \@@_dict_remove:nn { Catalog } { #1 }
-     }
-     {
-       \seq_pop_right:NN \l_tmpa_seq \tl_tmpa_tl
-       \exp_args:Nxx \@@_dict_remove:nn
-         { Catalog/\seq_use:Nn\l_tmpa_seq { / } }
-         { \tl_tmpa_tl }
-     }
-  }
-%    \end{macrocode}
 % \begin{variable}[added=2019-08-24]
 %     {
-%      \c_@@_Catalog_single_clist,
-%      \c_@@_Catalog_prop_clist,
-%      \c_@@_Catalog_seq_clist,
+%      \c_@@_dict_Catalog_toplevel_clist,
+%      \c_@@_dict_Catalog_sub_clist,
+%      \c_@@_dict_Catalog_seq_clist,
 %     }
 %  This variables hold the list of the various types of entries. With it
 %  the various \verb=_gput= commands are generated.
@@ -2370,7 +2322,7 @@
 %    \begin{macrocode}
 \@@_dict_gnew:n {Catalog}
 
-\clist_const:Nn \c_@@_Catalog_single_clist
+\clist_const:Nn \c_@@_dict_Catalog_toplevel_clist
   {
     Collection,
     DPartRoot,
@@ -2392,7 +2344,7 @@
     Version
   }
 
-\clist_const:Nn \c_@@_Catalog_prop_clist
+\clist_const:Nn \c_@@_dict_Catalog_sub_clist
   {
     AA,
     AcroForm,
@@ -2402,7 +2354,7 @@
     ViewerPreferences,
   }
 
-\clist_map_inline:Nn \c_@@_Catalog_prop_clist
+\clist_map_inline:Nn \c_@@_dict_Catalog_sub_clist
   {
     \@@_dict_gnew:n {Catalog/#1}
   }
@@ -2411,7 +2363,7 @@
 \@@_dict_gnew:n { Catalog / AcroForm }
 \@@_dict_gnew:n { Catalog / OCProperties }
 
-\clist_const:Nn \c_@@_Catalog_seq_clist
+\clist_const:Nn \c_@@_dict_Catalog_seq_clist
   {
     AF,
     OCProperties/OCGs,
@@ -2422,7 +2374,7 @@
 
 
 
-\clist_map_inline:Nn \c_@@_Catalog_seq_clist
+\clist_map_inline:Nn \c_@@_dict_Catalog_seq_clist
  {
    \seq_new:c { g_@@_dict_/Catalog/#1_seq } % new name later
    \cs_new_protected:cpn { @@_dict_/Catalog/#1_gput:n } ##1
@@ -2453,27 +2405,27 @@
 % \end{macro}
 %
 % \paragraph {Building the catalog: Push order}
-% \begin{macro}{\@@_Catalog_gpush:}
+% \begin{macro}{\@@_dict_Catalog_gpush:}
 %    \begin{macrocode}
-\cs_new_protected:Npn \@@_Catalog_gpush:
+\cs_new_protected:Npn \@@_dict_Catalog_gpush:
   {
-    \use:c { @@_/Catalog/AA_gpush: }
-    \use:c { @@_/Catalog/AcroForm_gpush: }
-    \use:c { @@_/Catalog/AF_gpush: }
-    \use:c { @@_/Catalog/MarkInfo_gpush: }
-    \use:c { @@_/Catalog/OCProperties_gpush: }
-    \use:c { @@_/Catalog/OutputIntents_gpush: }
-    \use:c { @@_/Catalog/Requirements_gpush: }
-    \use:c { @@_/Catalog/ViewerPreferences_gpush: }
+    \use:c { @@_dict_/Catalog/AA_gpush: }
+    \use:c { @@_dict_/Catalog/AcroForm_gpush: }
+    \use:c { @@_dict_/Catalog/AF_gpush: }
+    \use:c { @@_dict_/Catalog/MarkInfo_gpush: }
+    \use:c { @@_dict_/Catalog/OCProperties_gpush: }
+    \use:c { @@_dict_/Catalog/OutputIntents_gpush: }
+    \use:c { @@_dict_/Catalog/Requirements_gpush: }
+    \use:c { @@_dict_/Catalog/ViewerPreferences_gpush: }
     % output the single values:
     \prop_map_function:cN { \@@_dict_gname:n {Catalog} }  \@@_backend_catalog_gput:nn
   }
 %    \end{macrocode}
 % \end{macro}
 % \paragraph{Building catalog entries: AA}
-% \begin{macro}{\@@_/Catalog/AA_gpush:}
+% \begin{macro}{\@@_dict_/Catalog/AA_gpush:}
 %    \begin{macrocode}
-\cs_new_protected:cpn { @@_/Catalog/AA_gpush: }
+\cs_new_protected:cpn { @@_dict_/Catalog/AA_gpush: }
   {
     \prop_if_empty:cF
      { \@@_dict_gname:n { Catalog/AA } }
@@ -2501,9 +2453,9 @@
 % /Catalog/AcroForm/DR (dict),
 % /Catalog/AcroForm
 %
-% \begin{macro}{\@@_/Catalog/AcroForm_gpush:}
+% \begin{macro}{\@@_dict_/Catalog/AcroForm_gpush:}
 %    \begin{macrocode}
-\cs_new_protected:cpn { @@_/Catalog/AcroForm_gpush: }
+\cs_new_protected:cpn { @@_dict_/Catalog/AcroForm_gpush: }
   {
     \seq_if_empty:cF { g_@@_dict_/Catalog/AcroForm/Fields_seq }
       {
@@ -2576,9 +2528,9 @@
 %
 % \paragraph{Building catalog entries: AF}
 % AF is an array.
-% \begin{macro}{\@@_/Catalog/AF_gpush:}
+% \begin{macro}{\@@_dict_/Catalog/AF_gpush:}
 %    \begin{macrocode}
-\cs_new_protected:cpn { @@_/Catalog/AF_gpush: }
+\cs_new_protected:cpn { @@_dict_/Catalog/AF_gpush: }
   {
     \seq_if_empty:cF
      { g_@@_dict_/Catalog/AF_seq }
@@ -2600,9 +2552,9 @@
 % \end{macro}
 %
 % \paragraph{Building catalog entries: MarkInfo}
-% \begin{macro}{\@@_/Catalog/MarkInfo_gpush:}
+% \begin{macro}{\@@_dict_/Catalog/MarkInfo_gpush:}
 %    \begin{macrocode}
-\cs_new_protected:cpn { @@_/Catalog/MarkInfo_gpush: }
+\cs_new_protected:cpn { @@_dict_/Catalog/MarkInfo_gpush: }
   {
     \prop_if_empty:cF
      { \@@_dict_gname:n { Catalog/MarkInfo } }
@@ -2634,10 +2586,10 @@
 %  \end{description}
 %  The /D entry is also a config, it is the first of the seq.
 %  The overall structure is nested: a dict with arrays.
-% \begin{macro}{\@@_/Catalog/OCProperties_gpush:}
+% \begin{macro}{\@@_dict_/Catalog/OCProperties_gpush:}
 %    \begin{macrocode}
 % Catalog/OCProperties: OCGs + D is required
-\cs_new_protected:cpn { @@_/Catalog/OCProperties_gpush: }
+\cs_new_protected:cpn { @@_dict_/Catalog/OCProperties_gpush: }
   {
    \int_compare:nNnT
       {
@@ -2671,9 +2623,9 @@
 %
 % \paragraph{Building catalog entries: OutputIntents}
 % OutputIntents is an array.
-% \begin{macro}{\@@_/Catalog/OutputIntents_gpush:}
+% \begin{macro}{\@@_dict_/Catalog/OutputIntents_gpush:}
 %    \begin{macrocode}
-\cs_new_protected:cpn { @@_/Catalog/OutputIntents_gpush: }
+\cs_new_protected:cpn { @@_dict_/Catalog/OutputIntents_gpush: }
   {
     \seq_if_empty:cF
      { g_@@_dict_/Catalog/OutputIntents_seq }
@@ -2696,9 +2648,9 @@
 %
 % \paragraph{Building catalog entries: Requirements}
 % Requirements  is an array.
-% \begin{macro}{\@@_/Catalog/Requirements _gpush:}
+% \begin{macro}{\@@_dict_/Catalog/Requirements _gpush:}
 %    \begin{macrocode}
-\cs_new_protected:cpn { @@_/Catalog/Requirements _gpush: }
+\cs_new_protected:cpn { @@_dict_/Catalog/Requirements _gpush: }
   {
     \seq_if_empty:cF
      { g_@@_dict_/Catalog/Requirements _seq }
@@ -2720,9 +2672,9 @@
 % \end{macro}
 %
 % \paragraph{Building catalog entries: ViewerPreferences}
-% \begin{macro}{\@@_/Catalog/ViewerPreferences_gpush:}
+% \begin{macro}{\@@_dict_/Catalog/ViewerPreferences_gpush:}
 %    \begin{macrocode}
-\cs_new_protected:cpn { @@_/Catalog/ViewerPreferences_gpush: }
+\cs_new_protected:cpn { @@_dict_/Catalog/ViewerPreferences_gpush: }
   {
     \prop_if_empty:cF
      { \@@_dict_gname:n { Catalog/ViewerPreferences } }
@@ -2761,13 +2713,13 @@
 % is an absolute page number. \Arg{view} a string for the destination
 % without the leading slash. Examples are e.g. |XYZ left top zoom| or |Fit|.
 % The OpenAction uses (and could also be set directly with)
-% \cs{pdf_catalog_gput:nn}.
+% \cs{pdfdict_put:nnn}|{Catalog}|.
 % \end{function}
 %
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdf_docview:nn #1 #2
   {
-    \pdf_catalog_gput:nx { OpenAction }{[\pdf_pageobject_ref:n {#1}~/#2]}
+    \pdfdict_put:nnx {Catalog }{ OpenAction }{[\pdf_pageobject_ref:n {#1}~/#2]}
   }
 %    \end{macrocode}
 %
@@ -3179,7 +3131,7 @@
       },
     lang .code:n =
       {
-        \pdf_catalog_gput:nn {Lang}{(#1)}
+        \pdfdict_put:nnn {Catalog} {Lang}{(#1)}
       }
   }
 
