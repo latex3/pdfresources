@@ -35,7 +35,7 @@
 %%
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{new-transparent}%
-  [2019/08/27 v1.4 Transparency via pdfTeX's color stack (HO)]%
+  [2020/04/10 v1.41 Transparency via pdfTeX's color stack (HO)]%
 \RequirePackage{ifpdf}
 \ifpdf
 \else
@@ -53,7 +53,7 @@
   \protected\edef\TRP@pdfpageresources {\pdfvariable pageresources}
   \protected\def\TRP@pdfcolorstack     {\pdfextension colorstack}
 \fi
-\ifcsname pdf_pageresources_gput:nnn\endcsname
+\ifcsname pdfdict_put:nnn\endcsname
 \else
 \PackageWarningNoLine{new-transparent}{%
     Loading aborted, because pdf resource management code not found%
@@ -62,12 +62,12 @@
 \fi
 
 \ExplSyntaxOn
-\pdf_pageresources_gput:nnn { ExtGState}{TRP1}{<</ca~1/CA~1>>}
+\pdfdict_put:nnn{Page/Resources/ExtGState}{TRP1}{<</ca~1/CA~1>>}
 \cs_new_protected:Npn \__transparent_use:n #1
  {
    \tl_if_exist:cF { c__transparent_TRP#1_tl }
      {
-       \pdf_pageresources_gput:nnn { ExtGState}{TRP#1}{<</ca~#1/CA~#1>>}
+       \pdfdict_put:nnn{Page/Resources/ExtGState}{TRP#1}{<</ca~#1/CA~#1>>}
        \tl_const:cn { c__transparent_TRP#1_tl }{ /TRP#1~gs }
      }
  }

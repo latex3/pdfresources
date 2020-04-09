@@ -546,11 +546,16 @@
         \@@_dict_if_exist:nTF { #1 }
           {
             \cs_if_exist:cTF
-              { @@_dict_/#1/#2_\@@_dict_get_g:n{#1}put:n }
-              { \use:c {@@_dict_/#1/#2_\@@_dict_get_g:n{#1}put:n} {#3} } %special handler
+              { @@_dict_/#1/?_\@@_dict_get_g:n{#1}put:nn } %general, name independant handler
+              { \use:c {@@_dict_/#1/?_\@@_dict_get_g:n{#1}put:n} {#2} {#3} }
               {
-                \use:c { prop_\@@_dict_get_g:n{#1}put:cnn }
-                  { \@@_dict_Xname:n { #1 } }{ #2 } { #3 }
+                \cs_if_exist:cTF
+                  { @@_dict_/#1/#2_\@@_dict_get_g:n{#1}put:n }
+                  { \use:c {@@_dict_/#1/#2_\@@_dict_get_g:n{#1}put:n} {#3} } %special handler
+                  {
+                    \use:c { prop_\@@_dict_get_g:n{#1}put:cnn }
+                      { \@@_dict_Xname:n { #1 } }{ #2 } { #3 }
+                  }
               }
           }
           {
@@ -2167,6 +2172,31 @@
 %    \begin{macrocode}
 %
 % setter:  #1 is the name of the resource
+\@@_dict_gnew:n {Page / Resources / ExtGState}
+\@@_dict_gnew:n {Page / Resources / ColorSpace}
+\@@_dict_gnew:n {Page / Resources / Shading}
+\@@_dict_gnew:n {Page / Resources / Pattern}
+
+\cs_new_protected:cpn { @@_dict_/Page/Resources/ExtGState/?_\@@_dict_get_g:n{#1}put:nn } #1 #2
+  {
+    \@@_backend_PageNResources_gput:nnn {ExtGState} { #1 }{ #2 }
+  }
+
+\cs_new_protected:cpn { @@_dict_/Page/Resources/ColorSpace/?_\@@_dict_get_g:n{#1}put:nn } #1 #2
+  {
+    \@@_backend_PageNResources_gput:nnn {ColorSpace} { #1 }{ #2 }
+  }
+
+\cs_new_protected:cpn { @@_dict_/Page/Resources/Shading/?_\@@_dict_get_g:n{#1}put:nn } #1 #2
+  {
+    \@@_backend_PageNResources_gput:nnn {Shading} { #1 }{ #2 }
+  }
+
+\cs_new_protected:cpn { @@_dict_/Page/Resources/Pattern/?_\@@_dict_get_g:n{#1}put:nn } #1 #2
+  {
+    \@@_backend_PageNResources_gput:nnn {Pattern} { #1 }{ #2 }
+  }
+
 \cs_new_protected:Npn \pdf_pageresources_gput:nnn #1 #2 #3
   {
     \@@_backend_PageNResources_gput:nnn {#1} { #2 }{ #3 }
@@ -3346,13 +3376,13 @@
 \tl_new:N \l_@@_name_tmp_tl
 \tl_new:N \l_@@_value_tmp_tl
 
-\cs_generate_variant:Nn \pdf_pageresources_gput:nnn {noo}
-
-\cs_new_protected:Npn \pdf_pageresources_split_gput:nn  #1 #2  %#1  resources
-  {
-    \@@_split_dict_entry_aux:NNw \l_@@_name_tmp_tl \l_@@_value_tmp_tl #2 \q_stop
-    \pdf_pageresources_gput:noo {#1}{\l_@@_name_tmp_tl}{\l_@@_value_tmp_tl}
-  }
+%\cs_generate_variant:Nn \pdf_pageresources_gput:nnn {noo}
+%
+%\cs_new_protected:Npn \pdf_pageresources_split_gput:nn  #1 #2  %#1  resources
+%  {
+%    \@@_split_dict_entry_aux:NNw \l_@@_name_tmp_tl \l_@@_value_tmp_tl #2 \q_stop
+%    \pdf_pageresources_gput:noo {#1}{\l_@@_name_tmp_tl}{\l_@@_value_tmp_tl}
+%  }
 
 \cs_new:Npn \@@_patch_pgfextgs:w  #1/#2<<#3>>#4\q_stop
   {
@@ -3405,24 +3435,24 @@
         \@@_backend_object_write:nn
           {__spc_extgstate_op_false}
           {/Type /ExtGState~/op~false~/OP~false}
-        \pdf_pageresources_gput:nnn
-          {ExtGState}
+        \pdfdict_put:nnn
+          {Page/Resources/ExtGState}
           {SPCko}
           {\@@_backend_object_ref:n {__spc_extgstate_op_false}}
         \@@_backend_object_new:nn  {__spc_extgstate_op_true0}{dict}
         \@@_backend_object_write:nn
           {__spc_extgstate_op_true0}
           {/Type /ExtGState~/op~true~/OP~true~/OPM~0}%
-        \pdf_pageresources_gput:nnn
-          {ExtGState}
+        \pdfdict_put:nnn
+          {Page/Resources/ExtGState}
           {SPCmz}
           {\@@_backend_object_ref:n {__spc_extgstate_op_true0}}
         \@@_backend_object_new:nn  {__spc_extgstate_op_true1}{dict}
         \@@_backend_object_write:nn
           {__spc_extgstate_op_true1}
           {/Type /ExtGState~/op~true~/OP~true~/OPM~1}%
-        \pdf_pageresources_gput:nnn
-          {ExtGState}
+         \pdfdict_put:nnn
+          {Page/Resources/ExtGState}
           {SPCop}
           {\@@_backend_object_ref:n {__spc_extgstate_op_true1}}
         \def\spc@Pageresources#1{}
