@@ -137,7 +137,7 @@
 % pdfdict module
 \msg_new:nnn  { pdfdict } { show-dict }
   {
-    The~\tl_if_empty:cTF {c_@@_/#1_g_tl}{local}{global}~dictionary~'#1'~
+    The~\tl_if_empty:cTF {c_@@_dict_/#1_g_tl}{local}{global}~dictionary~'#1'~
     \tl_if_empty:nTF {#2}
       { is~empty \\>~ . }
       { contains~the~pairs~(without~outer~braces): #2 . }
@@ -409,7 +409,7 @@
 %
 %  Currently the following names are used: ^^A!!!!! check, compare with g_@@_dict_gnames_seq
 %  \begin{verbatim}
-%  /Pages           %w,  \pagesattr
+%  /Pages           %w,  \pagesattr ->pdfdict
 %  /backend_Page    %!!!!! consider name Page?
 %  /backend_PageN   %!!!!! consider name PageN?
 %  /backend_PageN/Resources/Properties %!!!!! consider name!!
@@ -420,8 +420,8 @@
 %  /PageN/Resources/Pattern
 %  /PageN/Resources/Shading
 %  /PageN/Resources/Properties
-%  /Info           %w, \pdfinfo
-%  /Catalog
+%  /Info           %w, \pdfinfo ->pdfdict
+%  /Catalog            % -> pdfdict
 %  /Catalog/AA
 %  /Catalog/OCProperties
 %  /Catalog/OutputIntents
@@ -456,22 +456,22 @@
 % to retried global status from pathes
 \cs_new:Npn \@@_dict_get_g:n #1 % path name without the leading /
   {
-   \tl_if_exist:cT {c_@@_/#1_g_tl}
+   \tl_if_exist:cT {c_@@_dict_/#1_g_tl}
      {
-      \tl_use:c {c_@@_/#1_g_tl}
+      \tl_use:c {c_@@_dict_/#1_g_tl}
      }
   }
 
 %global
 \cs_new:Npn \@@_dict_gname:n #1 % path name without the leading /
   {
-    g_@@_/#1_prop
+    g_@@_dict_/#1_prop
   }
 
 %local
 \cs_new:Npn \@@_dict_name:n #1 % path name without the leading /
   {
-    l_@@_/#1_prop
+    l_@@_dict_/#1_prop
   }
 
 
@@ -489,7 +489,7 @@
   {
     \prop_if_exist:cF {  \@@_dict_gname:n { #1 }  }
       {
-        \tl_const:cn { c_@@_/#1_g_tl } { g }
+        \tl_const:cn { c_@@_dict_/#1_g_tl } { g }
         \prop_new:c  { \@@_dict_gname:n { #1 } }
         \seq_gput_right:Nn \g_@@_dict_gnames_seq { #1 }
       }
@@ -500,7 +500,7 @@
   {
     \prop_if_exist:cF {  \@@_dict_name:n { #1 }  }
       {
-        \tl_const:cn { c_@@_/#1_g_tl } {  }
+        \tl_const:cn { c_@@_dict_/#1_g_tl } {  }
         \prop_new:c  { \@@_dict_name:n { #1 } }
         \seq_gput_right:Nn \g_@@_dict_names_seq { #1 }
       }
@@ -510,7 +510,7 @@
 \prg_new_conditional:Npnn \@@_dict_if_exist:n #1 { p , T , F , TF }
   {
     \tl_if_exist:cTF
-      { c_@@_/#1_g_tl }
+      { c_@@_dict_/#1_g_tl }
       { \prg_return_true: }
       { \prg_return_false: }
   }
@@ -568,7 +568,7 @@
 \cs_new_protected:Npn \@@_dict_get:nnN  #1 #2 #3 %path,key,macro
   {
     \prop_get:cnN
-      { \use:c{ @@_dict_\tl_use:c{c_@@_/#1_g_tl}name:n } { #1 } }
+      { \use:c{ @@_dict_\tl_use:c{c_@@_dict_/#1_g_tl}name:n } { #1 } }
       { #2 } #3
   }
 
@@ -667,9 +667,9 @@
 % in the same way. Most importantly
 % \begin{itemize}
 % \item the expansion behaviour of the backends can differ. Some backends expand a
-% value always fully when writing to the PDF, with other command names could end as strings
-% in the PDF. So one should neither rely on \Arg{name} \Arg{value} to be expanded nor not expanded
-% by the backend commands.
+% value always fully when writing to the PDF, with other backends command names
+% could end as strings in the PDF. So one should neither rely on \Arg{name}
+% \Arg{value} to be expanded nor not expanded by the backend commands.
 % \item The number of compilations needed can differ between the engines and backends.
 % Some engines has to use labels and the aux-file to setup the dictionaries.
 % \end{itemize}
@@ -690,6 +690,9 @@
 %   \end{syntax}
 %   This shows the content of \Arg{dictionary} in the log and on the terminal.
 %   It also shows if  \Arg{dictionary} is a local or a global dictionary.
+%   It doesn't show the special catalog dictionaries with arrays as values
+%   as these are filled only at
+%   the end of the document.
 %\end{function}
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdfdict_show:n
@@ -743,6 +746,8 @@
 %   If \meta{name} is not found no change occurs,
 %   \emph{i.e}~there is no need to test for the existence of a name before
 %   trying to remove it.
+%   Values from the special Catalog entries with arrays as values can not be
+%   removed.
 % \end{function}
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdfdict_remove:nn #1 #2
