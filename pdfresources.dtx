@@ -2066,8 +2066,8 @@
 % and to push the values.
 % xelatex doesn't need the dict, but it can be used to show the content
 \clist_map_inline:Nn \c_@@_backend_PageNResources_clist
-      {
-        \@@_dict_gnew:n {PageN/Resources/#1}
+      { %xetex doesn't like it if the prop exist. Check!!!!
+        %\@@_dict_gnew:n {PageN/Resources/#1}
       }
 % pdftex and luatex
 \bool_if:nT
@@ -2079,6 +2079,7 @@
   { %create the props and backend objects:
     \clist_map_inline:Nn \c_@@_backend_PageNResources_clist
       {
+        \@@_dict_gnew:n {PageN/Resources/#1}
         \@@_backend_object_new:nn {PageN/Resources/#1} {dict}
         \cs_if_exist:NT \tex_directlua:D
           {
@@ -2149,7 +2150,7 @@
     \cs_new_protected:Npn \@@_backend_PageNResources_gput:nnn #1 #2 #3
       {
        % this is unused but can be used by the show command
-       \@@_dict_put:nnn {PageN/Resources/#1} { #2 }{ #3 }
+       %\prop_gput:cnn { \@@_dict_Xname:n {PageN/Resources/#1} } { #2 }{ #3 }
        %objects are not filled with \pdf_object_write as this is not additive!
         \@@_backend:x
           {
@@ -2165,8 +2166,8 @@
   {
     \cs_new_protected:Npn \@@_backend_PageNResources:n #1 {}
     \cs_new_protected:Npn \@@_backend_PageNResources_gput:nnn #1 #2 #3
-      { %only for the show command
-        \@@_dict_put:nnn {PageN/Resources/#1} { #2 }{ #3 }
+      { %only for the show command TEST!!
+        %\@@_dict_put:nnn {PageN/Resources/#1} { #2 }{ #3 }
       }
     \cs_new_protected:Npn \@@_PageNResources_gpush: {}
   }

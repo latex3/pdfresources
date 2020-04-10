@@ -15,7 +15,7 @@ some text
 
 %test command:
 \newcommand\attributecontent{(somesetting)}
-\exp_args:Nno\pdfdict_put:nnn {Page} {SSS}{\attributecontent}
+\pdfdict_put:nnx {Page} {SSS}{\attributecontent}
 
 \newpage
 \pdf_pageattr_gremove:n {Rotate}
