@@ -547,7 +547,7 @@
           {
             \cs_if_exist:cTF
               { @@_dict_/#1/?_\@@_dict_get_g:n{#1}put:nn } %general, name independant handler
-              { \use:c {@@_dict_/#1/?_\@@_dict_get_g:n{#1}put:nn } {#2} {#3} }
+              { \use:c {@@_dict_/#1/?_\@@_dict_get_g:n{#1}put:nn} {#2} {#3} }
               {
                 \cs_if_exist:cTF
                   { @@_dict_/#1/#2_\@@_dict_get_g:n{#1}put:n }
@@ -2144,11 +2144,16 @@
 % \end{macro}
 % !!!!! check path names (backend or not ...)
 %
-% \subsubsection{ page resources: ExtGState, ColorSpace, Shading, Pattern/management}
-% \begin{function}[added = 2019-08-08]
-%   {\pdf_pageresources_gput:nnn}
+% \subsubsection{ pdfdict: ExtGState, ColorSpace, Shading, Pattern/management}
+% \begin{function}[updated = 2020-04-10]
+%   {
+%    pdfdict: Page/Resources/ExtGState,
+%    pdfdict: Page/Resources/ColorSpace,
+%    pdfdict: Page/Resources/Shading,
+%    pdfdict: Page/Resources/Pattern,
+%   }
 %   \begin{syntax}
-%     \cs{pdf_pageresources_gput:nnn} \Arg{resource} \Arg{name} \Arg{value}
+%     \cs{\pdfdict_put:nnn} \{Page/Resources/\meta{resource}\} \Arg{name} \Arg{value}
 %   \end{syntax}
 %   Adds |/|\meta{name} \meta{value} to the page resource \meta{resource}.
 %   \meta{resource} can be |ExtGState|, |ColorSpace|, |Pattern| oder |Shading|.
@@ -2162,12 +2167,15 @@
 %   With the dvips backend the command does nothing: resources are managed by
 %   ghostscript or the distiller if e.\,g. transparency is used.
 %
-%   The resources is added to all pages starting with the first where something has
-%   been added to a resources.
+%   The resources are added to all pages starting with the first where something has
+%   been added to a resources. That means that for example
+%   all ExtGState resources are combined in one
+%   dictionary object and every page with a ExtGState resource refer to this object.
 %
 %   \potentialclash The primitive commands to set the resources should not be used
 %   together with this code as the calls will overwrite each other and values
-%   will be lost.
+%   will be lost. This means that currently there are clashes with the packages tikz,
+%   transparent and colorspace.
 % \end{function}
 %    \begin{macrocode}
 %
@@ -2197,10 +2205,6 @@
     \@@_backend_PageNResources_gput:nnn {Pattern} { #1 }{ #2 }
   }
 
-\cs_new_protected:Npn \pdf_pageresources_gput:nnn #1 #2 #3
-  {
-    \@@_backend_PageNResources_gput:nnn {#1} { #2 }{ #3 }
-  }
 %    \end{macrocode}
 %
 % \subsection{pdfdict: \enquote{Catalog}}
