@@ -547,7 +547,7 @@
           {
             \cs_if_exist:cTF
               { @@_dict_/#1/?_\@@_dict_get_g:n{#1}put:nn } %general, name independant handler
-              { \use:c {@@_dict_/#1/?_\@@_dict_get_g:n{#1}put:n} {#2} {#3} }
+              { \use:c {@@_dict_/#1/?_\@@_dict_get_g:n{#1}put:nn } {#2} {#3} }
               {
                 \cs_if_exist:cTF
                   { @@_dict_/#1/#2_\@@_dict_get_g:n{#1}put:n }
@@ -2177,22 +2177,22 @@
 \@@_dict_gnew:n {Page / Resources / Shading}
 \@@_dict_gnew:n {Page / Resources / Pattern}
 
-\cs_new_protected:cpn { @@_dict_/Page/Resources/ExtGState/?_\@@_dict_get_g:n{#1}put:nn } #1 #2
+\cs_new_protected:cpn { @@_dict_/Page/Resources/ExtGState/?_gput:nn } #1 #2
   {
     \@@_backend_PageNResources_gput:nnn {ExtGState} { #1 }{ #2 }
   }
 
-\cs_new_protected:cpn { @@_dict_/Page/Resources/ColorSpace/?_\@@_dict_get_g:n{#1}put:nn } #1 #2
+\cs_new_protected:cpn { @@_dict_/Page/Resources/ColorSpace/?_gput:nn } #1 #2
   {
     \@@_backend_PageNResources_gput:nnn {ColorSpace} { #1 }{ #2 }
   }
 
-\cs_new_protected:cpn { @@_dict_/Page/Resources/Shading/?_\@@_dict_get_g:n{#1}put:nn } #1 #2
+\cs_new_protected:cpn { @@_dict_/Page/Resources/Shading/?_gput:nn } #1 #2
   {
     \@@_backend_PageNResources_gput:nnn {Shading} { #1 }{ #2 }
   }
 
-\cs_new_protected:cpn { @@_dict_/Page/Resources/Pattern/?_\@@_dict_get_g:n{#1}put:nn } #1 #2
+\cs_new_protected:cpn { @@_dict_/Page/Resources/Pattern/?_gput:nn } #1 #2
   {
     \@@_backend_PageNResources_gput:nnn {Pattern} { #1 }{ #2 }
   }
