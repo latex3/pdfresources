@@ -1191,6 +1191,13 @@
   }
 
 \cs_generate_variant:Nn \pdf_pageattr_gput:nn {nx}
+
+%handler for pdfdict
+\cs_new_protected:cpn { @@_dict_/Page/?_gput:nn } #1 #2
+  {
+    \prop_gput:cnn  { \@@_dict_Xname:n { ThisPage } }{ #1 } { #2 }
+    \@@_backend_Page_gput:nn { #1 }{ #2 }
+  }
 % remove:
 %^^A documentated
 \cs_new_protected:Npn \pdf_pageattr_gremove:n #1
@@ -1202,10 +1209,17 @@
 %^^A documentated
 \cs_new_protected:Npn \pdf_thispageattr_gput:nn #1 #2
   {
+    \prop_gput:cnn  { \@@_dict_Xname:n { ThisPage } }{ #1 } { #2 }
     \@@_backend_PageN_gput:nn { #1 }{ #2 }
   }
 
 \cs_generate_variant:Nn \pdf_thispageattr_gput:nn {nx}
+
+% handler for pdfdict
+\cs_new_protected:cpn { @@_dict_/ThisPage/?_gput:nn } #1 #2
+  {
+    \@@_backend_PageN_gput:nn { #1 }{ #2 }
+  }
 
 %    \end{macrocode}
 %

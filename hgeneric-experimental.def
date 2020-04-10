@@ -1421,7 +1421,7 @@
    \pdf_pageattr_gremove:n {Trans}
    \tl_if_empty:NF \@pdfpagetransition
     {
-     \pdf_pageattr_gput:nn {Trans}{<< /S /\@pdfpagetransition\space >>}
+     \pdfdict_put:nnx {Page} {Trans}{<< /S /\@pdfpagetransition\space >>}
     }
   \fi
 }
@@ -1432,7 +1432,7 @@
    \pdf_pageattr_gremove:n {Dur}
    \tl_if_empty:NF \@pdfpageduration
     {
-     \pdf_pageattr_gput:nn {Dur}{\@pdfpageduration\space}
+     \pdfdict_put:nnx {Page} {Dur}{\@pdfpageduration\space}
     }
   \fi
 }
