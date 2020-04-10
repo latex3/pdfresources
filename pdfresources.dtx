@@ -396,7 +396,7 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \subsection{dict / path-Code}
+% \subsection{pdfdict / path-Code}
 %  Many code parts are quite similar: property lists for dictionaries are filled and output.
 %  So we define some generic commands to ensure systematic
 %  internal names. The names are based on paths separated by slashed.
@@ -639,7 +639,7 @@
 % \end{macro}
 %
 % \section{Resources management}
-% \subsection{User interface pdfdict}
+% \subsection{Module pdfdict}
 % Many features of a PDF are set by adding key-value pair
 % to specific PDF dictionaries. The following commands offer an interface to
 % these dictionaries. They unify a number of primitives like the pdftex
@@ -655,28 +655,36 @@
 %   \begin{syntax}
 %     \cs{pdfdict_put:nnn} \Arg{dictionary} \Arg{name} \Arg{value}
 %   \end{syntax}
-% This functions put \Arg{name} \Arg{value} either globally or locally in internal
+% This function puts \Arg{name} \Arg{value} either globally or locally in internal
 % property lists.
-% \Arg{dictionary} is a symbolic names for the property list.
-% \Arg{name} should be a valid PDF name without
-% the starting slash, \Arg{value} should be a valid PDF value for this name in the
-% target dictionary. The PDF resource management code predefines a large number of
+%
+% \Arg{dictionary} is a symbolic name for a concrete PDF dictionary to which the
+% content of these property lists will be written by the PDF resource management code.
+%
+% \Arg{name} should be a valid PDF Name without
+% the starting slash.
+%
+% \Arg{value} should be a valid PDF value for this Name in the
+% target dictionary.
+%
+% The PDF resource management code predefines a large number of
 % symbolic names for important dictionaries and will write the stored values
 % at the right time to the PDF. The predefined symbolic names are described below.
-% By convention, dictionaries with starting with an uppercase letter are always stored
+% By convention, dictionaries starting with an uppercase letter are always stored
 % globally (e.g. \texttt{Catalog} or \texttt{Info}, lowercase letters indicates
 % dictionaries that respect \TeX-groups -- this is e.g. used for dictionaries used in
 % local objects like links.
 %
-% The code works with all major engines but not necessarly
+% The code works with all major engines but not necessarily
 % in the same way. Most importantly
 % \begin{itemize}
-% \item the expansion behaviour of the backends can differ. Some backends expand a
+% \item The expansion behaviour of the backends can differ. Some backends expand a
 % value always fully when writing to the PDF, with other backends command names
 % could end as strings in the PDF. So one should neither rely on \Arg{name}
 % \Arg{value} to be expanded nor not expanded by the backend commands.
 % \item The number of compilations needed can differ between the engines and backends.
-% Some engines has to use labels and the aux-file to setup the dictionaries.
+% Some engines has to use labels and the aux-file to setup the dictionaries and so need
+% at least two compilations to put everything in place.
 % \end{itemize}
 % \end{function}
 %    \begin{macrocode}
@@ -2013,7 +2021,7 @@
 %    \end{macrocode}
 % \end{macro}
 % \end{macro}
-% \subsection{page resources: ExtGState, ColorSpace, Shading, Pattern }
+% \subsection{pdfdict: page resources: ExtGState, ColorSpace, Shading, Pattern }
 % \begin{NOTE}{UF}
 % Only for pdf/luatex and xdvipdfmx backend- and pdf-code is needed to add values
 % to these resources.
@@ -2153,7 +2161,7 @@
 %    pdfdict: Page/Resources/Pattern,
 %   }
 %   \begin{syntax}
-%     \cs{\pdfdict_put:nnn} \{Page/Resources/\meta{resource}\} \Arg{name} \Arg{value}
+%     \cs{pdfdict_put:nnn} \{Page/Resources/\meta{resource}\} \Arg{name} \Arg{value}
 %   \end{syntax}
 %   Adds |/|\meta{name} \meta{value} to the page resource \meta{resource}.
 %   \meta{resource} can be |ExtGState|, |ColorSpace|, |Pattern| oder |Shading|.
@@ -2293,7 +2301,7 @@
 %
 %   \medskip
 %   \noindent
-%   \begin{tabularx}{\linewidth}{lll>{\raggedright\arraybackslash}X}
+%   \begin{tabularx}{\linewidth}{llll>{\raggedright\arraybackslash}X}
 %    \bfseries Dictionary    & \bfseries Names & \bfseries Value  & \bfseries Remark
 %    \\\midrule
 %    Catalog/AA              &WC, WS, DS, WP,DP& all dict    \\
@@ -2313,7 +2321,7 @@
 %                            & UserProperties  & boolean      \\
 %                            & Suspects        & boolean      \\
 %  Catalog/ViewerPreferences & HideToolbar     & boolean      \\
-%                            & Direction       & /R2L or /L2R
+%                            & Direction       & /R2L or /L2R \\
 %                            & \ldots          &              & many more, see the reference \\
 % \end{tabularx}
 %
