@@ -880,6 +880,7 @@
   }
 %    \end{macrocode}
 % \end{macro}
+%
 % \subsection{pdfdict \enquote{Pages} (pdfpagesattr)}
 % The content of the property list associated with this dictionary name is written to the
 % /Pages object. This replaces \cs{pdfpagesattr}. This dictionary is global.
@@ -981,6 +982,7 @@
 
 %    \end{macrocode}
 % \end{macro}
+%
 % \subsection{pdfpageattr}
 % \subsubsection{pdfpageattr/backend}
 % \begin{NOTE}{UF}
@@ -2316,8 +2318,8 @@
 % Entries to subdictionaries by using in the first
 % argument one of the pathes described later.
 % The entries in the catalog have varying requirements regarding the
-% pdf management. Some entries (like /Lang) are simple values where the last
-% setting should win, other like /OutputIntents are dictionaries which can
+% PDF management. Some entries (like /Lang) are simple values where the last
+% setting should win, other like \texttt{/OutputIntents} are dictionaries which can
 % be filled from more than one source. In some cases the values that needs to be
 % added are not at the top-level but in some subsubdictionary or are actually part
 % of an array.
@@ -2326,7 +2328,7 @@
 %   The Names in the following tabular are entries that are added to the
 %   top level of the catalog.
 %
-%   If \meta{Name} gets assigned two values the last one wins.
+%   If \meta{Name} gets assigned a value more than once the last one wins.
 %   There is no check that the values have the correct type and format.
 %   It is up to the user to ensure that the value does what is intended.
 %
@@ -2404,6 +2406,7 @@
 % The value is -- with the exception
 % of AcroForm/Fields and AcroForm/CO -- an object name of an object
 % which must have been declared previously. E.g.
+% %!!!!!!!!!! consider if a reference to object now isn't better.
 %  \begin{verbatim}
 %  \pdf_object_new:nn   {pkg@intent}{dict}
 %  \pdf_object_write:nn {pkg@intent}{...}
@@ -2480,8 +2483,7 @@
     \@@_dict_gnew:n {Catalog/#1}
   }
 
-% special cases
-\@@_dict_gnew:n { Catalog / AcroForm }
+% special cases, AcroForm is above
 \@@_dict_gnew:n { Catalog / OCProperties }
 
 \clist_const:Nn \c_@@_dict_Catalog_seq_clist
