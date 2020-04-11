@@ -405,20 +405,15 @@
 %  So we define some generic commands to ensure systematic
 %  internal names. The names are based on paths separated by slashed.
 %  The first slash is not used in the names.
-%  \begin{NOTE}{UF}
-%  The main question will be if one can/should encode the different
-%  inner structures (array/dict) and the cases where users shouldn't fill a value
-%  but it should be done by subtrees ...
-%  \end{NOTE}
 %
 %  Currently the following names are used: ^^A!!!!! check, compare with g_@@_dict_gnames_seq
 %  \begin{verbatim}
-%  /Info           %w, \pdfinfo    -> pdfdict
-%  /Catalog            %           -> pdfdict
-%  /Catalog/AA
+%  /Info                      %   -> pdfdict (\pdfinfo)
+%  /Catalog                   %   -> pdfdict (\pdfcatalog)
+%  /Catalog/AA                %
+%  /Catalog/AcroForm
 %  /Catalog/OCProperties
 %  /Catalog/OutputIntents
-%  /Catalog/AcroForm
 %  /Catalog/AcroForm/DR
 %  /Catalog/AcroForm/DR/Font
 %  /Catalog/MarkInfo
@@ -576,12 +571,12 @@
         \@@_dict_if_exist:nTF { #1 }
           {
             \cs_if_exist:cTF
-              { @@_dict_/#1/?_\@@_dict_get_g:n{#1}put:nn } %general, name independant handler
-              { \use:c {@@_dict_/#1/?_\@@_dict_get_g:n{#1}put:nn} {#2} {#3} }
+              { @@_dict_handler/#1/?_\@@_dict_get_g:n{#1}put:nn } %general, name independant handler
+              { \use:c {@@_dict_handler/#1/?_\@@_dict_get_g:n{#1}put:nn} {#2} {#3} }
               {
                 \cs_if_exist:cTF
-                  { @@_dict_/#1/#2_\@@_dict_get_g:n{#1}put:n }
-                  { \use:c {@@_dict_/#1/#2_\@@_dict_get_g:n{#1}put:n} {#3} } %special handler
+                  { @@_dict_handler/#1/#2_\@@_dict_get_g:n{#1}put:n }
+                  { \use:c {@@_dict_handler/#1/#2_\@@_dict_get_g:n{#1}put:n} {#3} } %special handler
                   {
                     \use:c { prop_\@@_dict_get_g:n{#1}put:cnn }
                       { \@@_dict_Xname:n { #1 } }{ #2 } { #3 }
@@ -875,8 +870,8 @@
 % push to the register command / issue the special
 \cs_new_protected:Npn \@@_dict_Info_gpush:
   {
-    \prop_map_function:cN  { \@@_dict_Xname:n {Info} } \@@_backend_info_gput:nn
-    \prop_gclear:c { \@@_dict_Xname:n {Info} }
+    \prop_map_function:cN  { \@@_dict_gname:n {Info} } \@@_backend_info_gput:nn
+    \prop_gclear:c { \@@_dict_gname:n {Info} }
   }
 %    \end{macrocode}
 % \end{macro}
@@ -1305,9 +1300,9 @@
 \cs_generate_variant:Nn \pdf_pageattr_gput:nn {nx}
 
 %handler for pdfdict
-\cs_new_protected:cpn { @@_dict_/Page/?_gput:nn } #1 #2
+\cs_new_protected:cpn { @@_dict_handler/Page/?_gput:nn } #1 #2
   {
-    \prop_gput:cnn  { \@@_dict_Xname:n { ThisPage } }{ #1 } { #2 }
+    \prop_gput:cnn  { \@@_dict_gname:n { ThisPage } }{ #1 } { #2 }
     \@@_backend_Page_gput:nn { #1 }{ #2 }
   }
 % remove:
@@ -1321,14 +1316,14 @@
 %^^A documentated
 \cs_new_protected:Npn \pdf_thispageattr_gput:nn #1 #2
   {
-    \prop_gput:cnn  { \@@_dict_Xname:n { ThisPage } }{ #1 } { #2 }
+    \prop_gput:cnn  { \@@_dict_gname:n { ThisPage } }{ #1 } { #2 }
     \@@_backend_PageN_gput:nn { #1 }{ #2 }
   }
 
 \cs_generate_variant:Nn \pdf_thispageattr_gput:nn {nx}
 
 % handler for pdfdict
-\cs_new_protected:cpn { @@_dict_/ThisPage/?_gput:nn } #1 #2
+\cs_new_protected:cpn { @@_dict_handler/ThisPage/?_gput:nn } #1 #2
   {
     \@@_backend_PageN_gput:nn { #1 }{ #2 }
   }
@@ -2199,7 +2194,7 @@
     \cs_new_protected:Npn \@@_backend_PageNResources_gput:nnn #1 #2 #3
       {
        % this is unused but can be used by the show command
-       %\prop_gput:cnn { \@@_dict_Xname:n {PageN/Resources/#1} } { #2 }{ #3 }
+       %\prop_gput:cnn { \@@_dict_gname:n {PageN/Resources/#1} } { #2 }{ #3 }
        %objects are not filled with \pdf_object_write as this is not additive!
         \@@_backend:x
           {
@@ -2266,22 +2261,22 @@
 \@@_dict_gnew:n {Page / Resources / Shading}
 \@@_dict_gnew:n {Page / Resources / Pattern}
 
-\cs_new_protected:cpn { @@_dict_/Page/Resources/ExtGState/?_gput:nn } #1 #2
+\cs_new_protected:cpn { @@_dict_handler/Page/Resources/ExtGState/?_gput:nn } #1 #2
   {
     \@@_backend_PageNResources_gput:nnn {ExtGState} { #1 }{ #2 }
   }
 
-\cs_new_protected:cpn { @@_dict_/Page/Resources/ColorSpace/?_gput:nn } #1 #2
+\cs_new_protected:cpn { @@_dict_handler/Page/Resources/ColorSpace/?_gput:nn } #1 #2
   {
     \@@_backend_PageNResources_gput:nnn {ColorSpace} { #1 }{ #2 }
   }
 
-\cs_new_protected:cpn { @@_dict_/Page/Resources/Shading/?_gput:nn } #1 #2
+\cs_new_protected:cpn { @@_dict_handler/Page/Resources/Shading/?_gput:nn } #1 #2
   {
     \@@_backend_PageNResources_gput:nnn {Shading} { #1 }{ #2 }
   }
 
-\cs_new_protected:cpn { @@_dict_/Page/Resources/Pattern/?_gput:nn } #1 #2
+\cs_new_protected:cpn { @@_dict_handler/Page/Resources/Pattern/?_gput:nn } #1 #2
   {
     \@@_backend_PageNResources_gput:nnn {Pattern} { #1 }{ #2 }
   }
@@ -2311,6 +2306,7 @@
 % /Dests ? difference to subdict in Names?
 % /DSS                      (dict, pdf 2.0)
 % /Acroform/DR/ExtGState etc probably unneeded.
+%
 % \end{NOTE}
 % The catalog is a central dictionary in a PDF with a number of subdictionaries.
 % Entries to the top level of the catalog can be added with
@@ -2318,12 +2314,13 @@
 % Entries to subdictionaries by using in the first
 % argument one of the pathes described later.
 % The entries in the catalog have varying requirements regarding the
-% PDF management. Some entries (like /Lang) are simple values where the last
-% setting should win, other like \texttt{/OutputIntents} are dictionaries which can
-% be filled from more than one source. In some cases the values that needs to be
-% added are not at the top-level but in some subsubdictionary or are actually part
-% of an array.
+% PDF management. Some entries (like /Lang) are simple values where new values should
+% overwrite existing values, other like for example \texttt{/OutputIntents}
+% are dictionaries which can be filled from more than one source.
+% In some cases the values that needs to be added are not at the top-level
+% but in some subsubdictionary or are actually part of an array.
 % To handle this some pathes use internal special handlers.
+%
 %   \paragraph{Entries at the top level of the catalog}
 %   The Names in the following tabular are entries that are added to the
 %   top level of the catalog.
@@ -2332,30 +2329,33 @@
 %   There is no check that the values have the correct type and format.
 %   It is up to the user to ensure that the value does what is intended.
 %
+%   The required PDF version is only mentioned if it is larger than 1.5.
+%
 %   Example: |\pdfdict_put:nnn {Catalog}{PageMode}{/UseNone}|
 %
+%% !!!!!!!! Warning for unknown names is currently not working!
 %   \medskip
 %   \noindent
 %   \begin{tabularx}{\linewidth}{ll>{\raggedright\arraybackslash}X}
 %    \bfseries Name           &  \bfseries Value  & \bfseries Remark \\\midrule
-%    Collection              &  objref or dict\\
-%    DPartRoot               &  objref or dict & pdf 2.0\\
-%    Lang                    &  string & e.g. \texttt{(de-DE)} \\
-%    Legal                   &  objref or dict\\
-%    Metadata                &  obj ref or stream \\
-%    NeedsRendering          &  boolean       &   pdf 1.7\\
+%    Collection              &  objref or dict                        \\
+%    DPartRoot               &  objref or dict     & PDF 2.0           \\
+%    Lang                    &  string             & e.g. \texttt{(de-DE)} \\
+%    Legal                   &  objref or dict                             \\
+%    Metadata                &  obj ref or stream                       \\
+%    NeedsRendering          &  boolean            &   PDF 1.7\\
 %    OpenAction              &  array (dest) or dict (action) \\
-%    PageLabels              &  objref or dict      &  number tree \\
-%    PageLayout              &  name   & one of /SinglePage, /OneColumn,
+%    PageLabels              &  objref or dict     &  number tree \\
+%    PageLayout              &  name               & one of /SinglePage, /OneColumn,
 %                                        /TwoColumnLeft, /TwoColumnRight,
-%                                        /TwoPageLeft (PDF 1.5),
-%                                        /TwoPageRight (PDF 1.5)) \\
-%    PageMode                & name  & one of /UseNone, /UseOutlines, /UseThumbs,
-%                                    /UseOC(PDF 1.5),UseAttachments\\
-%    Perms                   &  objref or dict & pdf 1.5, permissions\\
-%    PieceInfo               &  objref or dict\\
-%    SpiderInfo              &  objref or dict\\
-%    StructTreeRoot          &  obj ref or dict   \\
+%                                        /TwoPageLeft,
+%                                        /TwoPageRight \\
+%    PageMode                &  name               & one of /UseNone, /UseOutlines, /UseThumbs,
+%                                    /UseOC, /UseAttachments (PDF 1.6)\\
+%    Perms                   &  objref or dict     & permissions\\
+%    PieceInfo               &  objref or dict \\
+%    SpiderInfo              &  objref or dict \\
+%    StructTreeRoot          &  obj ref or dict \\
 %    Threads                 &  objref to an array\\
 %    URI                     &  objref or dict \\
 %    Version                 &  name           & eg. \texttt{/1.7} \\
@@ -2367,7 +2367,8 @@
 %   \paragraph{Simple entries in subdictionaries of the catalog}
 %   The following dictionaries have been predeclared and allow to
 %   add values to the respective subdictionaries of the catalog. The
-%   names of the dictionaries follow the naming in PDF reference.
+%   names of the dictionaries follow the naming and location of the dictionaries
+%   in PDF reference.
 %   If \meta{Name} gets assigned two values the last one wins.
 %
 %   Example: |\pdfdict_put:nnn {Catalog/MarkInfo}{Marked}{true}|
@@ -2406,7 +2407,8 @@
 % The value is -- with the exception
 % of AcroForm/Fields and AcroForm/CO -- an object name of an object
 % which must have been declared previously. E.g.
-% %!!!!!!!!!! consider if a reference to object now isn't better.
+% % !!!!!!!!
+% %!!!!!!!!!! consider if a reference to a now object isn't better.
 %  \begin{verbatim}
 %  \pdf_object_new:nn   {pkg@intent}{dict}
 %  \pdf_object_write:nn {pkg@intent}{...}
@@ -2428,7 +2430,7 @@
 %                                         second wins, and the first is
 %                                         added to OCProperties/Configs.\\
 %    Catalog              & OutputIntents        & object name\\
-%    Catalog              & Requirements         & object name & pdf 1.7 \\
+%    Catalog              & Requirements         & object name & PDF 1.7 \\
 %   \end{tabularx}
 %
 %
@@ -2476,6 +2478,7 @@
     AcroForm/DR/Font,
     MarkInfo,
     ViewerPreferences,
+    OCProperties
   }
 
 \clist_map_inline:Nn \c_@@_dict_Catalog_sub_clist
@@ -2483,8 +2486,6 @@
     \@@_dict_gnew:n {Catalog/#1}
   }
 
-% special cases, AcroForm is above
-\@@_dict_gnew:n { Catalog / OCProperties }
 
 \clist_const:Nn \c_@@_dict_Catalog_seq_clist
   {
@@ -2500,7 +2501,7 @@
 \clist_map_inline:Nn \c_@@_dict_Catalog_seq_clist
  {
    \seq_new:c { g_@@_dict_/Catalog/#1_seq } % new name later
-   \cs_new_protected:cpn { @@_dict_/Catalog/#1_gput:n } ##1
+   \cs_new_protected:cpn { @@_dict_handler/Catalog/#1_gput:n } ##1
      {
        \seq_gput_right:cx { g_@@_dict_/Catalog/#1_seq } { \pdf_object_ref:n { ##1 } }
      }
@@ -2511,14 +2512,14 @@
 \clist_map_inline:nn { AcroForm/Fields, AcroForm/CO }
   {
     \seq_new:c { g_@@_dict_/Catalog/#1_seq } % new name later
-    \cs_new_protected:cpn { @@_dict_/Catalog/#1_gput:n } ##1
+    \cs_new_protected:cpn { @@_dict_handler/Catalog/#1_gput:n } ##1
       {
         \seq_gput_right:cx { g_@@_dict_/Catalog/#1_seq } { ##1 }
       }
  }
 
 
-\cs_new_protected:cpn { @@_dict_/Catalog/OCProperties/D_gput:n } #1
+\cs_new_protected:cpn { @@_dict_handler/Catalog/OCProperties/D_gput:n } #1
   {
     \seq_gput_left:cx
       { g_@@_dict_/Catalog/OCProperties/Configs_seq }
@@ -2573,7 +2574,7 @@
 % /Catalog/AcroForm/Fields  (array),
 % /Catalog/AcroForm/CO      (array),
 % /Catalog/AcroForm/DR/Font (dict),
-% /Catalog/AcroForm/DR (dict),
+% /Catalog/AcroForm/DR      (dict),
 % /Catalog/AcroForm
 %
 % \begin{macro}{\@@_dict_/Catalog/AcroForm_gpush:}
@@ -2587,7 +2588,7 @@
             { g_@@_dict_/Catalog/AcroForm/Fields_obj }
             { \seq_use:cn { g_@@_dict_/Catalog/AcroForm/Fields_seq } {~} }
         \exp_args:Nnnx
-          \prop_gput:cnn %we have to use \prop here to avoid the handler ...
+          \prop_gput:cnn %do wewe have to use \prop here to avoid the handler ...
             { \__pdf_dict_Xname:n { Catalog/AcroForm } }
             { Fields }
             { \@@_backend_object_ref:n { g_@@_dict_/Catalog/AcroForm/Fields_obj } }
