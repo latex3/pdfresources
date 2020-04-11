@@ -18,8 +18,8 @@ some text
 \pdfdict_put:nnx {Page} {SSS}{\attributecontent}
 
 \newpage
-\pdf_pageattr_gremove:n {Rotate}
-\pdf_pageattr_gremove:n {CropBox}
+\pdfdict_remove:nn {Page}{Rotate}
+\pdfdict_remove:nn {Page}{CropBox}
 some text more text
 \begin{figure}[p]
 \rule{1cm}{15cm}

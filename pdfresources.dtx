@@ -317,7 +317,7 @@
 
 \@@_BACKEND_thispage_shipout_gput:n
   {
-    \exp_args:NV \@@_backend_PageN_gpush:n           { \g_@@_abspage_int }
+    \exp_args:NV \@@_backend_ThisPage_gpush:n           { \g_@@_abspage_int }
     \exp_args:NV \@@_backend_PageN_Resources_gpush:n { \g_@@_abspage_int }
   }
 
@@ -622,8 +622,24 @@
 % local / global
 \cs_new_protected:Npn \@@_dict_remove:nn #1 #2 %path,key
   {
-    \use:c { prop_\@@_dict_get_g:n{#1}remove:cn }
-           { \@@_dict_Xname:n { #1 } } { #2 }
+    \@@_dict_if_exist:nTF { #1 }
+          {
+            \cs_if_exist:cTF
+              { @@_dict_handler/#1/?_\@@_dict_get_g:n{#1}remove:n } %general, name independant handler
+              { \use:c {@@_dict_handler/#1/?_\@@_dict_get_g:n{#1}remove:n} {#2} }
+              {
+                \cs_if_exist:cTF
+                  { @@_dict_handler/#1/#2_\@@_dict_get_g:n{#1}remove: }
+                  { \use:c {@@_dict_handler/#1/#2_\@@_dict_get_g:n{#1}remove:} } %special handler
+                  {
+                    \use:c { prop_\@@_dict_get_g:n{#1}remove:cn }
+                      { \@@_dict_Xname:n { #1 } }{ #2 }
+                  }
+              }
+          }
+          {
+            \msg_error:nnn { pdfdict } { unknown-dict } { /#1 }
+          }
   }
 
 
@@ -1002,8 +1018,8 @@
 % \begin{macro}{\@@_backend_Page_primitive:n,
 %               \@@_backend_Page_gput:nn,
 %               \@@_backend_Page_gremove:n,
-%               \@@_backend_PageN_gput:nn,
-%               \@@_backend_PageN_gpush:n }
+%               \@@_backend_ThisPage_gput:nn,
+%               \@@_backend_ThisPage_gpush:n }
 % \cs{@@_backend_Page_primitive:n} is the primitive command to add
 % something to the /Page dictionary.
 % It works differently for the backends: pdftex and luatex overwrite existing
@@ -1011,8 +1027,8 @@
 % The higher level code has to take this into account.
 % \cs{@@_backend_Page_gput:nn} stores default values.
 % \cs{@@_backend_Page_gremove:n} allows to remove a value.
-% \cs{@@_backend_PageN_gput:nn} adds a value to the current page.
-% \cs{@@_backend_PageN_gpush:n} merges the default and the page value and
+% \cs{@@_backend_ThisPage_gput:nn} adds a value to the current page.
+% \cs{@@_backend_ThisPage_gpush:n} merges the default and the page value and
 % adds it to the dictionary of the current page in
 % \cs{g_@@_BACKEND_thispage_shipout_tl}.
 %    \begin{macrocode}
@@ -1048,7 +1064,7 @@
  % \latelua: fill a page related table with lualatex, merge it with the page
  % table and push it directly
  % write to aux and store in prop with pdflatex
-  \cs_new_protected:Npn \@@_backend_PageN_gput:nn #1 #2
+  \cs_new_protected:Npn \@@_backend_ThisPage_gput:nn #1 #2
     {
       \int_gincr:N\g_@@_backend_resourceid_int
       \zref@labelbylist {l3pdf\int_use:N\g_@@_backend_resourceid_int} {l3pdf}
@@ -1066,7 +1082,7 @@
   %merges the two props and then fills the register in pdflatex
   %merges the two tables and then fills (in lua) in luatex
   %issues the values stored in the global prop with dvi
-  \cs_new_protected:Npn \@@_backend_PageN_gpush:n #1
+  \cs_new_protected:Npn \@@_backend_ThisPage_gpush:n #1
     {
       \@@_dict_gmerge:nnN {backend_Page}{backend_Page#1}\g_@@_tmpa_prop
       \exp_args:Nx \@@_backend_Page_primitive:n
@@ -1119,7 +1135,7 @@
  % \latelua: fill a page related table with lualatex, merge it with the page
  % table and push it directly
  % write to aux and store in prop with pdflatex
-  \cs_new_protected:Npn \@@_backend_PageN_gput:nn #1 #2
+  \cs_new_protected:Npn \@@_backend_ThisPage_gput:nn #1 #2
     {
       \tex_latelua:D
         {
@@ -1136,7 +1152,7 @@
   %merges the two props and then fills the register in pdflatex
   %merges the two tables (the one is probably still empty) and then fills (in lua) in luatex
   %issues the values stored in the global prop with dvi
-  \cs_new_protected:Npn \@@_backend_PageN_gpush:n #1
+  \cs_new_protected:Npn \@@_backend_ThisPage_gpush:n #1
     {
       \tex_latelua:D
         {
@@ -1171,7 +1187,7 @@
   % \latelua: fill a page related table with lualatex, merge it with the page
   % table and push it directly
   % write to aux and store in prop with pdflatex
-    \cs_new_protected:Npn \@@_backend_PageN_gput:nn #1 #2
+    \cs_new_protected:Npn \@@_backend_ThisPage_gput:nn #1 #2
       {
         \@@_backend_Page_primitive:n { /#1~#2 }
       }
@@ -1180,7 +1196,7 @@
   %merges the two tables (the one is probably still empty)
   % and then fills (in lua) in luatex
   %issues the values stored in the global prop with dvi
-    \cs_new_protected:Npn \@@_backend_PageN_gpush:n #1
+    \cs_new_protected:Npn \@@_backend_ThisPage_gpush:n #1
       {
         \exp_args:Nx \@@_backend_Page_primitive:n
           { \@@_dict_map_dict_item:n {backend_Page} }
@@ -1212,7 +1228,7 @@
   % \latelua: fill a page related table with lualatex, merge it with the page
   % table and push it directly
   % write to aux and store in prop with pdflatex
-    \cs_new_protected:Npn \@@_backend_PageN_gput:nn #1 #2
+    \cs_new_protected:Npn \@@_backend_ThisPage_gput:nn #1 #2
       {
         \@@_backend_Page_primitive:n { /#1~#2 }
       }
@@ -1221,7 +1237,7 @@
   %merges the two tables (the one is probably still empty)
   %and then fills (in lua) in luatex
   %issues the values stored in the global prop with dvi
-    \cs_new_protected:Npn \@@_backend_PageN_gpush:n #1
+    \cs_new_protected:Npn \@@_backend_ThisPage_gpush:n #1
       {
         \exp_args:Nx \@@_backend_Page_primitive:n
           { \@@_dict_map_dict_item:n {backend_Page} }
@@ -1230,61 +1246,49 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \subsubsection{pdfpageattr/management}
+% \subsubsection{pdfdict: Page, ThisPage (pdfpageattr)/management}
 % \begin{NOTE}{UF}
 % Open is the question if one need a command to set attribute on a page by page number.
 % Open is the setter for /AF (and perhaps /OutputIntents).
 % See also https://tex.stackexchange.com/questions/479812/extension-of-rotating-package-to-set-pdf-rotation
 % (should work now)
 % \end{NOTE}
-% \begin{function}[added = 2019-06-04]
-%   {\pdf_pageattr_gput:nn, \pdf_pageattr_gput:nx}
+% \begin{function}[added = 2020-04-12]
+%   {pdfdict: Page}
 %   \begin{syntax}
-%     \cs{pdf_pageattr_gput:nn} \Arg{name} \Arg{value}
+%     \cs{pdfdict_put:nnn} \{Page\} \Arg{name} \Arg{value}
 %   \end{syntax}
-%   Adds |/|\meta{name} \meta{value} to the page dictionary of the
+%   Value added to the dictionary \texttt{Page} are added to the page dictionary of the
 %   current page and the following pages. The current page means the page on which
 %   the command is executed. \meta{name} should be a valid pdf name
-%   without the leading slash, \meta{value} should be a valid pdf value.
+%   without the leading slash. Typical names used here are e.g. \texttt{Rotate} and \texttt{CropBox}.
+%   \meta{value} should be a valid pdf value.
 %   Any escaping or (re)encoding must be done explicitly. Some backends expand the
 %   value but this should not be relied on.
 %   To avoid problems with the asynchronous page breaking
 %   the command should be used after \cs{newpage}, or in the header,
-%   and better not in float.
+%   and better not in a float.
 %   The value is assigned directly and is always stored globally.
 %   If a \meta{name} is used twice, only the last \meta{value}
 %   set will be used. Names set with \cs{pdf_thispageattr_gput:nn} will overwrite
 %   names set with \cs{pdf_pageattr_gput:nn} if there is a clash.
+%   Values can be removed again with \cs{pdfdict_remove:nn}
 % \end{function}
-% \begin{function}[added = 2019-06-04]
-%   {
-%    \pdf_pageattr_gremove:n
-%   }
+% \begin{function}[added = 2020-04-12]
+%   { pdfdict: ThisPage}
 %   \begin{syntax}
-%     \cs{pdf_pageattr_gremove:n} \Arg{name}
-%   \end{syntax}
-%   Removes |/|\meta{name} and its associated \meta{value} added by
-%   \cs{pdf_pageattr_gput:nn} from the page dictionaries of the current
-%   and the following pages.
-%   If \meta{name} is not found no change occurs,
-%   \emph{i.e}~there is no need to test for the existence of a name before
-%   trying to remove it. It doesn't affect values set with
-%   \cs{pdf_thispageattr_gput:nn}.
-% \end{function}
-% \begin{function}[added = 2019-06-19]
-%   {\pdf_thispageattr_gput:nn, \pdf_thispageattr_gput:nx}
-%   \begin{syntax}
-%     \cs{pdf_thispageattr_gput:nn}  \Arg{name} \Arg{value}
+%     \cs{pdfdict_put:nnn} \{ThisPage\} \Arg{name} \Arg{value}
 %   \end{syntax}
 %   Adds |/|\meta{name} \meta{value} at shipout to the page dictionary of the
 %   current page.
-%   It is always stored globally. If \Arg{name} has already a value set with
-%   \cs{pdf_pageattr_gput:nn} it will overwrite it for this page.
+%   It is always stored globally. If \Arg{name} has already a value set in the \texttt{Page}
+%   dictionary it will be overwritte for this page.
 %   \meta{name} should be a valid pdf name without the leading slash,
 %   \meta{value} should be a valid pdf value. Any escaping or (re)encoding must be
 %   done explicitly. If a \meta{name} is used twice, only the last \meta{value}
 %   set will be used.
 %   With the engine pdflatex (at least) a second compilation is needed.
+%   Value added to \texttt{ThisPage} can not be removed.
 % \end{function}
 %    \begin{macrocode}
 % setter.
@@ -1292,45 +1296,34 @@
 \@@_dict_gnew:n { Page }
 \@@_dict_gnew:n { ThisPage }
 
-\cs_new_protected:Npn \pdf_pageattr_gput:nn #1 #2
-  {
-    \@@_backend_Page_gput:nn { #1 }{ #2 }
-  }
-
-\cs_generate_variant:Nn \pdf_pageattr_gput:nn {nx}
-
 %handler for pdfdict
 \cs_new_protected:cpn { @@_dict_handler/Page/?_gput:nn } #1 #2
   {
-    \prop_gput:cnn  { \@@_dict_gname:n { ThisPage } }{ #1 } { #2 }
+    \prop_gput:cnn  { \@@_dict_gname:n { Page } }{ #1 } { #2 }
     \@@_backend_Page_gput:nn { #1 }{ #2 }
   }
 % remove:
-%^^A documentated
-\cs_new_protected:Npn \pdf_pageattr_gremove:n #1
+\cs_new_protected:cpn { @@_dict_handler/Page/?_gremove:n } #1
   {
+    \prop_gremove:cn  { \@@_dict_gname:n { Page } }{ #1 }
     \@@_backend_Page_gremove:n { #1 }
   }
-
-% add to this page:
-%^^A documentated
-\cs_new_protected:Npn \pdf_thispageattr_gput:nn #1 #2
-  {
-    \prop_gput:cnn  { \@@_dict_gname:n { ThisPage } }{ #1 } { #2 }
-    \@@_backend_PageN_gput:nn { #1 }{ #2 }
-  }
-
-\cs_generate_variant:Nn \pdf_thispageattr_gput:nn {nx}
 
 % handler for pdfdict
 \cs_new_protected:cpn { @@_dict_handler/ThisPage/?_gput:nn } #1 #2
   {
-    \@@_backend_PageN_gput:nn { #1 }{ #2 }
+    \prop_gput:cnn  { \@@_dict_gname:n { ThisPage } }{ #1 } { #2 }
+    \@@_backend_ThisPage_gput:nn { #1 }{ #2 }
   }
 
+\cs_new_protected:cpn { @@_dict_handler/ThisPage/?_gremove:n } #1
+  {
+   %!!!!!!!! do we need this?
+    %\prop_gremove:cn  { \@@_dict_gname:n { ThisPage } }{ #1 }
+    %\@@_backend_PageN_gremove:n { #1 }
+  }
 %    \end{macrocode}
 %
-
 %
 % \subsection{page resources:  Properties and bdc-mark}
 % \begin{NOTE}{UF}
@@ -3577,12 +3570,12 @@ local function @@_backend_Page_gclear ()
  @@.Page.dflt={}
 end
 
-local function @@_backend_PageN_gput (page,name,value)
+local function @@_backend_ThisPage_gput (page,name,value)
  @@.Page[page] = @@.Page[page] or {}
  @@.Page[page][name]=value
 end
 
-local function @@_backend_PageN_gpush (page)
+local function @@_backend_ThisPage_gpush (page)
  local token=""
  local t = {}
  local tkeys= {}
@@ -3606,11 +3599,11 @@ local function @@_backend_PageN_gpush (page)
 end
 
 function l3kernel.@@.backend_PageN_gput (page,name,value) -- tex.count["g_@@_abspage_int"]
- @@_backend_PageN_gput (page,name,value)
+ @@_backend_ThisPage_gput (page,name,value)
 end
 
 function l3kernel.@@.backend_PageN_gpush (page)
-  pdf.setpageattributes(@@_backend_PageN_gpush (page))
+  pdf.setpageattributes(@@_backend_ThisPage_gpush (page))
 end
 
 function l3kernel.@@.backend_Page_gput (name,value)
