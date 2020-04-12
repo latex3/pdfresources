@@ -1018,8 +1018,8 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \subsection{pdfpageattr}
-% \subsubsection{pdfpageattr/backend}
+% \subsection{pdfdict: Page (pdfpageattr)}
+% \subsubsection{pdfdict: Page (pdfpageattr)/backend}
 % \begin{NOTE}{UF}
 %  path: Page
 %  The engines differ a lot here: pdflatex and lualatex uses a register while with
@@ -1279,10 +1279,11 @@
 %   \begin{syntax}
 %     \cs{pdfdict_put:nnn} \{Page\} \Arg{name} \Arg{value}
 %   \end{syntax}
-%   Value added to the dictionary \texttt{Page} are added to the page dictionary of the
-%   current page and the following pages. The current page means the page on which
-%   the command is executed. \meta{name} should be a valid pdf name
-%   without the leading slash. Typical names used here are e.g. \texttt{Rotate} and \texttt{CropBox}.
+%   Values added to the dictionary \texttt{Page} are added to the page dictionary
+%   of the current page and the following pages. The current page means the page
+%   on which the command is executed. \meta{name} should be a valid pdf name
+%   without the leading slash. Typical names used here are e.g.
+%   \texttt{Rotate} and \texttt{CropBox}.
 %   \meta{value} should be a valid pdf value.
 %   Any escaping or (re)encoding must be done explicitly. Some backends expand the
 %   value but this should not be relied on.
@@ -1291,8 +1292,8 @@
 %   and better not in a float.
 %   The value is assigned directly and is always stored globally.
 %   If a \meta{name} is used twice, only the last \meta{value}
-%   set will be used. Names set with \cs{pdf_thispageattr_gput:nn} will overwrite
-%   names set with \cs{pdf_pageattr_gput:nn} if there is a clash.
+%   set will be used. Names set with \cs{pdfdict_put:nnn}|{ThisPage}| will overwrite
+%   names set with \cs{pdfdict_put:nnn}|{Page}| if there is a clash.
 %   Values can be removed again with \cs{pdfdict_remove:nn}
 % \end{function}
 % \begin{function}[added = 2020-04-12]
@@ -1301,15 +1302,17 @@
 %     \cs{pdfdict_put:nnn} \{ThisPage\} \Arg{name} \Arg{value}
 %   \end{syntax}
 %   Adds |/|\meta{name} \meta{value} at shipout to the page dictionary of the
-%   current page.
-%   It is always stored globally. If \Arg{name} has already a value set in the \texttt{Page}
+%   current page. Current page means here the shipout page.
+%   It is always stored globally.
+%   If \Arg{name} has already a value set in the \texttt{Page}
 %   dictionary it will be overwritte for this page.
 %   \meta{name} should be a valid pdf name without the leading slash,
 %   \meta{value} should be a valid pdf value. Any escaping or (re)encoding must be
 %   done explicitly. If a \meta{name} is used twice, only the last \meta{value}
 %   set will be used.
 %   With the engine pdflatex (at least) a second compilation is needed.
-%   Value added to \texttt{ThisPage} can not be removed.
+%   Values added to \texttt{ThisPage} can not be removed. It is not possible to
+%   show the content of this dictionary with \cs{pdfdict_show:n}.
 % \end{function}
 %    \begin{macrocode}
 % setter.
@@ -1607,7 +1610,7 @@
   }
 
 % pdflatex is the most complicated as it has to go through the aux ...
-% !!! the push command will have to be extended to take other resources too
+% the push command is extended to take other resources too
 \bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
   {
     \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
@@ -2111,7 +2114,7 @@
 % fine, see experiment colorspace-resources.
 % As pgf does the same, there is a need to patch it for now. Ditto for package colorspace.
 % \end{NOTE}
-% \subsubsection{page resources: ExtGState, ColorSpace, Shading, Pattern/backend}
+% \subsubsection{pdfdict: page resources: ExtGState, ColorSpace, Shading, Pattern/backend}
 % Path: Page/Resources/ExtGState etc. The actual output of the resources is handled
 % together with the bdc/Properties. Here is only special code.
 % \begin{macro}{\@@_backend_PageResources_gput:nnn}
@@ -2207,10 +2210,9 @@
       {
         \@@_backend:n {put~@resources~<<#1>>}
       }
-    %\@@_dict_gnew:n {Page/Resources/ExtGState} ???? global/local problem.
     \cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
       {
-       % this is not used for output, put there is a test if the resource is empty
+       % this is not used for output, but there is a test if the resource is empty
        \prop_gput:cnn { \@@_dict_gname:n {Page/Resources/#1} } { #2 }{ #3 }
        %objects are not filled with \pdf_object_write as this is not additive!
         \@@_backend:x
@@ -2377,7 +2379,7 @@
 %    URI                     &  objref or dict \\
 %    Version                 &  name           & eg. \texttt{/1.7} \\
 %    \meta{unknown}          &                 & an unknown \meta{name} will be
-%                                                inserted with a warning.\\
+%                                                inserted without a warning.\\
 %   \end{tabularx}
 %   \par\medskip
 %
