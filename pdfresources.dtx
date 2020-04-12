@@ -2089,7 +2089,7 @@
 % \subsubsection{page resources: ExtGState, ColorSpace, Shading, Pattern/backend}
 % Path: PageN/Resources/ExtGState etc. The actual output of the resources is handled
 % together with the bdc/Properties. Here is only special code.
-% \begin{macro}{\@@_backend_PageNResources_gput:nnn}
+% \begin{macro}{\@@_backend_PageResources_gput:nnn}
 % stores values for the page resources.
 % \begin{arguments}
 % \item name of the resource (ExtGState, ColorSpace, Shading, Pattern)
@@ -2130,7 +2130,7 @@
  % values are only stored in a prop and will be output at end document.
     \sys_if_engine_luatex:TF
       {
-        \cs_new_protected:Npn \@@_backend_PageNResources_gput:nnn #1 #2 #3
+        \cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
           {
             \@@_dict_handler_put:nnn {PageN/Resources/#1} { #2 }{ #3 }
             % luatex must also trigger the lua side
@@ -2142,7 +2142,7 @@
           }
       }
       { %pdftex
-        \cs_new_protected:Npn \@@_backend_PageNResources_gput:nnn #1 #2 #3
+        \cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
           {
             \@@_dict_handler_put:nnn {PageN/Resources/#1} { #2 }{ #3 }
           }
@@ -2183,7 +2183,7 @@
         \@@_backend:n {put~@resources~<<#1>>}
       }
     %\@@_dict_gnew:n {PageN/Resources/ExtGState} ???? global/local problem.
-    \cs_new_protected:Npn \@@_backend_PageNResources_gput:nnn #1 #2 #3
+    \cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
       {
        % this is not used for output, put there is a test if the resource is empty
        \prop_gput:cnn { \@@_dict_gname:n {PageN/Resources/#1} } { #2 }{ #3 }
@@ -2201,7 +2201,7 @@
 \bool_if:nT { \sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p: }
   {
     \cs_new_protected:Npn \@@_backend_PageNResources:n #1 {}
-    \cs_new_protected:Npn \@@_backend_PageNResources_gput:nnn #1 #2 #3
+    \cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
       { %only for the show command TEST!!
         %\@@_dict_handler_put:nnn {PageN/Resources/#1} { #2 }{ #3 }
       }
@@ -2255,22 +2255,22 @@
 
 \cs_new_protected:cpn { @@_dict_handler/Page/Resources/ExtGState/?_gput:nn } #1 #2
   {
-    \@@_backend_PageNResources_gput:nnn {ExtGState} { #1 }{ #2 }
+    \@@_backend_PageResources_gput:nnn {ExtGState} { #1 }{ #2 }
   }
 
 \cs_new_protected:cpn { @@_dict_handler/Page/Resources/ColorSpace/?_gput:nn } #1 #2
   {
-    \@@_backend_PageNResources_gput:nnn {ColorSpace} { #1 }{ #2 }
+    \@@_backend_PageResources_gput:nnn {ColorSpace} { #1 }{ #2 }
   }
 
 \cs_new_protected:cpn { @@_dict_handler/Page/Resources/Shading/?_gput:nn } #1 #2
   {
-    \@@_backend_PageNResources_gput:nnn {Shading} { #1 }{ #2 }
+    \@@_backend_PageResources_gput:nnn {Shading} { #1 }{ #2 }
   }
 
 \cs_new_protected:cpn { @@_dict_handler/Page/Resources/Pattern/?_gput:nn } #1 #2
   {
-    \@@_backend_PageNResources_gput:nnn {Pattern} { #1 }{ #2 }
+    \@@_backend_PageResources_gput:nnn {Pattern} { #1 }{ #2 }
   }
 
 %    \end{macrocode}
@@ -3464,15 +3464,15 @@
 
 \cs_new:Npn \@@_patch_pgfextgs:w  #1/#2<<#3>>#4\q_stop
   {
-    \@@_backend_PageNResources_gput:nnn {ExtGState}{#2}{<<#3>>}
+    \@@_backend_PageResources_gput:nnn {ExtGState}{#2}{<<#3>>}
   }
 \cs_new:Npn \@@_patch_pgfpatterns:w  #1/#2\space#3\q_stop
   {
-    \exp_args:Nnnx \@@_backend_PageNResources_gput:nnn {Pattern}{#2}{#3}
+    \exp_args:Nnnx \@@_backend_PageResources_gput:nnn {Pattern}{#2}{#3}
   }
 \cs_new:Npn \@@_patch_pgfcolorspaces:w  #1/#2[#3]#4\q_stop
   {
-    \@@_backend_PageNResources_gput:nnn {ColorSpace}{#2}{[#3]}
+    \@@_backend_PageResources_gput:nnn {ColorSpace}{#2}{[#3]}
   }
 
 %    \end{macrocode}
@@ -3484,13 +3484,13 @@
   {
     \def\TRP@addresource
       {
-        \@@_backend_PageNResources_gput:nnn{ExtGState}{TRP1}{<</ca~1/CA~1>>}
+        \@@_backend_PageResources_gput:nnn{ExtGState}{TRP1}{<</ca~1/CA~1>>}
       }
     \def\transparent@use#1
       {
         \tl_if_exist:cF{TRP#1}
           {
-            \@@_backend_PageNResources_gput:nnn
+            \@@_backend_PageResources_gput:nnn
               {ExtGState}
               {TRP#1}
               {<</ca~#1/CA~#1>>}
