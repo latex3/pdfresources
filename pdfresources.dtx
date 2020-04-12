@@ -1414,7 +1414,7 @@
 \bool_new:N \l_@@_backend_xform_bool
 \@@_dict_gnew:n {xform/Resources/Properties}
 %quite often needed
-\clist_const:Nn \c_@@_backend_PageNResources_clist
+\clist_const:Nn \c_@@_backend_PageResources_clist
   {
     ExtGState,
     ColorSpace,
@@ -1505,7 +1505,7 @@
   % at shipout
   \cs_new_protected:Npn \@@_backend_PageResources_gpush:n #1
     {
-      \clist_map_inline:Nn \c_@@_backend_PageNResources_clist
+      \clist_map_inline:Nn \c_@@_backend_PageResources_clist
         {
           \prop_if_empty:cF { \@@_dict_gname:n {PageN/Resources/##1} }
             {
@@ -1684,7 +1684,7 @@
              }
            %% add ExtGState etc
            \clist_map_function:NN
-             \c_@@_backend_PageNResources_clist
+             \c_@@_backend_PageResources_clist
              \@@_backend_PageResources_gpush_aux:n
          }
     }
@@ -2102,7 +2102,7 @@
 % backend commands the command to fill the register
 % and to push the values.
 % xelatex doesn't need the dict, but it can be used to show the content
-\clist_map_inline:Nn \c_@@_backend_PageNResources_clist
+\clist_map_inline:Nn \c_@@_backend_PageResources_clist
       {
         \@@_dict_gnew:n {PageN/Resources/#1}
       }
@@ -2114,7 +2114,7 @@
     \sys_if_engine_luatex_p:
   }
   { %create the backend objects:
-    \clist_map_inline:Nn \c_@@_backend_PageNResources_clist
+    \clist_map_inline:Nn \c_@@_backend_PageResources_clist
       {
         \@@_backend_object_new:nn {Page/Resources/#1} {dict}
         \cs_if_exist:NT \tex_directlua:D
@@ -2151,7 +2151,7 @@
  % code for end of document code
    \cs_new_protected:Npn \@@_PageNResources_gpush:
      {
-       \clist_map_inline:Nn \c_@@_backend_PageNResources_clist
+       \clist_map_inline:Nn \c_@@_backend_PageResources_clist
          {
            \prop_if_empty:cF
              { \@@_dict_gname:n {PageN/Resources/##1} }
@@ -2172,7 +2172,7 @@
 \sys_if_engine_xetex:T
   {
   %objects should not only be created but also "initialized"
-    \clist_map_inline:Nn \c_@@_backend_PageNResources_clist
+    \clist_map_inline:Nn \c_@@_backend_PageResources_clist
       {
         \@@_backend_object_new:nn   { Page/Resources/#1 } { dict }
         \@@_backend_object_write:nn { Page/Resources/#1 } {}
