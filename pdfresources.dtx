@@ -1512,7 +1512,7 @@
               \__kernel_backend_literal:x
                 {
                   pdf:put~@resources~
-                    <</##1~\@@_backend_object_ref:n {PageN/Resources/##1}>>
+                    <</##1~\@@_backend_object_ref:n {Page/Resources/##1}>>
                 }
             }
         }
@@ -1664,7 +1664,7 @@
       \prop_if_empty:cF
         { \@@_dict_gname:n {PageN/Resources/#1} }
         {
-          \@@_dict_objref_item:nn { #1 }{PageN/Resources/#1}
+          \@@_dict_objref_item:nn { #1 }{Page/Resources/#1}
         }
     }
 
@@ -1798,7 +1798,7 @@
 
 %    \end{macrocode}
 %
-%   \subsubsection{pdfxform/backend }
+%  \subsubsection{pdfxform/backend }
 %  \begin{macro}{ \@@_backend_xform_new:nnnn }
 %  \begin{arguments}
 %  \item name
@@ -1854,22 +1854,22 @@
             \prop_if_empty:cF
               { \@@_dict_gname:n {PageN/Resources/ExtGState} }
               {
-                /ExtGState~ \pdf_object_ref:n {PageN/Resources/ExtGState}
+                /ExtGState~ \pdf_object_ref:n {Page/Resources/ExtGState}
               }
             \prop_if_empty:cF
               { \@@_dict_gname:n {PageN/Resources/Pattern} }
               {
-                /Pattern~ \pdf_object_ref:n {PageN/Resources/Pattern}
+                /Pattern~ \pdf_object_ref:n {Page/Resources/Pattern}
               }
             \prop_if_empty:cF
               { \@@_dict_gname:n {PageN/Resources/Shading} }
               {
-                /Shading~ \pdf_object_ref:n {PageN/Resources/Shading}
+                /Shading~ \pdf_object_ref:n {Page/Resources/Shading}
               }
             \prop_if_empty:cF
               { \@@_dict_gname:n {PageN/Resources/ColorSpace} }
               {
-                /ColorSpace~ \pdf_object_ref:n {PageN/Resources/ColorSpace}
+                /ColorSpace~ \pdf_object_ref:n {Page/Resources/ColorSpace}
               }
           }
           \l_@@_tmpa_box
@@ -1936,22 +1936,22 @@
             \prop_if_empty:cF
               { \@@_dict_gname:n {PageN/Resources/ExtGState} }
               {
-                /ExtGState~ \pdf_object_ref:n {PageN/Resources/ExtGState}
+                /ExtGState~ \pdf_object_ref:n {Page/Resources/ExtGState}
               }
             \prop_if_empty:cF
               { \@@_dict_gname:n {PageN/Resources/Pattern} }
               {
-                /Pattern~ \pdf_object_ref:n {PageN/Resources/Pattern}
+                /Pattern~ \pdf_object_ref:n {Page/Resources/Pattern}
               }
             \prop_if_empty:cF
               { \@@_dict_gname:n {PageN/Resources/Shading} }
               {
-                /Shading~ \pdf_object_ref:n {PageN/Resources/Shading}
+                /Shading~ \pdf_object_ref:n {Page/Resources/Shading}
               }
             \prop_if_empty:cF
               { \@@_dict_gname:n {PageN/Resources/ColorSpace} }
               {
-                /ColorSpace~ \pdf_object_ref:n {PageN/Resources/ColorSpace}
+                /ColorSpace~ \pdf_object_ref:n {Page/Resources/ColorSpace}
               }
           }
           \l_@@_tmpa_box
@@ -2020,21 +2020,21 @@
           {
             put~ @resources ~
               <<
-                /ExtGState~ \pdf_object_ref:n {PageN/Resources/ExtGState}
+                /ExtGState~ \pdf_object_ref:n {Page/Resources/ExtGState}
               >>
           }
         \@@_backend:x
           {
             put~ @resources ~
             <<
-              /Pattern~ \pdf_object_ref:n {PageN/Resources/Pattern}
+              /Pattern~ \pdf_object_ref:n {Page/Resources/Pattern}
             >>
           }
         \@@_backend:x
           {
             put~ @resources ~
             <<
-              /Shading~ \pdf_object_ref:n {PageN/Resources/Shading}
+              /Shading~ \pdf_object_ref:n {Page/Resources/Shading}
             >>
           }
         \@@_backend:x
@@ -2042,7 +2042,7 @@
             put~ @resources ~
             <<
               /ColorSpace~
-              \pdf_object_ref:n {PageN/Resources/ColorSpace}
+              \pdf_object_ref:n {Page/Resources/ColorSpace}
             >>
           }
         \exp_args:Nx
@@ -2116,14 +2116,14 @@
   { %create the backend objects:
     \clist_map_inline:Nn \c_@@_backend_PageNResources_clist
       {
-        \@@_backend_object_new:nn {PageN/Resources/#1} {dict}
+        \@@_backend_object_new:nn {Page/Resources/#1} {dict}
         \cs_if_exist:NT \tex_directlua:D
           {
             \tex_directlua:D
               {
-                l3kernel.@@.object["PageN/Resources/#1"]
+                l3kernel.@@.object["Page/Resources/#1"]
                 =
-                "\@@_backend_object_ref:n{PageN/Resources/#1}"
+                "\@@_backend_object_ref:n{Page/Resources/#1}"
               }
           }
        }
@@ -2157,7 +2157,7 @@
              { \@@_dict_gname:n {PageN/Resources/##1} }
              {
                \@@_backend_object_write:nx
-                 { PageN/Resources/##1 }
+                 { Page/Resources/##1 }
                  { \@@_dict_map_dict_item:n {PageN/Resources/##1} }
              }
         }
@@ -2174,8 +2174,8 @@
   %objects should not only be created but also "initialized"
     \clist_map_inline:Nn \c_@@_backend_PageNResources_clist
       {
-        \@@_backend_object_new:nn   { PageN/Resources/#1 } { dict }
-        \@@_backend_object_write:nn { PageN/Resources/#1 } {}
+        \@@_backend_object_new:nn   { Page/Resources/#1 } { dict }
+        \@@_backend_object_write:nn { Page/Resources/#1 } {}
       }
 
     \cs_new_protected:Npn \@@_backend_PageNResources:n #1
@@ -2190,7 +2190,7 @@
        %objects are not filled with \pdf_object_write as this is not additive!
         \@@_backend:x
           {
-            put~\@@_backend_object_ref:n {PageN/Resources/#1}<</#2~#3>>
+            put~\@@_backend_object_ref:n {Page/Resources/#1}<</#2~#3>>
           }
       }
 
@@ -3418,9 +3418,9 @@
    %objects are already created ...
     \def\pgf@sys@pdf@possible@resources
       {
-        /ColorSpace~\pdf_object_ref:n {PageN/Resources/ColorSpace}
-        /Pattern   ~\pdf_object_ref:n {PageN/Resources/Pattern}
-        /ExtGState ~\pdf_object_ref:n {PageN/Resources/ExtGState}
+        /ColorSpace~\pdf_object_ref:n {Page/Resources/ColorSpace}
+        /Pattern   ~\pdf_object_ref:n {Page/Resources/Pattern}
+        /ExtGState ~\pdf_object_ref:n {Page/Resources/ExtGState}
       }
     \let\pgf@sys@pdf@check@resources=\relax%
     %not sure if needed, but perhaps the lists are used somewhere else ...
@@ -3637,7 +3637,7 @@ local function @@_backend_PageN_Resources_gpush (page)
  end
   for i,name in ipairs(ResourceList) do
    if l3kernel.@@.Page.Resources[name] then
-   token = token .. "/"..name.." "..l3kernel.pdf.object_ref("PageN/Resources/"..name)
+   token = token .. "/"..name.." "..l3kernel.pdf.object_ref("Page/Resources/"..name)
    end
   end
  return token
