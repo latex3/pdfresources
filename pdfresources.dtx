@@ -152,6 +152,13 @@
   }
 \msg_new:nnn  { pdfdict } { empty-value }
               { The~value~for~#1~is~empty~and~will~be~ignored }
+
+\msg_new:nnn  { pdfdict } { no-removal }
+              { It~is~not~possible~to~remove~values~from~dictionary~'#1'.}
+
+\msg_new:nnn  { pdfdict } { no-show }
+              { It~is~not~possible~to~show~the~dictionary~'#1'.}
+
 %    \end{macrocode}
 % \section{Preparation/helper Code}
 %^^A still needed:
@@ -657,17 +664,22 @@
 
 \cs_new_protected:Npn \@@_dict_show:Nn #1#2
   {
-    \prop_if_exist:cTF { \@@_dict_Xname:n { #2 } }
+    \cs_if_exist:cTF
+      { @@_dict_handler/#2/?_show: } %general, name independant handler
+      { \use:c {@@_dict_handler/#2/?_show:} }
       {
-         #1
-           { pdfdict } { show-dict }
-           { \tl_to_str:n {#2} }
-           { \prop_map_function:cN {\@@_dict_Xname:n { #2 }} \msg_show_item:nn }
-           { } { }
-      }
-      {
-        #1 { pdfdict } { unknown-dict } {#2}{}{}{}
-      }
+        \prop_if_exist:cTF { \@@_dict_Xname:n { #2 } }
+          {
+             #1
+               { pdfdict } { show-dict }
+               { \tl_to_str:n {#2} }
+               { \prop_map_function:cN {\@@_dict_Xname:n { #2 }} \msg_show_item:nn }
+               { } { }
+          }
+          {
+            #1 { pdfdict } { unknown-dict } {#2}{}{}{}
+          }
+       }
   }
 \cs_new_protected:Npn \@@_dict_show:n #1  %path
   {
@@ -1045,9 +1057,6 @@
 % \cs{g_@@_BACKEND_thispage_shipout_tl}.
 %    \begin{macrocode}
 %  backend commands
-%  a prop for global/default settings which are used for more than
-%  one page
-%\@@_dict_gnew:n {backend_Page}
 
 %pdflatex
 \bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
@@ -1330,10 +1339,14 @@
 
 \cs_new_protected:cpn { @@_dict_handler/ThisPage/?_gremove:n } #1
   {
-   %!!!!!!!! do we need this?
-    %\prop_gremove:cn  { \@@_dict_gname:n { ThisPage } }{ #1 }
-    %\@@_backend_PageN_gremove:n { #1 }
+    \msg_warning:nnn { pdfdict } { no-removal }{ThisPage}
   }
+
+\cs_new_protected:cpn { @@_dict_handler/ThisPage/?_show: } 
+  {
+    \msg_warning:nnn { pdfdict } { no-show }{ThisPage}
+  }
+
 %    \end{macrocode}
 %
 %
