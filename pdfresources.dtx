@@ -426,16 +426,16 @@
 %  /Catalog/MarkInfo
 %  /Catalog/ViewerPreferences
 %  /Pages           %w,  \pagesattr ->pdfdict
-%  /backend_Page    %!!!!! consider name Page?
-%  /backend_PageN   %!!!!! consider name PageN?
+%  /Page    %!!!!! consider name Page?
+%  /backend_ThisPage   %!!!!! consider name PageN?
 %  /backend_PageN/Resources/Properties %!!!!! consider name!!
-%  /PageN           %w, N=1,..n or empty (=all pages) \pageattr %used?
-%  /PageN/Resources %nw? \pageresources
-%  /PageN/Resources/ExtGState
-%  /PageN/Resources/ColorSpace
-%  /PageN/Resources/Pattern
-%  /PageN/Resources/Shading
-%  /PageN/Resources/Properties
+%  /Page           %w, N=1,..n or empty (=all pages) \pageattr %used?
+%  /Page/Resources %nw? \pageresources
+%  /Page/Resources/ExtGState
+%  /Page/Resources/ColorSpace
+%  /Page/Resources/Pattern
+%  /Page/Resources/Shading
+%  /Page/Resources/Properties
 %  /xform/Resources/Properties
 %  \end{verbatim}
 % \begin{macro}{\@@_dict_item:nn,\@@_dict_objref_item:nn}
@@ -1342,7 +1342,7 @@
     \msg_warning:nnn { pdfdict } { no-removal }{ThisPage}
   }
 
-\cs_new_protected:cpn { @@_dict_handler/ThisPage/?_show: } 
+\cs_new_protected:cpn { @@_dict_handler/ThisPage/?_show: }
   {
     \msg_warning:nnn { pdfdict } { no-show }{ThisPage}
   }
@@ -1532,7 +1532,7 @@
     {
       \clist_map_inline:Nn \c_@@_backend_PageResources_clist
         {
-          \prop_if_empty:cF { \@@_dict_gname:n {PageN/Resources/##1} }
+          \prop_if_empty:cF { \@@_dict_gname:n {Page/Resources/##1} }
             {
               \__kernel_backend_literal:x
                 {
@@ -1687,7 +1687,7 @@
   \cs_new:Npn \@@_backend_PageResources_gpush_aux:n #1 %#1 ExtGState etc
     {
       \prop_if_empty:cF
-        { \@@_dict_gname:n {PageN/Resources/#1} }
+        { \@@_dict_gname:n {Page/Resources/#1} }
         {
           \@@_dict_objref_item:nn { #1 }{Page/Resources/#1}
         }
@@ -1877,22 +1877,22 @@
               }
 
             \prop_if_empty:cF
-              { \@@_dict_gname:n {PageN/Resources/ExtGState} }
+              { \@@_dict_gname:n {Page/Resources/ExtGState} }
               {
                 /ExtGState~ \pdf_object_ref:n {Page/Resources/ExtGState}
               }
             \prop_if_empty:cF
-              { \@@_dict_gname:n {PageN/Resources/Pattern} }
+              { \@@_dict_gname:n {Page/Resources/Pattern} }
               {
                 /Pattern~ \pdf_object_ref:n {Page/Resources/Pattern}
               }
             \prop_if_empty:cF
-              { \@@_dict_gname:n {PageN/Resources/Shading} }
+              { \@@_dict_gname:n {Page/Resources/Shading} }
               {
                 /Shading~ \pdf_object_ref:n {Page/Resources/Shading}
               }
             \prop_if_empty:cF
-              { \@@_dict_gname:n {PageN/Resources/ColorSpace} }
+              { \@@_dict_gname:n {Page/Resources/ColorSpace} }
               {
                 /ColorSpace~ \pdf_object_ref:n {Page/Resources/ColorSpace}
               }
@@ -1959,22 +1959,22 @@
                   >>
               }
             \prop_if_empty:cF
-              { \@@_dict_gname:n {PageN/Resources/ExtGState} }
+              { \@@_dict_gname:n {Page/Resources/ExtGState} }
               {
                 /ExtGState~ \pdf_object_ref:n {Page/Resources/ExtGState}
               }
             \prop_if_empty:cF
-              { \@@_dict_gname:n {PageN/Resources/Pattern} }
+              { \@@_dict_gname:n {Page/Resources/Pattern} }
               {
                 /Pattern~ \pdf_object_ref:n {Page/Resources/Pattern}
               }
             \prop_if_empty:cF
-              { \@@_dict_gname:n {PageN/Resources/Shading} }
+              { \@@_dict_gname:n {Page/Resources/Shading} }
               {
                 /Shading~ \pdf_object_ref:n {Page/Resources/Shading}
               }
             \prop_if_empty:cF
-              { \@@_dict_gname:n {PageN/Resources/ColorSpace} }
+              { \@@_dict_gname:n {Page/Resources/ColorSpace} }
               {
                 /ColorSpace~ \pdf_object_ref:n {Page/Resources/ColorSpace}
               }
@@ -2112,7 +2112,7 @@
 % As pgf does the same, there is a need to patch it for now. Ditto for package colorspace.
 % \end{NOTE}
 % \subsubsection{page resources: ExtGState, ColorSpace, Shading, Pattern/backend}
-% Path: PageN/Resources/ExtGState etc. The actual output of the resources is handled
+% Path: Page/Resources/ExtGState etc. The actual output of the resources is handled
 % together with the bdc/Properties. Here is only special code.
 % \begin{macro}{\@@_backend_PageResources_gput:nnn}
 % stores values for the page resources.
@@ -2129,7 +2129,7 @@
 % xelatex doesn't need the dict, but it can be used to show the content
 \clist_map_inline:Nn \c_@@_backend_PageResources_clist
       {
-        \@@_dict_gnew:n {PageN/Resources/#1}
+        \@@_dict_gnew:n {Page/Resources/#1}
       }
 % pdftex and luatex
 \bool_if:nT
@@ -2157,7 +2157,7 @@
       {
         \cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
           {
-            \@@_dict_handler_put:nnn {PageN/Resources/#1} { #2 }{ #3 }
+            \@@_dict_put:nnn {Page/Resources/#1} { #2 }{ #3 }
             % luatex must also trigger the lua side
             \tex_latelua:D{l3kernel.@@.Page.Resources.#1=true}
             \tex_latelua:D
@@ -2169,7 +2169,7 @@
       { %pdftex
         \cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
           {
-            \@@_dict_handler_put:nnn {PageN/Resources/#1} { #2 }{ #3 }
+            \@@_dict_put:nnn {Page/Resources/#1} { #2 }{ #3 }
           }
       }
 
@@ -2179,11 +2179,11 @@
        \clist_map_inline:Nn \c_@@_backend_PageResources_clist
          {
            \prop_if_empty:cF
-             { \@@_dict_gname:n {PageN/Resources/##1} }
+             { \@@_dict_gname:n {Page/Resources/##1} }
              {
                \@@_backend_object_write:nx
                  { Page/Resources/##1 }
-                 { \@@_dict_map_dict_item:n {PageN/Resources/##1} }
+                 { \@@_dict_map_dict_item:n {Page/Resources/##1} }
              }
         }
      }
@@ -2203,15 +2203,15 @@
         \@@_backend_object_write:nn { Page/Resources/#1 } {}
       }
 
-    \cs_new_protected:Npn \@@_backend_PageNResources:n #1
+    \cs_new_protected:Npn \@@_backend_PageResources:n #1
       {
         \@@_backend:n {put~@resources~<<#1>>}
       }
-    %\@@_dict_gnew:n {PageN/Resources/ExtGState} ???? global/local problem.
+    %\@@_dict_gnew:n {Page/Resources/ExtGState} ???? global/local problem.
     \cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
       {
        % this is not used for output, put there is a test if the resource is empty
-       \prop_gput:cnn { \@@_dict_gname:n {PageN/Resources/#1} } { #2 }{ #3 }
+       \prop_gput:cnn { \@@_dict_gname:n {Page/Resources/#1} } { #2 }{ #3 }
        %objects are not filled with \pdf_object_write as this is not additive!
         \@@_backend:x
           {
@@ -2225,10 +2225,10 @@
 % dvips unneeded, or no-op
 \bool_if:nT { \sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p: }
   {
-    \cs_new_protected:Npn \@@_backend_PageNResources:n #1 {}
+    \cs_new_protected:Npn \@@_backend_PageResources:n #1 {}
     \cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
       { %only for the show command TEST!!
-        %\@@_dict_handler_put:nnn {PageN/Resources/#1} { #2 }{ #3 }
+        \@@_dict_put:nnn {Page/Resources/#1} { #2 }{ #3 }
       }
     \cs_new_protected:Npn \@@_PageResources_gpush: {}
   }
