@@ -326,7 +326,7 @@
   {
    % \@@_dict_Pages_gpush:            %pagesattr
    % \@@_dict_Info_gpush:             %pdfinfo
-    \@@_PageNResources_gpush:   %ExtGState etc
+    \@@_PageResources_gpush:   %ExtGState etc
   }
 
 \@@_BACKEND_end_run_gput:n
@@ -334,7 +334,7 @@
     \@@_dict_Pages_gpush:            %pagesattr
     \@@_dict_Info_gpush:             %pdfinfo
     \@@_dict_Catalog_gpush:
-   % \@@_PageNResources_gpush:   %ExtGState etc
+   % \@@_PageResources_gpush:   %ExtGState etc
   }
 %    \end{macrocode}
 % \end{macro}
@@ -2096,7 +2096,7 @@
 % \item a pdf name without slash
 % \item value
 % \end{arguments}
-% \begin{macro}{\@@_PageNResources_gpush:}
+% \begin{macro}{\@@_PageResources_gpush:}
 % This pushes out the objects. It is a no-op with xdvipdfmx and dvips.
 %    \begin{macrocode}
 % backend commands the command to fill the register
@@ -2149,7 +2149,7 @@
       }
 
  % code for end of document code
-   \cs_new_protected:Npn \@@_PageNResources_gpush:
+   \cs_new_protected:Npn \@@_PageResources_gpush:
      {
        \clist_map_inline:Nn \c_@@_backend_PageResources_clist
          {
@@ -2194,7 +2194,7 @@
           }
       }
 
-    \cs_new_protected:Npn \@@_PageNResources_gpush: {}
+    \cs_new_protected:Npn \@@_PageResources_gpush: {}
   }
 
 % dvips unneeded, or no-op
@@ -2205,7 +2205,7 @@
       { %only for the show command TEST!!
         %\@@_dict_handler_put:nnn {PageN/Resources/#1} { #2 }{ #3 }
       }
-    \cs_new_protected:Npn \@@_PageNResources_gpush: {}
+    \cs_new_protected:Npn \@@_PageResources_gpush: {}
   }
 %    \end{macrocode}
 % \end{macro}
