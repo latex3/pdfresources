@@ -318,7 +318,7 @@
 \@@_BACKEND_thispage_shipout_gput:n
   {
     \exp_args:NV \@@_backend_ThisPage_gpush:n           { \g_@@_abspage_int }
-    \exp_args:NV \@@_backend_PageN_Resources_gpush:n { \g_@@_abspage_int }
+    \exp_args:NV \@@_backend_PageResources_gpush:n { \g_@@_abspage_int }
   }
 
 %!!!!! check if pdftex/luatex can run some of them in the immediate end-of-run
@@ -1401,12 +1401,12 @@
 %     \@@_backend_bdc:n,
 %     \@@_backend_bmc:n,
 %     \@@_backend_emc:,
-%     \@@_backend_PageN_Resources_gpush:n
+%     \@@_backend_PageResources_gpush:n
 %   }
 % \cs{@@_backend_bdc:nn}, \cs{@@_backend_bmc:n} and \cs{@@_backend_emc:}
 %  are the backend command that
 %  create the bdc/emc marker and store the properties.
-% \cs{@@_backend_PageN_Resources_gpush:n} outputs the /Properties in
+% \cs{@@_backend_PageResources_gpush:n} outputs the /Properties in
 % \cs{@@_BACKEND_thispage_shipout_gput:n} for the current page.
 %    \begin{macrocode}
 % pdftex and luatex (and perhaps dvips ...) need to know if there are in a
@@ -1445,7 +1445,7 @@
       {
         \special {ps:~mark~/#1~/BMC~pdfmark} %
       }
-    \cs_new_protected:Npn \@@_backend_PageN_Resources_gpush:n #1 {}
+    \cs_new_protected:Npn \@@_backend_PageResources_gpush:n #1 {}
  }
 % xetex has to create the entries in the /Properties manually
 % (like the other backends)
@@ -1503,7 +1503,7 @@
     }
   % properties are handled automatically, but the other resources should be added
   % at shipout
-  \cs_new_protected:Npn \@@_backend_PageN_Resources_gpush:n #1
+  \cs_new_protected:Npn \@@_backend_PageResources_gpush:n #1
     {
       \clist_map_inline:Nn \c_@@_backend_PageNResources_clist
         {
@@ -1578,7 +1578,7 @@
         \__kernel_backend_literal_page:n { EMC }
       }
 
-    \cs_new_protected:Npn \@@_backend_PageN_Resources_gpush:n #1 {}
+    \cs_new_protected:Npn \@@_backend_PageResources_gpush:n #1 {}
   }
 
 % pdflatex is the most complicated as it has to go through the aux ...
@@ -1659,7 +1659,7 @@
       \__kernel_backend_literal_page:n { EMC }
     }
 
-  \cs_new:Npn \@@_backend_PageN_Resources_gpush_aux:n #1
+  \cs_new:Npn \@@_backend_PageResources_gpush_aux:n #1 %#1 ExtGState etc
     {
       \prop_if_empty:cF
         { \@@_dict_gname:n {PageN/Resources/#1} }
@@ -1668,7 +1668,7 @@
         }
     }
 
-  \cs_new_protected:Npn \@@_backend_PageN_Resources_gpush:n #1
+  \cs_new_protected:Npn \@@_backend_PageResources_gpush:n #1
     {
        \exp_args:NNx \tex_global:D \tex_pdfpageresources:D
          {
@@ -1685,7 +1685,7 @@
            %% add ExtGState etc
            \clist_map_function:NN
              \c_@@_backend_PageNResources_clist
-             \@@_backend_PageN_Resources_gpush_aux:n
+             \@@_backend_PageResources_gpush_aux:n
          }
     }
   }
