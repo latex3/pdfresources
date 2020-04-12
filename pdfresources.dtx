@@ -1139,13 +1139,13 @@
     {
       \tex_latelua:D
         {
-          l3kernel.@@.backend_PageN_gput
+          l3kernel.@@.backend_ThisPage_gput
             (
               tex.count["g_@@_abspage_int"],
               \@@_backend_luastring:n { #1 },
               \@@_backend_luastring:n { #2 }
             )
-          l3kernel.@@.backend_PageN_gpush (tex.count["g_@@_abspage_int"])
+          l3kernel.@@.backend_ThisPage_gpush (tex.count["g_@@_abspage_int"])
         }
     }
   %the code to push the values, used in shipout
@@ -1156,7 +1156,7 @@
     {
       \tex_latelua:D
         {
-          l3kernel.@@.backend_PageN_gpush (tex.count["g_@@_abspage_int"])
+          l3kernel.@@.backend_ThisPage_gpush (tex.count["g_@@_abspage_int"])
         }
     }
   }
@@ -3598,11 +3598,11 @@ local function @@_backend_ThisPage_gpush (page)
  return token
 end
 
-function l3kernel.@@.backend_PageN_gput (page,name,value) -- tex.count["g_@@_abspage_int"]
+function l3kernel.@@.backend_ThisPage_gput (page,name,value) -- tex.count["g_@@_abspage_int"]
  @@_backend_ThisPage_gput (page,name,value)
 end
 
-function l3kernel.@@.backend_PageN_gpush (page)
+function l3kernel.@@.backend_ThisPage_gpush (page)
   pdf.setpageattributes(@@_backend_ThisPage_gpush (page))
 end
 
@@ -3621,7 +3621,7 @@ end
 
 local Properties  = l3kernel.@@.Page.Resources.Properties
 local ResourceList= l3kernel.@@.Page.Resources.List
-local function @@_backend_PageN_Resources_gpush (page)
+local function @@_backend_PageResources_gpush (page)
  local token=""
  if Properties[page] then
 -- we sort the table, so that the pdf test works
@@ -3647,11 +3647,11 @@ end
 function l3kernel.pdf.Page_Resources_Properties_gput (page,name,value) -- tex.count["g_@@_abspage_int"]
  Properties[page] = Properties[page] or {}
  Properties[page][name]=value
- pdf.setpageresources(@@_backend_PageN_Resources_gpush (page))
+ pdf.setpageresources(@@_backend_PageResources_gpush (page))
 end
 
 function l3kernel.pdf.Page_Resources_gpush(page)
- pdf.setpageresources(@@_backend_PageN_Resources_gpush (page))
+ pdf.setpageresources(@@_backend_PageResources_gpush (page))
 end
 
 function l3kernel.pdf.object_ref (objname)
