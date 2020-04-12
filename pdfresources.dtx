@@ -2423,16 +2423,20 @@
 % The following entries are special: Their values are arrays and
 % it must be possible to append to such arrays. This means that a new
 % call to set this value doesn't replace the value but appends it.
-% The value is -- with the exception
-% of AcroForm/Fields and AcroForm/CO -- an object name of an object
-% which must have been declared previously. E.g.
-% % !!!!!!!!
-% %!!!!!!!!!! consider if a reference to a now object isn't better.
+% The value is an object reference. It is sensible to declare the object
+% first. E.g.
 %  \begin{verbatim}
 %  \pdf_object_new:nn   {pkg@intent}{dict}
 %  \pdf_object_write:nn {pkg@intent}{...}
-%  \pdfdict_put:nnn  {Catalog} {OutputIntents}{pkg@intent}
+%  \pdfdict_put:nnx  {Catalog} {OutputIntents}{\pdf_object_ref:n {pkg@intent}}
 %  \end{verbatim}
+%
+%  or
+%  \begin{verbatim}
+%  \pdf_object_now:nn   {dict} { ... }
+%  \pdfdict_put:nnx  {Catalog} {OutputIntents}{\pdf_object_last:}
+%  \end{verbatim}
+%
 %
 %   \medskip
 %   \noindent
@@ -2440,16 +2444,16 @@
 %    \bfseries Dictionary &\bfseries Name        & \bfseries Value   & \bfseries Remark \\\midrule
 %    Catalog/AcroForm     & Fields               & object reference\\
 %    Catalog/AcroForm     & CO                   & object reference\\
-%    Catalog              & AF                   & object name\\
-%    Catalog/OCProperties & OCGs                 & object name  &if there are OCProperties, OCGs and D are required.\\
-%    Catalog/OCProperties & Configs              & object name \\
-%    Catalog/OCProperties & D                    & object name & This actually a single value as
+%    Catalog              & AF                   & object reference\\
+%    Catalog/OCProperties & OCGs                 & object reference  &if there are OCProperties, OCGs and D are required.\\
+%    Catalog/OCProperties & Configs              & object reference \\
+%    Catalog/OCProperties & D                    & object reference & This actually a single value as
 %                                         there can be only one default.
 %                                         If the value is set twice, the
 %                                         second wins, and the first is
 %                                         added to OCProperties/Configs.\\
-%    Catalog              & OutputIntents        & object name\\
-%    Catalog              & Requirements         & object name & PDF 1.7 \\
+%    Catalog              & OutputIntents        & object reference\\
+%    Catalog              & Requirements         & object reference & PDF 1.7 \\
 %   \end{tabularx}
 %
 %
@@ -2512,7 +2516,9 @@
     OCProperties/OCGs,
     OCProperties/Configs,
     OutputIntents,
-    Requirements
+    Requirements,
+    AcroForm/Fields,
+    AcroForm/CO
   }
 
 
@@ -2522,27 +2528,15 @@
    \seq_new:c { g_@@_dict_/Catalog/#1_seq } % new name later
    \cs_new_protected:cpn { @@_dict_handler/Catalog/#1_gput:n } ##1
      {
-       \seq_gput_right:cx { g_@@_dict_/Catalog/#1_seq } { \pdf_object_ref:n { ##1 } }
+       \seq_gput_right:cn { g_@@_dict_/Catalog/#1_seq } {  ##1  }
      }
  }
 
-%not from a named object
-
-\clist_map_inline:nn { AcroForm/Fields, AcroForm/CO }
-  {
-    \seq_new:c { g_@@_dict_/Catalog/#1_seq } % new name later
-    \cs_new_protected:cpn { @@_dict_handler/Catalog/#1_gput:n } ##1
-      {
-        \seq_gput_right:cx { g_@@_dict_/Catalog/#1_seq } { ##1 }
-      }
- }
-
-
 \cs_new_protected:cpn { @@_dict_handler/Catalog/OCProperties/D_gput:n } #1
   {
-    \seq_gput_left:cx
+    \seq_gput_left:cn
       { g_@@_dict_/Catalog/OCProperties/Configs_seq }
-      { \pdf_object_ref:n { #1 } }
+      {  #1  }
   }
 %    \end{macrocode}
 % \end{macro}

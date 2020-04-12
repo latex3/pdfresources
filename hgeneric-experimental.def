@@ -527,8 +527,8 @@
               /View  <</ViewState/OFF>>~
              >>
           }
-       \pdfdict_put:nnn { Catalog / OCProperties }{OCGs }{ l__hyp_ocg_view_dict_obj }
-       \pdfdict_put:nnn { Catalog / OCProperties }{OCGs }{ l__hyp_ocg_print_dict_obj }
+       \pdfdict_put:nnx { Catalog / OCProperties }{OCGs }{ \pdf_object_ref:n {l__hyp_ocg_view_dict_obj} }
+       \pdfdict_put:nnx { Catalog / OCProperties }{OCGs }{ \pdf_object_ref:n {l__hyp_ocg_print_dict_obj} }
        \pdf_object_write:nx { l__hyp_ocg_config_dict_obj }
          {
            /OFF[\pdf_object_ref:n { l__hyp_ocg_print_dict_obj }]
@@ -550,7 +550,7 @@
              >>
               ]
          }
-       \pdfdict_put:nnn { Catalog / OCProperties }{ D }{ l__hyp_ocg_config_dict_obj }
+       \pdfdict_put:nnx { Catalog / OCProperties }{ D }{ \pdf_object_ref:n { l__hyp_ocg_config_dict_obj} }
     }
     \Hy@AtBeginDocument
       {
@@ -1574,7 +1574,7 @@
         \prop_map_inline:Nn \g__hyp_AcroForm_Fields_prop
           {
             \pdfdict_put:nnx { Catalog / AcroForm } { Fields }{##1}
-            \pdfdict_show:n { Catalog / AcroForm }
+            %\pdfdict_show:n { Catalog / AcroForm }
             \seq_show:c { g__pdf_/Catalog/AcroForm/Fields_seq}
           }
         \prop_if_empty:NF \g__hyp_AcroForm_CoFields_prop
