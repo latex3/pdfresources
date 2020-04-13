@@ -406,8 +406,32 @@
 %
 %    \end{macrocode}
 % \end{macro}
+% \section{Module pdfdict}
+% Many features of a PDF are set by adding a (pdf-)Name and a value
+% to specific PDF dictionaries. The commands in this module offer an interface to
+% these dictionaries. They unify a number of primitives like the pdftex
+% registers \cs{pdfcatalog}, \cs{pdfpagesattr}, \cs{pdfinfo} and similar commands
+% of the other backends  in a backend independant way.
 %
-% \subsection{pdfdict / path-Code}
+% The following tabular summarize the dictionaries and which pdftex primitive they
+% replace:
+% \begin{tabular}{lll}
+%  Info                                  & \cs{pdfinfo} \\
+%  Catalog \&  various subdictionaries   & \cs{pdfcatalog}\\
+%  Pages                                 & \cs{pdfpagesattr}\\
+%  Page, ThisPage                        & \cs{pdfpageattr}\\
+%  Page/Resources/ExtGState              & \cs{pdfpageresources}\\
+%  Page/Resources/Shading                & \cs{pdfpageresources}\\
+%  Page/Resources/Pattern                & \cs{pdfpageresources}\\
+%  Page/Resources/ColorSpace             & \cs{pdfpageresources}\\%
+%  xform\ldots                           & argument of \cs{pdfxform} \\
+%  annot\ldots                           & argument of \cs{pdfannot}, \cs{pdfstartlink}\\
+%  \end{tabular}
+%
+%  The /Properties dictionary of the page resources is not handled by this module. It is
+%  filled and managed through side effects when setting BDC-marks.
+
+% \subsection{Internal dictionary Code}
 %  Many code parts are quite similar: property lists for dictionaries are filled and output.
 %  So we define some generic commands to ensure systematic
 %  internal names. The names are based on paths separated by slashed.
@@ -426,11 +450,9 @@
 %  /Catalog/MarkInfo
 %  /Catalog/ViewerPreferences
 %  /Pages           %w,  \pagesattr ->pdfdict
-%  /Page    %!!!!! consider name Page?
-%  /backend_ThisPage   %!!!!! consider name PageN?
-%  /backend_PageN/Resources/Properties %!!!!! consider name!!
-%  /Page           %w, N=1,..n or empty (=all pages) \pageattr %used?
-%  /Page/Resources %nw? \pageresources
+%  /Page
+%  /ThisPage
+%  /backend_PageN/Resources/Properties %
 %  /Page/Resources/ExtGState
 %  /Page/Resources/ColorSpace
 %  /Page/Resources/Pattern
@@ -504,7 +526,7 @@
   {
     \@@_dict_if_exist:nTF { #1 }
       {
-        \msg_error:nnn
+        \msg_error:nnx
           { pdfdict }
           { dict-already-defined }
           { #1}
@@ -521,7 +543,7 @@
   {
     \@@_dict_if_exist:nTF { #1 }
       {
-        \msg_error:nnn
+        \msg_error:nnx
           { pdfdict }
           { dict-already-defined }
           { #1}
@@ -720,13 +742,7 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \section{Resources management}
-% \subsection{Module pdfdict}
-% Many features of a PDF are set by adding key-value pair
-% to specific PDF dictionaries. The following commands offer an interface to
-% these dictionaries. They unify a number of primitives like the pdftex
-% registers \cs{pdfcatalog}, \cs{pdfpagesattr}, \cs{pdfinfo}
-% in a backend independant way.
+% \subsection{User Commands}
 % \begin{NOTE}{UF}
 % How to differentiate between global and local dicts?
 % global: upper case: Catalog, Pages.
@@ -851,7 +867,7 @@
   }
 %    \end{macrocode}
 %
-% \subsection{pdfdict: \enquote{Info} (pdfinfo)}
+% \subsection{The \enquote{Info} dictionary (pdfinfo)}
 % \begin{NOTE}{UF}
 % path: Info
 % The info dictionary is filled by e.g. \cs{pdfinfo}. Multiple appearances of
@@ -916,10 +932,10 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \subsection{pdfdict \enquote{Pages} (pdfpagesattr)}
+% \subsection{The \enquote{Pages} dictionary (pdfpagesattr)}
 % The content of the property list associated with this dictionary name is written to the
 % /Pages object. This replaces \cs{pdfpagesattr}. This dictionary is global.
-% \subsubsection{pdfdict \enquote{Pages} (pdfpagesattr)/backend}
+% \subsubsection{\enquote{Pages} / backend}
 % \begin{NOTE}{UF}
 %  path: Pages
 %  pdfpagesattr is a single token register which is used at the end of the compilation.
@@ -972,7 +988,7 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \subsubsection{pdfdict \enquote{Pages}  (pdfpagesattr)/management}
+% \subsubsection{\enquote{Pages} / management}
 % \begin{NOTE}{UF}
 % The register is normally used only a few times in a document, so it would be
 % okay to update the register/add the special at every change,
@@ -1018,8 +1034,8 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \subsection{pdfdict: Page (pdfpageattr)}
-% \subsubsection{pdfdict: Page (pdfpageattr)/backend}
+% \subsection{\enquote{Page} and \enquote{ThisPage} (pdfpageattr)}
+% \subsubsection{\enquote{Page} and \enquote{ThisPage} /backend}
 % \begin{NOTE}{UF}
 %  path: Page
 %  The engines differ a lot here: pdflatex and lualatex uses a register while with
@@ -1096,7 +1112,10 @@
             {pdf@abspage}
             {0}
         }
-      \@@_dict_gnew:n          {backend_Page\l_@@_tmpa_tl}
+      \@@_dict_if_exist:nF {backend_Page\l_@@_tmpa_tl}
+        {
+          \@@_dict_gnew:n          {backend_Page\l_@@_tmpa_tl}
+        }
       \@@_dict_handler_put:nnn {backend_Page\l_@@_tmpa_tl}{ #1 }{ #2 }
     }
   %the code to push the values, used in shipout
@@ -1267,7 +1286,7 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \subsubsection{pdfdict: Page, ThisPage (pdfpageattr)/management}
+% \subsubsection{\enquote{Page} and \enquote{ThisPage} / management}
 % \begin{NOTE}{UF}
 % Open is the question if one need a command to set attribute on a page by page number.
 % Open is the setter for /AF (and perhaps /OutputIntents).
@@ -1353,754 +1372,7 @@
 %    \end{macrocode}
 %
 %
-% \subsection{page resources:  Properties and bdc-mark}
-% \begin{NOTE}{UF}
-%  we still need a switch for the case that the resource should be added to
-%  xform resource instead of a page resources, see pdfbase.sty
-% - xdvipdfmx: looks fine, the resource is added to the xform resource automatically
-% - pdftex should now work okay too
-% \end{NOTE}
-% Entries to the /Properties dictionary in the page resources can
-% be added with dvips only through side-effects: if a bdc-mark is created
-% dvips/ghostscript will automatically create the necessary objects and names.
-% To get a sensible abstraction the code does the same for the other backends:
-% There are no public commands to add values to the /Properties dictionary
-% directly, only commands to set BDC-marks.
-% \begin{function}[added = 2019-06-29]
-%   {
-%     \pdf_bdc:nn
-%   }
-%   \begin{syntax}
-%     \cs{pdf_bdc:nn} \Arg{tag} \Arg{object name}
-%   \end{syntax}
-%    This command adds a BDC marked content operator to the current page stream.
-%   \meta{tag} is the tag of this operator (without the leading slash),
-%   \meta{object name}  is a the name of an dictionary object reserved with
-%   \cs{pdf_object_new:nn} and filled with \cs{pdf_object_write:n} with
-%   the properties of the BDC.
-% \end{function}
-% \begin{function}[added = 2019-10-18]
-%   {
-%     \pdf_bdc:n
-%   }
-%   \begin{syntax}
-%     \cs{pdf_bdc:n} \Arg{tag}
-%   \end{syntax}
-%    This command adds a BDC marked content operator to the current page stream.
-%   \meta{tag} is the tag of this operator (without the leading slash).
-%   As object this commands uses the last anonymous dictionary object created with
-%   \cs{pdf_object_now:nn}. It lies in the responsibility of the user that the last
-%   object is the wanted one.
-% \end{function}
-% \begin{function}[added = 2019-10-17]
-%   {
-%     \pdf_bmc:n
-%   }
-%   \begin{syntax}
-%     \cs{pdf_bmc:n} \Arg{tag}
-%   \end{syntax}
-%    This command created a BMC marked content operator. The argument is the
-%    tag without the leading slash. It can be e.g. used for simple artifact
-%    markers.
-% \end{function}
-% \begin{function}[added = 2019-06-30]
-%   {
-%     \pdf_emc:
-%   }
-%   \begin{syntax}
-%     \cs{pdf_emc:}
-%   \end{syntax}
-%    This command closes the  BDC marked content operator opened with \cs{pdf_bdc:nn}.
-%    It should be one the same page as the bdc-command.
-%
-%   \begin{verbatim}
-%   \pdf_object_new:nn   {objA}{dict}
-%   \pdf_object_write:nn {objA}{/Type/Artifact}
-%   \pdf_bdc:nn {Span}{objA}
-%   text
-%   \pdf_emc:
-%   \end{verbatim}
-% \end{function}
-%
-% \subsubsection{bdc and Properties/backend}
-% \begin{macro}
-%   {
-%     \@@_backend_bdc:nn,
-%     \@@_backend_bdc:n,
-%     \@@_backend_bmc:n,
-%     \@@_backend_emc:,
-%     \@@_backend_PageResources_gpush:n
-%   }
-% \cs{@@_backend_bdc:nn}, \cs{@@_backend_bmc:n} and \cs{@@_backend_emc:}
-%  are the backend command that
-%  create the bdc/emc marker and store the properties.
-% \cs{@@_backend_PageResources_gpush:n} outputs the /Properties in
-% \cs{@@_BACKEND_thispage_shipout_gput:n} for the current page.
-%    \begin{macrocode}
-% pdftex and luatex (and perhaps dvips ...) need to know if there are in a
-% xform stream ...
-\bool_new:N \l_@@_backend_xform_bool
-\@@_dict_gnew:n {xform/Resources/Properties}
-%quite often needed
-\clist_const:Nn \c_@@_backend_PageResources_clist
-  {
-    ExtGState,
-    ColorSpace,
-    Pattern,
-    Shading,
-  }
-
-% dvips
-% dvips is easy: create an object, and reference it in the bdc
-% ghostscript will then automatically replace it by a name
-% and add the name to the /Properties dict
-% special variant von accsupp https://chat.stackexchange.com/transcript/message/50831812#50831812
-\bool_if:nT {\sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p: }
-  {
-    \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
-      {
-        \special {ps:~mark~/#1~\@@_backend_object_ref:n{#2}~/BDC~pdfmark}
-      }
-    \cs_set_protected:Npn \@@_backend_bdc:n #1  % #1 eg. Span,
-      {
-        \special {ps:~mark~/#1~\@@_backend_object_last:~/BDC~pdfmark}
-      }
-    \cs_set_protected:Npn \@@_backend_emc:
-      {
-        \special {ps:~mark~/EMC~pdfmark} %
-      }
-    \cs_set_protected:Npn \@@_backend_bmc:n #1
-      {
-        \special {ps:~mark~/#1~/BMC~pdfmark} %
-      }
-    \cs_new_protected:Npn \@@_backend_PageResources_gpush:n #1 {}
- }
-% xetex has to create the entries in the /Properties manually
-% (like the other backends)
-% use pdfbase special
-% https://chat.stackexchange.com/transcript/message/50832016#50832016
-% the property is added to xform resources automatically,
-% no need to worry about it.
-\sys_if_engine_xetex:T
-  {
-    \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
-      {
-        \int_gincr:N \g_@@_backend_name_int
-        \__kernel_backend_literal:x
-          {
-            pdf:code~/#1/l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC
-          }
-        \__kernel_backend_literal:x
-          {
-            pdf:put~@resources~
-              <<
-                /Properties~
-                  <<
-                    /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl
-                    \@@_backend_object_ref:n { #2 }
-                  >>
-              >>
-          }
-      }
-    \cs_set_protected:Npn \@@_backend_bdc:n #1  % #1 eg. Span
-      {
-        \int_gincr:N \g_@@_backend_name_int
-        \__kernel_backend_literal:x
-          {
-            pdf:code~/#1/l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC
-          }
-        \__kernel_backend_literal:x
-          {
-            pdf:put~@resources~
-              <<
-                /Properties~
-                  <<
-                    /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl
-                    \@@_backend_object_last:
-                  >>
-              >>
-          }
-      }
- \cs_set_protected:Npn \@@_backend_bmc:n #1
-    {
-      \__kernel_backend_literal:n {pdf:code~/#1~BMC}  %pdfbase
-    }
-  \cs_set_protected:Npn \@@_backend_emc:
-    {
-      \__kernel_backend_literal:n {pdf:code~EMC}  %pdfbase
-    }
-  % properties are handled automatically, but the other resources should be added
-  % at shipout
-  \cs_new_protected:Npn \@@_backend_PageResources_gpush:n #1
-    {
-      \clist_map_inline:Nn \c_@@_backend_PageResources_clist
-        {
-          \prop_if_empty:cF { \@@_dict_gname:n {Page/Resources/##1} }
-            {
-              \__kernel_backend_literal:x
-                {
-                  pdf:put~@resources~
-                    <</##1~\@@_backend_object_ref:n {Page/Resources/##1}>>
-                }
-            }
-        }
-    }
- }
-% luatex
-\sys_if_engine_luatex:T
-  {
-    \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
-      {
-        \int_gincr:N \g_@@_backend_name_int
-        \exp_args:Nx\__kernel_backend_literal_page:n
-          { /#1 ~ /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC }
-        \bool_if:NTF \l_@@_backend_xform_bool
-          {
-            \exp_args:Nnx\@@_dict_handler_put:nnn
-              { xform/Resources/Properties }
-              { l3pdf\int_use:N\g_@@_backend_name_int }
-              { \@@_backend_object_ref:n { #2 } }
-          }
-          {
-            \exp_args:Nx \tex_latelua:D
-              {
-                l3kernel.pdf.Page_Resources_Properties_gput
-                  (
-                    tex.count["g_@@_abspage_int"],
-                    "l3pdf\int_use:N\g_@@_backend_name_int",
-                    "\@@_backend_object_ref:n { #2 }"
-                  )
-              }
-          }
-    }
-    \cs_set_protected:Npn \@@_backend_bdc:n #1% #1 eg. Span
-      {
-        \int_gincr:N \g_@@_backend_name_int
-        \exp_args:Nx\__kernel_backend_literal_page:n
-          { /#1 ~ /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC }
-        \bool_if:NTF \l_@@_backend_xform_bool
-          {
-            \@@_dict_handler_put:nxx
-              { xform/Resources/Properties }
-              { l3pdf\int_use:N\g_@@_backend_name_int }
-              { \@@_backend_object_last: }
-          }
-          {
-            \exp_args:Nx \tex_latelua:D
-              {
-                l3kernel.pdf.Page_Resources_Properties_gput
-                  (
-                    tex.count["g_@@_abspage_int"],
-                    "l3pdf\int_use:N\g_@@_backend_name_int",
-                    "\@@_backend_object_last:"
-                  )
-              }
-          }
-    }
-   \cs_set_protected:Npn \@@_backend_bmc:n #1
-      {
-        \__kernel_backend_literal_page:n { /#1~BMC }
-      }
-    \cs_set_protected:Npn \@@_backend_emc:
-      {
-        \__kernel_backend_literal_page:n { EMC }
-      }
-
-    \cs_new_protected:Npn \@@_backend_PageResources_gpush:n #1 {}
-  }
-
-% pdflatex is the most complicated as it has to go through the aux ...
-% the push command is extended to take other resources too
-\bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
-  {
-    \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
-      {
-        \int_gincr:N \g_@@_backend_name_int
-        \exp_args:Nx\__kernel_backend_literal_page:n
-          { /#1 ~ /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC }
-        % code to set the property ....
-        \int_gincr:N\g_@@_backend_resourceid_int
-        \bool_if:NTF \l_@@_backend_xform_bool
-          {
-            \@@_dict_handler_put:nxx
-              { xform/Resources/Properties }
-              { l3pdf\int_use:N\g_@@_backend_resourceid_int }
-              { \@@_backend_object_ref:n { #2 } }
-          }
-          {
-            \zref@labelbylist
-              { l3pdf\int_use:N\g_@@_backend_resourceid_int }
-              { l3pdf }
-            \tl_set:Nx \l_@@_tmpa_tl
-              {
-                \zref@extractdefault
-                  { l3pdf\int_use:N\g_@@_backend_resourceid_int }
-                  {pdf@abspage}
-                  {0}
-              }
-            \@@_dict_gnew:n { backend_Page\l_@@_tmpa_tl/Resources/Properties }
-            \@@_dict_handler_put:nxx
-              { backend_Page\l_@@_tmpa_tl/Resources/Properties }
-              { l3pdf\int_use:N\g_@@_backend_resourceid_int }
-              { \@@_backend_object_ref:n{#2} }
-          }
-      }
-    \cs_set_protected:Npn \@@_backend_bdc:n #1% #1 eg. Span
-      {
-        \int_gincr:N \g_@@_backend_name_int
-        \exp_args:Nx\__kernel_backend_literal_page:n
-          { /#1 ~ /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC }
-        % code to set the property ....
-        \int_gincr:N\g_@@_backend_resourceid_int
-        \bool_if:NTF \l_@@_backend_xform_bool
-          {
-            \@@_dict_handler_put:nxx
-              { xform/Resources/Properties }
-              { l3pdf\int_use:N\g_@@_backend_resourceid_int }
-              { \@@_backend_object_last: }
-          }
-          {
-            \zref@labelbylist
-              { l3pdf\int_use:N\g_@@_backend_resourceid_int }
-              { l3pdf }
-            \tl_set:Nx \l_@@_tmpa_tl
-              {
-                \zref@extractdefault
-                  { l3pdf\int_use:N\g_@@_backend_resourceid_int }
-                  {pdf@abspage}
-                  {0}
-              }
-            \@@_dict_gnew:n { backend_Page\l_@@_tmpa_tl/Resources/Properties }
-            \@@_dict_handler_put:nxx
-              { backend_Page\l_@@_tmpa_tl/Resources/Properties }
-              { l3pdf\int_use:N\g_@@_backend_resourceid_int }
-              { \@@_backend_object_last: }
-            %\@@_dict_show:n { backend_Page\l_@@_tmpa_tl/Resources/Properties }
-          }
-      }
-  \cs_set_protected:Npn \@@_backend_bmc:n #1
-    {
-      \__kernel_backend_literal_page:n { /#1~BMC }
-    }
-  \cs_set_protected:Npn \@@_backend_emc:
-    {
-      \__kernel_backend_literal_page:n { EMC }
-    }
-
-  \cs_new:Npn \@@_backend_PageResources_gpush_aux:n #1 %#1 ExtGState etc
-    {
-      \prop_if_empty:cF
-        { \@@_dict_gname:n {Page/Resources/#1} }
-        {
-          \@@_dict_objref_item:nn { #1 }{Page/Resources/#1}
-        }
-    }
-
-  \cs_new_protected:Npn \@@_backend_PageResources_gpush:n #1
-    {
-       \exp_args:NNx \tex_global:D \tex_pdfpageresources:D
-         {
-           \prop_if_exist:cT
-             { \@@_dict_gname:n  { backend_Page#1/Resources/Properties } }
-             {
-               /Properties~
-                 <<
-                   \prop_map_function:cN
-                     { \@@_dict_gname:n  { backend_Page#1/Resources/Properties } }
-                     \@@_dict_item:nn
-                 >>
-             }
-           %% add ExtGState etc
-           \clist_map_function:NN
-             \c_@@_backend_PageResources_clist
-             \@@_backend_PageResources_gpush_aux:n
-         }
-    }
-  }
-%    \end{macrocode}
-% \end{macro}
-%
-% \subsubsection{bdc and Properties/management}
-%    \begin{macrocode}
-\cs_new_protected:Npn  \pdf_bdc:nn #1 #2 { \@@_backend_bdc:nn { #1 }{ #2 } }
-\cs_new_protected:Npn  \pdf_bdc:n #1     { \@@_backend_bdc:n  { #1 } }
-\cs_new_protected:Npn  \pdf_bmc:n #1     { \@@_backend_bmc:n  { #1 } }
-\cs_new_protected:Npn  \pdf_emc:         { \@@_backend_emc: }
-%    \end{macrocode}
-%
-% \subsection{pdfxform}
-% \begin{NOTE}{UF}
-%  - As in dvi mode the xform is immediate, this is done for pdftex/luatex too.
-%    If needed a delayed version can be added later.
-%  - the argument for attributes is needed to add e.g. /StructParents
-%  - it is not clear if an argument for additional resources is needed, probably they
-%    should / need to be added automatically.
-%  - code for adding ExtGState etc to the local resource is missing, will be
-%    added when the object name is clear.!!!!!!!!!!!!
-%  - should the size be stored in dim or tl?
-%  - dvips implementation is missing for ideas: pdfbase, atfi-dvips.def,
-%  \end{NOTE}
-%
-%  \subsubsection{pdfxform/management}
-%  \begin{function}[added = 2019-08-05]
-%   {
-%     \pdf_xform_new:nnn
-%   }
-%   \begin{syntax}
-%     \cs{pdf_xform_new:nnnn} \Arg{name} \Arg{attributes} \Arg{content}
-%   \end{syntax}
-%    This command create a new form XObject that can be used as appearance or
-%    directly later.
-%    If the content contains BDC-marks it should \emph{not} be given as a
-%    previously typeset box, but directly so that the names of the
-%    BDC-marks can be added to the resources of the xform. The xform will automatically
-%    include the resources of the current page.
-%    The content will be typeset in a hbox. With pdflatex and luatex
-%    the surrounding color is \emph{not} stored in the XObject
-%    but should be if wanted added e.g. with |\color_select:n{.}|. This keeps
-%    the option of color injection open.
-%   \end{function}
-%   \begin{function}[added = 2019-08-05]
-%     {
-%      \pdf_xform_use:n
-%     }
-%   \begin{syntax}
-%     \cs{pdf_xform_use:n} \Arg{name}
-%   \end{syntax}
-%    This command uses (typesets) a previously created form XObject.
-%    If the surrounding color is different, it is injected in the XObject with the
-%    engines pdftex or luatex.
-%   \end{function}
-%   \begin{function}[EXP,added = 2019-08-05]
-%     {
-%       \pdf_xform_ref:n
-%     }
-%   \begin{syntax}
-%     \cs{pdf_xform_ref:n} \Arg{name}
-%   \end{syntax}
-%   Inserts the appropriate information to reference the xform \meta{name}
-%   in for example appearance dictionaries.
-%   \end{function}
-%   \begin{function}[EXP,added = 2019-08-05]
-%     {
-%       \pdf_xform_wd:n, \pdf_xform_ht:n, \pdf_xform_dp:n
-%     }
-%   \begin{syntax}
-%     \cs{pdf_xform_wd:n} \Arg{name}
-%   \end{syntax}
-%    These command give back the sizes of the XObject. The values are stored in
-%    tl-variables with the unit pt and not in dimensions!
-%   \end{function}
-%    \begin{macrocode}
-\cs_new_protected:Npn  \pdf_xform_new:nnn #1 #2 #3
-  {
-    \@@_backend_xform_new:nnnn { #1 } { #2 } {  } { #3 }
-  }
-
-\cs_new_protected:Npn \pdf_xform_use:n #1
-  {
-    \@@_backend_xform_use:n { #1 }
-  }
-% expansion?
-\cs_new:Npn \pdf_xform_ref:n #1
-  {
-    \@@_backend_xform_ref:n { #1 }
-  }
-
-\cs_generate_variant:Nn \pdf_xform_ref:n {o}
-
-\cs_new:Npn \pdf_xform_wd:n #1
-  {
-    \tl_use:c { c_@@_backend_xform_wd_ \tl_to_str:n { #1 } _tl }
-  }
-
-\cs_new:Npn \pdf_xform_ht:n #1
-  {
-    \tl_use:c { c_@@_backend_xform_ht_ \tl_to_str:n { #1 } _tl }
-  }
-
-\cs_new:Npn \pdf_xform_dp:n #1
-  {
-    \tl_use:c { c_@@_backend_xform_dp_ \tl_to_str:n { #1 } _tl }
-  }
-
-%    \end{macrocode}
-%
-%  \subsubsection{pdfxform/backend }
-%  \begin{macro}{ \@@_backend_xform_new:nnnn }
-%  \begin{arguments}
-%  \item name
-%  \item attributes
-%  \item resources %needed?? or are all resources autogenerated?
-%  \item content, this doesn't need to be a box!
-%  \end{arguments}
-%  \begin{macro}{ \@@_backend_xform_use:n, \@@_backend_xform_ref:n }
-%    \begin{macrocode}
-%%pdftex
-\bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
-  {
-    \cs_new_protected:Npn \@@_backend_xform_new:nnnn #1 #2 #3 #4
-    % #1 name
-    % #2 attributes
-    % #3 resources
-    % #4 content, not necessarily a box!
-      {
-        \hbox_set:Nn \l_@@_tmpa_box
-          {
-            \bool_set_true:N \l_@@_backend_xform_bool
-            \@@_dict_clear:n {xform/Resources/Properties}
-            #4
-          }
-        %store the dimensions
-        \tl_const:cx
-          { c_@@_backend_xform_wd_ \tl_to_str:n {#1} _tl }
-          { \tex_the:D \box_wd:N \l_@@_tmpa_box }
-        \tl_const:cx
-          { c_@@_backend_xform_ht_ \tl_to_str:n {#1} _tl }
-          { \tex_the:D \box_ht:N \l_@@_tmpa_box }
-        \tl_const:cx
-          { c_@@_backend_xform_dp_ \tl_to_str:n {#1} _tl }
-          { \tex_the:D \box_dp:N \l_@@_tmpa_box }
-        %% do we need to test if #2 and #3 are empty??
-        \tex_immediate:D \tex_pdfxform:D
-          ~  attr      ~ { #2 }
-        %% which other resources should be default? Is an argument actually needed?
-          ~  resources ~
-          {
-            #3
-            \int_compare:nNnT
-              { \prop_count:c { \@@_dict_gname:n {xform/Resources/Properties} } }
-              >
-              { 0 }
-              {
-                /Properties~
-                  <<
-                    \@@_dict_map_dict_item:n {xform/Resources/Properties}
-                  >>
-              }
-
-            \prop_if_empty:cF
-              { \@@_dict_gname:n {Page/Resources/ExtGState} }
-              {
-                /ExtGState~ \pdf_object_ref:n {Page/Resources/ExtGState}
-              }
-            \prop_if_empty:cF
-              { \@@_dict_gname:n {Page/Resources/Pattern} }
-              {
-                /Pattern~ \pdf_object_ref:n {Page/Resources/Pattern}
-              }
-            \prop_if_empty:cF
-              { \@@_dict_gname:n {Page/Resources/Shading} }
-              {
-                /Shading~ \pdf_object_ref:n {Page/Resources/Shading}
-              }
-            \prop_if_empty:cF
-              { \@@_dict_gname:n {Page/Resources/ColorSpace} }
-              {
-                /ColorSpace~ \pdf_object_ref:n {Page/Resources/ColorSpace}
-              }
-          }
-          \l_@@_tmpa_box
-       \int_const:cn
-         { c_@@_backend_xform_ \tl_to_str:n {#1} _int }
-         { \tex_pdflastxform:D }
-      }
-
-  \cs_new_protected:Npn \@@_backend_xform_use:n #1
-    {
-      \tex_pdfrefxform:D
-        \int_use:c { c_@@_backend_xform_ \tl_to_str:n {#1} _int }
-        \scan_stop:
-    }
-
-  \cs_new:Npn \@@_backend_xform_ref:n #1
-    {
-      \int_use:c { c_@@_backend_xform_ \tl_to_str:n {#1} _int } ~ 0 ~ R
-    }
-  }
-
-%luatex
-%nearly identical but not completely ...
-\sys_if_engine_luatex:T
-  {
-    \cs_new:Npn \@@_backend_xform_new:nnnn #1 #2 #3 #4
-    % #1 name
-    % #2 attributes
-    % #3 resources
-    % #4 content, not necessarily a box!
-      {
-        \hbox_set:Nn \l_@@_tmpa_box
-          {
-            \bool_set_true:N \l_@@_backend_xform_bool
-            \@@_dict_clear:n {xform/Resources/Properties}
-            #4
-          }
-        \tl_const:cx
-          { c_@@_backend_xform_wd_ \tl_to_str:n {#1} _tl }
-          { \tex_the:D \box_wd:N \l_@@_tmpa_box }
-        \tl_const:cx
-          { c_@@_backend_xform_ht_ \tl_to_str:n {#1} _tl }
-          { \tex_the:D \box_ht:N \l_@@_tmpa_box }
-        \tl_const:cx
-          { c_@@_backend_xform_dp_ \tl_to_str:n {#1} _tl }
-          { \tex_the:D \box_dp:N \l_@@_tmpa_box }
-        %% do we need to test if #2 and #3 are empty??
-        \tex_immediate:D \tex_pdfxform:D
-          ~  attr      ~ { #2 }
-          %% which resources should be default? Is an argument actually needed?
-          ~  resources ~
-          {
-            #3
-            \int_compare:nNnT
-              {\prop_count:c { \@@_dict_gname:n {xform/Resources/Properties} }}
-              >
-              { 0 }
-              {
-                /Properties~
-                  <<
-                    \@@_dict_map_dict_item:n {xform/Resources/Properties}
-                  >>
-              }
-            \prop_if_empty:cF
-              { \@@_dict_gname:n {Page/Resources/ExtGState} }
-              {
-                /ExtGState~ \pdf_object_ref:n {Page/Resources/ExtGState}
-              }
-            \prop_if_empty:cF
-              { \@@_dict_gname:n {Page/Resources/Pattern} }
-              {
-                /Pattern~ \pdf_object_ref:n {Page/Resources/Pattern}
-              }
-            \prop_if_empty:cF
-              { \@@_dict_gname:n {Page/Resources/Shading} }
-              {
-                /Shading~ \pdf_object_ref:n {Page/Resources/Shading}
-              }
-            \prop_if_empty:cF
-              { \@@_dict_gname:n {Page/Resources/ColorSpace} }
-              {
-                /ColorSpace~ \pdf_object_ref:n {Page/Resources/ColorSpace}
-              }
-          }
-          \l_@@_tmpa_box
-          \int_const:cn
-            { c_@@_backend_xform_ \tl_to_str:n {#1} _int }
-            { \tex_pdflastxform:D }
-      }
-
-    \cs_new:Npn \@@_backend_xform_use:n #1
-      {
-        \tex_pdfrefxform:D \int_use:c
-          {
-            c_@@_backend_xform_ \tl_to_str:n {#1} _int
-          }
-          \scan_stop:
-      }
-
-    \cs_new:Npn \@@_backend_xform_ref:n #1
-      { \int_use:c { c_@@_backend_xform_ \tl_to_str:n {#1} _int } ~ 0 ~ R }
-  }
-
-
-\sys_if_engine_xetex:T
-  {
-   % it needs a bit testing if it really works to set the box to 0 before the special ...
-   % does it disturb viewing the xobject?
-   % what happens with the resources (bdc)? (should work as they are specials too)
-    \cs_new:Npn \@@_backend_xform_new:nnnn #1 #2 #3 #4
-    % #1 name
-    % #2 attributes
-    % #3 resources
-    % #4 content, not necessarily a box!
-      {
-        \int_gincr:N \g_@@_backend_object_int
-        \int_const:cn
-          { c_@@_backend_xform_ \tl_to_str:n {#1} _int }
-          { \g_@@_backend_object_int }
-        \hbox_set:Nn \l_@@_tmpa_box
-          {
-            \bool_set_true:N \l_@@_backend_xform_bool
-            #4
-          }
-        \tl_const:cx
-          { c_@@_backend_xform_wd_ \tl_to_str:n {#1} _tl }
-          { \tex_the:D \box_wd:N \l_@@_tmpa_box }
-        \tl_const:cx
-          { c_@@_backend_xform_ht_ \tl_to_str:n {#1} _tl }
-          { \tex_the:D \box_ht:N \l_@@_tmpa_box }
-        \tl_const:cx
-          { c_@@_backend_xform_dp_ \tl_to_str:n {#1} _tl }
-          { \tex_the:D \box_dp:N \l_@@_tmpa_box }
-        \box_set_dp:Nn  \l_@@_tmpa_box { \c_zero_dim }
-        \box_set_ht:Nn  \l_@@_tmpa_box { \c_zero_dim }
-        \box_set_wd:Nn  \l_@@_tmpa_box { \c_zero_dim }
-        \mode_leave_vertical: %needed, the xform disappears without it.
-        \@@_backend:x
-          {
-            bxobj  ~ \@@_backend_xform_ref:n  { #1 }
-            \c_space_tl width  ~ \pdf_xform_wd:n { #1 }
-            \c_space_tl height ~ \pdf_xform_ht:n { #1 }
-            \c_space_tl depth  ~ \pdf_xform_dp:n { #1 }
-          }
-        \box_use_drop:N \l_@@_tmpa_box
-        \@@_backend:x {put ~ @resources ~<<#3>> }
-        \@@_backend:x
-          {
-            put~ @resources ~
-              <<
-                /ExtGState~ \pdf_object_ref:n {Page/Resources/ExtGState}
-              >>
-          }
-        \@@_backend:x
-          {
-            put~ @resources ~
-            <<
-              /Pattern~ \pdf_object_ref:n {Page/Resources/Pattern}
-            >>
-          }
-        \@@_backend:x
-          {
-            put~ @resources ~
-            <<
-              /Shading~ \pdf_object_ref:n {Page/Resources/Shading}
-            >>
-          }
-        \@@_backend:x
-          {
-            put~ @resources ~
-            <<
-              /ColorSpace~
-              \pdf_object_ref:n {Page/Resources/ColorSpace}
-            >>
-          }
-        \exp_args:Nx
-        \@@_backend:x {exobj ~<<#2>>}
-     }
-
-    \cs_new:Npn \@@_backend_xform_ref:n #1
-      {
-        @pdf.xform \int_use:c { c_@@_backend_xform_ \tl_to_str:n {#1} _int }
-      }
-
-    \cs_new:Npn \@@_backend_xform_use:n #1
-     {
-       \hbox_set:Nn \l_@@_tmpa_box
-         {
-           \@@_backend:x
-             {
-               uxobj~ \@@_backend_xform_ref:n { #1 }
-             }
-         }
-       \box_set_wd:Nn  \l_@@_tmpa_box { \pdf_xform_wd:n { #1 } }
-       \box_set_ht:Nn  \l_@@_tmpa_box { \pdf_xform_ht:n { #1 } }
-       \box_set_dp:Nn  \l_@@_tmpa_box { \pdf_xform_dp:n { #1 } }
-       \box_use_drop:N \l_@@_tmpa_box
-     }
-  }
-%    \end{macrocode}
-% \end{macro}
-% \end{macro}
-% \subsection{pdfdict: page resources: ExtGState, ColorSpace, Shading, Pattern }
+% \subsection{\enquote{Page/Resources}: ExtGState, ColorSpace, Shading, Pattern }
 % \begin{NOTE}{UF}
 % Only for pdf/luatex and xdvipdfmx backend- and pdf-code is needed to add values
 % to these resources.
@@ -2114,7 +1386,7 @@
 % fine, see experiment colorspace-resources.
 % As pgf does the same, there is a need to patch it for now. Ditto for package colorspace.
 % \end{NOTE}
-% \subsubsection{pdfdict: page resources: ExtGState, ColorSpace, Shading, Pattern/backend}
+% \subsubsection{\enquote{Page/Resources}: ExtGState, ColorSpace, Shading, Pattern / backend}
 % Path: Page/Resources/ExtGState etc. The actual output of the resources is handled
 % together with the bdc/Properties. Here is only special code.
 % \begin{macro}{\@@_backend_PageResources_gput:nnn}
@@ -2129,7 +1401,16 @@
 %    \begin{macrocode}
 % backend commands the command to fill the register
 % and to push the values.
-% xelatex doesn't need the dict, but it can be used to show the content
+%
+%quite often needed
+\clist_const:Nn \c_@@_backend_PageResources_clist
+  {
+    ExtGState,
+    ColorSpace,
+    Pattern,
+    Shading,
+  }
+
 \clist_map_inline:Nn \c_@@_backend_PageResources_clist
       {
         \@@_dict_gnew:n {Page/Resources/#1}
@@ -2239,7 +1520,7 @@
 % \end{macro}
 % !!!!! check path names (backend or not ...)
 %
-% \subsubsection{ pdfdict: ExtGState, ColorSpace, Shading, Pattern/management}
+% \subsubsection{\enquote{Page/Resources}: ExtGState, ColorSpace, Shading, Pattern / management}
 % \begin{function}[updated = 2020-04-10]
 %   {
 %    pdfdict: Page/Resources/ExtGState,
@@ -2275,10 +1556,6 @@
 %    \begin{macrocode}
 %
 % setter:  #1 is the name of the resource
-\@@_dict_gnew:n {Page / Resources / ExtGState}
-\@@_dict_gnew:n {Page / Resources / ColorSpace}
-\@@_dict_gnew:n {Page / Resources / Shading}
-\@@_dict_gnew:n {Page / Resources / Pattern}
 
 \cs_new_protected:cpn { @@_dict_handler/Page/Resources/ExtGState/?_gput:nn } #1 #2
   {
@@ -2302,12 +1579,12 @@
 
 %    \end{macrocode}
 %
-% \subsection{pdfdict: \enquote{Catalog}}
-% \subsubsection{\enquote{Catalog}/backend}
+% \subsection{\enquote{Catalog} \& subdirectories (pdfcatalog) }
+% \subsubsection{\enquote{Catalog} \& subdirectories / backend}
 % the backend command is already in the driver:
 % \cs{@@_backend_catalog_gput:nn}
 %
-% \subsubsection{ pdfdict: \enquote{Catalog} \& subdirectories /management }
+% \subsubsection{\enquote{Catalog} \& subdirectories / management }
 % \begin{NOTE}{UF}
 % The catalog dictionary is filled by e.g. \cs{pdfcatalog}. Multiple appearances of
 % \cs{pdfcatalog} are concatenated, so one could end with multiple entries
@@ -2335,10 +1612,10 @@
 % The entries in the catalog have varying requirements regarding the
 % PDF management. Some entries (like /Lang) are simple values where new values should
 % overwrite existing values, other like for example \texttt{/OutputIntents}
-% are dictionaries which can be filled from more than one source.
+% can contain a number of values and can be filled from more than one source.
 % In some cases the values that needs to be added are not at the top-level
 % but in some subsubdictionary or are actually part of an array.
-% To handle this some pathes use internal special handlers.
+% To handle this some pathes use internally special handlers.
 %
 %   \paragraph{Entries at the top level of the catalog}
 %   The Names in the following tabular are entries that are added to the
@@ -2387,7 +1664,7 @@
 %   The following dictionaries have been predeclared and allow to
 %   add values to the respective subdictionaries of the catalog. The
 %   names of the dictionaries follow the naming and location of the dictionaries
-%   in PDF reference.
+%   in the PDF reference.
 %   If \meta{Name} gets assigned two values the last one wins.
 %
 %   Example: |\pdfdict_put:nnn {Catalog/MarkInfo}{Marked}{true}|
@@ -2404,10 +1681,10 @@
 %                                                           it is then required
 %                                                           that every widget has
 %                                                           an appearance streams.\\
-%                            &  SigFlags       &  Integer\\
-%                            &  DA             &  String \\
-%                            &  Q              &  Integer\\
-%                            &  XFA            &  stream or array & pdf 1.5\\
+%                            &  SigFlags       & Integer\\
+%                            &  DA             & String \\
+%                            &  Q              & Integer\\
+%                            &  XFA            & stream or array & pdf 1.5\\
 %  Catalog/AcroForm/DR       & \meta{name}     &            & probably unneeded \\
 %  Catalog/AcroForm/DR/Font  & \meta{name}     & dict       & \\
 %  Catalog/MarkInfo          & Marked          & boolean      \\
@@ -2831,34 +2108,749 @@
   }
 %    \end{macrocode}
 % \end{macro}
+% \section{Various PDF contents}
+% The following commands allow to create a number of important pdf objects and contents in a
+% backend independant way.
 %
-% \subsubsection{Doc View/Openaction}
+% \subsection{BDC operator / Properties resource}
 % \begin{NOTE}{UF}
-%   /OpenAction can be an array:
-%   |/OpenAction [5 0 R /Fit]| or an action: |<< /S /GoTo /D [ 7 0 R /Fit ] >>|.
-%  The implementation below allows only the first. It is not quite clear, if
-%  this is sensible (and if a special docview command is needed at all).
-%  The second could be set directly.
+%  we still need a switch for the case that the resource should be added to
+%  xform resource instead of a page resources, see pdfbase.sty
+% - xdvipdfmx: looks fine, the resource is added to the xform resource automatically
+% - pdftex should now work okay too
 % \end{NOTE}
-%
-% \begin{function}[added = 2019-08-18]
-%   {\pdf_docview:nn}
+% Entries to the /Properties dictionary in the page resources can
+% be added with dvips only through side-effects: if a BDC-mark is created
+% dvips/ghostscript will automatically create the necessary objects and names.
+% To get a sensible abstraction the code does the same for the other backends:
+% There are no public commands to add values to the /Properties dictionary
+% directly, only commands to set BDC-marks.
+% \begin{function}[added = 2019-06-29]
+%   {
+%     \pdf_bdc:nn
+%   }
 %   \begin{syntax}
-%     \cs{pdf_docview:nn} \Arg{page} \Arg{view}
+%     \cs{pdf_bdc:nn} \Arg{tag} \Arg{object name}
 %   \end{syntax}
-% This command allows to set the OpenAction array. The \meta{page}
-% is an absolute page number. \Arg{view} a string for the destination
-% without the leading slash. Examples are e.g. |XYZ left top zoom| or |Fit|.
-% The OpenAction uses (and could also be set directly with)
-% \cs{pdfdict_put:nnn}|{Catalog}|.
+%    This command adds a BDC marked content operator to the current page stream.
+%   \meta{tag} is the tag of this operator (without the leading slash),
+%   \meta{object name}  is a the name of an dictionary object reserved with
+%   \cs{pdf_object_new:nn} and filled with \cs{pdf_object_write:n} with
+%   the properties of the BDC.
+% \end{function}
+% \begin{function}[added = 2019-10-18]
+%   {
+%     \pdf_bdc:n
+%   }
+%   \begin{syntax}
+%     \cs{pdf_bdc:n} \Arg{tag}
+%   \end{syntax}
+%    This command adds a BDC marked content operator to the current page stream.
+%   \meta{tag} is the tag of this operator (without the leading slash).
+%   As object this commands uses the last anonymous dictionary object created with
+%   \cs{pdf_object_now:nn}. It lies in the responsibility of the user that the last
+%   object is the wanted one.
+% \end{function}
+% \begin{function}[added = 2019-10-17]
+%   {
+%     \pdf_bmc:n
+%   }
+%   \begin{syntax}
+%     \cs{pdf_bmc:n} \Arg{tag}
+%   \end{syntax}
+%    This command created a BMC marked content operator. The argument is the
+%    tag without the leading slash. It can be e.g. used for simple artifact
+%    markers.
+% \end{function}
+% \begin{function}[added = 2019-06-30]
+%   {
+%     \pdf_emc:
+%   }
+%   \begin{syntax}
+%     \cs{pdf_emc:}
+%   \end{syntax}
+%    This command closes the  BDC marked content operator opened with \cs{pdf_bdc:nn}.
+%    It should be one the same page as the bdc-command.
+%
+%   \begin{verbatim}
+%   \pdf_object_new:nn   {objA}{dict}
+%   \pdf_object_write:nn {objA}{/Type/Artifact}
+%   \pdf_bdc:nn {Span}{objA}
+%   text
+%   \pdf_emc:
+%   \end{verbatim}
 % \end{function}
 %
+% \subsubsection{BDC and Properties / backend}
+% \begin{macro}
+%   {
+%     \@@_backend_bdc:nn,
+%     \@@_backend_bdc:n,
+%     \@@_backend_bmc:n,
+%     \@@_backend_emc:,
+%     \@@_backend_PageResources_gpush:n
+%   }
+% \cs{@@_backend_bdc:nn}, \cs{@@_backend_bmc:n} and \cs{@@_backend_emc:}
+%  are the backend command that
+%  create the bdc/emc marker and store the properties.
+% \cs{@@_backend_PageResources_gpush:n} outputs the /Properties in
+% \cs{@@_BACKEND_thispage_shipout_gput:n} for the current page.
 %    \begin{macrocode}
-\cs_new_protected:Npn \pdf_docview:nn #1 #2
+% pdftex and luatex (and perhaps dvips ...) need to know if there are in a
+% xform stream ...
+\bool_new:N \l_@@_backend_xform_bool
+\@@_dict_gnew:n {xform/Resources/Properties}
+
+% dvips
+% dvips is easy: create an object, and reference it in the bdc
+% ghostscript will then automatically replace it by a name
+% and add the name to the /Properties dict
+% special variant von accsupp https://chat.stackexchange.com/transcript/message/50831812#50831812
+\bool_if:nT {\sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p: }
   {
-    \pdfdict_put:nnx {Catalog }{ OpenAction }{[\pdf_pageobject_ref:n {#1}~/#2]}
+    \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
+      {
+        \special {ps:~mark~/#1~\@@_backend_object_ref:n{#2}~/BDC~pdfmark}
+      }
+    \cs_set_protected:Npn \@@_backend_bdc:n #1  % #1 eg. Span,
+      {
+        \special {ps:~mark~/#1~\@@_backend_object_last:~/BDC~pdfmark}
+      }
+    \cs_set_protected:Npn \@@_backend_emc:
+      {
+        \special {ps:~mark~/EMC~pdfmark} %
+      }
+    \cs_set_protected:Npn \@@_backend_bmc:n #1
+      {
+        \special {ps:~mark~/#1~/BMC~pdfmark} %
+      }
+    \cs_new_protected:Npn \@@_backend_PageResources_gpush:n #1 {}
+ }
+% xetex has to create the entries in the /Properties manually
+% (like the other backends)
+% use pdfbase special
+% https://chat.stackexchange.com/transcript/message/50832016#50832016
+% the property is added to xform resources automatically,
+% no need to worry about it.
+\sys_if_engine_xetex:T
+  {
+    \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
+      {
+        \int_gincr:N \g_@@_backend_name_int
+        \__kernel_backend_literal:x
+          {
+            pdf:code~/#1/l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC
+          }
+        \__kernel_backend_literal:x
+          {
+            pdf:put~@resources~
+              <<
+                /Properties~
+                  <<
+                    /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl
+                    \@@_backend_object_ref:n { #2 }
+                  >>
+              >>
+          }
+      }
+    \cs_set_protected:Npn \@@_backend_bdc:n #1  % #1 eg. Span
+      {
+        \int_gincr:N \g_@@_backend_name_int
+        \__kernel_backend_literal:x
+          {
+            pdf:code~/#1/l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC
+          }
+        \__kernel_backend_literal:x
+          {
+            pdf:put~@resources~
+              <<
+                /Properties~
+                  <<
+                    /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl
+                    \@@_backend_object_last:
+                  >>
+              >>
+          }
+      }
+ \cs_set_protected:Npn \@@_backend_bmc:n #1
+    {
+      \__kernel_backend_literal:n {pdf:code~/#1~BMC}  %pdfbase
+    }
+  \cs_set_protected:Npn \@@_backend_emc:
+    {
+      \__kernel_backend_literal:n {pdf:code~EMC}  %pdfbase
+    }
+  % properties are handled automatically, but the other resources should be added
+  % at shipout
+  \cs_new_protected:Npn \@@_backend_PageResources_gpush:n #1
+    {
+      \clist_map_inline:Nn \c_@@_backend_PageResources_clist
+        {
+          \prop_if_empty:cF { \@@_dict_gname:n {Page/Resources/##1} }
+            {
+              \__kernel_backend_literal:x
+                {
+                  pdf:put~@resources~
+                    <</##1~\@@_backend_object_ref:n {Page/Resources/##1}>>
+                }
+            }
+        }
+    }
+ }
+% luatex
+\sys_if_engine_luatex:T
+  {
+    \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
+      {
+        \int_gincr:N \g_@@_backend_name_int
+        \exp_args:Nx\__kernel_backend_literal_page:n
+          { /#1 ~ /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC }
+        \bool_if:NTF \l_@@_backend_xform_bool
+          {
+            \exp_args:Nnx\@@_dict_handler_put:nnn
+              { xform/Resources/Properties }
+              { l3pdf\int_use:N\g_@@_backend_name_int }
+              { \@@_backend_object_ref:n { #2 } }
+          }
+          {
+            \exp_args:Nx \tex_latelua:D
+              {
+                l3kernel.pdf.Page_Resources_Properties_gput
+                  (
+                    tex.count["g_@@_abspage_int"],
+                    "l3pdf\int_use:N\g_@@_backend_name_int",
+                    "\@@_backend_object_ref:n { #2 }"
+                  )
+              }
+          }
+    }
+    \cs_set_protected:Npn \@@_backend_bdc:n #1% #1 eg. Span
+      {
+        \int_gincr:N \g_@@_backend_name_int
+        \exp_args:Nx\__kernel_backend_literal_page:n
+          { /#1 ~ /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC }
+        \bool_if:NTF \l_@@_backend_xform_bool
+          {
+            \@@_dict_handler_put:nxx
+              { xform/Resources/Properties }
+              { l3pdf\int_use:N\g_@@_backend_name_int }
+              { \@@_backend_object_last: }
+          }
+          {
+            \exp_args:Nx \tex_latelua:D
+              {
+                l3kernel.pdf.Page_Resources_Properties_gput
+                  (
+                    tex.count["g_@@_abspage_int"],
+                    "l3pdf\int_use:N\g_@@_backend_name_int",
+                    "\@@_backend_object_last:"
+                  )
+              }
+          }
+    }
+   \cs_set_protected:Npn \@@_backend_bmc:n #1
+      {
+        \__kernel_backend_literal_page:n { /#1~BMC }
+      }
+    \cs_set_protected:Npn \@@_backend_emc:
+      {
+        \__kernel_backend_literal_page:n { EMC }
+      }
+
+    \cs_new_protected:Npn \@@_backend_PageResources_gpush:n #1 {}
+  }
+
+% pdflatex is the most complicated as it has to go through the aux ...
+% the push command is extended to take other resources too
+\bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
+  {
+    \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
+      {
+        \int_gincr:N \g_@@_backend_name_int
+        \exp_args:Nx\__kernel_backend_literal_page:n
+          { /#1 ~ /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC }
+        % code to set the property ....
+        \int_gincr:N\g_@@_backend_resourceid_int
+        \bool_if:NTF \l_@@_backend_xform_bool
+          {
+            \@@_dict_handler_put:nxx
+              { xform/Resources/Properties }
+              { l3pdf\int_use:N\g_@@_backend_resourceid_int }
+              { \@@_backend_object_ref:n { #2 } }
+          }
+          {
+            \zref@labelbylist
+              { l3pdf\int_use:N\g_@@_backend_resourceid_int }
+              { l3pdf }
+            \tl_set:Nx \l_@@_tmpa_tl
+              {
+                \zref@extractdefault
+                  { l3pdf\int_use:N\g_@@_backend_resourceid_int }
+                  {pdf@abspage}
+                  {0}
+              }
+            \@@_dict_gnew:n { backend_Page\l_@@_tmpa_tl/Resources/Properties }
+            \@@_dict_handler_put:nxx
+              { backend_Page\l_@@_tmpa_tl/Resources/Properties }
+              { l3pdf\int_use:N\g_@@_backend_resourceid_int }
+              { \@@_backend_object_ref:n{#2} }
+          }
+      }
+    \cs_set_protected:Npn \@@_backend_bdc:n #1% #1 eg. Span
+      {
+        \int_gincr:N \g_@@_backend_name_int
+        \exp_args:Nx\__kernel_backend_literal_page:n
+          { /#1 ~ /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC }
+        % code to set the property ....
+        \int_gincr:N\g_@@_backend_resourceid_int
+        \bool_if:NTF \l_@@_backend_xform_bool
+          {
+            \@@_dict_handler_put:nxx
+              { xform/Resources/Properties }
+              { l3pdf\int_use:N\g_@@_backend_resourceid_int }
+              { \@@_backend_object_last: }
+          }
+          {
+            \zref@labelbylist
+              { l3pdf\int_use:N\g_@@_backend_resourceid_int }
+              { l3pdf }
+            \tl_set:Nx \l_@@_tmpa_tl
+              {
+                \zref@extractdefault
+                  { l3pdf\int_use:N\g_@@_backend_resourceid_int }
+                  {pdf@abspage}
+                  {0}
+              }
+            \@@_dict_gnew:n { backend_Page\l_@@_tmpa_tl/Resources/Properties }
+            \@@_dict_handler_put:nxx
+              { backend_Page\l_@@_tmpa_tl/Resources/Properties }
+              { l3pdf\int_use:N\g_@@_backend_resourceid_int }
+              { \@@_backend_object_last: }
+            %\@@_dict_show:n { backend_Page\l_@@_tmpa_tl/Resources/Properties }
+          }
+      }
+  \cs_set_protected:Npn \@@_backend_bmc:n #1
+    {
+      \__kernel_backend_literal_page:n { /#1~BMC }
+    }
+  \cs_set_protected:Npn \@@_backend_emc:
+    {
+      \__kernel_backend_literal_page:n { EMC }
+    }
+
+  \cs_new:Npn \@@_backend_PageResources_gpush_aux:n #1 %#1 ExtGState etc
+    {
+      \prop_if_empty:cF
+        { \@@_dict_gname:n {Page/Resources/#1} }
+        {
+          \@@_dict_objref_item:nn { #1 }{Page/Resources/#1}
+        }
+    }
+
+  \cs_new_protected:Npn \@@_backend_PageResources_gpush:n #1
+    {
+       \exp_args:NNx \tex_global:D \tex_pdfpageresources:D
+         {
+           \prop_if_exist:cT
+             { \@@_dict_gname:n  { backend_Page#1/Resources/Properties } }
+             {
+               /Properties~
+                 <<
+                   \prop_map_function:cN
+                     { \@@_dict_gname:n  { backend_Page#1/Resources/Properties } }
+                     \@@_dict_item:nn
+                 >>
+             }
+           %% add ExtGState etc
+           \clist_map_function:NN
+             \c_@@_backend_PageResources_clist
+             \@@_backend_PageResources_gpush_aux:n
+         }
+    }
   }
 %    \end{macrocode}
+% \end{macro}
+%
+% \subsubsection{BDC and Properties  / management}
+%    \begin{macrocode}
+\cs_new_protected:Npn  \pdf_bdc:nn #1 #2 { \@@_backend_bdc:nn { #1 }{ #2 } }
+\cs_new_protected:Npn  \pdf_bdc:n #1     { \@@_backend_bdc:n  { #1 } }
+\cs_new_protected:Npn  \pdf_bmc:n #1     { \@@_backend_bmc:n  { #1 } }
+\cs_new_protected:Npn  \pdf_emc:         { \@@_backend_emc: }
+%    \end{macrocode}
+%
+% \subsection{Form XObject (pdfxform)}
+% \begin{NOTE}{UF}
+%  - As in dvi mode the xform is immediate, this is done for pdftex/luatex too.
+%    If needed a delayed version can be added later.
+%  - the argument for attributes is needed to add e.g. /StructParents
+%  - it is not clear if an argument for additional resources is needed, probably they
+%    should / need to be added automatically.
+%  - code for adding ExtGState etc to the local resource is missing, will be
+%    added when the object name is clear.!!!!!!!!!!!!
+%  - should the size be stored in dim or tl?
+%  - dvips implementation is missing for ideas: pdfbase, atfi-dvips.def,
+%  \end{NOTE}
+%
+%  \subsubsection{Form XObject / management}
+%  \begin{function}[added = 2019-08-05]
+%   {
+%     \pdf_xform_new:nnn
+%   }
+%   \begin{syntax}
+%     \cs{pdf_xform_new:nnnn} \Arg{name} \Arg{attributes} \Arg{content}
+%   \end{syntax}
+%    This command create a new form XObject that can be used as appearance or
+%    directly later.
+%    If the content contains BDC-marks it should \emph{not} be given as a
+%    previously typeset box, but directly so that the names of the
+%    BDC-marks can be added to the resources of the xform. The xform will automatically
+%    include the resources of the current page.
+%    The content will be typeset in a hbox. With pdflatex and luatex
+%    the surrounding color is \emph{not} stored in the XObject
+%    but should be if wanted added e.g. with |\color_select:n{.}|. This keeps
+%    the option of color injection open.
+%   \end{function}
+%   \begin{function}[added = 2019-08-05]
+%     {
+%      \pdf_xform_use:n
+%     }
+%   \begin{syntax}
+%     \cs{pdf_xform_use:n} \Arg{name}
+%   \end{syntax}
+%    This command uses (typesets) a previously created form XObject.
+%    If the surrounding color is different, it is injected in the XObject with the
+%    engines pdftex or luatex.
+%   \end{function}
+%   \begin{function}[EXP,added = 2019-08-05]
+%     {
+%       \pdf_xform_ref:n
+%     }
+%   \begin{syntax}
+%     \cs{pdf_xform_ref:n} \Arg{name}
+%   \end{syntax}
+%   Inserts the appropriate information to reference the xform \meta{name}
+%   in for example appearance dictionaries.
+%   \end{function}
+%   \begin{function}[EXP,added = 2019-08-05]
+%     {
+%       \pdf_xform_wd:n, \pdf_xform_ht:n, \pdf_xform_dp:n
+%     }
+%   \begin{syntax}
+%     \cs{pdf_xform_wd:n} \Arg{name}
+%   \end{syntax}
+%    These command give back the sizes of the XObject. The values are stored in
+%    tl-variables with the unit pt and not in dimensions!
+%   \end{function}
+%    \begin{macrocode}
+\cs_new_protected:Npn  \pdf_xform_new:nnn #1 #2 #3
+  {
+    \@@_backend_xform_new:nnnn { #1 } { #2 } {  } { #3 }
+  }
+
+\cs_new_protected:Npn \pdf_xform_use:n #1
+  {
+    \@@_backend_xform_use:n { #1 }
+  }
+% expansion?
+\cs_new:Npn \pdf_xform_ref:n #1
+  {
+    \@@_backend_xform_ref:n { #1 }
+  }
+
+\cs_generate_variant:Nn \pdf_xform_ref:n {o}
+
+\cs_new:Npn \pdf_xform_wd:n #1
+  {
+    \tl_use:c { c_@@_backend_xform_wd_ \tl_to_str:n { #1 } _tl }
+  }
+
+\cs_new:Npn \pdf_xform_ht:n #1
+  {
+    \tl_use:c { c_@@_backend_xform_ht_ \tl_to_str:n { #1 } _tl }
+  }
+
+\cs_new:Npn \pdf_xform_dp:n #1
+  {
+    \tl_use:c { c_@@_backend_xform_dp_ \tl_to_str:n { #1 } _tl }
+  }
+
+%    \end{macrocode}
+%
+%  \subsubsection{Form XObject / backend }
+%  \begin{macro}{ \@@_backend_xform_new:nnnn }
+%  \begin{arguments}
+%  \item name
+%  \item attributes
+%  \item resources %needed?? or are all resources autogenerated?
+%  \item content, this doesn't need to be a box!
+%  \end{arguments}
+%  \begin{macro}{ \@@_backend_xform_use:n, \@@_backend_xform_ref:n }
+%    \begin{macrocode}
+%%pdftex
+\bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
+  {
+    \cs_new_protected:Npn \@@_backend_xform_new:nnnn #1 #2 #3 #4
+    % #1 name
+    % #2 attributes
+    % #3 resources
+    % #4 content, not necessarily a box!
+      {
+        \hbox_set:Nn \l_@@_tmpa_box
+          {
+            \bool_set_true:N \l_@@_backend_xform_bool
+            \@@_dict_clear:n {xform/Resources/Properties}
+            #4
+          }
+        %store the dimensions
+        \tl_const:cx
+          { c_@@_backend_xform_wd_ \tl_to_str:n {#1} _tl }
+          { \tex_the:D \box_wd:N \l_@@_tmpa_box }
+        \tl_const:cx
+          { c_@@_backend_xform_ht_ \tl_to_str:n {#1} _tl }
+          { \tex_the:D \box_ht:N \l_@@_tmpa_box }
+        \tl_const:cx
+          { c_@@_backend_xform_dp_ \tl_to_str:n {#1} _tl }
+          { \tex_the:D \box_dp:N \l_@@_tmpa_box }
+        %% do we need to test if #2 and #3 are empty??
+        \tex_immediate:D \tex_pdfxform:D
+          ~  attr      ~ { #2 }
+        %% which other resources should be default? Is an argument actually needed?
+          ~  resources ~
+          {
+            #3
+            \int_compare:nNnT
+              { \prop_count:c { \@@_dict_gname:n {xform/Resources/Properties} } }
+              >
+              { 0 }
+              {
+                /Properties~
+                  <<
+                    \@@_dict_map_dict_item:n {xform/Resources/Properties}
+                  >>
+              }
+
+            \prop_if_empty:cF
+              { \@@_dict_gname:n {Page/Resources/ExtGState} }
+              {
+                /ExtGState~ \pdf_object_ref:n {Page/Resources/ExtGState}
+              }
+            \prop_if_empty:cF
+              { \@@_dict_gname:n {Page/Resources/Pattern} }
+              {
+                /Pattern~ \pdf_object_ref:n {Page/Resources/Pattern}
+              }
+            \prop_if_empty:cF
+              { \@@_dict_gname:n {Page/Resources/Shading} }
+              {
+                /Shading~ \pdf_object_ref:n {Page/Resources/Shading}
+              }
+            \prop_if_empty:cF
+              { \@@_dict_gname:n {Page/Resources/ColorSpace} }
+              {
+                /ColorSpace~ \pdf_object_ref:n {Page/Resources/ColorSpace}
+              }
+          }
+          \l_@@_tmpa_box
+       \int_const:cn
+         { c_@@_backend_xform_ \tl_to_str:n {#1} _int }
+         { \tex_pdflastxform:D }
+      }
+
+  \cs_new_protected:Npn \@@_backend_xform_use:n #1
+    {
+      \tex_pdfrefxform:D
+        \int_use:c { c_@@_backend_xform_ \tl_to_str:n {#1} _int }
+        \scan_stop:
+    }
+
+  \cs_new:Npn \@@_backend_xform_ref:n #1
+    {
+      \int_use:c { c_@@_backend_xform_ \tl_to_str:n {#1} _int } ~ 0 ~ R
+    }
+  }
+
+%luatex
+%nearly identical but not completely ...
+\sys_if_engine_luatex:T
+  {
+    \cs_new:Npn \@@_backend_xform_new:nnnn #1 #2 #3 #4
+    % #1 name
+    % #2 attributes
+    % #3 resources
+    % #4 content, not necessarily a box!
+      {
+        \hbox_set:Nn \l_@@_tmpa_box
+          {
+            \bool_set_true:N \l_@@_backend_xform_bool
+            \@@_dict_clear:n {xform/Resources/Properties}
+            #4
+          }
+        \tl_const:cx
+          { c_@@_backend_xform_wd_ \tl_to_str:n {#1} _tl }
+          { \tex_the:D \box_wd:N \l_@@_tmpa_box }
+        \tl_const:cx
+          { c_@@_backend_xform_ht_ \tl_to_str:n {#1} _tl }
+          { \tex_the:D \box_ht:N \l_@@_tmpa_box }
+        \tl_const:cx
+          { c_@@_backend_xform_dp_ \tl_to_str:n {#1} _tl }
+          { \tex_the:D \box_dp:N \l_@@_tmpa_box }
+        %% do we need to test if #2 and #3 are empty??
+        \tex_immediate:D \tex_pdfxform:D
+          ~  attr      ~ { #2 }
+          %% which resources should be default? Is an argument actually needed?
+          ~  resources ~
+          {
+            #3
+            \int_compare:nNnT
+              {\prop_count:c { \@@_dict_gname:n {xform/Resources/Properties} }}
+              >
+              { 0 }
+              {
+                /Properties~
+                  <<
+                    \@@_dict_map_dict_item:n {xform/Resources/Properties}
+                  >>
+              }
+            \prop_if_empty:cF
+              { \@@_dict_gname:n {Page/Resources/ExtGState} }
+              {
+                /ExtGState~ \pdf_object_ref:n {Page/Resources/ExtGState}
+              }
+            \prop_if_empty:cF
+              { \@@_dict_gname:n {Page/Resources/Pattern} }
+              {
+                /Pattern~ \pdf_object_ref:n {Page/Resources/Pattern}
+              }
+            \prop_if_empty:cF
+              { \@@_dict_gname:n {Page/Resources/Shading} }
+              {
+                /Shading~ \pdf_object_ref:n {Page/Resources/Shading}
+              }
+            \prop_if_empty:cF
+              { \@@_dict_gname:n {Page/Resources/ColorSpace} }
+              {
+                /ColorSpace~ \pdf_object_ref:n {Page/Resources/ColorSpace}
+              }
+          }
+          \l_@@_tmpa_box
+          \int_const:cn
+            { c_@@_backend_xform_ \tl_to_str:n {#1} _int }
+            { \tex_pdflastxform:D }
+      }
+
+    \cs_new:Npn \@@_backend_xform_use:n #1
+      {
+        \tex_pdfrefxform:D \int_use:c
+          {
+            c_@@_backend_xform_ \tl_to_str:n {#1} _int
+          }
+          \scan_stop:
+      }
+
+    \cs_new:Npn \@@_backend_xform_ref:n #1
+      { \int_use:c { c_@@_backend_xform_ \tl_to_str:n {#1} _int } ~ 0 ~ R }
+  }
+
+
+\sys_if_engine_xetex:T
+  {
+   % it needs a bit testing if it really works to set the box to 0 before the special ...
+   % does it disturb viewing the xobject?
+   % what happens with the resources (bdc)? (should work as they are specials too)
+    \cs_new:Npn \@@_backend_xform_new:nnnn #1 #2 #3 #4
+    % #1 name
+    % #2 attributes
+    % #3 resources
+    % #4 content, not necessarily a box!
+      {
+        \int_gincr:N \g_@@_backend_object_int
+        \int_const:cn
+          { c_@@_backend_xform_ \tl_to_str:n {#1} _int }
+          { \g_@@_backend_object_int }
+        \hbox_set:Nn \l_@@_tmpa_box
+          {
+            \bool_set_true:N \l_@@_backend_xform_bool
+            #4
+          }
+        \tl_const:cx
+          { c_@@_backend_xform_wd_ \tl_to_str:n {#1} _tl }
+          { \tex_the:D \box_wd:N \l_@@_tmpa_box }
+        \tl_const:cx
+          { c_@@_backend_xform_ht_ \tl_to_str:n {#1} _tl }
+          { \tex_the:D \box_ht:N \l_@@_tmpa_box }
+        \tl_const:cx
+          { c_@@_backend_xform_dp_ \tl_to_str:n {#1} _tl }
+          { \tex_the:D \box_dp:N \l_@@_tmpa_box }
+        \box_set_dp:Nn  \l_@@_tmpa_box { \c_zero_dim }
+        \box_set_ht:Nn  \l_@@_tmpa_box { \c_zero_dim }
+        \box_set_wd:Nn  \l_@@_tmpa_box { \c_zero_dim }
+        \mode_leave_vertical: %needed, the xform disappears without it.
+        \@@_backend:x
+          {
+            bxobj  ~ \@@_backend_xform_ref:n  { #1 }
+            \c_space_tl width  ~ \pdf_xform_wd:n { #1 }
+            \c_space_tl height ~ \pdf_xform_ht:n { #1 }
+            \c_space_tl depth  ~ \pdf_xform_dp:n { #1 }
+          }
+        \box_use_drop:N \l_@@_tmpa_box
+        \@@_backend:x {put ~ @resources ~<<#3>> }
+        \@@_backend:x
+          {
+            put~ @resources ~
+              <<
+                /ExtGState~ \pdf_object_ref:n {Page/Resources/ExtGState}
+              >>
+          }
+        \@@_backend:x
+          {
+            put~ @resources ~
+            <<
+              /Pattern~ \pdf_object_ref:n {Page/Resources/Pattern}
+            >>
+          }
+        \@@_backend:x
+          {
+            put~ @resources ~
+            <<
+              /Shading~ \pdf_object_ref:n {Page/Resources/Shading}
+            >>
+          }
+        \@@_backend:x
+          {
+            put~ @resources ~
+            <<
+              /ColorSpace~
+              \pdf_object_ref:n {Page/Resources/ColorSpace}
+            >>
+          }
+        \exp_args:Nx
+        \@@_backend:x {exobj ~<<#2>>}
+     }
+
+    \cs_new:Npn \@@_backend_xform_ref:n #1
+      {
+        @pdf.xform \int_use:c { c_@@_backend_xform_ \tl_to_str:n {#1} _int }
+      }
+
+    \cs_new:Npn \@@_backend_xform_use:n #1
+     {
+       \hbox_set:Nn \l_@@_tmpa_box
+         {
+           \@@_backend:x
+             {
+               uxobj~ \@@_backend_xform_ref:n { #1 }
+             }
+         }
+       \box_set_wd:Nn  \l_@@_tmpa_box { \pdf_xform_wd:n { #1 } }
+       \box_set_ht:Nn  \l_@@_tmpa_box { \pdf_xform_ht:n { #1 } }
+       \box_set_dp:Nn  \l_@@_tmpa_box { \pdf_xform_dp:n { #1 } }
+       \box_use_drop:N \l_@@_tmpa_box
+     }
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
 %
 %\subsection{Annotation}
 %\subsubsection{Annotation/backend}
@@ -3240,6 +3232,35 @@
   }
 
 %    \end{macrocode}
+% \section{Drop?}
+% \subsubsection{Doc View/Openaction}
+% \begin{NOTE}{UF}
+%   /OpenAction can be an array:
+%   |/OpenAction [5 0 R /Fit]| or an action: |<< /S /GoTo /D [ 7 0 R /Fit ] >>|.
+%  The implementation below allows only the first. It is not quite clear, if
+%  this is sensible (and if a special docview command is needed at all).
+%  The second could be set directly.
+% \end{NOTE}
+%
+% \begin{function}[added = 2019-08-18]
+%   {\pdf_docview:nn}
+%   \begin{syntax}
+%     \cs{pdf_docview:nn} \Arg{page} \Arg{view}
+%   \end{syntax}
+% This command allows to set the OpenAction array. The \meta{page}
+% is an absolute page number. \Arg{view} a string for the destination
+% without the leading slash. Examples are e.g. |XYZ left top zoom| or |Fit|.
+% The OpenAction uses (and could also be set directly with)
+% \cs{pdfdict_put:nnn}|{Catalog}|.
+% \end{function}
+%
+%    \begin{macrocode}
+\cs_new_protected:Npn \pdf_docview:nn #1 #2
+  {
+    \pdfdict_put:nnx {Catalog }{ OpenAction }{[\pdf_pageobject_ref:n {#1}~/#2]}
+  }
+%    \end{macrocode}
+%
 % \section{Document metadata}
 % We plan a \cs{DeclareDocumentMetaData} so let's start with it.
 % It should for the begin allow to set the version, to uncompress a pdf,
