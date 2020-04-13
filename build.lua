@@ -12,7 +12,10 @@ sourcefiles =  {"*.dtx","*.ins",
                 "tmpl3shipout.sty",
                 "newpackages/new-transparent.sty",
                 "newpackages/new-bookmark.sty",
-                "newpackages/bkm-generic.def"}
+                "newpackages/bkm-generic.def",
+                "newpackages/new-attachfile.sty",
+                "newpackages/atfi-generic.def",
+                }
 
 checkruns = 3
 
