@@ -41,6 +41,7 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{new-attachfile}%
   [2020/04/13 v1.00 Attach files into PDF (HO/UF)]%
+\RequirePackage{pdfresources}  
 \RequirePackage{iftex}[2019/11/07]
 \RequirePackage{keyval}
 \RequirePackage{color}
@@ -242,35 +243,8 @@
   \fi
 }
 \DeclareBoolOption{nofiles}
-\let\atfi@driver\ltx@empty
-\def\atfi@driver@pdftex{pdftex}
-\def\atfi@driver@luatex{luatex}
-\def\atfi@driver@dvips{dvips}
-\def\atfi@driver@dvipdfmx{dvipdfmx}
-\DeclareVoidOption{pdftex}{%
- \ifpdf
-  \let\atfi@driver\atfi@driver@pdftex
- \else
-   \let\atfi@driver\ltx@empty
-    \PackageError{attachfile2}{%
-      Wrong driver option `pdftex',\MessageBreak
-      because pdfTeX in PDF mode is not detected%
-    }\@ehc
- \fi
-}
-\DeclareVoidOption{luatex}{%
-  \let\atfi@driver\atfi@driver@luatex
-}
-\DeclareVoidOption{dvips}{%
-  \let\atfi@driver\atfi@driver@dvips
-}
-\DeclareVoidOption{dvipdfmx}{%
-  \let\atfi@driver\atfi@driver@dvipdfmx
-}
-\DeclareVoidOption{xetex}{%
-  \let\atfi@driver\atfi@driver@dvipdfmx
-}
-\DeclareStringOption{driverfallback}
+
+
 \DeclareRobustCommand{\attachfilesetup}[1]{\setkeys{AtFi}{#1}}
 \DeclareLocalOptions{%
   annotname,%
@@ -294,48 +268,7 @@
 \def\atfi@DisableOption{%
   \DisableKeyvalOption[action=error,package=attachfile2]{AtFi}%
 }
-\ifpdf
- \ifluatex
-  \let\atfi@driver\atfi@driver@luatex
- \else
-  \let\atfi@driver\atfi@driver@pdftex
- \fi
-\else
- \ifxetex
-    \let\atfi@driver\atfi@driver@dvipdfmx
-  \else
-    \ifx\atfi@driver\ltx@empty
-      \ifx\atfi@driverfallback\ltx@empty
-      \else
-        \expandafter\let\expandafter\atfi@driver
-            \csname atfi@driver@\atfi@driverfallback\endcsname
-        \ifx\atfi@driver\atfi@driver@dvips
-        \else
-          \ifx\atfi@driver\atfi@driver@dvipdfmx
-          \else
-             \let\atfi@driver\ltx@empty
-             \PackageWarningNoLine{attachfile2}{%
-               Option `driverfallback' with unsupported\MessageBreak
-               DVI driver (\atfi@driverfallback)%
-             }%
-          \fi
-        \fi
-      \fi
-      \ifx\atfi@driver\ltx@empty
-        \PackageWarningNoLine{attachfile2}{%
-          Driver is not specified,\MessageBreak
-          enforce draft settings%
-        }%
-        \atfi@drafttrue
-      \fi
-    \fi
-  \fi
-\fi
-\atfi@DisableOption{pdftex}
-\atfi@DisableOption{dvips}
-\atfi@DisableOption{dvipdfmx}
-\atfi@DisableOption{xetex}
-\atfi@DisableOption{driverfallback}
+
 \DeclareRobustCommand{\notextattachfile}[2][]{%
   \begingroup
     \atfi@setup{#1}%
@@ -368,7 +301,7 @@
   }%
    \expandafter\endinput
 \fi
-\input{atfi-\atfi@driver.def}
+\input{atfi-generic.def}
 \def\atfi@acroGraph@data{%
   \atfi@GSAVE
   0.5 \atfi@SETGRAYFILL

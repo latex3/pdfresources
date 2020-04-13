@@ -39,3 +39,52 @@
 Page:             code /resources for all pages (starting from first use) = \pageattr
 ThisPage:         code specific to one Page
 ThisPage<number>: code specific to page <number>
+
+
+% object dictionaries
+
+/Type/Filespec%
+
+/FS  - name optional
+/F   - string
+/UF  - string (BOM + utf8 bytes) /=path separator.
+/DOS - bytestring - optional, deprecated 2.0
+/Mac
+/Unix
+/ID - array with two entries [<B822F9570D48EBF9E10849164052EDF1> <B822F9570D48EBF9E10849164052EDF1>]
+      (first entry: creation, second after update. Always equal for us
+/V boolean
+/Desc string
+/AFRelationship name
+/Thumb stream (pdf 2.0)
+/CI  obj reference to dictionary
+/EF: dictionary: /F objref to stream, /UF objref to stream (/EF=embedded
+/RF: R=related 
+/EP: dictionarie, related to encryption content unclear
+
+
+Stream object:
+obj
+/Type/Embeddedfile
+/Subtype/text#2Fplain  (mime type, escaped)
+/Params dictionary required for AF
+        /Size         integer
+        /CreationDate date
+        /ModDate      date
+        /Mac dict, deprecated in 2.0
+        /CheckSum string, optional
+stream .... endstream
+endobj
+      
+/Desc (This embedded file is encrypted using the Acme Custom Crypto filter)
+/EF <</F 18 0 R>>
+/F (AcmeCustomCrypto Protected PDF.pdf)
+/Type /Filespec
+/UF (AcmeCustomCrypto Protected PDF.pdf)
+/EP
+<<
+/Type /EncryptedPayload
+/Subtype /AcmeCustomCrypto
+/Version /1.0
+>>
+/AFRelationship /EncryptedPayload

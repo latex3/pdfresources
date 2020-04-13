@@ -42,7 +42,7 @@
 \ProvidesFile{atfi-generic.def}%
   [2020/04/13 v1.0 generic attachfile2 (UF)]%
 \ExplSyntaxOn
-\cs_set_eq:NN \atfi@literal \__draw_backend_literal:n
+\cs_set:Npn \atfi@literal #1{ \__draw_backend_literal:x {#1}} %???
 \ExplSyntaxOff
 %\let\atfi@literal\pdfliteral %<---
 \def\atfi@GSAVE{q }
@@ -72,6 +72,7 @@
 \define@key{AtFi@file}{Size}{%
   \edef\atfi@params{\atfi@params/Size #1}%
 }
+\ExplSyntaxOn
 \def\atfi@embedfile#1{%
   \ltx@IfUndefined{atfi@fileobj@#1}{%
     \begingroup
@@ -93,18 +94,15 @@
       \else
         \edef\atfi@params{/Params<<\atfi@params>>}%
       \fi
-      \immediate\pdfobj stream attr {%
-        /Type/EmbeddedFile%
-        \atfi@mimetype
-        \atfi@params
-      } file {#1}%
+      \pdf_object_now:nx{fstream}{{/Type/EmbeddedFile\atfi@mimetype\atfi@params}{#1}}
       \expandafter
-      \xdef\csname atfi@fileobj@#1\endcsname{\the\pdflastobj}%
+      \xdef\csname atfi@fileobj@#1\endcsname{\pdf_object_last:}%
     \endgroup
   }{%
     % file already embedded
   }%
 }
+\ExplSyntaxOff
 \def\atfi@xform{%
   \immediate\pdfxform\atfi@appearancebox
   \edef\atfi@appearanceobj{\the\pdflastxform}%
@@ -113,14 +111,15 @@
 \def\atfi@refxform#1{%
   \pdfrefxform#1\relax
 }
+\ExplSyntaxOn
 \def\atfi@insert@file@annot#1{%
   \rule{0pt}{0pt}%
   \ifatfi@appearance
     \def\atfi@appearance@dict{%
       /AP<<%
-        /N \atfi@appearanceobj\space 0 R%
-        /R \atfi@appearanceobj\space 0 R%
-        /D \atfi@appearanceobj\space 0 R%
+        /N~ \atfi@appearanceobj\space 0~ R%
+        /R~ \atfi@appearanceobj\space 0~ R%
+        /D~ \atfi@appearanceobj\space 0~ R%
       >>%
     }%
   \else
@@ -130,8 +129,7 @@
     \begingroup
       \hypersetup{unicode=false}%
       \atfi@pdfstringdef\atfi@file{#1}%
-      \immediate\pdfobj{%
-        <<%
+      \pdf_object_now:nx{dict}{%
           /Type/Filespec%
           /F(\atfi@file)%
           \ifx\atfi@ucfilespec\ltx@empty
@@ -139,19 +137,18 @@
             /UF(\atfi@ucfilespec)%
           \fi
           /EF<<%
-            /F \@nameuse{atfi@fileobj@#1} 0 R%
+            /F~ \@nameuse{atfi@fileobj@#1}%
           >>%
-        >>%
       }%
       \expandafter\xdef\csname atfi@fsobj@#1\endcsname{%
-        \the\pdflastobj
+        \pdf_object_last:
       }%
     \endgroup
   }{%
   }%
-  \pdfannot width \atfi@scale\atfi@appearancewidth
-            height \atfi@scale\atfi@appearanceheight
-            depth \atfi@scale\atfi@appearancedepth {%
+  \pdfannot width ~\atfi@scale\atfi@appearancewidth
+            height~ \atfi@scale\atfi@appearanceheight
+            depth~ \atfi@scale\atfi@appearancedepth {%
     /Subtype/FileAttachment%
     \atfi@icon
     \atfi@color@annot
@@ -161,13 +158,14 @@
     \atfi@description
     \atfi@subject
     \atfi@appearance@dict
-    /F \theatfi@flags
-    /FS \@nameuse{atfi@fsobj@#1} 0 R%
+    /F~ \theatfi@flags
+    /FS~ \@nameuse{atfi@fsobj@#1}%
   }%
   \rule{0pt}{\atfi@appearanceheight}%
   \rule[-\atfi@appearancedepth]{0pt}{\atfi@appearancedepth}%
   \rule{\atfi@appearancewidth}{0pt}%
 }
+\ExplSyntaxOff
 \endinput
 %%
 %% End of file `atfi-pdftex.def'.
