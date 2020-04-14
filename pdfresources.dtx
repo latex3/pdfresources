@@ -2108,6 +2108,25 @@
   }
 %    \end{macrocode}
 % \end{macro}
+%
+% \subsection{Local dictonaries}
+%
+% All dictionaries described above were global dictionaries and basically they
+% are written at most once (or at most once per page) to the PDF. The pdfdict module
+% predefines also a number of local dictionaries. These are used in objects like
+% link annotations (see the pdfannot module) which are written in varying
+% numbers to the PDF and allow to set their features and change them locally
+% if needed. The predefined dictionaries are
+%
+% \begin{tabular}{lp{6cm}}
+%  \multicolumn{2}{l}{annotation related: here are
+%                     \texttt{Border} and \texttt{C} (color)}\\
+%  annot/Link/Goto   & used in GoTo links (internal references) \\
+%  annot/Link/URI    & used in URI links (external uri references) \\
+%  annot/Link/GotoR  & used in GoToR links (file  references) \\
+%  annot/Link/Named  & used in Named actions (menu calls) \\
+%  annot/Link/Launch & used in Launch links (application calls) \\
+% \end{tabular}
 % \section{Various PDF contents}
 % The following commands allow to create a number of important pdf objects and contents in a
 % backend independant way.
