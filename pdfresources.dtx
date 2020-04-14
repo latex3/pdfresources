@@ -2443,7 +2443,10 @@
                   {pdf@abspage}
                   {0}
               }
-            \@@_dict_gnew:n { backend_Page\l_@@_tmpa_tl/Resources/Properties }
+            \@@_dict_if_exist:nF { backend_Page\l_@@_tmpa_tl/Resources/Properties }
+              {
+                \@@_dict_gnew:n { backend_Page\l_@@_tmpa_tl/Resources/Properties }
+              }  
             \@@_dict_handler_put:nxx
               { backend_Page\l_@@_tmpa_tl/Resources/Properties }
               { l3pdf\int_use:N\g_@@_backend_resourceid_int }
