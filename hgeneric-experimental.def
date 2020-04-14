@@ -152,7 +152,7 @@
 
 \providecommand*\@pdfview{XYZ}
 
-\pdf_link_margin:n { 1pt }
+\pdfannot_link_margin:n { 1pt }
 
 %%%%%%%%%%
 % variants
@@ -214,27 +214,23 @@
   {
     \bool_if:NT \l__hyp_pdfa_bool
       {
-        \hook_put:nnnn
-          { pdf }
-          { link_URI_attr }
+        \pdfdict_put:nnn
+          {annot/Link/URI}
           { F }
           { 4 }
 
-        \hook_put:nnnn
-          { pdf }
-          { link_GoTo_attr }
+        \pdfdict_put:nnn
+          {annot/Link/GoTo}
           { F }
           { 4 }
 
-        \hook_put:nnnn
-          { pdf }
-          { link_GoToR_attr }
+        \pdfdict_put:nnn
+          {annot/Link/GoToR}
           { F }
           { 4 }
 
-        \hook_put:nnnn
-          { pdf }
-          { link_Named_attr }
+        \pdfdict_put:nnn
+          {annot/Link/Named}
           { F }
           { 4 }
       }
@@ -248,27 +244,25 @@
 
 \cs_new_protected:Npn \Hy@EXPsetpdfborder
   {
-    \seq_map_inline:Nn \c_pdf_link_types_seq
+    \seq_map_inline:Nn \c_pdfannot_link_types_seq
       {
         \tl_if_empty:NTF \@pdfborder
           {
-            \hook_remove:nnn { pdf } { link_##1_attr } { Border }
+            \pdfdict_remove:nn {annot/Link/##1}{Border}
           }
           {
-            \hook_put:nnnn
-              { pdf }
-              { link_##1_attr }
+            \pdfdict_put:nnx
+              {annot/Link/##1}
               { Border }
               { [\@pdfborder] }
           }
         \tl_if_empty:NTF \@pdfborderstyle
           {
-            \hook_remove:nnn  { pdf }{ link_##1_attr } { BS }
+            \pdfdict_remove:nn {annot/Link/##1} { BS }
           }
           {
-            \hook_put:nnnn
-              { pdf }
-              { link_##1_attr }
+           \pdfdict_put:nnx
+              {annot/Link/##1}
               { BS }
               { <<\@pdfborderstyle>> }
           }
@@ -278,16 +272,15 @@
 % highlight
 \cs_new_protected:Npn \Hy@EXPsetpdfhighlight
   {
-    \seq_map_inline:Nn \c_pdf_link_types_seq
+    \seq_map_inline:Nn \c_pdfannot_link_types_seq
       {
         \tl_if_empty:NTF \@pdfhighlight
           {
-            \hook_remove:nnn { pdf } { link_##1_attr }{ H }
+            \pdfdict_remove:nn {annot/Link/##1}{ H }
           }
           {
-            \hook_put:nnnn
-              { pdf }
-              { link_##1_attr }
+             \pdfdict_put:nnx
+              {annot/Link/##1}
               { H }
               { \@pdfhighlight }
          }
@@ -297,18 +290,17 @@
 % bordercolor
 \cs_new_protected:Npn \Hy@EXPsetbordercolor
   {
-    \seq_map_inline:Nn \c_pdf_link_types_seq
+    \seq_map_inline:Nn \c_pdfannot_link_types_seq
       {
         \tl_if_exist:cTF { @\prop_item:Nn\c__hyp_map_linktypes_prop{##1}bordercolor }
           {
-            \hook_put:nnnn
-             { pdf }
-             { link_##1_attr }
-             { C }
-             { [\tl_use:c {@\prop_item:Nn\c__hyp_map_linktypes_prop{##1}bordercolor}] }
+            \pdfdict_put:nnx
+              {annot/Link/##1}
+              { C }
+              { [\tl_use:c {@\prop_item:Nn\c__hyp_map_linktypes_prop{##1}bordercolor}] }
           }
           {
-            \hook_remove:nnn { pdf } { link_##1_attr } { C }
+            \pdfdict_remove:nn {annot/Link/##1} { C }
           }
      }
   }
@@ -594,7 +586,7 @@
 
 \cs_set_protected:Npn \setpdflinkmargin #1
   {
-    \pdf_link_margin:n { #1 }
+    \pdfannot_link_margin:n { #1 }
   }
 
 % internal definitions for anchors (destinations) and links to destinations.
@@ -629,14 +621,14 @@
           }
       }
     \exp_args:No
-      \pdf_link_goto_begin:nw  { \l__hyp_destname_tmpa_tl }
+      \pdfannot_link_goto_begin:nw  { \l__hyp_destname_tmpa_tl }
         \Hy@colorlink\@linkcolor
   }
 
 \cs_new_protected:Npn \__hyp_link_dest_end:
   {
     \Hy@endcolorlink
-    \pdf_link_goto_end:
+    \pdfannot_link_goto_end:
   }
 
 %% hyperref commands for destinations (anchor) and links to destinations
@@ -695,9 +687,8 @@
     \mode_leave_vertical:
     %Subtype and A could probably also be handled with hooks if needed
     %but checks for all drivers should be done then.
-    \pdf_link_user:nnn { URI }
+    \pdfannot_link:nnn { URI }
       {
-        /Subtype /Link
         /A
           <<
             % the action dictionary has no hook!
@@ -732,10 +723,9 @@
     \__hyp_pstringdef:Nn \l__hyp_destname_tmpa_tl { #3 }
     \Hy@MakeRemoteAction
     \mode_leave_vertical:
-    \pdf_link_user:nnn %expansion??
+    \pdfannot_link:nnn %expansion??
       { GoToR }
       {
-        /Subtype /Link
         /A<<
           /F( \l__hyp_filename_tmpa_tl )
           /S/GoToR
@@ -775,10 +765,9 @@
     %\Hy@pstringdef\Hy@pstringF{#1}%
     %\Hy@pstringdef\Hy@pstringP{#3}%
     \mode_leave_vertical:
-    \pdf_link_user:nnn %expansion?
+    \pdfannot_link:nnn %expansion?
      { Launch }
      {
-       /Subtype /Link
        /A<<
           /F( \l__hyp_filename_tmpa_tl )
           /S/Launch
@@ -1453,15 +1442,14 @@
   \Hy@Acrobatmenu{#1}{#2}{%
     \mode_leave_vertical:
     \EdefEscapeName\Hy@temp@menu{#1}%
-    \pdf_link_user:nnn { Named }
+    \pdfannot_link:nnn { Named }
       {
-       /Subtype /Link
-       /A<<
-          /S/Named
-          /N/\Hy@temp@menu
-          \Hy@href@nextactionraw
-        >>
-
+        /A
+          <<
+            /S/Named
+            /N/\Hy@temp@menu
+            \Hy@href@nextactionraw
+          >>
       }
       {
        \Hy@colorlink\@menucolor#2
@@ -1521,7 +1509,7 @@
     \exp_args:Nx\HyField@@AddToFields
       {
         %\pdf_link_last:
-        \pdf_annotation_last:
+        \pdfannot_box_last:
       }
     \ifx\Fld@calculate@code\ltx@empty
     \else
@@ -1538,7 +1526,7 @@
                }
                {
                  %  \pdf_link_last:
-                 \pdf_annotation_last:
+                 \pdfannot_box_last:
                }
             }
           \fi
@@ -1575,7 +1563,7 @@
           {
             \pdfdict_put:nnx { Catalog / AcroForm } { Fields }{##1}
             %\pdfdict_show:n { Catalog / AcroForm }
-            \seq_show:c { g__pdf_/Catalog/AcroForm/Fields_seq}
+            %\seq_show:c { g__pdf_/Catalog/AcroForm/Fields_seq} %!!!!!
           }
         \prop_if_empty:NF \g__hyp_AcroForm_CoFields_prop
           {
@@ -1732,7 +1720,7 @@
       \leavevmode
       \HyAnn@AbsPageLabel
       \Hy@escapeform\PDFForm@Text
-      \pdf_annotation:nnnn
+      \pdfannot_box:nnnn
           {\Fld@width}
           {\Fld@height}
           {0pt} %is this correct?
@@ -1830,7 +1818,7 @@
     \leavevmode
     \HyAnn@AbsPageLabel
     \Hy@escapeform\PDFForm@Radio
-    \pdf_annotation:nnnn
+    \pdfannot_box:nnnn
       {\Fld@width}
       {\Fld@height}
       {0pt} %is this correct?
@@ -1897,7 +1885,7 @@
         \HyAnn@AbsPageLabel
         \Hy@escapeform\PDFForm@Push
         \hbox_set:Nn \l_tmpa_box { \MakeButtonField {#2}}
-        \pdf_annotation:nnnn
+        \pdfannot_box:nnnn
           {\box_wd:N\l_tmpa_box}
           {\box_ht:N\l_tmpa_box}
           {\box_dp:N\l_tmpa_box} %is this correct?
@@ -1928,7 +1916,7 @@
     \HyAnn@AbsPageLabel
     \Hy@escapeform\PDFForm@Submit
     \hbox_set:Nn \l_tmpa_box { \MakeButtonField {#2}}
-    \pdf_annotation:nnnn
+    \pdfannot_box:nnnn
       {\box_wd:N\l_tmpa_box}
       {\box_ht:N\l_tmpa_box}
       {\box_dp:N\l_tmpa_box} %is this correct?
@@ -1967,7 +1955,7 @@
          \HyAnn@AbsPageLabel
          \Hy@escapeform\PDFForm@Reset
          \hbox_set:Nn \l_tmpa_box { \MakeButtonField {#2}}
-         \pdf_annotation:nnnn
+         \pdfannot_box:nnnn
            {\box_wd:N\l_tmpa_box}
            {\box_ht:N\l_tmpa_box}
            {\box_dp:N\l_tmpa_box} %is this correct?
@@ -2000,7 +1988,7 @@
           \mode_leave_vertical:
           \HyAnn@AbsPageLabel
           \Hy@escapeform\PDFForm@Check
-          \pdf_annotation:nnnn
+          \pdfannot_box:nnnn
             {\Fld@width}
             {\Fld@height}
             {0pt} %is this correct?

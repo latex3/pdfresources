@@ -2389,7 +2389,10 @@
                   {pdf@abspage}
                   {0}
               }
-            \@@_dict_gnew:n { backend_Page\l_@@_tmpa_tl/Resources/Properties }
+            \@@_dict_if_exist:nF { backend_Page\l_@@_tmpa_tl/Resources/Properties }
+              {
+                \@@_dict_gnew:n  { backend_Page\l_@@_tmpa_tl/Resources/Properties }
+              }
             \@@_dict_handler_put:nxx
               { backend_Page\l_@@_tmpa_tl/Resources/Properties }
               { l3pdf\int_use:N\g_@@_backend_resourceid_int }
@@ -2852,72 +2855,89 @@
 % \end{macro}
 % \end{macro}
 %
-%\subsection{Annotation}
-%\subsubsection{Annotation/backend}
-% The backend commands are already in the driver:
-% \cs{@@_backend_annotation:nnnn} and \cs{@@_backend_annotation_last:}
-%
-% \subsubsection{Annotation/management }
+%\subsection{Annotations}
 % \begin{NOTE}{UF}
+% The code/naming tries to unify general annotations and the special type of
+% link under a common name.
 % regarding naming and relation of annotation commands see
 % https://github.com/FrankMittelbach/AccessiblePDF/issues/73
 % \end{NOTE}
-% \begin{function}[added = 2019-09-05]
-%   {\pdf_annotation:nnnn}
+
+%\subsubsection{Annotations / backend}
+% The backend commands are already in the driver:
+% \cs{@@_backend_annotation:nnnn} and \cs{@@_backend_annotation_last:}
+% \cs{@@_backend_link_begin_user:nnw}, etc
+%
+% \subsubsection{ general Annotation/management }
+%  \begin{function}[added = 2020-04-14] %!!!type or not type? Syntax for type???
+%   {\pdfannot:nnn}
 %   \begin{syntax}
-%     \cs{pdf_annotation:nnnn} \Arg{width} \Arg{height} \Arg{depth} \Arg{annot spec}
+%     \cs{pdfannot:nnn} \Arg{type} \Arg{action spec} \Arg{annot text}
 %   \end{syntax}
-%   This creates an /Type/Annot object.
+%   This creates an /Type/Annot object whose rectangle is defined by \Arg{annot text}.
+%   If \Arg{type} is a known type the hooks of this type are executed at the begin and
+%   the end, and the attribute dictionary of the type is inserted as attributes.
+%   This allows to create for example a link annotation which shares border settings
+%   with other links. \Arg{type} should e.g. be |Link/URI|. %!!!!!syntax?
+% \end{function}
+% %!!!!!! should there be a version without type??
+% \begin{function}[added = 2019-09-05, update 2020-04-14]
+%   {\pdfannot_box:nnnn}
+%   \begin{syntax}
+%     \cs{pdfannot_box:nnnn} \Arg{width} \Arg{height} \Arg{depth} \Arg{annot spec}
+%   \end{syntax}
+%   This creates an /Type/Annot object with the given dimensions.
 % \end{function}
 % \begin{function}[added = 2020-03-30]
-%   {\pdf_annotation:nnnnn}
+%   {\pdfannot_box:nnnnn}
 %   \begin{syntax}
-%     \cs{pdf_annotation:nnnn} \Arg{type} \Arg{width} \Arg{height} \Arg{depth} \Arg{annot spec}
+%     \cs{pdfannot_box:nnnn} \Arg{type} \Arg{width} \Arg{height} \Arg{depth} \Arg{annot spec}
 %   \end{syntax}
-%   This creates an /Type/Annot object, which uses the |type-attr| hook in the attributes.
+%   This creates an /Type/Annot object.
+%   If \Arg{type} is a known type the hooks of this type are executed at the begin and
+%   the end, and the attribute dictionary of the type is inserted as attributes.
 %   This allows to create for example a link annotation which shares border settings
-%   with other links. \Arg{type} should e.g. be |link_URI|.
+%   with other links. \Arg{type} should e.g. be |Link/URI|. %!!!!!syntax?
 % \end{function}
 % \begin{function}[added = 2019-09-05]
-%   {\pdf_annotation_last:}
+%   {\pdfannot_box_last:}
 %   \begin{syntax}
-%     \cs{pdf_annotation_last:}
+%     \cs{pdfannot_box_last:}
 %   \end{syntax}
 %   This retrieves the object reference of the last annotation created. This is not
 %   available with xetex.
 % \end{function}
 %    \begin{macrocode}
-\cs_new_protected:Npn \pdf_annotation:nnnn #1 #2 #3 #4
+\cs_new_protected:Npn \pdfannot_box:nnnn #1 #2 #3 #4
   {
     \@@_backend_annotation:nnnn {#1}{#2}{#3}{#4}
   }
 
-\cs_new:Npn \pdf_annotation_last:
+\cs_new:Npn \pdfannot_box_last:
   {
     \@@_backend_annotation_last:
   }
 
-\cs_new_protected:Npn \pdf_annotation:nnnnn #1 #2 #3 #4 #5
+\cs_new_protected:Npn \pdfannot_box:nnnnn #1 #2 #3 #4 #5
   {
     \exp_args:Nx
     \@@_backend_annotation:nnnn {#2}{#3}{#4}
       {
-        \prop_if_exist:cT { l_@@_hook_#1_attr_prop }
+        \@@_dict_if_exist:nT { annot/#1 }
           {
-            \prop_map_function:cN
-              { l_@@_hook_#1_attr_prop }
-              \@@_dict_item:nn
+            \@@_dict_map_dict_item:n {annot/#1}
           }
         #5
       }
   }
 
 
+
 %    \end{macrocode}
 %
-% \subsection{Links}\label{sec:links}
+% \subsection{Annotations, subtype Link}\label{sec:links}
 % Packages like hyperref, ocgx2 and tagpdf all wants to add code
-% to links/annotation. So we need commands to start and end a link which allows
+% to link annotation. So we need commands to start and end a link which allows
 % packages to add their code through hooks. There are three places in a link where
 % hooks are needed: At the begin (for example for a structure command or color),
 % in the \emph{attr spec} of the link (for example for the border), and
@@ -2953,101 +2973,103 @@
 % link |\hyper@link|, |\find@pdflink|
 % menu |\Acrobatmenu|
 % \end{NOTE}
-% \begin{variable}[added = 2020-03-12]{ \c_pdf_link_types_seq }
+% \begin{variable}[added = 2020-03-12]{ \c_pdfannot_link_types_seq }
 % This constant sequence contains the list of currently supported link types
-% for which hooks exist.
+% for which hooks and dictionaries exist.
 % \end{variable}
 %
 %    \begin{macrocode}
 
-\seq_const_from_clist:Nn \c_pdf_link_types_seq { URI , GoToR , Launch , GoTo, Named }
+\seq_const_from_clist:Nn \c_pdfannot_link_types_seq { URI , GoToR , Launch , GoTo, Named }
 
-\seq_map_inline:Nn \c_pdf_link_types_seq
+\seq_map_inline:Nn \c_pdfannot_link_types_seq
  {
-   \prop_new:c { l_@@_hook_link_#1_attr_prop }
-   \seq_new:c  { l_@@_hook_link_#1_begin_seq }
-   \seq_new:c  { l_@@_hook_link_#1_end_seq }
+   \@@_dict_new:n { annot/Link/#1 }
+   \seq_new:c  { l_@@_hook_annot/Link/#1_begin_seq }
+   \seq_new:c  { l_@@_hook_annot/Link/#1_end_seq }
  }
 
 %    \end{macrocode}
 
 
-% \subsubsection{Links/management}
-% \begin{function}[added = 2020-03-12]{ \pdf_link_user:nnn }
+% \subsubsection{Annotations, subtype Link /management}
+% \begin{function}[added = 2020-03-12, updates 2020]{ \pdfannot_link:nnn }
 %   \begin{syntax}
-%     \cs{pdf_link_user:nnn} \Arg{type} \Arg{user action spec} \Arg{link text}
+%     \cs{pdfannot_link:nnn} \Arg{type} \Arg{user action spec} \Arg{link text}
 %   \end{syntax}
 %  This creates a link around the \Arg{link text} with the specified
 %  \Arg{user action spec}\footnote{The wording follows the pdftex documentation}.
-%  If the type is one of the known types the attributes stored in the attribute
-%  hook of type \Arg{type} are inserted as \emph{attr spec} and the code in
+%  \texttt{/Subtype/Link} is added automatically.
+%  If \texttt{annot/Link/}\Arg{type} is a known local dictionary
+%  attributes stored in dictionary of type \Arg{type} are inserted as
+%  \emph{attr spec} and the code in
 %  the begin and end hook is executed  before and after the link. \Arg{type} should
 %  normally be identical to the value of the |/S| key in the action dictionary.
 %  As example
 %  \begin{verbatim}
-%    \pdf_link_user:nnn { URI }
+%    \pdfannot_link:nnn { URI }
 %     {
-%       /Subtype /Link
-%       /A<<
-%         /Type/Action
-%         /S/URI
-%         /URI(https://www.latex-project.org)
-%       >>
+%       /A
+%         <<
+%           /Type/Action
+%           /S/URI
+%           /URI(https://www.latex-project.org)
+%         >>
 %     }
 %     { link text }
 %    \end{verbatim}
 % \end{function}
 %
 %    \begin{macrocode}
-\cs_new_protected:Nn \pdf_link_user:nnn %#1 type (URI, GoTo etc),
+\cs_new_protected:Nn \pdfannot_link:nnn %#1 type (URI, GoTo etc),
                                         %#2 action spec, #3 link text
   {
-    \seq_if_exist:cT { l_@@_hook_link_#1_begin_seq }
+    \seq_if_exist:cT { l_@@_hook_annot/Link/#1_begin_seq }
       {
-        \seq_use:cn { l_@@_hook_link_#1_begin_seq }{}
+        \seq_use:cn { l_@@_hook_annot/Link/#1_begin_seq }{}
       }
     \mode_leave_vertical:
     \exp_args:Nxx %xetex needs expansion
     \@@_backend_link_begin_user:nnw
       {
-        \prop_if_exist:cT { l_@@_hook_link_#1_attr_prop }
+         \@@_dict_if_exist:nT { annot/Link/#1 }
           {
-            \prop_map_function:cN
-              { l_@@_hook_link_#1_attr_prop }
-              \@@_dict_item:nn
+            \@@_dict_map_dict_item:n {annot/Link/#1}
           }
       }
       {
+        /Subtype/Link
         #2
       }
     #3
     \@@_backend_link_end:
-    \seq_if_exist:cT { l_@@_hook_link_#1_end_seq }
+    \seq_if_exist:cT { l_@@_hook_annot/Link/#1_end_seq }
       {
-        \seq_use:cn { l_@@_hook_link_#1_end_seq }{}
+        \seq_use:cn { l_@@_hook_annot/Link/#1_end_seq }{}
       }
   }
 %    \end{macrocode}
-% \begin{function}[added = 2020-03-12]{ \pdf_link_begin_user:nnw, \pdf_link_end:n }
+% \begin{function}[added = 2020-03-12]{ \pdfannot_link_begin:nnw, \pdfannot_link_end:n }
 %   \begin{syntax}
-%     \cs{pdf_link_begin_user:nnw} \Arg{type} \Arg{user action spec} \meta{content}
-%     \cs{pdf_link_end:n} \Arg{type}
+%     \cs{pdfannot_link_begin:nnw} \Arg{type} \Arg{user action spec} \meta{content}
+%     \cs{pdfannot_link_end:n} \Arg{type}
 %   \end{syntax}
 %  This creates a link around the \meta{content} with the specified
 %  \meta{user action spec} (e.g. an /A dictionary with an URI) or
 %  \meta{destination} (a name as defined with the
 %  first argument of \cs{pdf_destination:nn}).
-%  In contrast to \cs{pdf_link_user:nnn} this function
+%  \texttt{/Subtype/Link} is added automatically.
+%  In contrast to \cs{pdfannot_link:nnn} this function
 %  does not absorb the argument when finding the \meta{content}, and so can
 %  be used in circumstances where the \meta{content} may not be a simple
 %  argument.
-%  If the type is one of the known types the attributes stored in the attribute
-%  hook of type \meta{type} are inserted as \emph{attr spec} and the code in
-%  the begin and end hook is executed  before and after the link. As example
+%  If \texttt{annot/Link/}\Arg{type} is a known local dictionary
+%  attributes stored in dictionary of type \Arg{type} are inserted as
+%  \emph{attr spec} and the code in the begin and end hook is executed
+%  before and after the link. As example
 %  \begin{verbatim}
-%    \pdf_link_begin_user:nnw { URI }
+%    \pdfannot_link_begin:nnw { URI }
 %     {
-%       /Subtype /Link
 %       /A<<
 %         /Type/Action
 %         /S/URI
@@ -3055,83 +3077,80 @@
 %       >>
 %     }
 %     link text
-%    \pdf_link_end:n { URI }
+%    \pdfannot_link_end:n { URI }
 %    \end{verbatim}
 % \end{function}
 %    \begin{macrocode}
-\cs_new_protected:Npn \pdf_link_begin_user:nnw #1 #2 %#1 type, #2 action spec
+\cs_new_protected:Npn \pdfannot_link_begin:nnw #1 #2 %#1 type, #2 action spec
   {
-    \seq_if_exist:cT { l_@@_hook_link_#1_begin_seq }
+    \seq_if_exist:cT { l_@@_hook_annot/Link/#1_begin_seq }
       {
-        \seq_use:cn { l_@@_hook_link_#1_begin_seq }{}
+        \seq_use:cn { l_@@_hook_annot/Link/#1_begin_seq }{}
       }
     \exp_args:Nxx %xetex needs expansion
       \@@_backend_link_begin_user:nnw
         {
-          \prop_if_exist:cT { l_@@_hook_link_#1_attr_prop }
+           \@@_dict_if_exist:nT { annot/Link/#1 }
             {
-              \prop_map_function:cN
-                { l_@@_hook_link_#1_attr_prop }
-                \@@_dict_item:nn
+              \@@_dict_map_dict_item:n {annot/Link/#1}
             }
-       }
-       { #2 }
+        }
+        { #2 }
   }
 
-\cs_new_protected:Nn \pdf_link_end:n %#1 type, e.g. url
+\cs_new_protected:Nn \pdfannot_link_end:n %#1 type, e.g. url
   {
     \@@_backend_link_end:
-    \seq_if_exist:cT {l_@@_hook_link_#1_end_seq}
+    \seq_if_exist:cT {l_@@_hook_annot/Link/#1_end_seq}
       {
-        \seq_use:cn { l_@@_hook_link_#1_end_seq }{}
+        \seq_use:cn { l_@@_hook_annot/Link/#1_end_seq }{}
       }
   }
 %    \end{macrocode}
-% \begin{function}[updated = 2020-03-30]{ \pdf_link_goto_begin:nw, \pdf_link_goto_end: }
+% \begin{function}[updated = 2020-03-30]{ \pdfannot_link_goto_begin:nw, \pdfannot_link_goto_end: }
 %   \begin{syntax}
-%     \cs{pdf_link_goto_begin:nw} \Arg{destination} \meta{content}
-%     \cs{pdf_link_goto_end:}
+%     \cs{pdfannot_link_goto_begin:nw} \Arg{destination} \meta{content}
+%     \cs{pdfannot_link_goto_end:}
 %   \end{syntax}
 % This is a special, shorter version for links to internal destinations. It always
-% uses the hooks of the |GoTo| link type.
+% uses the hooks and dictionary of the |GoTo| link type.
 % \end{function}
 %     \begin{macrocode}
-\cs_new_protected:Npn \pdf_link_goto_begin:nw #1 %#1 destination
+\cs_new_protected:Npn \pdfannot_link_goto_begin:nw #1 %#1 destination
   {
-    \seq_use:cn { l_@@_hook_link_GoTo_begin_seq }{}
+    \seq_use:cn { l_@@_hook_annot/Link/GoTo_begin_seq }{}
     \exp_args:Nxx %xetex needs expansion
     \@@_backend_link_begin_goto:nnw
       {
-        \prop_map_function:cN
-           { l_@@_hook_link_GoTo_attr_prop }
-           \@@_dict_item:nn
+        \@@_dict_map_dict_item:n {annot/Link/GoTo}
+
       }
       { #1 }
   }
 
-\cs_new_protected:Nn \pdf_link_goto_end:
+\cs_new_protected:Nn \pdfannot_link_goto_end:
   {
     \@@_backend_link_end:
-    \seq_use:cn { l_@@_hook_link_GoTo_end_seq }{}
+    \seq_use:cn { l_@@_hook_annot/Link/GoTo_end_seq }{}
   }
 
 %    \end{macrocode}
-% \begin{function}[added = 2020-03-12]{  \pdf_link_last: }
+% \begin{function}[added = 2020-03-12]{  \pdfannot_link_last: }
 %   This retrieves the object reference a previously link created with the commands
 %   above
 % \end{function}
 %    \begin{macrocode}
 \cs_set_eq:NN \pdf_link_last: \@@_backend_link_last:
 %    \end{macrocode}
-%
-% \begin{function}[added = 2020-03-12]{  \pdf_link_margin:n }
+% %!!!! only annot link or also annot??
+% \begin{function}[added = 2020-03-12]{  \pdfannot_link_margin:n }
 %  \begin{syntax}
-%    \cs{pdf_link_margin:n} \Arg{dimen}
+%    \cs{pdfannot_link_margin:n} \Arg{dimen}
 %  \end{syntax}
 %   This sets the dimension of the link margin.
 % \end{function}
 %    \begin{macrocode}
-\cs_set_eq:NN \pdf_link_margin:n \@@_backend_link_margin:n
+\cs_set_eq:NN \pdfannot_link_margin:n \@@_backend_link_margin:n
 %    \end{macrocode}
 
 % \subsection{Destinations}
@@ -3373,25 +3392,25 @@
   \seq_put_left:cn { l__#1_hook_#2_seq } { #3 }
  }
 
-\cs_new:Nn \hook_put:nnnn
- {
-  \prop_put:cnn { l__#1_hook_#2_prop } { #3 }{ #4 }
- }
+%\cs_new:Nn \hook_put:nnnn
+% {
+%  \prop_put:cnn { l__#1_hook_#2_prop } { #3 }{ #4 }
+% }
+%
+%\cs_new:Nn \hook_gput:nnnn
+% {
+%  \prop_gput:cnn { g__#1_hook_#2_prop } { #3 }{ #4 }
+% }
 
-\cs_new:Nn \hook_gput:nnnn
- {
-  \prop_gput:cnn { g__#1_hook_#2_prop } { #3 }{ #4 }
- }
-
-\cs_new:Nn \hook_remove:nnn
- {
-  \prop_remove:cn { l__#1_hook_#2_prop } { #3 }
- }
-
-\cs_new:Nn \hook_gremove:nnn
- {
-  \prop_gremove:cn { g__#1_hook_#2_prop } { #3 }
- }
+%\cs_new:Nn \hook_remove:nnn
+% {
+%  \prop_remove:cn { l__#1_hook_#2_prop } { #3 }
+% }
+%
+%\cs_new:Nn \hook_gremove:nnn
+% {
+%  \prop_gremove:cn { g__#1_hook_#2_prop } { #3 }
+% }
 %    \end{macrocode}
 % \subsection{Passing external information to hooks}
 % hooks sometimes wants to know something about the arguments of the surrounding command.

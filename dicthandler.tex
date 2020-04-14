@@ -34,6 +34,15 @@
 >  {Page/Resources/Pattern}             /? handler
 
 
+local dictionaries
+
+annot/Link/URI
+annot/Link/GoTo
+annot/Link/GoToR
+annot/Link/Named
+annot/Link/File
+
+
 %%% Sorting Page / PageN mess
 
 Page:             code /resources for all pages (starting from first use) = \pageattr
@@ -59,7 +68,7 @@ ThisPage<number>: code specific to page <number>
 /Thumb stream (pdf 2.0)
 /CI  obj reference to dictionary
 /EF: dictionary: /F objref to stream, /UF objref to stream (/EF=embedded
-/RF: R=related 
+/RF: R=related
 /EP: dictionarie, related to encryption content unclear
 
 
@@ -75,7 +84,7 @@ obj
         /CheckSum string, optional
 stream .... endstream
 endobj
-      
+
 /Desc (This embedded file is encrypted using the Acme Custom Crypto filter)
 /EF <</F 18 0 R>>
 /F (AcmeCustomCrypto Protected PDF.pdf)
