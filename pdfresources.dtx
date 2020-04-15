@@ -1602,7 +1602,7 @@
 % /Dests ? difference to subdict in Names?
 % /DSS                      (dict, pdf 2.0)
 % /Acroform/DR/ExtGState etc probably unneeded.
-%
+% /Collection is currently missing, need to understand embedfile first.
 % \end{NOTE}
 % The catalog is a central dictionary in a PDF with a number of subdictionaries.
 % Entries to the top level of the catalog can be added with
@@ -2446,7 +2446,7 @@
             \@@_dict_if_exist:nF { backend_Page\l_@@_tmpa_tl/Resources/Properties }
               {
                 \@@_dict_gnew:n { backend_Page\l_@@_tmpa_tl/Resources/Properties }
-              }  
+              }
             \@@_dict_handler_put:nxx
               { backend_Page\l_@@_tmpa_tl/Resources/Properties }
               { l3pdf\int_use:N\g_@@_backend_resourceid_int }
@@ -2891,7 +2891,10 @@
 % \cs{@@_backend_link_begin_user:nnw}, etc
 %
 % \subsubsection{ general Annotation/management }
-%  \begin{function}[added = 2020-04-14] %!!!type or not type? Syntax for type???
+% \begin{NOTE}{UF}
+% !!!type or not type? Syntax for type???
+% \end{NOTE}
+%  \begin{function}[added = 2020-04-14]
 %   {\pdfannot:nnn}
 %   \begin{syntax}
 %     \cs{pdfannot:nnn} \Arg{type} \Arg{action spec} \Arg{annot text}
@@ -2903,7 +2906,7 @@
 %   with other links. \Arg{type} should e.g. be |Link/URI|. %!!!!!syntax?
 % \end{function}
 % %!!!!!! should there be a version without type??
-% \begin{function}[added = 2019-09-05, update 2020-04-14]
+% \begin{function}[added = 2019-09-05, updated = 2020-04-14]
 %   {\pdfannot_box:nnnn}
 %   \begin{syntax}
 %     \cs{pdfannot_box:nnnn} \Arg{width} \Arg{height} \Arg{depth} \Arg{annot spec}
@@ -3015,7 +3018,7 @@
 
 
 % \subsubsection{Annotations, subtype Link /management}
-% \begin{function}[added = 2020-03-12, updates 2020]{ \pdfannot_link:nnn }
+% \begin{function}[added = 2020-03-12, updated = 2020-04-14]{ \pdfannot_link:nnn }
 %   \begin{syntax}
 %     \cs{pdfannot_link:nnn} \Arg{type} \Arg{user action spec} \Arg{link text}
 %   \end{syntax}
