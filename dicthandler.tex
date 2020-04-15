@@ -50,6 +50,15 @@ ThisPage:         code specific to one Page
 ThisPage<number>: code specific to page <number>
 
 
+%% embedded/associated files
+General: /AF key: array of dictionaries pointing to filespec
+- Catalog : ok
+- Page: open
+- BDC + properties: open  /AF /NamedAF BDC,  /Properties <</NamedAF [12 0 R]>>, 12-> Filespec
+- StructureElement
+- XObject
+- Annotation
+
 % object dictionaries
 
 /Type/Filespec%
@@ -66,10 +75,10 @@ ThisPage<number>: code specific to page <number>
 /Desc string
 /AFRelationship name
 /Thumb stream (pdf 2.0)
-/CI  obj reference to dictionary
+/CI  obj reference to dictionary (Collection item dict)
 /EF: dictionary: /F objref to stream, /UF objref to stream (/EF=embedded
 /RF: R=related
-/EP: dictionarie, related to encryption content unclear
+/EP: dictionary, related to encryption, content unclear
 
 
 Stream object:

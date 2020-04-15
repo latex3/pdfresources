@@ -102,11 +102,18 @@
     % file already embedded
   }%
 }
-\ExplSyntaxOff
+% we probably need an xform by icon ...
+
 \def\atfi@xform{%
-  \immediate\pdfxform\atfi@appearancebox
-  \edef\atfi@appearanceobj{\the\pdflastxform}%
+  \pdf_xform_new:nnn
+  { atfi@appearancebox }
+  { }
+  { \usebox\atfi@appearancebox }
+  %\immediate\pdfxform\atfi@appearancebox
+  %\edef\atfi@appearanceobj{\the\pdflastxform}%
 }
+\ExplSyntaxOff
+
 \let\atfi@xform@icon\atfi@xform
 \def\atfi@refxform#1{%
   \pdfrefxform#1\relax
@@ -115,11 +122,11 @@
 \def\atfi@insert@file@annot#1{%
   \rule{0pt}{0pt}%
   \ifatfi@appearance
-    \def\atfi@appearance@dict{%
+    \edef\atfi@appearance@dict{%
       /AP<<%
-        /N~ \atfi@appearanceobj\space 0~ R%
-        /R~ \atfi@appearanceobj\space 0~ R%
-        /D~ \atfi@appearanceobj\space 0~ R%
+        /N~ \pdf_xform_ref:n { atfi@appearancebox }%
+        /R~ \pdf_xform_ref:n { atfi@appearancebox }%
+        /D~ \pdf_xform_ref:n { atfi@appearancebox }%
       >>%
     }%
   \else
@@ -146,24 +153,26 @@
     \endgroup
   }{%
   }%
-  \pdfannot width ~\atfi@scale\atfi@appearancewidth
-            height~ \atfi@scale\atfi@appearanceheight
-            depth~ \atfi@scale\atfi@appearancedepth {%
-    /Subtype/FileAttachment%
-    \atfi@icon
-    \atfi@color@annot
-    \atfi@author
-    \atfi@date
-    \atfi@annotname
-    \atfi@description
-    \atfi@subject
-    \atfi@appearance@dict
-    /F~ \theatfi@flags
-    /FS~ \@nameuse{atfi@fsobj@#1}%
-  }%
-  \rule{0pt}{\atfi@appearanceheight}%
-  \rule[-\atfi@appearancedepth]{0pt}{\atfi@appearancedepth}%
-  \rule{\atfi@appearancewidth}{0pt}%
+  \pdfannot_box:nnnn
+     {\atfi@scale\atfi@appearancewidth}
+     {\atfi@scale\atfi@appearanceheight}
+     {\atfi@scale\atfi@appearancedepth}
+     {
+      /Subtype/FileAttachment%
+      \atfi@icon
+      \atfi@color@annot
+      \atfi@author
+      \atfi@date
+      \atfi@annotname
+      \atfi@description
+      \atfi@subject
+      \atfi@appearance@dict
+      /F~ \theatfi@flags
+      /FS~ \@nameuse{atfi@fsobj@#1}%
+     }%
+  %\rule{0pt}{\atfi@appearanceheight}%
+%  \rule[-\atfi@appearancedepth]{0pt}{\atfi@appearancedepth}%
+%  \rule{\atfi@appearancewidth}{0pt}%
 }
 \ExplSyntaxOff
 \endinput
