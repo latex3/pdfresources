@@ -41,7 +41,7 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{new-attachfile}%
   [2020/04/13 v1.00 Attach files into PDF (HO/UF)]%
-\RequirePackage{pdfresources}  
+\RequirePackage{pdfresources}
 \RequirePackage{iftex}[2019/11/07]
 \RequirePackage{keyval}
 \RequirePackage{color}
@@ -137,22 +137,23 @@
 \def\atfi@mimetype{}
 \define@key{AtFi}{mimetype}{%
   \edef\atfi@mimetype{#1}%
-  \ifx\atfi@mimetype\ltx@empty
-  \else
-    \atfi@Match\atfi@mimetype{%
-      ^(application|audio|image|model|text|video|x-\atfi@PatToken)%
-      /%
-      ([a-z\-\+_\.0-9]+)%
-      (; ?\atfi@PatToken=(\atfi@PatToken|\atfi@PatQuotedString))*$%
-    }{icase}{}{%
-      \atfi@Warning{%
-        Invalid value `\atfi@mimetype'\MessageBreak
-        of option `mimetype'.\MessageBreak
-        Value is discarded%
-      }%
-      \let\atfi@mimetype\ltx@empty
-    }%
-  \fi
+  %fails with allowed types so removing it
+ % \ifx\atfi@mimetype\ltx@empty
+%  \else
+%    \atfi@Match\atfi@mimetype{%
+%      ^(application|audio|image|model|text|video|x-\atfi@PatToken)%
+%      /%
+%      ([a-z\-\+_\.0-9]+)%
+%      (; ?\atfi@PatToken=(\atfi@PatToken|\atfi@PatQuotedString))*$%
+%    }{icase}{}{%
+%      \atfi@Warning{%
+%        Invalid value `\atfi@mimetype'\MessageBreak
+%        of option `mimetype'.\MessageBreak
+%        Value is discarded%
+%      }%
+%      \let\atfi@mimetype\ltx@empty
+%    }%
+%  \fi
   \ifx\atfi@mimetype\ltx@empty
   \else
     \EdefEscapeName\atfi@mimetype{\atfi@mimetype}%
