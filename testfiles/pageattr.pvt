@@ -6,24 +6,24 @@
 \START
 some text
 \ExplSyntaxOn
- \pdfdict_put:nnn {Page} {Rotate}{90}
+ \pdfdict_gput:nnn {Page} {Rotate}{90}
 %test local:
-{\pdfdict_put:nnn {Page} {CropBox}{[0~0~300~350]}}
+{\pdfdict_gput:nnn {Page} {CropBox}{[0~0~300~350]}}
 
 %test doublette
- \pdfdict_put:nnn {Page} {Rotate}{90}
+ \pdfdict_gput:nnn {Page} {Rotate}{90}
 
 %test command:
 \newcommand\attributecontent{(somesetting)}
-\pdfdict_put:nnx {Page} {SSS}{\attributecontent}
+\pdfdict_gput:nnx {Page} {SSS}{\attributecontent}
 
 \newpage
-\pdfdict_remove:nn {Page}{Rotate}
-\pdfdict_remove:nn {Page}{CropBox}
+\pdfdict_gremove:nn {Page}{Rotate}
+\pdfdict_gremove:nn {Page}{CropBox}
 some text more text
 \begin{figure}[p]
 \rule{1cm}{15cm}
-\pdfdict_put:nnn {ThisPage}{Rotate}{-90}
+\pdfdict_gput:nnn {ThisPage}{Rotate}{-90}
 \end{figure}
 \newpage
 abbb

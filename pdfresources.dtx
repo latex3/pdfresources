@@ -128,7 +128,7 @@
 \msg_new:nnn  { pdf } { catalog-special }
               {
                 values~to~the~catalog~entry~#1~should~be~added~with~
-                \token_to_str:N\pdfdict_put:nnn
+                \token_to_str:N\pdfdict_gput:nnn
               }
 \msg_new:nnn  { pdf } { catalog-unknown }
               {
@@ -145,6 +145,11 @@
 \msg_new:nnn  { pdfdict } { unknown-dict }
   {
     The~dictionary~'#1'~is~not~declared.
+  }
+\msg_new:nnn  { pdfdict } { wrong-or-unknown-dict }
+  {
+    The~dictionary~'#1'~is~either~not~a~#2~dictionary\\
+    or~is~not~declared.
   }
 \msg_new:nnn  { pdfdict } { dict-already-defined  }
   {
@@ -413,19 +418,40 @@
 % registers \cs{pdfcatalog}, \cs{pdfpagesattr}, \cs{pdfinfo} and similar commands
 % of the other backends  in a backend independant way.
 %
+% There are two distinct types of dictionaries
+% \begin{description}
+%    \item[Global dictionaries] These are dictionaries which are inserted only
+%    once in a PDF or only once per page. Examples are the Catalog dictionary,
+%    the Info dictionary, the page resources. For these dictionaries it is necessary
+%    that all package which want to write to them uses the interface provided
+%    by this module to avoid clashes and incompabilities. Values to these
+%    dictionaries are always added globally and written by the code
+%    at a suitable time to the PDF.
+%    Global dictionaries are set and manipulated with the global commands, e.g.
+%    \cs{pdf_dict_gput:nnn}.
+%
+%    \item[Local dictionaries ] These are dictionaries which are used in varying number
+%    with varying content. Examples are attributes of links, filespec dictionaries,
+%    xform dictionaries. The main purpose of the code here is to give packages and users
+%    a better interface to add or change values of such objects.
+%
+%    Local dictionaries are set and manipulated with the local commands, e.g.
+%    \cs{pdf_dict_put:nnn}
+%  \end{description}
+%
 % The following tabular summarize the dictionaries and which pdftex primitive they
 % replace:
 % \begin{tabular}{lll}
-%  Info                                  & \cs{pdfinfo} \\
-%  Catalog \&  various subdictionaries   & \cs{pdfcatalog}\\
-%  Pages                                 & \cs{pdfpagesattr}\\
-%  Page, ThisPage                        & \cs{pdfpageattr}\\
-%  Page/Resources/ExtGState              & \cs{pdfpageresources}\\
-%  Page/Resources/Shading                & \cs{pdfpageresources}\\
-%  Page/Resources/Pattern                & \cs{pdfpageresources}\\
-%  Page/Resources/ColorSpace             & \cs{pdfpageresources}\\%
-%  xform\ldots                           & argument of \cs{pdfxform} \\
-%  annot\ldots                           & argument of \cs{pdfannot}, \cs{pdfstartlink}\\
+%  Info                                  & \cs{pdfinfo}    &global\\
+%  Catalog \&  various subdictionaries   & \cs{pdfcatalog} &global\\
+%  Pages                                 & \cs{pdfpagesattr}&global\\
+%  Page, ThisPage                        & \cs{pdfpageattr}&global\\
+%  Page/Resources/ExtGState              & \cs{pdfpageresources}&global\\
+%  Page/Resources/Shading                & \cs{pdfpageresources}&global\\
+%  Page/Resources/Pattern                & \cs{pdfpageresources}&global\\
+%  Page/Resources/ColorSpace             & \cs{pdfpageresources}&global\\%
+%  xform\ldots                           & argument of \cs{pdfxform} &local\\
+%  annot\ldots                           & argument of \cs{pdfannot}, \cs{pdfstartlink} &local\\
 %  \end{tabular}
 %
 %  The /Properties dictionary of the page resources is not handled by this module. It is
@@ -489,6 +515,9 @@
 %    \begin{macrocode}
 \seq_new:N \g_@@_dict_gnames_seq
 \seq_new:N \g_@@_dict_names_seq
+
+\tl_const:Nn \c_@@_dict_globalprefix_tl {g}
+\tl_const:Nn \c_@@_dict_localprefix_tl  {}
 
 % to retried global status from pathes
 \cs_new:Npn \@@_dict_get_g:n #1 % path name without the leading /
@@ -563,6 +592,24 @@
       { \prg_return_true: }
       { \prg_return_false: }
   }
+% test if global, non existing dicts return false
+\prg_new_conditional:Npnn \@@_dict_if_global:n #1 { p , T , F , TF }
+   {
+     \tl_if_eq:NcTF
+        \c_@@_dict_globalprefix_tl
+        { c_@@_dict_/#1_g_tl }
+        { \prg_return_true: }
+        { \prg_return_false: }
+   }
+% test if local, non existing dicts return false
+\prg_new_conditional:Npnn \@@_dict_if_local:n #1 { p , T , F , TF }
+   {
+     \tl_if_eq:NcTF
+        \c_@@_dict_localprefix_tl
+        { c_@@_dict_/#1_g_tl }
+        { \prg_return_true: }
+        { \prg_return_false: }
+   }
 
 %    \end{macrocode}
 %  \end{macro}
@@ -581,13 +628,14 @@
 %
 %    \begin{macrocode}
 
-%local + global
+%we allow only for local dictionaries a clear command
 \cs_new_protected:Npn \@@_dict_clear:n #1
   {
-    \use:c { prop_\@@_dict_get_g:n{#1}clear:c }
-           { \@@_dict_Xname:n { #1 } }
+    \@@_dict_if_local:nT { #1 }
+      {
+        \prop_clear:c  { \@@_dict_name:n { #1 } }
+      }
   }
-
 
 %local + global
 \cs_new_protected:Npn \@@_dict_handler_put:nnn #1 #2 #3  %#1 path, #2 name, #3 value
@@ -749,9 +797,10 @@
 % local:  lower case: annot/link/URI.
 % \end{NOTE}
 % \begin{function}[added = 2020-04-06]
-%   {\pdfdict_put:nnn}
+%   {\pdfdict_put:nnn, \pdfdict_gput:nnn}
 %   \begin{syntax}
-%     \cs{pdfdict_put:nnn} \Arg{dictionary} \Arg{name} \Arg{value}
+%     \cs{pdfdict_gput:nnn} \Arg{global dictionary} \Arg{name} \Arg{value}\\
+%     \cs{pdfdict_put:nnn} \Arg{local dictionary} \Arg{name} \Arg{value}
 %   \end{syntax}
 % This function puts \Arg{name} \Arg{value} either globally or locally in internal
 % property lists.
@@ -789,10 +838,28 @@
 
 \cs_new_protected:Npn \pdfdict_put:nnn #1 #2 #3
   {
-     \@@_dict_handler_put:nnn { #1 }{ #2 }{ #3 }
+    \@@_dict_if_local:nTF { #1 }
+      {
+        \@@_dict_handler_put:nnn { #1 }{ #2 }{ #3 }
+      }
+      {
+        \msg_error:nnnn{pdfdict}{wrong-or-unknown-dict}{#1}{local}
+      }
+  }
+
+\cs_new_protected:Npn \pdfdict_gput:nnn #1 #2 #3
+  {
+    \@@_dict_if_global:nTF { #1 }
+      {
+        \@@_dict_handler_put:nnn { #1 }{ #2 }{ #3 }
+      }
+      {
+        \msg_error:nnnn{pdfdict}{wrong-or-unknown-dict}{#1}{global}
+      }
   }
 
 \cs_generate_variant:Nn \pdfdict_put:nnn {nnx}
+\cs_generate_variant:Nn \pdfdict_gput:nnn {nnx}
 %    \end{macrocode}
 % \begin{function}[added = 2020-04-08]
 %   {\pdfdict_show:n }
@@ -828,8 +895,8 @@
 %   \begin{syntax}
 %     \cs{pdfdict_get:nnN}  \Arg{dictionary} \Arg{name} \meta{tl var}
 %   \end{syntax}
-%   Recovers the \meta{value} stored by \cs{pdfdict_put:nnn} for
-%   \meta{name} and places this in the \meta{token list
+%   Recovers the \meta{value} stored by \cs{pdfdict_put:nnn} or \cs{pdfdict_gput:nnn}
+%   for \meta{name} and places this in the \meta{token list
 %   variable}. If \meta{name} is not found
 %   then the \meta{token list variable} is set
 %   to the special marker \cs{q_no_value}. The \meta{token list
@@ -848,11 +915,11 @@
 %     \pdfdict_remove:nn,
 %   }
 %   \begin{syntax}
-%     \cs{pdfdict_remove:nn} \Arg{dictionary} \Arg{name}
+%     \cs{pdfdict_remove:nn} \Arg{local dictionary} \Arg{name}\\
+%     \cs{pdfdict_gremove:nn} \Arg{global dictionary} \Arg{name}
 %   \end{syntax}
 %   Removes  |/|\meta{name} and its associated \meta{value} from the \Arg{dictionary}
-%   or \Arg{local dict} (if the name-value pair has been added by
-%   \cs{pdfdict_put:nnn}). The removal is local for local dictionaries, and global
+%   The removal is local for local dictionaries, and global
 %   for global dictionaries.
 %   If \meta{name} is not found no change occurs,
 %   \emph{i.e}~there is no need to test for the existence of a name before
@@ -863,7 +930,24 @@
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdfdict_remove:nn #1 #2
   {
-    \@@_dict_handler_remove:nn { #1 }{ #2 }
+    \@@_dict_if_local:nTF { #1 }
+      {
+        \@@_dict_handler_remove:nn { #1 }{ #2 }
+      }
+      {
+        \msg_error:nnnn{pdfdict}{wrong-or-unknown-dict}{#1}{local}
+      }
+  }
+
+\cs_new_protected:Npn \pdfdict_gremove:nn #1 #2
+  {
+    \@@_dict_if_global:nTF { #1 }
+      {
+        \@@_dict_handler_remove:nn { #1 }{ #2 }
+      }
+      {
+        \msg_error:nnnn{pdfdict}{wrong-or-unknown-dict}{#1}{global}
+      }
   }
 %    \end{macrocode}
 %
@@ -899,7 +983,7 @@
 %     pdfdict: Info (global)
 %   }
 %   \begin{syntax}
-%     \cs{pdfdict_put:nnn} \{Info\} \Arg{name} \Arg{value}
+%     \cs{pdfdict_gput:nnn} \{Info\} \Arg{name} \Arg{value}
 %   \end{syntax}
 %   Adds |/|\meta{name} and the \meta{value} to the Info dictionary.
 %   \meta{name} should be a valid pdf name without the leading slash,
@@ -912,7 +996,7 @@
 %   normally sensible:
 %   \begin{verbatim}
 %   \str_set_convert:Nnnn \l_tmpa_str { Grüße }{ utf8 } {utf8/string}
-%   \pdfdict_put:nx {Title}{(\l_tmpa_str)}
+%   \pdfdict_gput:nnx {Info} {Title}{(\l_tmpa_str)}
 %   \end{verbatim}
 % \end{function}
 %    \begin{macrocode}
@@ -997,7 +1081,7 @@
 % \end{NOTE}
 % \begin{function}{pdfdict: Pages (global)}
 %   \begin{syntax}
-%     \cs{pdfdict_put:nnn} \{Pages\} \Arg{name} \Arg{value}
+%     \cs{pdfdict_gput:nnn} \{Pages\} \Arg{name} \Arg{value}
 %   \end{syntax}
 %
 %   Adds |/|\meta{name} \meta{value} to the |/Pages| dictionary.
@@ -1296,7 +1380,7 @@
 % \begin{function}[added = 2020-04-12]
 %   {pdfdict: Page}
 %   \begin{syntax}
-%     \cs{pdfdict_put:nnn} \{Page\} \Arg{name} \Arg{value}
+%     \cs{pdfdict_gput:nnn} \{Page\} \Arg{name} \Arg{value}
 %   \end{syntax}
 %   Values added to the dictionary \texttt{Page} are added to the page dictionary
 %   of the current page and the following pages. The current page means the page
@@ -1318,7 +1402,7 @@
 % \begin{function}[added = 2020-04-12]
 %   { pdfdict: ThisPage}
 %   \begin{syntax}
-%     \cs{pdfdict_put:nnn} \{ThisPage\} \Arg{name} \Arg{value}
+%     \cs{pdfdict_gput:nnn} \{ThisPage\} \Arg{name} \Arg{value}
 %   \end{syntax}
 %   Adds |/|\meta{name} \meta{value} at shipout to the page dictionary of the
 %   current page. Current page means here the shipout page.
@@ -1529,7 +1613,7 @@
 %    pdfdict: Page/Resources/Pattern,
 %   }
 %   \begin{syntax}
-%     \cs{pdfdict_put:nnn} \{Page/Resources/\meta{resource}\} \Arg{name} \Arg{value}
+%     \cs{pdfdict_gput:nnn} \{Page/Resources/\meta{resource}\} \Arg{name} \Arg{value}
 %   \end{syntax}
 %   Adds |/|\meta{name} \meta{value} to the page resource \meta{resource}.
 %   \meta{resource} can be |ExtGState|, |ColorSpace|, |Pattern| oder |Shading|.
@@ -1627,7 +1711,7 @@
 %
 %   The required PDF version is only mentioned if it is larger than 1.5.
 %
-%   Example: |\pdfdict_put:nnn {Catalog}{PageMode}{/UseNone}|
+%   Example: |\pdfdict_gput:nnn {Catalog}{PageMode}{/UseNone}|
 %
 %% !!!!!!!! Warning for unknown names is currently not working!
 %   \medskip
@@ -1667,7 +1751,7 @@
 %   in the PDF reference.
 %   If \meta{Name} gets assigned two values the last one wins.
 %
-%   Example: |\pdfdict_put:nnn {Catalog/MarkInfo}{Marked}{true}|
+%   Example: |\pdfdict_gput:nnn {Catalog/MarkInfo}{Marked}{true}|
 %
 %   \medskip
 %   \noindent
@@ -1705,13 +1789,13 @@
 %  \begin{verbatim}
 %  \pdf_object_new:nn   {pkg@intent}{dict}
 %  \pdf_object_write:nn {pkg@intent}{...}
-%  \pdfdict_put:nnx  {Catalog} {OutputIntents}{\pdf_object_ref:n {pkg@intent}}
+%  \pdfdict_gput:nnx  {Catalog} {OutputIntents}{\pdf_object_ref:n {pkg@intent}}
 %  \end{verbatim}
 %
 %  or
 %  \begin{verbatim}
 %  \pdf_object_now:nn   {dict} { ... }
-%  \pdfdict_put:nnx  {Catalog} {OutputIntents}{\pdf_object_last:}
+%  \pdfdict_gput:nnx  {Catalog} {OutputIntents}{\pdf_object_last:}
 %  \end{verbatim}
 %
 %
@@ -3295,13 +3379,13 @@
 % is an absolute page number. \Arg{view} a string for the destination
 % without the leading slash. Examples are e.g. |XYZ left top zoom| or |Fit|.
 % The OpenAction uses (and could also be set directly with)
-% \cs{pdfdict_put:nnn}|{Catalog}|.
+% \cs{pdfdict_gput:nnn}|{Catalog}|.
 % \end{function}
 %
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdf_docview:nn #1 #2
   {
-    \pdfdict_put:nnx {Catalog }{ OpenAction }{[\pdf_pageobject_ref:n {#1}~/#2]}
+    \pdfdict_gput:nnx {Catalog }{ OpenAction }{[\pdf_pageobject_ref:n {#1}~/#2]}
   }
 %    \end{macrocode}
 %
@@ -3333,7 +3417,7 @@
       },
     lang .code:n =
       {
-        \pdfdict_put:nnn {Catalog} {Lang}{(#1)}
+        \pdfdict_gput:nnn {Catalog} {Lang}{(#1)}
       }
   }
 
@@ -3599,7 +3683,7 @@
         \@@_backend_object_write:nn
           {__spc_extgstate_op_false}
           {/Type /ExtGState~/op~false~/OP~false}
-        \pdfdict_put:nnn
+        \pdfdict_gput:nnn
           {Page/Resources/ExtGState}
           {SPCko}
           {\@@_backend_object_ref:n {__spc_extgstate_op_false}}
@@ -3607,7 +3691,7 @@
         \@@_backend_object_write:nn
           {__spc_extgstate_op_true0}
           {/Type /ExtGState~/op~true~/OP~true~/OPM~0}%
-        \pdfdict_put:nnn
+        \pdfdict_gput:nnn
           {Page/Resources/ExtGState}
           {SPCmz}
           {\@@_backend_object_ref:n {__spc_extgstate_op_true0}}
@@ -3615,7 +3699,7 @@
         \@@_backend_object_write:nn
           {__spc_extgstate_op_true1}
           {/Type /ExtGState~/op~true~/OP~true~/OPM~1}%
-         \pdfdict_put:nnn
+         \pdfdict_gput:nnn
           {Page/Resources/ExtGState}
           {SPCop}
           {\@@_backend_object_ref:n {__spc_extgstate_op_true1}}

@@ -5,7 +5,7 @@
 \usepackage{fancyhdr,zref-user}
 \pagestyle{fancy}
 \ExplSyntaxOn \makeatletter
-\lfoot{\pdfdict_put:nnx {Page} {Rotate}{\ifodd\c@page -90\else 90 \fi}}
+\lfoot{\pdfdict_gput:nnx {Page} {Rotate}{\ifodd\c@page -90\else 90 \fi}}
 \ExplSyntaxOff
 \usepackage{kantlipsum}
 \begin{document}
@@ -16,7 +16,7 @@ some text \kant
 \ExplSyntaxOn
 \begin{figure}%[p]
 \zlabel{a}\label{a}
-\pdfdict_put:nnx {ThisPage}{Rotate}{90}
+\pdfdict_gput:nnx {ThisPage}{Rotate}{90}
 \Huge
 code~is~on~page~\thepage\par
 float~is~on~page~\zpageref{a}\par

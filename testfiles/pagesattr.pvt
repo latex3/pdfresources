@@ -6,16 +6,16 @@
 \START
 some text
 \ExplSyntaxOn
- \pdfdict_put:nnn {Pages} {YYY}{(yyy)}
+ \pdfdict_gput:nnn {Pages} {YYY}{(yyy)}
 %test local:
-{\pdfdict_put:nnn {Pages} {ZZZ}{(zzz)}}
+{\pdfdict_gput:nnn {Pages} {ZZZ}{(zzz)}}
 
 %test doublette
- \pdfdict_put:nnn {Pages} {YYY}{(y22)}
+ \pdfdict_gput:nnn {Pages} {YYY}{(y22)}
 
 %test command:
 \newcommand\attributecontent{(somesetting)}
-\pdfdict_put:nnn {Pages} {SSS}{\attributecontent}
+\pdfdict_gput:nnn {Pages} {SSS}{\attributecontent}
 %\tl_show:N\g__pdf_pagesattr_tl
 \ExplSyntaxOff
 \end{document} 

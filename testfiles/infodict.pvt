@@ -10,8 +10,8 @@
 {
  \str_set_convert:Nnnn \l_tmpa_str { Grüße }{  } {utf8/string}
 }
-\pdfdict_put:nnx {Info} {Title}{(\l_tmpa_str)}
-\pdfdict_put:nnx {Info} {Author}{(Some~Author)}
+\pdfdict_gput:nnx {Info} {Title}{(\l_tmpa_str)}
+\pdfdict_gput:nnx {Info} {Author}{(Some~Author)}
 \ExplSyntaxOff
 \begin{document}
 \START
