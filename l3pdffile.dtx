@@ -49,16 +49,86 @@
 % \maketitle
 % \begin{documentation}
 %
-% \section{\pkg{l3draw} documentation}
-
+% \section{\pkg{l3pdffile} documentation}
+% External files can be referenced from a PDF in three ways:
+% \begin{enumerate}
+% \item through an normal url link,
+% \item by referencing a local file in the file system,
+% \item by embedding the file directly into the PDF.
+% \end{enumerate}
 %
-% \begin{function}{\pdffile_XXXX}
+% Url links (1) are created with the \cs{pdfannot} commands.
+%
+% This module handles the two last possibilities. Actually from the view
+% of the PDF format there are quite similar:
+% In both cases the core dictionaries are /FileSpec dictionaries which similar entries.
+% In the embedding case there is only an additional /EF entry which points to the
+% stream object of the file.
+%
+% \begin{verbatim}
+% <<
+% /Type /Filespec
+% /F (l3pdffile.dtx)
+% /UF (l3pdffile.dtx)
+% /AFRelationship /Source
+% /EF <</F 21 0 R>>   %case 3, embedded file
+% >>
+% \end{verbatim}
+%
+%\subsection{Embedding a file}
+% Embedding an existing file is in most cases quite straightforward. It can be done with
+% \cs{pdf_object_now:nn} or \cs{\pdf_object_new:nn}/\cs{pdf_object_write:nn}.
+% In the first variant one should then store the object number for the reference
+% in the /FileSpec dictionary.
+%
+% \begin{verbatim}
+% \pdf_object_now:nx {fstream}
+%   {
+%     {
+%       /Type /EmbeddedFile
+%       /Subtype /application\c_hash_str2Fpostscript
+%       /Params
+%         <<
+%           /ModDate  ~ (\file_timestamp:n{example-image.eps})
+%           /Size     ~  \file_size:n {example-image.eps}
+%           /CheckSum ~ (\file_mdfive_hash:n {example-image.eps})
+%          >>
+%     }
+%     {example-image.eps}
+%   }
+% \tl_set:Nx \l_my_fileobj_tl {\pdf_object_last:}
+% \end{verbatim}
+%
+% Remarks:
+% \begin{itemize}
+% \item The /Params dictionary is not always required, but as the basic data
+% are easily accessed it makes sense to add it automatically. Users will
+% perhaps want to add also CreationDate here.
+% \item The mimetype (in the /Subtype) can not be detected automatically but must
+% be added by the user.
+% \item The dictionary can contain additional keys (/Filter, /DecodeParms)
+% \item The dictionary can actually refer to an external file (in which case the
+% stream is ignored.
+% \end{itemize}
+%
+% Implementation: There will be two local dictionaries, embeddedfile and embeddedfile/Params.
+% The embeddedfile/Params will have default settings. The dictionaries are used to
+% build the attributes of the object.
+%
+%
+%
+%
+% \begin{function}{\pdffile_embed:nN}
 %   \begin{syntax}
-%     \cs{\pdffile_XXXX:}
+%     \cs{pdffile_embed:nN} \Arg{filename} \meta{tl var}
 %   \end{syntax}
+%   This commands embeds the file \Arg{filename} in the PDF and stores the
+%   object reference in \meta{tl var}. It uses the content of the local
+%   dictionaries \texttt{embeddedfile} and \texttt{embeddedfile/Params} to setup
+%   the dictionary entries of the stream object.
 % \end{function}
 % \end{documentation}
-% 
+%
 % \begin{implementation}
 %
 % \section{\pkg{l3pdffile} implementation}
@@ -71,17 +141,59 @@
 %<@@=pdf>
 %    \end{macrocode}
 %
-% \begin{variable}{XXX}
+% \begin{variable}
+%  {
+%   \l_pdffile_embed_filename_tl
+%   \c_pdffile_embed_moddate_tl,
+%   \c_pdffile_embed_size_tl,
+%   \c_pdffile_embed_checksum_tl,
+%
+%   }
+%
 %    \begin{macrocode}
+\tl_new:N \l_pdffile_embed_filename_tl
+\tl_const:N \c_pdffile_embed_moddate_tl
+  {
+    \file_timestamp:n{ \l_pdffile_embed_filename_tl }
+  }
+\tl_const:N \c_pdffile_embed_size_tl
+  {
+    \file_size:n {\l_pdffile_embed_filename_tl}
+  }
+\tl_const:N \c_pdffile_embed_checksum_tl
+  {
+    \file_mdfive_hash:n {\l_pdffile_embed_filename_tl}
+  }
+
+\pdfdict_new:n {embeddedfile}
+\pdfdict_new:n {embeddedfile/Params}
+
+\pdfdict_put:nnn {embeddedfile/Params}
+  {ModDate} { \c_pdffile_embed_moddate_tl }
+\pdfdict_put:nnn {embeddedfile/Params}
+  {Size} { \c_pdffile_embed_size_tl }
+\pdfdict_put:nnn {embeddedfile/Params}
+  {CheckSum} { \c_pdffile_embed_checksum_tl }
+
 
 %    \end{macrocode}
 % \end{variable}
 %
-% \begin{macro}{\pdffile_XXX}
-% \begin{macro}{\@@_XXX}
+% \begin{macro}{\pdffile_embed:nN}
 %    \begin{macrocode}
+\cs_new_protected:Npn \pdffile_embed:nN
+  {
+    \tl_set:Nn \l_pdffile_embed_filename_tl {#1}
+    \pdf_object_now:nx {fstream}
+      {
+       {
+        \@@_dict_map_dict_item:n {embeddedfile}
+        % if empty params ...
+
+       }
+       { #1 }
+      }
 %    \end{macrocode}
-% \end{macro}
 % \end{macro}
 %
 

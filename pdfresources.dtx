@@ -796,6 +796,19 @@
 % global: upper case: Catalog, Pages.
 % local:  lower case: annot/link/URI.
 % \end{NOTE}
+% \begin{function}[added = 2020-04-21]
+%   {\pdfdict_new:n}
+%   \begin{syntax}
+%     \cs{pdfdict_new:n} \Arg{local dictionary name}
+%   \end{syntax}
+% This function create a new local dictionary.
+%    \begin{macrocode}
+\cs_new_protected:Npn \pdfdict_new:n
+  {
+    \@@_dict_new:n {#1}
+  }
+%    \end{macrocode}
+% \end{function}
 % \begin{function}[added = 2020-04-06]
 %   {\pdfdict_put:nnn, \pdfdict_gput:nnn}
 %   \begin{syntax}
