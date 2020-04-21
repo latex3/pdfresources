@@ -60,10 +60,51 @@
 % Url links (1) are created with the \cs{pdfannot} commands.
 %
 % This module handles the two last possibilities. Actually from the view
-% of the PDF format there are quite similar:
+% of the PDF format they are quite similar:
 % In both cases the core dictionaries are /FileSpec dictionaries which similar entries.
 % In the embedding case there is only an additional /EF entry which points to the
 % stream object of the file.
+%
+% The tasks to embed and reference such file are
+% \begin{enumerate}
+% \item Embed the file in a stream. (This is optional).
+% \item Create a FileSpec dictionary which if needed reference the embedded file.
+% \item Reference the FileSpec dictionary so that the user can access the file.
+%       This can be done in various way:
+%       \begin{enumerate}
+%       \item With an annotation (/Subtype/FileAttachment). This done by
+%       attachfile, attachfile2 and intopdf. Typical entries of such an annotation
+%       are:
+%
+%             \begin{tabular}{lll}
+%             FS      & object reference &(FileSpec dictionary)\\
+%             Name    & name           & Graph, PushPin, Paperclip, Tag\\
+%             Contents & text string & optional but recommended\\
+%             F        & integer     & Flags\\
+%             AP       & dictionary  & Appearance (required if rectangle >0) \\
+%             AS       & name\\
+%             \end{tabular}
+%
+%             The AP takes precedance over Border and similar keys.
+%       \item Through an entry in the EmbeddedFiles name tree. This what embedfiles does.
+%       \begin{verbatim}
+%       20 0 obj %Document Name tree
+%        <</EmbeddedFiles 21 0 R>>
+%           endobj
+%         21 0 obj %Embedded Files Name dictionary
+%        <</Names [(AcmeCustomCrypto Protected PDF.pdf) 17 0 R]>>
+%        endobj
+%       \end{verbatim}
+%       \item Through the /AF key in various objects (pdf 2.0), the value is normally an array of object
+%       references.
+%        But it can also be a name which is mapped to an array in /Properties:
+%        \begin{verbatim}
+%        /AF /NamedAF BDC
+%        /Properties <</NamedAF [12 0 R]
+%        \end{verbatim}
+%        The related FileSpec dictionary should contain an /AFRelationship key in this case.
+%       \end{enumerate}
+% \end{enumerate}
 %
 % \begin{verbatim}
 % <<
@@ -137,7 +178,7 @@
 %<*package>
 \ProvidesExplPackage {l3pdffile} {2020-04-21} {0.1}
   {embedding and referencing files in PDF}
-\RequirePackage{new-pdfescape}  %temporarly!!  
+\RequirePackage{new-pdfescape}  %temporarly!!
 %    \end{macrocode}
 %
 %    \begin{macrocode}
