@@ -1,0 +1,80 @@
+\ProvidesExplPackage {new-pdfescape} {2020-04-21} {0.1}
+  {escape command for PDF}
+%very temporarly until this is in l3 properly!!!!
+\cs_new:Npn \str_escape_pdfname:n #1
+  {
+    \exp_args:Ne \tl_to_str:n
+      {
+         \exp_after:wN \__str_escape_pdfname:n \exp_after:wN
+           { \tl_to_str:n {#1} }
+      }
+  }
+\cs_new:Npx \__str_escape_pdfname:n #1
+  {
+    \exp_not:N \__str_escape_pdfname_first:w #1 ~
+      \exp_not:N \q_recursion_tail \c_space_tl
+      \exp_not:N \q_recursion_stop
+  }
+\cs_new:Npn \__str_escape_pdfname_first:w #1 ~
+  {
+    \quark_if_recursion_tail_stop:n {#1}
+    \__str_escape_pdfname_outer:n {#1}
+  }
+\cs_new:Npn \__str_escape_pdfname_loop:w #1 ~
+  {
+    \quark_if_recursion_tail_stop:n {#1}
+    \c_hash_str 20
+    \__str_escape_pdfname_outer:n {#1}
+  }
+\cs_new:Npx \__str_escape_pdfname_outer:n #1
+  {
+    \exp_not:N \__str_escape_pdfname_inner:w #1
+      \exp_not:N \q_recursion_tail \exp_not:N \q_recursion_stop
+    \exp_not:N \__str_escape_pdfname_loop:w
+  }
+\bool_lazy_or:nnTF
+  { \sys_if_engine_luatex_p: }
+  { \sys_if_engine_xetex_p: }
+  {
+    \cs_new:Npn \__str_escape_pdfname_inner:w #1
+      {
+        \quark_if_recursion_tail_stop:n {#1}
+        \int_compare:nNnTF { `#1 } > { "7F }
+          { \__str_escape_pdfname_bytes:n {#1} }
+          { \__str_escape_name_char:N #1 }
+        \__str_escape_pdfname_inner:w
+      }
+    \cs_new:Npn \__str_escape_pdfname_bytes:n #1
+      {
+        \exp_args:Ne \__str_escape_pdfname_bytes_aux:n
+          { \char_to_utfviii_bytes:n {`#1} }
+      }
+    \cs_new:Npn \__str_escape_pdfname_bytes_aux:n #1
+      { \__str_escape_pdfname_bytes_aux:nnnn #1 }
+    \cs_new:Npx \__str_escape_pdfname_bytes_aux:nnnn #1#2#3#4
+      {
+        \c_hash_str \exp_not:N \__str_output_hexadecimal:n {#1}
+        \c_hash_str \exp_not:N \__str_output_hexadecimal:n {#2}
+        \exp_not:N \tl_if_blank:nF {#3}
+          {
+            \c_hash_str \exp_not:N \__str_output_hexadecimal:n {#3}
+            \exp_not:N \tl_if_blank:nF {#4}
+              {
+                \c_hash_str \exp_not:N \__str_output_hexadecimal:n {#4}
+              }
+          }
+      }
+  }
+  {
+    \cs_new:Npn \__str_escape_pdfname_inner:w #1
+      {
+        \quark_if_recursion_tail_stop:n {#1}
+        \__str_escape_name_char:N #1
+        \__str_escape_pdfname_inner:w
+      }
+  }
+
+ \cs_generate_variant:Nn \str_escape_pdfname:n { e }
+
+ \cs_set:Npn \pdftool_name:n #1
+    { / \str_escape_pdfname:e { \text_expand:n{#1} } }

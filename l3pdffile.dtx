@@ -135,64 +135,59 @@
 %
 %    \begin{macrocode}
 %<*package>
+\ProvidesExplPackage {l3pdffile} {2020-04-21} {0.1}
+  {embedding and referencing files in PDF}
+\RequirePackage{new-pdfescape}  %temporarly!!  
 %    \end{macrocode}
 %
 %    \begin{macrocode}
 %<@@=pdf>
 %    \end{macrocode}
-%
+% \begin{NOTE}{UF}
+% should the default value be stored in dedicated commands or tl vars?
+% \end{NOTE}
 % \begin{variable}
 %  {
-%   \l_pdffile_embed_filename_tl
-%   \c_pdffile_embed_moddate_tl,
-%   \c_pdffile_embed_size_tl,
-%   \c_pdffile_embed_checksum_tl,
-%
-%   }
-%
+%   \l_pdffile_embed_curfilename_tl
+%  }
+% \cs{l_pdffile_embed_curfilename_tl} will be set at the begin of the command, and
+% so can be used in dictionary values or other references.
 %    \begin{macrocode}
 \tl_new:N \l_pdffile_embed_filename_tl
-\tl_const:N \c_pdffile_embed_moddate_tl
-  {
-    \file_timestamp:n{ \l_pdffile_embed_filename_tl }
-  }
-\tl_const:N \c_pdffile_embed_size_tl
-  {
-    \file_size:n {\l_pdffile_embed_filename_tl}
-  }
-\tl_const:N \c_pdffile_embed_checksum_tl
-  {
-    \file_mdfive_hash:n {\l_pdffile_embed_filename_tl}
-  }
 
 \pdfdict_new:n {embeddedfile}
 \pdfdict_new:n {embeddedfile/Params}
 
 \pdfdict_put:nnn {embeddedfile/Params}
-  {ModDate} { \c_pdffile_embed_moddate_tl }
+  {ModDate}  { (\file_timestamp:n { \l_pdffile_embed_filename_tl }) }
 \pdfdict_put:nnn {embeddedfile/Params}
-  {Size} { \c_pdffile_embed_size_tl }
+  {Size}     { \file_size:n { \l_pdffile_embed_filename_tl } }
 \pdfdict_put:nnn {embeddedfile/Params}
-  {CheckSum} { \c_pdffile_embed_checksum_tl }
-
-
+  {CheckSum} { (\file_mdfive_hash:n { \l_pdffile_embed_filename_tl }) }
 %    \end{macrocode}
 % \end{variable}
 %
 % \begin{macro}{\pdffile_embed:nN}
 %    \begin{macrocode}
-\cs_new_protected:Npn \pdffile_embed:nN
+\cs_new_protected:Npn \pdffile_embed:nN #1 #2
   {
     \tl_set:Nn \l_pdffile_embed_filename_tl {#1}
     \pdf_object_now:nx {fstream}
       {
        {
-        \@@_dict_map_dict_item:n {embeddedfile}
-        % if empty params ...
-
+        \pdfdict_map:n {embeddedfile}
+        \pdfdict_if_empty:nF {embeddedfile/Params}
+         {
+          /Params
+           <<
+            \pdfdict_map:n {embeddedfile/Params}
+           >>
+         }
        }
        { #1 }
       }
+    \tl_set:Nx #2 {\pdf_object_last:}
+  }
 %    \end{macrocode}
 % \end{macro}
 %

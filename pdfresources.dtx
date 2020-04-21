@@ -883,6 +883,22 @@
 \cs_generate_variant:Nn \pdfdict_put:nnn {nnx}
 \cs_generate_variant:Nn \pdfdict_gput:nnn {nnx}
 %    \end{macrocode}
+% \begin{function}[EXP,added = 2020-04-21]
+%   {\pdfdict_map:n }
+%   \begin{syntax}
+%     \cs{pdfdict_map:n}  \Arg{dictionary}
+%   \end{syntax}
+%   This outputs the property list of the dictionary as a list of
+%   \texttt{/key value} pairs.
+%   This is suitable for simple, local dictionaries which can be written directly
+%   to the PDF.
+% \end{function}
+%    \begin{macrocode}
+\cs_new:Npn \pdfdict_map:n #1
+  {
+    \@@_dict_map:n { #1 }
+  }
+%    \end{macrocode}
 % \begin{function}[added = 2020-04-08]
 %   {\pdfdict_show:n }
 %   \begin{syntax}
