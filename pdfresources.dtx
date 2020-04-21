@@ -611,6 +611,13 @@
         { \prg_return_false: }
    }
 
+\prg_new_conditional:Npnn \@@_dict_if_empty:n #1 { p , T , F , TF }
+  {
+    \prop_if_empty:cTF
+      { \@@_dict_Xname:n { #1 } }
+      { \prg_return_true: }
+      { \prg_return_false: }
+  }
 %    \end{macrocode}
 %  \end{macro}
 %
@@ -803,7 +810,7 @@
 %   \end{syntax}
 % This function create a new local dictionary.
 %    \begin{macrocode}
-\cs_new_protected:Npn \pdfdict_new:n
+\cs_new_protected:Npn \pdfdict_new:n #1
   {
     \@@_dict_new:n {#1}
   }
@@ -903,6 +910,19 @@
   { TF , T , F , p }
 
 %    \end{macrocode}
+% \begin{function}[EXP, pTF,added = 2020-04-08]
+%   {\pdfdict_if_empty:n }
+%   \begin{syntax}
+%     \cs{pdfdict_if_empty:n}  \Arg{dictionary}
+%   \end{syntax}
+%   This tests if the dictionary is empty. The result is false if the
+%   dictionary doesn't exist.
+%\end{function}
+%    \begin{macrocode}
+\prg_new_eq_conditional:NNn \pdfdict_if_empty:n \@@_dict_if_empty:n
+  { TF , T , F , p }
+%    \end{macrocode}
+%
 % \begin{function}[added = 2020-04-07]
 %   {\pdfdict_get:nn }
 %   \begin{syntax}

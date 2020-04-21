@@ -1,0 +1,19 @@
+\input{regression-test}
+\documentclass{article}
+\usepackage{pdfresources}
+
+\begin{document}\START
+\showoutput
+
+\ExplSyntaxOn
+\pdfdict_if_empty:nTF{test}{empty}{not empty}\par
+\pdfdict_new:n {test}
+\pdfdict_if_empty:nTF{test}{empty}{not empty}\par
+\pdfdict_put:nnn {test}{key}{value}
+\pdfdict_if_empty:nTF{test}{empty}{not empty}\par
+\pdfdict_if_empty:nTF{Page}{empty}{not empty}\par
+\pdfdict_gput:nnn {Page}{Rotate}{90}
+\pdfdict_if_empty:nTF{Page}{empty}{not empty}\par
+\ExplSyntaxOff
+
+\end{document}
