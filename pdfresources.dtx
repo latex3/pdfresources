@@ -1715,10 +1715,6 @@
 %    \end{macrocode}
 %
 % \subsection{\enquote{Catalog} \& subdirectories (pdfcatalog) }
-% \begin{NOTE}{UF}
-% missing is an access to /Names (\pdfnames), needed for EmbeddedFiles
-% missing is a handler for Collection (ditto embedfiles)
-% \end{NOTE}
 % \subsubsection{\enquote{Catalog} \& subdirectories / backend}
 % the backend command is already in the driver:
 % \cs{@@_backend_catalog_gput:nn}
@@ -1743,6 +1739,8 @@
 % /DSS                      (dict, pdf 2.0)
 % /Acroform/DR/ExtGState etc probably unneeded.
 % /Collection is currently missing, need to understand embedfile first.
+% missing is an access to /Names (\pdfnames), needed for EmbeddedFiles
+% (implicitly done, no direct access needed)
 % \end{NOTE}
 % The catalog is a central dictionary in a PDF with a number of subdictionaries.
 % Entries to the top level of the catalog can be added with

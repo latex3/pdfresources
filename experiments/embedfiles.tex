@@ -10,39 +10,51 @@
 \section{a}
 blub
 \ExplSyntaxOn
-\pdfdict_put:nnn  {embeddedfile}{Subtype}{\pdftool_name:n{application/postscript}}
-\pdffile_embed:nN {example-image.eps}\l_tmpa_tl
+
+
+\tl_new:N\l_file_a_tl
+\tl_new:N\l_file_b_tl
+\pdfdict_put:nnn {embeddedfile}{Subtype}{\pdftool_name:n{application/postscript}}
+\pdfdict_put:nnn {embeddedfile/FileSpec} {AFRelationship}{/Source}
+\pdfdict_put:nnn {embeddedfile/FileSpec} {Desc}{(this~is~a~description)}
+
+\pdffile_embed:nN       {example-image.eps}\l_tmpa_tl
+\pdffile_embed_spec:nnN {example-image.eps}{\l_tmpa_tl}\l_file_a_tl
 
 \pdfdict_put:nnn  {embeddedfile}{Subtype}{\pdftool_name:n{text/plain}}
-\pdffile_embed:nN {testinput.txt}\l_tmpa_tl
+\pdfdict_put:nnn       {embeddedfile/FileSpec} {AFRelationship}{/Data}
+\pdfdict_put:nnn       {embeddedfile/FileSpec} {Desc}{(this~is~another~description)}
+\pdffile_embed:nN       {testinput.txt}\l_tmpa_tl
+\pdffile_embed_spec:nnN {testinput.txt}{\l_tmpa_tl}\l_file_b_tl
 
 
-\pdf_object_new:nn  {myfilespec}{dict}
-\pdf_object_write:nx {myfilespec}
- {
-  /Type /Filespec
-  /F (example-image.eps)
-  /UF (example-image.eps)
-  /AFRelationship /Source
-  /EF <</F~\l_tmpa_tl >>
-  /Desc (this~is~a~description)
- }
 
-\pdf_object_new:nn  {myfilespec2}{dict}
-\pdf_object_write:nx {myfilespec2}
- {
-  /Type /Filespec
-  /F (ftestinput.txt)
-  /UF (blubltestinput.txt)
-  /AFRelationship /Source
-  /EF <</F~\l_tmpa_tl >>
- }
-
+%\pdf_object_new:nn  {myfilespec}{dict}
+%\pdf_object_write:nx {myfilespec}
+% {
+%  /Type /Filespec
+%  /F (example-image.eps)
+%  /UF (example-image.eps)
+%  /AFRelationship /Source
+%  /EF <</F~\l_tmpa_tl >>
+%  /Desc (this~is~a~description)
+% }
+%
+%\pdf_object_new:nn  {myfilespec2}{dict}
+%\pdf_object_write:nx {myfilespec2}
+% {
+%  /Type /Filespec
+%  /F (ftestinput.txt)
+%  /UF (blubltestinput.txt)
+%  /AFRelationship /Source
+%  /EF <</F~\l_tmpa_tl >>
+% }
+%
 
 \pdf_object_new:nn {embedfilelist}{dict}
 \pdf_object_write:nx {embedfilelist}
  {
-  /Names[ (emded1)~\pdf_object_ref:n{myfilespec}~(xxx1)~\pdf_object_ref:n{myfilespec2}]
+  /Names[ \seq_use:Nn \g__pdf_file_embednames_seq {~}]
  }
 
 \bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p:}

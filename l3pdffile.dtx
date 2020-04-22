@@ -229,8 +229,10 @@
 %    \begin{macrocode}
 \tl_new:N \l_pdffile_embed_filename_tl
 
-\pdfdict_new:n {embeddedfile}
-\pdfdict_new:n {embeddedfile/Params}
+\pdfdict_new:n   {embeddedfile}
+\pdfdict_put:nnn {embeddedfile}{Type}{/EmbeddedFile}
+\pdfdict_new:n   {embeddedfile/Params}
+\pdfdict_new:n   {embeddedfile/FileSpec}
 
 \pdfdict_put:nnn {embeddedfile/Params}
   {ModDate}  { (\file_timestamp:n { \l_pdffile_embed_filename_tl }) }
@@ -238,9 +240,24 @@
   {Size}     { \file_size:n { \l_pdffile_embed_filename_tl } }
 \pdfdict_put:nnn {embeddedfile/Params}
   {CheckSum} { (\file_mdfive_hash:n { \l_pdffile_embed_filename_tl }) }
+
+
+\pdfdict_put:nnn {embeddedfile/FileSpec}
+  {Type} { /FileSpec }
+
+%escaping??
+\pdfdict_put:nnn {embeddedfile/FileSpec}
+  {F} { (\l_pdffile_embed_filename_tl) }
+
+\pdfdict_put:nnn {embeddedfile/FileSpec}
+  {UF} { (\l_pdffile_embed_filename_tl) }
+
+\pdfdict_put:nnn {embeddedfile/FileSpec}
+  {AFRelationship} { /Unspecified }
+
 %    \end{macrocode}
 % \end{variable}
-%
+% these macros must be combined ...
 % \begin{macro}{\pdffile_embed:nN}
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdffile_embed:nN #1 #2
@@ -265,7 +282,52 @@
 %    \end{macrocode}
 % \end{macro}
 %
+% \begin{macro}{\pdffile_spec:nN}
+%    \begin{macrocode}
+\cs_new_protected:Npn \pdffile_spec:nN #1 #2
+  {
+    \tl_set:Nn \l_pdffile_embed_filename_tl {#1}
+    \pdf_object_now:nx {dict}
+      {
+        \pdfdict_map:n {embeddedfile/FileSpec}
+      }
+    \tl_set:Nx #2 {\pdf_object_last:}
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\pdffile_embed_spec:nnN}
+%    \begin{macrocode}
+\int_new:N \g_@@_file_embedname_int
+\seq_new:N \g_@@_file_embednames_seq
+\cs_new:Npn \@@_file_embedname:
+ {
+   (
+    l3ef
+    \int_compare:nNnT {\g_@@_file_embedname_int} < {10}
+     {0}
+    \int_compare:nNnT {\g_@@_file_embedname_int} < {100}
+     {0}
+    \int_compare:nNnT {\g_@@_file_embedname_int} < {1000}
+     {0}
+    \int_use:N \g_@@_file_embedname_int
+   )
+ }
 
+\cs_new_protected:Npn \pdffile_embed_spec:nnN #1 #2 #3 %#1 file name, #2 stream ref, #3tlvar
+  {
+    \tl_set:Nn \l_pdffile_embed_filename_tl {#1}
+    \pdf_object_now:nx {dict}
+      {
+        \pdfdict_map:n {embeddedfile/FileSpec}
+        /EF <</F~#2/UF~#2>>
+      }
+    \tl_set:Nx #3 {\pdf_object_last:}
+    \int_gincr:N \g_@@_file_embedname_int
+    \seq_gput_right:Nx \g_@@_file_embednames_seq { \@@_file_embedname:~\pdf_object_last: }
+  }
+%    \end{macrocode}
+% \end{macro}
 %    \begin{macrocode}
 %</package>
 %    \end{macrocode}
