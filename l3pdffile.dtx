@@ -69,6 +69,15 @@
 % \begin{enumerate}
 % \item Embed the file in a stream. (This is optional).
 % \item Create a FileSpec dictionary which if needed reference the embedded file.
+% \begin{verbatim}
+% <<
+% /Type /Filespec
+% /F (l3pdffile.dtx)
+% /UF (l3pdffile.dtx)
+% /AFRelationship /Source
+% /EF <</F 21 0 R>>   %case 3, embedded file
+% >>
+% \end{verbatim}
 % \item Reference the FileSpec dictionary so that the user can access the file.
 %       This can be done in various way:
 %       \begin{enumerate}
@@ -86,7 +95,7 @@
 %             \end{tabular}
 %
 %             The AP takes precedance over Border and similar keys.
-%       \item Through an entry in the EmbeddedFiles name tree. This what embedfiles does.
+%       \item Through an entry in the EmbeddedFiles name tree. This is what embedfiles does.
 %       \begin{verbatim}
 %       20 0 obj %Document Name tree
 %        <</EmbeddedFiles 21 0 R>>
@@ -95,26 +104,50 @@
 %        <</Names [(AcmeCustomCrypto Protected PDF.pdf) 17 0 R]>>
 %        endobj
 %       \end{verbatim}
-%       \item Through the /AF key in various objects (pdf 2.0), the value is normally an array of object
-%       references.
-%        But it can also be a name which is mapped to an array in /Properties:
+%       The strings (keys) in the /Names dictionary must be sorted lexically. But they
+%       don't have to be the file name or anything related to the file name. So the code will
+%       use l3emb0001, l3emb0002. The key is needed only in one place:
+%       to identify the start file in a collection.
+%
+%       \item Through the /AF key in various objects (pdf 2.0). The value is normally an array of object
+%       references, but it can also be a name which is mapped to an array in /Properties:
 %        \begin{verbatim}
 %        /AF /NamedAF BDC
 %        /Properties <</NamedAF [12 0 R]
 %        \end{verbatim}
-%        The related FileSpec dictionary should contain an /AFRelationship key in this case.
-%       \end{enumerate}
+%        The related FileSpec dictionary should contain an /AFRelationship key in this case:
+%
+%       \begin{tabular}{lp{6cm}}
+%       Source  & shall be used if this file specification is the original
+%                source material for the associated content.\\
+%       Data    & shall be used if this file specification represents information used to
+%                derive a visual presentation – such as for a table or a graph.\\
+%       Alternative & shall be used if this file specification is an
+%               alternative representation of content, for example audio.\\
+%       Supplement & shall be used if this file specification represents
+%       a supplemental representation of the original source or data
+%       that may be more easily consumable
+%       (e.g., A MathML version of an equation).\\
+%       EncryptedPayload & shall be used if this file specification
+%       is an encrypted payload document that should be displayed to the user
+%       if the PDF processor has the cryptographic filter
+%       needed to decrypt the document.\\
+%       FormData & shall be used if this file specification
+%       is the data associated with the AcroForm
+%       (see 12.7.3, "Interactive form dictionary") of this PDF.\\
+%       Schema & shall be used if this file specification is a schema
+%       definition for the associated object
+%       (e.g. an XML schema associated with a metadata stream).\\
+%       Unspecified &(default value) shall be used when the
+%       relationship is not known
+%       or cannot be described using one of the other values.\\
+%       Other names & Second-class names (see Annex E,
+%       “(normative) PDF Name Registry") should be used to
+%       represent other types of relationships.
+%       \end{tabular}
+%      \end{enumerate}
 % \end{enumerate}
 %
-% \begin{verbatim}
-% <<
-% /Type /Filespec
-% /F (l3pdffile.dtx)
-% /UF (l3pdffile.dtx)
-% /AFRelationship /Source
-% /EF <</F 21 0 R>>   %case 3, embedded file
-% >>
-% \end{verbatim}
 %
 %\subsection{Embedding a file}
 % Embedding an existing file is in most cases quite straightforward. It can be done with

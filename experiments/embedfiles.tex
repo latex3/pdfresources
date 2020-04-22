@@ -1,12 +1,95 @@
+% !Mode:: "TeX:UTF-8:Main"
 \documentclass{article}
 \usepackage{pdfresources,l3pdffile}
+\usepackage{hyperref}
 \ExplSyntaxOn
 \pdf_uncompress:
 \ExplSyntaxOff
 \begin{document}
+\subsection{n}
+\section{a}
 blub
 \ExplSyntaxOn
 \pdfdict_put:nnn  {embeddedfile}{Subtype}{\pdftool_name:n{application/postscript}}
 \pdffile_embed:nN {example-image.eps}\l_tmpa_tl
+
+\pdfdict_put:nnn  {embeddedfile}{Subtype}{\pdftool_name:n{text/plain}}
+\pdffile_embed:nN {testinput.txt}\l_tmpa_tl
+
+
+\pdf_object_new:nn  {myfilespec}{dict}
+\pdf_object_write:nx {myfilespec}
+ {
+  /Type /Filespec
+  /F (example-image.eps)
+  /UF (example-image.eps)
+  /AFRelationship /Source
+  /EF <</F~\l_tmpa_tl >>
+  /Desc (this~is~a~description)
+ }
+
+\pdf_object_new:nn  {myfilespec2}{dict}
+\pdf_object_write:nx {myfilespec2}
+ {
+  /Type /Filespec
+  /F (ftestinput.txt)
+  /UF (blubltestinput.txt)
+  /AFRelationship /Source
+  /EF <</F~\l_tmpa_tl >>
+ }
+
+
+\pdf_object_new:nn {embedfilelist}{dict}
+\pdf_object_write:nx {embedfilelist}
+ {
+  /Names[ (emded1)~\pdf_object_ref:n{myfilespec}~(xxx1)~\pdf_object_ref:n{myfilespec2}]
+ }
+
+\bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p:}
+ {
+  \pdfnames{/EmbeddedFiles~\pdf_object_ref:n{embedfilelist} }
+ }
+
+\sys_if_engine_luatex:T
+ {
+   \pdfextension names {/EmbeddedFiles~\pdf_object_ref:n{embedfilelist} }
+ }
+
+\sys_if_engine_xetex:T
+ {
+  \special{pdf: put @names <</EmbeddedFiles~\pdf_object_ref:n{embedfilelist}>>}
+ }
+
+\bool_if:nT {\sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p:}
+ {
+  %\pdfnames{/EmbeddedFiles~\pdf_object_ref:n{embedfilelist} }
+  %[/Name (Unicode Name)
+%/FS << /Type /Filespec /F (name) /EF << /F {streamName} >> >>
+%EMBED pdfmark
+   \__pdf_backend_pdfmark:x
+     {
+       /Name~ (e22)~
+       /FS~\pdf_object_ref:n{myfilespec}
+       ~ /EMBED
+   }
+   \__pdf_backend_pdfmark:x
+     {
+       /Name~ (e3)~
+       /FS~\pdf_object_ref:n{myfilespec2}
+       ~ /EMBED
+   }
+  }
+
+
+
 \ExplSyntaxOff
-\end{document} 
+\end{document}
+
+immediate\pdfobj{%
+          <<%
+            /Names[\EmFi@list]%
+          >>%
+        }%
+        \pdfnames{%
+          /EmbeddedFiles \the\pdflastobj\ltx@space 0 R%
+        }%
