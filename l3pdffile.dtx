@@ -188,8 +188,8 @@
 % stream is ignored.
 % \end{itemize}
 %
-% Implementation: There will be two local dictionaries, embeddedfile and embeddedfile/Params.
-% The embeddedfile/Params will have default settings. The dictionaries are used to
+% Implementation: There will be two local dictionaries, file and file/Params.
+% The file/Params will have default settings. The dictionaries are used to
 % build the attributes of the object.
 %
 %
@@ -201,7 +201,7 @@
 %   \end{syntax}
 %   This commands embeds the file \Arg{filename} in the PDF and stores the
 %   object reference in \meta{tl var}. It uses the content of the local
-%   dictionaries \texttt{embeddedfile} and \texttt{embeddedfile/Params} to setup
+%   dictionaries \texttt{file} and \texttt{file/Params} to setup
 %   the dictionary entries of the stream object.
 % \end{function}
 % \end{documentation}
@@ -220,15 +220,28 @@
 %    \begin{macrocode}
 %<@@=pdf>
 %    \end{macrocode}
-% \begin{variable} {\g_pdffile_mimetypes_prop}
-% This variable will hold common mimetypes
+% \begin{variable}
+%   {
+%     \l_@@_file_tmpa_tl,
+%     \l_@@_file_tmpa_str,
+%     \l_@@_file_ext_str,
+%     \l_@@_file_subtype_tl
+%   }
+% temporary variables: generic, for extension, subtype
 % \end{variable}
 %    \begin{macrocode}
-\tl_new:N\l_@@_file_tmpa_tl
-\tl_new:N\l_@@_file_ext_tl
-\tl_new:N\l_@@_file_subtype_tl
-\prop_new:N \g_pdffile_mimetypes_prop
+\tl_new:N  \l_@@_file_tmpa_tl
+\str_new:N \l_@@_file_tmpa_str
 
+\str_new:N \l_@@_file_ext_str
+\tl_new:N  \l_@@_file_subtype_tl
+
+%    \end{macrocode}
+% \begin{variable} {\g_pdffile_mimetypes_prop}
+% This variable holds common mimetypes
+% \end{variable}
+%    \begin{macrocode}
+\prop_new:N \g_pdffile_mimetypes_prop
 \prop_set_from_keyval:Nn \g_pdffile_mimetypes_prop
   {
     ,.csv = text/csv
@@ -243,45 +256,39 @@
     ,.txt = text/plain
   }
 %    \end{macrocode}
-% \begin{NOTE}{UF}
-% should the default value be stored in dedicated commands or tl vars?
-% \end{NOTE}
 % \begin{variable}
 %  {
-%   \l_pdffile_embed_curfilename_tl,
-%   \l_pdffile_embed_curfileext_tl,
+%   \l_pdffile_full_name_str,
 %  }
-% \cs{l_pdffile_embed_curfilename_tl} will be set at the begin of the command, and
+% \cs{l_pdffile_full_name_str} will be set at the begin of the command and contains the
+% , and
 % so can be used in dictionary values or other references.
+% \end{variable}
 %    \begin{macrocode}
-\tl_new:N  \l_pdffile_embed_filename_tl
-\tl_new:N  \l_pdffile_embed_fileext_tl
-\tl_set:Nn \l_pdffile_embed_fileext_tl {.tex}
+\str_new:N  \l_pdffile_full_name_str
+%    \end{macrocode}
+% Here we define and setup the local dictionaries
+%    \begin{macrocode}
+\pdfdict_new:n   {file}
+\pdfdict_put:nnn {file}{Type}{/EmbeddedFile}
 
-\pdfdict_new:n   {embeddedfile}
-\pdfdict_put:nnn {embeddedfile}{Type}{/EmbeddedFile}
-\pdfdict_new:n   {embeddedfile/Params}
-\pdfdict_new:n   {embeddedfile/FileSpec}
+\pdfdict_new:n   {file/Params}
+\pdfdict_put:nnn {file/Params}
+  {ModDate}  { (\file_timestamp:n { \l_pdffile_full_name_str }) }
+\pdfdict_put:nnn {file/Params}
+  {Size}     { \file_size:n { \l_pdffile_full_name_str } }
+\pdfdict_put:nnn {file/Params}
+  {CheckSum} { (\file_mdfive_hash:n { \l_pdffile_full_name_str }) }
 
-\pdfdict_put:nnn {embeddedfile/Params}
-  {ModDate}  { (\file_timestamp:n { \l_pdffile_embed_filename_tl }) }
-\pdfdict_put:nnn {embeddedfile/Params}
-  {Size}     { \file_size:n { \l_pdffile_embed_filename_tl } }
-\pdfdict_put:nnn {embeddedfile/Params}
-  {CheckSum} { (\file_mdfive_hash:n { \l_pdffile_embed_filename_tl }) }
-
-
-\pdfdict_put:nnn {embeddedfile/FileSpec}
+\pdfdict_new:n   {file/FileSpec}
+\pdfdict_put:nnn {file/FileSpec}
   {Type} { /FileSpec }
-
 %escaping??
-\pdfdict_put:nnn {embeddedfile/FileSpec}
-  {F} { (\l_pdffile_embed_filename_tl) }
-
-\pdfdict_put:nnn {embeddedfile/FileSpec}
-  {UF} { (\l_pdffile_embed_filename_tl) }
-
-\pdfdict_put:nnn {embeddedfile/FileSpec}
+\pdfdict_put:nnn {file/FileSpec}
+  {F} { (\l_pdffile_full_name_str) }
+\pdfdict_put:nnn {file/FileSpec}
+  {UF} { (\l_pdffile_full_name_str) }
+\pdfdict_put:nnn {file/FileSpec}
   {AFRelationship} { /Unspecified }
 
 %    \end{macrocode}
@@ -289,56 +296,68 @@
 % these macros must be combined ...
 % \begin{macro}{\pdffile_embed:nN}
 %    \begin{macrocode}
-\cs_new_protected:Npn \pdffile_embed:nN #1 #2
+\cs_new_protected:Npn \pdffile_embed:nn #1 #2
+ %#1 symbolic object name of file spec  #2 file name,
   {
-    \tl_set:Nn \l_pdffile_embed_filename_tl {#1}
-    \file_parse_full_name:nNNN {#1}\l_tmpa_tl\l_tmpb_tl\l_@@_file_ext_tl
-    \pdfdict_get:nnN {embeddedfile}{Subtype}\l_@@_file_tmpa_tl
+    \file_get_full_name:nNF  \l_pdffile_full_name_str { #2 }
+     {
+        %error message
+     }
+    \file_parse_full_name:VNNN
+      \l_pdffile_full_name_str
+      \l_tmpa_tl \l_tmpb_tl \l_@@_file_ext_str
+    %check if Subtype has been set
+    \pdfdict_get:nnN {file}{Subtype}\l_@@_file_tmpa_tl
     \quark_if_no_value:NT \l_@@_file_tmpa_tl
       {
         \prop_get:NVNTF \g_pdffile_mimetypes_prop \l_@@_file_ext_tl \l_tmpa_tl
-         {
-           \tl_set:Nx \l_@@_file_subtype_tl {/Subtype \pdftool_name:V \l_tmpa_tl}
-         }
-         {
-           \tl_clear:N \l_@@_file_subtype_tl
-         }
+          {
+            \tl_set:Nx \l_@@_file_subtype_tl {/Subtype~\pdftool_name:V \l_tmpa_tl}
+           }
+          {
+            \tl_clear:N \l_@@_file_subtype_tl
+          }
       }
-    \pdf_object_now:nx {fstream}
+    \pdf_object_now:nx { fstream }
       {
-       {%try to guess mime type
-        \l_@@_file_subtype_tl
-        \pdfdict_map:n {embeddedfile}
-
-        \pdfdict_if_empty:nF {embeddedfile/Params}
-         {
-          /Params
-           <<
-            \pdfdict_map:n {embeddedfile/Params}
-           >>
-         }
-       }
-       { #1 }
+        {
+          \l_@@_file_subtype_tl
+          \pdfdict_map:n {file}
+          \pdfdict_if_empty:nF {file/Params}
+            {
+              /Params
+              <<
+                \pdfdict_map:n {file/Params}
+              >>
+            }
+        }
+        { \l_pdffile_full_name_str }
       }
-    \tl_clear:N \l_@@_file_subtype_tl  
-    \tl_set:Nx #2 {\pdf_object_last:}
+    \tl_clear:N \l_@@_file_subtype_tl
+    \tl_set:Nx \l_@@_file_object_last_tl {\pdf_object_last:}
+    \pdf_object_new:nn   { #1 } {dict}
+    \pdf_object_write:nx { #1 }
+      {
+        \pdfdict_map:n {file/FileSpec}
+        /EF <</F~\l_@@_file_object_last_tl /UF~\l_@@_file_object_last_tl>>
+      }
   }
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\pdffile_spec:nN}
-%    \begin{macrocode}
-\cs_new_protected:Npn \pdffile_spec:nN #1 #2
-  {
-    \tl_set:Nn \l_pdffile_embed_filename_tl {#1}
-    \pdf_object_now:nx {dict}
-      {
-        \pdfdict_map:n {embeddedfile/FileSpec}
-      }
-    \tl_set:Nx #2 {\pdf_object_last:}
-  }
-%    \end{macrocode}
-% \end{macro}
+^^A% \begin{macro}{\pdffile_spec:nN}
+^^A%    \begin{macrocode}
+^^A\cs_new_protected:Npn \pdffile_spec:nN #1 #2
+^^A  {
+^^A    \tl_set:Nn \l_pdffile_full_name_str {#1}
+^^A    \pdf_object_now:nx {dict}
+^^A      {
+^^A        \pdfdict_map:n {file/FileSpec}
+^^A      }
+^^A    \tl_set:Nx #2 {\pdf_object_last:}
+^^A  }
+^^A%    \end{macrocode}
+^^A% \end{macro}
 %
 % \begin{macro}{\pdffile_embed_spec:nnN}
 %    \begin{macrocode}
@@ -360,10 +379,10 @@
 
 \cs_new_protected:Npn \pdffile_embed_spec:nnN #1 #2 #3 %#1 file name, #2 stream ref, #3tlvar
   {
-    \tl_set:Nn \l_pdffile_embed_filename_tl {#1}
+    \file_get_full_name:nN {#1} \l_pdffile_full_name_str
     \pdf_object_now:nx {dict}
       {
-        \pdfdict_map:n {embeddedfile/FileSpec}
+        \pdfdict_map:n {file/FileSpec}
         /EF <</F~#2/UF~#2>>
       }
     \tl_set:Nx #3 {\pdf_object_last:}

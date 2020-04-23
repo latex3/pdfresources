@@ -21,23 +21,23 @@
 \tl_new:N\l_file_a_tl
 \tl_new:N\l_file_b_tl
 \par
-\pdfdict_get:nnN {embeddedfile}{Subtype}\l_tmpa_tl
+\pdfdict_get:nnN {file}{Subtype}\l_tmpa_tl
 \quark_if_no_value:NTF \l_tmpa_tl {nosubtype}{subtype}\par
-\pdfdict_put:nnn {embeddedfile}{Subtype}{\pdftool_name:n{application/postscript}}
-\pdfdict_get:nnN {embeddedfile}{Subtype}\l_tmpa_tl\par
-\pdfdict_remove:nn {embeddedfile}{Subtype}
-\pdfdict_get:nnN {embeddedfile}{Subtype}\l_tmpa_tl\par
+\pdfdict_put:nnn {file}{Subtype}{\pdftool_name:n{application/postscript}}
+\pdfdict_get:nnN {file}{Subtype}\l_tmpa_tl\par
+\pdfdict_remove:nn {file}{Subtype}
+\pdfdict_get:nnN {file}{Subtype}\l_tmpa_tl\par
 \quark_if_no_value:NTF \l_tmpa_tl {nosubtype}{subtype}
 
-\pdfdict_put:nnn {embeddedfile/FileSpec} {AFRelationship}{/Source}
-\pdfdict_put:nnn {embeddedfile/FileSpec} {Desc}{(this~is~a~description)}
+\pdfdict_put:nnn {file/FileSpec} {AFRelationship}{/Source}
+\pdfdict_put:nnn {file/FileSpec} {Desc}{(this~is~a~description)}
 
 \pdffile_embed:nN       {example-image.eps}\l_tmpa_tl
 \pdffile_embed_spec:nnN {example-image.eps}{\l_tmpa_tl}\l_file_a_tl
 
-\pdfdict_put:nnn       {embeddedfile}{Subtype}{\pdftool_name:n{text/plain}}
-\pdfdict_put:nnn       {embeddedfile/FileSpec} {AFRelationship}{/Data}
-\pdfdict_put:nnn       {embeddedfile/FileSpec} {Desc}{(this~is~another~description)}
+\pdfdict_put:nnn       {file}{Subtype}{\pdftool_name:n{text/plain}}
+\pdfdict_put:nnn       {file/FileSpec} {AFRelationship}{/Data}
+\pdfdict_put:nnn       {file/FileSpec} {Desc}{(this~is~another~description)}
 \pdffile_embed:nN       {testinput.txt}\l_tmpa_tl
 \pdffile_embed_spec:nnN {testinput.txt}{\l_tmpa_tl}\l_file_b_tl
 
