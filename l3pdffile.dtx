@@ -52,49 +52,51 @@
 % \section{\pkg{l3pdffile} documentation}
 % External files can be referenced from a PDF in three ways:
 % \begin{enumerate}
-% \item through an normal url link,
+% \item through an annotation of type Link,
 % \item by referencing a local file in the file system,
-% \item by embedding the file directly into the PDF.
+% \item by embedding the file directly into the PDF
 % \end{enumerate}
 %
-% Url links (1) are created with the \cs{pdfannot} commands.
+% Case 1 (Links) are created with the \cs{pdfannot} commands.
 %
-% This module handles the two last possibilities. Actually from the view
-% of the PDF format they are quite similar:
-% In both cases the core dictionaries are /FileSpec dictionaries which similar entries.
-% In the embedding case there is only an additional /EF entry which points to the
-% stream object of the file.
+% This module handles the two other cases. Actually from the view
+% of the PDF format they are quite similar: Case 2 is case 3 without the stream
+% object and without the /EF entry in the /FileSpec dictionary (this points to the
+% stream object of the file). Not embedding the file makes the PDF smaller. But it is
+% also less portable: the files can only be found if there are is the right location
+% relative to the PDF. The normal case is to embed the file. So this is handled first.
 %
 % The tasks to embed and reference such file are
 % \begin{enumerate}
-% \item Embed the file in a stream. (This is optional).
-% \item Create a FileSpec dictionary which if needed reference the embedded file.
+% \item Embed the file in a stream.
+% \item Create a FileSpec dictionary which references the embedded file. In the /EF
+% dictionary
 % \begin{verbatim}
 % <<
 % /Type /Filespec
 % /F (l3pdffile.dtx)
 % /UF (l3pdffile.dtx)
 % /AFRelationship /Source
-% /EF <</F 21 0 R>>   %case 3, embedded file
+% /EF <</F 21 0 R /UF 21 0 R>>   %case 3, embedded file
 % >>
 % \end{verbatim}
 % \item Reference the FileSpec dictionary so that the user can access the file.
 %       This can be done in various way:
 %       \begin{enumerate}
-%       \item With an annotation (/Subtype/FileAttachment). This done by
+%       \item With an annotation (/Subtype/FileAttachment). This is done by
 %       attachfile, attachfile2 and intopdf. Typical entries of such an annotation
 %       are:
 %
 %             \begin{tabular}{lll}
-%             FS      & object reference &(FileSpec dictionary)\\
-%             Name    & name           & Graph, PushPin, Paperclip, Tag\\
+%             FS       & object reference &(FileSpec dictionary)\\
+%             Name     & name           & Graph, PushPin, Paperclip, Tag\\
 %             Contents & text string & optional but recommended\\
 %             F        & integer     & Flags\\
 %             AP       & dictionary  & Appearance (required if rectangle >0) \\
 %             AS       & name\\
 %             \end{tabular}
 %
-%             The AP takes precedance over Border and similar keys.
+%             The AP takes precedence over Border and similar keys.
 %       \item Through an entry in the EmbeddedFiles name tree. This is what embedfiles does.
 %       \begin{verbatim}
 %       20 0 obj %Document Name tree
@@ -178,8 +180,9 @@
 % \item The /Params dictionary is not always required, but as the basic data
 % are easily accessed it makes sense to add it automatically. Users will
 % perhaps want to add also CreationDate here.
-% \item The mimetype (in the /Subtype) can not be detected automatically but must
-% be added by the user.
+% \item The mimetype (in the /Subtype) can not always be detected automatically but
+% it should be possible to store and use a list of common extensions. Other
+% can be added manually.
 % \item The dictionary can contain additional keys (/Filter, /DecodeParms)
 % \item The dictionary can actually refer to an external file (in which case the
 % stream is ignored.
@@ -217,17 +220,43 @@
 %    \begin{macrocode}
 %<@@=pdf>
 %    \end{macrocode}
+% \begin{variable} {\g_pdffile_mimetypes_prop}
+% This variable will hold common mimetypes
+% \end{variable}
+%    \begin{macrocode}
+\tl_new:N\l_@@_file_tmpa_tl
+\tl_new:N\l_@@_file_ext_tl
+\tl_new:N\l_@@_file_subtype_tl
+\prop_new:N \g_pdffile_mimetypes_prop
+
+\prop_set_from_keyval:Nn \g_pdffile_mimetypes_prop
+  {
+    ,.csv = text/csv
+    ,.html= text/html
+    ,.dtx = text/plain %or application/x-tex, not in iana.org list
+    ,.eps = application/postscript
+    ,.jpg = image/jpeg
+    ,.mp4 = video/mp4
+    ,.pdf = application/pdf
+    ,.png = image/png
+    ,.tex = text/plain %or application/x-tex, not in iana.org list
+    ,.txt = text/plain
+  }
+%    \end{macrocode}
 % \begin{NOTE}{UF}
 % should the default value be stored in dedicated commands or tl vars?
 % \end{NOTE}
 % \begin{variable}
 %  {
-%   \l_pdffile_embed_curfilename_tl
+%   \l_pdffile_embed_curfilename_tl,
+%   \l_pdffile_embed_curfileext_tl,
 %  }
 % \cs{l_pdffile_embed_curfilename_tl} will be set at the begin of the command, and
 % so can be used in dictionary values or other references.
 %    \begin{macrocode}
-\tl_new:N \l_pdffile_embed_filename_tl
+\tl_new:N  \l_pdffile_embed_filename_tl
+\tl_new:N  \l_pdffile_embed_fileext_tl
+\tl_set:Nn \l_pdffile_embed_fileext_tl {.tex}
 
 \pdfdict_new:n   {embeddedfile}
 \pdfdict_put:nnn {embeddedfile}{Type}{/EmbeddedFile}
@@ -263,10 +292,24 @@
 \cs_new_protected:Npn \pdffile_embed:nN #1 #2
   {
     \tl_set:Nn \l_pdffile_embed_filename_tl {#1}
+    \file_parse_full_name:nNNN {#1}\l_tmpa_tl\l_tmpb_tl\l_@@_file_ext_tl
+    \pdfdict_get:nnN {embeddedfile}{Subtype}\l_@@_file_tmpa_tl
+    \quark_if_no_value:NT \l_@@_file_tmpa_tl
+      {
+        \prop_get:NVNTF \g_pdffile_mimetypes_prop \l_@@_file_ext_tl \l_tmpa_tl
+         {
+           \tl_set:Nx \l_@@_file_subtype_tl {/Subtype \pdftool_name:V \l_tmpa_tl}
+         }
+         {
+           \tl_clear:N \l_@@_file_subtype_tl
+         }
+      }
     \pdf_object_now:nx {fstream}
       {
-       {
+       {%try to guess mime type
+        \l_@@_file_subtype_tl
         \pdfdict_map:n {embeddedfile}
+
         \pdfdict_if_empty:nF {embeddedfile/Params}
          {
           /Params
@@ -277,6 +320,7 @@
        }
        { #1 }
       }
+    \tl_clear:N \l_@@_file_subtype_tl  
     \tl_set:Nx #2 {\pdf_object_last:}
   }
 %    \end{macrocode}
