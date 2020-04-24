@@ -1,48 +1,104 @@
 % !Mode:: "TeX:UTF-8:Main"
 \documentclass{article}
-\usepackage{pdfresources,l3pdffile}
+\usepackage{pdfresources}
+\usepackage{l3pdffile}
 \usepackage{hyperref}
 \ExplSyntaxOn
 \pdf_uncompress:
 \ExplSyntaxOff
 \begin{document}
-\subsection{n}
-\section{a}
+\section{Testing embedding and attaching files}
 \ExplSyntaxOn
-\file_parse_full_name:nNNN {example-image.pdf}\l_tmpa_tl\l_tmpb_tl\l__pdf_file_ext_tl
-\tl_show:N \l__pdf_file_ext_tl
-\tl_show:N \l_tmpb_tl
-\tl_show:N \l_tmpa_tl
-\file_if_exist:nTF {example-image.pdf}{true}{false}
-\file_if_exist:nTF {new-attachfile}
-{\g_file_curr_ext_str, \g_file_curr_name_str}
-{blub}
+\showoutput
+\cs_new_protected:Npn \__pdf_backend_object_write_fstream:nn #1#2
+  {
+    \exp_args:Nx
+      \__pdf_backend_object_write_fstream:nnn {#1} #2
+  }
 
-\tl_new:N\l_file_a_tl
-\tl_new:N\l_file_b_tl
-\par
-\pdfdict_get:nnN {file}{Subtype}\l_tmpa_tl
-\quark_if_no_value:NTF \l_tmpa_tl {nosubtype}{subtype}\par
-\pdfdict_put:nnn {file}{Subtype}{\pdftool_name:n{application/postscript}}
-\pdfdict_get:nnN {file}{Subtype}\l_tmpa_tl\par
-\pdfdict_remove:nn {file}{Subtype}
-\pdfdict_get:nnN {file}{Subtype}\l_tmpa_tl\par
-\quark_if_no_value:NTF \l_tmpa_tl {nosubtype}{subtype}
+\cs_new_protected:Npn \__pdf_backend_object_write_fstream:nnn #1#2#3
+  {
+   \tl_set:Nn\l_tmpa_tl {#3}\show\l_tmpa_tl
 
-\pdfdict_put:nnn {file/FileSpec} {AFRelationship}{/Source}
-\pdfdict_put:nnn {file/FileSpec} {Desc}{(this~is~a~description)}
+    \__kernel_backend_postscript:x
+      {
+        %[nobreak]
+        ~
+        mark ~ #1 ~ << #2 >> /PUT ~ pdfmark ~
+        mark ~ #1 ~ ( #3 )~ (r)~ file ~ /PUT ~ pdfmark ~
+      }
+  }
 
-\pdffile_embed:nN       {example-image.eps}\l_tmpa_tl
-\pdffile_embed_spec:nnN {example-image.eps}{\l_tmpa_tl}\l_file_a_tl
+%\%cs_set_protected:Npn \pdffile_embed:nn #1 #2
+% % #1 symbolic object name of file spec  #2 file name,
+%  {
+%    \file_get_full_name:nNF {#2} \l_pdffile_full_name_str
+%     {
+%        \msg_error:nnn { pdffile }{ file-not-found }{ #2 }
+%     }
+%    %we need the extension
+%    \file_parse_full_name:VNNN
+%      \l_pdffile_full_name_str
+%      \l_tmpa_tl
+%      \l_tmpb_tl
+%      \l__pdf_file_ext_str
+%    %check if Subtype has been set
+%    \pdfdict_get:nnN {file}{Subtype}\l__pdf_file_tmpa_tl
+%    \quark_if_no_value:NT \l__pdf_file_tmpa_tl
+%      {
+%        \prop_get:NVNTF \g_pdffile_mimetypes_prop \l__pdf_file_ext_str \l_tmpa_tl
+%          {
+%            \tl_set:Nx \l__pdf_file_subtype_tl {/Subtype~\pdftool_name:V \l_tmpa_tl}
+%           }
+%          {
+%            \tl_clear:N \l__pdf_file_subtype_tl
+%            \msg_warn:nnn { pdffile }{ mimetype-missing} { #2 }
+%          }
+%      }
+%    \pdf_object_now:nx { fstream }
+%      {
+%        {
+%          \l__pdf_file_subtype_tl
+%          \pdfdict_map:n {file}
+%          \pdfdict_if_empty:nF {file/Params}
+%            {
+%              /Params
+%                <<
+%                  \pdfdict_map:n {file/Params}
+%                >>
+%            }
+%        }
+%        { \l_pdffile_full_name_str }
+%      }
+%%    \tl_clear:N \l__pdf_file_subtype_tl
+%%    \tl_set:Nx  \l__pdf_file_object_last_tl {\pdf_object_last:}
+%%    \pdf_object_new:nn   { #1 } {dict}
+%%    \pdf_object_write:nx { #1 }
+%%      {
+%%        \pdfdict_map:n {file/FileSpec}
+%%        /EF <</F~\l__pdf_file_object_last_tl /UF~\l__pdf_file_object_last_tl>>
+%%      }
+%  }
 
-\pdfdict_put:nnn       {file}{Subtype}{\pdftool_name:n{text/plain}}
-\pdfdict_put:nnn       {file/FileSpec} {AFRelationship}{/Data}
-\pdfdict_put:nnn       {file/FileSpec} {Desc}{(this~is~another~description)}
-\pdffile_embed:nN       {testinput.txt}\l_tmpa_tl
-\pdffile_embed_spec:nnN {testinput.txt}{\l_tmpa_tl}\l_file_b_tl
+\pdfdict_put:nnn  {file/FileSpec} {AFRelationship}{/Source}
+\pdfdict_put:nnn  {file/FileSpec} {Desc}{(this~is~a~eps)}
+\pdffile_embed:nn {example}{example-imageX.eps}
+\pdffile_attach:n {example}
+%
+\pdfdict_put:nnn  {file/FileSpec} {AFRelationship}{/Data}
+\pdfdict_put:nnn  {file/FileSpec} {Desc}{(this~is~a~text~file)}
+\pdffile_embed:nn {test} {testinput.txt}
+\pdffile_attach:n {test}
+%
+\pdfdict_put:nnn  {file/FileSpec} {AFRelationship}{/Source}
+\pdfdict_put:nnn  {file/FileSpec} {Desc}{(this~is~a~tex~file)}
+\pdffile_embed:nn {tex} {links.tex}
+\pdffile_attach:nN {tex}\l_tmpa_tl
 
+%\tl_show:N\l_tmpa_tl
+\ExplSyntaxOff
 
-
+\end{document}
 %\pdf_object_new:nn  {myfilespec}{dict}
 %\pdf_object_write:nx {myfilespec}
 % {

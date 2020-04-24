@@ -367,40 +367,43 @@
 % \end{function}
 % \begin{macro}{ \@@_backend_pageobject_ref:n }
 %    \begin{macrocode}
-%pdftex
-\bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p:}
+% command is in git.
+\cs_if_free:NT \@@_backend_pageobject_ref:n
   {
-    \cs_new:Npn \@@_backend_pageobject_ref:n #1
-      {
-        \tex_pdfpageref:D #1 ~ \c_space_tl 0 ~ R
-      }
-  }
-%luatex
-\sys_if_engine_luatex:T
-  {
-    \cs_new:Npn \@@_backend_pageobject_ref:n #1
-      {
-        \tex_pdffeedback:D~pageref #1 ~ \c_space_tl 0 ~ R
-      }
-  }
-%dvips
-\bool_if:nT {\sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p: }
-  {
-    \cs_new:Npn \@@_backend_pageobject_ref:n #1
-      {
-        {Page#1}
-      }
-  }
+  %pdftex
+  \bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p:}
+    {
+      \cs_new:Npn \@@_backend_pageobject_ref:n #1
+        {
+          \tex_pdfpageref:D #1 ~ \c_space_tl 0 ~ R
+        }
+    }
+  %luatex
+  \sys_if_engine_luatex:T
+    {
+      \cs_new:Npn \@@_backend_pageobject_ref:n #1
+        {
+          \tex_pdffeedback:D~pageref #1 ~ \c_space_tl 0 ~ R
+        }
+    }
+  %dvips
+  \bool_if:nT {\sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p: }
+    {
+      \cs_new:Npn \@@_backend_pageobject_ref:n #1
+        {
+          {Page#1}
+        }
+    }
 
-%xetex
-\sys_if_engine_xetex:T
-  {
-    \cs_new:Npn \@@_backend_pageobject_ref:n #1
-      {
-        @page#1
-      }
+  %xetex
+  \sys_if_engine_xetex:T
+    {
+      \cs_new:Npn \@@_backend_pageobject_ref:n #1
+        {
+          @page#1
+        }
+    }
   }
-
 \cs_new:Npn \pdf_pageobject_ref:n #1 { \@@_backend_pageobject_ref:n { #1 }}
 
 %% no idea here, so ...
@@ -1719,7 +1722,46 @@
 % the backend command is already in the driver:
 % \cs{@@_backend_catalog_gput:nn}
 %
-%
+% \paragraph { Special case: the /Names dictionary }
+% Entries to /Names are handled differently, in part (/Desc) it is automatic, for
+% other special commands like \cs{pdfnames} must be used.
+%    \begin{macrocode}
+% pdflatex
+\bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p:}
+ {
+   \cs_new_protected:Npn \@@_backend_NamesEmbeddedFiles_gpush:n #1 %array content
+     {
+        \pdf_object_now:nn {dict} {/Names [#1] }
+        \pdfnames{/EmbeddedFiles~\pdf_object_last:}
+     }
+ }
+
+\sys_if_engine_luatex:T
+ {
+   \cs_new_protected:Npn \@@_backend_NamesEmbeddedFiles_gpush:n #1 %array content
+     {
+       \pdf_object_now:nn {dict} {/Names [#1] }
+       \pdfextension~names~{/EmbeddedFiles~\pdf_object_last: }
+     }
+ }
+
+\sys_if_engine_xetex:T
+ {
+   \cs_new_protected:Npn \@@_backend_NamesEmbeddedFiles_gpush:n #1 %array content
+     {
+       \pdf_object_now:nn {dict} { /Names [#1] }
+       %n or x?
+       \__pdf_backend:x {put~@names~<</EmbeddedFiles~\pdf_object_last: >>}
+     }
+ }
+
+%dvips: noop
+\bool_if:nT {\sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p:}
+  {
+    \cs_new_protected:Npn \@@_backend_NamesEmbeddedFiles_gpush:n #1 {}
+  }
+
+%    \end{macrocode}
 % \subsubsection{\enquote{Catalog} \& subdirectories / management }
 % \begin{NOTE}{UF}
 % The catalog dictionary is filled by e.g. \cs{pdfcatalog}. Multiple appearances of
@@ -1754,6 +1796,13 @@
 % In some cases the values that needs to be added are not at the top-level
 % but in some subsubdictionary or are actually part of an array.
 % To handle this some pathes use internally special handlers.
+%
+% \potentialclash In some cases entries are added implicitly.
+% For example entries to the name
+% tree of the \texttt{/EmbeddedFiles} key in the \texttt{/Names} directory are
+% added with the commands of the \texttt{l3pdffile} module. This clashes with
+% e.g. the embedfile package which should not be used!
+%
 %
 %   \paragraph{Entries at the top level of the catalog}
 %   The Names in the following tabular are entries that are added to the
@@ -1955,7 +2004,6 @@
   }
 %    \end{macrocode}
 % \end{macro}
-%
 % \paragraph {Building the catalog: Push order}
 % \begin{macro}{\@@_dict_Catalog_gpush:}
 %    \begin{macrocode}
@@ -1971,6 +2019,8 @@
     \use:c { @@_dict_/Catalog/ViewerPreferences_gpush: }
     % output the single values:
     \prop_map_function:cN { \@@_dict_gname:n {Catalog} }  \@@_backend_catalog_gput:nn
+    % output names tree:
+    \use:c { @@_dict_/Catalog/Names/EmbeddedFiles_gpush: }
   }
 %    \end{macrocode}
 % \end{macro}
@@ -2246,6 +2296,22 @@
   }
 %    \end{macrocode}
 % \end{macro}
+% \paragraph{Building catalog entries: Names/EmbeddedFiles}
+% The entry should only be added if there are actually embedded files.
+% This can be tested by checking the names_seq
+% \begin{macro}{\@@_dict_/Catalog/Names/EmbeddedFiles_gpush:}
+%    \begin{macrocode}
+\seq_new:N \g_@@_file_tree_name_seq
+\cs_new_protected:cpn { @@_dict_/Catalog/Names/EmbeddedFiles_gpush: }
+  {
+    \seq_if_empty:NF \g_@@_file_tree_name_seq
+      {
+        \exp_args:Nx \@@_backend_NamesEmbeddedFiles_gpush:n
+          {
+            \seq_use:Nn \g_@@_file_tree_name_seq {~}
+          }
+      }
+  }
 %
 % \subsection{Local dictonaries}
 %
