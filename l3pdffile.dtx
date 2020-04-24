@@ -295,6 +295,7 @@
 % \end{variable}
 %    \begin{macrocode}
 \str_new:N  \l_pdffile_full_name_str
+\str_new:N  \l_pdffile_full_name_convert_str
 %    \end{macrocode}
 % Here we define and setup the local dictionaries
 %    \begin{macrocode}
@@ -314,9 +315,9 @@
   {Type} { /FileSpec }
 %escaping??
 \pdfdict_put:nnn {file/FileSpec}
-  {F} { (\l_pdffile_full_name_str) }
+  {F} { (\l_pdffile_full_name_convert_str) }
 \pdfdict_put:nnn {file/FileSpec}
-  {UF} { (\l_pdffile_full_name_str) }
+  {UF} { (\l_pdffile_full_name_convert_str) }
 \pdfdict_put:nnn {file/FileSpec}
   {AFRelationship} { /Unspecified }
 
@@ -369,6 +370,7 @@
       \tl_clear:N \l_@@_file_subtype_tl
       \tl_set:Nx  \l_@@_file_object_last_tl {\pdf_object_last:}
       \pdf_object_new:nn   { #1 } {dict}
+      \pdftool_str_convert:nN  { #2 } \l_pdffile_full_name_convert_str
       \pdf_object_write:nx { #1 }
         {
           \pdfdict_map:n {file/FileSpec}
