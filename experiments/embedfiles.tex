@@ -13,15 +13,16 @@
 \group_begin:
 \pdfdict_put:nnn  {file/FileSpec} {AFRelationship}{/Source}
 \pdfdict_put:nnn  {file/FileSpec} {Desc}{(this~is~a~eps)}
+\pdfdict_show:n   {file/FileSpec}
 \pdffile_embed:nn {example}{grüße.txt}
 \pdffile_attach:n {example}
 \group_end:
-\end{document}
+
 \group_begin:
 \pdfdict_put:nnn  {file/FileSpec} {AFRelationship}{/Source}
 \pdfdict_put:nnn  {file/FileSpec} {Desc}{(this~is~a~eps)}
-\pdffile_embed:nn {example}{example-image.eps}
-\pdffile_attach:n {example}
+\pdffile_embed:nn {example2}{example-image.eps}
+\pdffile_attach:n {example2}
 \group_end:
 %
 \group_begin:
@@ -36,7 +37,7 @@
 \group_begin:
 \pdfdict_put:nnn  {file/FileSpec} {AFRelationship}{/Source}
 \pdfdict_put:nnn  {file/FileSpec} {Desc}{(this~is~a~tex~file)}
-\pdffile_embed:nn {tex} {links.tex}
+\pdffile_embed:nn  {tex} {links.tex}
 \pdffile_attach:nN {tex}\l_tmpa_tl
 \group_end:
 

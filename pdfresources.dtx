@@ -627,6 +627,7 @@
 %
 %  \begin{macro}{
 %                \@@_dict_clear,
+%                \@@_dict_reset,
 %                \@@_dict_handler_put:nnn,
 %                \@@_dict_get:nnN,
 %                \@@_dict_remove:nn,
@@ -647,6 +648,17 @@
         \prop_clear:c  { \@@_dict_name:n { #1 } }
       }
   }
+
+%reset clears and then fills with the default
+\cs_new_protected:Npn \@@_dict_reset:n #1
+  {
+    \@@_dict_if_local:nT { #1 }
+      {
+        \prop_clear:c  { \@@_dict_name:n { #1 } }
+        \use:c { @@_dict_#1_reset: }
+      }
+  }
+
 
 %local + global
 \cs_new_protected:Npn \@@_dict_handler_put:nnn #1 #2 #3  %#1 path, #2 name, #3 value
@@ -900,6 +912,21 @@
 \cs_new:Npn \pdfdict_map:n #1
   {
     \@@_dict_map:n { #1 }
+  }
+%    \end{macrocode}
+%
+% \begin{function}[added = 2020-04-25]
+%   {\pdfdict_reset:n }
+%   \begin{syntax}
+%     \cs{pdfdict_reset:n}  \Arg{(local) dictionary}
+%   \end{syntax}
+% This resets a dictionary: it clears the entries and then adds eventually
+% default values (normally at least the Type entry).
+%  \end{function}
+%    \begin{macrocode}
+\cs_new_protected:Npn \pdfdict_reset:n #1
+  {
+    \@@_dict_reset:n { #1 }
   }
 %    \end{macrocode}
 % \begin{function}[added = 2020-04-08]
