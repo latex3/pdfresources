@@ -6,65 +6,15 @@
 %\definecolor{attachfilecolor}{cmyk}{.1,.2,.3,.4}
 %t0\attachfilesetup{color=attachfilecolor}
 \begin{document}
+
 \attachfile[icon=Graph,mimetype=application/x-hdf]{catalogue.tex} some text
 \makeatletter
 
 x\atfi@acroPushPin x
+\show\x
 
+\atfi@acroGraph@data
 
-x\ExplSyntaxOn
-\tl_set:Nn \l_color_fixed_model_tl {rgb}
-\color_parse:nN {cyan!50!magenta!10!yellow}\l_tmpa_tl
-\tl_show:N\l_tmpa_tl
-\__draw_backend_scope_begin:
-\__draw_backend_color_fill_gray:n {0.5}
-\__draw_backend_rectangle:nnnn {1.1133bp}{0bp}{20.7202bp}{18.2754bp}
-\__draw_backend_fill:
-\__draw_backend_literal:x {0~i} %???
-\__draw_backend_linewidth:n {0.5bp}
-\__draw_backend_miterlimit:n {4bp}
-
-\__draw_backend_color_fill_gray:n {1}
-\__draw_backend_color_stroke_gray:n {0}
-\__draw_backend_rectangle:nnnn {0.25bp} {1.6453bp} {20.145bp} {17.7715bp}
-\__draw_backend_fillstroke:
-
-\__draw_backend_color_fill_gray:n {0}
-\__draw_backend_rectangle:nnnn {2.7319bp}{4.1367bp}{3.9571bp}{13.8867bp}
-\__draw_backend_fill:
-\__draw_backend_rectangle:nnnn {8.7031bp}{4.1367bp}{3.9571bp}{9.8867bp}
-\__draw_backend_fill:
-\__draw_backend_rectangle:nnnn {14.7471bp}{4.1367bp}{3.9571bp}{11.8867bp}
-\__draw_backend_fill:
-
-\__draw_backend_scope_end:
-\ExplSyntaxOff
-y
-\show\atfi@color@inline
-\def\atfi@acroGraph@data{%
-  \atfi@GSAVE
-  0.5 \atfi@SETGRAYFILL
-  1.1133 0 20.7202 18.2754 \atfi@RECTFILL
-  0 \atfi@SETFLAT
-  0.5 \atfi@SETLINEWIDTH
-  4 \atfi@SETMITERLIMIT
-  \atfi@RECTSTROKEFILL{%
-    1 \atfi@SETGRAYFILL
-  }{%
-    0 \atfi@SETGRAYSTROKE
-  }{%
-    0.25 1.6453 20.145 17.7715 %
-  }%
-  0 \atfi@SETGRAYFILL
-  2.7319 4.1367 3.9571 13.8867 \atfi@RECTFILL
-  8.7031 4.1367 3.9571 9.8867 \atfi@RECTFILL
-  14.7471 4.1367 3.9571 11.8867 \atfi@RECTFILL
-  \atfi@color@inline{FILL}%
-  1.689 3.0938 3.9571 13.8867 \atfi@RECTFILL
-  7.6602 3.0938 3.9571 9.8867 \atfi@RECTFILL
-  13.7041 3.0938 3.9571 11.8867 \atfi@RECTFILL
-  \atfi@GRESTORE
-}
 
 \def\atfi@acroPushPin@data{%
   \atfi@GSAVE

@@ -52,6 +52,7 @@
 \RequirePackage{pdfescape}[2007/11/11]
 \RequirePackage{hyperref}
 \RequirePackage{hycolor}[2008/07/29]
+\RequirePackage{l3color,l3draw}
 \ltx@IfUndefined{pdfmatch}{%
   \def\atfi@Match#1#2#3#4#5{}%
 }{%
@@ -303,33 +304,59 @@
    \expandafter\endinput
 \fi
 \input{atfi-generic.def}
+\ExplSyntaxOn
+
+\cs_new:Npn \__atfi_color_to_rgb_seq:nN #1 #2 % #1 name #2 seq
+ {
+   \tl_set_eq:NN \l__color_ori_fixed_model_tl \l_color_fixed_model_tl
+   \tl_set:Nn \l_color_fixed_model_tl {rgb}
+   \color_parse:nN {#1}\l_tmpa_tl
+   \seq_set_split:NnV #2 { ~ }\l_tmpa_tl
+   \seq_pop_left:NN #2 \l_tmpa_tl
+   \tl_set_eq:NN  \l_color_fixed_model_tl \l__color_ori_fixed_model_tl
+ }
+\cs_new:Npn \__atfi_arg_braced:n #1 {{#1}}
+
+\color_set:nnn {__atfi_color_inline}{rgb}{1,0.9255,0.7765}
+
 \def\atfi@acroGraph@data{%
-  \atfi@GSAVE
-  0.5 \atfi@SETGRAYFILL
-  1.1133 0 20.7202 18.2754 \atfi@RECTFILL
-  0 \atfi@SETFLAT
-  0.5 \atfi@SETLINEWIDTH
-  4 \atfi@SETMITERLIMIT
-  \atfi@RECTSTROKEFILL{%
-    1 \atfi@SETGRAYFILL
-  }{%
-    0 \atfi@SETGRAYSTROKE
-  }{%
-    0.25 1.6453 20.145 17.7715 %
-  }%
-  0 \atfi@SETGRAYFILL
-  2.7319 4.1367 3.9571 13.8867 \atfi@RECTFILL
-  8.7031 4.1367 3.9571 9.8867 \atfi@RECTFILL
-  14.7471 4.1367 3.9571 11.8867 \atfi@RECTFILL
-  \atfi@color@inline{FILL}%
-  1.689 3.0938 3.9571 13.8867 \atfi@RECTFILL
-  7.6602 3.0938 3.9571 9.8867 \atfi@RECTFILL
-  13.7041 3.0938 3.9571 11.8867 \atfi@RECTFILL
-  \atfi@GRESTORE
+   \__draw_backend_scope_begin:
+   \__draw_backend_color_fill_gray:n {0.5}
+   \__draw_backend_rectangle:nnnn {1.1133bp}{0bp}{20.7202bp}{18.2754bp}
+   \__draw_backend_fill:
+   \__draw_backend_literal:x {0~i} %???
+   \__draw_backend_linewidth:n {0.5bp}
+   \__draw_backend_miterlimit:n {4bp}
+
+   \__draw_backend_color_fill_gray:n {1}
+   \__draw_backend_color_stroke_gray:n {0}
+   \__draw_backend_rectangle:nnnn {0.25bp} {1.6453bp} {20.145bp} {17.7715bp}
+   \__draw_backend_fillstroke:
+
+   \__draw_backend_color_fill_gray:n {0}
+   \__draw_backend_rectangle:nnnn {2.7319bp}{4.1367bp}{3.9571bp}{13.8867bp}
+   \__draw_backend_fill:
+   \__draw_backend_rectangle:nnnn {8.7031bp}{4.1367bp}{3.9571bp}{9.8867bp}
+   \__draw_backend_fill:
+   \__draw_backend_rectangle:nnnn {14.7471bp}{4.1367bp}{3.9571bp}{11.8867bp}
+   \__draw_backend_fill:
+
+   \__atfi_color_to_rgb_seq:nN {__atfi_color_inline} \l_tmpa_seq
+   \exp_last_unbraced:Ne \__draw_backend_color_fill_rgb:nnn
+     { \seq_map_function:NN \l_tmpa_seq \__atfi_arg_braced:n }
+
+   \__draw_backend_rectangle:nnnn {1.689bp}{3.0938bp}{3.9571bp}{13.8867bp}
+   \__draw_backend_fill:
+   \__draw_backend_rectangle:nnnn {7.6602bp}{3.0938bp}{3.9571bp}{9.8867bp}
+   \__draw_backend_fill:
+   \__draw_backend_rectangle:nnnn {13.7041bp}{3.0938bp}{3.9571bp}{11.8867bp}
+   \__draw_backend_fill:
+   \__draw_backend_scope_end:
 }
+\ExplSyntaxOff
 \def\atfi@acroGraph{%
   \raisebox{-1.5bp}{\parbox[b][20bp]{22bp}{%
-    \rule{0pt}{0pt}\atfi@literal{\atfi@acroGraph@data}}%
+    \rule{0pt}{0pt}\atfi@acroGraph@data}%
   }%
 }
 \newcommand{\atfi@acroPaperclip@data}{%
