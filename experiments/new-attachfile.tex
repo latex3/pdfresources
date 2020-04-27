@@ -7,12 +7,30 @@
 %t0\attachfilesetup{color=attachfilecolor}
 \begin{document}
 abc
-%\attachfile[icon=Graph,mimetype=application/x-hdf]{catalogue.tex} some text
-%\makeatletter
+\attachfile[icon=Graph,mimetype=application/x-hdf]{catalogue.tex} some text
+
+%\attachfile[icon=Paperclip,mimetype=application/x-hdf]{catalogue.tex} some text
+
+%\attachfile[icon=Tag,mimetype=application/x-hdf]{catalogue.tex} some text
+%
+%\attachfile[icon=Data,mimetype=application/x-hdf]{catalogue.tex} some text
+
+\makeatletter
 %
 %x\atfi@acroPushPin x
 %\show\x
 %
+\atfi@acroPaperclip
+\atfi@acroTag
+\ExplSyntaxOn
+
+\ExplSyntaxOff
+
+ \end{document}
+ 
+ 
+
+
 %\atfi@acroGraph@data
 \ExplSyntaxOn
 \__draw_backend_scope_begin:
@@ -22,9 +40,10 @@ abc
 \__draw_backend_lineto:nn {11bp}{13bp}
 \__draw_backend_lineto:nn {12bp}{13bp}
 \__draw_backend_lineto:nn {14bp}{11bp}
-\__draw_backend_lineto:nn {21bp}{11bp}
+\__draw_backend_lineto:nn {21bp}{11bp}%
 \__draw_backend_lineto:nn {22bp}{12bp}
 \__draw_backend_lineto:nn {23bp}{12bp}
+\__draw_backend_lineto:nn {23bp}{2bp}
 \__draw_backend_lineto:nn {22bp}{2bp}
 \__draw_backend_lineto:nn {21bp}{3bp}
 \__draw_backend_lineto:nn {14bp}{3bp}
@@ -43,9 +62,16 @@ abc
 \__draw_backend_lineto:nn {10bp}{8bp}
 \__draw_backend_lineto:nn {1bp}{8bp}
 \__draw_backend_stroke:
+\__draw_backend_color_stroke_gray:n {1}
+\__draw_backend_moveto:nn {12bp} {12bp}
+\__draw_backend_lineto:nn {14bp}{10bp}
+\__draw_backend_lineto:nn {22bp}{10bp}
+\__draw_backend_lineto:nn {22bp}{11bp}
+\__draw_backend_stroke:
 \__draw_backend_scope_end:
 \ExplSyntaxOff
 
+\atfi@acroPushPin
 %\def\atfi@acroPushPin@data{%
 %  \atfi@GSAVE
 %  1 \atfi@SETLINEWIDTH

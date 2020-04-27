@@ -41,34 +41,7 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesFile{atfi-generic.def}%
   [2020/04/13 v1.0 generic attachfile2 (UF)]%
-\ExplSyntaxOn
-\cs_set:Npn \atfi@literal #1{ \__draw_backend_literal:x {#1}} %???
-\ExplSyntaxOff
-%\let\atfi@literal\pdfliteral %<---
-\def\atfi@GSAVE{q }
-\def\atfi@GRESTORE{Q }
-\def\atfi@SETLINEWIDTH{w }
-\def\atfi@LINETO{l }
-\def\atfi@MOVETO{m }
-\def\atfi@STROKE{S }
-\def\atfi@FILL{f }
-\def\atfi@FILLSTROKE#1#2{#1#2B }
-\def\atfi@SETRGBCOLORSTROKE{RG }
-\def\atfi@SETRGBCOLORFILL{rg }
-\def\atfi@SETGRAYSTROKE{G }
-\def\atfi@SETGRAYFILL{g }
-\def\atfi@SETCMYKCOLORSTROKE{K }
-\def\atfi@SETCMYKCOLORFILL{k }
-\def\atfi@RECTFILL{re f }
-\def\atfi@RECTSTROKEFILL#1#2#3{#1#2#3re B }
-\def\atfi@SETMITERLIMIT{M }
-\def\atfi@SETFLAT{i }
-\def\atfi@SETLINECAP{J }
-\def\atfi@CURVETO{c }
-\def\atfi@CURVETOV{v }
-\def\atfi@CURVETOY{y }
-\def\atfi@CLOSEPATH{h }
-\def\atfi@SETLINEJOIN{j }
+
 \define@key{AtFi@file}{Size}{%
   \edef\atfi@params{\atfi@params/Size #1}%
 }
