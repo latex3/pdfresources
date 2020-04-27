@@ -1,56 +1,86 @@
 % !Mode:: "TeX:UTF-8:Main"
 \documentclass{article}
 \usepackage{xcolor}
-\usepackage[customdriver=hgeneric-experimental,pdfversion=1.7]{hyperref}
+\usepackage[customdriver=hgeneric-experimental]{hyperref}
 \usepackage{new-attachfile,l3draw,l3color}
 %\definecolor{attachfilecolor}{cmyk}{.1,.2,.3,.4}
 %t0\attachfilesetup{color=attachfilecolor}
 \begin{document}
+abc
+%\attachfile[icon=Graph,mimetype=application/x-hdf]{catalogue.tex} some text
+%\makeatletter
+%
+%x\atfi@acroPushPin x
+%\show\x
+%
+%\atfi@acroGraph@data
+\ExplSyntaxOn
+\__draw_backend_scope_begin:
+\__draw_backend_linewidth:n {1bp}
+\__draw_backend_moveto:nn {1bp} {6bp}
+\__draw_backend_lineto:nn {11bp}{6bp}
+\__draw_backend_lineto:nn {11bp}{13bp}
+\__draw_backend_lineto:nn {12bp}{13bp}
+\__draw_backend_lineto:nn {14bp}{11bp}
+\__draw_backend_lineto:nn {21bp}{11bp}
+\__draw_backend_lineto:nn {22bp}{12bp}
+\__draw_backend_lineto:nn {23bp}{12bp}
+\__draw_backend_lineto:nn {22bp}{2bp}
+\__draw_backend_lineto:nn {21bp}{3bp}
+\__draw_backend_lineto:nn {14bp}{3bp}
+\__draw_backend_lineto:nn {12bp}{1bp}
+\__draw_backend_lineto:nn {11bp}{1bp}
+\__draw_backend_lineto:nn {11bp}{6bp}
 
-\attachfile[icon=Graph,mimetype=application/x-hdf]{catalogue.tex} some text
-\makeatletter
+\__atfi_color_to_rgb_seq:nN {__atfi_color_inline} \l_tmpa_seq
+   \exp_last_unbraced:Ne \__draw_backend_color_fill_rgb:nnn
+     { \seq_map_function:NN \l_tmpa_seq \__atfi_arg_braced:n }
+\__draw_backend_color_stroke_gray:n {0}
+\__draw_backend_fillstroke:
+\__draw_backend_color_stroke_gray:n {0.5}
+\__draw_backend_moveto:nn {0bp} {7bp}
+\__draw_backend_lineto:nn {10bp}{7bp}
+\__draw_backend_lineto:nn {10bp}{8bp}
+\__draw_backend_lineto:nn {1bp}{8bp}
+\__draw_backend_stroke:
+\__draw_backend_scope_end:
+\ExplSyntaxOff
 
-x\atfi@acroPushPin x
-\show\x
-
-\atfi@acroGraph@data
-
-
-\def\atfi@acroPushPin@data{%
-  \atfi@GSAVE
-  1 \atfi@SETLINEWIDTH
-  1 6   \atfi@MOVETO
-  11 6  \atfi@LINETO
-  11 13 \atfi@LINETO
-  12 13 \atfi@LINETO
-  14 11 \atfi@LINETO
-  21 11 \atfi@LINETO
-  22 12 \atfi@LINETO
-  23 12 \atfi@LINETO
-  23 2  \atfi@LINETO
-  22 2  \atfi@LINETO
-  21 3  \atfi@LINETO
-  14 3  \atfi@LINETO
-  12 1  \atfi@LINETO
-  11 1  \atfi@LINETO
-  11 6  \atfi@LINETO
-  \atfi@FILLSTROKE{%
-    \atfi@color@inline{FILL}%
-  }{%
-    0 \atfi@SETGRAYSTROKE
-  }%
-  0.5 \atfi@SETGRAYSTROKE
-  0 7  \atfi@MOVETO
-  10 7 \atfi@LINETO
-  10 8 \atfi@LINETO
-  1 8  \atfi@LINETO
-  \atfi@STROKE
-  1 \atfi@SETGRAYSTROKE
-  12 12 \atfi@MOVETO
-  14 10 \atfi@LINETO
-  22 10 \atfi@LINETO
-  22 11 \atfi@LINETO
-  \atfi@STROKE
-  \atfi@GRESTORE
-}
+%\def\atfi@acroPushPin@data{%
+%  \atfi@GSAVE
+%  1 \atfi@SETLINEWIDTH
+%  1 6   \atfi@MOVETO
+%  11 6  \atfi@LINETO
+%  11 13 \atfi@LINETO
+%  12 13 \atfi@LINETO
+%  14 11 \atfi@LINETO
+%  21 11 \atfi@LINETO
+%  22 12 \atfi@LINETO
+%  23 12 \atfi@LINETO
+%  23 2  \atfi@LINETO
+%  22 2  \atfi@LINETO
+%  21 3  \atfi@LINETO
+%  14 3  \atfi@LINETO
+%  12 1  \atfi@LINETO
+%  11 1  \atfi@LINETO
+%  11 6  \atfi@LINETO
+%  \atfi@FILLSTROKE{%
+%    \atfi@color@inline{FILL}%
+%  }{%
+%    0 \atfi@SETGRAYSTROKE
+%  }%
+%  0.5 \atfi@SETGRAYSTROKE
+%  0 7  \atfi@MOVETO
+%  10 7 \atfi@LINETO
+%  10 8 \atfi@LINETO
+%  1 8  \atfi@LINETO
+%  \atfi@STROKE
+%  1 \atfi@SETGRAYSTROKE
+%  12 12 \atfi@MOVETO
+%  14 10 \atfi@LINETO
+%  22 10 \atfi@LINETO
+%  22 11 \atfi@LINETO
+%  \atfi@STROKE
+%  \atfi@GRESTORE
+%}
 \end{document} 
