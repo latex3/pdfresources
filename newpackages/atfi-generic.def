@@ -46,35 +46,15 @@
   \edef\atfi@params{\atfi@params/Size #1}%
 }
 \ExplSyntaxOn
-\def\atfi@embedfile#1{%
-  \ltx@IfUndefined{atfi@fileobj@#1}{%
-    \begingroup
-      \let\atfi@params\ltx@empty
-      \expandafter\let\expandafter\atfi@temp
-          \csname atfi@file@#1\endcsname
-      \ifx\atfi@temp\ltx@empty
-        \let\atfi@temp\relax
-      \fi
-      \ifx\atfi@temp\relax
-        \atfi@pdftexdata{#1}%
-      \else
-        \edef\x{%
-          \noexpand\setkeys{AtFi@file}{\@nameuse{atfi@file@#1}}%
-        }%
-        \x
-      \fi
-      \ifx\atfi@params\ltx@empty
-      \else
-        \edef\atfi@params{/Params<<\atfi@params>>}%
-      \fi
-      \pdf_object_now:nx{fstream}{{/Type/EmbeddedFile\atfi@mimetype\atfi@params}{#1}}
-      \expandafter
-      \xdef\csname atfi@fileobj@#1\endcsname{\pdf_object_last:}%
-    \endgroup
-  }{%
-    % file already embedded
-  }%
-}
+\def\atfi@embedfile#1
+  {%
+  \pdfobject_if_exist:nF { atfi@fileobj@#1 }
+   {
+     %keys for dict entries ...
+     \pdffile_embed:nn {atfi@fileobj@#1 }{ #1 }
+   }
+  }
+
 % we probably need an xform by icon ...
 
 \def\atfi@xform{%

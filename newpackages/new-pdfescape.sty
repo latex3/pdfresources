@@ -1,6 +1,12 @@
 \ProvidesExplPackage {new-pdfescape} {2020-04-21} {0.1}
-  {escape command for PDF}
+  {temporary escape commands and tools for PDF}
 %very temporarly until this is in l3 properly!!!!
+
+
+\prg_new_eq_conditional:NNn \pdfobject_if_exist:n\__pdf_backend_object_if_exist:n
+  { TF , T , F , p }
+
+
 \cs_new:Npn \str_escape_pdfname:n #1
   {
     \exp_args:Ne \tl_to_str:n

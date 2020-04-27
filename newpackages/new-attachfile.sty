@@ -52,7 +52,7 @@
 \RequirePackage{pdfescape}[2007/11/11]
 \RequirePackage{hyperref}
 \RequirePackage{hycolor}[2008/07/29]
-\RequirePackage{l3color,l3draw}
+\RequirePackage{l3color,l3draw,l3pdffile}
 \ltx@IfUndefined{pdfmatch}{%
   \def\atfi@Match#1#2#3#4#5{}%
 }{%
@@ -306,7 +306,7 @@
 \input{atfi-generic.def}
 \ExplSyntaxOn
 
-\cs_new:Npn \__atfi_color_to_rgb_seq:nN #1 #2 % #1 name #2 seq
+\cs_new_protected:Npn \__atfi_color_to_rgb_seq:nN #1 #2 % #1 name #2 seq
  {
    \tl_set_eq:NN \l__color_ori_fixed_model_tl \l_color_fixed_model_tl
    \tl_set:Nn \l_color_fixed_model_tl {rgb}
@@ -319,47 +319,53 @@
 
 \color_set:nnn {__atfi_color_inline}{rgb}{1,0.9255,0.7765}
 
-\def\atfi@acroGraph@data{%
-   \__draw_backend_scope_begin:
-   \__draw_backend_color_fill_gray:n {0.5}
-   \__draw_backend_rectangle:nnnn {1.1133bp}{0bp}{20.7202bp}{18.2754bp}
-   \__draw_backend_fill:
-   \__draw_backend_literal:x {0~i} %???
-   \__draw_backend_linewidth:n {0.5bp}
-   \__draw_backend_miterlimit:n {4bp}
+\cs_new_protected:Npn \atfi@acroGraph@data
+  {
+    \__draw_backend_scope_begin:
+    \__draw_backend_color_fill_gray:n {0.5}
+    \__draw_backend_rectangle:nnnn {1.1133bp}{0bp}{20.7202bp}{18.2754bp}
+    \__draw_backend_fill:
+    \__draw_backend_literal:x {0~i} %???
+    \__draw_backend_linewidth:n {0.5bp}
+    \__draw_backend_miterlimit:n {4bp}
 
-   \__draw_backend_color_fill_gray:n {1}
-   \__draw_backend_color_stroke_gray:n {0}
-   \__draw_backend_rectangle:nnnn {0.25bp} {1.6453bp} {20.145bp} {17.7715bp}
-   \__draw_backend_fillstroke:
+    \__draw_backend_color_fill_gray:n {1}
+    \__draw_backend_color_stroke_gray:n {0}
+    \__draw_backend_rectangle:nnnn {0.25bp} {1.6453bp} {20.145bp} {17.7715bp}
+    \__draw_backend_fillstroke:
 
-   \__draw_backend_color_fill_gray:n {0}
-   \__draw_backend_rectangle:nnnn {2.7319bp}{4.1367bp}{3.9571bp}{13.8867bp}
-   \__draw_backend_fill:
-   \__draw_backend_rectangle:nnnn {8.7031bp}{4.1367bp}{3.9571bp}{9.8867bp}
-   \__draw_backend_fill:
-   \__draw_backend_rectangle:nnnn {14.7471bp}{4.1367bp}{3.9571bp}{11.8867bp}
-   \__draw_backend_fill:
+    \__draw_backend_color_fill_gray:n {0}
+    \__draw_backend_rectangle:nnnn {2.7319bp}{4.1367bp}{3.9571bp}{13.8867bp}
+    \__draw_backend_fill:
+    \__draw_backend_rectangle:nnnn {8.7031bp}{4.1367bp}{3.9571bp}{9.8867bp}
+    \__draw_backend_fill:
+    \__draw_backend_rectangle:nnnn {14.7471bp}{4.1367bp}{3.9571bp}{11.8867bp}
+    \__draw_backend_fill:
 
-   \__atfi_color_to_rgb_seq:nN {__atfi_color_inline} \l_tmpa_seq
-   \exp_last_unbraced:Ne \__draw_backend_color_fill_rgb:nnn
-     { \seq_map_function:NN \l_tmpa_seq \__atfi_arg_braced:n }
+    \__atfi_color_to_rgb_seq:nN {__atfi_color_inline} \l_tmpa_seq
+    \exp_last_unbraced:Ne \__draw_backend_color_fill_rgb:nnn
+      { \seq_map_function:NN \l_tmpa_seq \__atfi_arg_braced:n }
 
-   \__draw_backend_rectangle:nnnn {1.689bp}{3.0938bp}{3.9571bp}{13.8867bp}
-   \__draw_backend_fill:
-   \__draw_backend_rectangle:nnnn {7.6602bp}{3.0938bp}{3.9571bp}{9.8867bp}
-   \__draw_backend_fill:
-   \__draw_backend_rectangle:nnnn {13.7041bp}{3.0938bp}{3.9571bp}{11.8867bp}
-   \__draw_backend_fill:
-   \__draw_backend_scope_end:
-}
-\def\atfi@acroGraph{%
-  \raisebox{-1.5bp}{\parbox[b][20bp]{22bp}{%
-    \rule{0pt}{0pt}\atfi@acroGraph@data}%
-  }%
-}
+    \__draw_backend_rectangle:nnnn {1.689bp}{3.0938bp}{3.9571bp}{13.8867bp}
+    \__draw_backend_fill:
+    \__draw_backend_rectangle:nnnn {7.6602bp}{3.0938bp}{3.9571bp}{9.8867bp}
+    \__draw_backend_fill:
+    \__draw_backend_rectangle:nnnn {13.7041bp}{3.0938bp}{3.9571bp}{11.8867bp}
+    \__draw_backend_fill:
+    \__draw_backend_scope_end:
+  }
+\cs_new_protected:Npn \atfi@acroGraph
+  {
+    \raisebox{-1.5bp}
+      {
+        \parbox[b][20bp]{22bp}
+          {
+            \rule{0pt}{0pt}\atfi@acroGraph@data
+          }
+      }
+  }
 
-\newcommand{\atfi@acroPaperclip@data}
+\cs_new_protected:Npn {\atfi@acroPaperclip@data}
   {
     \__draw_backend_scope_begin:
     \__draw_backend_color_stroke_gray:n {0.75}
@@ -420,55 +426,68 @@
     \__draw_backend_scope_end:
     }
 
-\def\atfi@acroPaperclip{%
-  \raisebox{-1.25bp}{\parbox[b][21bp]{12bp}{%
-    \rule{0pt}{0pt}\atfi@acroPaperclip@data}%
-  }%
-}
-\def\atfi@acroPushPin@data{%
-  \__draw_backend_scope_begin:
-  \__draw_backend_linewidth:n {1bp}
-  \__draw_backend_moveto:nn {1bp} {6bp}
-  \__draw_backend_lineto:nn {11bp}{6bp}
-  \__draw_backend_lineto:nn {11bp}{13bp}
-  \__draw_backend_lineto:nn {12bp}{13bp}
-  \__draw_backend_lineto:nn {14bp}{11bp}
-  \__draw_backend_lineto:nn {21bp}{11bp}%
-  \__draw_backend_lineto:nn {22bp}{12bp}
-  \__draw_backend_lineto:nn {23bp}{12bp}
-  \__draw_backend_lineto:nn {23bp}{2bp}
-  \__draw_backend_lineto:nn {22bp}{2bp}
-  \__draw_backend_lineto:nn {21bp}{3bp}
-  \__draw_backend_lineto:nn {14bp}{3bp}
-  \__draw_backend_lineto:nn {12bp}{1bp}
-  \__draw_backend_lineto:nn {11bp}{1bp}
-  \__draw_backend_lineto:nn {11bp}{6bp}
-  \__atfi_color_to_rgb_seq:nN {__atfi_color_inline} \l_tmpa_seq
-     \exp_last_unbraced:Ne \__draw_backend_color_fill_rgb:nnn
-       { \seq_map_function:NN \l_tmpa_seq \__atfi_arg_braced:n }
-  \__draw_backend_color_stroke_gray:n {0}
-  \__draw_backend_fillstroke:
-  \__draw_backend_color_stroke_gray:n {0.5}
-  \__draw_backend_moveto:nn {0bp} {7bp}
-  \__draw_backend_lineto:nn {10bp}{7bp}
-  \__draw_backend_lineto:nn {10bp}{8bp}
-  \__draw_backend_lineto:nn {1bp}{8bp}
-  \__draw_backend_stroke:
-  \__draw_backend_color_stroke_gray:n {1}
-  \__draw_backend_moveto:nn {12bp} {12bp}
-  \__draw_backend_lineto:nn {14bp}{10bp}
-  \__draw_backend_lineto:nn {22bp}{10bp}
-  \__draw_backend_lineto:nn {22bp}{11bp}
-  \__draw_backend_stroke:
-  \__draw_backend_scope_end:
-}
-\def\atfi@acroPushPin{%
-  \raisebox{-1.25bp}{\parbox[b][14bp]{24bp}{%
-    \rule{0pt}{0pt}\atfi@acroPushPin@data}%
-  }%
-}
+\cs_new_protected:Npn \atfi@acroPaperclip
+  {
+    \raisebox{-1.25bp}
+      {
+        \parbox[b][21bp]{12bp}
+          {
+            \rule{0pt}{0pt}\atfi@acroPaperclip@data
+          }
+      }
+  }
 
-\def\atfi@acroTag@data{%
+\cs_new_protected:Npn \atfi@acroPushPin@data
+  {
+     \__draw_backend_scope_begin:
+     \__draw_backend_linewidth:n {1bp}
+     \__draw_backend_moveto:nn {1bp} {6bp}
+     \__draw_backend_lineto:nn {11bp}{6bp}
+     \__draw_backend_lineto:nn {11bp}{13bp}
+     \__draw_backend_lineto:nn {12bp}{13bp}
+     \__draw_backend_lineto:nn {14bp}{11bp}
+     \__draw_backend_lineto:nn {21bp}{11bp}%
+     \__draw_backend_lineto:nn {22bp}{12bp}
+     \__draw_backend_lineto:nn {23bp}{12bp}
+     \__draw_backend_lineto:nn {23bp}{2bp}
+     \__draw_backend_lineto:nn {22bp}{2bp}
+     \__draw_backend_lineto:nn {21bp}{3bp}
+     \__draw_backend_lineto:nn {14bp}{3bp}
+     \__draw_backend_lineto:nn {12bp}{1bp}
+     \__draw_backend_lineto:nn {11bp}{1bp}
+     \__draw_backend_lineto:nn {11bp}{6bp}
+     \__atfi_color_to_rgb_seq:nN {__atfi_color_inline} \l_tmpa_seq
+        \exp_last_unbraced:Ne \__draw_backend_color_fill_rgb:nnn
+          { \seq_map_function:NN \l_tmpa_seq \__atfi_arg_braced:n }
+     \__draw_backend_color_stroke_gray:n {0}
+     \__draw_backend_fillstroke:
+     \__draw_backend_color_stroke_gray:n {0.5}
+     \__draw_backend_moveto:nn {0bp} {7bp}
+     \__draw_backend_lineto:nn {10bp}{7bp}
+     \__draw_backend_lineto:nn {10bp}{8bp}
+     \__draw_backend_lineto:nn {1bp}{8bp}
+     \__draw_backend_stroke:
+     \__draw_backend_color_stroke_gray:n {1}
+     \__draw_backend_moveto:nn {12bp} {12bp}
+     \__draw_backend_lineto:nn {14bp}{10bp}
+     \__draw_backend_lineto:nn {22bp}{10bp}
+     \__draw_backend_lineto:nn {22bp}{11bp}
+     \__draw_backend_stroke:
+     \__draw_backend_scope_end:
+  }
+\cs_new_protected:Npn \atfi@acroPushPin
+  {
+    \raisebox{-1.25bp}
+      {
+        \parbox[b][14bp]{24bp}
+          {
+            \rule{0pt}{0pt}\atfi@acroPushPin@data
+          }
+      }
+   }
+
+\cs_new_protected:Npn \atfi@acroTag@data
+  {
     \__draw_backend_scope_begin:
     \__draw_backend_color_fill_gray:n {0.5}
     \__draw_backend_moveto:nn {10.0542bp} {14.9873bp}
@@ -532,13 +551,20 @@
     \__draw_backend_stroke:
     \__draw_backend_scope_end:
   }
-\ExplSyntaxOff
 
-\def\atfi@acroTag{%
-  \raisebox{-1.6bp}{\parbox[b][17bp]{25bp}{%
-    \rule{0pt}{0pt}\atfi@acroTag@data}%
-  }%
-}
+
+\cs_new_protected:Npn \atfi@acroTag
+  {
+    \raisebox{-1.6bp}
+      {
+        \parbox[b][17bp]{25bp}
+          {
+            \rule{0pt}{0pt}\atfi@acroTag@data
+          }
+      }
+   }
+
+\ExplSyntaxOff
 \def\attachfile@timezone#1{%
   \ifx\\#1\\%
     % no timezone information given
@@ -554,7 +580,7 @@
     \@namedef{atfi@file@\atfi@filename}{#1}%
   \fi
 }
-\InputIfFileExists{\jobname.atfi}{}{}%
+
 \newif\ifatfi@checksum
 \define@key{AtFi@file}{CheckSum}{%
   \atfi@checksumtrue
@@ -633,34 +659,8 @@
     \fi
   }%
 \fi
-\if@filesw
-\else
-  \atfi@nofilestrue
-\fi
-\ifatfi@nofiles
-  \PackageInfo{attachfile2}{%
-    File `\jobname.atfi' will not be written because of\MessageBreak
-    \string\nofiles\space or option `nofiles'%
-  }%
-  \let\atfi@writefile\ltx@gobble
-\else
-  \newwrite\atfi@stream
-  \immediate\openout\atfi@stream=\jobname.atfi\relax
-  \immediate\write\atfi@stream{%
-    \string\attachfile@timezone{\atfi@timezone}%
-  }%
-  \def\atfi@writefile#1{%
-    \begingroup
-      \EdefEscapeHex\atfi@temp{#1}%
-      \immediate\write\atfi@stream{%
-        \string\attachfile@file[%
-          \ltx@ifundefined{atfi@file@#1}{}{\@nameuse{atfi@file@#1}}%
-        ]{\atfi@temp}%
-      }%
-    \endgroup
-  }%
-\fi
-\atfi@DisableOption{nofiles}
+%atfi file unneeded
+%\atfi@DisableOption{nofiles}
 \def\atfi@attachfile#1#2{%
   \ltx@IfUndefined{atfi@fileobj@#2}{%
     \atfi@writefile{#2}%
