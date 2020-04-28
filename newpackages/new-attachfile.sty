@@ -662,11 +662,6 @@
 %atfi file unneeded
 %\atfi@DisableOption{nofiles}
 \def\atfi@attachfile#1#2{%
-  \ltx@IfUndefined{atfi@fileobj@#2}{%
-    \atfi@writefile{#2}%
-  }{%
-    % don't need duplicates
-  }%
   \atfi@setup{#1}%
   \atfi@embedfile{#2}%
   \atfi@set@appearance@icon
@@ -734,11 +729,6 @@
     \atfi@textattachfile@i{#1}{#2}%
 }
 \def\atfi@textattachfile@i#1#2#3{%
-    \ltx@IfUndefined{atfi@fileobj@#2}{%
-      \atfi@writefile{#2}%
-    }{%
-      % don't need duplicates
-    }%
     \atfi@setup{#1}%
     \atfi@embedfile{#2}%
     \atfi@set@appearance{%

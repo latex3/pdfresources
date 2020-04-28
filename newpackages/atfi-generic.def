@@ -51,7 +51,7 @@
   \pdfobject_if_exist:nF { atfi@fileobj@#1 }
    {
      %keys for dict entries ...
-     \pdffile_embed:nn {atfi@fileobj@#1 }{ #1 }
+     \pdffile_embed:nn { atfi@fileobj@#1 }{ #1 }
    }
   }
 
@@ -85,27 +85,27 @@
   \else
     \let\atfi@appearance@dict\ltx@empty
   \fi
-  \ltx@IfUndefined{atfi@fsobj@#1}{%
-    \begingroup
-      \hypersetup{unicode=false}%
-      \atfi@pdfstringdef\atfi@file{#1}%
-      \pdf_object_now:nx{dict}{%
-          /Type/Filespec%
-          /F(\atfi@file)%
-          \ifx\atfi@ucfilespec\ltx@empty
-          \else
-            /UF(\atfi@ucfilespec)%
-          \fi
-          /EF<<%
-            /F~ \@nameuse{atfi@fileobj@#1}%
-          >>%
-      }%
-      \expandafter\xdef\csname atfi@fsobj@#1\endcsname{%
-        \pdf_object_last:
-      }%
-    \endgroup
-  }{%
-  }%
+%  \ltx@IfUndefined{atfi@fsobj@#1}{%
+%    \begingroup
+%      \hypersetup{unicode=false}%
+%      \atfi@pdfstringdef\atfi@file{#1}%
+%      \pdf_object_now:nx{dict}{%
+%          /Type/Filespec%
+%          /F(\atfi@file)%
+%          \ifx\atfi@ucfilespec\ltx@empty
+%          \else
+%            /UF(\atfi@ucfilespec)%
+%          \fi
+%          /EF<<%
+%            /F~ \@nameuse{atfi@fileobj@#1}%
+%          >>%
+%      }%
+%      \expandafter\xdef\csname atfi@fsobj@#1\endcsname{%
+%        \pdf_object_last:
+%      }%
+%    \endgroup
+%  }{%
+%  }%
   \pdfannot_box:nnnn
      {\atfi@scale\atfi@appearancewidth}
      {\atfi@scale\atfi@appearanceheight}
@@ -121,7 +121,7 @@
       \atfi@subject
       \atfi@appearance@dict
       /F~ \theatfi@flags
-      /FS~ \@nameuse{atfi@fsobj@#1}%
+      /FS~ \pdf_object_ref:n{atfi@fileobj@#1}%
      }%
   %\rule{0pt}{\atfi@appearanceheight}%
 %  \rule[-\atfi@appearancedepth]{0pt}{\atfi@appearancedepth}%

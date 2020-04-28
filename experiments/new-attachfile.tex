@@ -3,13 +3,16 @@
 \usepackage{xcolor}
 \usepackage[customdriver=hgeneric-experimental]{hyperref}
 \usepackage{new-attachfile,l3draw,l3color}
+\ExplSyntaxOn
+\pdf_uncompress:
+\ExplSyntaxOff
 %\definecolor{attachfilecolor}{cmyk}{.1,.2,.3,.4}
 %t0\attachfilesetup{color=attachfilecolor}
 \begin{document}
 abc
-\attachfile[icon=Graph,mimetype=application/x-hdf]{catalogue.tex} some text
+\attachfile[icon=Graph,mimetype=text/plain]{catalogue.tex} some text
 
-%\attachfile[icon=Paperclip,mimetype=application/x-hdf]{catalogue.tex} some text
+\attachfile[icon=Paperclip,mimetype=application/x-hdf]{catalogue.tex} some text
 
 %\attachfile[icon=Tag,mimetype=application/x-hdf]{catalogue.tex} some text
 %
@@ -27,8 +30,8 @@ abc
 \ExplSyntaxOff
 
  \end{document}
- 
- 
+
+
 
 
 %\atfi@acroGraph@data
