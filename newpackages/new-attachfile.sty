@@ -37,85 +37,10 @@
 \RequirePackage{pdfescape}[2007/11/11]
 \RequirePackage{hyperref}
 \RequirePackage{hycolor}[2008/07/29]
-\RequirePackage{l3color,l3draw,l3pdffile}
+\RequirePackage{l3color,l3draw,l3pdffile,bitset,xparse}
 
 
-\ltx@IfUndefined{pdfmatch}{%
-  \def\atfi@Match#1#2#3#4#5{}%
-}{%
-  \def\atfi@Match#1#2#3{%
-    \begingroup
-    \edef\^{\ltx@backslashchar\string^}%
-    \edef\.{\ltx@backslashchar.}%
-    \let\#\ltx@hashchar
-    \edef\[{\ltx@backslashchar[}% ]]
-    \edef\${\ltx@backslashchar$}%
-    \let\%\ltx@percentchar
-    \edef\&{\string&}%
-    \edef\({\ltx@backslashchar(}%
-    \edef\){\ltx@backslashchar)}%
-    \edef\|{\ltx@backslashchar|}%
-    \edef\*{\ltx@backslashchar*}%
-    \edef\+{\ltx@backslashchar+}%
-    \edef\?{\ltx@backslashchar?}%
-    \edef\{{\ltx@backslashchar\ltx@leftbracechar}%
-    \edef\}{\ltx@rightbracechar}%
-    \edef\\{\ltx@backslashchar\ltx@backslashchar}%
-    \edef\~{\string~}%
-    \ifcase\pdfmatch#3{#2}{#1} %
-      \endgroup
-      \expandafter\ltx@secondoftwo
-    \or
-      \endgroup
-      \expandafter\ltx@firstoftwo
-    \else
-%      \atfi@Warning{%
-%        Internal error: Wrong pattern!\MessageBreak
-%        --> #2 <--\MessageBreak
-%        Pattern check ignored%
-%      }%
-      \endgroup
-      \expandafter\ltx@firstoftwo
-    \fi
-  }%
-  \def\atfi@PatToken{%
-    [%
-      -% first character
-      !%
-      \#$\%\&'%
-      \*\+\.%
-      0-9%
-      A-Z%
-      \^_`%
-      a-z%
-      \{\}\|\~%
-    ]+%
-  }%
-  \begingroup
-    \lccode64=13 % @
-  \lowercase{\endgroup
-    \def\atfi@CR{@}%
-  }%
-  \def\atfi@PatQuotedString{%
-    "%
-    ([^"\\\atfi@CR]|\\.)*%
-    "%
-  }%
-  \ltx@ifpackagelater{ltxcmds}{2010/09/11}{}{%
-    \begingroup
-      \lccode`0=`\{\relax
-    \lowercase{\endgroup
-      \def\ltx@leftbracechar{0}%
-    }%
-    \begingroup
-      \lccode`0=`\}\relax
-    \lowercase{\endgroup
-      \def\ltx@rightbracechar{0}%
-    }%
-  }%
-}
-
-%\def\atfi@Warning{\PackageWarning{new-attachfile}}
+%pattern matching removed. Perhaps later with regex ...
 
 
 \SetupKeyvalOptions{%
@@ -123,14 +48,26 @@
   prefix=atfi@%
 }
 
-\def\atfi@setup{\setkeys{AtFi}}
+\ExplSyntaxOn
+\cs_new_protected:Npn \atfi@setup #1
+  {
+    \keys_set:nn {AtFi} { #1 }
+  }
+\ExplSyntaxOff
 \DeclareBoolOption{draft}
 \DeclareComplementaryOption{final}{draft}
 
 \ExplSyntaxOn
 \keys_define:nn { atfi }
   {
-    %mimetype -> embed step
+    %mimetype   -> embed step
+    ,mimetype  .tl_set:N = \l__atfi_mimetype_tl %escape with \pdftool_name:V later or now?
+
+
+    %ucfilespec -> embed step
+    %checksum   -> bool to suppress the checksum
+    %creationdate ->additional /CreationDate in FileSpec-dict
+    %moddate    -> boolean to suppress /ModDate in FileSpec
 
     %icon     -> attach step / setup
     %         choice? PushPin, Data, Graph,
@@ -153,19 +90,29 @@
     % description /Contents
 
     % subject    /Subj
+
+    % appearance: decides if the appearance dict is insert. drop?
+
+    % print: sets /F flag, also boolean used in the no-XXX command
+
+    % scale :scales the icon/annot
+
+    %   timezone,: ignored (we take \file_timestamp)
   }
+
+\bitsetReset {__atfi_annotFlags}
 \ExplSyntaxOff
-\def\atfi@mimetype{}
-\define@key{AtFi}{mimetype}{%
-  \edef\atfi@mimetype{#1}%
-  % pattern matching remove as it fails with allowed types
-  %
-  \ifx\atfi@mimetype\ltx@empty
-  \else
-    \EdefEscapeName\atfi@mimetype{\atfi@mimetype}%
-    \edef\atfi@mimetype{/Subtype/\atfi@mimetype}%
-  \fi
-}
+%\def\atfi@mimetype{}
+%\define@key{AtFi}{mimetype}{%
+%  \edef\atfi@mimetype{#1}%
+%  % pattern matching remove as it fails with allowed types
+%  %
+%  \ifx\atfi@mimetype\ltx@empty
+%  \else
+%    \EdefEscapeName\atfi@mimetype{\atfi@mimetype}%
+%    \edef\atfi@mimetype{/Subtype/\atfi@mimetype}%
+%  \fi
+%}
 \define@key{AtFi}{icon}{%
   \def\atfi@icon{/Name/#1}%
   \def\atfi@icon@icon{#1}%
@@ -233,8 +180,12 @@
 \define@key{AtFi}{subject}[\NoValue]{%
   \atfi@DefNoValueName\atfi@subject{Subj}{#1}%
 }
-\DeclareBoolOption[true]{print}
-\DeclareBoolOption[true]{zoom}
+\DeclareBoolOption[true]{print} % should set boolean and
+%\bitsetSet{__atfi_annotFlags}{\prop_item:Nn\c__pdf_annot_flag_prop:{Print}}
+
+\DeclareBoolOption[true]{zoom} %should set boolean and
+%\bitsetSet{__atfi_annotFlags}{\prop_item:Nn\c__pdf_annot_flag_prop:{Zoom}}
+
 \DeclareBoolOption[true]{appearance}
 \DeclareStringOption[1]{scale}
 \def\atfi@ucfilespec{}
@@ -245,8 +196,6 @@
     \atfi@pdfstringdef\atfi@ucfilespec{#1}%
   \fi
 }
-\DeclareBoolOption{nofiles}
-
 
 \DeclareRobustCommand{\attachfilesetup}[1]{\setkeys{AtFi}{#1}}
 \DeclareLocalOptions{%
@@ -258,11 +207,9 @@
   description,%
   icon,%
   mimetype,%
-  nofiles,%
   print,%
   scale,%
   subject,%
-  timezone,%
   ucfilespec,%
   zoom,%
 }
@@ -304,7 +251,299 @@
   }%
    \expandafter\endinput
 \fi
-\input{atfi-generic.def}
+%\input{atfi-generic.def}
+\define@key{AtFi@file}{Size}{%
+  \edef\atfi@params{\atfi@params/Size #1}%
+}
+\ExplSyntaxOn
+\def\atfi@embedfile#1
+  {%
+  \pdfobject_if_exist:nF { atfi@fileobj@#1 }
+   {
+     %keys for dict entries ...
+     \pdffile_embed:nn { atfi@fileobj@#1 }{ #1 }
+   }
+  }
+
+% we probably need an xform by icon ...
+
+\def\atfi@xform{%
+  \pdf_xform_if_exist:nF { atfi@appearancebox }
+    {
+      \pdf_xform_new:nnn
+        { atfi@appearancebox }
+        { }
+        { \usebox\atfi@appearancebox }
+    }
+  %\immediate\pdfxform\atfi@appearancebox
+  %\edef\atfi@appearanceobj{\the\pdflastxform}%
+}
+
+
+\let\atfi@xform@icon\atfi@xform
+%\def\atfi@refxform#1{%
+%  %\pdf_xform_ref:n { #1 }
+%  \pdf_xform_use:n { atfi@appearancebox }
+%  %\pdfrefxform#1\relax
+%}
+
+\def\atfi@insert@file@annot#1{%
+  \rule{0pt}{0pt}%
+  \ifatfi@appearance
+    \edef\atfi@appearance@dict{%
+      /AP<<%
+        /N~ \pdf_xform_ref:n { atfi@appearancebox }%
+        /R~ \pdf_xform_ref:n { atfi@appearancebox }%
+        /D~ \pdf_xform_ref:n { atfi@appearancebox }%
+      >>%
+    }%
+  \else
+    \let\atfi@appearance@dict\ltx@empty
+  \fi
+%  \ltx@IfUndefined{atfi@fsobj@#1}{%
+%    \begingroup
+%      \hypersetup{unicode=false}%
+%      \atfi@pdfstringdef\atfi@file{#1}%
+%      \pdf_object_now:nx{dict}{%
+%          /Type/Filespec%
+%          /F(\atfi@file)%
+%          \ifx\atfi@ucfilespec\ltx@empty
+%          \else
+%            /UF(\atfi@ucfilespec)%
+%          \fi
+%          /EF<<%
+%            /F~ \@nameuse{atfi@fileobj@#1}%
+%          >>%
+%      }%
+%      \expandafter\xdef\csname atfi@fsobj@#1\endcsname{%
+%        \pdf_object_last:
+%      }%
+%    \endgroup
+%  }{%
+%  }%
+  \pdfannot_box:nnnn
+     {\atfi@scale\atfi@appearancewidth}
+     {\atfi@scale\atfi@appearanceheight}
+     {\atfi@scale\atfi@appearancedepth}
+     {
+      /Subtype/FileAttachment%
+      \atfi@icon
+      \atfi@color@annot
+      \atfi@author
+      \atfi@date
+      \atfi@annotname
+      \atfi@description
+      \atfi@subject
+      \atfi@appearance@dict
+      /F~ \bitsetGetDec {__atfi_annotFlags}
+      /FS~ \pdf_object_ref:n{atfi@fileobj@#1}%
+     }%
+  %\rule{0pt}{\atfi@appearanceheight}%
+%  \rule[-\atfi@appearancedepth]{0pt}{\atfi@appearancedepth}%
+%  \rule{\atfi@appearancewidth}{0pt}%
+}
+\ExplSyntaxOff
+
+%\def\attachfile@timezone#1{%
+%  \ifx\\#1\\%
+%    % no timezone information given
+%  \else
+%    \def\atfi@timezone{#1}%
+%  \fi
+%}
+
+\newcommand*{\attachfile@file}[2][]{%
+  \EdefUnescapeHex\atfi@filename{#2}%
+  \ifx\atfi@filename\ltx@empty
+    \PackageError{attachfile2}{Empty file name}\@ehc
+  \else
+    \@namedef{atfi@file@\atfi@filename}{#1}%
+  \fi
+}
+
+%\newif\ifatfi@checksum
+%\define@key{AtFi@file}{CheckSum}{%
+%  \atfi@checksumtrue
+%  \edef\atfi@params{\atfi@params/CheckSum<#1>}%
+%}
+%\newif\ifatfi@creationdate
+%\define@key{AtFi@file}{CreationDateTZ}{%
+%  \ifatfi@creationdate
+%  \else
+%    \atfi@creationdatetrue
+%    \edef\atfi@params{%
+%      \atfi@params
+%      /CreationDate(#1)%
+%    }%
+%  \fi
+%}
+%\define@key{AtFi@file}{CreationDate}{%
+%  \ifatfi@creationdate
+%  \else
+%    \atfi@creationdatetrue
+%    \edef\atfi@params{%
+%      \atfi@params
+%      /CreationDate(#1\atfi@timezone)%
+%    }%
+%  \fi
+%}
+\newif\ifatfi@moddate
+\define@key{AtFi@file}{ModDateTZ}{%
+  \ifatfi@moddate
+  \else
+    \atfi@moddatetrue
+    \edef\atfi@params{%
+      \atfi@params
+      /ModDate(#1)%
+    }%
+  \fi
+}
+\define@key{AtFi@file}{ModDate}{%
+  \ifatfi@moddate
+  \else
+    \atfi@moddatetrue
+    \edef\atfi@params{%
+      \atfi@params
+      /ModDate(D:#1\atfi@timezone)%
+    }%
+  \fi
+}
+%\let\atfi@temp\ltx@one
+%\ltx@IfUndefined{pdf@filesize}{%
+%  \let\atfi@temp\ltx@zero
+%}{}
+%\ltx@IfUndefined{pdf@filemoddate}{%
+%  \let\atfi@temp\ltx@zero
+%}{}
+%\ltx@IfUndefined{pdf@filemdfivesum}{%
+%  \let\atfi@temp\ltx@zero
+%}{}
+%\ifcase\atfi@temp
+%  \let\atfi@pdftexdata\ltx@gobble
+%\or
+%  \def\atfi@pdftexdata#1{%
+%    \edef\atfi@temp{\pdf@filesize{#1}}%
+%    \ifx\atfi@temp\ltx@empty
+%    \else
+%      \setkeys{AtFi@file}{Size=\atfi@temp}%
+%      \edef\atfi@temp{\pdf@filemoddate{#1}}%
+%      \ifx\atfi@temp\ltx@empty
+%      \else
+%        \setkeys{AtFi@file}{ModDateTZ=\atfi@temp}%
+%      \fi
+%      \edef\atfi@temp{\pdf@filemdfivesum{#1}}%
+%      \ifx\atfi@temp\ltx@empty
+%      \else
+%        \setkeys{AtFi@file}{CheckSum=\atfi@temp}%
+%      \fi
+%    \fi
+%  }%
+%\fi
+%atfi file unneeded
+%\atfi@DisableOption{nofiles}
+\def\atfi@attachfile#1#2{%
+  \atfi@setup{#1}%
+  \atfi@embedfile{#2}%
+  \atfi@set@appearance@icon
+  %\atfi@flags@to@int %flags are set in setup
+  \atfi@insert@file@annot{#2}%
+  \endgroup
+}
+\newlength{\atfi@appearancewidth}
+\newlength{\atfi@appearanceheight}
+\newlength{\atfi@appearancedepth}
+\newsavebox{\atfi@appearancebox}
+\def\atfi@set@appearance@icon{%
+  \ltx@IfUndefined{atfi@appobj@\atfi@icon@icon}{%
+    \savebox{\atfi@appearancebox}{%
+      \@nameuse{atfi@acro\atfi@icon@icon}%
+    }%
+    \expandafter
+    \xdef\csname atfi@appwidth@\atfi@icon@icon\endcsname{%
+      \the\wd\atfi@appearancebox
+    }%
+    \expandafter
+    \xdef\csname atfi@appheight@\atfi@icon@icon\endcsname{%
+      \the\ht\atfi@appearancebox
+    }%
+    \expandafter
+    \xdef\csname atfi@appdepth@\atfi@icon@icon\endcsname{%
+      \the\dp\atfi@appearancebox
+    }%
+    \atfi@xform@icon
+    \global\expandafter\let
+        \csname atfi@appobj@\atfi@icon@icon\endcsname
+        \atfi@appearanceobj
+  }{%
+  }%
+  % optimization: \setlength dropped
+  \atfi@appearancewidth=%
+      \@nameuse{atfi@appwidth@\atfi@icon@icon}\relax
+  \atfi@appearanceheight=%
+      \@nameuse{atfi@appheight@\atfi@icon@icon}\relax
+  \atfi@appearancedepth=%
+      \@nameuse{atfi@appdepth@\atfi@icon@icon}\relax
+  \expandafter\let\expandafter\atfi@appearanceobj
+      \csname atfi@appobj@\atfi@icon@icon\endcsname
+}
+\def\atfi@set@appearance#1{%
+  \savebox{\atfi@appearancebox}{#1}%
+  \atfi@appearancewidth=\wd\atfi@appearancebox
+  \atfi@appearanceheight=\ht\atfi@appearancebox
+  \atfi@appearancedepth=\dp\atfi@appearancebox
+  \atfi@xform
+}
+
+\def\atfi@textattachfile#1#2{%
+    \endgroup
+    \atfi@textattachfile@i{#1}{#2}%
+}
+\def\atfi@textattachfile@i#1#2#3{%
+    \atfi@setup{#1}%
+    \atfi@embedfile{#2}%
+    \atfi@set@appearance{%
+      \leavevmode
+      \begingroup
+        \HyColor@UseColor\atfi@color@tex
+        #3\strut
+      \endgroup
+    }%
+    %\atfi@flags@to@int
+    \atfi@insert@file@annot{#2}%
+  \endgroup
+}
+\DeclareRobustCommand{\attachfile}[1][]{%
+  \begingroup
+    \let\do\@makeother
+    \dospecials
+    \catcode`\{=1\relax
+    \catcode`\}=2\relax
+    \atfi@attachfile{#1}%
+}
+\DeclareRobustCommand{\textattachfile}[1][]{%
+  \begingroup
+    \begingroup
+      \let\do\@makeother
+      \dospecials
+      \catcode`\{=1\relax
+      \catcode`\}=2\relax
+      \atfi@textattachfile{#1}%
+}
+\DeclareRobustCommand{\noattachfile}[1][]{%
+  \begingroup
+    \atfi@setup{#1}%
+    \atfi@set@appearance@icon
+    \ifatfi@print
+      \expandafter
+      %\atfi@refxform\csname atfi@appobj@\atfi@icon@icon\endcsname %???
+      \pdf_xform_use:n { atfi@appearancebox } %icon, is use meant here??
+    \else
+      \makebox[\atfi@appearancewidth]{}%
+    \fi
+  \endgroup
+}
+
+%data for the icons
 \ExplSyntaxOn
 
 \cs_new_protected:Npn \__atfi_color_to_rgb_seq:nN #1 #2 % #1 name #2 seq
@@ -566,213 +805,7 @@
    }
 
 \ExplSyntaxOff
-\def\attachfile@timezone#1{%
-  \ifx\\#1\\%
-    % no timezone information given
-  \else
-    \def\atfi@timezone{#1}%
-  \fi
-}
-\newcommand*{\attachfile@file}[2][]{%
-  \EdefUnescapeHex\atfi@filename{#2}%
-  \ifx\atfi@filename\ltx@empty
-    \PackageError{attachfile2}{Empty file name}\@ehc
-  \else
-    \@namedef{atfi@file@\atfi@filename}{#1}%
-  \fi
-}
 
-\newif\ifatfi@checksum
-\define@key{AtFi@file}{CheckSum}{%
-  \atfi@checksumtrue
-  \edef\atfi@params{\atfi@params/CheckSum<#1>}%
-}
-\newif\ifatfi@creationdate
-\define@key{AtFi@file}{CreationDateTZ}{%
-  \ifatfi@creationdate
-  \else
-    \atfi@creationdatetrue
-    \edef\atfi@params{%
-      \atfi@params
-      /CreationDate(#1)%
-    }%
-  \fi
-}
-\define@key{AtFi@file}{CreationDate}{%
-  \ifatfi@creationdate
-  \else
-    \atfi@creationdatetrue
-    \edef\atfi@params{%
-      \atfi@params
-      /CreationDate(#1\atfi@timezone)%
-    }%
-  \fi
-}
-\newif\ifatfi@moddate
-\define@key{AtFi@file}{ModDateTZ}{%
-  \ifatfi@moddate
-  \else
-    \atfi@moddatetrue
-    \edef\atfi@params{%
-      \atfi@params
-      /ModDate(#1)%
-    }%
-  \fi
-}
-\define@key{AtFi@file}{ModDate}{%
-  \ifatfi@moddate
-  \else
-    \atfi@moddatetrue
-    \edef\atfi@params{%
-      \atfi@params
-      /ModDate(D:#1\atfi@timezone)%
-    }%
-  \fi
-}
-\let\atfi@temp\ltx@one
-\ltx@IfUndefined{pdf@filesize}{%
-  \let\atfi@temp\ltx@zero
-}{}
-\ltx@IfUndefined{pdf@filemoddate}{%
-  \let\atfi@temp\ltx@zero
-}{}
-\ltx@IfUndefined{pdf@filemdfivesum}{%
-  \let\atfi@temp\ltx@zero
-}{}
-\ifcase\atfi@temp
-  \let\atfi@pdftexdata\ltx@gobble
-\or
-  \def\atfi@pdftexdata#1{%
-    \edef\atfi@temp{\pdf@filesize{#1}}%
-    \ifx\atfi@temp\ltx@empty
-    \else
-      \setkeys{AtFi@file}{Size=\atfi@temp}%
-      \edef\atfi@temp{\pdf@filemoddate{#1}}%
-      \ifx\atfi@temp\ltx@empty
-      \else
-        \setkeys{AtFi@file}{ModDateTZ=\atfi@temp}%
-      \fi
-      \edef\atfi@temp{\pdf@filemdfivesum{#1}}%
-      \ifx\atfi@temp\ltx@empty
-      \else
-        \setkeys{AtFi@file}{CheckSum=\atfi@temp}%
-      \fi
-    \fi
-  }%
-\fi
-%atfi file unneeded
-%\atfi@DisableOption{nofiles}
-\def\atfi@attachfile#1#2{%
-  \atfi@setup{#1}%
-  \atfi@embedfile{#2}%
-  \atfi@set@appearance@icon
-  \atfi@flags@to@int
-  \atfi@insert@file@annot{#2}%
-  \endgroup
-}
-\newlength{\atfi@appearancewidth}
-\newlength{\atfi@appearanceheight}
-\newlength{\atfi@appearancedepth}
-\newsavebox{\atfi@appearancebox}
-\def\atfi@set@appearance@icon{%
-  \ltx@IfUndefined{atfi@appobj@\atfi@icon@icon}{%
-    \savebox{\atfi@appearancebox}{%
-      \@nameuse{atfi@acro\atfi@icon@icon}%
-    }%
-    \expandafter
-    \xdef\csname atfi@appwidth@\atfi@icon@icon\endcsname{%
-      \the\wd\atfi@appearancebox
-    }%
-    \expandafter
-    \xdef\csname atfi@appheight@\atfi@icon@icon\endcsname{%
-      \the\ht\atfi@appearancebox
-    }%
-    \expandafter
-    \xdef\csname atfi@appdepth@\atfi@icon@icon\endcsname{%
-      \the\dp\atfi@appearancebox
-    }%
-    \atfi@xform@icon
-    \global\expandafter\let
-        \csname atfi@appobj@\atfi@icon@icon\endcsname
-        \atfi@appearanceobj
-  }{%
-  }%
-  % optimization: \setlength dropped
-  \atfi@appearancewidth=%
-      \@nameuse{atfi@appwidth@\atfi@icon@icon}\relax
-  \atfi@appearanceheight=%
-      \@nameuse{atfi@appheight@\atfi@icon@icon}\relax
-  \atfi@appearancedepth=%
-      \@nameuse{atfi@appdepth@\atfi@icon@icon}\relax
-  \expandafter\let\expandafter\atfi@appearanceobj
-      \csname atfi@appobj@\atfi@icon@icon\endcsname
-}
-\def\atfi@set@appearance#1{%
-  \savebox{\atfi@appearancebox}{#1}%
-  \atfi@appearancewidth=\wd\atfi@appearancebox
-  \atfi@appearanceheight=\ht\atfi@appearancebox
-  \atfi@appearancedepth=\dp\atfi@appearancebox
-  \atfi@xform
-}
-\newcounter{atfi@flags}
-\DeclareRobustCommand{\atfi@flags@to@int}{%
-  \setcounter{atfi@flags}{0}%
-  \ifatfi@print
-    \addtocounter{atfi@flags}{4}%
-  \fi%
-  \ifatfi@zoom
-  \else
-    \addtocounter{atfi@flags}{8}%
-  \fi%
-}
-\def\atfi@textattachfile#1#2{%
-    \endgroup
-    \atfi@textattachfile@i{#1}{#2}%
-}
-\def\atfi@textattachfile@i#1#2#3{%
-    \atfi@setup{#1}%
-    \atfi@embedfile{#2}%
-    \atfi@set@appearance{%
-      \leavevmode
-      \begingroup
-        \HyColor@UseColor\atfi@color@tex
-        #3\strut
-      \endgroup
-    }%
-    \atfi@flags@to@int
-    \atfi@insert@file@annot{#2}%
-  \endgroup
-}
-\DeclareRobustCommand{\attachfile}[1][]{%
-  \begingroup
-    \let\do\@makeother
-    \dospecials
-    \catcode`\{=1\relax
-    \catcode`\}=2\relax
-    \atfi@attachfile{#1}%
-}
-\DeclareRobustCommand{\textattachfile}[1][]{%
-  \begingroup
-    \begingroup
-      \let\do\@makeother
-      \dospecials
-      \catcode`\{=1\relax
-      \catcode`\}=2\relax
-      \atfi@textattachfile{#1}%
-}
-\DeclareRobustCommand{\noattachfile}[1][]{%
-  \begingroup
-    \atfi@setup{#1}%
-    \atfi@set@appearance@icon
-    \ifatfi@print
-      \expandafter
-      %\atfi@refxform\csname atfi@appobj@\atfi@icon@icon\endcsname %???
-      \pdf_xform_use:n { atfi@appearancebox } %icon, is use meant here??
-    \else
-      \makebox[\atfi@appearancewidth]{}%
-    \fi
-  \endgroup
-}
 \endinput
 %%
-%% End of file `attachfile2.sty'.
+%% End of file `new-attachfile.sty'.

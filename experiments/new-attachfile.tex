@@ -10,6 +10,12 @@
 %t0\attachfilesetup{color=attachfilecolor}
 \begin{document}
 abc
+\makeatletter
+\atfi@acroPaperclip
+\atfi@acroTag
+\atfi@acroGraph
+\atfi@acroPushPin
+\end{document}
 \ExplSyntaxOn
 \__pdf_backend_xform_if_exist:nTF { atfi@appearancebox }{true}{false}
 \par
@@ -40,26 +46,14 @@ abc
 \atfi@acroTag
 \ExplSyntaxOn
 
-\prop_const_from_keyval:Nn \__pdf_annot_flag_prop:
- {
-   Invisible = 0,
-   Hidden    = 1,
-   Print     = 2,
-   NoZoom    = 3,
-   NoRotate  = 4,
-   NoView    = 5,
-   ReadOnly  = 6,
-   Locked    = 7,
-   ToggleNoView = 8,
-   LockedContents = 9
- }
+
 \bitsetReset {annotFlag}
 
-\bitsetSet{annotFlag}{\prop_item:Nn\__pdf_annot_flag_prop:{Print}}
+\bitsetSet{annotFlag}{\prop_item:Nn\c__pdf_annot_flag_prop:{Print}}
 
 \bitsetGetDec {annotFlag}\par
 
-\bitsetSet{annotFlag}{\prop_item:Nn\__pdf_annot_flag_prop:{NoZoom}}
+\bitsetSet{annotFlag}{\prop_item:Nn\c__pdf_annot_flag_prop:{NoZoom}}
 
 \bitsetGetDec {annotFlag}
 \ExplSyntaxOff
