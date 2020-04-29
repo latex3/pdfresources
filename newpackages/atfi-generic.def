@@ -58,20 +58,25 @@
 % we probably need an xform by icon ...
 
 \def\atfi@xform{%
-  \pdf_xform_new:nnn
-  { atfi@appearancebox }
-  { }
-  { \usebox\atfi@appearancebox }
+  \pdf_xform_if_exist:nF { atfi@appearancebox }
+    {
+      \pdf_xform_new:nnn
+        { atfi@appearancebox }
+        { }
+        { \usebox\atfi@appearancebox }
+    }
   %\immediate\pdfxform\atfi@appearancebox
   %\edef\atfi@appearanceobj{\the\pdflastxform}%
 }
-\ExplSyntaxOff
 
-\let\atfi@xform@icon\atfi@xform
-\def\atfi@refxform#1{%
-  \pdfrefxform#1\relax
-}
-\ExplSyntaxOn
+
+%\let\atfi@xform@icon\atfi@xform
+%\def\atfi@refxform#1{%
+%  %\pdf_xform_ref:n { #1 }
+%  \pdf_xform_use:n { atfi@appearancebox }
+%  %\pdfrefxform#1\relax
+%}
+
 \def\atfi@insert@file@annot#1{%
   \rule{0pt}{0pt}%
   \ifatfi@appearance

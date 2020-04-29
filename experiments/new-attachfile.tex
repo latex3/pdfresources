@@ -2,7 +2,7 @@
 \documentclass{article}
 \usepackage{xcolor}
 \usepackage[customdriver=hgeneric-experimental]{hyperref}
-\usepackage{new-attachfile,l3draw,l3color}
+\usepackage{new-attachfile,l3draw,l3color,bitset}
 \ExplSyntaxOn
 \pdf_uncompress:
 \ExplSyntaxOff
@@ -10,9 +10,22 @@
 %t0\attachfilesetup{color=attachfilecolor}
 \begin{document}
 abc
+\ExplSyntaxOn
+\__pdf_backend_xform_if_exist:nTF { atfi@appearancebox }{true}{false}
+\par
+
+\pdf_xform_if_exist:nTF { atfi@appearancebox }{true}{false}
+\ExplSyntaxOff
+
+%\end{document}
+
+
 \attachfile[icon=Graph,mimetype=text/plain]{catalogue.tex} some text
 
-%\attachfile[icon=Paperclip,mimetype=application/x-hdf]{catalogue.tex} some text
+\ExplSyntaxOn
+\pdf_xform_if_exist:nTF { atfi@appearancebox }{true}{false}
+\ExplSyntaxOff
+\attachfile[icon=Paperclip,mimetype=application/x-hdf]{catalogue.tex} some text
 
 %\attachfile[icon=Tag,mimetype=application/x-hdf]{catalogue.tex} some text
 %
@@ -27,6 +40,28 @@ abc
 \atfi@acroTag
 \ExplSyntaxOn
 
+\prop_const_from_keyval:Nn \__pdf_annot_flag_prop:
+ {
+   Invisible = 0,
+   Hidden    = 1,
+   Print     = 2,
+   NoZoom    = 3,
+   NoRotate  = 4,
+   NoView    = 5,
+   ReadOnly  = 6,
+   Locked    = 7,
+   ToggleNoView = 8,
+   LockedContents = 9
+ }
+\bitsetReset {annotFlag}
+
+\bitsetSet{annotFlag}{\prop_item:Nn\__pdf_annot_flag_prop:{Print}}
+
+\bitsetGetDec {annotFlag}\par
+
+\bitsetSet{annotFlag}{\prop_item:Nn\__pdf_annot_flag_prop:{NoZoom}}
+
+\bitsetGetDec {annotFlag}
 \ExplSyntaxOff
 
  \end{document}
