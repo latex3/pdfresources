@@ -2839,9 +2839,6 @@
     \tl_use:c { c_@@_backend_xform_dp_ \tl_to_str:n { #1 } _tl }
   }
 
-\prg_new_eq_conditional:NNn \pdf_xform_if_exist:n\__pdf_backend_xform_if_exist:n
-  { TF , T , F , p }
-
 %    \end{macrocode}
 %
 %  \subsubsection{Form XObject / backend }
@@ -3116,12 +3113,15 @@
      }
   }
 %% all
-\prg_new_conditional:Npnn \__pdf_backend_xform_if_exist:n #1 { p , T , F , TF }
+\prg_new_conditional:Npnn \@@_backend_xform_if_exist:n #1 { p , T , F , TF }
   {
-    \int_if_exist:cTF { c__pdf_backend_xform_ \tl_to_str:n {#1} _int }
+    \int_if_exist:cTF { c_@@_backend_xform_ \tl_to_str:n {#1} _int }
      { \prg_return_true: }
      { \prg_return_false:}
   }
+\prg_new_eq_conditional:NNn \pdf_xform_if_exist:n\@@_backend_xform_if_exist:n
+  { TF , T , F , p }
+
 %    \end{macrocode}
 % \end{macro}
 % \end{macro}
