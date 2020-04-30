@@ -215,11 +215,12 @@
 \ProvidesExplPackage {l3pdffile} {2020-04-21} {0.1}
   {embedding and referencing files in PDF}
 \RequirePackage{new-pdfescape}  %temporarly!!
-\cs_set_eq:NN \@@_file_filename_convert:nN \pdftool_textstringhex_print:nN
 %    \end{macrocode}
 %
 %    \begin{macrocode}
 %<@@=pdf>
+\cs_set_eq:NN \@@_file_filename_convert:nN \pdftool_textstringhex_print:nN
+\cs_show:N\@@_file_filename_convert:nN
 %    \end{macrocode}
 %    \begin{macrocode}
 % https://github.com/latex3/latex3/issues/711
