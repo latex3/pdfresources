@@ -92,7 +92,7 @@
 %% string conversions and printing
 %% we assume here that the text purify step has been done. The input is
 %% a list of (utf8) chars.
-%% str convert, not expandable. 
+%% str convert, not expandable.
 % filespec (attachment view)  tests:
 % utf8:  gr\303\274\303\237e.txt                    %doesn't work, umlaut wrong,
 % utf8 with BOM \357\273\277gr\303\274\303\237e.txt %doesn't work, umlaut wrong, bom visible
@@ -125,15 +125,15 @@
     \cs_new:Npn \pdftool_textstringhex_print:nN #1 #2
       {
          \str_set_convert:Nnnn #2 { #1 }{ utf8 } {utf16/hex}
-         \str_put_left:N #2  {<}
-         \str_put_right:N #2 {>}
+         \str_put_left:Nn #2  {<}
+         \str_put_right:Nn #2 {>}
       }
   }
   {
     \cs_new:Npn \pdftool_textstringhex_print:nN #1 #2
       {
         \str_set_convert:Nnnn #2 { #1 }{  } {utf16/string}
-         \str_put_left:N #2  {<}
-         \str_put_right:N #2 {>}
+         \str_put_left:Nn #2  {<}
+         \str_put_right:Nn #2 {>}
       }
   }
