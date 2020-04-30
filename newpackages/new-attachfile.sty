@@ -40,38 +40,104 @@
 \RequirePackage{l3color,l3draw,l3pdffile,bitset,xparse}
 
 
-%pattern matching removed. Perhaps later with regex ...
+% pattern matching removed. Perhaps later with regex ...
 
-
+% setup commands / options
+%document options, handle later
 \SetupKeyvalOptions{%
   family=AtFi,%
   prefix=atfi@%
 }
-
-\ExplSyntaxOn
-\cs_new_protected:Npn \atfi@setup #1
-  {
-    \keys_set:nn {AtFi} { #1 }
-  }
-\ExplSyntaxOff
 \DeclareBoolOption{draft}
 \DeclareComplementaryOption{final}{draft}
 
+% keyval setup is stored in a list. It should be executed locally to be
+% able to change the dictionaries in a group
+
 \ExplSyntaxOn
+\cs_new:Npn \__atfi_clist_display:n #1 {*~#1\\}
+
+\tl_new:N \l__atfi_setup_keyval_tl
+\tl_new:N \l__atfi_annot_icon_tl
+\tl_new:N \l__atfi_filename_tl
+\msg_new:nnn
+  { atfi }
+  { unknown-choice }
+  {
+    Value~'#3'~is~invalid~for~key~'#1'.\\
+    The~key~accepts~only~the~choices\\
+    \clist_map_function:nN { #2 }\__atfi_clist_display:n
+    An~empty~value~removes~the~setting.
+  }
+
+
+\NewDocumentCommand\attachfilesetup { m }
+ {
+   \tl_put_right:Nn \l__atfi_setup_keyval_tl {, #1 }
+ }
+
+% replace later
+\cs_new_protected:Npn \atfi@setup #1
+  {
+    \keys_set:nn {atfi} { #1 }
+  }
+
+% probably generic ....
+\pdfdict_new:n   {annot/FileAttachment}
+\pdfdict_put:nnn {annot/FileAttachment}{Subtype}{/FileAttachment}
+\pdfdict_new:n {annot/FileAttachment/AP} % appearance
+
 \keys_define:nn { atfi }
   {
-    %mimetype   -> embed step
-    ,mimetype  .tl_set:N = \l__atfi_mimetype_tl %escape with \pdftool_name:V later or now?
-
-
+    ,mimetype  .code:n   =
+      {
+        \tl_if_empty:nTF { #1 }
+          {
+            \pdfdict_remove:nn {file}{Subtype}
+          }
+          {
+            \pdfdict_put:nnx   {file}{Subtype}{\pdftool_name:n{#1} }
+          }
+      }
+    ,mimetype  .groups:n = { embed }
+    ,filename .code:n =
+      {
+        \tl_if_empty:nF { #1 }
+          {
+           \pdftool_str_convert:nN  { #1 } \l__atfi_filename_tl
+           
+          }
+      }
     %ucfilespec -> embed step
     %checksum   -> bool to suppress the checksum
     %creationdate ->additional /CreationDate in FileSpec-dict
     %moddate    -> boolean to suppress /ModDate in FileSpec
-
-    %icon     -> attach step / setup
-    %         choice? PushPin, Data, Graph,
-    %         initial: PushPin
+   ,moddate  .code:n   =
+      {
+        \tl_if_empty:nTF { #1 }
+          {
+            \pdfdict_remove:nn {file/FileSpec}{ModDate}
+          }
+          {
+            \pdfdict_put:nnx   {file}{ModDate}{\pdftool_litstring:n{#1} }
+          }
+      }
+    ,moddate  .groups:n  = { embed }
+    ,icon     .choices:nn =
+      { Data, Graph, PushPin, Tag } =
+      {
+        \tl_set:Nn \l__atfi_annot_icon_tl { #1 }
+        \pdfdict_put:nnn { annot/FileAttachment }{ Name }{ #1 }
+      }
+    ,icon / unknown .code:n =
+      {
+        \msg_warning:nnxxx { atfi } { unknown-choice }
+          { icon }
+          { Data, Graph, PushPin, Tag }
+          { \exp_not:n {#1} }
+      }
+    ,icon     .groups:n =  { attach }
+    %         initial: PushPin, but should be set only in the command
 
     %color    -> attach step, affects icon
     %         decide allowed syntax of expressions ...
@@ -84,12 +150,22 @@
     %annotname /NM (..) (unique name)
     %          no initial value
 
-    % author  /T (...)
+    ,author    .code:n    =
+      {
+        %!! code to sanitize the value
+        \pdfdict_put:nnn {annot/FileAttachment}{T}{#1}
+      }
+    ,author     .groups:n =  { attach }
     %          no initial value
 
     % description /Contents
 
-    % subject    /Subj
+    ,subject    .code:n    =
+      {
+        %!! code to sanitize the value
+        \pdfdict_put:nnn {annot/FileAttachment}{Subj}{#1}
+      }
+    ,subject     .groups:n =  { attach }
 
     % appearance: decides if the appearance dict is insert. drop?
 

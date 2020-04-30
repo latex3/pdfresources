@@ -11,12 +11,18 @@
 \begin{document}
 abc
 \makeatletter
+\attachfile[icon=Graph,mimetype=text/plain]{catalogue.tex} some text
 \atfi@acroPaperclip
 \atfi@acroTag
 \atfi@acroGraph
 \atfi@acroPushPin
-\end{document}
+
 \ExplSyntaxOn
+\keys_set:nn {atfi}{mimetype=text/mix}
+\pdfdict_show:n{file}
+\pdfdict_show:n{file/FileSpec}
+\ExplSyntaxOff
+\end{document}
 \__pdf_backend_xform_if_exist:nTF { atfi@appearancebox }{true}{false}
 \par
 

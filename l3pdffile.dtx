@@ -215,6 +215,7 @@
 \ProvidesExplPackage {l3pdffile} {2020-04-21} {0.1}
   {embedding and referencing files in PDF}
 \RequirePackage{new-pdfescape}  %temporarly!!
+\cs_set_eq:NN \@@_file_filename_convert:nN \pdftool_textstringhex_print:nN
 %    \end{macrocode}
 %
 %    \begin{macrocode}
@@ -324,9 +325,9 @@
     \pdfdict_put:nnn { file/FileSpec }
       {Type} { /FileSpec }
     \pdfdict_put:nnn { file/FileSpec }
-      {F} { (\l_pdffile_full_name_convert_str) }
+      {F}  { \l_pdffile_full_name_convert_str }
     \pdfdict_put:nnn { file/FileSpec }
-      {UF} { (\l_pdffile_full_name_convert_str) }
+      {UF} { \l_pdffile_full_name_convert_str }
     \pdfdict_put:nnn { file/FileSpec }
       {AFRelationship} { /Unspecified }
   }
@@ -381,7 +382,7 @@
       \tl_clear:N \l_@@_file_subtype_tl
       \tl_set:Nx  \l_@@_file_object_last_tl {\pdf_object_last:}
       \pdf_object_new:nn   { #1 } {dict}
-      \pdftool_str_convert:nN  { #2 } \l_pdffile_full_name_convert_str
+      \@@_file_filename_convert:nN  { #2 } \l_pdffile_full_name_convert_str
       \pdf_object_write:nx { #1 }
         {
           \pdfdict_map:n {file/FileSpec}

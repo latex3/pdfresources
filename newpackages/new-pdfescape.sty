@@ -2,11 +2,12 @@
   {temporary escape commands and tools for PDF}
 %very temporarly until this is in l3 properly!!!!
 
-
+%% test if object exist, doesn't belong here ...
 \prg_new_eq_conditional:NNn \pdfobject_if_exist:n\__pdf_backend_object_if_exist:n
   { TF , T , F , p }
 
 
+%% escape a pdfname expandably:
 \cs_new:Npn \str_escape_pdfname:n #1
   {
     \exp_args:Ne \tl_to_str:n
@@ -82,21 +83,57 @@
 
  \cs_generate_variant:Nn \str_escape_pdfname:n { e }
 
+%% tool command escape name
  \cs_new:Npn \pdftool_name:n #1
     { / \str_escape_pdfname:e { \text_expand:n{#1} } }
 
 \cs_generate_variant:Nn \pdftool_name:n {V}
 
+%% string conversions and printing
+%% we assume here that the text purify step has been done. The input is
+%% a list of (utf8) chars.
+%% str convert, not expandable. 
+% filespec (attachment view)  tests:
+% utf8:  gr\303\274\303\237e.txt                    %doesn't work, umlaut wrong,
+% utf8 with BOM \357\273\277gr\303\274\303\237e.txt %doesn't work, umlaut wrong, bom visible
+% utf16 with BE: (FEFF)  \376\377\000g\000r\000\374\000\337\000e\000.\000t\000x\000t %works
+%                xetex converts to <feff0067007200fc00df0065002e007400780074>
+% utf16 with BE / HEX: <FEFF0067007200FC00DF0065002E007400780074> works
+
+% bookmarks: as pdfoutline uses () currently only utf16 with BE is usable.
+% check if one can use HEX too when directly writing the object
 \sys_if_engine_pdftex:TF
   {
-    \cs_new:Npn \pdftool_str_convert:nN #1 #2
+    \cs_new:Npn \pdftool_textlitstring_print:nN #1 #2
       {
          \str_set_convert:Nnnn #2 { #1 }{ utf8 } {utf16/string}
+         \str_put_left:N #2  {(}
+         \str_put_right:N #2 {)}
       }
   }
   {
-    \cs_new:Npn \pdftool_str_convert:nN #1 #2
+    \cs_new:Npn \pdftool_textlitstring_print:nN #1 #2
       {
         \str_set_convert:Nnnn #2 { #1 }{  } {utf16/string}
+        \str_put_left:N #2  {(}
+        \str_put_right:N #2 {)}
+      }
+  }
+
+\sys_if_engine_pdftex:TF
+  {
+    \cs_new:Npn \pdftool_textstringhex_print:nN #1 #2
+      {
+         \str_set_convert:Nnnn #2 { #1 }{ utf8 } {utf16/hex}
+         \str_put_left:N #2  {<}
+         \str_put_right:N #2 {>}
+      }
+  }
+  {
+    \cs_new:Npn \pdftool_textstringhex_print:nN #1 #2
+      {
+        \str_set_convert:Nnnn #2 { #1 }{  } {utf16/string}
+         \str_put_left:N #2  {<}
+         \str_put_right:N #2 {>}
       }
   }

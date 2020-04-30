@@ -1,8 +1,11 @@
 % !Mode:: "TeX:UTF-8:Main"
+\RequirePackage{pdfresources}
+\DeclareDocumentMetaData{pdfversion=1.6}
 \documentclass{article}
 \usepackage{pdfresources}
 \usepackage{l3pdffile}
 \usepackage[customdriver=hgeneric-experimental]{hyperref}
+\hypersetup{pdfversion=1.6,pdfpagemode=UseAttachments}
 \ExplSyntaxOn
 \pdf_uncompress:
 \ExplSyntaxOff
@@ -10,12 +13,14 @@
 \begin{document}
 \section{grüße Testing embedding and attaching files}
 \ExplSyntaxOn
+\pdftool_textlitstring_print:nN {xxxgrüße}\l_tmpa_str
+\pdfextension outline goto name {Doc-Start}{\l_tmpa_str}
 \group_begin:
 \pdfdict_put:nnn  {file/FileSpec} {AFRelationship}{/Source}
 \pdfdict_put:nnn  {file/FileSpec} {Desc}{(this~is~a~eps)}
-\pdfdict_show:n   {file/FileSpec}
-\pdffile_embed:nn {example}{grüße.txt}
-\pdffile_attach:n {example}
+%\pdfdict_show:n   {file/FileSpec}
+%\pdffile_embed:nn {example}{grüße.txt}
+%\pdffile_attach:n {example}
 \group_end:
 
 \group_begin:
