@@ -59,7 +59,10 @@
 
 \tl_new:N \l__atfi_setup_keyval_tl
 \tl_new:N \l__atfi_annot_icon_tl
+\tl_new:N \l__atfi_annot_color_tl
 \tl_new:N \l__atfi_filename_tl
+\color_set:nnn {__atfi_annot_color}{rgb}{1,0.9255,0.7765}
+
 \msg_new:nnn
   { atfi }
   { unknown-choice }
@@ -85,7 +88,7 @@
 % probably generic ....
 \pdfdict_new:n   {annot/FileAttachment}
 \pdfdict_put:nnn {annot/FileAttachment}{Subtype}{/FileAttachment}
-\pdfdict_new:n {annot/FileAttachment/AP} % appearance
+\pdfdict_new:n   {annot/FileAttachment/AP} % appearance
 
 \keys_define:nn { atfi }
   {
@@ -104,8 +107,7 @@
       {
         \tl_if_empty:nF { #1 }
           {
-           \pdftool_str_convert:nN  { #1 } \l__atfi_filename_tl
-           
+           \pdftool_textstringhex_print:nN  { #1 } \l__atfi_filename_tl %variable
           }
       }
     %ucfilespec -> embed step
@@ -124,7 +126,7 @@
       }
     ,moddate  .groups:n  = { embed }
     ,icon     .choices:nn =
-      { Data, Graph, PushPin, Tag } =
+      { Data, Graph, PushPin, Tag }
       {
         \tl_set:Nn \l__atfi_annot_icon_tl { #1 }
         \pdfdict_put:nnn { annot/FileAttachment }{ Name }{ #1 }
@@ -138,7 +140,9 @@
       }
     ,icon     .groups:n =  { attach }
     %         initial: PushPin, but should be set only in the command
-
+    ,color    .tl_set:N = \l__atfi_annot_color_tl
+    ,color    .groups:n =  { attach }
+    ,color    .initial:n = { __atfi_annot_color }
     %color    -> attach step, affects icon
     %         decide allowed syntax of expressions ...
     %         initial: 1 0.9255 0.7765
@@ -199,7 +203,7 @@
           \atfi@color@tex\atfi@color@inline\atfi@color@annot
           {attachfile2}{color}%
 }
-\atfi@setup{color=1 0.9255 0.7765}
+%\atfi@setup{color=1 0.9255 0.7765}
 \def\atfi@pad@ii#1{%
   \ifnum#1>9 %
     \number#1%
@@ -402,15 +406,16 @@
      {\atfi@scale\atfi@appearanceheight}
      {\atfi@scale\atfi@appearancedepth}
      {
-      /Subtype/FileAttachment%
-      \atfi@icon
-      \atfi@color@annot
-      \atfi@author
-      \atfi@date
-      \atfi@annotname
-      \atfi@description
-      \atfi@subject
-      \atfi@appearance@dict
+      \pdfdict_map:n {annot/FileAttachment}
+     % /Subtype/FileAttachment%
+%      \atfi@icon
+%      \atfi@color@annot
+%      \atfi@author
+%      \atfi@date
+%      \atfi@annotname
+%      \atfi@description
+%      \atfi@subject
+%      \atfi@appearance@dict
       /F~ \bitsetGetDec {__atfi_annotFlags}
       /FS~ \pdf_object_ref:n{atfi@fileobj@#1}%
      }%
@@ -529,39 +534,41 @@
 \newlength{\atfi@appearanceheight}
 \newlength{\atfi@appearancedepth}
 \newsavebox{\atfi@appearancebox}
+\ExplSyntaxOn
 \def\atfi@set@appearance@icon{%
-  \ltx@IfUndefined{atfi@appobj@\atfi@icon@icon}{%
+  \ltx@IfUndefined{atfi@appobj@\l__atfi_annot_icon_tl}{%
     \savebox{\atfi@appearancebox}{%
-      \@nameuse{atfi@acro\atfi@icon@icon}%
+      \@nameuse{atfi@acro\l__atfi_annot_icon_tl}%
     }%
     \expandafter
-    \xdef\csname atfi@appwidth@\atfi@icon@icon\endcsname{%
+    \xdef\csname atfi@appwidth@\l__atfi_annot_icon_tl\endcsname{%
       \the\wd\atfi@appearancebox
     }%
     \expandafter
-    \xdef\csname atfi@appheight@\atfi@icon@icon\endcsname{%
+    \xdef\csname atfi@appheight@\l__atfi_annot_icon_tl\endcsname{%
       \the\ht\atfi@appearancebox
     }%
     \expandafter
-    \xdef\csname atfi@appdepth@\atfi@icon@icon\endcsname{%
+    \xdef\csname atfi@appdepth@\l__atfi_annot_icon_tl\endcsname{%
       \the\dp\atfi@appearancebox
     }%
     \atfi@xform@icon
     \global\expandafter\let
-        \csname atfi@appobj@\atfi@icon@icon\endcsname
+        \csname atfi@appobj@\l__atfi_annot_icon_tl\endcsname
         \atfi@appearanceobj
   }{%
   }%
   % optimization: \setlength dropped
   \atfi@appearancewidth=%
-      \@nameuse{atfi@appwidth@\atfi@icon@icon}\relax
+      \@nameuse{atfi@appwidth@\l__atfi_annot_icon_tl}\relax
   \atfi@appearanceheight=%
-      \@nameuse{atfi@appheight@\atfi@icon@icon}\relax
+      \@nameuse{atfi@appheight@\l__atfi_annot_icon_tl}\relax
   \atfi@appearancedepth=%
-      \@nameuse{atfi@appdepth@\atfi@icon@icon}\relax
+      \@nameuse{atfi@appdepth@\l__atfi_annot_icon_tl}\relax
   \expandafter\let\expandafter\atfi@appearanceobj
-      \csname atfi@appobj@\atfi@icon@icon\endcsname
+      \csname atfi@appobj@\l__atfi_annot_icon_tl\endcsname
 }
+\ExplSyntaxOff
 \def\atfi@set@appearance#1{%
   \savebox{\atfi@appearancebox}{#1}%
   \atfi@appearancewidth=\wd\atfi@appearancebox
@@ -631,9 +638,8 @@
    \seq_pop_left:NN #2 \l_tmpa_tl
    \tl_set_eq:NN  \l_color_fixed_model_tl \l__color_ori_fixed_model_tl
  }
+\cs_generate_variant:Nn \__atfi_color_to_rgb_seq:nN {oN}
 \cs_new:Npn \__atfi_arg_braced:n #1 {{#1}}
-
-\color_set:nnn {__atfi_color_inline}{rgb}{1,0.9255,0.7765}
 
 \cs_new_protected:Npn \atfi@acroGraph@data
   {
@@ -658,7 +664,7 @@
     \__draw_backend_rectangle:nnnn {14.7471bp}{4.1367bp}{3.9571bp}{11.8867bp}
     \__draw_backend_fill:
 
-    \__atfi_color_to_rgb_seq:nN {__atfi_color_inline} \l_tmpa_seq
+    \__atfi_color_to_rgb_seq:oN {\l__atfi_annot_color_tl} \l_tmpa_seq
     \exp_last_unbraced:Ne \__draw_backend_color_fill_rgb:nnn
       { \seq_map_function:NN \l_tmpa_seq \__atfi_arg_braced:n }
 
@@ -720,7 +726,7 @@
     \__draw_backend_literal:x {6.9692~6.3301~6.9692~7.1572~v}
     \__draw_backend_literal:x {6.9692~7.9863~6.9692~12.21~y}
     \__draw_backend_stroke:
-    \__atfi_color_to_rgb_seq:nN {__atfi_color_inline} \l_tmpa_seq
+    \__atfi_color_to_rgb_seq:oN {\l__atfi_annot_color_tl} \l_tmpa_seq
        \exp_last_unbraced:Ne \__draw_backend_color_stroke_rgb:nnn
          { \seq_map_function:NN \l_tmpa_seq \__atfi_arg_braced:n }
     \__draw_backend_linewidth:n {1bp}
@@ -772,7 +778,7 @@
      \__draw_backend_lineto:nn {12bp}{1bp}
      \__draw_backend_lineto:nn {11bp}{1bp}
      \__draw_backend_lineto:nn {11bp}{6bp}
-     \__atfi_color_to_rgb_seq:nN {__atfi_color_inline} \l_tmpa_seq
+     \__atfi_color_to_rgb_seq:oN {\l__atfi_annot_color_tl} \l_tmpa_seq
         \exp_last_unbraced:Ne \__draw_backend_color_fill_rgb:nnn
           { \seq_map_function:NN \l_tmpa_seq \__atfi_arg_braced:n }
      \__draw_backend_color_stroke_gray:n {0}
@@ -841,7 +847,7 @@
     \__draw_backend_curveto:nnnnnn{8.7344bp}{7.2715bp}{9.4463bp}{8.0879bp}{9.4463bp}{9.0957bp}
     \__draw_backend_curveto:nnnnnn{9.4463bp}{10.1035bp}{8.7344bp}{10.9199bp}{7.856bp}{10.9199bp}
     \__draw_backend_closepath:
-    \__atfi_color_to_rgb_seq:nN {__atfi_color_inline} \l_tmpa_seq
+    \__atfi_color_to_rgb_seq:oN {\l__atfi_annot_color_tl} \l_tmpa_seq
          \exp_last_unbraced:Ne \__draw_backend_color_fill_rgb:nnn
            { \seq_map_function:NN \l_tmpa_seq \__atfi_arg_braced:n }
     \__draw_backend_color_stroke_gray:n {0}
