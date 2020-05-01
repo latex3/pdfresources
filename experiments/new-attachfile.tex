@@ -10,8 +10,16 @@
 %t0\attachfilesetup{color=attachfilecolor}
 \begin{document}
 abc
-\makeatletter
-\attachfilesetup{color=red}
+\makeatletter 
+\attachfilesetup{color=red,author=Müsterhaße}
+\ExplSyntaxOn
+\tl_show:N \l__atfi_annot_color_tl
+\tl_show:N \l__atfi_setup_keyval_tl
+\keys_set:no {atfi} { \l__atfi_setup_keyval_tl }
+\pdfdict_show:n{annot/FileAttachment}
+\tl_show:N \l__atfi_annot_color_tl
+
+\ExplSyntaxOff
 \attachfile[icon=Graph,mimetype=text/plain,color=red]{catalogue.tex} some text
 \atfi@acroPaperclip
 \atfi@acroTag
@@ -19,9 +27,9 @@ abc
 \atfi@acroPushPin
 
 \ExplSyntaxOn
-\keys_set:nn {atfi}{mimetype=text/mix}
-\pdfdict_show:n{file}
-\pdfdict_show:n{file/FileSpec}
+%\keys_set:nn {atfi}{mimetype=text/mix}
+%\pdfdict_show:n{file}
+%\pdfdict_show:n{file/FileSpec}
 \ExplSyntaxOff
 \end{document}
 \__pdf_backend_xform_if_exist:nTF { atfi@appearancebox }{true}{false}

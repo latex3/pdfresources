@@ -51,18 +51,19 @@
 \DeclareBoolOption{draft}
 \DeclareComplementaryOption{final}{draft}
 
+% need a
+\DeclareRobustCommand{\atfi@pdfstringdef}[2]{%
+  \pdfstringdef\atfi@temp@string{#2}%
+  \edef#1{\atfi@temp@string}%
+}
+
+
 % keyval setup is stored in a list. It should be executed locally to be
 % able to change the dictionaries in a group
 
 \ExplSyntaxOn
+% message
 \cs_new:Npn \__atfi_clist_display:n #1 {*~#1\\}
-
-\tl_new:N \l__atfi_setup_keyval_tl
-\tl_new:N \l__atfi_annot_icon_tl
-\tl_new:N \l__atfi_annot_color_tl
-\tl_new:N \l__atfi_filename_tl
-\color_set:nnn {__atfi_annot_color}{rgb}{1,0.9255,0.7765}
-
 \msg_new:nnn
   { atfi }
   { unknown-choice }
@@ -73,11 +74,51 @@
     An~empty~value~removes~the~setting.
   }
 
+\msg_new:nnn
+  { atfi }
+  { no-bool }
+  {
+    Value~'#2'~is~invalid~for~key~'#1'.\\
+    The~key~accepts~only~the~choices\\
+    *~true\\
+    *~false \\
+    No~value~is~equivalent~to~using~`true`.
+  }
+% variables
+% probably generic ....
+\pdfdict_new:n   {annot/FileAttachment}
+\pdfdict_put:nnn {annot/FileAttachment}{Subtype}{/FileAttachment}
+\pdfdict_new:n   {annot/FileAttachment/AP} % appearance
+
+%
+\color_set:nnn {__atfi_annot_color}{rgb}{1,0.9255,0.7765}
+\bitsetReset {__atfi_annotFlags} %
+
+\tl_new:N \l__atfi_tmpa_tl
+% key-val
+
+\tl_new:N   \l__atfi_setup_keyval_tl
+\tl_new:N   \l__atfi_filename_tl
+
+\tl_new:N   \l__atfi_annot_icon_tl
+\tl_new:N   \l__atfi_annot_color_tl
+\fp_new:N   \l__atfi_annot_scale_fp
+\bool_new:N \l__atfi_annot_print_bool
+\bool_new:N \l__atfi_annot_appearance_bool
+\bool_set_true:N \l__atfi_annot_appearance_bool
 
 \NewDocumentCommand\attachfilesetup { m }
  {
    \tl_put_right:Nn \l__atfi_setup_keyval_tl {, #1 }
  }
+
+% defaults:
+
+\attachfilesetup
+  {
+    ,icon=PushPin
+    ,date=\file_timestamp:n{\jobname.log}
+  }
 
 % replace later
 \cs_new_protected:Npn \atfi@setup #1
@@ -85,10 +126,6 @@
     \keys_set:nn {atfi} { #1 }
   }
 
-% probably generic ....
-\pdfdict_new:n   {annot/FileAttachment}
-\pdfdict_put:nnn {annot/FileAttachment}{Subtype}{/FileAttachment}
-\pdfdict_new:n   {annot/FileAttachment/AP} % appearance
 
 \keys_define:nn { atfi }
   {
@@ -108,8 +145,10 @@
         \tl_if_empty:nF { #1 }
           {
            \pdftool_textstringhex_print:nN  { #1 } \l__atfi_filename_tl %variable
+           \pdfdict_put:nnx { file/FileSpec } {F} { \l__atfi_filename_tl }
           }
       }
+    ,filename .groups:n = {embed}
     %ucfilespec -> embed step
     %checksum   -> bool to suppress the checksum
     %creationdate ->additional /CreationDate in FileSpec-dict
@@ -138,166 +177,123 @@
           { Data, Graph, PushPin, Tag }
           { \exp_not:n {#1} }
       }
-    ,icon     .groups:n =  { attach }
+    ,icon     .groups:n =  { annot }
     %         initial: PushPin, but should be set only in the command
     ,color    .tl_set:N = \l__atfi_annot_color_tl
-    ,color    .groups:n =  { attach }
+    ,color    .groups:n =  { annot }
     ,color    .initial:n = { __atfi_annot_color }
     %color    -> attach step, affects icon
     %         decide allowed syntax of expressions ...
     %         initial: 1 0.9255 0.7765
 
     %% annotation dict (attach step)
-    %date     /M(...)
-    %         initial  \file_timestamp:n {\jobname.log}
-
+    ,date     .code:n  =
+      {  % escaping??
+         \pdfdict_put:nnn {annot/FileAttachment}{M}{(#1)}
+      }
     %annotname /NM (..) (unique name)
     %          no initial value
-
+    ,annotname    .code:n    =
+      {
+        %code to sanitize the value
+        %need an expl3 variant ...
+        \atfi@pdfstringdef\l__atfi_tmpa_tl { #1 }
+        \pdfdict_put:nnx {annot/FileAttachment}{NM}{(\l__atfi_tmpa_tl)}
+      }
+    ,annotname    .groups:n =  { annot }
+    %          no initial value
     ,author    .code:n    =
       {
-        %!! code to sanitize the value
-        \pdfdict_put:nnn {annot/FileAttachment}{T}{#1}
+        %code to sanitize the value
+        %need an expl3 variant ...
+        \atfi@pdfstringdef\l__atfi_tmpa_tl { #1 }
+        \pdfdict_put:nnx {annot/FileAttachment}{T}{(\l__atfi_tmpa_tl)}
       }
-    ,author     .groups:n =  { attach }
+    ,author     .groups:n =  { annot }
     %          no initial value
 
     % description /Contents
+    ,description    .code:n    =
+      {
+        %code to sanitize the value
+        %need an expl3 variant ...
+        \atfi@pdfstringdef\l__atfi_tmpa_tl { #1 }
+        \pdfdict_put:nnx {annot/FileAttachment}{Contents}{(\l__atfi_tmpa_tl)}
+      }
+    ,description     .groups:n =  { annot }
 
     ,subject    .code:n    =
       {
-        %!! code to sanitize the value
-        \pdfdict_put:nnn {annot/FileAttachment}{Subj}{#1}
+      %code to sanitize the value
+        %need an expl3 variant ...
+        \atfi@pdfstringdef\l__atfi_tmpa_tl { #1 }
+        \pdfdict_put:nnn {annot/FileAttachment}{Subj}{(\l__atfi_tmpa_tl)}
       }
-    ,subject     .groups:n =  { attach }
-
+    ,subject     .groups:n =  { annot }
+    ,appearance  .bool_set:N = \l__atfi_annot_appearance_bool
+    ,appearance  .groups:n =  { annot }
     % appearance: decides if the appearance dict is insert. drop?
-
+    ,print .choice:
+    ,print / false .code:n =
+      {
+        \bool_set_false:N \__atfi_annot_print_bool
+        \bitsetClear { __atfi_annotFlags }{\prop_item:Nn\c_pdfannot_flags_prop {Print}}
+        \pdfdict_put:nnx {annot/FileAttachment}{F}{\bitsetGetDec { __atfi_annotFlags }}
+      }
+    ,print / true .code:n =
+      {
+        \bool_set_true:N \__atfi_annot_print_bool
+        \bitsetSet { __atfi_annotFlags }{\prop_item:Nn\c_pdfannot_flags_prop {Print}}
+        \pdfdict_put:nnx {annot/FileAttachment}{F}{\bitsetGetDec { __atfi_annotFlags }}
+      }
+    ,print    .default:n = true
+    ,print / unknown .code:n =
+     {
+       \msg_warning:nnxx { atfi} { no-bool }
+         { print }
+         { \exp_not:n {#1} }
+     }
+    ,print .groups:n = { annot }
     % print: sets /F flag, also boolean used in the no-XXX command
-
-    % scale :scales the icon/annot
-
-    %   timezone,: ignored (we take \file_timestamp)
+    ,zoom .choice:
+    ,zoom / false .code:n =
+      {
+        \bool_set_false:N \__atfi_annot_zoom_bool
+        \bitsetSet { __atfi_annotFlags }{\prop_item:Nn\c_pdfannot_flags_prop {NoZoom}}
+        \pdfdict_put:nnx {annot/FileAttachment}{F}{\bitsetGetDec { __atfi_annotFlags }}
+      }
+    ,zoom / true .code:n =
+      {
+        \bool_set_true:N \__atfi_annot_zoom_bool
+        \bitsetClear { __atfi_annotFlags }{\prop_item:Nn\c_pdfannot_flags_prop {NoZoom}}
+        \pdfdict_put:nnx {annot/FileAttachment}{F}{\bitsetGetDec { __atfi_annotFlags }}
+      }
+    ,zoom / unknown .code:n =
+     {
+       \msg_warning:nnxx { atfi} { no-bool }
+         { zoom }
+         { \exp_not:n {#1} }
+     }
+    ,print .groups:n = { annot }
+    ,scale .fp_set:N = \l__atfi_annot_scale_fp
+    ,scale .initial:n = 1
   }
 
-\bitsetReset {__atfi_annotFlags}
+
 \ExplSyntaxOff
-%\def\atfi@mimetype{}
-%\define@key{AtFi}{mimetype}{%
-%  \edef\atfi@mimetype{#1}%
-%  % pattern matching remove as it fails with allowed types
-%  %
-%  \ifx\atfi@mimetype\ltx@empty
-%  \else
-%    \EdefEscapeName\atfi@mimetype{\atfi@mimetype}%
-%    \edef\atfi@mimetype{/Subtype/\atfi@mimetype}%
-%  \fi
+
+% more colors?
+%\define@key{AtFi}{color}{%
+%  \HyColor@AttachfileColor{#1}%
+%          \atfi@color@tex\atfi@color@inline\atfi@color@annot
+%          {attachfile2}{color}%
 %}
-\define@key{AtFi}{icon}{%
-  \def\atfi@icon{/Name/#1}%
-  \def\atfi@icon@icon{#1}%
-}
-\atfi@setup{icon=PushPin}
-\define@key{AtFi}{color}{%
-  \HyColor@AttachfileColor{#1}%
-          \atfi@color@tex\atfi@color@inline\atfi@color@annot
-          {attachfile2}{color}%
-}
-%\atfi@setup{color=1 0.9255 0.7765}
-\def\atfi@pad@ii#1{%
-  \ifnum#1>9 %
-    \number#1%
-  \else
-    0\number#1%
-  \fi%
-}
-\let\atfi@timezone\ltx@empty
-\define@key{AtFi}{timezone}{\def\atfi@timezone{#1}}
-\edef\atfi@time{\the\time}
-\def\atfi@hours{%
-  \numexpr\dimexpr0.01667\dimexpr\atfi@time sp\relax\relax\relax
-}
-\def\atfi@minutes{%
-  \numexpr\atfi@time-60*\atfi@hours\relax
-}
-\def\atfi@seconds{0}
-\ExplSyntaxOn
-\def\atfi@date{%
-  /M(\file_timestamp:n{\jobname.log})%
-}
-\ExplSyntaxOff
-\define@key{AtFi}{date}{%
-  \EdefEscapeString\atfi@date{#1}%
-  \edef\atfi@date{/M(\atfi@date)}%
-}
-\DeclareRobustCommand{\atfi@pdfstringdef}[2]{%
-  \pdfstringdef\atfi@temp@string{#2}%
-  \edef#1{\atfi@temp@string}%
-}
-\def\atfi@NoValue{\NoValue}
-\def\atfi@DefNoValueName#1#2#3{%
-  \def#1{#3}%
-  \ifx#1\atfi@NoValue
-    \let#1\ltx@empty
-  \else
-    \atfi@pdfstringdef#1{#1}%
-    \edef#1{/#2(#1)}%
-  \fi
-}
-\let\atfi@annotname\ltx@empty
-\define@key{AtFi}{annotname}[\NoValue]{%
-  \atfi@DefNoValueName\atfi@annotname{NM}{#1}%
-}
-\def\atfi@author{}
-\define@key{AtFi}{author}[\NoValue]{%
-  \atfi@DefNoValueName\atfi@author{T}{#1}%
-}
-\def\atfi@description{}
-\define@key{AtFi}{description}[\NoValue]{%
-  \atfi@DefNoValueName\atfi@description{Contents}{#1}%
-}
-\def\atfi@subject{}
-\define@key{AtFi}{subject}[\NoValue]{%
-  \atfi@DefNoValueName\atfi@subject{Subj}{#1}%
-}
-\DeclareBoolOption[true]{print} % should set boolean and
-%\bitsetSet{__atfi_annotFlags}{\prop_item:Nn\c__pdf_annot_flag_prop:{Print}}
 
-\DeclareBoolOption[true]{zoom} %should set boolean and
-%\bitsetSet{__atfi_annotFlags}{\prop_item:Nn\c__pdf_annot_flag_prop:{Zoom}}
 
-\DeclareBoolOption[true]{appearance}
-\DeclareStringOption[1]{scale}
-\def\atfi@ucfilespec{}
-\define@key{AtFi}{ucfilespec}[1]{%
-  \def\atfi@ucfilespec{#1}%
-  \ifx\atfi@ucfilespec\ltx@empty
-  \else
-    \atfi@pdfstringdef\atfi@ucfilespec{#1}%
-  \fi
-}
-
-\DeclareRobustCommand{\attachfilesetup}[1]{\setkeys{AtFi}{#1}}
-\DeclareLocalOptions{%
-  annotname,%
-  appearance,%
-  author,%
-  color,%
-  date,%
-  description,%
-  icon,%
-  mimetype,%
-  print,%
-  scale,%
-  subject,%
-  ucfilespec,%
-  zoom,%
-}
-\InputIfFileExists{attachfile.cfg}{}{}
 \ProcessKeyvalOptions*
-\def\atfi@DisableOption{%
-  \DisableKeyvalOption[action=error,package=attachfile2]{AtFi}%
-}
+%\def\atfi@DisableOption{%
+%  \DisableKeyvalOption[action=error,package=attachfile2]{AtFi}%
+%}
 
 \DeclareRobustCommand{\notextattachfile}[2][]{%
   \begingroup
