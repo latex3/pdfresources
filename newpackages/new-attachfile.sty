@@ -110,6 +110,13 @@
 
 \tl_new:N   \l__atfi_annot_icon_tl
 \tl_new:N   \l__atfi_annot_color_tl
+\clist_new:N   \g__atfi_file_afrelationship_clist
+\clist_gset:Nn \g__atfi_file_afrelationship_clist
+  {
+    Source, Data, Alternative, Supplement,
+    EncryptedPayload, FormData, Schema,
+    Unspecified (default)
+  }
 \fp_new:N   \l__atfi_annot_scale_fp
 \bool_new:N \l__atfi_annot_print_bool
 \bool_new:N \l__atfi_annot_appearance_bool
@@ -153,10 +160,42 @@
         \tl_if_empty:nF { #1 }
           {
            \pdftool_textstringhex_print:nN  { #1 } \l__atfi_filename_tl %variable
-           \pdfdict_put:nnx { file/FileSpec } {F} { \l__atfi_filename_tl }
+           \pdfdict_put:nnx { file/FileSpec } {F}  { \l__atfi_filename_tl }
+           \pdfdict_put:nnx { file/FileSpec } {UF} { \l__atfi_filename_tl }
           }
       }
     ,filename .groups:n = {embed}
+    ,afrelationship .choices:nn =
+      {Source, Data, Alternative, Supplement, EncryptedPayload, FormData, Schema, Unspecified }
+      {
+        \pdfdict_put:nnx { file/FileSpec } {AFRelationship }  { \pdftool_name:n {#1} }
+      }
+    ,afrelationship .default:n = { Unspecified }
+    ,afrelationship / .code:n =
+      {
+        \pdfdict_remove:nn { file/FileSpec } {AFRelationship }
+      }
+    ,afrelationship  / unknown .code:n =
+      {
+        \msg_warning:nnxxx { atfi } { unknown-choice }
+         { afrelationship }
+         { \g__atfi_file_afrelationship_clist }
+         { \exp_not:n {#1} }
+      }
+    ,new-afrelationship .code:n =
+      {
+        \clist_gput_right:Nn \g__atfi_file_afrelationship_clist { #1~(user~defined) }
+        \keys_define:nn { atfi }
+          {
+            afrelationship / #1 .code:n =
+              {
+                \pdfdict_put:nnx
+                  { file/FileSpec }
+                  {AFRelationship }
+                  { \pdftool_name:n {#1} }
+              }
+          }
+      }
     %ucfilespec -> embed step
     %checksum   -> bool to suppress the checksum
     %creationdate ->additional /CreationDate in FileSpec-dict
@@ -324,8 +363,8 @@
     \group_end:
   }
 \ExplSyntaxOff
-\atfi@DisableOption{draft}%
-\atfi@DisableOption{final}%
+%\atfi@DisableOption{draft}%
+%\atfi@DisableOption{final}%
 \ifatfi@draft
   \def\atfi@dummy@pushpin{%
     \raisebox{-1.25bp}{\parbox[b][14bp]{24bp}{}}%
@@ -344,7 +383,7 @@
 
 \ExplSyntaxOn
 % embed the file and create the filespec dictionary:
-\cs_new_protected:Npn \__atfi_file_embed:nn #1 #2 % #1 keys, #2 symbolic name, #3 file name
+\cs_new_protected:Npn \__atfi_file_embed:nnn #1 #2 #3 % #1 keys, #2 symbolic name, #3 file name
   {
     \pdfobject_if_exist:nTF { g__atfi_file_obj_#2 }
       {
@@ -362,7 +401,7 @@
   }
 
 % create the appearance xform:
-\cs_new_protected:Npn \__atfi_annot_xform_appearance:n
+\cs_new_protected:Npn \__atfi_annot_xform_appearance:n #1
   {
     \pdf_xform_if_exist:nF { g__atfi_annot_iconxform_#1 }
       {
@@ -374,71 +413,65 @@
   }
 
 
-\def\atfi@insert@file@annot#1{%
-  \rule{0pt}{0pt}%
-  \ifatfi@appearance
-    \edef\atfi@appearance@dict{%
-      /AP<<%
-        /N~ \pdf_xform_ref:n { atfi@appearancebox }%
-        /R~ \pdf_xform_ref:n { atfi@appearancebox }%
-        /D~ \pdf_xform_ref:n { atfi@appearancebox }%
-      >>%
-    }%
-  \else
-    \let\atfi@appearance@dict\ltx@empty
-  \fi
-%  \ltx@IfUndefined{atfi@fsobj@#1}{%
-%    \begingroup
-%      \hypersetup{unicode=false}%
-%      \atfi@pdfstringdef\atfi@file{#1}%
-%      \pdf_object_now:nx{dict}{%
-%          /Type/Filespec%
-%          /F(\atfi@file)%
-%          \ifx\atfi@ucfilespec\ltx@empty
-%          \else
-%            /UF(\atfi@ucfilespec)%
-%          \fi
-%          /EF<<%
-%            /F~ \@nameuse{atfi@fileobj@#1}%
-%          >>%
-%      }%
-%      \expandafter\xdef\csname atfi@fsobj@#1\endcsname{%
-%        \pdf_object_last:
-%      }%
-%    \endgroup
-%  }{%
-%  }%
-  \pdfannot_box:nnnn
-     {\atfi@scale\atfi@appearancewidth}
-     {\atfi@scale\atfi@appearanceheight}
-     {\atfi@scale\atfi@appearancedepth}
-     {
-      \pdfdict_map:n {annot/FileAttachment}
-     % /Subtype/FileAttachment%
-%      \atfi@icon
-%      \atfi@color@annot
-%      \atfi@author
-%      \atfi@date
-%      \atfi@annotname
-%      \atfi@description
-%      \atfi@subject
-%      \atfi@appearance@dict
-      /F~ \bitsetGetDec {__atfi_annotFlags}
-      /FS~ \pdf_object_ref:n{atfi@fileobj@#1}%
-     }%
-  %\rule{0pt}{\atfi@appearanceheight}%
-%  \rule[-\atfi@appearancedepth]{0pt}{\atfi@appearancedepth}%
-%  \rule{\atfi@appearancewidth}{0pt}%
-}
-\ExplSyntaxOff
+\cs_new_protected:Npn \__atfi_annot:n #1 {}%#1 symbolic object name from
+\def\atfi@insert@file@annot#1
+  {
+    \rule{0pt}{0pt}%
+    \pdfdict_put:nnx
+          { annot/FileAttachment }
+          {FS}
+          {\pdf_object_ref:n{g__atfi_file_obj_#1}}
+    \bool_if:NT \l__atfi_annot_appearance_bool
+      {
+        \pdfdict_put:nnx
+          { annot/FileAttachment/AP }
+          { N }
+          { \pdf_xform_ref:n { g__atfi_annot_iconxform_\l__atfi_annot_icon_tl } }
+        \pdfdict_put:nnx
+          { annot/FileAttachment/AP }
+          { R }
+          { \pdf_xform_ref:n { g__atfi_annot_iconxform_\l__atfi_annot_icon_tl } }
+        \pdfdict_put:nnx
+          { annot/FileAttachment/AP }
+          { D }
+          { \pdf_xform_ref:n { g__atfi_annot_iconxform_\l__atfi_annot_icon_tl } }
+       }
+     \pdfannot_box:nnnn
+        {
+          \fp_to_dim:n
+            {
+              \l__atfi_annot_scale_fp *
+              \pdf_xform_wd:n{g__atfi_annot_iconxform_\l__atfi_annot_icon_tl}
+            }
+        }
+        {
+          \fp_to_dim:n
+            {
+              \l__atfi_annot_scale_fp *
+              \pdf_xform_ht:n{g__atfi_annot_iconxform_\l__atfi_annot_icon_tl}
+            }
+        }
+        {
+          \fp_to_dim:n
+            {
+              \l__atfi_annot_scale_fp *
+              \pdf_xform_dp:n{g__atfi_annot_iconxform_\l__atfi_annot_icon_tl}
+            }
+        }
+        {
+          \pdfdict_map:n {annot/FileAttachment}
+          \bool_if:NT \l__atfi_annot_appearance_bool
+            {
+              /AF
+                <<
+                  \pdfdict_map:n {annot/FileAttachment/AF}
+                >>
+            }
 
-%\def\attachfile@timezone#1{%
-%  \ifx\\#1\\%
-%    % no timezone information given
-%  \else
-%    \def\atfi@timezone{#1}%
-%  \fi
-%}
+         /FS~ \pdf_object_ref:n{atfi@fileobj@#1}%
+     }%
+  }
+\ExplSyntaxOff
 
 \newcommand*{\attachfile@file}[2][]{%
   \EdefUnescapeHex\atfi@filename{#2}%
@@ -462,15 +495,6 @@
 }
 
 \ExplSyntaxOn
-
-
-\def\atfi@set@appearance#1{%
-  \savebox{\atfi@appearancebox}{#1}%
-  \atfi@appearancewidth=\wd\atfi@appearancebox
-  \atfi@appearanceheight=\ht\atfi@appearancebox
-  \atfi@appearancedepth=\dp\atfi@appearancebox
-  \atfi@xform
-}
 
 \def\atfi@textattachfile#1#2{%
     \endgroup
