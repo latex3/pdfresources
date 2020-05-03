@@ -38,7 +38,7 @@
 %<*package>
 \RequirePackage{xparse,l3pdf}
 %\RequirePackage{tmpl3shipout}
-\RequirePackage{atbegshi,zref-lastpage}
+\RequirePackage{lthooks,zref-lastpage}
 \ProvidesExplPackage {pdfresources} {2020-04-08} {0.5}
   {experimental pdf-resource management}
 \DeclareOption { debug }
@@ -251,9 +251,10 @@
   {
     \cs_new_protected:Npn \@@_BACKEND_end_run:
       {
-        \AtEndDocument
+        \hook_gput_code:nnn {enddocument/afterlastpage}
+          {pdf}
           {
-            \clearpage \g_@@_BACKEND_end_run_tl
+            \g_@@_BACKEND_end_run_tl
           }
       }
   }
@@ -306,13 +307,15 @@
     \tl_gput_right:Nn \g_@@_BACKEND_thispage_shipout_tl { #1 }
   }
 
-\AtBeginShipout
-  {
-    \AtBeginShipoutAddToBox
-      {
-        \@@_BACKEND_shipout_code:
-      }
-  }
+%box needed??
+\hook_gput_code:nnn{shipout}{pdf}{\AtBeginShipoutAddToBox { \@@_BACKEND_shipout_code:} }
+%\AtBeginShipout
+%  {
+%    \AtBeginShipoutAddToBox
+%      {
+%        \@@_BACKEND_shipout_code:
+%      }
+%  }
 
 \cs_new_protected:Npn \@@_BACKEND_shipout_code:
   {
@@ -3799,7 +3802,10 @@
       }
   }
 \def\pgfutil@setuppdfresources{\@@_pgf_sys_setuppdfresources_plain:}
-\AtEndPreamble{\pgfutil@setuppdfresources}
+
+%label??
+\hook_gput_code:nnn {begindocument/end} {pdf} { \pgfutil@setuppdfresources }
+%\AtEndPreamble{\pgfutil@setuppdfresources}
 % helper commands as pgf doesn't pass resources as two arguments
 % code to add to the resources existing stuff in the format "/name value":
 \cs_new:Npn \@@_split_dict_entry_aux:NNw #1 #2 /#3~#4\q_stop
@@ -3836,7 +3842,10 @@
 % transparent, we assume that pdfresource is loaded first.
 % the code does nothing is with new-transparent ...
 %    \begin{macrocode}
-\AtEndPreamble
+
+%label??
+\hook_gput_code:nnn {begindocument/end} {pdf}
+%\AtEndPreamble
   {
     \def\TRP@addresource
       {
@@ -3861,7 +3870,8 @@
 % it can not be avoided to recreate the objects (and so to get duplicates)
 % as colorspace uses temporary macros whose contents is lost.
 %    \begin{macrocode}
-\AtEndPreamble
+\hook_gput_code:nnn {begindocument/end} {pdf}
+%\AtEndPreamble
   {
     \tl_if_exist:NT \spc@op
       {
