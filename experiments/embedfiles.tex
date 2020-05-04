@@ -13,8 +13,8 @@
 \begin{document}
 \section{grüße Testing embedding and attaching files}
 \ExplSyntaxOn
-\pdftool_textlitstring_print:nN {xxxgrüße}\l_tmpa_str
-\pdfextension outline goto name {Doc-Start}{\l_tmpa_str}
+%\pdftool_textlitstring_print:nN {xxxgrüße}\l_tmpa_str
+%\pdfextension outline goto name {Doc-Start}{\l_tmpa_str}
 \group_begin:
 \pdfdict_put:nnn  {file/FileSpec} {AFRelationship}{/Source}
 \pdfdict_put:nnn  {file/FileSpec} {Desc}{(this~is~a~eps)}
@@ -26,10 +26,11 @@
 \group_begin:
 \pdfdict_put:nnn  {file/FileSpec} {AFRelationship}{/Source}
 \pdfdict_put:nnn  {file/FileSpec} {Desc}{(this~is~a~eps)}
-\pdffile_embed:nn {example2}{example-image.eps}
-\pdffile_attach:n {example2}
+\pdffile_embed_file:nnn {example-image.eps}{blub.txt}{example2}
+%\pdffile_attach:n {example2}
 \group_end:
 %
+\end{document}
 \group_begin:
 \pdfdict_put:nnn  {file/FileSpec} {AFRelationship}{/Data}
 \pdfdict_put:nnn  {file/FileSpec} {Desc}{(this~is~a~text~file)}

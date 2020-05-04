@@ -213,7 +213,7 @@
 %
 % \begin{function}{\pdffile_embed_file:nnn}
 %   \begin{syntax}
-%     \cs{pdffile_embed_file:nnn} \Arg{source filename} \Arg{target filename} \Arg{object name } 
+%     \cs{pdffile_embed_file:nnn} \Arg{source filename} \Arg{target filename} \Arg{object name }
 %   \end{syntax}
 %   This commands embeds the file \Arg{source filename} in the PDF,
 %   creates a /FileSpec dictionary object named \Arg { object name }.
@@ -222,11 +222,13 @@
 %   dictionaries \texttt{file}, \texttt{file/Params} \texttt{file/FileSpec} to setup
 %   the dictionary entries of the stream object and the  /FileSpec dictionary. The
 %   /F and /UF entry are filled with \Arg{target filename}. If \Arg{target filename}
-%   is empty \Arg{source filename} is used instead.
+%   is empty \Arg{source filename} is used instead. If the file dictionary doesn't
+%   contain a Subtype entry with the mimetype, the command tries to guess it
+%   from the file extension.
 % \end{function}
 % \begin{function}{\pdffile_embed_stream:nnn}
 %   \begin{syntax}
-%     \cs{pdffile_embed_stream:nnN} \Arg{object name } \Arg{content} \Arg{target filename}
+%     \cs{pdffile_embed_stream:nnN} \Arg{content} \Arg{target filename} \Arg{object name }
 %   \end{syntax}
 %   This commands embeds the \Arg{content} in the PDF in a stream objects,
 %   creates a /FileSpec dictionary object named \Arg { object name }.
@@ -251,7 +253,7 @@
 %
 %    \begin{macrocode}
 %<@@=pdf>
-\cs_set_eq:NN \@@_file_filename_convert:nN \pdftool_textstringhex_print:nN
+\cs_set_eq:NN \@@_file_filename_convert_to_print:nN \pdftool_textstringhex_print:nN
 %    \end{macrocode}
 %    \begin{macrocode}
 % https://github.com/latex3/latex3/issues/711
@@ -287,7 +289,7 @@
 %     \l_@@_file_tmpa_tl,
 %     \l_@@_file_tmpa_str,
 %     \l_@@_file_ext_str,
-%     \l_@@_file_subtype_tl
+%     \l_@@_file_automimetype_tl
 %   }
 % temporary variables: generic, for extension, subtype
 % \end{variable}
@@ -296,7 +298,7 @@
 \str_new:N \l_@@_file_tmpa_str
 
 \str_new:N \l_@@_file_ext_str
-\tl_new:N  \l_@@_file_subtype_tl
+\tl_new:N  \l_@@_file_automimetype_tl
 
 %    \end{macrocode}
 % \begin{variable} {\g_pdffile_mimetypes_prop}
@@ -321,14 +323,13 @@
 %    \end{macrocode}
 % \begin{variable}
 %  {
-%   \l_pdffile_full_name_str,
+%   \l_pdffile_source_full_name_str,
 %  }
-% \cs{l_pdffile_full_name_str} will be set at the begin of the command and
+% \cs{l_pdffile_source_full_name_str} will be set at the begin of the command and
 % contains the full file name and can be used e.g. with \cs{file_timestamp:n}.
-% It is used in the default values of the file/Params dictionary.
 % \end{variable}
 %    \begin{macrocode}
-\str_new:N  \l_pdffile_full_name_str
+\str_new:N  \l_pdffile_source_full_name_str
 \str_new:N  \l_pdffile_full_name_convert_str
 %    \end{macrocode}
 % Here we define and setup the local dictionaries. We also define constants.
@@ -344,11 +345,11 @@
 \cs_new_protected:cpn { @@_dict_file/Params_reset: }
   {
     \pdfdict_put:nnn { file/Params }
-      {ModDate}  { (\file_timestamp:n { \l_pdffile_full_name_str }) }
+      {ModDate}  { (\file_timestamp:n { \l_pdffile_source_full_name_str }) }
     \pdfdict_put:nnn { file/Params }
-      {Size}     { \file_size:n { \l_pdffile_full_name_str } }
+      {Size}     { \file_size:n { \l_pdffile_source_full_name_str } }
     \pdfdict_put:nnn { file/Params }
-      {CheckSum} { (\file_mdfive_hash:n { \l_pdffile_full_name_str }) }
+      {CheckSum} { (\file_mdfive_hash:n { \l_pdffile_source_full_name_str }) }
   }
 \pdfdict_reset:n { file/Params }
 
@@ -368,20 +369,13 @@
 
 %    \end{macrocode}
 % \end{variable}
-% these macros must be combined ...
-% \begin{macro}{\pdffile_embed:nN}
-%    \begin{macrocode}
 
-%% separate file name to embed and file name to display!
-\cs_new_protected:Npn \pdffile_embed:nn #1 #2
- % #1 symbolic object name of file spec  #2 real file name,
- % the /F and /UF value must be set before!
+% \begin{macro}{\pdffile_embed:nnn}
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_file_mimetype_set:NN #1 #2 %#1 file name, #2 tl for guessed mimetype
   {
-    \file_get_full_name:nNTF {#2} \l_pdffile_full_name_str
-      {
-        %we need the extension
-        \file_parse_full_name:VNNN
-          \l_pdffile_full_name_str
+    \file_parse_full_name:VNNN
+          #1
           \l_tmpa_tl
           \l_tmpb_tl
           \l_@@_file_ext_str
@@ -391,41 +385,66 @@
           {
             \prop_get:NVNTF \g_pdffile_mimetypes_prop \l_@@_file_ext_str \l_tmpa_tl
               {
-                \tl_set:Nx \l_@@_file_subtype_tl {/Subtype~\pdftool_name:V \l_tmpa_tl}
+                \tl_set:Nx #2 {/Subtype~\pdftool_name:V \l_tmpa_tl}
               }
               {
-                \tl_clear:N \l_@@_file_subtype_tl
+                \tl_clear:N #2
                 \msg_warning:nnn { pdffile }{ mimetype-missing} { #2 }
               }
           }
-      \pdf_object_now:nx { fstream }
+    }
+
+\cs_new_protected:Npn \@@_file_fstream_write:NN #1 #2 %#1 file name, #2 guessed mimetype
+  {
+    \pdf_object_now:nx { fstream }
+      {
         {
+          #2
+          \pdfdict_map:n {file}
+          \pdfdict_if_empty:nF {file/Params}
+            {
+              /Params
+                <<
+                  \pdfdict_map:n {file/Params}
+                >>
+            }
+        }
+        { #1 }
+      }
+     \tl_clear:N \l_@@_file_automimetype_tl
+   }
+
+\cs_new_protected:Npn \@@_file_filespec_write:nnn #1 #2 #3 %#1 dict, #2 target file name, #3 object ref
+  {
+    \pdf_object_new:nn   { #1 } {dict}
+    \group_begin:
+        \@@_file_filename_convert_to_print:nN  { #2 } \l_@@_file_tmpa_str
+        \pdfdict_put:nnx {file/FileSpec}{F} { \l_@@_file_tmpa_str }
+        \pdfdict_put:nnx {file/FileSpec}{UF}{ \l_@@_file_tmpa_str }
+        \pdf_object_write:nx { #1 }
           {
-            \l_@@_file_subtype_tl
-            \pdfdict_map:n {file}
-            \pdfdict_if_empty:nF {file/Params}
+            \pdfdict_map:n {file/FileSpec}
+            \tl_if_empty:nF { #3 }
               {
-                /Params
-                  <<
-                    \pdfdict_map:n {file/Params}
-                  >>
+                /EF <</F~#3 /UF~#3>>
               }
           }
-          { \l_pdffile_full_name_str }
-        }
-      \tl_clear:N \l_@@_file_subtype_tl
-      \tl_set:Nx  \l_@@_file_object_last_tl {\pdf_object_last:}
-      \pdf_object_new:nn   { #1 } {dict}
-      \@@_file_filename_convert:nN  { #2 } \l_pdffile_full_name_convert_str
-      \pdf_object_write:nx { #1 }
-        {
-          \pdfdict_map:n {file/FileSpec}
-          /EF <</F~\l_@@_file_object_last_tl /UF~\l_@@_file_object_last_tl>>
-        }
-     }
-     {
-        \msg_error:nnn { pdffile }{ file-not-found }{ #2 }
-     }
+    \group_end:
+  }
+%% separate file name to embed and file name to display!
+\cs_new_protected:Npn \pdffile_embed_file:nnn #1 #2 #3 %\Arg{source filename} \Arg{target filename} \Arg{ object name }
+  { %!!! add tests: if #1 empty => only filespec
+    %              if #2 empty => = #1
+    \file_get_full_name:nNTF {#1} \l_pdffile_source_full_name_str
+      {
+        \@@_file_mimetype_set:NN  \l_pdffile_source_full_name_str \l_@@_file_automimetype_tl
+        \@@_file_fstream_write:NN \l_pdffile_source_full_name_str \l_@@_file_automimetype_tl
+        \exp_args:Nnnx
+         \@@_file_filespec_write:nnn { #3 } { #2 } {\pdf_object_last:} %#1 dict, #2 target file name, #3 object ref
+      }
+      {
+        \msg_error:nnn { pdffile }{ file-not-found }{ #1 }
+      }
   }
 
 
