@@ -395,7 +395,7 @@
        %keys for dict entries ...
        \keys_set_groups:nnV {atfi}{embed} \l__atfi_setup_keys_tl
        \keys_set_groups:nnn {atfi}{embed} {#1}
-       \pdffile_embed:nn { g__atfi_file_obj_#2 }{ #3 }
+       \pdffile_embed_file:nnN { g__atfi_file_obj_#2 }{ #3 } %!!!!!!!!!!!syntax
        \group_end:
       }
   }

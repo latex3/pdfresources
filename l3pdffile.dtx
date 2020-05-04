@@ -69,7 +69,7 @@
 % The tasks to embed and reference such file are
 % \begin{enumerate}
 % \item Embed the file in a stream.
-% \item Create a FileSpec dictionary which references the embedded file. In the /EF
+% \item Create a FileSpec dictionary which references the stream object in the /EF
 % dictionary
 % \begin{verbatim}
 % <<
@@ -80,7 +80,12 @@
 % /EF <</F 21 0 R /UF 21 0 R>>   %case 3, embedded file
 % >>
 % \end{verbatim}
-% \item Reference the FileSpec dictionary so that the user can access the file.
+% The file names in the /UF and /F value don't need to be identical to the
+% file name of the embedded file. It is quite possible to embed a \texttt{zzz.tex}
+% and name it \texttt{blub.tex}. The second name is then what the user will see
+% in the attachment list or in the properties of an annotation.
+%
+%\item Reference the FileSpec dictionary so that the user can access the file.
 %       This can be done in various way:
 %       \begin{enumerate}
 %       \item With an annotation (/Subtype/FileAttachment). This is done by
@@ -97,7 +102,7 @@
 %             \end{tabular}
 %
 %             The AP takes precedence over Border and similar keys.
-%       \item Through an entry in the EmbeddedFiles name tree. This is what embedfiles does.
+%       \item Through an entry in the /EmbeddedFiles name tree. This is what embedfiles does.
 %       \begin{verbatim}
 %       20 0 obj %Document Name tree
 %        <</EmbeddedFiles 21 0 R>>
@@ -108,8 +113,8 @@
 %       \end{verbatim}
 %       The strings (keys) in the /Names dictionary must be sorted lexically. But they
 %       don't have to be the file name or anything related to the file name. So the code will
-%       use l3emb0001, l3emb0002. The key is needed only in one place:
-%       to identify the start file in a collection.
+%       use l3emb0001, l3emb0002. The key  used for a is perhaps needed once:
+%       to identify the start file in a collection, so there must be a way to retrieve it.
 %
 %       \item Through the /AF key in various objects (pdf 2.0). The value is normally an array of object
 %       references, but it can also be a name which is mapped to an array in /Properties:
@@ -136,7 +141,7 @@
 %       needed to decrypt the document.\\
 %       FormData & shall be used if this file specification
 %       is the data associated with the AcroForm
-%       (see 12.7.3, "Interactive form dictionary") of this PDF.\\
+%       (see 12.7.3, \enquote{Interactive form dictionary}) of this PDF.\\
 %       Schema & shall be used if this file specification is a schema
 %       definition for the associated object
 %       (e.g. an XML schema associated with a metadata stream).\\
@@ -144,7 +149,7 @@
 %       relationship is not known
 %       or cannot be described using one of the other values.\\
 %       Other names & Second-class names (see Annex E,
-%       “(normative) PDF Name Registry") should be used to
+%       \enquote{(normative) PDF Name Registry}) should be used to
 %       represent other types of relationships.
 %       \end{tabular}
 %      \end{enumerate}
@@ -184,25 +189,52 @@
 % it should be possible to store and use a list of common extensions. Other
 % can be added manually.
 % \item The dictionary can contain additional keys (/Filter, /DecodeParms)
-% \item The dictionary can actually refer to an external file (in which case the
+% \item The filespec dictionary can actually refer to an external file (in which case the
 % stream is ignored.
+
 % \end{itemize}
 %
-% Implementation: There will be two local dictionaries, file and file/Params.
-% The file/Params will have default settings. The dictionaries are used to
-% build the attributes of the object.
+% \begin{function}{file, file/Params, file/FileSpec}
+% These are three local dictionaries which are used by the \cs{\pdffile_embed} command
+% to fill the dictionaries of the file and the filespec object. The following values
+% are preset in the dictionary:
 %
+% \begin{tabular}{lll}
+% dictionary & key  & value\\\hline
+% file       & Type  & /EmbeddedFile\\
+% file/Params& Size     & \cs{file_size:n}\\
+% file/Params& ModDate  & (\cs{file_timestamp:n})\\
+% file/Params& CheckSum & (\cs{file_mdfive_hash:n})\\
+% file/FileSpec & Type & /FileSpec\\
+% file/FileSpec & AFRelationship &Unspecified
 %
+% \end{tabular}
+% \end{function}
 %
-%
-% \begin{function}{\pdffile_embed:nN}
+% \begin{function}{\pdffile_embed_file:nnn}
 %   \begin{syntax}
-%     \cs{pdffile_embed:nN} \Arg{filename} \meta{tl var}
+%     \cs{pdffile_embed_file:nnn} \Arg{source filename} \Arg{target filename} \Arg{object name } 
 %   \end{syntax}
-%   This commands embeds the file \Arg{filename} in the PDF and stores the
-%   object reference in \meta{tl var}. It uses the content of the local
-%   dictionaries \texttt{file} and \texttt{file/Params} to setup
-%   the dictionary entries of the stream object.
+%   This commands embeds the file \Arg{source filename} in the PDF,
+%   creates a /FileSpec dictionary object named \Arg { object name }.
+%   The object name must be unique.
+%   It uses the content of the local
+%   dictionaries \texttt{file}, \texttt{file/Params} \texttt{file/FileSpec} to setup
+%   the dictionary entries of the stream object and the  /FileSpec dictionary. The
+%   /F and /UF entry are filled with \Arg{target filename}. If \Arg{target filename}
+%   is empty \Arg{source filename} is used instead.
+% \end{function}
+% \begin{function}{\pdffile_embed_stream:nnn}
+%   \begin{syntax}
+%     \cs{pdffile_embed_stream:nnN} \Arg{object name } \Arg{content} \Arg{target filename}
+%   \end{syntax}
+%   This commands embeds the \Arg{content} in the PDF in a stream objects,
+%   creates a /FileSpec dictionary object named \Arg { object name }.
+%   The object name must be unique. It uses the content of the local
+%   dictionaries \texttt{file}, \texttt{file/Params} \texttt{file/FileSpec} to setup
+%   the dictionary entries of the stream object and the /FileSpec dictionary. The
+%   /F and /UF entry are filled with \Arg{target filename}. If \Arg{target filename}
+%   is empty an automatically created name is used instead.
 % \end{function}
 % \end{documentation}
 %
@@ -268,7 +300,8 @@
 
 %    \end{macrocode}
 % \begin{variable} {\g_pdffile_mimetypes_prop}
-% This variable holds common mimetypes
+% This variable holds common mimetypes. The key is an extension with (one) period, the
+% value the description, e.g. \texttt{text/csv}.
 % \end{variable}
 %    \begin{macrocode}
 \prop_new:N \g_pdffile_mimetypes_prop
@@ -290,9 +323,9 @@
 %  {
 %   \l_pdffile_full_name_str,
 %  }
-% \cs{l_pdffile_full_name_str} will be set at the begin of the command and contains the
-% , and
-% so can be used in dictionary values or other references.
+% \cs{l_pdffile_full_name_str} will be set at the begin of the command and
+% contains the full file name and can be used e.g. with \cs{file_timestamp:n}.
+% It is used in the default values of the file/Params dictionary.
 % \end{variable}
 %    \begin{macrocode}
 \str_new:N  \l_pdffile_full_name_str
@@ -324,10 +357,10 @@
   {
     \pdfdict_put:nnn { file/FileSpec }
       {Type} { /FileSpec }
-    \pdfdict_put:nnn { file/FileSpec }
-      {F}  { \l_pdffile_full_name_convert_str }
-    \pdfdict_put:nnn { file/FileSpec }
-      {UF} { \l_pdffile_full_name_convert_str }
+%   \pdfdict_put:nnn { file/FileSpec }
+%      {F}  { \l_pdffile_full_name_convert_str }
+%    \pdfdict_put:nnn { file/FileSpec }
+%      {UF} { \l_pdffile_full_name_convert_str }
     \pdfdict_put:nnn { file/FileSpec }
       {AFRelationship} { /Unspecified }
   }
@@ -339,31 +372,32 @@
 % \begin{macro}{\pdffile_embed:nN}
 %    \begin{macrocode}
 
-
+%% separate file name to embed and file name to display!
 \cs_new_protected:Npn \pdffile_embed:nn #1 #2
- % #1 symbolic object name of file spec  #2 file name,
+ % #1 symbolic object name of file spec  #2 real file name,
+ % the /F and /UF value must be set before!
   {
     \file_get_full_name:nNTF {#2} \l_pdffile_full_name_str
       {
-      %we need the extension
-      \file_parse_full_name:VNNN
-        \l_pdffile_full_name_str
-        \l_tmpa_tl
-        \l_tmpb_tl
-        \l_@@_file_ext_str
-      %check if Subtype has been set
-      \pdfdict_get:nnN {file}{Subtype}\l_@@_file_tmpa_tl
-      \quark_if_no_value:NT \l_@@_file_tmpa_tl
-        {
-          \prop_get:NVNTF \g_pdffile_mimetypes_prop \l_@@_file_ext_str \l_tmpa_tl
-            {
-              \tl_set:Nx \l_@@_file_subtype_tl {/Subtype~\pdftool_name:V \l_tmpa_tl}
-             }
-            {
-              \tl_clear:N \l_@@_file_subtype_tl
-              \msg_warning:nnn { pdffile }{ mimetype-missing} { #2 }
-            }
-        }
+        %we need the extension
+        \file_parse_full_name:VNNN
+          \l_pdffile_full_name_str
+          \l_tmpa_tl
+          \l_tmpb_tl
+          \l_@@_file_ext_str
+        %check if Subtype has been set
+        \pdfdict_get:nnN {file}{Subtype}\l_@@_file_tmpa_tl
+        \quark_if_no_value:NT \l_@@_file_tmpa_tl
+          {
+            \prop_get:NVNTF \g_pdffile_mimetypes_prop \l_@@_file_ext_str \l_tmpa_tl
+              {
+                \tl_set:Nx \l_@@_file_subtype_tl {/Subtype~\pdftool_name:V \l_tmpa_tl}
+              }
+              {
+                \tl_clear:N \l_@@_file_subtype_tl
+                \msg_warning:nnn { pdffile }{ mimetype-missing} { #2 }
+              }
+          }
       \pdf_object_now:nx { fstream }
         {
           {
@@ -393,6 +427,8 @@
         \msg_error:nnn { pdffile }{ file-not-found }{ #2 }
      }
   }
+
+
 %    \end{macrocode}
 % \end{macro}
 
