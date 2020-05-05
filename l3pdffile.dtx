@@ -283,6 +283,10 @@
   {
     file~object~'\tl_to_str:n{#1}'~is~not~declared
   }
+\msg_new:nnn { pdffile } { target-name-missing }
+  {
+    a~target~name~for~the~/FileSpec~dictionary~is~missing.
+  }
 %    \end{macrocode}
 % \begin{variable}
 %   {
@@ -416,36 +420,58 @@
 
 \cs_new_protected:Npn \@@_file_filespec_write:nnn #1 #2 #3 %#1 dict, #2 target file name, #3 object ref
   {
-    \pdf_object_new:nn   { #1 } {dict}
-    \group_begin:
-        \@@_file_filename_convert_to_print:nN  { #2 } \l_@@_file_tmpa_str
-        \pdfdict_put:nnx {file/FileSpec}{F} { \l_@@_file_tmpa_str }
-        \pdfdict_put:nnx {file/FileSpec}{UF}{ \l_@@_file_tmpa_str }
-        \pdf_object_write:nx { #1 }
-          {
-            \pdfdict_map:n {file/FileSpec}
-            \tl_if_empty:nF { #3 }
+    \tl_if_blank:nT { #2 }
+      {
+        \msg_error:nn {pdffile}{target-name-missing}
+      }
+      {
+        \pdf_object_new:nn   { #1 } {dict}
+        \group_begin:
+            \@@_file_filename_convert_to_print:nN  { #2 } \l_@@_file_tmpa_str
+            \pdfdict_put:nnx {file/FileSpec}{F} { \l_@@_file_tmpa_str }
+            \pdfdict_put:nnx {file/FileSpec}{UF}{ \l_@@_file_tmpa_str }
+            \pdf_object_write:nx { #1 }
               {
-                /EF <</F~#3 /UF~#3>>
+                \pdfdict_map:n {file/FileSpec}
+                \tl_if_empty:nF { #3 }
+                  {
+                    /EF <</F~#3 /UF~#3>>
+                  }
               }
-          }
-    \group_end:
+        \group_end:
+       }
   }
 %% separate file name to embed and file name to display!
 \cs_new_protected:Npn \pdffile_embed_file:nnn #1 #2 #3 %\Arg{source filename} \Arg{target filename} \Arg{ object name }
-  { %!!! add tests: if #1 empty => only filespec
-    %              if #2 empty => = #1
-    \file_get_full_name:nNTF {#1} \l_pdffile_source_full_name_str
+  { %               if #1 empty => only filespec
+    %               if #2 empty => = #1
+
+    \tl_if_blank:nTF { #1 }
       {
-        \@@_file_mimetype_set:NN  \l_pdffile_source_full_name_str \l_@@_file_automimetype_tl
-        \@@_file_fstream_write:NN \l_pdffile_source_full_name_str \l_@@_file_automimetype_tl
+        \tl_set:Nn \l_@@_file_embed_ref_tl {}
+      }
+      {
+        \file_get_full_name:nNTF {#1} \l_pdffile_source_full_name_str
+          {
+            \@@_file_mimetype_set:NN  \l_pdffile_source_full_name_str \l_@@_file_automimetype_tl
+            \@@_file_fstream_write:NN \l_pdffile_source_full_name_str \l_@@_file_automimetype_tl
+            \tl_set:Nx \l_@@_file_embed_ref_tl { \pdf_object_last: }
+          }
+          {
+            \msg_error:nnn { pdffile }{ file-not-found }{ #1 }
+          }
+
+       }
+    \tl_if_blank:nTF { #2 }
+      {
         \exp_args:Nnnx
-         \@@_file_filespec_write:nnn { #3 } { #2 } {\pdf_object_last:} %#1 dict, #2 target file name, #3 object ref
+          \@@_file_filespec_write:nnn { #3 } { #1 } {\l_@@_file_embed_ref_tl} %#1 dict, #2 target file name, #3 object ref
       }
       {
-        \msg_error:nnn { pdffile }{ file-not-found }{ #1 }
+        \exp_args:Nnnx
+          \@@_file_filespec_write:nnn { #3 } { #2 } {\l_@@_file_embed_ref_tl} %#1 dict, #2 target file name, #3 object ref
       }
-  }
+   }
 
 
 %    \end{macrocode}
@@ -455,7 +481,7 @@
 % For pdflatex, lualatex and xelatex, the name and object reference is stored in a sequence.
 % The pdfresources code for the catalog output this and add a reference to /Names,
 % if the sequence is not empty.
-% dvips wants code for every file and then sorts this it self.
+% dvips wants code for every file and then sorts this itself.
 %    \begin{macrocode}
 \int_new:N \g_@@_file_tree_name_int
 % \seq_new:N \g_@@_file_tree_name_seq %moved to resource file, to the push command
@@ -547,7 +573,7 @@
 %     \cs{pdffile_attach:nN}  \Arg{name} \meta{tl var}
 %   \end{syntax}
 %   This attaches the file with name \Arg{name} which has been embedded
-%   with \csname{pdffile_embed:nn}\Arg{name}\Arg{file} to the attachments panel
+%   with \csname{pdffile_embed:nnn} to the attachments panel
 %   of the pdf reader. \meta{tl var} stores the name used in the name tree, in
 %   case it is needed to setup up for example a collection.
 %\end{function}
@@ -578,7 +604,7 @@
      }
  }
 
-%for anonymous objects. This allows to use the interface with objects not
+% for anonymous objects. This allows to use the interface with objects not
 % created with l3 commands / naming
 \cs_new_protected:Npn \pdffile_attach_last:N #1 % #1 in case the name must be retourned
  {

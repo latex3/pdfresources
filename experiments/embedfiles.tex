@@ -26,19 +26,26 @@
 \group_begin:
 \pdfdict_put:nnn  {file/FileSpec} {AFRelationship}{/Source}
 \pdfdict_put:nnn  {file/FileSpec} {Desc}{(this~is~a~eps)}
-\pdffile_embed_file:nnn {example-image.eps}{blub.txt}{example2}
+\pdffile_embed_file:nnn {example-image.eps}{blub.txt}{example1}
 %\pdffile_attach:n {example2}
 \group_end:
 %
-\end{document}
 \group_begin:
 \pdfdict_put:nnn  {file/FileSpec} {AFRelationship}{/Data}
 \pdfdict_put:nnn  {file/FileSpec} {Desc}{(this~is~a~text~file)}
-\pdfdict_put:nnn  {file/FileSpec} {F}{(Fnewname.txt)}
-\pdfdict_put:nnn  {file/FileSpec} {UF}{(UFnewname.txt)}
-\pdffile_embed:nn {test} {testinput.txt}
-\pdffile_attach:n {test}
+\pdffile_embed_file:nnn {testinput.txt} {} {example2}
+\pdffile_attach:n {example2}
 \group_end:
+
+\group_begin:
+\pdfdict_put:nnn  {file/FileSpec} {AFRelationship}{/Data}
+\pdfdict_put:nnn  {file/FileSpec} {Desc}{(this~is~only~a~filespec)}
+\pdffile_embed_file:nnn {} {testinput.txt} {example4}
+\pdffile_attach:n {example4} %not a good idea doesn't work.
+\group_end:
+
+\end{document}
+
 %
 \group_begin:
 \pdfdict_put:nnn  {file/FileSpec} {AFRelationship}{/Source}
