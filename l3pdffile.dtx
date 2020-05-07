@@ -283,9 +283,21 @@
   {
     file~object~'\tl_to_str:n{#1}'~is~not~declared
   }
+
 \msg_new:nnn { pdffile } { target-name-missing }
   {
     a~target~name~for~the~/FileSpec~dictionary~is~missing.
+  }
+
+\msg_new:nnn { pdffile } { object-exists }
+  {
+    object~name~'#1'~is~already~used.
+  }
+
+\msg_new:nnn { pdffile } { no-file-embedded }
+  {
+    No~file~has~been~embedded~with~object~name~'#1'\\
+    Attaching~command~ignored.
   }
 %    \end{macrocode}
 % \begin{variable}
@@ -442,36 +454,63 @@
        }
   }
 %% separate file name to embed and file name to display!
-\cs_new_protected:Npn \pdffile_embed_file:nnn #1 #2 #3 %\Arg{source filename} \Arg{target filename} \Arg{ object name }
+% we record here the source file. This allows also to test if an object name
+% has an embedded file or is only a filespec
+%
+\prop_new:N \g_@@__file_embed_sources_prop
+
+\cs_new_protected:Npn \pdffile_embed_file:nnn #1 #2 #3
+   %\Arg{source filename} \Arg{target filename} \Arg{ object name }
   { %               if #1 empty => only filespec
     %               if #2 empty => = #1
-
-    \tl_if_blank:nTF { #1 }
+    \pdfobject_if_exist:nTF { #3 }
       {
-        \tl_set:Nn \l_@@_file_embed_ref_tl {}
+        \msg_error:nnn { pdffile }{ object-exists } { #3 }
       }
       {
-        \file_get_full_name:nNTF {#1} \l_pdffile_source_full_name_str
+        \tl_if_blank:nTF { #1 }
           {
-            \@@_file_mimetype_set:NN  \l_pdffile_source_full_name_str \l_@@_file_automimetype_tl
-            \@@_file_fstream_write:NN \l_pdffile_source_full_name_str \l_@@_file_automimetype_tl
-            \tl_set:Nx \l_@@_file_embed_ref_tl { \pdf_object_last: }
+            \tl_set:Nn \l_@@_file_embed_ref_tl {}
           }
           {
-            \msg_error:nnn { pdffile }{ file-not-found }{ #1 }
-          }
+            \file_get_full_name:nNTF {#1} \l_pdffile_source_full_name_str
+              {
+                \prop_gput:NnV
+                  \g_@@__file_embed_sources_prop
+                  { #1 }
+                  \l_pdffile_source_full_name_str
+                \@@_file_mimetype_set:NN
+                  \l_pdffile_source_full_name_str
+                  \l_@@_file_automimetype_tl
+                \@@_file_fstream_write:NN
+                  \l_pdffile_source_full_name_str
+                  \l_@@_file_automimetype_tl
+                \tl_set:Nx \l_@@_file_embed_ref_tl { \pdf_object_last: }
+              }
+              {
+                \msg_error:nnn { pdffile }{ file-not-found }{ #1 }
+              }
 
-       }
-    \tl_if_blank:nTF { #2 }
-      {
-        \exp_args:Nnnx
-          \@@_file_filespec_write:nnn { #3 } { #1 } {\l_@@_file_embed_ref_tl} %#1 dict, #2 target file name, #3 object ref
+           }
+        \tl_if_blank:nTF { #2 }
+          {
+            \exp_args:Nnnx
+              \@@_file_filespec_write:nnn
+                %#1 dict, #2 target file name, #3 object ref
+                { #3 }
+                { #1 }
+                {\l_@@_file_embed_ref_tl}
+          }
+          {
+            \exp_args:Nnnx
+              \@@_file_filespec_write:nnn
+                %#1 dict, #2 target file name, #3 object ref
+                { #3 }
+                { #2 }
+                {\l_@@_file_embed_ref_tl}
+          }
       }
-      {
-        \exp_args:Nnnx
-          \@@_file_filespec_write:nnn { #3 } { #2 } {\l_@@_file_embed_ref_tl} %#1 dict, #2 target file name, #3 object ref
-      }
-   }
+  }
 
 
 %    \end{macrocode}
@@ -508,12 +547,13 @@
      \sys_if_engine_xetex_p:
   }
  {
-  \cs_new_protected:Npn  \@@_backend_attach_tree_name:nN #1 #2 %#1 object ref , #2 in case the name must be retourned
-   {
-     \int_gincr:N \g_@@_file_tree_name_int
-     \tl_set:Nx #2 { \@@_file_tree_name: }
-     \seq_gput_right:Nx \g_@@_file_tree_name_seq { #2 ~#1 }
-   }
+  \cs_new_protected:Npn  \@@_backend_attach_tree_name:nN #1 #2
+    %#1 object ref , #2 in case the name must be retourned
+    {
+      \int_gincr:N \g_@@_file_tree_name_int
+      \tl_set:Nx #2 { \@@_file_tree_name: }
+      \seq_gput_right:Nx \g_@@_file_tree_name_seq { #2 ~#1 }
+    }
  }
 
 % dvips
@@ -578,13 +618,23 @@
 %   case it is needed to setup up for example a collection.
 %\end{function}
 %    \begin{macrocode}
+\cs_new_protected:Npn \@@_file_check_attach_aux:nN #1  #2
+  {
+    \prop_get:NnNTF \g_@@__file_embed_sources_prop { #1 } \l_tmpa_str
+      {
+        \exp_args:Nx
+          \@@_backend_attach_tree_name:nN {\pdf_object_ref:n{#1}} #2
+      }
+      {
+        \msg_warning:nnn { pdffile } { no-file-embedded } { #1 }
+      }
+  }
 
-\cs_new_protected:Npn \pdffile_attach:nN #1 #2 % name of filespec object, #2 in case the name must be retourned
+\cs_new_protected:Npn \pdffile_attach:nN #1 #2 % #1 name of filespec object, #2 in case the name must be retourned
  {
-   \@@_backend_object_if_exist:nTF { #1}
+   \@@_backend_object_if_exist:nTF { #1 }
      {
-       \exp_args:Nx
-       \@@_backend_attach_tree_name:nN {\pdf_object_ref:n{#1}} #2
+       \@@_file_check_attach_aux:nN { #1 } #2
      }
      {
        \msg_error:nnn { pdffile } { file-object-no-found } { #1 }
@@ -595,9 +645,7 @@
  {
    \@@_backend_object_if_exist:nTF { #1}
      {
-       \exp_args:Nx
-         \@@_backend_attach_tree_name:nN
-           {\pdf_object_ref:n{#1}} \l_@@_file_tmpa_tl
+       \@@_file_check_attach_aux:nN { #1 } \l_@@_file_tmpa_tl
      }
      {
        \msg_error:nnn { pdffile } { file-object-no-found } { #1 }
@@ -605,7 +653,7 @@
  }
 
 % for anonymous objects. This allows to use the interface with objects not
-% created with l3 commands / naming
+% created with l3 commands / naming. Testing if there is a file is not possible here
 \cs_new_protected:Npn \pdffile_attach_last:N #1 % #1 in case the name must be retourned
  {
    \tl_set:Nx \l_@@_file_tmpa_tl {\pdf_object_last:}
