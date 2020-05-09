@@ -335,6 +335,7 @@
     ,.png = image/png
     ,.tex = text/plain %or application/x-tex, not in iana.org list
     ,.txt = text/plain
+    ,.sty = text/plain
   }
 %    \end{macrocode}
 % \begin{variable}
@@ -404,8 +405,8 @@
                 \tl_set:Nx #2 {/Subtype~\pdftool_name:V \l_tmpa_tl}
               }
               {
+                \msg_warning:nnx { pdffile }{ mimetype-missing} {#1}
                 \tl_clear:N #2
-                \msg_warning:nnn { pdffile }{ mimetype-missing} { #2 }
               }
           }
     }
