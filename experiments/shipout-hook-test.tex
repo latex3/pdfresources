@@ -1,0 +1,24 @@
+\RequirePackage{lthooks}
+\documentclass{article}
+\usepackage{zref-user}
+\makeatletter
+\ExplSyntaxOn
+\zref@newprop* {myabspage} [0] { \int_use:N \g_abspage_int }
+\zref@addprop {main} {myabspage}
+
+\int_new:N\g_abspage_int
+\hook_gput_code:nnn{shipout/background}{test}{\put(10,-30){\gdef\blub{back}background: \zlabel{back}\zref[myabspage]{back}}}
+\hook_gput_code:nnn{shipout/before}{test}{\gdef\blub{before}\def\blab{xxx}\int_gincr:N \g_abspage_int}
+\hook_gput_code:nnn{shipout/foreground}{test}{\put(10,-50){foreground: \zlabel{fore}\zref[myabspage]{fore}}}
+\ExplSyntaxOff
+\makeatother
+\begin{document}
+
+\ExplSyntaxOn
+page: \zlabel{page}\zref[myabspage]{page}
+\ExplSyntaxOff
+
+\newpage
+\blub \blab
+
+\end{document}
