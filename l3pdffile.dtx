@@ -441,6 +441,7 @@
         \pdf_object_new:nn   { #1 } {dict}
         \group_begin:
             \@@_file_filename_convert_to_print:nN  { #2 } \l_@@_file_tmpa_str
+            \str_show:N\l_@@_file_tmpa_str
             \pdfdict_put:nnx {file/FileSpec}{F} { \l_@@_file_tmpa_str }
             \pdfdict_put:nnx {file/FileSpec}{UF}{ \l_@@_file_tmpa_str }
             \pdf_object_write:nx { #1 }
@@ -458,7 +459,7 @@
 % we record here the source file. This allows also to test if an object name
 % has an embedded file or is only a filespec
 %
-\prop_new:N \g_@@__file_embed_sources_prop
+\prop_new:N \g_@@_file_embed_sources_prop
 
 \cs_new_protected:Npn \pdffile_embed_file:nnn #1 #2 #3
    %\Arg{source filename} \Arg{target filename} \Arg{ object name }
@@ -477,8 +478,8 @@
             \file_get_full_name:nNTF {#1} \l_pdffile_source_full_name_str
               {
                 \prop_gput:NnV
-                  \g_@@__file_embed_sources_prop
-                  { #1 }
+                  \g_@@_file_embed_sources_prop
+                  { #3 }
                   \l_pdffile_source_full_name_str
                 \@@_file_mimetype_set:NN
                   \l_pdffile_source_full_name_str
@@ -621,7 +622,7 @@
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_file_check_attach_aux:nN #1  #2
   {
-    \prop_get:NnNTF \g_@@__file_embed_sources_prop { #1 } \l_tmpa_str
+    \prop_get:NnNTF \g_@@_file_embed_sources_prop { #1 } \l_tmpa_str
       {
         \exp_args:Nx
           \@@_backend_attach_tree_name:nN {\pdf_object_ref:n{#1}} #2

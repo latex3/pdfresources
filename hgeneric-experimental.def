@@ -1371,7 +1371,8 @@
     \group_begin:
       \cs_set:Npn \HyInfo@do##1{%
         \EdefEscapeName\HyInfo@Key{##1}%
-        \pdf_info_gput:on {\HyInfo@Key}{(\csname HyInfo@Value@##1\endcsname)}
+        %variant??
+        \pdfdict_gput:nox {Info} {\HyInfo@Key}{(\csname HyInfo@Value@##1\endcsname)}
         }
       \HyInfo@AddonList
     \group_end:
@@ -1379,6 +1380,7 @@
 
 
 \def\PDF@FinishDoc{}% dummy needed for hyperref ...
+
 
 \AtEndPreamble{
   \pdf@ifdraftmode{}{
