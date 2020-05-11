@@ -3870,6 +3870,17 @@
 % it can not be avoided to recreate the objects (and so to get duplicates)
 % as colorspace uses temporary macros whose contents is lost.
 %    \begin{macrocode}
+% this must be earlier, to avoid problems with luatex which has two pageresources
+% lua/tex
+\hook_gput_code:nnn {begindocument} {pdf}
+  {
+    \tl_if_exist:NT \spc@op
+      {
+        \def\spc@Pageresources#1{}
+      }
+
+  }
+
 \hook_gput_code:nnn {begindocument/end} {pdf}
 %\AtEndPreamble
   {
@@ -3899,7 +3910,6 @@
           {Page/Resources/ExtGState}
           {SPCop}
           {\@@_backend_object_ref:n {__spc_extgstate_op_true1}}
-        \def\spc@Pageresources#1{}
       }
   }
 %    \end{macrocode}
