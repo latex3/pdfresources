@@ -1,0 +1,135 @@
+% \iffalse meta-comment
+%
+%% File: l3pdffile.dtx
+%
+% Copyright (C) 2018-2020 The LaTeX3 Project
+%
+% It may be distributed and/or modified under the conditions of the
+% LaTeX Project Public License (LPPL), either version 1.3c of this
+% license or (at your option) any later version.  The latest version
+% of this license is in the file
+%
+%    http://www.latex-project.org/lppl.txt
+%
+% This file is part of the "(experimental) pdfresources bundle" (The Work in LPPL)
+% and all files in that bundle must be distributed together.
+%
+% -----------------------------------------------------------------------
+%
+% The development version of the bundle can be found at
+%
+%    https://github.com/latex3/pdfresources
+%
+% for those people who are interested.
+%
+%<*driver>
+\RequirePackage{expl3}
+\documentclass[full]{l3doc}
+\begin{document}
+  \DocInput{\jobname.dtx}
+\end{document}
+%</driver>
+% \fi
+%
+% \title{^^A
+%   The \pkg{l3pdfmeta} package\\ Adding XMP-metadata to a pdf  ^^A
+% }
+%
+% \author{^^A
+%  The \LaTeX3 Project\thanks
+%    {^^A
+%      E-mail:
+%        \href{mailto:latex-team@latex-project.org}
+%          {latex-team@latex-project.org}^^A
+%    }^^A
+% }
+%
+% \date{Released XXXX-XX-XX}
+%
+% \maketitle
+% \begin{documentation}
+%
+% \section{\pkg{l3pdfmeta} documentation}
+% XMP-metadata are needed for various standards. Currently they can be added
+% by two mutual incompatible packages: \pkg{hyperxmp} and \pkg{pdfx}. Both
+% packages are currently also incompatible with the pdf resource management.
+%
+% This package should not replace both packages. Its goal is to create
+% a skeleton metadata stream, add some core default values
+% and to define interfaces that allows other packages
+% to add data to this metadata and so to extend them.
+%
+% The problems to solve are
+% \begin{itemize}
+% \item which tree structure is sensible
+% \item how to escape if needed the input (or which tools are needed to allow
+% the users to correctly escape their input)
+% \item how interface to input data should look
+% \end{itemize}
+
+% \end{documentation}
+%
+% \begin{implementation}
+%
+% \section{\pkg{l3pdfmeta} implementation}
+%
+%    \begin{macrocode}
+%<*package>
+\ProvidesExplPackage {l3pdfmeta} {2020-05-13} {0.1}
+  {XMP-Metadata}
+\RequirePackage{pdfresources}
+\RequirePackage{new-pdfescape}  %temporarly!!
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%<@@=pdf>
+% we need a command to write a BOM to the pdf:
+\str_const:Nx\c_@@_meta_bom_str
+ {
+  \bool_if:nTF
+    {
+      \sys_if_engine_luatex_p: || \sys_if_engine_xetex_p:
+    }
+    {
+     \char_generate:nn {65279}{12}
+    }
+    {
+      \char_generate:nn {239}{12}
+      \char_generate:nn {187}{12}
+      \char_generate:nn {191}{12}
+    }
+ }
+% writing the stream:
+\str_new:N \g_@@_xmpmeta_str
+
+\str_gset:Nx      \g_@@_xmpmeta_str {<?xpacket~begin="\c_@@_meta_bom_str"~id="W5M0MpCehiHzreSzNTczkc9d"?>\iow_newline:}
+\str_put_right:Nx \g_@@_xmpmeta_str {<x:xmpmeta~xmlns:x="adobe:ns:meta/">\iow_newline:}
+
+%here more contents ...
+\str_put_right:Nx \g_@@_xmpmeta_str { </x:xmpmeta> \iow_newline: }
+%here padding??
+\str_put_right:Nn \g_@@_xmpmeta_str { <?xpacket~end="w"?> }
+%
+%    \end{macrocode}
+% \subsection{The stream object}
+%
+%    \begin{macrocode}
+\pdf_object_new:nn {__pdf_Metadata} {stream}
+
+% we will need a boolean to suppress the metadata if wanted ...
+\hook_gput_code:nnn {shipout/lastpage}{pdf}
+  {
+    \pdf_object_write:nx {__pdf_Metadata}
+      {
+        { /Type /Metadata /Subtype /XML }
+        {\g_@@_xmpmeta_str}
+      }
+  }
+%    \end{macrocode}
+%    \begin{macrocode}
+%</package>
+%    \end{macrocode}
+%
+% \end{implementation}
+%
+% \PrintIndex
