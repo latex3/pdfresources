@@ -1,0 +1,29 @@
+\documentclass{article}
+\usepackage{pdfresources}
+\pagestyle{empty}
+%based/translated from https://chat.stackexchange.com/transcript/message/54366708#54366708
+\ExplSyntaxOn
+
+\pdf_uncompress:
+
+\pdfdict_new:n   {annot/Widget}
+\pdfdict_put:nnn {annot/Widget}{Subtype}{/Widget}
+
+\NewDocumentCommand \buttonfield { }
+  {
+    \group_begin:
+    \pdfdict_put:nnn{annot/Widget}{F}{/Btn}
+    \pdfdict_put:nnn{annot/Widget}{T}{(button)}
+    \pdfdict_put:nnn{annot/Widget}{Ft}{65536}
+    \pdfannot_box:nnnnn {Widget}{ 100pt } { 100pt } { 0pt }{}
+    \pdfdict_gput:nnx {Catalog/AcroForm}{Fields}{\pdfannot_box_last:}
+    \group_end:
+  }
+
+\ExplSyntaxOff
+
+\begin{document}
+
+xxx\buttonfield
+
+\end{document}
