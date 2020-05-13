@@ -38,13 +38,16 @@
 \ProvidesFile{hgeneric-experimental.def}
   [2020/03/16 v0.5 %
   Hyperref driver for luaTeX]
-\RequirePackage{xparse,etoolbox}
 \RequirePackage{pdfresources}
+\RequirePackage{xparse,etoolbox}
+
 \chardef\Hy@VersionChecked=1 %don't check the version!
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \ExplSyntaxOn
 %% messages, should later (with more drivers) go somewhere more generic ...
 \prop_gput:Nnn \g_msg_module_name_prop { hyp }{ hyperref }
+
+\cs_new:Npn \__hyp_clist_display:n #1 {*~#1\\}
 \msg_new:nnn
   { hyp }
   { missing-bookmark-package }
@@ -107,6 +110,15 @@
     Value~'#3'~is~invalid~for~key~'#1'.\\
     The~key~accepts~only~the~choices\\
     \clist_map_function:nN { #2 }\__hyp_clist_display:n
+  }
+
+\msg_new:nnn
+  { hyp }
+  { unknown-choice+empty }
+  {
+    Value~'#3'~is~invalid~for~key~'#1'.\\
+    The~key~accepts~only~the~choices\\
+    \clist_map_function:nN { #2 }\__hyp_clist_display:n
     An~empty~value~removes~the~setting.
   }
 
@@ -122,7 +134,8 @@
     No~value~is~equivalent~to~using~`true`.
   }
 
-\cs_new:Npn \__hyp_clist_display:n #1 {*~#1\\}
+
+
 %% I require the bookmark package to get rid of some of the bookmarks code.
 % but the testing code doesn't work.
 % !!!!!!!!!!!!!!!!!!!!! to do !!!!!!!!!!!!!!!!!!!!!
@@ -145,20 +158,16 @@
 % checked dvips, luatex, xetex, dvipdfm: values are identical:
 \providecommand*\@pdfborder{0~0~1}
 \providecommand*\@pdfborderstyle{}
+\providecommand*\@pdfview{XYZ}
+
 % unicode ...
 \HyPsd@LoadUnicode
 \Hy@unicodetrue
 \let\HyPsd@pdfencoding\HyPsd@pdfencoding@unicode
 
-\providecommand*\@pdfview{XYZ}
-
 \pdfannot_link_margin:n { 1pt }
 
 %%%%%%%%%%
-% variants
-\cs_generate_variant:Nn \pdf_object_write:nn {nx}
-
-%\cs_generate_variant:Nn \pdf_pagesattr_gput:nn {nx} %not really needed but one shouldn't rely on side effects
 
 % tmp
 \box_new:N \l__hyp_tmpa_box
@@ -176,7 +185,7 @@
 \tl_new:N  \g__hyp_pdfstartpage_tl
 \tl_new:N  \g__hyp_pdfstartview_tl
 
-% bools
+% booleans
 %%% pdfa key:
 \bool_new:N \l__hyp_pdfa_bool
 \ifHy@pdfa
@@ -871,7 +880,7 @@
      }
    ,pdfdirection / unknown .code:n =
      {
-       \msg_warning:nnxxx { hyp } { unknown-choice }
+       \msg_warning:nnxxx { hyp } { unknown-choice+empty }
          { pdfdirection }
          { L2R , R2L }
          { \exp_not:n {#1} }
@@ -908,7 +917,7 @@
      }
    ,pdfduplex / unknown .code:n =
      {
-       \msg_warning:nnxxx { hyp } { unknown-choice }
+       \msg_warning:nnxxx { hyp } { unknown-choice+empty }
          { pdfduplex }
          { Simplex, DuplexFlipShortEdge, DuplexFlipLongEdge }
          { \exp_not:n {#1} }
@@ -987,7 +996,7 @@
      }
    ,pdfnonfullscreenpagemode / unknown .code:n =
      {
-       \msg_warning:nnxxx { hyp } { unknown-choice }
+       \msg_warning:nnxxx { hyp } { unknown-choice+empty }
          { pdfnonfullscreenpagemode }
          { UseNone, UseOutlines, UseThumbs, FullScreen, UseOC, UseAttachments (PDF 1.6) }
          { \exp_not:n {#1} }
@@ -1020,7 +1029,7 @@
      { \pdfdict_gremove:nn {Catalog} { PageLayout } }
    ,pdfpagelayout / unknown .code:n =
      {
-       \msg_warning:nnxxx { hyp } { unknown-choice }
+       \msg_warning:nnxxx { hyp } { unknown-choice+empty }
          { pdfpagelayout }
          { SinglePage, OneColumn, TwoColumnLeft, TwoColumnRight, TwoPageLeft, TwoPageRight }
          { \exp_not:n {#1} }
@@ -1045,7 +1054,7 @@
    ,pdfpagemode   .initial:n  = { UseOutlines } %for now ...
    ,pdfpagemode / unknown .code:n =
      {
-       \msg_warning:nnxxx { hyp } { unknown-choice }
+       \msg_warning:nnxxx { hyp } { unknown-choice+empty }
          { pdfpagemode }
          { UseNone, UseOutlines, UseThumbs, FullScreen, UseOC, UseAttachments (PDF 1.6) }
          { \exp_not:n {#1} }
@@ -1121,7 +1130,7 @@
      { \pdfdict_gremove:nn {Catalog / ViewerPreferences } { PrintArea } }
    ,pdfprintarea / unknown .code:n =
      {
-       \msg_warning:nnxxx { hyp } { unknown-choice }
+       \msg_warning:nnxxx { hyp } { unknown-choice+empty }
          { pdfprintarea }
          { MediaBox, CropBox, BleedBox, TrimBox, ArtBox }
          { \exp_not:n {#1} }
@@ -1148,7 +1157,7 @@
      }
    ,pdfprintclip / unknown .code:n =
      {
-       \msg_warning:nnxxx { hyp } { unknown-choice }
+       \msg_warning:nnxxx { hyp } { unknown-choice+empty }
          { pdfprintclip }
          { MediaBox, CropBox, BleedBox, TrimBox, ArtBox }
          { \exp_not:n {#1} }
@@ -1197,7 +1206,7 @@
      }
    ,pdfprintscaling / unknown .code:n =
      {
-       \msg_warning:nnxxx { hyp } { unknown-choice }
+       \msg_warning:nnxxx { hyp } { unknown-choice+empty }
          { pdfprintarea }
          { None, AppDefault }
          { \exp_not:n {#1} }
@@ -1278,7 +1287,7 @@
      }
    ,pdfviewarea / unknown .code:n =
      {
-       \msg_warning:nnxxx { hyp } { unknown-choice }
+       \msg_warning:nnxxx { hyp } { unknown-choice+empty }
          { pdfviewarea }
          { MediaBox, CropBox, BleedBox, TrimBox, ArtBox }
          { \exp_not:n {#1} }
@@ -1305,7 +1314,7 @@
      }
    ,pdfviewclip / unknown .code:n =
      {
-       \msg_warning:nnxxx { hyp } { unknown-choice }
+       \msg_warning:nnxxx { hyp } { unknown-choice+empty }
          { pdfviewclip }
          { MediaBox, CropBox, BleedBox, TrimBox, ArtBox }
          { \exp_not:n {#1} }
@@ -1350,6 +1359,31 @@
   }
 
 \hypupdateattribute
+
+%"info" keys
+\keys_define:nn { hyp / setup }
+  {
+    ,pdftrapped .code:n =
+      {
+        \exp_args:Nne
+          \keys_set:nn { hyp / setup } { __pdftrapped = \str_uppercase:n { #1 } }
+      }
+    ,__pdftrapped  .choices:nn = {TRUE,FALSE,UNKNOWN}
+       {
+         \pdfdict_gput:nnx {Info}{Trapped}
+           {/
+             \str_uppercase:f { \str_head:n { #1 } }
+             \str_lowercase:f { \str_tail:n { #1 } }
+           }
+       }
+    ,__pdftrapped / unknown .code:n =
+       {
+         \msg_warning:nnxxx { hyp } { unknown-choice }
+           { pdftrapped }
+           { true~(case~insensitive), false~(case~insensitive), unknown~(case~insensitive) }
+           { \exp_not:n {#1} }
+       }
+  }
 
 \cs_set_protected:Npn \PDF@SetupDoc
   {
@@ -1405,12 +1439,6 @@
       }
     \pdfdict_gput:nnx {Info}
       {Keywords}{(\@pdfkeywords)}
-    \tl_if_empty:NF
-       \@pdftrapped
-       {
-        \pdfdict_gput:nnx {Info}
-        {Trapped}{/\@pdftrapped}
-       }
     }
   \Hy@DisableOption{pdfauthor}%
   \Hy@DisableOption{pdftitle}%
@@ -1420,7 +1448,6 @@
   \Hy@DisableOption{pdfmoddate}%
   \Hy@DisableOption{pdfproducer}%
   \Hy@DisableOption{pdfkeywords}%
-  \Hy@DisableOption{pdftrapped}%
   \Hy@DisableOption{pdfinfo}%
 }
 

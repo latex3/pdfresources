@@ -32,7 +32,7 @@
 % \fi
 %
 % \title{^^A
-%   The \pkg{l3pdfmeta} package\\ Adding XMP-metadata to a pdf  ^^A
+%   The \pkg{l3pdfmeta} package\\ pdf-standards and XMP-metadata   ^^A
 % }
 %
 % \author{^^A
@@ -50,22 +50,27 @@
 % \begin{documentation}
 %
 % \section{\pkg{l3pdfmeta} documentation}
-% XMP-metadata are needed for various standards. Currently they can be added
-% by two mutual incompatible packages: \pkg{hyperxmp} and \pkg{pdfx}. Both
+% This module sets up some tools and commands needed for pdf standards in general
+% and to setup XMP-metadata needed by the various standards in special.
+% Currently XMP-metadata can be added by two mutual incompatible packages:
+% \pkg{hyperxmp} and \pkg{pdfx}. Both
 % packages are currently also incompatible with the pdf resource management.
 %
-% This package should not replace both packages. Its goal is to create
-% a skeleton metadata stream, add some core default values
+% This package should not replace both packages. Regarding XMP-metadate its goal
+% is to create a skeleton metadata stream, add some core default values
 % and to define interfaces that allows other packages
 % to add data to this metadata and so to extend them.
 %
-% The problems to solve are
+% The problems to solve here are
 % \begin{itemize}
 % \item which tree structure is sensible
 % \item how to escape if needed the input (or which tools are needed to allow
 % the users to correctly escape their input)
 % \item how interface to input data should look
 % \end{itemize}
+%
+% Regarding the pdf standards the goal is to collect the requirements and
+% to set check how to set them.
 
 % \end{documentation}
 %
@@ -80,7 +85,7 @@
 \RequirePackage{pdfresources}
 \RequirePackage{new-pdfescape}  %temporarly!!
 %    \end{macrocode}
-%
+% \section{XMP-metadata}
 %    \begin{macrocode}
 %<@@=pdf>
 % we need a command to write a BOM to the pdf:
@@ -125,6 +130,49 @@
         {\g_@@_xmpmeta_str}
       }
   }
+%    \end{macrocode}
+%
+% \section{standards (work in progress)}
+% \subsection{pdf/A}
+%    \begin{macrocode}
+\prop_new:c { g_@@_meta_standard_pdf/A-1b }
+\prop_set_from_keyval:cn { g_@@_meta_standard_pdf/A-1b }
+  {
+    ,name         = pdf/A-1b
+    ,year         = 2005
+    ,pdf_version  = 1.4        %minimum
+    ,encryption   = false
+    ,external_content = false  % no F, FFilter, or FDecodeParms in stream dicts
+    ,embed_content = false,    %no EF key in filespec, no /Type/EmbeddedFiles
+    ,max_string_size  = 65535
+    ,max_array_size   = 8191
+    ,max_dict_size    = 4095
+    ,max_obj_num     =  8388607
+    ,max_nest_qQ     = 28
+    ,Catalog/OCProperties    = false
+    % to be continued https://docs.verapdf.org/validation/pdfa-part1/
+  }
+
+%   ["pdf/a-1b:2005"] = {
+%            pdf_version             = 1.4,
+%            format_name             = "pdf/a-1b:2005",
+%            xmp_file                = "lpdf-pda.xml",
+%            gts_flag                = "GTS_PDFA1",
+%            gray_scale              = true,
+%            cmyk_colors             = true,
+%            rgb_colors              = true,
+%            spot_colors             = true,
+%            calibrated_rgb_colors   = true, -- unknown
+%            cielab_colors           = true, -- unknown
+%            include_intents         = true,
+%            forms                   = true,
+%            internal_icc_profiles   = true,
+%            include_cidsets         = true,
+%            include_charsets        = true,
+%            inject_metadata         = function()
+%                injectxmpinfo("xml://rdf:RDF","<rdf:Description rdf:about='' xmlns:pdfaid='http://www.aiim.org/pdfa/ns/id/'><pdfaid:part>1</pdfaid:part><pdfaid:conformance>B</pdfaid:conformance></rdf:Description>",false)
+%            end
+%        },
 %    \end{macrocode}
 %    \begin{macrocode}
 %</package>
