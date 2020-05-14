@@ -12,8 +12,9 @@
 \NewDocumentCommand \buttonfield { }
   {
     \group_begin:
-    \pdfdict_put:nnn{annot/Widget}{F}{/Btn}
+    \pdfdict_put:nnn{annot/Widget}{FT}{/Btn}
     \pdfdict_put:nnn{annot/Widget}{T}{(button)}
+    \pdfdict_put:nnn{annot/Widget}{Border}{[0~0~1]}
     \pdfdict_put:nnn{annot/Widget}{Ft}{65536}
     \pdfannot_box:nnnnn {Widget}{ 100pt } { 100pt } { 0pt }{}
     \pdfdict_gput:nnx {Catalog/AcroForm}{Fields}{\pdfannot_box_last:}
@@ -26,4 +27,4 @@
 
 xxx\buttonfield
 
-\end{document}
+\end{document} 
