@@ -1,0 +1,14 @@
+\input{regression-test}
+\RequirePackage{l3pdf,lthooks,new-pdfescape}
+\ExplSyntaxOn
+\pdf_version_gset:n{1.7}
+\ExplSyntaxOff
+
+\documentclass{article}
+\usepackage[customdriver=hgeneric-experimental]{hyperref}
+
+\hypersetup{pdfsubject={🦆},pdfinfo={Title={grüße$\int=a$}, Author=blub, Xy Z=ups}}
+
+\begin{document}
+xxx
+\end{document}

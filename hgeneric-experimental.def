@@ -42,7 +42,7 @@
   Hyperref driver for luaTeX]
 \RequirePackage{pdfresources}
 \RequirePackage{xparse,etoolbox}
-
+\RequirePackage{new-pdfescape} %temporarly!
 \chardef\Hy@VersionChecked=1 %don't check the version!
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \ExplSyntaxOn
@@ -256,7 +256,7 @@
 \cs_new_protected:Npn \__hyp_text_purify:nN #1 #2
   {
      \hook_use:n {hyp/text/purify}
-     \tl_set:Nx #2 {\text_purify:n { #1 }
+     \tl_set:Nx #2 {\text_purify:n { #1 } }
   }
 
 % this takes the output of \__hyp_text_purify and applies a converter
@@ -267,15 +267,15 @@
 %           or lit for \pdftool_textstringlit:nN
 \cs_new_protected:Npn \__hyp_text_convert:NnN #1 #2 #3
   {
-     \use:c { pdftool_textstring#2:VN} #1 #3
+     \use:c { pdftool_textstring#2:VN } #1 #3
   }
 
 %% combining both:
 % #1=input, #2= handler shortcut #3 output command
-\cs_new_protected:Npn \__hyp_text_pdfdef:Nnn
+\cs_new_protected:Npn \__hyp_text_pdfdef:nnN #1 #2 #3
  {
    \__hyp_text_purify:nN {#1}\l__hyp_tmpa_tl
-   \__hyp_text_convert:NnN \l__hyp_tmpa_tl { #2} #3
+   \__hyp_text_convert:NnN \l__hyp_tmpa_tl { #2 } #3
  }
 
 % variants of hyperref commands to get attributes in the prop
@@ -1394,6 +1394,54 @@
 \hypupdateattribute
 
 %"info" keys
+% as hyperref resets some at begin document,
+% they only work correctly if set later ...
+% for now they use hex-encoding
+% later we can add instruction to add to meta data here
+\cs_new_protected:Npn \__hyp_setup_info_key:nn #1 #2
+  {
+    \keys_define:nn { hyp / setup }
+      {
+        pdf#1  .code:n =
+          {
+            \__hyp_text_pdfdef:nnN {##1}{ hex_print}\l__hyp_tmpa_tl
+            \pdfdict_gput:nnx {Info}{#2}{\l__hyp_tmpa_tl}
+          }
+      }
+    \keys_define:nn { hyp / info }
+      {
+        #2  .code:n =
+          { 
+            \__hyp_text_pdfdef:nnN {##1}{ hex_print}\l__hyp_tmpa_tl
+            \pdfdict_gput:nnx {Info}{#2}{\l__hyp_tmpa_tl}
+          }
+        ,unknown .code:n =
+         {
+            \__hyp_text_pdfdef:nnN {##1}{ hex_print}\l__hyp_tmpa_tl
+            \exp_args:Nnx
+              \pdfdict_gput:nnx {Info}{\exp_args:No\pdftool_name:n{\l_keys_key_str}}{\l__hyp_tmpa_tl}
+         }
+      }
+  }
+\__hyp_setup_info_key:nn {author}   {Author}
+\__hyp_setup_info_key:nn {title}    {Title}
+\__hyp_setup_info_key:nn {producer} {Producer}
+\__hyp_setup_info_key:nn {creator}  {Creator}
+% ignored key: addtopdfcreator
+\__hyp_setup_info_key:nn {creationdate}  {Creationdate}
+\__hyp_setup_info_key:nn {moddate}  {ModDate}
+\__hyp_setup_info_key:nn {subject}  {Subject}
+\__hyp_setup_info_key:nn {keywords}  {Keywords}
+
+%pdfinfo allows to set the key with keyval ...
+\keys_define:nn { hyp / setup }
+  {
+    pdfinfo .code:n =
+      {
+        \keys_set:nn { hyp / info } { #1 }
+      }
+  }
+%Trapped is a bit curious, it has an value "unknown", and one can't suppress it ...
 \keys_define:nn { hyp / setup }
   {
     ,pdftrapped .code:n =
@@ -1432,47 +1480,15 @@
 %      }
 }
 
-
-\cs_new:Npn \__hyp_info_generate_addons:
- {
-    \group_begin:
-      \cs_set:Npn \HyInfo@do##1{%
-        \EdefEscapeName\HyInfo@Key{##1}%
-        %variant??
-        \pdfdict_gput:nox {Info} {\HyInfo@Key}{(\csname HyInfo@Value@##1\endcsname)}
-        }
-      \HyInfo@AddonList
-    \group_end:
- }
-
-
 \def\PDF@FinishDoc{}% dummy needed for hyperref ...
 
 
 \AtEndPreamble{
   \pdf@ifdraftmode{}{
-    \Hy@UseMaketitleInfos %get Title/Author from \title if pdfusetitle is true
-    \__hyp_info_generate_addons:
-    \pdfdict_gput:nnx {Info}
-      {Author} {(\@pdfauthor)}
-    \pdfdict_gput:nnx {Info}
-      {Title}  {(\@pdftitle)}
-    \pdfdict_gput:nnx {Info}
-      {Subject}{(\@pdfsubject)}
-    \pdfdict_gput:nnx {Info}
-      {Creator}{(\@pdfcreator)}
-    \pdfdict_gput:nnx {Info}
-      {CreationDate}{(\@pdfcreationdate)}
-    \pdfdict_gput:nnx {Info}
-      {ModDate}{(\@pdfmoddate)}
-    \tl_if_exist:NT \@pdfproducer %special, as \relax is default
-      {
-       \pdfdict_gput:nnx {Info}
-        {Producer}{(\@pdfproducer)}
-      }
-    \pdfdict_gput:nnx {Info}
-      {Keywords}{(\@pdfkeywords)}
+    %!!!!! this must be handled somehow
+    \Hy@UseMaketitleInfos %get/set Title/Author from \title if pdfusetitle is true
     }
+  %is this still needed?
   \Hy@DisableOption{pdfauthor}%
   \Hy@DisableOption{pdftitle}%
   \Hy@DisableOption{pdfsubject}%
@@ -1487,10 +1503,10 @@
 \def\hyper@pagetransition{%
   \ifx\@pdfpagetransition\relax
   \else
-   \pdf_pageattr_gremove:n {Trans}
+   \pdfdict_gremove:nn { Page } {Trans}
    \tl_if_empty:NF \@pdfpagetransition
     {
-     \pdfdict_gput:nnx {Page} {Trans}{<< /S /\@pdfpagetransition\space >>}
+     \pdfdict_gput:nnx { Page } {Trans}{<< /S /\@pdfpagetransition\space >>}
     }
   \fi
 }
@@ -1498,7 +1514,7 @@
 \def\hyper@pageduration{%
   \ifx\@pdfpageduration\relax
   \else
-   \pdf_pageattr_gremove:n {Dur}
+   \pdfdict_gremove:nn { Page } {Dur}
    \tl_if_empty:NF \@pdfpageduration
     {
      \pdfdict_gput:nnx {Page} {Dur}{\@pdfpageduration\space}

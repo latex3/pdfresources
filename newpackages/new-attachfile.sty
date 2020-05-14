@@ -151,7 +151,7 @@
             \pdfdict_remove:nn {file}{Subtype}
           }
           {
-            \pdfdict_put:nnx   {file}{Subtype}{\pdftool_name:n{#1} }
+            \pdfdict_put:nnx   {file}{Subtype}{\pdftool_name_print:n{#1} }
           }
       }
     ,mimetype  .groups:n = { embed }
@@ -168,7 +168,7 @@
     ,afrelationship .choices:nn =
       {Source, Data, Alternative, Supplement, EncryptedPayload, FormData, Schema, Unspecified }
       {
-        \pdfdict_put:nnx { file/FileSpec } {AFRelationship }  { \pdftool_name:n {#1} }
+        \pdfdict_put:nnx { file/FileSpec } {AFRelationship }  { \pdftool_name_print:n {#1} }
       }
     ,afrelationship .default:n = { Unspecified }
     ,afrelationship / .code:n =
@@ -192,7 +192,7 @@
                 \pdfdict_put:nnx
                   { file/FileSpec }
                   {AFRelationship }
-                  { \pdftool_name:n {#1} }
+                  { \pdftool_name_print:n {#1} }
               }
           }
       }
