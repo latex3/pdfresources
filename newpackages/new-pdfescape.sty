@@ -104,6 +104,11 @@
 % check if one can use HEX too when directly writing the object
 \sys_if_engine_pdftex:TF
   {
+    \cs_new:Npn \pdftool_textstringlit:nN #1 #2
+      {
+         \str_set_convert:Nnnn #2 { #1 }{ utf8 } {utf16/string}
+      }
+
     \cs_new:Npn \pdftool_textstringlit_print:nN #1 #2
       {
          \str_set_convert:Nnnn #2 { #1 }{ utf8 } {utf16/string}
@@ -112,6 +117,11 @@
       }
   }
   {
+     \cs_new:Npn \pdftool_textstringlit:nN #1 #2
+      {
+        \str_set_convert:Nnnn #2 { #1 }{  } {utf16/string}
+      }
+
     \cs_new:Npn \pdftool_textstringlit_print:nN #1 #2
       {
         \str_set_convert:Nnnn #2 { #1 }{  } {utf16/string}
@@ -122,6 +132,10 @@
 
 \sys_if_engine_pdftex:TF
   {
+    \cs_new:Npn \pdftool_textstringhex:nN #1 #2
+      {
+         \str_set_convert:Nnnn #2 { #1 }{ utf8 } {utf16/hex}
+      }
     \cs_new:Npn \pdftool_textstringhex_print:nN #1 #2
       {
          \str_set_convert:Nnnn #2 { #1 }{ utf8 } {utf16/hex}
@@ -130,6 +144,11 @@
       }
   }
   {
+    \cs_new:Npn \pdftool_textstringhex:nN #1 #2
+      {
+        \str_set_convert:Nnnn #2 { #1 }{  } {utf16/hex}
+      }
+
     \cs_new:Npn \pdftool_textstringhex_print:nN #1 #2
       {
         \str_set_convert:Nnnn #2 { #1 }{  } {utf16/hex}
@@ -137,3 +156,8 @@
          \str_put_right:Nn #2 {>}
       }
   }
+
+\cs_generate_variant:Nn \pdftool_textstringhex_print:nN {VN}
+\cs_generate_variant:Nn \pdftool_textstringhex:nN       {VN}
+\cs_generate_variant:Nn \pdftool_textstringlit_print:nN {VN}
+\cs_generate_variant:Nn \pdftool_textstringlit:nN       {VN}

@@ -14,6 +14,8 @@
 %% \__hyp_PageLabels_gpush: : puts pagelabels in the catalog, used on every storing
 %% \__hyp_pstringdef:Nn     : replaces Hy@pstringdef, converts n to pdfstring and stores in N
 %%                            naming??
+%% \__hyp_text_purify:Nn   : replaces the first step of \pdfstringdef/\Hy@pdfstringdef
+%%                           currently simply \text_purify:n
 %% \__hyp_info_generate_addons: what did this do??
 %% list of new variables
 %% \l__hyp_pdfa_bool : for pdfa option (unclear if it will stay)
@@ -244,6 +246,37 @@
           { 4 }
       }
   }
+
+%% conversion macro, replacement for \pdfstringdef
+% first the purify step
+% a hook, but there will need for a wrapper interface ...
+
+\hook_new:n {hyp/text/purify}
+
+\cs_new_protected:Npn \__hyp_text_purify:nN #1 #2
+  {
+     \hook_use:n {hyp/text/purify}
+     \tl_set:Nx #2 {\text_purify:n { #1 }
+  }
+
+% this takes the output of \__hyp_text_purify and applies a converter
+% #1 = text, #2 = converter #3 output
+% #2 should be hex_print for \pdftool_textstringhex_print:nN
+%              hex for \pdftool_textstringhex:nN
+%           or lit_print for \pdftool_textstringlit_print:nN
+%           or lit for \pdftool_textstringlit:nN
+\cs_new_protected:Npn \__hyp_text_convert:NnN #1 #2 #3
+  {
+     \use:c { pdftool_textstring#2:VN} #1 #3
+  }
+
+%% combining both:
+% #1=input, #2= handler shortcut #3 output command
+\cs_new_protected:Npn \__hyp_text_pdfdef:Nnn
+ {
+   \__hyp_text_purify:nN {#1}\l__hyp_tmpa_tl
+   \__hyp_text_convert:NnN \l__hyp_tmpa_tl { #2} #3
+ }
 
 % variants of hyperref commands to get attributes in the prop
 % these are (temporary) commands to fill various attributes (color, border style) in
