@@ -3233,6 +3233,16 @@
     LockedContents = 9
   }
 %    \end{macrocode}
+% \subsection{Annotations, subtype Widget}
+% The local dictionary \texttt{annot/Widget} is a sceleton
+% dictionary for this subtype. It currently contains as only entry
+% the subtype setting (the /Type is added by the backend).
+%    \begin{macrocode}
+
+\pdfdict_new:n   {annot/Widget}
+\pdfdict_put:nnn {annot/Widget}{Subtype}{/Widget}
+
+%    \end{macrocode}
 % \subsection{Annotations, subtype Link}\label{sec:links}
 % Packages like hyperref, ocgx2 and tagpdf all wants to add code
 % to link annotation. So we need commands to start and end a link which allows
