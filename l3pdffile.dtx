@@ -255,18 +255,6 @@
 %<@@=pdf>
 \cs_set_eq:NN \@@_file_filename_convert_to_print:nN \pdftool_textstringhex_print:nN
 %    \end{macrocode}
-%    \begin{macrocode}
-% https://github.com/latex3/latex3/issues/711
-\prg_new_conditional:Npnn \__pdf_backend_object_if_exist:n #1 { p , T , F , TF }
-  {
-    \int_if_exist:cTF { c__pdf_backend_object_ \tl_to_str:n {#1} _int }
-     { \prg_return_true: }
-     { \prg_return_false:}
-  }
-
-\prg_new_eq_conditional:NNn \pdfobject_if_exist:n\__pdf_backend_object_if_exist:n
-  { TF , T , F , p }
-%    \end{macrocode}
 % \subsection{Messages}
 %    \begin{macrocode}
 \msg_new:nnn { pdffile } { file-not-found }
@@ -465,7 +453,7 @@
    %\Arg{source filename} \Arg{target filename} \Arg{ object name }
   { %               if #1 empty => only filespec
     %               if #2 empty => = #1
-    \pdfobject_if_exist:nTF { #3 }
+    \pdf_object_if_exist:nTF { #3 }
       {
         \msg_error:nnn { pdffile }{ object-exists } { #3 }
       }

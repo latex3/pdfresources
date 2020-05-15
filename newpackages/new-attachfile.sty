@@ -385,7 +385,7 @@
 % embed the file and create the filespec dictionary:
 \cs_new_protected:Npn \__atfi_file_embed:nnn #1 #2 #3 % #1 keys, #2 symbolic name, #3 file name
   {
-    \pdfobject_if_exist:nTF { g__atfi_file_obj_#2 }
+    \pdf_object_if_exist:nTF { g__atfi_file_obj_#2 }
       {
         % message ...
         \msg_warning:nnnn {atfi}{name-exist}{#2}{#3}
