@@ -1515,40 +1515,144 @@
   \Hy@DisableOption{pdfinfo}%
 }
 
-\def\hyper@pagetransition{%
-  \ifx\@pdfpagetransition\relax
-  \else
-   \pdfdict_gremove:nn { Page } {Trans}
-   \tl_if_empty:NF \@pdfpagetransition
-    {
-     \pdfdict_gput:nnx { Page } {Trans}{<< /S /\@pdfpagetransition\space >>}
-    }
-  \fi
-}
 
-\def\hyper@pageduration{%
-  \ifx\@pdfpageduration\relax
-  \else
-   \pdfdict_gremove:nn { Page } {Dur}
-   \tl_if_empty:NF \@pdfpageduration
-    {
-     \pdfdict_gput:nnx {Page} {Dur}{\@pdfpageduration\space}
-    }
-  \fi
-}
-\ExplSyntaxOff
+% pdfpageduration sets the duration a page is shown in full screen mode.
 
+\keys_define:nn { hyp / setup }
+  {
+    pdfpageduration .code:n =
+     {
+        \tl_if_blank:nTF { #1 }
+          {
+            \pdfdict_gremove:nn {Page}{Dur}
+          }
+          {
+            \pdfdict_gput:nnn {Page}{Dur}{#1}
+          }
+     }
+  }
 
-\pdf@ifdraftmode{}{%
-  \g@addto@macro\Hy@EveryPageHook{%
-    \hyper@pagetransition
-    \hyper@pageduration
-    %\hyper@pagehidden %UF is obsolete
-  }%
-}
+% Transition settings are used by (some) pdf viewers when presenting a
+% pdf in full screen mode. They are added to the page settings and describe the
+% transition from the previous page to current page. Transition setting can be
+% set in the preamble for all pages or in the document for the current and the
+% following pages. Due to the asynchronous page breaking one has to be careful
+% to set it on the right page, e.g. only after a |\newpage|.
+% The generic driver uses a different syntax than the other hyperref drivers:
+% various transition options can be set by a keyval syntax in the value of
+% \texttt{pdfpagetransition}. A typical setting looks e.g. like this\\
+% |\hypersetup{pdfpagetransition={style=Fly,duration=2,direction=90,opaque=false}}|
+%
+% The keys allowed in the argument of \texttt{pdfpagetransition} are
+% \begin{tabular}{l>{\raggedright}p{6cm}}
+% style    &  one of Split, Blinds, Box, Wipe, Dissolve, Glitter, R, Fly, Push, Cover, Uncover, Fade\\
+% duration &  a number, describes the duration of the transition\\
+% direction& \begin{tabular}[t]{l}
+%             H~(horizontal,~only~Split,~Blinds)\\
+%             V~(vertical,~only~Split,~Blinds)\\
+%             0~(left~to~right,~only~Wipe,~Glitter,~Fly,~Cover,~Uncover,~Push)\\
+%             90~(bottom~to~top,~only~Wipe)\\
+%             180~(right~to~left,~only~Wipe)\\
+%             270~(top~to~bottom,~only~Wipe,~Glitter,~Fly,~Cover,~Uncover,~Push)\\
+%             315~(top~left~to~bottom,~only~Glitter)\\
+%             None~(only~Fly)
+%             \end{tabular}\\
+% motion   & one of I, O, only relevant for Split, Box and Fly\\
+% scale    & a number, only relevant for Fly style \\
+% opaque   & true or false, only relevant for Fly style
+% \end{tabular}
+
+\keys_define:nn { hyp / setup }
+  {
+    pdfpagetransition .code:n =
+     {
+       \tl_if_blank:nTF {#1}
+         {
+           \pdfdict_gremove:nn {Page}{Trans}
+         }
+         {
+           \group_begin:
+           \keys_set:nn { hyp / trans }{style=R,#1}
+           \pdf_object_now:nx { dict }
+             {
+               \pdfdict_map:n {page/Trans}
+             }
+           \pdfdict_gput:nnx {Page}{Trans}{\pdf_object_last:}
+           \group_end:
+         }
+     }
+  }
+\keys_define:nn { hyp / trans }
+  {
+    ,style .choices:nn =
+      {Split,Blinds,Box,Wipe,Dissolve,Glitter,R,Fly,Push,Cover,Uncover,Fade}
+      { \pdfdict_put:nnn {page/Trans}{ S }{/#1} }
+    ,style / unknown .code:n =
+      {
+        \msg_warning:nnxxx { hyp } { unknown-choice }
+           { trans / style }
+           { Split,Blinds,Box,Wipe,Dissolve,Glitter,R,Fly,Push,Cover,Uncover,Fade }
+           { \exp_not:n {#1} }
+      }
+    ,duration .code:n  =
+      {
+        \pdfdict_put:nnn {page/Trans}{ D }{#1}
+      }
+    ,direction .choices:nn =
+      {H,V}
+      { \pdfdict_put:nnn {page/Trans}{ S }{/#1} }
+    ,direction .choices:nn =
+      {0,90,180,270,315}
+      { \pdfdict_put:nnn {page/Trans}{ DI }{ #1 } }
+    ,direction / None .code:n =
+      { \pdfdict_put:nnn {page/Trans}{ DI }{ /None } }
+    ,direction / unknown .code:n =
+      {
+        \msg_warning:nnxxx { hyp } { unknown-choice }
+           { trans / direction }
+           {
+             H~(horizontal,~only~Split,~Blinds),
+             V~(vertical,~only~Split,~Blinds),
+             0~(left~to~right,~only~Wipe,~Glitter,~Fly,~Cover,~Uncover,~Push),
+             90~(bottom~to~top,~only~Wipe),
+             180~(right~to~left,~only~Wipe),
+             270~(top~to~bottom,~only~Wipe,~Glitter,~Fly,~Cover,~Uncover,~Push),
+             315~(top~left~to~bottom,~only~Glitter),
+             None~(only~Fly)
+           }
+           { \exp_not:n {#1} }
+      }
+    ,motion .choices:nn =
+     {I,O}
+     { \pdfdict_put:nnn {page/Trans}{ M }{/#1} }
+    ,motion / unknown .code:n =
+      {
+        \msg_warning:nnxxx { hyp } { unknown-choice }
+           { trans / motion }
+           { I~(inwards) , O~(outwards) }
+           { \exp_not:n {#1} }
+      }
+     ,scale .code:n =
+       { \pdfdict_put:nnn { page/Trans }{ SS }{ #1 } }
+     ,opaque .choices:nn = {true,false}
+       { \pdfdict_put:nnn { page/Trans }{ B } { #1} }
+     ,opaque / unknown .code:n =
+       {
+          \msg_warning:nnxxx { hyp } { unknown-choice }
+           { trans / B }
+           { true~(opaque~back,~only~Fly), false~(opaque~back,~only~Fly) }
+           { \exp_not:n {#1} }
+       }
+     % try to set unknown keys as style
+     ,unknown .code:n =
+       {
+         % warning ...
+         \exp_args:Nnx\keys_set:nn {hyp/trans}{ style=\l_keys_key_str }
+       }
+  }
 
 %%% UF removed setpagesize code, should be done by kernel/graphicx
-\ExplSyntaxOn
+
 \def\Acrobatmenu#1#2{%
   \Hy@Acrobatmenu{#1}{#2}{%
     \mode_leave_vertical:
