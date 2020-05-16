@@ -1034,7 +1034,16 @@
       }
   }
 %    \end{macrocode}
-%
+% \subsection{Convenience local dictionaries}
+% A number of predefined small, local dictionaries, that are perhaps needed.
+% \subsubsection{page/Trans}
+% This is a template for a Trans dictionary that can be used in a page dictionary.
+%    \begin{macrocode}
+\pdfdict_new:n {page/Trans}
+\pdfdict_put:nnn {page/Trans}{Type}{/Trans}
+ %keys: /S (name), /D integer, /Dm (name), /M (name), /SS number /B boolean.
+ %decribes transition *to* the page.
+%    \end{macrocode}
 % \subsection{The \enquote{Info} dictionary (pdfinfo)}
 % \begin{NOTE}{UF}
 % path: Info
