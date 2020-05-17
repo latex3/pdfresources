@@ -95,6 +95,7 @@
 % \end{NOTE}
 % \begin{function}[added=2019-08-25]{\DeclareDocumentMetaData}
 %    \begin{macrocode}
+%<@@=pdf>
 \NewDocumentCommand\DeclareDocumentMetaData { m }
   {
     \cs_if_eq:NNTF \documentclass \@twoclasseserror
@@ -122,7 +123,7 @@
     ,standard .choices:nn =
       {A-1b,A-2b,A-3b}
       {
-        \prop_gset_eq:Nc \g_@@_meta_standard_prop { g_@@_meta_standard_pdf/#1_prop }
+        \prop_gset_eq:Nc \g_pdfmeta_standard_prop { g_@@_meta_standard_pdf/#1_prop }
       }
     ,standard / unknown .code:n =
       {
@@ -133,7 +134,6 @@
 % \end{function}
 % \section{XMP-metadata}
 %    \begin{macrocode}
-%<@@=pdf>
 % we need a command to write a BOM to the pdf:
 \str_const:Nx\c_@@_meta_bom_str
  {
@@ -166,10 +166,6 @@
 %
 %    \begin{macrocode}
 
-
-% we will need a boolean to suppress the metadata if wanted ...
-\bool_new:N \g_@@_meta_bool
-
 \hook_gput_code:nnn {shipout/lastpage}{pdf}
   {
     \bool_if:NT \g_@@_meta_bool
@@ -188,7 +184,7 @@
 % \subsection{pdf/A}
 %    \begin{macrocode}
 
-\prop_new:N \g_@@_meta_standard_prop
+\prop_new:N \g_pdfmeta_standard_prop
 
 \prop_new:c { g_@@_meta_standard_pdf/A-1b_prop }
 \prop_set_from_keyval:cn { g_@@_meta_standard_pdf/A-1b_prop }

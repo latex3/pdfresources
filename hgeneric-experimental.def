@@ -38,7 +38,7 @@
 %%   \Hy@EXPsetbordercolor
 %%   \hypupdateattribute
 \ProvidesFile{hgeneric-experimental.def}
-  [2020/03/16 v0.5 %
+  [2020/05/17 v0.6 %
   Hyperref driver for luaTeX]
 \RequirePackage{pdfresources}
 \RequirePackage{xparse,etoolbox}
@@ -188,6 +188,7 @@
 \tl_new:N  \g__hyp_pdfstartview_tl
 
 % booleans
+\bool_new:N \l__hyp_tmpa_bool
 %%% pdfa key:
 \bool_new:N \l__hyp_pdfa_bool
 \ifHy@pdfa
@@ -1653,27 +1654,46 @@
 
 %%% UF removed setpagesize code, should be done by kernel/graphicx
 
-\def\Acrobatmenu#1#2{%
-  \Hy@Acrobatmenu{#1}{#2}{%
-    \mode_leave_vertical:
-    \EdefEscapeName\Hy@temp@menu{#1}%
-    \pdfannot_link:nnn { Named }
-      {
-        /A
-          <<
-            /S/Named
-            /N\pdftool_name_print:n{#1}
-            \Hy@href@nextactionraw
-          >>
+\def\Acrobatmenu#1#2
+ {
+   \prop_get:NnNTF \g_pdfmeta_standard_prop {named_actions} \l_tmpa_tl
+     {
+      \tl_if_in:NnTF \l_tmpa_tl { #1 }
+        {
+          \bool_set_true:N \l__hyp_tmpa_bool %restricted but ok
+        }
+        {
+          \bool_set_false:N \l__hyp_tmpa_bool %restricted not ok
+        }
+     }
+     {
+      \bool_set_true:N \l__hyp_tmpa_bool % no restrictions
+     }
+   \bool_if:NTF \l__hyp_tmpa_bool
+     {
+       \mode_leave_vertical:
+       \pdfannot_link:nnn { Named }
+         {
+           /A
+             <<
+               /S/Named
+               /N\pdftool_name_print:n{#1}
+               \Hy@href@nextactionraw
+             >>
+         }
+         {
+           \Hy@colorlink\@menucolor#2
+           \Hy@xspace@end
+           \Hy@endcolorlink
+           \Hy@VerboseLinkStop
+         }
       }
       {
-       \Hy@colorlink\@menucolor#2
-       \Hy@xspace@end
-       \Hy@endcolorlink
-       \Hy@VerboseLinkStop
+        % named action not allowed ...
+        % error??
+        #2
       }
   }
-}
 \ExplSyntaxOff
 %%% UF removed old atbegshi fix
 \ExplSyntaxOn
