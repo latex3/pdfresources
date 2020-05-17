@@ -1044,6 +1044,13 @@
  %keys: /S (name), /D integer, /Dm (name), /M (name), /SS number /B boolean.
  %decribes transition *to* the page.
 %    \end{macrocode}
+% \subsubsection{annot/Link}
+% The dictionaries \texttt{annot/Link/URI}, \texttt{annot/Link/GoToR},
+% \texttt{annot/Link/Launch}, \texttt{annot/Link/GoTo}, \texttt{annot/Link/Named}
+% are created in the pdfannot section \ref{pdf:annot:widget}
+% \subsubsection{annot/Widget}
+% \texttt{annot/Widget} see section \ref{sec:links}.
+%
 % \subsection{The \enquote{Info} dictionary (pdfinfo)}
 % \begin{NOTE}{UF}
 % path: Info
@@ -3242,7 +3249,7 @@
     LockedContents = 9
   }
 %    \end{macrocode}
-% \subsection{Annotations, subtype Widget}
+% \subsection{Annotations, subtype Widget}\label{pdf:annot:widget}
 % The local dictionary \texttt{annot/Widget} is a sceleton
 % dictionary for this subtype. It currently contains as only entry
 % the subtype setting (the /Type is added by the backend).
@@ -3301,7 +3308,7 @@
 
 \seq_map_inline:Nn \c_pdfannot_link_types_seq
  {
-   \@@_dict_new:n { annot/Link/#1 }
+   \pdfdict_new:n { annot/Link/#1 }
    \seq_new:c  { l_@@_hook_annot/Link/#1_begin_seq }
    \seq_new:c  { l_@@_hook_annot/Link/#1_end_seq }
  }
@@ -3600,34 +3607,15 @@
 % \section{Document metadata}
 % We plan a \cs{DeclareDocumentMetaData} so let's start with it.
 % It should for the begin allow to set the version, to uncompress a pdf,
-% and set the language.
+% and set the language. We also add a key to activate the metadata stream and
+% to set a standard. The code has been moved to l3pdfmeta.
 % \begin{NOTE}{UF}
 % how to setup a backend/driver key? Can it be copied from expl3?
 % \end{NOTE}
 % \begin{function}[added=2019-08-25]{\DeclareDocumentMetaData}
 %    \begin{macrocode}
-\NewDocumentCommand\DeclareDocumentMetaData { m }
-  {
-    \cs_if_eq:NNTF \documentclass \@twoclasseserror
-      { \msg_error:nn { pdf }{ setup-after-documentclass } }
-      { \keys_set:nn  { pdf / setup } { #1 } }
-  }
+\RequirePackage{l3pdfmeta} %
 
-\keys_define:nn { pdf / setup }
-  {
-    pdfversion .code:n =
-      {
-        \pdf_version_gset:n { #1 }
-      },
-    uncompress .code:n =
-      {
-        \pdf_uncompress:
-      },
-    lang .code:n =
-      {
-        \pdfdict_gput:nnn {Catalog} {Lang}{(#1)}
-      }
-  }
 
 %    \end{macrocode}
 % \end{function}

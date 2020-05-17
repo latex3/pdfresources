@@ -80,11 +80,57 @@
 %
 %    \begin{macrocode}
 %<*package>
-\ProvidesExplPackage {l3pdfmeta} {2020-05-13} {0.1}
+\ProvidesExplPackage {l3pdfmeta} {2020-05-17} {0.2}
   {XMP-Metadata}
 \RequirePackage{pdfresources}
 \RequirePackage{new-pdfescape}  %temporarly!!
 %    \end{macrocode}
+% \section{Document metadata}
+% We plan a \cs{DeclareDocumentMetaData} so let's start with it.
+% It should for the begin allow to set the version, to uncompress a pdf,
+% and set the language. We also add a key to activate the metadata stream and
+% to set a standard. The code has been moved to l3pdfmeta.
+% \begin{NOTE}{UF}
+% how to setup a backend/driver key? Can it be copied from expl3?
+% \end{NOTE}
+% \begin{function}[added=2019-08-25]{\DeclareDocumentMetaData}
+%    \begin{macrocode}
+\NewDocumentCommand\DeclareDocumentMetaData { m }
+  {
+    \cs_if_eq:NNTF \documentclass \@twoclasseserror
+      { \msg_error:nn { pdf }{ setup-after-documentclass } }
+      { \keys_set:nn  { pdf / setup } { #1 } }
+  }
+
+\msg_new:nnn {pdf}{unknown-standard}{The~standard~'#1'~is~unknown~and~has~been~ignored}
+\bool_new:N \g_@@_meta_bool
+\keys_define:nn { pdf / setup }
+  {
+    ,pdfversion .code:n =
+      {
+        \pdf_version_gset:n { #1 }
+      }
+    ,uncompress .code:n =
+      {
+        \pdf_uncompress:
+      }
+    ,lang .code:n =
+      {
+        \pdfdict_gput:nnn {Catalog} {Lang}{(#1)}
+      }
+    ,meta .bool_gset:N = \g_@@_meta_bool
+    ,standard .choices:nn =
+      {A-1b,A-2b,A-3b}
+      {
+        \prop_gset_eq:Nc \g_@@_meta_standard_prop { g_@@_meta_standard_pdf/#1_prop }
+      }
+    ,standard / unknown .code:n =
+      {
+        \msg_warning:nnn{pdf}{unknown-standard}{#1}
+      }
+  }
+%    \end{macrocode}
+% \end{function}
 % \section{XMP-metadata}
 %    \begin{macrocode}
 %<@@=pdf>
@@ -119,15 +165,21 @@
 % \subsection{The stream object}
 %
 %    \begin{macrocode}
-\pdf_object_new:nn {__pdf_Metadata} {stream}
+
 
 % we will need a boolean to suppress the metadata if wanted ...
+\bool_new:N \g_@@_meta_bool
+
 \hook_gput_code:nnn {shipout/lastpage}{pdf}
   {
-    \pdf_object_write:nx {__pdf_Metadata}
+    \bool_if:NT \g_@@_meta_bool
       {
-        { /Type /Metadata /Subtype /XML }
-        {\g_@@_xmpmeta_str}
+        \pdf_object_new:nn {__pdf_Metadata} {stream}
+        \pdf_object_write:nx {__pdf_Metadata}
+         {
+           { /Type /Metadata /Subtype /XML }
+           {\g_@@_xmpmeta_str}
+         }
       }
   }
 %    \end{macrocode}
@@ -135,8 +187,11 @@
 % \section{standards (work in progress)}
 % \subsection{pdf/A}
 %    \begin{macrocode}
-\prop_new:c { g_@@_meta_standard_pdf/A-1b }
-\prop_set_from_keyval:cn { g_@@_meta_standard_pdf/A-1b }
+
+\prop_new:N \g_@@_meta_standard_prop
+
+\prop_new:c { g_@@_meta_standard_pdf/A-1b_prop }
+\prop_set_from_keyval:cn { g_@@_meta_standard_pdf/A-1b_prop }
   {
     ,name         = pdf/A-1b
     ,year         = 2005
@@ -150,8 +205,20 @@
     ,max_obj_num     =  8388607
     ,max_nest_qQ     = 28
     ,Catalog/OCProperties    = false
+    ,named_actions   = {NextPage, PrevPage, FirstPage, LastPage}
     % to be continued https://docs.verapdf.org/validation/pdfa-part1/
   }
+
+\prop_new:c { g_@@_meta_standard_pdf/A-2b_prop }
+\prop_gset_eq:cc
+  { g_@@_meta_standard_pdf/A-2b_prop }
+  { g_@@_meta_standard_pdf/A-1b_prop }
+
+\prop_new:c { g_@@_meta_standard_pdf/A-3b_prop }
+\prop_gset_eq:cc
+  { g_@@_meta_standard_pdf/A-3b_prop }
+  { g_@@_meta_standard_pdf/A-2b_prop }
+
 
 %   ["pdf/a-1b:2005"] = {
 %            pdf_version             = 1.4,
