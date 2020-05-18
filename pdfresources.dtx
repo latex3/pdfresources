@@ -38,7 +38,7 @@
 %<*package>
 \RequirePackage{xparse,l3pdf}
 %\RequirePackage{tmpl3shipout}
-\RequirePackage{lthooks,zref-lastpage}
+\RequirePackage{lthooks,zref-lastpage,bitset}
 \ProvidesExplPackage {pdfresources} {2020-04-08} {0.5}
   {experimental pdf-resource management}
 \DeclareOption { debug }
@@ -3227,7 +3227,7 @@
 
 
 %    \end{macrocode}
-%% \subsection{Annotations, help tools}
+% \subsection{Annotations, Flags}
 % \begin{variable}{ \c_pdfannot_flags_prop }
 % This property list maps keys like \enquote{Invisible} to the
 % bit positions for the /F-flag. It can be used
@@ -3248,6 +3248,37 @@
     ToggleNoView = 8,
     LockedContents = 9
   }
+
+%Link annotations will always use flags, as we need for the standards.
+%If flags should be different for the subtypes, the hooks should be used.
+%Other flags should perhaps follow. For now we use the bitset package,
+%but this should perhaps change ....
+%
+\cs_new_protected:Npn \pdfannot_flag_new:n #1
+  {
+    \bitsetReset  { @@_#1_flag }
+  }
+
+\pdfannot_flag_new:n {annot/Link}
+
+% #1: type, e.g. annot/Link
+% #2: name of flag, e.g. Print
+\cs_new_protected:Npn \pdfannot_flag_set:nn #1 #2
+  {
+    \bitsetSet  { @@_#1_flag }{\prop_item:Nn\c_pdfannot_flags_prop {#1}}
+  }
+
+\cs_new_protected:Npn \pdfannot_flag_clear:nn #1 #2
+  {
+    \bitsetClear{ @@_#1_flag }{\prop_item:Nn\c_pdfannot_flags_prop {#1}}
+  }
+
+%flags are output as decimals.
+\cs_new:Npn \pdfannot_flag_use:n #1
+  {
+    \bitsetGetDec { @@_#1_flag }
+  }
+
 %    \end{macrocode}
 % \subsection{Annotations, subtype Widget}\label{pdf:annot:widget}
 % The local dictionary \texttt{annot/Widget} is a sceleton
@@ -3309,6 +3340,9 @@
 \seq_map_inline:Nn \c_pdfannot_link_types_seq
  {
    \pdfdict_new:n { annot/Link/#1 }
+   \pdfdict_put:nnn { annot/Link/#1}{ F }{ \pdfannot_flag_use:n { annot/Link} }
+   \hook_new:n {pdf/annot/Link/#1/before}
+   \hook_new:n {pdf/annot/Link/#1/after}
    \seq_new:c  { l_@@_hook_annot/Link/#1_begin_seq }
    \seq_new:c  { l_@@_hook_annot/Link/#1_end_seq }
  }
