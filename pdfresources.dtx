@@ -3341,8 +3341,9 @@
  {
    \pdfdict_new:n { annot/Link/#1 }
    \pdfdict_put:nnn { annot/Link/#1}{ F }{ \pdfannot_flag_use:n { annot/Link} }
-   \hook_new:n {pdf/annot/Link/#1/before}
-   \hook_new:n {pdf/annot/Link/#1/after}
+   \hook_new_pair:nn
+     {pdf/annot/Link/#1/before}
+     {pdf/annot/Link/#1/after}
    \seq_new:c  { l_@@_hook_annot/Link/#1_begin_seq }
    \seq_new:c  { l_@@_hook_annot/Link/#1_end_seq }
  }
@@ -3382,10 +3383,11 @@
 \cs_new_protected:Nn \pdfannot_link:nnn %#1 type (URI, GoTo etc),
                                         %#2 action spec, #3 link text
   {
-    \seq_if_exist:cT { l_@@_hook_annot/Link/#1_begin_seq }
-      {
-        \seq_use:cn { l_@@_hook_annot/Link/#1_begin_seq }{}
-      }
+    %\seq_if_exist:cT { l_@@_hook_annot/Link/#1_begin_seq }
+%      {
+%        \seq_use:cn { l_@@_hook_annot/Link/#1_begin_seq }{}
+%      }
+    \hook_use:n { pdf/annot/Link/#1/before}
     \mode_leave_vertical:
     \exp_args:Nxx %xetex needs expansion
     \@@_backend_link_begin_user:nnw
@@ -3401,10 +3403,11 @@
       }
     #3
     \@@_backend_link_end:
-    \seq_if_exist:cT { l_@@_hook_annot/Link/#1_end_seq }
-      {
-        \seq_use:cn { l_@@_hook_annot/Link/#1_end_seq }{}
-      }
+    %\seq_if_exist:cT { l_@@_hook_annot/Link/#1_end_seq }
+%      {
+%        \seq_use:cn { l_@@_hook_annot/Link/#1_end_seq }{}
+%      }
+    \hook_use:n { pdf/annot/Link/#1/after}
   }
 %    \end{macrocode}
 % \begin{function}[added = 2020-03-12]{ \pdfannot_link_begin:nnw, \pdfannot_link_end:n }
@@ -3441,10 +3444,11 @@
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdfannot_link_begin:nnw #1 #2 %#1 type, #2 action spec
   {
-    \seq_if_exist:cT { l_@@_hook_annot/Link/#1_begin_seq }
-      {
-        \seq_use:cn { l_@@_hook_annot/Link/#1_begin_seq }{}
-      }
+    %\seq_if_exist:cT { l_@@_hook_annot/Link/#1_begin_seq }
+%      {
+%        \seq_use:cn { l_@@_hook_annot/Link/#1_begin_seq }{}
+%      }
+    \hook_use:n { pdf/annot/Link/#1/before}
     \exp_args:Nxx %xetex needs expansion
       \@@_backend_link_begin_user:nnw
         {
@@ -3459,10 +3463,11 @@
 \cs_new_protected:Nn \pdfannot_link_end:n %#1 type, e.g. url
   {
     \@@_backend_link_end:
-    \seq_if_exist:cT {l_@@_hook_annot/Link/#1_end_seq}
-      {
-        \seq_use:cn { l_@@_hook_annot/Link/#1_end_seq }{}
-      }
+  %  \seq_if_exist:cT {l_@@_hook_annot/Link/#1_end_seq}
+%      {
+%        \seq_use:cn { l_@@_hook_annot/Link/#1_end_seq }{}
+%      }
+    \hook_use:n { pdf/annot/Link/#1/after}
   }
 %    \end{macrocode}
 % \begin{function}[updated = 2020-03-30]{ \pdfannot_link_goto_begin:nw, \pdfannot_link_goto_end: }
@@ -3476,7 +3481,8 @@
 %     \begin{macrocode}
 \cs_new_protected:Npn \pdfannot_link_goto_begin:nw #1 %#1 destination
   {
-    \seq_use:cn { l_@@_hook_annot/Link/GoTo_begin_seq }{}
+    %\seq_use:cn { l_@@_hook_annot/Link/GoTo_begin_seq }{}
+    \hook_use:n { pdf/annot/Link/GoTo/before}
     \exp_args:Nxx %xetex needs expansion
     \@@_backend_link_begin_goto:nnw
       {
@@ -3489,7 +3495,8 @@
 \cs_new_protected:Nn \pdfannot_link_goto_end:
   {
     \@@_backend_link_end:
-    \seq_use:cn { l_@@_hook_annot/Link/GoTo_end_seq }{}
+    %\seq_use:cn { l_@@_hook_annot/Link/GoTo_end_seq }{}
+    \hook_use:n { pdf/annot/Link/GoTo/before}
   }
 
 %    \end{macrocode}
@@ -3721,15 +3728,15 @@
 % \verb+l__<module>_hook_<hook-name>_prop+
 %
 %    \begin{macrocode}
-\cs_new:Nn \hook_put_right:nnn
- {
-  \seq_put_right:cn { l__#1_hook_#2_seq } { #3 }
- }
-
-\cs_new:Nn \hook_put_left:nnn
- {
-  \seq_put_left:cn { l__#1_hook_#2_seq } { #3 }
- }
+%\cs_new:Nn \hook_put_right:nnn
+% {
+%  \seq_put_right:cn { l__#1_hook_#2_seq } { #3 }
+% }
+%
+%\cs_new:Nn \hook_put_left:nnn
+% {
+%  \seq_put_left:cn { l__#1_hook_#2_seq } { #3 }
+% }
 
 %\cs_new:Nn \hook_put:nnnn
 % {

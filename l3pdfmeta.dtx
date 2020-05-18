@@ -154,12 +154,12 @@
 \str_new:N \g_@@_xmpmeta_str
 
 \str_gset:Nx      \g_@@_xmpmeta_str {<?xpacket~begin="\c_@@_meta_bom_str"~id="W5M0MpCehiHzreSzNTczkc9d"?>\iow_newline:}
-\str_put_right:Nx \g_@@_xmpmeta_str {<x:xmpmeta~xmlns:x="adobe:ns:meta/">\iow_newline:}
+\str_gput_right:Nx \g_@@_xmpmeta_str {<x:xmpmeta~xmlns:x="adobe:ns:meta/">\iow_newline:}
 
 %here more contents ...
-\str_put_right:Nx \g_@@_xmpmeta_str { </x:xmpmeta> \iow_newline: }
+\str_gput_right:Nx \g_@@_xmpmeta_str { </x:xmpmeta> \iow_newline: }
 %here padding??
-\str_put_right:Nn \g_@@_xmpmeta_str { <?xpacket~end="w"?> }
+\str_gput_right:Nn \g_@@_xmpmeta_str { <?xpacket~end="w"?> }
 %
 %    \end{macrocode}
 % \subsection{The stream object}
@@ -202,6 +202,12 @@
     ,max_nest_qQ     = 28
     ,Catalog/OCProperties    = false
     ,named_actions   = {NextPage, PrevPage, FirstPage, LastPage}
+    ,annot_flags     = {
+                         \pdfannot_flag_set:nn   {annot/Link}{Print}
+                         \pdfannot_flag_clear:nn {annot/Link}{Hidden}
+                         \pdfannot_flag_clear:nn {annot/Link}{Invisible}
+                         \pdfannot_flag_clear:nn {annot/Link}{NoView}
+                       }
     % to be continued https://docs.verapdf.org/validation/pdfa-part1/
   }
 
