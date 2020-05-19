@@ -1,0 +1,27 @@
+% !Mode:: "TeX:UTF-8:Main"
+\RequirePackage{pdfresources}
+\ExplSyntaxOn
+\pdf_uncompress:
+\pdf_version_gset:n{1.7}
+\ExplSyntaxOff
+%\DeclareDocumentMetaData{standard=A-1b}
+
+\documentclass{article}
+\usepackage{new-pdfescape,lipsum,xcolor}
+\usepackage[customdriver=hgeneric-experimental]{hyperref}
+
+\begin{document}
+
+\ExplSyntaxOn
+\pdfannot_flag_set:nn   {annot/Link}{Print}
+\ExplSyntaxOff
+\AddToHook{pdf/annot/Link/Named/before}[me]{\begingroup\color{red}}
+\AddToHook{pdf/annot/Link/Named/after}[me] {\endgroup}
+
+\url{https://www.dante.de}
+
+\Acrobatmenu{XXX}{abc}
+
+\Acrobatmenu{FirstPage}{abc} abc
+
+\end{document}

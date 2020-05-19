@@ -1,0 +1,193 @@
+\RequirePackage{pdfresources}
+%adapted from https://chat.stackexchange.com/transcript/message/54421537#54421537
+\documentclass{article}
+
+\pagestyle{empty}
+
+\usepackage{xparse}
+\usepackage{l3pdf}
+
+\usepackage[customdriver=hgeneric-experimental]{hyperref}
+
+\ExplSyntaxOn
+
+\pdf_uncompress:
+
+
+% # begin l3pdf extensions (pdflatex and lualatex only)
+
+% ## l3pdf annotation extentsion
+\cs_new_protected:Npn \dcp_pdf_annotation:nnnn #1#2#3#4
+{ \__pdf_backend_annotation:nnnn {#1} {#2} {#3} {#4} }
+\cs_generate_variant:Nn \dcp_pdf_annotation:nnnn { nnnx }
+\cs_new:Npn \dcp_pdf_annotation_last:
+{ \__pdf_backend_annotation_last: }
+
+% ## l3pdf xform extensions
+\cs_new_protected:Npn \dcp_pdf_xform_now:N #1
+{
+\tex_immediate:D \tex_pdfxform:D #1
+}
+\cs_new:Npx \dcp_pdf_xform_last:
+{
+\exp_not:N \int_value:w
+\exp_not:N \tex_pdflastxform:D
+\c_space_tl 0 ~ R
+}
+
+
+% # default font objects
+% (they are already in hyperref).
+
+
+% # variables
+
+% ## global variables
+
+\tl_new:N \g_dcp_normal_off_default_tl
+\tl_new:N \g_dcp_normal_yes_default_tl
+
+% ## initialise global variables
+\tl_set:Nn \g_dcp_normal_off_default_tl
+  {
+    \hbox_set:Nn \l_tmpa_box { }
+    \box_set_ht:Nn \l_tmpa_box { 0.8 \box_ht:N \strutbox }
+    \box_set_dp:Nn \l_tmpa_box { 0.2 \box_ht:N \strutbox }
+    \fboxsep 0pt
+    \framebox
+     [ \box_ht:N \strutbox ]
+     { \box_use_drop:N \l_tmpa_box }
+  }
+\tl_set:Nn \g_dcp_normal_yes_default_tl
+  {
+    \hbox_set:Nn \l_tmpa_box { $\times$ }
+    \box_set_ht:Nn \l_tmpa_box { 0.8 \box_ht:N \strutbox }
+    \box_set_dp:Nn \l_tmpa_box { 0.2 \box_ht:N \strutbox }
+    \fboxsep 0pt
+    \framebox
+      [ \box_ht:N \strutbox ]
+      { \box_use_drop:N \l_tmpa_box }
+  }
+
+% ## local variables
+\dim_new:N \l_dcp_field_ht_dim
+\dim_new:N \l_dcp_field_wd_dim
+\dim_new:N \l_dcp_field_dp_dim
+\int_new:N \l_dcp_field_flags_int
+
+
+% # l3keys set up
+
+\tl_new:N \l_dcp_normal_off_tl
+\tl_new:N \l_dcp_normal_yes_tl
+
+\keys_define:nn { dcp }
+  {
+    normal ~ off .tl_set:N = \l_dcp_normal_off_tl,
+    normal ~ off .value_required:n = true,
+    normal ~ yes .tl_set:N = \l_dcp_normal_yes_tl,
+    normal ~ yes .value_required:n = true,
+  }
+
+
+% # form and field helper macros
+
+\cs_new_protected:Nn \dcp_normalise_boxes:
+  {
+    \dim_set:Nn \l_dcp_field_wd_dim
+      { \dim_max:nn { \box_wd:N \l_tmpa_box } { \box_wd:N \l_tmpb_box } }
+    \dim_set:Nn \l_dcp_field_ht_dim
+      { \dim_max:nn { \box_ht:N \l_tmpa_box } { \box_ht:N \l_tmpb_box } }
+    \dim_set:Nn \l_dcp_field_dp_dim
+      { \dim_max:nn { \box_dp:N \l_tmpa_box } { \box_dp:N \l_tmpb_box } }
+    \box_set_wd:Nn \l_tmpa_box { \l_dcp_field_wd_dim }
+    \box_set_ht:Nn \l_tmpa_box { \l_dcp_field_ht_dim }
+    \box_set_dp:Nn \l_tmpa_box { \l_dcp_field_dp_dim }
+    \box_set_wd:Nn \l_tmpb_box { \l_dcp_field_wd_dim }
+    \box_set_ht:Nn \l_tmpb_box { \l_dcp_field_ht_dim }
+    \box_set_dp:Nn \l_tmpb_box { \l_dcp_field_dp_dim }
+  }
+
+
+
+% # form and field interface macros
+
+\NewDocumentCommand \setdefaultcheckboxoff { m }
+  {
+   \tl_set:Nn \g_dcp_normal_off_default_tl { #1 }
+  }
+
+\NewDocumentCommand \setdefaultcheckboxyes { m }
+  {
+    \tl_set:Nn \g_dcp_normal_yes_default_tl { #1 }
+  }
+
+\NewDocumentCommand \checkboxfield { om }
+  {
+    \group_begin:
+    \keys_set:nn { dcp }
+      {
+        normal ~ yes = \g_dcp_normal_yes_default_tl,
+        normal ~ off = \g_dcp_normal_off_default_tl
+      }
+   \IfNoValueF { #1 }
+     {
+       \keys_set:nn { dcp } { #1 }
+     }
+   \hbox_set:Nn \l_tmpa_box { \l_dcp_normal_yes_tl }
+   \hbox_set:Nn \l_tmpb_box { \l_dcp_normal_off_tl }
+   \dcp_normalise_boxes:
+   \dcp_pdf_xform_now:N \l_tmpa_box
+   \tl_set:Nx \l_tmpa_tl { \dcp_pdf_xform_last: }
+   \dcp_pdf_xform_now:N \l_tmpb_box
+   \tl_set:Nx \l_tmpb_tl { \dcp_pdf_xform_last: }
+   \hbox_to_wd:nn
+     { \l_dcp_field_wd_dim }
+     {
+       \dcp_pdf_annotation:nnnx
+         { \dim_use:N \l_dcp_field_wd_dim }
+         { \dim_use:N \l_dcp_field_ht_dim }
+         { \dim_use:N \l_dcp_field_dp_dim }
+         {
+/Subtype ~ /Widget \iow_newline:
+/FT ~ /Btn \iow_newline:
+/F ~ 4 \iow_newline:
+/T ~ ( #2 ) \iow_newline:
+/V ~ /Off \iow_newline:
+/AS ~ /Off \iow_newline:
+/AP ~ << ~ \iow_newline:
+/N ~ << ~ /Yes ~ \l_tmpa_tl \c_space_tl
+/Off ~ \l_tmpb_tl \c_space_tl >> \iow_newline:
+>>
+}
+\hfill
+}
+\pdfdict_gput:nnx { Catalog / AcroForm } { Fields }{\dcp_pdf_annotation_last:}
+%\clist_gput_right:Nx \g_dcp_field_annots_clist
+%{ \dcp_pdf_annotation_last: }
+\group_end:
+}
+
+\ExplSyntaxOff
+
+\usepackage{tikz}
+\usepackage[default]{sourcesanspro}
+
+\begin{document}
+
+Option 1: \checkboxfield{checkbox1}
+
+Option 2: \checkboxfield[%
+normal off = ☐,
+normal yes = ☑]{checkbox2}
+
+Option 3: \checkboxfield[%
+normal off = {\tikz[baseline, inner sep=1pt]
+\node[draw=magenta, text=white, anchor=base]
+{\vrule width 8pt height 7pt depth 1pt };},
+normal yes = {\tikz[baseline, inner sep=1pt]
+\node[draw=magenta, text=cyan, anchor=base]
+{\vrule width 8pt height 7pt depth 1pt };},
+]{checkbox3}
+
+\end{document}
