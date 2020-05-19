@@ -1385,6 +1385,14 @@
    ,pdfwindowui    .default:n = true
  }
 
+% styles and colors.
+% this needs some sorting.
+% should colorlinks reset the border?
+% which colors should be used?
+% should we use the generic hooks or make hyp specific hooks?
+% what about font changes?
+% hooks are global, is this the right thing to use here?
+% perhaps the hook should only take a tl and this is filled?
 \keys_define:nn { hyp / setup }
   {
     ,pdfborder  .code:n =
@@ -1653,23 +1661,10 @@
   }
 
 %%% UF removed setpagesize code, should be done by kernel/graphicx
-
-\def\Acrobatmenu#1#2
+%!! do we need a action dict type??
+\RenewDocumentCommand \Acrobatmenu { m m }
  {
-   \prop_get:NnNTF \g_pdfmeta_standard_prop {named_actions} \l_tmpa_tl
-     {
-      \tl_if_in:NnTF \l_tmpa_tl { #1 }
-        {
-          \bool_set_true:N \l__hyp_tmpa_bool %restricted but ok
-        }
-        {
-          \bool_set_false:N \l__hyp_tmpa_bool %restricted not ok
-        }
-     }
-     {
-      \bool_set_true:N \l__hyp_tmpa_bool % no restrictions
-     }
-   \bool_if:NTF \l__hyp_tmpa_bool
+   \pdfmeta_if_named_action_allowed:nTF {#1}
      {
        \mode_leave_vertical:
        \pdfannot_link:nnn { Named }
@@ -1694,13 +1689,13 @@
         #2
       }
   }
-\ExplSyntaxOff
-%%% UF removed old atbegshi fix
-\ExplSyntaxOn
-\def\MakeFieldObject#1#2
+
+
+\NewDocumentCommand \MakeFieldObject { m m }
   {
     \pdf_xform_new:nnn { #2 }{} { #1 }
-  }%
+  }
+
 
 \prop_new:N   \g__hyp_AcroForm_CoFields_prop
 \prop_new:N   \g__hyp_AcroForm_Fields_prop

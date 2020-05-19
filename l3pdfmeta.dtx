@@ -105,6 +105,7 @@
 
 \msg_new:nnn {pdf}{unknown-standard}{The~standard~'#1'~is~unknown~and~has~been~ignored}
 \bool_new:N \g_@@_meta_bool
+
 \keys_define:nn { pdf / setup }
   {
     ,pdfversion .code:n =
@@ -181,11 +182,39 @@
 %    \end{macrocode}
 %
 % \section{standards (work in progress)}
-% \subsection{pdf/A}
+% \subsection{Tools and tests}
+% This public property will contain the settings for the document.
 %    \begin{macrocode}
-
 \prop_new:N \g_pdfmeta_standard_prop
-
+%    \end{macrocode}
+% This conditional tests if the value for /N in a named action is allowed
+% (pdf/A restrict the names).
+%    \begin{macrocode}
+\prg_new_protected_conditional:Npnn \pdfmeta_if_named_action_allowed:n #1 { F, T , TF }
+  {
+    \prop_get:NnNTF \g_pdfmeta_standard_prop {named_actions} \l_@@_tmpa_tl
+      {
+        \tl_if_in:NnTF \l_@@_tmpa_tl { #1 }
+          {
+            \prg_return_true: %restricted but ok
+          }
+          {
+            \prg_return_false: %restricted and false
+          }
+      }
+      {
+        \prg_return_true: %not restricted
+      }
+  }
+%    \end{macrocode}
+%    \begin{macrocode}
+\hook_gput_code:nnn {begindocument} {pdf}
+  {
+    \prop_item:Nn \g_pdfmeta_standard_prop { annot_flags }
+  }
+%    \end{macrocode}
+%  \subsection{pdf/A}
+%     \begin{macrocode}
 \prop_new:c { g_@@_meta_standard_pdf/A-1b_prop }
 \prop_set_from_keyval:cn { g_@@_meta_standard_pdf/A-1b_prop }
   {
