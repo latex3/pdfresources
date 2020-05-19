@@ -284,13 +284,13 @@
     ,print / false .code:n =
       {
         \bool_set_false:N \__atfi_annot_print_bool
-        \bitsetClear { __atfi_annotFlags }{\prop_item:Nn\c_pdfannot_flags_prop {Print}}
+        \bitsetClear { __atfi_annotFlags }{\prop_item:Nn\c_pdfannot_annot_flags_prop {Print}}
         \pdfdict_put:nnx {annot/FileAttachment}{F}{\bitsetGetDec { __atfi_annotFlags }}
       }
     ,print / true .code:n =
       {
         \bool_set_true:N \__atfi_annot_print_bool
-        \bitsetSet { __atfi_annotFlags }{\prop_item:Nn\c_pdfannot_flags_prop {Print}}
+        \bitsetSet { __atfi_annotFlags }{\prop_item:Nn\c_pdfannot_annot_flags_prop {Print}}
         \pdfdict_put:nnx {annot/FileAttachment}{F}{\bitsetGetDec { __atfi_annotFlags }}
       }
     ,print    .default:n = true
@@ -306,13 +306,13 @@
     ,zoom / false .code:n =
       {
         \bool_set_false:N \__atfi_annot_zoom_bool
-        \bitsetSet { __atfi_annotFlags }{\prop_item:Nn\c_pdfannot_flags_prop {NoZoom}}
+        \bitsetSet { __atfi_annotFlags }{\prop_item:Nn\c_pdfannot_annot_flags_prop {NoZoom}}
         \pdfdict_put:nnx {annot/FileAttachment}{F}{\bitsetGetDec { __atfi_annotFlags }}
       }
     ,zoom / true .code:n =
       {
         \bool_set_true:N \__atfi_annot_zoom_bool
-        \bitsetClear { __atfi_annotFlags }{\prop_item:Nn\c_pdfannot_flags_prop {NoZoom}}
+        \bitsetClear { __atfi_annotFlags }{\prop_item:Nn\c_pdfannot_annot_flags_prop {NoZoom}}
         \pdfdict_put:nnx {annot/FileAttachment}{F}{\bitsetGetDec { __atfi_annotFlags }}
       }
     ,zoom / unknown .code:n =
