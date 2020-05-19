@@ -3228,14 +3228,19 @@
 
 %    \end{macrocode}
 % \subsection{Annotations, Flags}
-% \begin{variable}{ \c_pdfannot_annot_flags_prop }
-% This property list maps keys like \enquote{Invisible} to the
-% bit positions for the /F-flag. It can be used
-% e.g. with bitsets.
-% \end{variable}
-%
+% Every flag should have an associated property that allows to set/clear flag positions by
+% name. The name is \c_pdfannot_flag_#1_prop
 %    \begin{macrocode}
-\prop_const_from_keyval:Nn \c_pdfannot_annot_flags_prop
+\cs_new_protected:Npn \pdfannot_flag_new:nn #1 #2
+  {
+    \bitsetReset  { @@_#1_flag }
+    \prop_const_from_keyval:cn { c_pdfannot_flag_#1_prop }
+      {
+        #2
+      }
+  }
+
+\pdfannot_flag_new:nn {annot/Link}
   {
     Invisible = 0,
     Hidden    = 1,
@@ -3249,8 +3254,8 @@
     LockedContents = 9
   }
 
-\prop_const_from_keyval:Nn \c_pdfannot_field_flags_prop
-  {
+\pdfannot_flag_new:nn {annot/Field} %it is not really an annot, but we will put
+  {                                 % form field in this module.
     ReadOnly  = 0,
     Required  = 1,
     NoExport  = 2,
@@ -3272,31 +3277,36 @@
     RichText        = 25,  %Tx
     CommitOnSelChange = 26
   }
-%Link annotations will always use flags, as we need for the standards.
-%If flags should be different for the subtypes, the hooks should be used.
-%Other flags should perhaps follow. For now we use the bitset package,
-%but this should perhaps change ....
-%
-\cs_new_protected:Npn \pdfannot_flag_new:n #1
+
+\pdfannot_flag_new:nn {annot/field/submit}
   {
-    \bitsetReset  { @@_#1_flag }
+    Include/Exclude  = 0,
+    IncludeNoValueFields  = 1,
+    ExportFormat  = 2,
+    GetMethod = 3,     % if ExportFormat=0 -> =0 to
+    SubmitCoordinates = 4, % if ExportFormat=0 -> =0 to
+    XFDF = 5,
+    IncludeAppendSaves = 6,
+    IncludeAnnotations = 7,
+    SubmitPDF = 8,
+    CanonicalFormat = 9,
+    ExclNonUserAnnots = 10,
+    ExclFKey = 11,
+    EmbedForm = 12,
   }
-
-\pdfannot_flag_new:n {annot/Link}
-\pdfannot_flag_new:n {annot/field} %it is not really an annot, but we will put
-                                   % form field in this module.
-
 
 % #1: type, e.g. annot/Link
 % #2: name of flag, e.g. Print
 \cs_new_protected:Npn \pdfannot_flag_set:nn #1 #2
   {
-    \bitsetSet  { @@_#1_flag }{\prop_item:Nn\c_pdfannot_annot_flags_prop {#2}}
+    \bitsetSet  { @@_#1_flag }
+      { \prop_item:cn {c_pdfannot_flag_#1_prop} {#2} }
   }
 
 \cs_new_protected:Npn \pdfannot_flag_clear:nn #1 #2
   {
-    \bitsetClear{ @@_#1_flag }{\prop_item:Nn\c_pdfannot_annot_flags_prop {#2}}
+    \bitsetClear{ @@_#1_flag }
+      { \prop_item:cn {c_pdfannot_flag_#1_prop} {#2} }
   }
 
 %flags are output as decimals.
