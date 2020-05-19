@@ -3265,12 +3265,12 @@
 % #2: name of flag, e.g. Print
 \cs_new_protected:Npn \pdfannot_flag_set:nn #1 #2
   {
-    \bitsetSet  { @@_#1_flag }{\prop_item:Nn\c_pdfannot_flags_prop {#1}}
+    \bitsetSet  { @@_#1_flag }{\prop_item:Nn\c_pdfannot_flags_prop {#2}}
   }
 
 \cs_new_protected:Npn \pdfannot_flag_clear:nn #1 #2
   {
-    \bitsetClear{ @@_#1_flag }{\prop_item:Nn\c_pdfannot_flags_prop {#1}}
+    \bitsetClear{ @@_#1_flag }{\prop_item:Nn\c_pdfannot_flags_prop {#2}}
   }
 
 %flags are output as decimals.
@@ -3339,7 +3339,7 @@
 
 \seq_map_inline:Nn \c_pdfannot_link_types_seq
  {
-   \pdfdict_new:n { annot/Link/#1 }
+   \pdfdict_new:n   { annot/Link/#1 }
    \pdfdict_put:nnn { annot/Link/#1}{ F }{ \pdfannot_flag_use:n { annot/Link} }
    \hook_new_pair:nn
      {pdf/annot/Link/#1/before}
