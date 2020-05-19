@@ -4,7 +4,7 @@
 \pdf_uncompress:
 \pdf_version_gset:n{1.7}
 \ExplSyntaxOff
-%\DeclareDocumentMetaData{standard=A-1b}
+\DeclareDocumentMetaData{standard=A-1b}
 
 \documentclass{article}
 \usepackage{new-pdfescape,lipsum,xcolor}
@@ -13,7 +13,7 @@
 \begin{document}
 
 \ExplSyntaxOn
-\pdfannot_flag_set:nn   {annot/Link}{Print}
+%\pdfannot_flag_set:nn   {annot/Link}{Print}
 \ExplSyntaxOff
 \AddToHook{pdf/annot/Link/Named/before}[me]{\begingroup\color{red}}
 \AddToHook{pdf/annot/Link/Named/after}[me] {\endgroup}

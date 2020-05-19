@@ -192,7 +192,7 @@ normal yes = {\tikz[baseline, inner sep=1pt]
 {\vrule width 8pt height 7pt depth 1pt };},
 ]{checkbox3}
 
-\end{document} 
+\end{document}
 
 Field dict
 Ft     : /Btn /Tx /Ch /Sig
@@ -200,18 +200,47 @@ Parent : OR
 Kids: array, other fields or annot/widget
 T: partial fieldname (test string)
 TU: alternate description (test string)
-TM: mapping name 
+TM: mapping name
 Ff: flags ->annot/Field
-V: value            % not pushbutton 
+V: value            % not pushbutton
 DV: default value   % not pushbutton
-AA: Action dict ...
+AA: Action dict ... -> see below
 Opt: array of strings, connected to kids
+     or for choices, choices
+TI integer (lists)
+I array Ch (complicated ...)
 
 /DA ( 0 0 1 rg /Ti 12 Tf ) %text field
 /MaxLen                    %text field
 
+Lock dict (Sig)
+SV dict (Sig)
+
+
+
+
 Connected widget:
-/AS ??
+/AS default appearance from AP ( here/Yes or /Off)
 % Appearance
 %checkbox
 /AP <</N <</Yes 2 0 R /Off 3 0 R>>>>
+/C / Border /BS
+
+/OC ?
+/Structparens?
+/F flags
+
+
+AA: Submit:
+  /S   /SubmitForm
+  /F   file /URI (/F ( ftp : / / www . beatles . com / Movies / AbbeyRoad . mov )
+  /Fields array
+  
+  /S /ImportData
+  /F file
+  
+  /S /ResetData
+  /Fields array
+  
+  /S /JavaScript
+  /JS text string or stream
