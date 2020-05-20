@@ -14,37 +14,12 @@
 \ExplSyntaxOn
 
 \pdf_uncompress:
+\cs_generate_variant:Nn \pdf_xform_wd:n {e}
+\cs_generate_variant:Nn \pdf_xform_ht:n {e}
+\cs_generate_variant:Nn \pdf_xform_dp:n {e}
+\cs_generate_variant:Nn \pdf_xform_ref:n{e}
 
 
-% # begin l3pdf extensions (pdflatex and lualatex only)
-
-% ## l3pdf annotation extentsion
-\cs_new_protected:Npn \dcp_pdf_annotation:nnnn #1#2#3#4
-{ \__pdf_backend_annotation:nnnn {#1} {#2} {#3} {#4} }
-\cs_generate_variant:Nn \dcp_pdf_annotation:nnnn { nnnx }
-\cs_new:Npn \dcp_pdf_annotation_last:
-{ \__pdf_backend_annotation_last: }
-
-% ## l3pdf xform extensions
-\cs_new_protected:Npn \dcp_pdf_xform_now:N #1
-{
-\tex_immediate:D \tex_pdfxform:D #1
-}
-\cs_new:Npx \dcp_pdf_xform_last:
-{
-\exp_not:N \int_value:w
-\exp_not:N \tex_pdflastxform:D
-\c_space_tl 0 ~ R
-}
-
-
-% # default font objects
-% (they are already in hyperref).
-
-
-% # variables
-
-% ## global variables
 
 \tl_new:N \g_dcp_normal_off_default_tl
 \tl_new:N \g_dcp_normal_yes_default_tl
@@ -52,68 +27,13 @@
 % ## initialise global variables
 \tl_set:Nn \g_dcp_normal_off_default_tl
   {
-    \hbox_set:Nn \l_tmpa_box { }
-    \box_set_ht:Nn \l_tmpa_box { 0.8 \box_ht:N \strutbox }
-    \box_set_dp:Nn \l_tmpa_box { 0.2 \box_ht:N \strutbox }
-    \fboxsep 0pt
-    \framebox
-     [ \box_ht:N \strutbox ]
-     { \box_use_drop:N \l_tmpa_box }
+    checkbox/Off/dflt
   }
 \tl_set:Nn \g_dcp_normal_yes_default_tl
   {
-    \hbox_set:Nn \l_tmpa_box { $\times$ }
-    \box_set_ht:Nn \l_tmpa_box { 0.8 \box_ht:N \strutbox }
-    \box_set_dp:Nn \l_tmpa_box { 0.2 \box_ht:N \strutbox }
-    \fboxsep 0pt
-    \framebox
-      [ \box_ht:N \strutbox ]
-      { \box_use_drop:N \l_tmpa_box }
+    checkbox/Yes/dflt
   }
-
-% ## local variables
-\dim_new:N \l_dcp_field_ht_dim
-\dim_new:N \l_dcp_field_wd_dim
-\dim_new:N \l_dcp_field_dp_dim
-\int_new:N \l_dcp_field_flags_int
-
-
-% # l3keys set up
-
-\tl_new:N \l_dcp_normal_off_tl
-\tl_new:N \l_dcp_normal_yes_tl
-
-\keys_define:nn { dcp }
-  {
-    normal ~ off .tl_set:N = \l_dcp_normal_off_tl,
-    normal ~ off .value_required:n = true,
-    normal ~ yes .tl_set:N = \l_dcp_normal_yes_tl,
-    normal ~ yes .value_required:n = true,
-  }
-
-
-% # form and field helper macros
-
-\cs_new_protected:Nn \dcp_normalise_boxes:
-  {
-    \dim_set:Nn \l_dcp_field_wd_dim
-      { \dim_max:nn { \box_wd:N \l_tmpa_box } { \box_wd:N \l_tmpb_box } }
-    \dim_set:Nn \l_dcp_field_ht_dim
-      { \dim_max:nn { \box_ht:N \l_tmpa_box } { \box_ht:N \l_tmpb_box } }
-    \dim_set:Nn \l_dcp_field_dp_dim
-      { \dim_max:nn { \box_dp:N \l_tmpa_box } { \box_dp:N \l_tmpb_box } }
-    \box_set_wd:Nn \l_tmpa_box { \l_dcp_field_wd_dim }
-    \box_set_ht:Nn \l_tmpa_box { \l_dcp_field_ht_dim }
-    \box_set_dp:Nn \l_tmpa_box { \l_dcp_field_dp_dim }
-    \box_set_wd:Nn \l_tmpb_box { \l_dcp_field_wd_dim }
-    \box_set_ht:Nn \l_tmpb_box { \l_dcp_field_ht_dim }
-    \box_set_dp:Nn \l_tmpb_box { \l_dcp_field_dp_dim }
-  }
-
-
-
-% # form and field interface macros
-
+  
 \NewDocumentCommand \setdefaultcheckboxoff { m }
   {
    \tl_set:Nn \g_dcp_normal_off_default_tl { #1 }
@@ -123,52 +43,115 @@
   {
     \tl_set:Nn \g_dcp_normal_yes_default_tl { #1 }
   }
+  
+    
 
-\NewDocumentCommand \checkboxfield { om }
+\pdf_xform_new:nnn {checkbox/Yes/dflt}{}
+  {
+    \hbox_set:Nn \l_tmpa_box { $\times$ }
+    \box_set_ht:Nn \l_tmpa_box { 0.8 \box_ht:N \strutbox }
+    \box_set_dp:Nn \l_tmpa_box { 0.2 \box_ht:N \strutbox }
+    \fboxsep 0pt
+    \framebox
+      [ \box_ht:N \strutbox ]
+      { \box_use_drop:N \l_tmpa_box }  
+  }
+  
+\pdf_xform_new:nnn {checkbox/Off/dflt}{}
+  {
+    \hbox_set:Nn \l_tmpa_box {  }
+    \box_set_ht:Nn \l_tmpa_box { 0.8 \box_ht:N \strutbox }
+    \box_set_dp:Nn \l_tmpa_box { 0.2 \box_ht:N \strutbox }
+    \fboxsep 0pt
+    \framebox
+      [ \box_ht:N \strutbox ]
+      { \box_use_drop:N \l_tmpa_box }
+  }  
+  
+\NewDocumentCommand \newcheckboxappearance { m m  }  %#1=name, #2 = content
+ {
+   \pdf_xform_new:nnn {#1}{}{#1} 
+ }
+ 
+ 
+% ## local variables
+\dim_new:N \l_dcp_field_ht_dim
+\dim_new:N \l_dcp_field_wd_dim
+\dim_new:N \l_dcp_field_dp_dim
+\int_new:N \l_dcp_field_flags_int
+  
+% # l3keys set up
+
+\tl_new:N \l_dcp_normal_off_tl
+\tl_new:N \l_dcp_normal_yes_tl
+
+\keys_define:nn { dcp }
+  {
+    normal ~ off .tl_set_x:N = \l_dcp_normal_off_tl,
+    normal ~ off .value_required:n = true,
+    normal ~ yes .tl_set_x:N = \l_dcp_normal_yes_tl,
+    normal ~ yes .value_required:n = true,
+  }
+
+\cs_new_protected:Nn \dcp_normalise_boxes:
+  { 
+    \dim_set:Nn \l_dcp_field_wd_dim
+       { \dim_max:nn { \pdf_xform_wd:e {\l_dcp_normal_off_tl} }{ \pdf_xform_wd:e {\l_dcp_normal_yes_tl} } }
+    \dim_set:Nn \l_dcp_field_ht_dim
+      { \dim_max:nn { \pdf_xform_ht:e {\l_dcp_normal_off_tl} }{ \pdf_xform_ht:e {\l_dcp_normal_yes_tl} } }            
+    \dim_set:Nn \l_dcp_field_dp_dim
+      { \dim_max:nn { \pdf_xform_dp:e {\l_dcp_normal_off_tl} }{ \pdf_xform_dp:e {\l_dcp_normal_yes_tl} } }
+  }
+
+
+
+% # form and field interface macros
+
+\NewDocumentCommand \checkboxfield { O{}m }
   {
     \group_begin:
     \keys_set:nn { dcp }
       {
         normal ~ yes = \g_dcp_normal_yes_default_tl,
-        normal ~ off = \g_dcp_normal_off_default_tl
+        normal ~ off = \g_dcp_normal_off_default_tl,
+        #1
       }
-   \IfNoValueF { #1 }
-     {
-       \keys_set:nn { dcp } { #1 }
-     }
-   \hbox_set:Nn \l_tmpa_box { \l_dcp_normal_yes_tl }
-   \hbox_set:Nn \l_tmpb_box { \l_dcp_normal_off_tl }
-   \dcp_normalise_boxes:
-   \dcp_pdf_xform_now:N \l_tmpa_box
-   \tl_set:Nx \l_tmpa_tl { \dcp_pdf_xform_last: }
-   \dcp_pdf_xform_now:N \l_tmpb_box
-   \tl_set:Nx \l_tmpb_tl { \dcp_pdf_xform_last: }
-   \hbox_to_wd:nn
-     { \l_dcp_field_wd_dim }
-     {
-       \dcp_pdf_annotation:nnnx
-         { \dim_use:N \l_dcp_field_wd_dim }
-         { \dim_use:N \l_dcp_field_ht_dim }
-         { \dim_use:N \l_dcp_field_dp_dim }
-         {
-/Subtype ~ /Widget \iow_newline:
-/FT ~ /Btn \iow_newline:
-/F ~ 4 \iow_newline:
-/T ~ ( #2 ) \iow_newline:
-/V ~ /Off \iow_newline:
-/AS ~ /Off \iow_newline:
-/AP ~ << ~ \iow_newline:
-/N ~ << ~ /Yes ~ \l_tmpa_tl \c_space_tl
-/Off ~ \l_tmpb_tl \c_space_tl >> \iow_newline:
->>
-}
-\hfill
-}
-\pdfdict_gput:nnx { Catalog / AcroForm } { Fields }{\dcp_pdf_annotation_last:}
-%\clist_gput_right:Nx \g_dcp_field_annots_clist
-%{ \dcp_pdf_annotation_last: }
-\group_end:
-}
+    \dcp_normalise_boxes:
+    \pdfdict_put:nnn {annot/Widget}{FT}{/Btn}
+    \pdfdict_put:nnn {annot/Widget}{T}{(#2)} %should pass throught some excape
+    \pdfdict_put:nnn {annot/Widget}{V}{/Off} %should be configurable
+    \pdfdict_put:nnn {annot/Widget}{AS}{/Off} %should be configurable
+    \pdfannot_flag_clear:nn {annot/Field}{Radio} %just in case
+    \pdfannot_flag_clear:nn {annot/Field}{Pushbutton} %just in case
+    \pdfannot_flag_set:nn {annot/Field}{NoExport}
+    \pdfdict_put:nnx {annot/Widget}{F}{\pdfannot_flag_use:n{annot/Field}}
+    % more flag configuration needed?
+%/AP <</N <</Yes 6 0 R/Off 9 0 R>>>>
+%/P 6 0 R/Q 0/BS<</W 1/S/S>>/AP<< /N <</Yes<<>>>> >> /MK<</BC[1 0 0]/BG[1 1 1]/CA(4)>>/DA(/ZaDb 10 Tf 0 0 0 rg)/H/P
+     \pdfdict_put:nnx {annot/Widget}{Q}{0}
+    
+     \hbox_to_wd:nn
+       { \l_dcp_field_wd_dim  }
+       {
+        \pdfannot_box:nnnnn
+           {Widget}
+           { \dim_use:N \l_dcp_field_wd_dim }
+           { \dim_use:N \l_dcp_field_ht_dim }
+           { \dim_use:N \l_dcp_field_dp_dim }
+           {
+            /AP ~
+              <<
+                /N ~
+                  << /Yes ~ \pdf_xform_ref:e { \l_dcp_normal_yes_tl}
+                     /Off ~ \pdf_xform_ref:e { \l_dcp_normal_off_tl}
+                  >>
+              >>
+           }
+         \hfill
+        }
+      \pdfdict_gput:nnx { Catalog / AcroForm } { Fields }{\pdfannot_box_last:}
+      \group_end:
+  }
 
 \ExplSyntaxOff
 
@@ -176,8 +159,24 @@
 \usepackage[default]{sourcesanspro}
 
 \begin{document}
+%\begin{Form}
+\ExplSyntaxOn
+x\pdf_xform_use:n {checkbox/Yes/dflt}y
+x\pdf_xform_use:n {checkbox/Off/dflt}y
+\ExplSyntaxOff
+Option 1: \checkboxfield{checkbox1}
+
+Option 1: \checkboxfield{checkbox2}
+
+Option 1: \checkboxfield{checkbox3}
 
 Option 1: \checkboxfield{checkbox1}
+
+Option 1: \checkboxfield{checkbox1}
+
+%\CheckBox{A}\CheckBox{A}
+%\end{Form}
+\end{document}
 
 Option 2: \checkboxfield[%
 normal off = ☐,
@@ -235,12 +234,12 @@ AA: Submit:
   /S   /SubmitForm
   /F   file /URI (/F ( ftp : / / www . beatles . com / Movies / AbbeyRoad . mov )
   /Fields array
-  
+
   /S /ImportData
   /F file
-  
+
   /S /ResetData
   /Fields array
-  
+
   /S /JavaScript
   /JS text string or stream
