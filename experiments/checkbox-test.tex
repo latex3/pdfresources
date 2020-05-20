@@ -14,184 +14,236 @@
 \ExplSyntaxOn
 
 \pdf_uncompress:
+
 \cs_generate_variant:Nn \pdf_xform_wd:n {e}
 \cs_generate_variant:Nn \pdf_xform_ht:n {e}
 \cs_generate_variant:Nn \pdf_xform_dp:n {e}
 \cs_generate_variant:Nn \pdf_xform_ref:n{e}
 
+\pdfdict_new:n {annot/Field}
 
+\tl_new:N \g__uf_normal_off_default_tl
+\tl_new:N \g__uf_normal_yes_default_tl
 
-\tl_new:N \g_dcp_normal_off_default_tl
-\tl_new:N \g_dcp_normal_yes_default_tl
+% # local variables
+\dim_new:N \l__uf_field_ht_dim
+\dim_new:N \l__uf_field_wd_dim
+\dim_new:N \l__uf_field_dp_dim
+\int_new:N \l__uf_field_flags_int
 
-% ## initialise global variables
-\tl_set:Nn \g_dcp_normal_off_default_tl
+% # l3keys variables
+
+\tl_new:N \l__uf_normal_off_tl
+\tl_new:N \l__uf_normal_yes_tl
+
+\tl_set:Nn \g__uf_normal_off_default_tl
   {
     checkbox/Off/dflt
   }
-\tl_set:Nn \g_dcp_normal_yes_default_tl
+\tl_set:Nn \g__uf_normal_yes_default_tl
   {
     checkbox/Yes/dflt
   }
   
-\NewDocumentCommand \setdefaultcheckboxoff { m }
-  {
-   \tl_set:Nn \g_dcp_normal_off_default_tl { #1 }
-  }
+%default xform 
 
-\NewDocumentCommand \setdefaultcheckboxyes { m }
-  {
-    \tl_set:Nn \g_dcp_normal_yes_default_tl { #1 }
-  }
-  
-    
-
-\pdf_xform_new:nnn {checkbox/Yes/dflt}{}
-  {
-    \hbox_set:Nn \l_tmpa_box { $\times$ }
-    \box_set_ht:Nn \l_tmpa_box { 0.8 \box_ht:N \strutbox }
-    \box_set_dp:Nn \l_tmpa_box { 0.2 \box_ht:N \strutbox }
-    \fboxsep 0pt
-    \framebox
-      [ \box_ht:N \strutbox ]
-      { \box_use_drop:N \l_tmpa_box }  
-  }
-  
-\pdf_xform_new:nnn {checkbox/Off/dflt}{}
-  {
-    \hbox_set:Nn \l_tmpa_box {  }
-    \box_set_ht:Nn \l_tmpa_box { 0.8 \box_ht:N \strutbox }
-    \box_set_dp:Nn \l_tmpa_box { 0.2 \box_ht:N \strutbox }
-    \fboxsep 0pt
-    \framebox
-      [ \box_ht:N \strutbox ]
-      { \box_use_drop:N \l_tmpa_box }
-  }  
-  
-\NewDocumentCommand \newcheckboxappearance { m m  }  %#1=name, #2 = content
+\NewDocumentCommand \newcheckboxappearance { s  m m  }  %#2=name, #3 = content
  {
-   \pdf_xform_new:nnn {#1}{}{#1} 
+   \pdf_xform_new:nnn {#2}{}
+     {
+      \normalsize
+      \hbox_set:Nn   \l_tmpa_box { #3 \strut }      
+      \IfBooleanTF {#1}
+       {
+        \fboxsep 0pt
+        \framebox
+        [ \dim_max:nn { \box_wd:N \l_tmpa_box }{ \box_ht:N\strutbox+\box_dp:N\strutbox} ]
+        { \box_use:N \l_tmpa_box } 
+       }
+       {
+        \makebox
+        [ \dim_max:nn { \box_wd:N \l_tmpa_box }{\box_ht:N\strutbox+\box_dp:N\strutbox} ]
+        { \box_use:N \l_tmpa_box }               
+       } 
+     }    
  }
  
- 
-% ## local variables
-\dim_new:N \l_dcp_field_ht_dim
-\dim_new:N \l_dcp_field_wd_dim
-\dim_new:N \l_dcp_field_dp_dim
-\int_new:N \l_dcp_field_flags_int
+\newcheckboxappearance* {checkbox/Yes/dflt}
+  { 
+    $\times$
+  }  
+
+\newcheckboxappearance* {checkbox/Off/dflt}
+  {  }  
   
-% # l3keys set up
+\usepackage{tikz,bearwear}
+\usepackage[default]{sourcesanspro}
 
-\tl_new:N \l_dcp_normal_off_tl
-\tl_new:N \l_dcp_normal_yes_tl
+  
+\newcheckboxappearance {checkbox/Off/unicode}
+ {\normalfont ☐}
+\newcheckboxappearance {checkbox/Yes/unicode}
+ {\normalfont ☑}
 
-\keys_define:nn { dcp }
+\newcheckboxappearance {checkbox/Off/tikz}
   {
-    normal ~ off .tl_set_x:N = \l_dcp_normal_off_tl,
+   \tikz[baseline]
+    \path[draw=white,fill=magenta](0,-1pt)rectangle(8pt,7pt);
+  }
+
+\newcheckboxappearance {checkbox/Yes/tikz}  
+   {
+    \tikz[baseline]
+      \path[draw=white,fill=cyan](0,-1pt)rectangle(8pt,7pt);
+   }
+     
+
+\newcheckboxappearance {checkbox/Off/bear}
+  {
+   \tikz[scale=0.5]\bear;
+  }
+
+\newcheckboxappearance {checkbox/Yes/bear}
+   {
+    \tikz[scale=0.5]\bear\bearwear;
+   }
+     
+
+\keys_define:nn { uf }
+  {
+    normal ~ off .tl_set_x:N = \l__uf_normal_off_tl,
     normal ~ off .value_required:n = true,
-    normal ~ yes .tl_set_x:N = \l_dcp_normal_yes_tl,
+    normal ~ yes .tl_set_x:N = \l__uf_normal_yes_tl,
     normal ~ yes .value_required:n = true,
   }
 
-\cs_new_protected:Nn \dcp_normalise_boxes:
-  { 
-    \dim_set:Nn \l_dcp_field_wd_dim
-       { \dim_max:nn { \pdf_xform_wd:e {\l_dcp_normal_off_tl} }{ \pdf_xform_wd:e {\l_dcp_normal_yes_tl} } }
-    \dim_set:Nn \l_dcp_field_ht_dim
-      { \dim_max:nn { \pdf_xform_ht:e {\l_dcp_normal_off_tl} }{ \pdf_xform_ht:e {\l_dcp_normal_yes_tl} } }            
-    \dim_set:Nn \l_dcp_field_dp_dim
-      { \dim_max:nn { \pdf_xform_dp:e {\l_dcp_normal_off_tl} }{ \pdf_xform_dp:e {\l_dcp_normal_yes_tl} } }
+\cs_new_protected:Nn \__uf_normalise_boxes:
+  {    
+    \dim_set:Nn \l__uf_field_wd_dim
+       { \dim_max:nn { \pdf_xform_wd:e {\l__uf_normal_off_tl} }{ \pdf_xform_wd:e {\l__uf_normal_yes_tl} } }
+    \dim_set:Nn \l__uf_field_ht_dim
+      { \dim_max:nn { \pdf_xform_ht:e {\l__uf_normal_off_tl} }{ \pdf_xform_ht:e {\l__uf_normal_yes_tl} } }
+    \dim_set:Nn \l__uf_field_dp_dim
+      { \dim_max:nn { \pdf_xform_dp:e {\l__uf_normal_off_tl} }{ \pdf_xform_dp:e {\l__uf_normal_yes_tl} } }
   }
 
 
 
-% # form and field interface macros
 
-\NewDocumentCommand \checkboxfield { O{}m }
+\cs_new_protected:Npn \__uf_checkbox_fielddict:n #1
   {
-    \group_begin:
-    \keys_set:nn { dcp }
-      {
-        normal ~ yes = \g_dcp_normal_yes_default_tl,
-        normal ~ off = \g_dcp_normal_off_default_tl,
-        #1
-      }
-    \dcp_normalise_boxes:
-    \pdfdict_put:nnn {annot/Widget}{FT}{/Btn}
-    \pdfdict_put:nnn {annot/Widget}{T}{(#2)} %should pass throught some excape
-    \pdfdict_put:nnn {annot/Widget}{V}{/Off} %should be configurable
-    \pdfdict_put:nnn {annot/Widget}{AS}{/Off} %should be configurable
-    \pdfannot_flag_clear:nn {annot/Field}{Radio} %just in case
-    \pdfannot_flag_clear:nn {annot/Field}{Pushbutton} %just in case
-    \pdfannot_flag_set:nn {annot/Field}{NoExport}
-    \pdfdict_put:nnx {annot/Widget}{F}{\pdfannot_flag_use:n{annot/Field}}
-    % more flag configuration needed?
-%/AP <</N <</Yes 6 0 R/Off 9 0 R>>>>
-%/P 6 0 R/Q 0/BS<</W 1/S/S>>/AP<< /N <</Yes<<>>>> >> /MK<</BC[1 0 0]/BG[1 1 1]/CA(4)>>/DA(/ZaDb 10 Tf 0 0 0 rg)/H/P
-     \pdfdict_put:nnx {annot/Widget}{Q}{0}
-    
+    %#1 should pass through some escaping!
+    \pdf_object_if_exist:nTF {annot/Field/Btn/#1}
+     {
+      %needed ? later
+     }
+     {
+      \group_begin:
+      \pdf_object_new:nn {annot/Field/Btn/#1}      {dict}
+      \pdf_object_new:nn {annot/Field/Btn/#1/Kids} {array}
+      \seq_new:c {g_annot/Field/Btn/#1/Kids_seq}
+      \hook_gput_code:nnn {enddocument/afterlastpage}{pdf}
+        {
+          \pdf_object_write:nx {annot/Field/Btn/#1/Kids} { \seq_use:cn{g_annot/Field/Btn/#1/Kids_seq}{~} }
+        }
+      \pdfdict_put:nnn {annot/Field}{FT}{/Btn}
+      \pdfdict_put:nnn {annot/Field}{T}{(#1)}
+      \pdfdict_put:nnn {annot/Field}{V}{/Off}  %should be configurable/in sync with /AS/DV
+      \pdfdict_put:nnn {annot/Field}{DV}{/Off} %should be configurable/in sync with /AS/DV
+      \pdfdict_put:nnx {annot/Field}{Kids}{\pdf_object_ref:n {annot/Field/Btn/#1/Kids}}
+      \pdfannot_flag_clear:nn {annot/Field}{Radio}      %just in case
+      \pdfannot_flag_clear:nn {annot/Field}{Pushbutton} %just in case
+      \pdfannot_flag_set:nn {annot/Field}{NoExport}
+      \pdfdict_put:nnx {annot/Field}{Ff}{\pdfannot_flag_use:n{annot/Field}}
+      \pdf_object_write:nx {annot/Field/Btn/#1} { \pdfdict_map:n {annot/Field} }
+      \pdfdict_gput:nnx { Catalog / AcroForm } { Fields }{\pdf_object_ref:n {annot/Field/Btn/#1} }
+      \group_end:
+     }
+  }
+
+\cs_new_protected:Npn \__uf_checkbox_annot:n #1
+  {
+    \group_begin:    
      \hbox_to_wd:nn
-       { \l_dcp_field_wd_dim  }
+       { \l__uf_field_wd_dim  }
        {
-        \pdfannot_box:nnnnn
+        \rule[-\l__uf_field_dp_dim]{0pt}{\dim_eval:n{\l__uf_field_ht_dim+\l__uf_field_dp_dim}}
+          \pdfannot_box:nnnnn
            {Widget}
-           { \dim_use:N \l_dcp_field_wd_dim }
-           { \dim_use:N \l_dcp_field_ht_dim }
-           { \dim_use:N \l_dcp_field_dp_dim }
+           { \dim_use:N \l__uf_field_wd_dim }
+           { \dim_use:N \l__uf_field_ht_dim }
+           { \dim_use:N \l__uf_field_dp_dim }
            {
+            /Parent~ \pdf_object_ref:n{annot/Field/Btn/#1}
+            /AS ~ /Off
             /AP ~
               <<
                 /N ~
-                  << /Yes ~ \pdf_xform_ref:e { \l_dcp_normal_yes_tl}
-                     /Off ~ \pdf_xform_ref:e { \l_dcp_normal_off_tl}
+                  << /Yes ~ \pdf_xform_ref:e { \l__uf_normal_yes_tl}
+                     /Off ~ \pdf_xform_ref:e { \l__uf_normal_off_tl}
                   >>
               >>
            }
          \hfill
         }
-      \pdfdict_gput:nnx { Catalog / AcroForm } { Fields }{\pdfannot_box_last:}
-      \group_end:
+    \seq_gput_right:cx {g_annot/Field/Btn/#1/Kids_seq}{ \pdfannot_box_last:}
+    \group_end:
+  }
+% # form and field interface macros
+
+\NewDocumentCommand \checkboxfield { O{}m }
+  {
+    \group_begin:
+    \keys_set:nn { uf }
+      {
+        normal ~ yes = \g__uf_normal_yes_default_tl,
+        normal ~ off = \g__uf_normal_off_default_tl,
+        #1
+      }
+    \__uf_normalise_boxes:
+    \__uf_checkbox_fielddict:n {#2}
+    \__uf_checkbox_annot:n {#2}
+    \group_end:
   }
 
 \ExplSyntaxOff
 
-\usepackage{tikz}
-\usepackage[default]{sourcesanspro}
 
 \begin{document}
-%\begin{Form}
-\ExplSyntaxOn
-x\pdf_xform_use:n {checkbox/Yes/dflt}y
-x\pdf_xform_use:n {checkbox/Off/dflt}y
-\ExplSyntaxOff
-Option 1: \checkboxfield{checkbox1}
+\begin{Form}[NeedAppearances=false]
 
-Option 1: \checkboxfield{checkbox2}
+1: \checkboxfield{checkbox1}
 
-Option 1: \checkboxfield{checkbox3}
+2: \checkboxfield{checkbox2}
 
-Option 1: \checkboxfield{checkbox1}
+3: \checkboxfield{checkbox3}
 
-Option 1: \checkboxfield{checkbox1}
+1: \checkboxfield{checkbox1}
 
-%\CheckBox{A}\CheckBox{A}
-%\end{Form}
+3: \checkboxfield{checkbox3}
+
+4: \checkboxfield[%
+normal off = checkbox/Off/unicode,
+normal yes = checkbox/Yes/unicode]{checkbox4}
+
+5: \checkboxfield[%
+normal off = checkbox/Off/tikz,
+normal yes = checkbox/Yes/tikz]{checkbox5}
+
+6: \checkboxfield[%
+normal off = checkbox/Off/bear,
+normal yes = checkbox/Yes/bear]{checkbox6}
+
+
+2: \checkboxfield[%
+normal off = checkbox/Off/bear,
+normal yes = checkbox/Yes/bear]{checkbox2}
+
+
+\end{Form}
 \end{document}
 
-Option 2: \checkboxfield[%
-normal off = ☐,
-normal yes = ☑]{checkbox2}
-
-Option 3: \checkboxfield[%
-normal off = {\tikz[baseline, inner sep=1pt]
-\node[draw=magenta, text=white, anchor=base]
-{\vrule width 8pt height 7pt depth 1pt };},
-normal yes = {\tikz[baseline, inner sep=1pt]
-\node[draw=magenta, text=cyan, anchor=base]
-{\vrule width 8pt height 7pt depth 1pt };},
-]{checkbox3}
-
-\end{document}
+%%%
 
 Field dict
 Ft     : /Btn /Tx /Ch /Sig
@@ -200,6 +252,7 @@ Kids: array, other fields or annot/widget
 T: partial fieldname (test string)
 TU: alternate description (test string)
 TM: mapping name
+Q integer (variable text field)
 Ff: flags ->annot/Field
 V: value            % not pushbutton
 DV: default value   % not pushbutton
