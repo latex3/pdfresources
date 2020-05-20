@@ -368,53 +368,9 @@
 %   This returns the object reference of a page object. The \Arg{number} is
 %   the absolute page number. The count starts with one.
 % \end{function}
-% \begin{macro}{ \@@_backend_pageobject_ref:n }
+% \begin{macro}{ \pdf_pageobject_ref:n }
 %    \begin{macrocode}
-% command is in git.
-\cs_if_free:NT \@@_backend_pageobject_ref:n
-  {
-  %pdftex
-  \bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p:}
-    {
-      \cs_new:Npn \@@_backend_pageobject_ref:n #1
-        {
-          \tex_pdfpageref:D #1 ~ \c_space_tl 0 ~ R
-        }
-    }
-  %luatex
-  \sys_if_engine_luatex:T
-    {
-      \cs_new:Npn \@@_backend_pageobject_ref:n #1
-        {
-          \tex_pdffeedback:D~pageref #1 ~ \c_space_tl 0 ~ R
-        }
-    }
-  %dvips
-  \bool_if:nT {\sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p: }
-    {
-      \cs_new:Npn \@@_backend_pageobject_ref:n #1
-        {
-          {Page#1}
-        }
-    }
-
-  %xetex
-  \sys_if_engine_xetex:T
-    {
-      \cs_new:Npn \@@_backend_pageobject_ref:n #1
-        {
-          @page#1
-        }
-    }
-  }
 \cs_new:Npn \pdf_pageobject_ref:n #1 { \@@_backend_pageobject_ref:n { #1 }}
-
-%% no idea here, so ...
-%\cs_new_protected:Npn \pdf_thispageobject_ref:N #1
-% {
-%
-% }
-%
 %    \end{macrocode}
 % \end{macro}
 % \section{Module pdfdict}
