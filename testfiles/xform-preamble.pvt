@@ -1,0 +1,14 @@
+\input{regression-test}
+\documentclass{article}
+\usepackage{pdfresources}
+\ExplSyntaxOn
+\pdf_xform_new:nnn  {myxformA}{/yyy~(bla)}{yyyyy}
+\ExplSyntaxOff
+\begin{document}
+\START
+text
+\ExplSyntaxOn
+\pdf_xform_use:n {myxformA}
+some~text~
+\ExplSyntaxOff
+\end{document} 
