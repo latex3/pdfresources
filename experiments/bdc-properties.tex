@@ -4,11 +4,6 @@
 
 \ExplSyntaxOn
 %correct g to c, is already in master ...
-\sys_if_engine_xetex:T
-{
- \cs_set:Npn \__pdf_backend_object_ref:n #1
-   { @pdf.obj \int_use:c { c__pdf_backend_object_ \tl_to_str:n {#1} _int } }
-}
 
 \pdf_uncompress:
 \ExplSyntaxOff
@@ -19,7 +14,7 @@
 \pdf_object_write:nn {objA}{/Type/Artifact}
 
 \pdf_object_new:nn   {objB}{dict}
-\pdf_object_write:nn {objB}{/ActualText(abc)}
+\pdf_object_write:nn {objB}{/ActualText~(abc)}
 
 \vspace*{44\baselineskip}
 \pdf_bdc:nn {Span}{objA}xxx
@@ -31,7 +26,7 @@
 \pdf_bdc:nn {Span}{objB}xxx
 \pdf_emc:
 
-\pdf_object_now:nn {dict}{/ActualText(xyz)}
+\pdf_object_now:nn {dict}{/ActualText~(xyz)}
 \pdf_bdc:n {Span}xx3
 \pdf_emc:
 

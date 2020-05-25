@@ -123,13 +123,13 @@
   {
     \dim_set:Nn \l__uf_field_wd_dim
        { \dim_max:nn { \pdf_xform_wd:e {\l__uf_normal_off_tl} }{ \pdf_xform_wd:e {\l__uf_normal_yes_tl} } }
-    \dim_set:Nn \l__uf_field_wd_dim { #1\l__uf_field_wd_dim}    
+    \dim_set:Nn \l__uf_field_wd_dim { #1\l__uf_field_wd_dim}
     \dim_set:Nn \l__uf_field_ht_dim
       { \dim_max:nn { \pdf_xform_ht:e {\l__uf_normal_off_tl} }{ \pdf_xform_ht:e {\l__uf_normal_yes_tl} } }
-    \dim_set:Nn \l__uf_field_ht_dim { #1\l__uf_field_ht_dim}      
+    \dim_set:Nn \l__uf_field_ht_dim { #1\l__uf_field_ht_dim}
     \dim_set:Nn \l__uf_field_dp_dim
       { \dim_max:nn { \pdf_xform_dp:e {\l__uf_normal_off_tl} }{ \pdf_xform_dp:e {\l__uf_normal_yes_tl} }}
-    \dim_set:Nn \l__uf_field_dp_dim { #1\l__uf_field_dp_dim}            
+    \dim_set:Nn \l__uf_field_dp_dim { #1\l__uf_field_dp_dim}
   }
 
 \cs_new_protected:Npn \pdfannot_field:nn #1 #2 %#1 type e.g. Btn. #2 name
@@ -164,7 +164,7 @@
             {annot/Field}{T}{(#2)}
           %write the field object and put in the field entry
           \pdf_object_write:nx {pdf/annot/Field/#1/#2} { \pdfdict_map:n {annot/Field} }
-          \pdfdict_gput:nnx { Catalog / AcroForm } { Fields }{\pdf_object_ref:n {pdf/annot/Field/#1/#2} }
+          %\pdfdict_gput:nnx { Catalog / AcroForm } { Fields }{\pdf_object_ref:n {pdf/annot/Field/#1/#2} }
         \group_end:
       }
 
@@ -235,11 +235,8 @@
 \ExplSyntaxOff
 
 
-\begin{document}\errorcontextlines200
-
-\begin{Form}[NeedAppearances=false,action=mailto:
-   ,encoding=html, method=post]
-
+\begin{document}
+\begin{Form}[NeedAppearances=false]
 1: \checkboxfield{checkbox1}
 
 2: \checkboxfield{checkbox2}
@@ -269,7 +266,9 @@ scale=0.5,
 normal off = checkbox/Off/bear,
 normal yes = checkbox/Yes/bear]{checkbox2}
 
-\Submit{Submit}
+
+
+%\Submit{Submit}
 
 %\PushButton[onclick={this.exportAsText()}]{Submit}
 \end{Form}
