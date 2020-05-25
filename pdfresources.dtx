@@ -182,11 +182,10 @@
 %
 % \subsection{some zref code, needs to be replaced later}
 % \begin{variable}
-%  {\g_@@_abspage_int, \g_@@_backend_resourceid_int, \g_@@_backend_name_int, \g_@@_backend_page_int}
-%  an absolute page counter, a counter to create labels for the resources, a counter
+%  {\g_@@_backend_resourceid_int, \g_@@_backend_name_int, \g_@@_backend_page_int}
+%  a counter to create labels for the resources, a counter
 %  to number properties in bdc marks, a counter for the \cs{pdfpageref} implementation.
 %    \begin{macrocode}
-\int_new:N \g_@@_abspage_int
 \int_new:N \g_@@_backend_resourceid_int
 \int_new:N \g_@@_backend_name_int
 \int_new:N \g_@@_backend_page_int
@@ -195,7 +194,7 @@
 % a reference for the absolute page counter
 %    \begin{macrocode}
 \zref@newlist  { l3pdf }
-\zref@newprop* { pdf@abspage } [0] { \int_use:N \g_@@_abspage_int }
+\zref@newprop* { pdf@abspage } [0] { \int_use:N \g_shipout_readonly_int }
 \zref@addprop  { l3pdf } { pdf@abspage }
 %    \end{macrocode}
 %
@@ -320,10 +319,9 @@
 
 \cs_new_protected:Npn \@@_BACKEND_shipout_code:
   {
-    \int_gincr:N \g_@@_abspage_int
     \g_@@_BACKEND_thispage_shipout_tl
     \int_compare:nNnT
-      { \g_@@_abspage_int }
+      { \g_shipout_readonly_int }
       =
       { \zref@extractdefault{LastPage}{abspage}{0} }
       {
@@ -333,8 +331,8 @@
 
 \@@_BACKEND_thispage_shipout_gput:n
   {
-    \exp_args:NV \@@_backend_ThisPage_gpush:n           { \g_@@_abspage_int }
-    \exp_args:NV \@@_backend_PageResources_gpush:n { \g_@@_abspage_int }
+    \exp_args:NV \@@_backend_ThisPage_gpush:n           { \g_shipout_readonly_int }
+    \exp_args:NV \@@_backend_PageResources_gpush:n { \g_shipout_readonly_int }
   }
 
 %!!!!! check if pdftex/luatex can run some of them in the immediate end-of-run
@@ -1322,11 +1320,11 @@
         {
           l3kernel.@@.backend_ThisPage_gput
             (
-              tex.count["g_@@_abspage_int"],
+              tex.count["g_shipout_readonly_int"],
               \@@_backend_luastring:n { #1 },
               \@@_backend_luastring:n { #2 }
             )
-          l3kernel.@@.backend_ThisPage_gpush (tex.count["g_@@_abspage_int"])
+          l3kernel.@@.backend_ThisPage_gpush (tex.count["g_shipout_readonly_int"])
         }
     }
   %the code to push the values, used in shipout
@@ -1337,7 +1335,7 @@
     {
       \tex_latelua:D
         {
-          l3kernel.@@.backend_ThisPage_gpush (tex.count["g_@@_abspage_int"])
+          l3kernel.@@.backend_ThisPage_gpush (tex.count["g_shipout_readonly_int"])
         }
     }
   }
@@ -1587,7 +1585,7 @@
             \tex_latelua:D{l3kernel.@@.Page.Resources.#1=true}
             \tex_latelua:D
               {
-                l3kernel.pdf.Page_Resources_gpush(tex.count["g_@@_abspage_int"])
+                l3kernel.pdf.Page_Resources_gpush(tex.count["g_shipout_readonly_int"])
               }
           }
       }
@@ -2541,7 +2539,7 @@
               {
                 l3kernel.pdf.Page_Resources_Properties_gput
                   (
-                    tex.count["g_@@_abspage_int"],
+                    tex.count["g_shipout_readonly_int"],
                     "l3pdf\int_use:N\g_@@_backend_name_int",
                     "\@@_backend_object_ref:n { #2 }"
                   )
@@ -2565,7 +2563,7 @@
               {
                 l3kernel.pdf.Page_Resources_Properties_gput
                   (
-                    tex.count["g_@@_abspage_int"],
+                    tex.count["g_shipout_readonly_int"],
                     "l3pdf\int_use:N\g_@@_backend_name_int",
                     "\@@_backend_object_last:"
                   )
@@ -4026,7 +4024,7 @@ local function @@_backend_ThisPage_gpush (page)
  return token
 end
 
-function l3kernel.@@.backend_ThisPage_gput (page,name,value) -- tex.count["g_@@_abspage_int"]
+function l3kernel.@@.backend_ThisPage_gput (page,name,value) -- tex.count["g_shipout_readonly_int"]
  @@_backend_ThisPage_gput (page,name,value)
 end
 
@@ -4072,7 +4070,7 @@ local function @@_backend_PageResources_gpush (page)
 end
 
 -- the function is public, as I probably need it in tagpdf too ...
-function l3kernel.pdf.Page_Resources_Properties_gput (page,name,value) -- tex.count["g_@@_abspage_int"]
+function l3kernel.pdf.Page_Resources_Properties_gput (page,name,value) -- tex.count["g_shipout_readonly_int"]
  Properties[page] = Properties[page] or {}
  Properties[page][name]=value
  pdf.setpageresources(@@_backend_PageResources_gpush (page))

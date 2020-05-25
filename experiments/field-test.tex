@@ -115,16 +115,21 @@
     normal ~ off .value_required:n = true,
     normal ~ yes .tl_set_x:N = \l__uf_normal_yes_tl,
     normal ~ yes .value_required:n = true,
+    scale .tl_set:N =  \l__uf_fieldscalefactor_tl,
+    scale .initial:n = {1}
   }
 
-\cs_new_protected:Nn \__uf_normalise_boxes:
+\cs_new_protected:Npn \__uf_normalise_boxes:n #1 %#1 scale factor
   {
     \dim_set:Nn \l__uf_field_wd_dim
        { \dim_max:nn { \pdf_xform_wd:e {\l__uf_normal_off_tl} }{ \pdf_xform_wd:e {\l__uf_normal_yes_tl} } }
+    \dim_set:Nn \l__uf_field_wd_dim { #1\l__uf_field_wd_dim}
     \dim_set:Nn \l__uf_field_ht_dim
       { \dim_max:nn { \pdf_xform_ht:e {\l__uf_normal_off_tl} }{ \pdf_xform_ht:e {\l__uf_normal_yes_tl} } }
+    \dim_set:Nn \l__uf_field_ht_dim { #1\l__uf_field_ht_dim}
     \dim_set:Nn \l__uf_field_dp_dim
-      { \dim_max:nn { \pdf_xform_dp:e {\l__uf_normal_off_tl} }{ \pdf_xform_dp:e {\l__uf_normal_yes_tl} } }
+      { \dim_max:nn { \pdf_xform_dp:e {\l__uf_normal_off_tl} }{ \pdf_xform_dp:e {\l__uf_normal_yes_tl} }}
+    \dim_set:Nn \l__uf_field_dp_dim { #1\l__uf_field_dp_dim}
   }
 
 \cs_new_protected:Npn \pdfannot_field:nn #1 #2 %#1 type e.g. Btn. #2 name
@@ -159,7 +164,7 @@
             {annot/Field}{T}{(#2)}
           %write the field object and put in the field entry
           \pdf_object_write:nx {pdf/annot/Field/#1/#2} { \pdfdict_map:n {annot/Field} }
-          \pdfdict_gput:nnx { Catalog / AcroForm } { Fields }{\pdf_object_ref:n {pdf/annot/Field/#1/#2} }
+          %\pdfdict_gput:nnx { Catalog / AcroForm } { Fields }{\pdf_object_ref:n {pdf/annot/Field/#1/#2} }
         \group_end:
       }
 
@@ -221,7 +226,7 @@
         normal ~ off = \g__uf_normal_off_default_tl,
         #1
       }
-    \__uf_normalise_boxes:
+    \__uf_normalise_boxes:n {\l__uf_fieldscalefactor_tl}
     \__uf_checkbox_fielddict:n {#2}
     \__uf_checkbox_annot:n {#2}
     \group_end:
@@ -230,10 +235,8 @@
 \ExplSyntaxOff
 
 
-\begin{document}\errorcontextlines200
-\begin{Form}[NeedAppearances=false,action=mailto:
-   ,encoding=html, method=post]
-
+\begin{document}
+\begin{Form}[NeedAppearances=false]
 1: \checkboxfield{checkbox1}
 
 2: \checkboxfield{checkbox2}
@@ -242,7 +245,7 @@
 
 1: \checkboxfield{checkbox1}
 
-3: \checkboxfield{checkbox3}
+3: \checkboxfield[scale=3]{checkbox3}
 
 4: \checkboxfield[%
 normal off = checkbox/Off/unicode,
@@ -251,17 +254,21 @@ normal yes = checkbox/Yes/unicode]{checkbox4}
 5: \checkboxfield[%
 normal off = checkbox/Off/tikz,
 normal yes = checkbox/Yes/tikz]{checkbox5}
+7: \checkboxfield[scale=1.5,%
+normal off = checkbox/Off/tikz,
+normal yes = checkbox/Yes/tikz]{checkbox7}
 
 6: \checkboxfield[%
 normal off = checkbox/Off/bear,
 normal yes = checkbox/Yes/bear]{checkbox6}
-
-
 2: \checkboxfield[%
+scale=0.5,
 normal off = checkbox/Off/bear,
 normal yes = checkbox/Yes/bear]{checkbox2}
 
-\Submit{Submit}
+
+
+%\Submit{Submit}
 
 %\PushButton[onclick={this.exportAsText()}]{Submit}
 \end{Form}

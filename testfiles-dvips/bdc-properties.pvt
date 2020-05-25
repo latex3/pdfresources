@@ -1,11 +1,12 @@
-% !Mode:: "TeX:DE:UTF-8:Main"
+\input{regression-test}
 \documentclass{article}
 \usepackage{l3pdf,pdfresources}
-
 \ExplSyntaxOn
-%correct g to c, is already in master ...
-
-\pdf_uncompress:
+%%% for reproducible tests:
+\pdfdict_gput:nnn {Info}{CreationDate}{(D:20200202111111+01'00')}
+\pdfdict_gput:nnn {Info}{ModDate}{(D:20200202111111+01'00')}
+\pdfdict_gput:nnn {Info}{Creator}{(l3build test)}
+%%%%%
 \ExplSyntaxOff
 
 \begin{document}
