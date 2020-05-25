@@ -1,0 +1,35 @@
+\input{regression-test}
+\documentclass{article}
+\usepackage{l3pdf,pdfresources}
+\ExplSyntaxOn
+%%% for reproducible tests:
+\pdfdict_gput:nnn {Info}{CreationDate}{(D:20200202111111+01'00')}
+\pdfdict_gput:nnn {Info}{ModDate}{(D:20200202111111+01'00')}
+\pdfdict_gput:nnn {Info}{Creator}{(l3build test)}
+%%%%%
+\ExplSyntaxOff
+
+\begin{document}
+\ExplSyntaxOn
+\pdf_object_new:nn   {objA}{dict}
+\pdf_object_write:nn {objA}{/Type/Artifact}
+
+\pdf_object_new:nn   {objB}{dict}
+\pdf_object_write:nn {objB}{/ActualText~(abc)}
+
+\vspace*{44\baselineskip}
+\pdf_bdc:nn {Span}{objA}xxx
+\pdf_emc:
+\\
+\pdf_bdc:nn {Span}{objA}xxx
+\pdf_emc:
+\\
+\pdf_bdc:nn {Span}{objB}xxx
+\pdf_emc:
+
+\pdf_object_now:nn {dict}{/ActualText~(xyz)}
+\pdf_bdc:n {Span}xx3
+\pdf_emc:
+
+\ExplSyntaxOff
+\end{document} 

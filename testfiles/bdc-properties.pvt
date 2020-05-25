@@ -1,0 +1,29 @@
+\input{regression-test}
+\documentclass{article}
+\usepackage{l3pdf,pdfresources}
+
+
+\begin{document}
+\ExplSyntaxOn
+\pdf_object_new:nn   {objA}{dict}
+\pdf_object_write:nn {objA}{/Type/Artifact}
+
+\pdf_object_new:nn   {objB}{dict}
+\pdf_object_write:nn {objB}{/ActualText~(abc)}
+
+\vspace*{44\baselineskip}
+\pdf_bdc:nn {Span}{objA}xxx
+\pdf_emc:
+\\
+\pdf_bdc:nn {Span}{objA}xxx
+\pdf_emc:
+\\
+\pdf_bdc:nn {Span}{objB}xxx
+\pdf_emc:
+
+\pdf_object_now:nn {dict}{/ActualText~(xyz)}
+\pdf_bdc:n {Span}xx3
+\pdf_emc:
+
+\ExplSyntaxOff
+\end{document} 
