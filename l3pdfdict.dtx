@@ -1,0 +1,113 @@
+% \iffalse meta-comment
+%
+%% File: l3pdfdict.dtx
+%
+% Copyright (C) 2018-2020 The LaTeX3 Project
+%
+% It may be distributed and/or modified under the conditions of the
+% LaTeX Project Public License (LPPL), either version 1.3c of this
+% license or (at your option) any later version.  The latest version
+% of this license is in the file
+%
+%    http://www.latex-project.org/lppl.txt
+%
+% This file is part of the "(experimental) pdfresources bundle" (The Work in LPPL)
+% and all files in that bundle must be distributed together.
+%
+% -----------------------------------------------------------------------
+%
+% The development version of the bundle can be found at
+%
+%    https://github.com/latex3/pdfresources
+%
+% for those people who are interested.
+%
+%<*driver>
+\RequirePackage{expl3}
+\documentclass[full]{l3doc}
+\begin{document}
+  \DocInput{\jobname.dtx}
+\end{document}
+%</driver>
+% \fi
+%
+% \title{^^A
+%   The \pkg{l3pdfdict} package\\ Managing global and local dictionaries ^^A
+% }
+%
+% \author{^^A
+%  The \LaTeX3 Project\thanks
+%    {^^A
+%      E-mail:
+%        \href{mailto:latex-team@latex-project.org}
+%          {latex-team@latex-project.org}^^A
+%    }^^A
+% }
+%
+% \date{Released XXXX-XX-XX}
+%
+% \maketitle
+% \begin{documentation}
+%
+% \section{\pkg{l3pdfdict} documentation}
+% Many features of a PDF are set by adding a (pdf-)Name and a value
+% to specific PDF dictionaries. The commands in this module offer an interface to
+% these dictionaries. They unify a number of primitives like the pdftex
+% registers \cs{pdfcatalog}, \cs{pdfpagesattr}, \cs{pdfinfo} and similar commands
+% of the other backends  in a backend independant way.
+%
+% There are two distinct types of dictionaries
+% \begin{description}
+%    \item[Global dictionaries] These are dictionaries which are inserted only
+%    once in a PDF or only once per page. Examples are the Catalog dictionary,
+%    the Info dictionary, the page resources. For these dictionaries it is necessary
+%    that all package which want to write to them uses the interface provided
+%    by this module to avoid clashes and incompabilities. Values to these
+%    dictionaries are always added globally and written by the code
+%    at a suitable time to the PDF.
+%    Global dictionaries are set and manipulated with the global commands, e.g.
+%    \cs{pdf_dict_gput:nnn}.
+%
+%    \item[Local dictionaries ] These are dictionaries which are used in varying number
+%    with varying content. Examples are attributes of links, filespec dictionaries,
+%    xform dictionaries. The main purpose of the code here is to give packages and users
+%    a better interface to add or change values of such objects.
+%
+%    Local dictionaries are set and manipulated with the local commands, e.g.
+%    \cs{pdf_dict_put:nnn}
+%  \end{description}
+%
+% The following tabular summarize the dictionaries and which pdftex primitive they
+% replace:
+% \begin{tabular}{lll}
+%  Info                                  & \cs{pdfinfo}    &global\\
+%  Catalog \&  various subdictionaries   & \cs{pdfcatalog} &global\\
+%  Pages                                 & \cs{pdfpagesattr}&global\\
+%  Page, ThisPage                        & \cs{pdfpageattr}&global\\
+%  Page/Resources/ExtGState              & \cs{pdfpageresources}&global\\
+%  Page/Resources/Shading                & \cs{pdfpageresources}&global\\
+%  Page/Resources/Pattern                & \cs{pdfpageresources}&global\\
+%  Page/Resources/ColorSpace             & \cs{pdfpageresources}&global\\%
+%  xform\ldots                           & argument of \cs{pdfxform} &local\\
+%  annot\ldots                           & argument of \cs{pdfannot}, \cs{pdfstartlink} &local\\
+%  \end{tabular}
+%
+%  The /Properties dictionary of the page resources is not handled by this module. It is
+%  filled and managed through side effects when setting BDC-marks.
+% \end{documentation}
+%
+% \begin{implementation}
+%
+% \section{\pkg{l3pdfdict} implementation}
+%
+%    \begin{macrocode}
+%<*package>
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%</package>
+%    \end{macrocode}
+%
+% \end{implementation}
+%
+% \PrintIndex

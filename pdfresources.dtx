@@ -179,8 +179,9 @@
 \box_new:N  \l_@@_tmpb_box
 %    \end{macrocode}
 % \end{variable}
-%
+%</package>
 % \subsection{some zref code, needs to be replaced later}
+%<*drivers>
 % \begin{variable}
 %  {\g_@@_backend_resourceid_int, \g_@@_backend_name_int, \g_@@_backend_page_int}
 %  a counter to create labels for the resources, a counter
@@ -191,14 +192,17 @@
 \int_new:N \g_@@_backend_page_int
 %    \end{macrocode}
 % \end{variable}
+%</drivers>
+%<*package>
 % a reference for the absolute page counter
 %    \begin{macrocode}
 \zref@newlist  { l3pdf }
 \zref@newprop* { pdf@abspage } [0] { \int_use:N \g_shipout_readonly_int }
 \zref@addprop  { l3pdf } { pdf@abspage }
 %    \end{macrocode}
-%
+%</package>
 % \subsection{luacode}
+%<*pdfmode>
 % Load the lua code.
 %    \begin{macrocode}
 \sys_if_engine_luatex:T
@@ -206,7 +210,7 @@
     \directlua { require("pdfresources.lua") }
   }
 %    \end{macrocode}
-%
+%</pdfmode>
 % \subsection{shipout and end of run code}
 % \begin{NOTE}{UF}
 % the \enquote{end-of-run} command is temporary until the shipout/atendshipout hooks
@@ -229,6 +233,7 @@
 % second compilation.
 % The code shouldn't contain typesetting content and shouldn't rely on some
 % specific grouping.
+%<*drivers>
 %    \begin{macrocode}
 %  for all:
 \tl_new:N\g_@@_BACKEND_end_run_tl
@@ -239,54 +244,44 @@
   {
     \tl_gput_right:Nn \g_@@_BACKEND_end_run_tl { #1 }
   }
-
-
+%</drivers>
+%<*pdfmode>
 % pdftex,luatex
-\bool_if:nT
+\cs_new_protected:Npn \@@_BACKEND_end_run:
   {
-    (\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p:)
-    ||
-    \sys_if_engine_luatex_p:
-  }
-  {
-    \cs_new_protected:Npn \@@_BACKEND_end_run:
+    \hook_gput_code:nnn {enddocument/afterlastpage}
+      {pdf}
       {
-        \hook_gput_code:nnn {enddocument/afterlastpage}
-          {pdf}
-          {
-            \g_@@_BACKEND_end_run_tl
-          }
+        \g_@@_BACKEND_end_run_tl
       }
   }
+%</pdfmode>
+%<*xdvipdfmx>
 %xetex check ...
-\bool_if:nT {\sys_if_engine_xetex_p:}
-  {
-    \cs_new_protected:Npn \@@_BACKEND_end_run:
+\cs_new_protected:Npn \@@_BACKEND_end_run:
+ {
+   \tl_gput_right:Nn \g_@@_BACKEND_lastpage_shipout_tl
      {
-       \tl_gput_right:Nn \g_@@_BACKEND_lastpage_shipout_tl
-         {
-           \g_@@_BACKEND_end_run_tl
-         }
+       \g_@@_BACKEND_end_run_tl
      }
-  }
-
+ }
+%</xdvipdfmx>
+%<*dvips>
 %dvips check ...
-\bool_if:nT { \sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p: }
-  {
-    \cs_new_protected:Npn \@@_BACKEND_end_run:
+\cs_new_protected:Npn \@@_BACKEND_end_run:
+ {
+   \tl_gput_right:Nn \g_@@_BACKEND_lastpage_shipout_tl
      {
-       \tl_gput_right:Nn \g_@@_BACKEND_lastpage_shipout_tl
-         {
-           \g_@@_BACKEND_end_run_tl
-         }
+       \g_@@_BACKEND_end_run_tl
      }
-  }
-
+ }
+%</dvips>
+%<*drivers>
 \@@_BACKEND_end_run:
-
+%</drivers>
 %    \end{macrocode}
 % \end{macro}
-%
+%<*drivers>
 % \begin{macro}{
 %    \@@_BACKEND_shipout_code:,
 %    \@@_BACKEND_lastpage_shipout_gput:n,
@@ -352,7 +347,8 @@
   }
 %    \end{macrocode}
 % \end{macro}
-%
+%</drivers>
+%<*package>
 % \subsection{references to page objects}
 % \begin{NOTE}{UF}
 % a reference to the current page would be useful, but difficult to
@@ -372,52 +368,8 @@
 \cs_new:Npn \pdf_pageobject_ref:n #1 { \@@_backend_pageobject_ref:n { #1 }}
 %    \end{macrocode}
 % \end{macro}
-% \section{Module pdfdict}
-% Many features of a PDF are set by adding a (pdf-)Name and a value
-% to specific PDF dictionaries. The commands in this module offer an interface to
-% these dictionaries. They unify a number of primitives like the pdftex
-% registers \cs{pdfcatalog}, \cs{pdfpagesattr}, \cs{pdfinfo} and similar commands
-% of the other backends  in a backend independant way.
-%
-% There are two distinct types of dictionaries
-% \begin{description}
-%    \item[Global dictionaries] These are dictionaries which are inserted only
-%    once in a PDF or only once per page. Examples are the Catalog dictionary,
-%    the Info dictionary, the page resources. For these dictionaries it is necessary
-%    that all package which want to write to them uses the interface provided
-%    by this module to avoid clashes and incompabilities. Values to these
-%    dictionaries are always added globally and written by the code
-%    at a suitable time to the PDF.
-%    Global dictionaries are set and manipulated with the global commands, e.g.
-%    \cs{pdf_dict_gput:nnn}.
-%
-%    \item[Local dictionaries ] These are dictionaries which are used in varying number
-%    with varying content. Examples are attributes of links, filespec dictionaries,
-%    xform dictionaries. The main purpose of the code here is to give packages and users
-%    a better interface to add or change values of such objects.
-%
-%    Local dictionaries are set and manipulated with the local commands, e.g.
-%    \cs{pdf_dict_put:nnn}
-%  \end{description}
-%
-% The following tabular summarize the dictionaries and which pdftex primitive they
-% replace:
-% \begin{tabular}{lll}
-%  Info                                  & \cs{pdfinfo}    &global\\
-%  Catalog \&  various subdictionaries   & \cs{pdfcatalog} &global\\
-%  Pages                                 & \cs{pdfpagesattr}&global\\
-%  Page, ThisPage                        & \cs{pdfpageattr}&global\\
-%  Page/Resources/ExtGState              & \cs{pdfpageresources}&global\\
-%  Page/Resources/Shading                & \cs{pdfpageresources}&global\\
-%  Page/Resources/Pattern                & \cs{pdfpageresources}&global\\
-%  Page/Resources/ColorSpace             & \cs{pdfpageresources}&global\\%
-%  xform\ldots                           & argument of \cs{pdfxform} &local\\
-%  annot\ldots                           & argument of \cs{pdfannot}, \cs{pdfstartlink} &local\\
-%  \end{tabular}
-%
-%  The /Properties dictionary of the page resources is not handled by this module. It is
-%  filled and managed through side effects when setting BDC-marks.
-
+%</package>
+%<*package>
 % \subsection{Internal dictionary Code}
 %  Many code parts are quite similar: property lists for dictionaries are filled and output.
 %  So we define some generic commands to ensure systematic
