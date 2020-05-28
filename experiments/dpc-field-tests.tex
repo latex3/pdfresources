@@ -1,0 +1,297 @@
+
+%https://chat.stackexchange.com/transcript/message/54457775#54457775
+\documentclass{article}
+
+\pagestyle{empty}
+
+\usepackage{xparse}
+\usepackage{l3pdf}
+
+\ExplSyntaxOn
+
+\pdf_uncompress:
+
+% # begin l3pdf extensions (pdflatex and lualatex only)
+
+\cs_new_protected:Npn \__dcp_pdf_catalog_gput:nn #1#2
+  { \exp_args:Nnx \__pdf_backend_catalog_gput:nn {#1} {#2} }
+
+% ## l3pdf annotation extentsion
+\cs_new_protected:Npn \__dcp_pdf_annotation:nnnn #1#2#3#4
+  { \__pdf_backend_annotation:nnnn {#1} {#2} {#3} {#4} }
+\cs_generate_variant:Nn \__dcp_pdf_annotation:nnnn { nnnx }
+\cs_new:Npn \__dcp_pdf_annotation_last:
+  { \__pdf_backend_annotation_last: }
+
+% # default font object
+
+\pdf_object_new:nn { helv } { dict }
+\pdf_object_write:nx { helv }
+  {
+    /Type ~ /Font \iow_newline:
+    /Subtype ~ /Type1 \iow_newline:
+    /Name ~ /Helv \iow_newline:
+    /BaseFont ~ /Helvetica
+  }
+
+% # variables
+
+% ## global variables
+\clist_new:N \g__dcp_field_annots_clist
+\int_new:N \g__dcp_field_id_count_int
+
+% ## local variables
+\clist_new:N \l__dcp_radio_obj_clist
+\clist_new:N \l__dcp_radio_refs_clist
+\int_new:N \l__dcp_radio_count_int
+\tl_new:N \l__dcp_radio_id_tl
+
+% # l3keys set up
+
+\keys_define:nn { dcp }
+  {
+    multiline    .bool_set:N       = \l__dcp_field_multiline_bool,
+    width        .dim_set:N        = \l__dcp_field_wd_dim,
+    width        .value_required:n = true,
+    height       .dim_set:N        = \l__dcp_field_ht_dim,
+    height       .value_required:n = true,
+    depth        .dim_set:N        = \l__dcp_field_dp_dim,
+    depth        .value_required:n = true,
+  }
+
+% # appearance streams
+
+\pdf_object_new:nn { yes } { stream }
+\pdf_object_write:nx { yes }
+  {
+    {
+      /Type ~ /XObject \iow_newline:
+      /Subtype ~ /Form \iow_newline:
+      /FormType ~ 1 \iow_newline:
+      /BBox ~ [ ~ 0 ~ 0 ~ 10 ~ 10 ~ ] \iow_newline:
+      /Resources ~ << ~ /Procset ~ [ ~ /PDF ~ ] ~ >>
+    }
+    {
+      0.02 ~ 0.14 ~ 0 ~ 0 ~ k \iow_newline:
+      0 ~ 0 ~ 10 ~ 10 ~ re \iow_newline:
+      f \iow_newline:
+      0 ~ 0 ~ 0 ~ 1 ~ k \iow_newline:
+      2 ~ 2 ~ m \iow_newline:
+      8 ~ 8 ~ l \iow_newline:
+      2 ~ 8 ~ m \iow_newline:
+      8 ~ 2 ~ l \iow_newline:
+      s
+    }
+  }
+
+\pdf_object_new:nn { off } { stream }
+\pdf_object_write:nx { off }
+  {
+    {
+      /Type ~ /XObject \iow_newline:
+      /Subtype ~ /Form \iow_newline:
+      /FormType ~ 1 \iow_newline:
+      /BBox ~ [ ~ 0 ~ 0 ~ 10 ~ 10 ~ ] \iow_newline:
+      /Resources ~ << ~ /Procset ~ [ ~ /PDF ~ ] ~ >>
+    }
+    {
+      0.02 ~ 0.14 ~ 0 ~ 0 ~ k \iow_newline:
+      0 ~ 0 ~ 10 ~ 10 ~ re \iow_newline:
+      f
+    }
+  }
+
+% # form set up
+
+\cs_new_protected:Nn \__dcp_acroform:
+  {
+    \clist_if_empty:NF \g__dcp_field_annots_clist
+      {
+        \pdf_object_new:nn { acroform } { dict }
+        \pdf_object_write:nx { acroform }
+          {
+            /Fields ~ [ ~ \clist_use:Nn \g__dcp_field_annots_clist { ~ } ~ ] \iow_newline:
+            /DA ~ (/Helv ~ 7 ~ Tf ~ 0 ~ g) \iow_newline:
+            /DR ~ << ~ /Font ~ << ~
+              /Helv ~ \pdf_object_ref:n { helv } ~ >> ~ >>
+          }
+        \__dcp_pdf_catalog_gput:nn
+          { AcroForm }
+          { \pdf_object_ref:n { acroform } }
+      }
+  }
+
+\AtEndDocument{\__dcp_acroform:}
+
+% # field macros
+
+\cs_new_protected:Nn \__dcp_checkbox_field:
+  {
+    \group_begin:
+      \dim_set:Nn \l_tmpa_dim { \box_ht:N \strutbox }
+      \mode_leave_vertical:
+      \hbox_to_wd:nn
+        { \l_tmpa_dim }
+        {
+          \__dcp_pdf_annotation:nnnx
+            { \dim_use:N \l_tmpa_dim }
+            { \dim_eval:n { 0.9 \l_tmpa_dim } }
+            { \dim_eval:n { 0.1 \l_tmpa_dim } }
+            {
+              /Subtype ~ /Widget \iow_newline:
+              /FT ~ /Btn \iow_newline:
+              /F ~ 4 \iow_newline:
+              /T ~ ( dcp_field_id_ \int_use:N \g__dcp_field_id_count_int ) \iow_newline:
+              /V ~ /Off \iow_newline:
+              /AS ~ /Off \iow_newline:
+              /AP ~ << ~
+                /N ~ << ~
+                  /Yes ~ \pdf_object_ref:n { yes } ~
+                  /Off ~ \pdf_object_ref:n { off } ~
+                  >> ~
+                >>
+            }
+            \hfill
+        }
+      \clist_gput_right:Nx \g__dcp_field_annots_clist
+        { \__dcp_pdf_annotation_last: }
+      \int_gincr:N \g__dcp_field_id_count_int
+    \group_end:
+  }
+
+\cs_new_protected:Nn \__dcp_radio_field:n
+  {
+    \group_begin:
+      \tl_set:Nn \l__dcp_radio_id_tl
+        { dcp_field_id_ \int_use:N \g__dcp_field_id_count_int }
+      \pdf_object_new:nn { \l__dcp_radio_id_tl } { dict }
+      \dim_set:Nn \l_tmpa_dim { \box_ht:N \strutbox }
+      \clist_clear:N \l__dcp_radio_refs_clist
+      \int_zero:N \l__dcp_radio_count_int
+      \clist_set:Nn \l__dcp_radio_obj_clist { #1 }
+      \mode_leave_vertical:
+      \clist_map_inline:Nn \l__dcp_radio_obj_clist
+        {
+          \hbox_to_wd:nn
+            { \l_tmpa_dim }
+            {
+              \__dcp_pdf_annotation:nnnx
+                { \dim_use:N \l_tmpa_dim }
+                { \dim_eval:n { 0.9 \l_tmpa_dim } }
+                { \dim_eval:n { 0.1 \l_tmpa_dim } }
+                {
+                  /Subtype ~ /Widget \iow_newline:
+                  /Parent ~ \pdf_object_ref:n { \l__dcp_radio_id_tl } \iow_newline:
+                  /FT ~ /Btn \iow_newline:
+                  /F ~ 4 \iow_newline:
+                  /AS ~ /Off \iow_newline:
+                  /AP ~ << ~
+                    /N ~ << ~
+                      /Yes \int_use:N \l__dcp_radio_count_int \c_space_tl \pdf_object_ref:n { yes } ~
+                      /Off ~ \pdf_object_ref:n { off } ~
+                      >> ~
+                    >>
+                }
+                \hfill
+              }
+          \clist_put_right:Nx \l__dcp_radio_refs_clist
+            { \__dcp_pdf_annotation_last: }
+          \int_incr:N \l__dcp_radio_count_int
+          \c_space_tl ##1 \enskip
+        }
+      \unskip
+      \pdf_object_write:nx
+        { \l__dcp_radio_id_tl }
+        {
+          /Kids ~ [ ~ \clist_use:Nn \l__dcp_radio_refs_clist { ~ } ~ ] \iow_newline:
+          /FT ~ /Btn \iow_newline:
+          /Ff ~ 49152 \iow_newline:
+          /T ~ ( \l__dcp_radio_id_tl ) \iow_newline:
+          /V ~ /Off
+        }
+      \clist_gput_right:Nx \g__dcp_field_annots_clist
+        { \pdf_object_ref:n { \l__dcp_radio_id_tl } }
+      \int_gincr:N \g__dcp_field_id_count_int
+    \group_end:
+  }
+
+\cs_new_protected:Nn \__dcp_text_field:n
+  {
+    \group_begin:
+      \keys_set:nn { dcp }
+        {
+          multiline = false,
+          width     = 100bp,
+          height    = \dim_eval:n { 0.9 \box_ht:N \strutbox },
+          depth     = \dim_eval:n { 0.9 \box_dp:N \strutbox }
+        }
+      \tl_if_empty:nF { #1 }
+        {
+          \keys_set:nn { dcp } { #1 }
+        }
+      \mode_leave_vertical:
+      \hbox_to_wd:nn
+        { \l__dcp_field_wd_dim }
+        {
+          \__dcp_pdf_annotation:nnnx
+            { \dim_use:N \l__dcp_field_wd_dim }
+            { \dim_use:N \l__dcp_field_ht_dim }
+            { \dim_use:N \l__dcp_field_dp_dim }
+            {
+              /Subtype ~ /Widget \iow_newline:
+              /FT ~ /Tx \iow_newline:
+              /F ~ 4 \iow_newline:
+              \bool_if:NT \l__dcp_field_multiline_bool
+                {
+                  /Ff ~ 4096 \iow_newline:
+                }
+              /T ~ ( dcp_field_id_ \int_use:N \g__dcp_field_id_count_int ) \iow_newline:
+              /MK ~ << ~ /BG ~ [ ~ 0.02 ~ 0.14 ~ 0 ~ 0 ~ ] ~ >> \iow_newline:
+              /AP ~ << ~ /N ~ \pdf_object_ref:n { off } ~ >>
+            }
+            \hfill
+          }
+      \clist_gput_right:Nx \g__dcp_field_annots_clist
+        { \__dcp_pdf_annotation_last: }
+      \int_gincr:N \g__dcp_field_id_count_int
+    \group_end:
+  }
+
+% # interface
+
+\NewDocumentCommand \checkboxfield { }
+  {
+    \__dcp_checkbox_field:
+  }
+
+\NewDocumentCommand \radiofield { m }
+  {
+    \__dcp_radio_field:n { #1 }
+  }
+
+\NewDocumentCommand \textfield { o }
+  {
+    \IfNoValueTF { #1 }
+      {
+        \__dcp_text_field:n { }
+      }
+      {
+        \__dcp_text_field:n { #1 }
+      }
+  }
+
+\ExplSyntaxOff
+
+\begin{document}
+
+\null
+
+A check box field: \checkboxfield
+
+A radio group: \radiofield{True, False}
+
+A text field: \textfield
+
+A multi-line text field: \textfield[multiline, depth=50bp]
+
+\end{document}
