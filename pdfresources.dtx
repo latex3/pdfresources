@@ -36,6 +36,9 @@
 %    \begin{macrocode}
 %<@@=pdf>
 %<*package>
+\ExplSyntaxOn
+\sys_load_backend:n {}
+\ExplSyntaxOff
 \RequirePackage{xparse,l3pdf}
 %\RequirePackage{tmpl3shipout}
 \RequirePackage{lthooks,zref-lastpage,bitset}
@@ -1494,6 +1497,8 @@
 % and to push the values.
 %
 %quite often needed
+%</package>
+%<*drivers>
 \clist_const:Nn \c_@@_backend_PageResources_clist
   {
     ExtGState,
@@ -1506,71 +1511,65 @@
       {
         \@@_dict_gnew:n {Page/Resources/#1}
       }
+%</drivers>
 % pdftex and luatex
-\bool_if:nT
-  {
-    (\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p:)
-    ||
-    \sys_if_engine_luatex_p:
-  }
-  { %create the backend objects:
-    \clist_map_inline:Nn \c_@@_backend_PageResources_clist
-      {
-        \@@_backend_object_new:nn {Page/Resources/#1} {dict}
-        \cs_if_exist:NT \tex_directlua:D
-          {
-            \tex_directlua:D
-              {
-                l3kernel.@@.object["Page/Resources/#1"]
-                =
-                "\@@_backend_object_ref:n{Page/Resources/#1}"
-              }
-          }
-       }
- % values are only stored in a prop and will be output at end document.
-    \sys_if_engine_luatex:TF
-      {
-        \cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
-          {
-            \@@_dict_put:nnn {Page/Resources/#1} { #2 }{ #3 }
-            % luatex must also trigger the lua side
-            \tex_latelua:D{l3kernel.@@.Page.Resources.#1=true}
-            \tex_latelua:D
-              {
-                l3kernel.pdf.Page_Resources_gpush(tex.count["g_shipout_readonly_int"])
-              }
-          }
-      }
-      { %pdftex
-        \cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
-          {
-            \@@_dict_put:nnn {Page/Resources/#1} { #2 }{ #3 }
-          }
-      }
-
- % code for end of document code
-   \cs_new_protected:Npn \@@_PageResources_gpush:
-     {
-       \clist_map_inline:Nn \c_@@_backend_PageResources_clist
-         {
-           \prop_if_empty:cF
-             { \@@_dict_gname:n {Page/Resources/##1} }
-             {
-               \@@_backend_object_write:nx
-                 { Page/Resources/##1 }
-                 { \@@_dict_map:n {Page/Resources/##1} }
-             }
+%<*pdfmode>
+ %create the backend objects:
+  \clist_map_inline:Nn \c_@@_backend_PageResources_clist
+    {
+      \@@_backend_object_new:nn {Page/Resources/#1} {dict}
+      \cs_if_exist:NT \tex_directlua:D
+        {
+          \tex_directlua:D
+            {
+              l3kernel.@@.object["Page/Resources/#1"]
+              =
+              "\@@_backend_object_ref:n{Page/Resources/#1}"
+            }
         }
      }
-  }
+ %values are only stored in a prop and will be output at end document.
+  \sys_if_engine_luatex:TF
+    {
+      \cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
+        {
+          \@@_dict_put:nnn {Page/Resources/#1} { #2 }{ #3 }
+          % luatex must also trigger the lua side
+          \tex_latelua:D{l3kernel.@@.Page.Resources.#1=true}
+          \tex_latelua:D
+            {
+              l3kernel.pdf.Page_Resources_gpush(tex.count["g_shipout_readonly_int"])
+            }
+        }
+    }
+    { %pdftex
+      \cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
+        {
+          \@@_dict_put:nnn {Page/Resources/#1} { #2 }{ #3 }
+        }
+    }
+
+ %code for end of document code
+ \cs_new_protected:Npn \@@_PageResources_gpush:
+   {
+     \clist_map_inline:Nn \c_@@_backend_PageResources_clist
+       {
+         \prop_if_empty:cF
+           { \@@_dict_gname:n {Page/Resources/##1} }
+           {
+             \@@_backend_object_write:nx
+               { Page/Resources/##1 }
+               { \@@_dict_map:n {Page/Resources/##1} }
+           }
+      }
+   }
+%</pdfmode>
 % xdvipdfmx
 % \special{pdf:pageresources<<#1>>} doesn't work correctly with object names ...
 % https://tug.org/pipermail/dvipdfmx/2019-August/000021.html,
 % so we use \special{pdf:put @resources}
 % this must be issued on every page!
-
-\sys_if_engine_xetex:T
-  {
+%<*xdvipdfmx>
   %objects should not only be created but also "initialized"
     \clist_map_inline:Nn \c_@@_backend_PageResources_clist
       {
@@ -1594,18 +1593,17 @@
       }
 
     \cs_new_protected:Npn \@@_PageResources_gpush: {}
-  }
-
+%</xdvipdfmx>
+%<*dvips>
 % dvips unneeded, or no-op
-\bool_if:nT { \sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p: }
-  {
     \cs_new_protected:Npn \@@_backend_PageResources:n #1 {}
     \cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
       { %only for the show command TEST!!
         \@@_dict_put:nnn {Page/Resources/#1} { #2 }{ #3 }
       }
     \cs_new_protected:Npn \@@_PageResources_gpush: {}
-  }
+%</dvips>
+%<*package>
 %    \end{macrocode}
 % \end{macro}
 % \end{macro}
@@ -3614,6 +3612,11 @@
 
 %    \end{macrocode}
 % \end{function}
+% %load backend driver
+%    \begin{macrocode}
+\file_input:n {l3\g__sys_backend_tl-pdf.def}
+
+%    \end{macrocode}
 %^^A the following is used in the experimental driver
 %^^A but it is unclear if is should stay / how the syntax should be
 % \section{Hook management}
