@@ -224,8 +224,8 @@
 % and reflect uses uppercase until better names are found.
 % \end{NOTE}
 %
-% \begin{macro}{\@@_BACKEND_end_run:, \@@_BACKEND_end_run_gput:n}
-% \cs{@@_BACKEND_end_run:} runs the code stored in
+% \begin{macro}{\@@_backen_end_run:, \@@_BACKEND_end_run_gput:n}
+% \cs{@@_backend_end_run:} setups the end of run hook for the code stored in
 % \cs{g_@@_BACKEND_end_run_code_tl} at the end of the compilation.
 % \cs{@@_BACKEND_end_run_gput:n} adds its argument to
 % \cs{g_@@_BACKEND_end_run_code_tl}
@@ -239,13 +239,13 @@
 %<*drivers>
 %    \begin{macrocode}
 %  for all:
-\tl_new:N\g_@@_BACKEND_end_run_tl
+\tl_new:N\g_@@_backend_end_run_tl
 \tl_new:N\g_@@_BACKEND_lastpage_shipout_tl
 \tl_new:N\g_@@_BACKEND_thispage_shipout_tl
 
 \cs_new_protected:Npn \@@_BACKEND_end_run_gput:n #1
   {
-    \tl_gput_right:Nn \g_@@_BACKEND_end_run_tl { #1 }
+    \tl_gput_right:Nn \g_@@_backend_end_run_tl { #1 }
   }
 %</drivers>
 %<*pdfmode>
@@ -255,7 +255,7 @@
     \hook_gput_code:nnn {enddocument/afterlastpage}
       {pdf}
       {
-        \g_@@_BACKEND_end_run_tl
+        \g_@@_backend_end_run_tl
       }
   }
 %</pdfmode>
@@ -263,9 +263,11 @@
 %xetex check ...
 \cs_new_protected:Npn \@@_BACKEND_end_run:
  {
-   \tl_gput_right:Nn \g_@@_BACKEND_lastpage_shipout_tl
+  \hook_gput_code:nnn {shipout/lastpage}
+      {pdf}
+   %\tl_gput_right:Nn \g_@@_BACKEND_lastpage_shipout_tl
      {
-       \g_@@_BACKEND_end_run_tl
+       \g_@@_backend_end_run_tl
      }
  }
 %</xdvipdfmx>
@@ -273,9 +275,11 @@
 %dvips check ...
 \cs_new_protected:Npn \@@_BACKEND_end_run:
  {
-   \tl_gput_right:Nn \g_@@_BACKEND_lastpage_shipout_tl
+   %\tl_gput_right:Nn \g_@@_BACKEND_lastpage_shipout_tl
+   \hook_gput_code:nnn {shipout/lastpage}
+      {pdf}
      {
-       \g_@@_BACKEND_end_run_tl
+       \g_@@_backend_end_run_tl
      }
  }
 %</dvips>
@@ -307,13 +311,6 @@
 
 %box needed??
 \hook_gput_code:nnn{shipout/background}{pdf}{\@@_BACKEND_shipout_code:}
-%\AtBeginShipout
-%  {
-%    \AtBeginShipoutAddToBox
-%      {
-%        \@@_BACKEND_shipout_code:
-%      }
-%  }
 
 \cs_new_protected:Npn \@@_BACKEND_shipout_code:
   {
@@ -1114,7 +1111,7 @@
 %
 % \begin{macro}{\@@_dict_Pages_gpush:}
 % This is the command that outputs the Pages dictionary. It is used
-% at the end of the document in \cs{g_@@_BACKEND_end_run_tl}
+% at the end of the document in \cs{g_@@_backend_end_run_tl}
 %    \begin{macrocode}
 % push to the register command / issue the special
 \cs_new_protected:Npn \@@_dict_Pages_gpush:
