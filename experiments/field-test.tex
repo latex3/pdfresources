@@ -49,7 +49,7 @@
 
 \NewDocumentCommand \newcheckboxappearance { s  m m  }  %#2=name, #3 = content
  {
-   \pdf_xform_new:nnn {#2}{}
+   \pdf_xform_new:nnn {#2}{/ProcSet~[/PDF/Text]}
      {
       \normalsize
       \hbox_set:Nn   \l_tmpa_box { #3 \strut }
