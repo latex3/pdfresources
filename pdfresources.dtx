@@ -36,9 +36,6 @@
 %    \begin{macrocode}
 %<@@=pdf>
 %<*package>
-\ExplSyntaxOn
-\sys_load_backend:n {}
-\ExplSyntaxOff
 \RequirePackage{xparse,l3pdf}
 %\RequirePackage{tmpl3shipout}
 \RequirePackage{lthooks,zref-lastpage,bitset}
@@ -215,16 +212,16 @@
 %    \end{macrocode}
 %</pdfmode>
 % \subsection{shipout and end of run code}
-% \begin{NOTE}{UF}
-% the \enquote{end-of-run} command is temporary until the shipout/atendshipout hooks
-% are ready. For now -- until a expl3/kernel interface exists -- code is
-% added with atbegshi. The code depends currently also on zref.
-% For dvips/dvipdfmx \cs{AtEndDvi} should be checked.
-% The naming is not really correct, so we keep this in one place
-% and reflect uses uppercase until better names are found.
-% \end{NOTE}
-%
-% \begin{macro}{\@@_backen_end_run:, \@@_BACKEND_end_run_gput:n}
+% Code is executed in three places: At shipout of every page,
+% at shipout of the last page, at the end of the document
+% (after the last clearpage). Due to backend differences the code in the
+% three places (and the exact timing) can be different. The code in
+% shipout of the last page relies on labels and so requires normally
+% a second compilation.
+% At first we define three tl-variables and commands to fill them.
+% The code added here shouldn't contain typesetting content and shouldn't rely on some
+% specific grouping.
+% +++++++++++++++++
 % \cs{@@_backend_end_run:} setups the end of run hook for the code stored in
 % \cs{g_@@_BACKEND_end_run_code_tl} at the end of the compilation.
 % \cs{@@_BACKEND_end_run_gput:n} adds its argument to
@@ -234,20 +231,47 @@
 % To avoid that specials are lost the code is added to
 % \cs{@@_BACKEND_lastpage_shipout_code_tl} with dvips/dvipdfmx and so needs a
 % second compilation.
-% The code shouldn't contain typesetting content and shouldn't rely on some
-% specific grouping.
+% ++++++++++++++++
 %<*drivers>
+% \begin{variable}
+%   {
+%    \g_@@_backend_end_run_tl,
+%    \g_@@_backend_lastpage_shipout_tl,
+%    \g_@@_backend_thispage_shipout_tl
+%   }
 %    \begin{macrocode}
 %  for all:
 \tl_new:N\g_@@_backend_end_run_tl
-\tl_new:N\g_@@_BACKEND_lastpage_shipout_tl
-\tl_new:N\g_@@_BACKEND_thispage_shipout_tl
-
+\tl_new:N\g_@@_backend_lastpage_shipout_tl
+\tl_new:N\g_@@_backend_thispage_shipout_tl
+%    \end{macrocode}
+% \end{variable}
+% \begin{macro}{\@@_BACKEND_end_run_gput:n,
+%               \@@_BACKEND_lastpage_shipout_gput:n,
+%               \@@_BACKEND_thispage_shipout_gput:n
+%               }
+%    \begin{macrocode}
 \cs_new_protected:Npn \@@_BACKEND_end_run_gput:n #1
   {
     \tl_gput_right:Nn \g_@@_backend_end_run_tl { #1 }
   }
+
+\cs_new_protected:Npn \@@_BACKEND_lastpage_shipout_gput:n #1
+  {
+    \tl_gput_right:Nn \g_@@_backend_lastpage_shipout_tl { #1 }
+  }
+
+\cs_new_protected:Npn \@@_BACKEND_thispage_shipout_gput:n #1
+  {
+    \tl_gput_right:Nn \g_@@_backend_thispage_shipout_tl { #1 }
+  }
+%    \end{macrocode}
+% \end{macro}
 %</drivers>
+% \begin{macro}{\@@_BACKEND_end_run:}
+% This command setups the hook for the end of run code. At the end
+% it can perhaps go and only the hook stay, so leave it in uppercase for now.
+%    \begin{macrocode}
 %<*pdfmode>
 % pdftex,luatex
 \cs_new_protected:Npn \@@_BACKEND_end_run:
@@ -260,82 +284,54 @@
   }
 %</pdfmode>
 %<*xdvipdfmx>
-%xetex check ...
 \cs_new_protected:Npn \@@_BACKEND_end_run:
- {
-  \hook_gput_code:nnn {shipout/lastpage}
-      {pdf}
-   %\tl_gput_right:Nn \g_@@_BACKEND_lastpage_shipout_tl
-     {
-       \g_@@_backend_end_run_tl
-     }
- }
+  {
+    \hook_gput_code:nnn {shipout/lastpage}
+      {pdf_endrun}
+      {
+        \g_@@_backend_end_run_tl
+      }
+    \hook_gset_rule:nnnn {shipout/lastpage}{pdf}{<}{pdf_endrun}
+  }
+
 %</xdvipdfmx>
 %<*dvips>
-%dvips check ...
 \cs_new_protected:Npn \@@_BACKEND_end_run:
- {
-   %\tl_gput_right:Nn \g_@@_BACKEND_lastpage_shipout_tl
-   \hook_gput_code:nnn {shipout/lastpage}
-      {pdf}
-     {
-       \g_@@_backend_end_run_tl
-     }
- }
+  {
+    \hook_gput_code:nnn {shipout/lastpage}
+      {pdf_endrun}
+      {
+        \g_@@_backend_end_run_tl
+      }
+    \hook_gset_rule:nnnn {shipout/lastpage}{pdf}{<}{pdf_endrun}
+  }
 %</dvips>
+%    \end{macrocode}
 %<*drivers>
+% now run the command to setup the hooks:
+%    \begin{macrocode}
 \@@_BACKEND_end_run:
-%</drivers>
 %    \end{macrocode}
 % \end{macro}
-%<*drivers>
-% \begin{macro}{
-%    \@@_BACKEND_shipout_code:,
-%    \@@_BACKEND_lastpage_shipout_gput:n,
-%    \@@_BACKEND_thispage_shipout_gput:n }
-%  \cs{@@_BACKEND_shipout_code:} contains the code that is executed at every shipout.
-%  It use two hooks: \cs{g_@@_BACKEND_thispage_shipout_tl} and
-%  \cs{g_@@_BACKEND_lastpage_shipout_tl}
-%  The lastpage code relies on a label and so needs at least two compilations.
-%
+% Now we add to the shipout hooks the relevant token lists.
 %    \begin{macrocode}
-\cs_new_protected:Npn \@@_BACKEND_lastpage_shipout_gput:n #1
-  {
-    \tl_gput_right:Nn \g_@@_BACKEND_lastpage_shipout_tl { #1 }
-  }
-
-\cs_new_protected:Npn \@@_BACKEND_thispage_shipout_gput:n #1
-  {
-    \tl_gput_right:Nn \g_@@_BACKEND_thispage_shipout_tl { #1 }
-  }
-
-%box needed??
-\hook_gput_code:nnn{shipout/background}{pdf}{\@@_BACKEND_shipout_code:}
-
-\cs_new_protected:Npn \@@_BACKEND_shipout_code:
-  {
-    \g_@@_BACKEND_thispage_shipout_tl
-    \int_compare:nNnT
-      { \g_shipout_readonly_int }
-      =
-      { \zref@extractdefault{LastPage}{abspage}{0} }
-      {
-        \g_@@_BACKEND_lastpage_shipout_tl
-      }
-  }
-
+\hook_gput_code:nnn{shipout/background}{pdf}
+  {\g_@@_backend_thispage_shipout_tl}
+\hook_gput_code:nnn {shipout/lastpage} {pdf}
+  {\g_@@_backend_lastpage_shipout_tl}
+%    \end{macrocode}
+% Here we fill the shipout hooks with content. For now
+%    \begin{macrocode}
 \@@_BACKEND_thispage_shipout_gput:n
   {
-    \exp_args:NV \@@_backend_ThisPage_gpush:n           { \g_shipout_readonly_int }
+    \exp_args:NV \@@_backend_ThisPage_gpush:n      { \g_shipout_readonly_int }
     \exp_args:NV \@@_backend_PageResources_gpush:n { \g_shipout_readonly_int }
   }
 
-%!!!!! check if pdftex/luatex can run some of them in the immediate end-of-run
+%!!!!! check if pdftex/luatex can run this in the immediate end-of-run
 \@@_BACKEND_lastpage_shipout_gput:n
   {
-   % \@@_dict_Pages_gpush:            %pagesattr
-   % \@@_dict_Info_gpush:             %pdfinfo
-    \@@_PageResources_gpush:   %ExtGState etc
+    \@@_PageResources_gpush:          %ExtGState etc
   }
 
 \@@_BACKEND_end_run_gput:n
@@ -343,10 +339,9 @@
     \@@_dict_Pages_gpush:            %pagesattr
     \@@_dict_Info_gpush:             %pdfinfo
     \@@_dict_Catalog_gpush:
-   % \@@_PageResources_gpush:   %ExtGState etc
   }
 %    \end{macrocode}
-% \end{macro}
+%
 %</drivers>
 %<*package>
 % \subsection{references to page objects}
@@ -1161,7 +1156,7 @@
 % \cs{@@_backend_ThisPage_gput:nn} adds a value to the current page.
 % \cs{@@_backend_ThisPage_gpush:n} merges the default and the page value and
 % adds it to the dictionary of the current page in
-% \cs{g_@@_BACKEND_thispage_shipout_tl}.
+% \cs{g_@@_backend_thispage_shipout_tl}.
 %    \begin{macrocode}
 %  backend commands
 
