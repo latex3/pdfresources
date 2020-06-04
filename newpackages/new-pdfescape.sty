@@ -2,111 +2,40 @@
   {temporary escape commands and tools for PDF}
 %very temporarly until this is in l3 properly!!!!
 
-
-
-%% escape a pdfname expandably:
-\cs_new:Npn \str_escape_pdfname:n #1
-  {
-    \exp_args:Ne \tl_to_str:n
-      {
-         \exp_after:wN \__str_escape_pdfname:n \exp_after:wN
-           { \tl_to_str:n {#1} }
-      }
-  }
-\cs_new:Npx \__str_escape_pdfname:n #1
-  {
-    \exp_not:N \__str_escape_pdfname_first:w #1 ~
-      \exp_not:N \q_recursion_tail \c_space_tl
-      \exp_not:N \q_recursion_stop
-  }
-\cs_new:Npn \__str_escape_pdfname_first:w #1 ~
-  {
-    \quark_if_recursion_tail_stop:n {#1}
-    \__str_escape_pdfname_outer:n {#1}
-  }
-\cs_new:Npn \__str_escape_pdfname_loop:w #1 ~
-  {
-    \quark_if_recursion_tail_stop:n {#1}
-    \c_hash_str 20
-    \__str_escape_pdfname_outer:n {#1}
-  }
-\cs_new:Npx \__str_escape_pdfname_outer:n #1
-  {
-    \exp_not:N \__str_escape_pdfname_inner:w #1
-      \exp_not:N \q_recursion_tail \exp_not:N \q_recursion_stop
-    \exp_not:N \__str_escape_pdfname_loop:w
-  }
-\bool_lazy_or:nnTF
-  { \sys_if_engine_luatex_p: }
-  { \sys_if_engine_xetex_p: }
-  {
-    \cs_new:Npn \__str_escape_pdfname_inner:w #1
-      {
-        \quark_if_recursion_tail_stop:n {#1}
-        \int_compare:nNnTF { `#1 } > { "7F }
-          { \__str_escape_pdfname_bytes:n {#1} }
-          { \__str_escape_name_char:N #1 }
-        \__str_escape_pdfname_inner:w
-      }
-    \cs_new:Npn \__str_escape_pdfname_bytes:n #1
-      {
-        \exp_args:Ne \__str_escape_pdfname_bytes_aux:n
-          { \char_to_utfviii_bytes:n {`#1} }
-      }
-    \cs_new:Npn \__str_escape_pdfname_bytes_aux:n #1
-      { \__str_escape_pdfname_bytes_aux:nnnn #1 }
-    \cs_new:Npx \__str_escape_pdfname_bytes_aux:nnnn #1#2#3#4
-      {
-        \c_hash_str \exp_not:N \__str_output_hexadecimal:n {#1}
-        \c_hash_str \exp_not:N \__str_output_hexadecimal:n {#2}
-        \exp_not:N \tl_if_blank:nF {#3}
-          {
-            \c_hash_str \exp_not:N \__str_output_hexadecimal:n {#3}
-            \exp_not:N \tl_if_blank:nF {#4}
-              {
-                \c_hash_str \exp_not:N \__str_output_hexadecimal:n {#4}
-              }
-          }
-      }
-  }
-  {
-    \cs_new:Npn \__str_escape_pdfname_inner:w #1
-      {
-        \quark_if_recursion_tail_stop:n {#1}
-        \__str_escape_name_char:N #1
-        \__str_escape_pdfname_inner:w
-      }
-  }
-
- \cs_generate_variant:Nn \str_escape_pdfname:n { e }
+\cs_generate_variant:Nn \str_convert_pdfname:n { e }
 
 %% tool command escape name
-%% name: only name, name_print: with / before, see also string naming
+%% commands in the argument are expanded if possible
+%% with \text_expand:n
+%% name: only name,
+%% name_print: with / before, see also string naming
  \cs_new:Npn \pdftool_name:n #1
-    { \str_escape_pdfname:e { \text_expand:n{#1} } }
+    { \str_convert_pdfname:e { \text_expand:n{#1} } }
 
 \cs_generate_variant:Nn \pdftool_name:n {V}
 
  \cs_new:Npn \pdftool_name_print:n #1
-    { / \str_escape_pdfname:e { \text_expand:n{#1} } }
+    { / \str_convert_pdfname:e { \text_expand:n{#1} } }
 
 \cs_generate_variant:Nn \pdftool_name_print:n {V}
-
 
 
 %% string conversions and printing
 %% we assume here that the text purify step has been done. The input is
 %% a list of (utf8) chars.
 %% str convert, not expandable.
-% filespec (attachment view)  tests:
-% utf8:  gr\303\274\303\237e.txt                    %doesn't work, umlaut wrong,
-% utf8 with BOM \357\273\277gr\303\274\303\237e.txt %doesn't work, umlaut wrong, bom visible
-% utf16 with BE: (FEFF)  \376\377\000g\000r\000\374\000\337\000e\000.\000t\000x\000t %works
+%  filespec (attachment view)  tests:
+%  utf8:  gr\303\274\303\237e.txt                    %doesn't work, umlaut wrong,
+%  utf8 with BOM \357\273\277gr\303\274\303\237e.txt %doesn't work, umlaut wrong, bom visible
+%  utf16 with BE: (FEFF)  \376\377\000g\000r\000\374\000\337\000e\000.\000t\000x\000t %works
 %                xetex converts to <feff0067007200fc00df0065002e007400780074>
-% utf16 with BE / HEX: <FEFF0067007200FC00DF0065002E007400780074> works
+%  utf16 with BE / HEX: <FEFF0067007200FC00DF0065002E007400780074> works
 
 % bookmarks: as pdfoutline uses () currently only utf16 with BE is usable.
 % check if one can use HEX too when directly writing the object
+
+% "input" is utf8 for pdftex, empty (native) for unicode engine
+% commands to output literal strings  (...)
 \sys_if_engine_pdftex:TF
   {
     \cs_new:Npn \pdftool_textstringlit:nN #1 #2
@@ -134,6 +63,8 @@
         \str_put_right:Nn #2 {)}
       }
   }
+
+% commands to output hex strings  (...)
 
 \sys_if_engine_pdftex:TF
   {
