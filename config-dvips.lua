@@ -1,5 +1,5 @@
 testfiledir  = "testfiles-dvips"
-resultdir   =  builddir .. "/result/dvips"
+-- resultdir   =  builddir .. "/result/dvips"
 checkengines = {"latexdvips"}
 
 stdengine     = "latexdvips"
