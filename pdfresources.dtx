@@ -366,56 +366,11 @@
 %</package>
 %<*package>
 %    \begin{macrocode}
+\RequirePackage{l3pdfgdict}
 \RequirePackage{l3pdfdict}
+
 %    \end{macrocode}
-% \begin{function}[EXP,added = 2020-04-21]
-%   {\pdfdict_map:n }
-%   \begin{syntax}
-%     \cs{pdfdict_map:n}  \Arg{dictionary}
-%   \end{syntax}
-%   This outputs the property list of the dictionary as a list of
-%   \texttt{/key value} pairs.
-%   This is suitable for simple, local dictionaries which can be written directly
-%   to the PDF.
-% \end{function}
-%    \begin{macrocode}
-\cs_new:Npn \pdfdict_map:n #1
-  {
-    \@@_dict_map:n { #1 }
-  }
-%    \end{macrocode}
-%
-% \begin{function}[added = 2020-04-25]
-%   {\pdfdict_reset:n }
-%   \begin{syntax}
-%     \cs{pdfdict_reset:n}  \Arg{(local) dictionary}
-%   \end{syntax}
-% This resets a dictionary: it clears the entries and then adds eventually
-% default values (normally at least the Type entry).
-%  \end{function}
-%    \begin{macrocode}
-\cs_new_protected:Npn \pdfdict_reset:n #1
-  {
-    \@@_dict_reset:n { #1 }
-  }
-%    \end{macrocode}
-% \begin{function}[added = 2020-04-08]
-%   {\pdfdict_show:n }
-%   \begin{syntax}
-%     \cs{pdfdict_show:n}  \Arg{dictionary}
-%   \end{syntax}
-%   This shows the content of \Arg{dictionary} in the log and on the terminal.
-%   It also shows if  \Arg{dictionary} is a local or a global dictionary.
-%   It doesn't show the special catalog dictionaries with arrays as values
-%   as these are filled only at
-%   the end of the document.
-%\end{function}
-%    \begin{macrocode}
-\cs_new_protected:Npn \pdfdict_show:n
-  {
-    \@@_dict_show:Nn \msg_show:nnxxxx
-  }
-%    \end{macrocode}
+
 % \begin{function}[EXP, pTF,added = 2020-04-08]
 %   {\pdfdict_if_exist:n }
 %   \begin{syntax}

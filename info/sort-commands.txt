@@ -1,0 +1,91 @@
+\pdf_version_compare
+\pdf_uncompress:
+\pdf_version_gset
+\pdf_pageobject_ref:n
+\pdf_object_new:nn
+\pdf_object_write:nn
+\pdf_object_ref:nn
+\pdf_object_last:nn
+
+\pdf_bdc
+\pdf_bmc
+\pdf_emc
+
+======================
+pdfprint /output / text / value /content fill store type
+======================
+
+\pdftool_name:n
+\pdftool_name_print:n
+\pdftool_textstringlit
+\pdftool_textstringhex_print:nN
+
+commands using/replacing
+ text_purify /pdfstringdef etc
+
+\pdftext_flag_set % if any should be internal
+
+
+=====================
+pdfcoredict
+=====================
+
+\pdfcoredict_gremove     \pdfdict_gremove:nn,
+\pdfcoredict_gput:nnn    \pdfdict_gput:nnn,
+
+\@@coredict_gnew:n
+
+==================
+pdfq (graphics)
+================
+
+\pdf_xform_new:nnn
+\pdf_xform_use:n
+\pdf_xform_ref:n
+\pdf_xform_wd:n, \pdf_xform_ht:n, \pdf_xform_dp:n
+\pdf_xform_if_exist:n
+
+======
+pdfannot: annotations, links, destinations
+======
+
+\pdfannot:nnn
+\pdfannot_box:nnnn
+\pdfannot_box_last:
+\pdfannot_link:nnn
+\pdfannot_link_begin:nnw
+\pdfannot_link_goto_begin:nw
+\pdfannot_link_last:
+\pdfannot_dest:nn (local) <- pdf_destination:nn
+\pdfannot_dest_box:nn
+
+
+%flags ...
+
+\pdfdict_map:n
+\pdfdict_reset:n (local)
+\pdfdict_show:n (local,global)
+\pdfdict_if_exist:n
+\pdfdict_if_empty:n (global?)
+\pdfdict_get:nn
+\pdfdict_remove:nn,
+
+=======
+pdfmeta
+=======
+
+\pdfmeta_if_named_action_allowed:n
+
+====
+pdfoutline ????
+=====
+outline
+
+\pdffile_embed_file:nnn (embed + filespec)
+\pdffile_embed_stream:nnn
+
+
+==============
+pdffield
+=============
+fields appearances ocr
