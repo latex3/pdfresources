@@ -129,6 +129,47 @@
 %   \end{syntax}
 %   This shows the content of \Arg{dictionary} in the log and on the terminal.
 %\end{function}
+%\begin{function}[EXP, pTF,added = 2020-04-08]
+%   {\pdfdict_if_exist:n }
+%   \begin{syntax}
+%     \cs{pdfdict_if_exist:n}  \Arg{dictionary}
+%   \end{syntax}
+%   This tests if the dictionary exists.
+%\end{function}
+% \begin{function}[EXP, pTF,added = 2020-04-08]
+%   {\pdfdict_if_empty:n }
+%   \begin{syntax}
+%     \cs{pdfdict_if_empty:n}  \Arg{dictionary}
+%   \end{syntax}
+%   This tests if the dictionary is empty. The result is false if the
+%   dictionary doesn't exist.
+%\end{function}
+% \begin{function}[added = 2020-04-07]
+%   {\pdfdict_get:nn }
+%   \begin{syntax}
+%     \cs{pdfdict_get:nnN}  \Arg{dictionary} \Arg{name} \meta{tl var}
+%   \end{syntax}
+%   Recovers the \meta{value} stored by \cs{pdfdict_put:nnn}
+%   for \meta{name} and places this in the \meta{token list
+%   variable}. If \meta{name} is not found
+%   then the \meta{token list variable} is set
+%   to the special marker \cs{q_no_value}. The \meta{token list
+%   variable} is set within the current \TeX{} group.
+%\end{function}
+% \begin{function}[added = 2020-04-07]
+%   {
+%     \pdfdict_remove:nn,
+%   }
+%   \begin{syntax}
+%     \cs{pdfdict_remove:nn} \Arg{dictionary} \Arg{name}\\
+%   \end{syntax}
+%   Removes  |/|\meta{name} and its associated \meta{value} from
+%   the \Arg{dictionary}
+%   The removal is local.
+%   If \meta{name} is not found no change occurs,
+%   \emph{i.e}~there is no need to test for the existence of a name before
+%   trying to remove it.
+% \end{function}
 % \end{documentation}
 %
 % \begin{implementation}
@@ -354,6 +395,35 @@
 \cs_new_protected:Npn \pdfdict_show:n
   {
     \@@_show:Nn \msg_show:nnxxxx {#1}
+  }
+%    \end{macrocode}
+%    \begin{macrocode}
+\prg_new_eq_conditional:NNn \pdfdict_if_exist:n \@@_if_exist:n
+  { TF , T , F , p }
+
+%    \end{macrocode}
+%    \begin{macrocode}
+\prg_new_eq_conditional:NNn \pdfdict_if_empty:n \@@_if_empty:n
+  { TF , T , F , p }
+%    \end{macrocode}
+%    \begin{macrocode}
+
+\cs_new_protected:Npn \pdfdict_get:nnN #1 #2 #3
+  {
+    \@@_get:nnN { #1 }{ #2 } #3
+  }
+
+%    \end{macrocode}
+%    \begin{macrocode}
+\cs_new_protected:Npn \pdfdict_remove:nn #1 #2
+  {
+    \@@_if_exist:nTF { #1 }
+      {
+        \prop_remove:cn { \@@_name:n { #1 } }{ #2 }
+      }
+      {
+        \msg_error:nnnn{pdfdict}{wrong-or-unknown-dict}{#1}{local}
+      }
   }
 %    \end{macrocode}
 %    \begin{macrocode}

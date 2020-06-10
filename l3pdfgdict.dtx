@@ -137,6 +137,21 @@
 %   as these are filled only at the end of the document. It is not reliable for
 %   page resources as these are filled a shipout.
 %\end{function}
+% \begin{function}[added = 2020-04-07]
+%   {
+%     \pdfgdict_gremove:nn,
+%   }
+%   \begin{syntax}
+%     \cs{pdfgdict_gremove:nn} \Arg{global dictionary} \Arg{name}
+%   \end{syntax}
+%   Removes  |/|\meta{name} and its associated \meta{value} from the \Arg{dictionary}
+%   The removal is global.
+%   If \meta{name} is not found no change occurs,
+%   \emph{i.e}~there is no need to test for the existence of a name before
+%   trying to remove it.
+%   Values from the special Catalog entries with arrays as values can not be
+%   removed.
+% \end{function}
 % \end{documentation}
 %
 % \begin{implementation}
@@ -449,7 +464,18 @@
     \@@_show:Nn \msg_show:nnxxxx {#1}
   }
 %    \end{macrocode}
-
+%    \begin{macrocode}
+\cs_new_protected:Npn \pdfgdict_gremove:nn #1 #2
+  {
+    \@@_if_exist:nTF { #1 }
+      {
+        \@@_handler_gremove:nn { #1 }{ #2 }
+      }
+      {
+        \msg_error:nnnn{pdfgdict}{wrong-or-unknown-dict}{#1}{core}
+      }
+  }
+%    \end{macrocode}
 %    \begin{macrocode}
 %</package>
 %    \end{macrocode}
