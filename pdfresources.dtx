@@ -350,7 +350,7 @@
 % are created in the pdfannot section \ref{pdf:annot:widget}
 % \subsubsection{annot/Widget}
 % \texttt{annot/Widget} see section \ref{sec:links}.
-%
+%</package>
 % \subsection{The \enquote{Info} dictionary (pdfinfo)}
 % \begin{NOTE}{UF}
 % path: Info
@@ -375,7 +375,7 @@
 %
 % \subsubsection{\enquote{Info}/management}
 % moved to l3pdfgdict
-% 
+%
 % \subsection{The \enquote{Pages} dictionary (pdfpagesattr)}
 % The content of the property list associated with this dictionary name is written to the
 % /Pages object. This replaces \cs{pdfpagesattr}. This dictionary is global.
@@ -393,8 +393,8 @@
 % content, dvips and dvipdfmx are additive. luatex sets it in lua.
 % The higher level code has to take this into account.
 %    \begin{macrocode}
-%pdftex
-\bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p:}
+%<*pdfmode>
+\sys_if_engine_pdftex:T
   {
     \cs_new_protected:Npn \@@_backend_Pages_primitive:n #1
       {
@@ -412,26 +412,23 @@
           }
       }
   }
+%</pdfmode>
+%<*dvips>
 %dvips
-\bool_if:nT {\sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p: }
+\cs_new_protected:Npx \@@_backend_Pages_primitive:n #1
   {
-    \cs_new_protected:Npx \@@_backend_Pages_primitive:n #1
-      {
-        \tex_special:D{ps:~[#1~/PAGES~pdfmark} %]
-      }
+    \tex_special:D{ps:~[#1~/PAGES~pdfmark} %]
   }
-
-%xetex
-\sys_if_engine_xetex:T
+%</dvips>
+%<*xdvipdfmx>
+\cs_new_protected:Npn \@@_backend_Pages_primitive:n #1
   {
-    \cs_new_protected:Npn \@@_backend_Pages_primitive:n #1
-      {
-        \@@_backend:n{put~@pages~<<#1>>}
-      }
+    \@@_backend:n{put~@pages~<<#1>>}
   }
+%</xdvipdfmx>
 %    \end{macrocode}
 % \end{macro}
-%
+%<*package>
 % \subsubsection{\enquote{Pages} / management}
 % \begin{NOTE}{UF}
 % The register is normally used only a few times in a document, so it would be
@@ -439,44 +436,7 @@
 % but with dvips/dvipdfmx this would disable removing entries.
 % So we issue the push code only at the end of the document.
 % \end{NOTE}
-% \begin{function}{pdfdict: Pages (global)}
-%   \begin{syntax}
-%     \cs{pdfdict_gput:nnn} \{Pages\} \Arg{name} \Arg{value}
-%   \end{syntax}
-%
-%   Adds |/|\meta{name} \meta{value} to the |/Pages| dictionary.
-%   It is always stored globally. The content is written to the pdf
-%   at the end of the compilation, so values can be added, changed or
-%   removed until then.
-%   \meta{name} should be a valid pdf name without the leading slash,
-%   \meta{value} should be a valid pdf value. Any escaping or (re)encoding must
-%   be done explicitly. Some backends expand the value but this should not be
-%   relied on. If a \meta{name} is used twice, only the last \meta{value}
-%   set will be used.
-%
-%   \potentialclash As the content is written at the end it will
-%   in pdftex and luatex overwrite values added with the primitive commands.
-%   Package authors should use the management commands instead.
-% \end{function}
-%    \begin{macrocode}
-\@@_dict_gnew:n {Pages}
-%    \end{macrocode}
-%
-% \begin{macro}{\@@_dict_Pages_gpush:}
-% This is the command that outputs the Pages dictionary. It is used
-% at the end of the document in \cs{g_@@_backend_end_run_tl}
-%    \begin{macrocode}
-% push to the register command / issue the special
-\cs_new_protected:Npn \@@_dict_Pages_gpush:
-  {
-    \exp_args:Nx \@@_backend_Pages_primitive:n
-      {
-        \@@_dict_map:n {Pages}
-      }
-  }
-
-%    \end{macrocode}
-% \end{macro}
+% moved to l3pdfgdict
 %
 % \subsection{\enquote{Page} and \enquote{ThisPage} (pdfpageattr)}
 % \subsubsection{\enquote{Page} and \enquote{ThisPage} /backend}

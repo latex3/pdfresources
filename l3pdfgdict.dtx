@@ -201,6 +201,32 @@
 %   \pdfgdict_gput:nnx {Info} {Title}{(\l_tmpa_str)}
 %   \end{verbatim}
 % \end{function}
+%
+% \subsection{The \enquote{Pages} dictionary}
+% \potentialclash As the content of this dictionary is written at the end it will
+% in pdftex and luatex overwrite values added with the primitive commands (e.g.
+% \cs{pdfpagesattr}.
+% Package authors should use the management commands instead.
+
+% The content of the property list associated with this dictionary name
+% is written to the /Pages object. This replaces for example \cs{pdfpagesattr}.
+%
+% \begin{function}{pdfgdict: Pages}
+%   \begin{syntax}
+%     \cs{pdfgdict_gput:nnn} \{Pages\} \Arg{name} \Arg{value}
+%   \end{syntax}
+%
+%   Adds |/|\meta{name} \meta{value} to the |/Pages| dictionary.
+%   It is always stored globally. The content is written to the pdf
+%   at the end of the compilation, so values can be added, changed or
+%   removed until then.
+%   \meta{name} should be a valid pdf name without the leading slash,
+%   \meta{value} should be a valid pdf value. Any escaping or (re)encoding must
+%   be done explicitly. Some backends expand the value but this should not be
+%   relied on. If a \meta{name} is used twice, only the last \meta{value}
+%   set will be used.
+%
+% \end{function}
 % \end{documentation}
 %
 % \begin{implementation}
@@ -546,6 +572,26 @@
     \prop_map_function:cN  { \@@_dict_gname:n {Info} } \@@_backend_info_gput:nn
     \prop_gclear:c { \@@_dict_gname:n {Info} }
   }
+%    \end{macrocode}
+% \end{macro}
+% The Pages dictionary code. At first the initialisation
+%     \begin{macrocode}
+\@@_new:n {Pages}
+%    \end{macrocode}
+%
+% \begin{macro}{\@@_Pages_gpush:}
+% This is the command that outputs the Pages dictionary. It is used
+% at the end of the document in \cs{g__pdf_backend_end_run_tl}
+%    \begin{macrocode}
+% push to the register command / issue the special
+\cs_new_protected:Npn \@@_Pages_gpush:
+  {
+    \exp_args:Nx \__pdf_backend_Pages_primitive:n
+      {
+        \@@_map:n {Pages}
+      }
+  }
+
 %    \end{macrocode}
 % \end{macro}
 %    \begin{macrocode}
