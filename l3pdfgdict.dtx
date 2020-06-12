@@ -168,11 +168,6 @@
   {
     The~dictionary~'#1'~is~not~declared.
   }
-\msg_new:nnn  { pdfgdict } { wrong-or-unknown-dict }
-  {
-    The~dictionary~'#1'~is~either~not~a~#2~dictionary\\
-    or~is~not~declared.
-  }
 
 \msg_new:nnn  { pdfgdict } { empty-value }
               { The~value~for~#1~is~empty~and~will~be~ignored }
@@ -191,7 +186,7 @@
         \@@_handler_put:nnn { #1 }{ #2 }{ #3 }
       }
       {
-        \msg_error:nnnn{pdfgdict}{wrong-or-unknown-dict}{#1}{core}
+        \msg_error:nnn{pdfgdict}{unknown-dict}{#1}
       }
   }
 
@@ -332,7 +327,7 @@
               }
           }
           {
-            \msg_error:nnn { pdfgdict } { unknown-dict } { /#1 }
+            \msg_error:nnn { pdfgdict } { unknown-dict } { #1 }
           }
       }
   }
@@ -353,7 +348,7 @@
              { \@@_name:n { #1 } }{ #2 } { #3 }
          }
          {
-           \msg_error:nnn { pdfgdict } { unknown-dict } { /#1 }
+           \msg_error:nnn { pdfgdict } { unknown-dict } { #1 }
          }
       }
   }
@@ -384,7 +379,7 @@
               }
           }
           {
-            \msg_error:nnn { pdfgdict } { unknown-dict } { /#1 }
+            \msg_error:nnn { pdfgdict } { unknown-dict } { #1 }
           }
   }
 
@@ -396,7 +391,7 @@
               { \@@_name:n { #1 } }{ #2 }
           }
           {
-            \msg_error:nnn { pdfgdict } { unknown-dict } { /#1 }
+            \msg_error:nnn { pdfgdict } { unknown-dict } { #1 }
           }
   }
 
@@ -472,7 +467,7 @@
         \@@_handler_gremove:nn { #1 }{ #2 }
       }
       {
-        \msg_error:nnnn{pdfgdict}{wrong-or-unknown-dict}{#1}{core}
+        \msg_error:nnn{pdfgdict}{unknown-dict}{#1}
       }
   }
 %    \end{macrocode}
