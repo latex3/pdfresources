@@ -490,14 +490,14 @@
   % sets a lua table with lualatex
   \cs_new_protected:Npn \@@_backend_Page_gput:nn #1 #2 %key,value
     {
-      \pdfgdict_gput:nnn {Page}{ #1 }{ #2 }
+      \__pdfgdict_gput:nnn {Page}{ #1 }{ #2 }
     }
   % the command to remove a default value.
   % Uses a prop with pdflatex + dvi,
   % changes a lua table with lualatex
   \cs_new_protected:Npn \@@_backend_Page_gremove:n #1
     {
-      \pdfgdict_gremove:nn  {Page}{ #1 }
+      \__pdfgdict_gremove:nn  {Page}{ #1 }
     }
  % the command used in the document.
  % direct call of the primitive special with dvips/dvipdfmx
@@ -515,11 +515,10 @@
             {pdf@abspage}
             {0}
         }
-      \pdfgdict_if_exist:nF {backend_Page\l_@@_tmpa_tl}
+      \__pdfgdict_if_exist:nF {backend_Page\l_@@_tmpa_tl}
         {
-          \pdfgdict_new:n          {backend_Page\l_@@_tmpa_tl}
+          \__pdfgdict_new:n          {backend_Page\l_@@_tmpa_tl}
         }
- %???????????????????? internal??
       \__pdfgdict_handler_gput:nnn {backend_Page\l_@@_tmpa_tl}{ #1 }{ #2 }
     }
   %the code to push the values, used in shipout
@@ -616,14 +615,14 @@
   % sets a lua table with lualatex
 \cs_new_protected:Npn \@@_backend_Page_gput:nn #1 #2
   {
-    \pdfgdict_gput:nnn {Page}{ #1 }{ #2 }
+    \__pdfgdict_gput:nnn {Page}{ #1 }{ #2 }
   }
   % the command to remove a default value.
   % Uses a prop with pdflatex + dvi,
   % changes a lua table with lualatex
 \cs_new_protected:Npn \@@_backend_Page_gremove:n #1
    {
-     \pdfgdict_gremove:nn  {Page}{ #1 }
+     \__pdfgdict_gremove:nn  {Page}{ #1 }
    }
   % the command used in the document.
   % direct call of the primitive special with dvips/dvipdfmx
@@ -642,7 +641,7 @@
 \cs_new_protected:Npn \@@_backend_ThisPage_gpush:n #1
   {
     \exp_args:Nx \@@_backend_Page_primitive:n
-      { \pdfgdict_map:n {Page} }
+      { \__pdfgdict_map:n {Page} }
   }
 %</xdvipdfmx>
 %<*dvips>
@@ -655,14 +654,14 @@
   % sets a lua table with lualatex
 \cs_new_protected:Npn \@@_backend_Page_gput:nn #1 #2
    {
-     \pdfgdict_gput:nnn {Page}{ #1 }{ #2 }
+     \__pdfgdict_gput:nnn {Page}{ #1 }{ #2 }
    }
   % the command to remove a default value.
   % Uses a prop with pdflatex + dvi,
   % changes a lua table with lualatex
 \cs_new_protected:Npn \@@_backend_Page_gremove:n #1
   {
-    \pdfgdict_gremove:nn  {Page}{ #1 }
+    \__pdfgdict_gremove:nn  {Page}{ #1 }
   }
   % the command used in the document.
   % direct call of the primitive special with dvips/dvipdfmx
@@ -681,7 +680,7 @@
 \cs_new_protected:Npn \@@_backend_ThisPage_gpush:n #1
   {
     \exp_args:Nx \@@_backend_Page_primitive:n
-          { \pdfgdict_map:n {Page} }
+          { \__pdfgdict_map:n {Page} }
   }
 %</dvips>
 %    \end{macrocode}
@@ -739,7 +738,7 @@
 
 \clist_map_inline:Nn \c_@@_backend_PageResources_clist
       {
-        \@@_dict_gnew:n {Page/Resources/#1}
+        \__pdfgdict_new:n {Page/Resources/#1}
       }
 %</drivers>
 % pdftex and luatex
@@ -763,7 +762,7 @@
     {
       \cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
         {
-          \@@_dict_put:nnn {Page/Resources/#1} { #2 }{ #3 }
+          \__pdfgdict_gput:nnn {Page/Resources/#1} { #2 }{ #3 }
           % luatex must also trigger the lua side
           \tex_latelua:D{l3kernel.@@.Page.Resources.#1=true}
           \tex_latelua:D
@@ -775,7 +774,7 @@
     { %pdftex
       \cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
         {
-          \@@_dict_put:nnn {Page/Resources/#1} { #2 }{ #3 }
+          \__pdfgdict_gput:nnn {Page/Resources/#1} { #2 }{ #3 }
         }
     }
 
@@ -785,11 +784,11 @@
      \clist_map_inline:Nn \c_@@_backend_PageResources_clist
        {
          \prop_if_empty:cF
-           { \@@_dict_gname:n {Page/Resources/##1} }
+           { \__pdfgdict_name:n {Page/Resources/##1} }
            {
              \@@_backend_object_write:nx
                { Page/Resources/##1 }
-               { \@@_dict_map:n {Page/Resources/##1} }
+               { \__pdfgdict_map:n {Page/Resources/##1} }
            }
       }
    }
@@ -814,7 +813,7 @@
     \cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
       {
        % this is not used for output, but there is a test if the resource is empty
-       \prop_gput:cnn { \@@_dict_gname:n {Page/Resources/#1} } { #2 }{ #3 }
+       \prop_gput:cnn { \__pdfgdict_name:n {Page/Resources/#1} } { #2 }{ #3 }
        %objects are not filled with \pdf_object_write as this is not additive!
         \@@_backend:x
           {
@@ -829,7 +828,7 @@
     \cs_new_protected:Npn \@@_backend_PageResources:n #1 {}
     \cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
       { %only for the show command TEST!!
-        \@@_dict_put:nnn {Page/Resources/#1} { #2 }{ #3 }
+        \__pdfgdict_gput:nnn {Page/Resources/#1} { #2 }{ #3 }
       }
     \cs_new_protected:Npn \@@_PageResources_gpush: {}
 %</dvips>
@@ -842,13 +841,13 @@
 % \subsubsection{\enquote{Page/Resources}: ExtGState, ColorSpace, Shading, Pattern / management}
 % \begin{function}[updated = 2020-04-10]
 %   {
-%    pdfdict: Page/Resources/ExtGState,
-%    pdfdict: Page/Resources/ColorSpace,
-%    pdfdict: Page/Resources/Shading,
-%    pdfdict: Page/Resources/Pattern,
+%    pdfgdict: Page/Resources/ExtGState,
+%    pdfgdict: Page/Resources/ColorSpace,
+%    pdfgdict: Page/Resources/Shading,
+%    pdfgdict: Page/Resources/Pattern,
 %   }
 %   \begin{syntax}
-%     \cs{pdfdict_gput:nnn} \{Page/Resources/\meta{resource}\} \Arg{name} \Arg{value}
+%     \cs{pdfgdict_gput:nnn} \{Page/Resources/\meta{resource}\} \Arg{name} \Arg{value}
 %   \end{syntax}
 %   Adds |/|\meta{name} \meta{value} to the page resource \meta{resource}.
 %   \meta{resource} can be |ExtGState|, |ColorSpace|, |Pattern| oder |Shading|.
