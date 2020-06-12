@@ -437,7 +437,7 @@
 % So we issue the push code only at the end of the document.
 % \end{NOTE}
 % moved to l3pdfgdict
-%
+%</package>
 % \subsection{\enquote{Page} and \enquote{ThisPage} (pdfpageattr)}
 % \subsubsection{\enquote{Page} and \enquote{ThisPage} /backend}
 % \begin{NOTE}{UF}
@@ -477,9 +477,8 @@
 % \cs{g_@@_backend_thispage_shipout_tl}.
 %    \begin{macrocode}
 %  backend commands
-
-%pdflatex
-\bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
+%<*pdfmode>
+\sys_if_engine_pdftex:T
   {
   %the primitive
     \cs_new_protected:Npn \@@_backend_Page_primitive:n #1
@@ -491,14 +490,14 @@
   % sets a lua table with lualatex
   \cs_new_protected:Npn \@@_backend_Page_gput:nn #1 #2 %key,value
     {
-      \@@_dict_put:nnn {Page}{ #1 }{ #2 }
+      \pdfgdict_gput:nnn {Page}{ #1 }{ #2 }
     }
   % the command to remove a default value.
   % Uses a prop with pdflatex + dvi,
   % changes a lua table with lualatex
   \cs_new_protected:Npn \@@_backend_Page_gremove:n #1
     {
-      \@@_dict_remove:nn  {Page}{ #1 }
+      \pdfgdict_remove:nn  {Page}{ #1 }
     }
  % the command used in the document.
  % direct call of the primitive special with dvips/dvipdfmx
@@ -516,11 +515,12 @@
             {pdf@abspage}
             {0}
         }
-      \@@_dict_if_exist:nF {backend_Page\l_@@_tmpa_tl}
+      \pdfgdict_if_exist:nF {backend_Page\l_@@_tmpa_tl}
         {
-          \@@_dict_gnew:n          {backend_Page\l_@@_tmpa_tl}
+          \pdfgdict_new:n          {backend_Page\l_@@_tmpa_tl}
         }
-      \@@_dict_handler_put:nnn {backend_Page\l_@@_tmpa_tl}{ #1 }{ #2 }
+ %???????????????????? internal??
+      \__pdfgdict_handler_gput:nnn {backend_Page\l_@@_tmpa_tl}{ #1 }{ #2 }
     }
   %the code to push the values, used in shipout
   %merges the two props and then fills the register in pdflatex
@@ -528,10 +528,10 @@
   %issues the values stored in the global prop with dvi
   \cs_new_protected:Npn \@@_backend_ThisPage_gpush:n #1
     {
-      \@@_dict_gmerge:nnN {Page}{backend_Page#1}\g_@@_tmpa_prop
+      \__pdfgdict_gmerge:nnN {Page}{backend_Page#1}\g_@@_tmpa_prop
       \exp_args:Nx \@@_backend_Page_primitive:n
         {
-          \prop_map_function:NN \g_@@_tmpa_prop \@@_dict_item:ne
+          \prop_map_function:NN \g_@@_tmpa_prop \__pdfgdict_item:ne
         }
     }
   }
@@ -604,92 +604,89 @@
         }
     }
   }
-
-\sys_if_engine_xetex:T
-  {
+%</pdfmode>
+%<*xdvipdfmx>
   %the primitive
-    \cs_new_protected:Npn \@@_backend_Page_primitive:n #1
-      {
-        \tex_special:D{pdf:~put~@thispage~<<#1>>}
-      }
+\cs_new_protected:Npn \@@_backend_Page_primitive:n #1
+  {
+    \tex_special:D{pdf:~put~@thispage~<<#1>>}
+  }
   % the command to store default values.
   % Uses a prop with pdflatex + dvi,
   % sets a lua table with lualatex
-    \cs_new_protected:Npn \@@_backend_Page_gput:nn #1 #2
-      {
-        \@@_dict_put:nnn {Page}{ #1 }{ #2 }
-      }
+\cs_new_protected:Npn \@@_backend_Page_gput:nn #1 #2
+  {
+    \pdfgdict_gput:nnn {Page}{ #1 }{ #2 }
+  }
   % the command to remove a default value.
   % Uses a prop with pdflatex + dvi,
   % changes a lua table with lualatex
-    \cs_new_protected:Npn \@@_backend_Page_gremove:n #1
-      {
-        \@@_dict_remove:nn  {Page}{ #1 }
-      }
+\cs_new_protected:Npn \@@_backend_Page_gremove:n #1
+   {
+     \pdfgdict_gremove:nn  {Page}{ #1 }
+   }
   % the command used in the document.
   % direct call of the primitive special with dvips/dvipdfmx
   % \latelua: fill a page related table with lualatex, merge it with the page
   % table and push it directly
   % write to aux and store in prop with pdflatex
-    \cs_new_protected:Npn \@@_backend_ThisPage_gput:nn #1 #2
-      {
-        \@@_backend_Page_primitive:n { /#1~#2 }
-      }
+\cs_new_protected:Npn \@@_backend_ThisPage_gput:nn #1 #2
+  {
+    \@@_backend_Page_primitive:n { /#1~#2 }
+  }
   %the code to push the values, used in shipout
   %merges the two props and then fills the register in pdflatex
   %merges the two tables (the one is probably still empty)
   % and then fills (in lua) in luatex
   %issues the values stored in the global prop with dvi
-    \cs_new_protected:Npn \@@_backend_ThisPage_gpush:n #1
-      {
-        \exp_args:Nx \@@_backend_Page_primitive:n
-          { \@@_dict_map:n {Page} }
-      }
-  }
-%dvips
-\bool_if:nT {\sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p: }
+\cs_new_protected:Npn \@@_backend_ThisPage_gpush:n #1
   {
-    \cs_new_protected:Npn \@@_backend_Page_primitive:n #1
-      {
-        \tex_special:D{ps:~[{ThisPage}<<#1>>~/PUT~pdfmark} %]
-      }
+    \exp_args:Nx \@@_backend_Page_primitive:n
+      { \pdfgdict_map:n {Page} }
+  }
+%</xdvipdfmx>
+%<*dvips>
+\cs_new_protected:Npn \@@_backend_Page_primitive:n #1
+   {
+     \tex_special:D{ps:~[{ThisPage}<<#1>>~/PUT~pdfmark} %]
+   }
   % the command to store default values.
   % Uses a prop with pdflatex + dvi,
   % sets a lua table with lualatex
-    \cs_new_protected:Npn \@@_backend_Page_gput:nn #1 #2
-      {
-        \@@_dict_put:nnn {Page}{ #1 }{ #2 }
-      }
+\cs_new_protected:Npn \@@_backend_Page_gput:nn #1 #2
+   {
+     \pdfgdict_gput:nnn {Page}{ #1 }{ #2 }
+   }
   % the command to remove a default value.
   % Uses a prop with pdflatex + dvi,
   % changes a lua table with lualatex
-    \cs_new_protected:Npn \@@_backend_Page_gremove:n #1
-      {
-        \@@_dict_remove:nn  {Page}{ #1 }
-      }
+\cs_new_protected:Npn \@@_backend_Page_gremove:n #1
+  {
+    \pdfgdict_gremove:nn  {Page}{ #1 }
+  }
   % the command used in the document.
   % direct call of the primitive special with dvips/dvipdfmx
   % \latelua: fill a page related table with lualatex, merge it with the page
   % table and push it directly
   % write to aux and store in prop with pdflatex
-    \cs_new_protected:Npn \@@_backend_ThisPage_gput:nn #1 #2
-      {
-        \@@_backend_Page_primitive:n { /#1~#2 }
-      }
+\cs_new_protected:Npn \@@_backend_ThisPage_gput:nn #1 #2
+  {
+    \@@_backend_Page_primitive:n { /#1~#2 }
+  }
   %the code to push the values, used in shipout
   %merges the two props and then fills the register in pdflatex
   %merges the two tables (the one is probably still empty)
   %and then fills (in lua) in luatex
   %issues the values stored in the global prop with dvi
-    \cs_new_protected:Npn \@@_backend_ThisPage_gpush:n #1
-      {
-        \exp_args:Nx \@@_backend_Page_primitive:n
-          { \@@_dict_map:n {Page} }
-      }
+\cs_new_protected:Npn \@@_backend_ThisPage_gpush:n #1
+  {
+    \exp_args:Nx \@@_backend_Page_primitive:n
+          { \pdfgdict_map:n {Page} }
   }
+%</dvips>
 %    \end{macrocode}
 % \end{macro}
-%
+%<*package>
 % \subsubsection{\enquote{Page} and \enquote{ThisPage} / management}
 % \begin{NOTE}{UF}
 % Open is the question if one need a command to set attribute on a page by page number.
@@ -697,84 +694,8 @@
 % See also https://tex.stackexchange.com/questions/479812/extension-of-rotating-package-to-set-pdf-rotation
 % (should work now)
 % \end{NOTE}
-% \begin{function}[added = 2020-04-12]
-%   {pdfdict: Page}
-%   \begin{syntax}
-%     \cs{pdfdict_gput:nnn} \{Page\} \Arg{name} \Arg{value}
-%   \end{syntax}
-%   Values added to the dictionary \texttt{Page} are added to the page dictionary
-%   of the current page and the following pages. The current page means the page
-%   on which the command is executed. \meta{name} should be a valid pdf name
-%   without the leading slash. Typical names used here are e.g.
-%   \texttt{Rotate} and \texttt{CropBox}.
-%   \meta{value} should be a valid pdf value.
-%   Any escaping or (re)encoding must be done explicitly. Some backends expand the
-%   value but this should not be relied on.
-%   To avoid problems with the asynchronous page breaking
-%   the command should be used after \cs{newpage}, or in the header,
-%   and better not in a float.
-%   The value is assigned directly and is always stored globally.
-%   If a \meta{name} is used twice, only the last \meta{value}
-%   set will be used. Names set with \cs{pdfdict_put:nnn}|{ThisPage}| will overwrite
-%   names set with \cs{pdfdict_put:nnn}|{Page}| if there is a clash.
-%   Values can be removed again with \cs{pdfdict_remove:nn}
-% \end{function}
-% \begin{function}[added = 2020-04-12]
-%   { pdfdict: ThisPage}
-%   \begin{syntax}
-%     \cs{pdfdict_gput:nnn} \{ThisPage\} \Arg{name} \Arg{value}
-%   \end{syntax}
-%   Adds |/|\meta{name} \meta{value} at shipout to the page dictionary of the
-%   current page. Current page means here the shipout page.
-%   It is always stored globally.
-%   If \Arg{name} has already a value set in the \texttt{Page}
-%   dictionary it will be overwritte for this page.
-%   \meta{name} should be a valid pdf name without the leading slash,
-%   \meta{value} should be a valid pdf value. Any escaping or (re)encoding must be
-%   done explicitly. If a \meta{name} is used twice, only the last \meta{value}
-%   set will be used.
-%   With the engine pdflatex (at least) a second compilation is needed.
-%   Values added to \texttt{ThisPage} can not be removed. It is not possible to
-%   show the content of this dictionary with \cs{pdfdict_show:n}.
-% \end{function}
-%    \begin{macrocode}
-% setter.
-%^^A documentated
-\@@_dict_gnew:n { Page }
-\@@_dict_gnew:n { ThisPage }
+% moved to l3pdfgdict ...
 
-%handler for pdfdict
-\cs_new_protected:cpn { @@_dict_handler/Page/?_gput:nn } #1 #2
-  {
-    %\prop_gput:cnn  { \@@_dict_gname:n { Page } }{ #1 } { #2 }
-    \@@_backend_Page_gput:nn { #1 }{ #2 }
-  }
-% remove:
-\cs_new_protected:cpn { @@_dict_handler/Page/?_gremove:n } #1
-  {
-    %\prop_gremove:cn  { \@@_dict_gname:n { Page } }{ #1 }
-    \@@_backend_Page_gremove:n { #1 }
-  }
-
-% handler for pdfdict
-\cs_new_protected:cpn { @@_dict_handler/ThisPage/?_gput:nn } #1 #2
-  {
-    \prop_gput:cnn  { \@@_dict_gname:n { ThisPage } }{ #1 } { #2 }
-    \@@_backend_ThisPage_gput:nn { #1 }{ #2 }
-  }
-
-\cs_new_protected:cpn { @@_dict_handler/ThisPage/?_gremove:n } #1
-  {
-    \msg_warning:nnn { pdfdict } { no-removal }{ThisPage}
-  }
-
-\cs_new_protected:cpn { @@_dict_handler/ThisPage/?_show: }
-  {
-    \msg_warning:nnn { pdfdict } { no-show }{ThisPage}
-  }
-
-%    \end{macrocode}
-%
 %
 % \subsection{\enquote{Page/Resources}: ExtGState, ColorSpace, Shading, Pattern }
 % \begin{NOTE}{UF}

@@ -202,7 +202,7 @@
 %   \end{verbatim}
 % \end{function}
 %
-% \subsection{The \enquote{Pages} dictionary}
+% \subsubsection{The \enquote{Pages} dictionary}
 % \potentialclash As the content of this dictionary is written at the end it will
 % in pdftex and luatex overwrite values added with the primitive commands (e.g.
 % \cs{pdfpagesattr}.
@@ -226,6 +226,48 @@
 %   relied on. If a \meta{name} is used twice, only the last \meta{value}
 %   set will be used.
 %
+% \end{function}
+%
+% \subsubsection{\enquote{Page} and \enquote{ThisPage}}
+% \begin{function}[added = 2020-04-12]
+%   {pdfgdict: Page}
+%   \begin{syntax}
+%     \cs{pdfgdict_gput:nnn} \{Page\} \Arg{name} \Arg{value}
+%   \end{syntax}
+%   Values added to the dictionary \texttt{Page} are added to the page dictionary
+%   of the current page and the following pages. The current page means the page
+%   on which the command is \emph{executed}. \meta{name} should be a valid pdf name
+%   without the leading slash. Typical names used here are e.g.
+%   \texttt{Rotate} and \texttt{CropBox}.
+%   \meta{value} should be a valid pdf value.
+%   Any escaping or (re)encoding must be done explicitly. Some backends expand the
+%   value but this should not be relied on.
+%   To avoid problems with the asynchronous page breaking
+%   the command should be used after \cs{newpage}, or in the header,
+%   and better not in a float.
+%   The value is assigned directly and is always stored globally.
+%   If a \meta{name} is used twice, only the last \meta{value}
+%   set will be used. Names set with \cs{pdfgdict_gput:nnn}|{ThisPage}| will overwrite
+%   names set with \cs{pdfgdict_gput:nnn}|{Page}| if there is a clash.
+%   Values can be removed again with \cs{pdfgdict_gremove:nn}
+% \end{function}
+% \begin{function}[added = 2020-04-12]
+%   { pdfgdict: ThisPage}
+%   \begin{syntax}
+%     \cs{pdfgdict_gput:nnn} \{ThisPage\} \Arg{name} \Arg{value}
+%   \end{syntax}
+%   Adds |/|\meta{name} \meta{value} at \emph{shipout} to the page dictionary of the
+%   current page. Current page means here the \emph{shipout} page.
+%   It is always stored globally.
+%   If \Arg{name} has already a value set in the \texttt{Page}
+%   dictionary it will be overwritte for this page.
+%   \meta{name} should be a valid pdf name without the leading slash,
+%   \meta{value} should be a valid pdf value. Any escaping or (re)encoding must be
+%   done explicitly. If a \meta{name} is used twice, only the last \meta{value}
+%   set will be used.
+%   With the engine pdflatex (at least) a second compilation is needed.
+%   Values added to \texttt{ThisPage} can not be removed. It is not possible to
+%   show the content of this dictionary with \cs{pdfgdict_show:n}.
 % \end{function}
 % \end{documentation}
 %
@@ -269,7 +311,7 @@
   {
     \@@_if_global:nTF { #1 }
       {
-        \@@_handler_put:nnn { #1 }{ #2 }{ #3 }
+        \@@_handler_gput:nnn { #1 }{ #2 }{ #3 }
       }
       {
         \msg_error:nnn{pdfgdict}{unknown-dict}{#1}
@@ -557,6 +599,7 @@
       }
   }
 %    \end{macrocode}
+% \subsection{The Info dictionary}
 % Initialization of the dictionary:
 %    \begin{macrocode}
 \@@_new:n {Info}
@@ -574,7 +617,8 @@
   }
 %    \end{macrocode}
 % \end{macro}
-% The Pages dictionary code. At first the initialisation
+% \subsection{The Pages dictionary code}
+% At first the initialisation
 %     \begin{macrocode}
 \@@_new:n {Pages}
 %    \end{macrocode}
@@ -594,6 +638,41 @@
 
 %    \end{macrocode}
 % \end{macro}
+% \subsection{The Page and ThisPage dictionary}
+% At first the initialisation.
+%    \begin{macrocode}
+\@@_new:n { Page }
+\@@_new:n { ThisPage }
+
+%handler for pdfgdict
+\cs_new_protected:cpn { @@_handler/Page/?_gput:nn } #1 #2
+  {
+    \@@_backend_Page_gput:nn { #1 }{ #2 }
+  }
+% remove:
+\cs_new_protected:cpn { @@_handler/Page/?_gremove:n } #1
+  {
+    \@@_backend_Page_gremove:n { #1 }
+  }
+
+% handler for pdfgdict
+\cs_new_protected:cpn { @@_handler/ThisPage/?_gput:nn } #1 #2
+  {
+    \prop_gput:cnn  { \@@_name:n { ThisPage } }{ #1 } { #2 }
+    \@@_backend_ThisPage_gput:nn { #1 }{ #2 }
+  }
+
+\cs_new_protected:cpn { @@_handler/ThisPage/?_gremove:n } #1
+  {
+    \msg_warning:nnn { pdfgdict } { no-removal }{ThisPage}
+  }
+
+\cs_new_protected:cpn { @@_handler/ThisPage/?_show: }
+  {
+    \msg_warning:nnn { pdfgdict } { no-show }{ThisPage}
+  }
+
+%    \end{macrocode}
 %    \begin{macrocode}
 %</package>
 %    \end{macrocode}
