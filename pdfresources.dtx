@@ -299,7 +299,7 @@
 
 \@@_BACKEND_end_run_gput:n
   {
-    \@@_dict_Pages_gpush:            %pagesattr
+    \__pdfgdict_Pages_gpush:            %pagesattr
     \__pdfgdict_Info_gpush:             %pdfinfo
     \@@_dict_Catalog_gpush:
   }
@@ -497,7 +497,7 @@
   % changes a lua table with lualatex
   \cs_new_protected:Npn \@@_backend_Page_gremove:n #1
     {
-      \pdfgdict_remove:nn  {Page}{ #1 }
+      \pdfgdict_gremove:nn  {Page}{ #1 }
     }
  % the command used in the document.
  % direct call of the primitive special with dvips/dvipdfmx
@@ -695,7 +695,7 @@
 % (should work now)
 % \end{NOTE}
 % moved to l3pdfgdict ...
-
+%</package>
 %
 % \subsection{\enquote{Page/Resources}: ExtGState, ColorSpace, Shading, Pattern }
 % \begin{NOTE}{UF}
@@ -728,7 +728,6 @@
 % and to push the values.
 %
 %quite often needed
-%</package>
 %<*drivers>
 \clist_const:Nn \c_@@_backend_PageResources_clist
   {
