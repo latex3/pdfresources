@@ -66,15 +66,7 @@
 %
 % \maketitle
 % \section{Introduction}
-% When creating a pdf a number of objects, dictionaries and entries to
-% dictionaries must be created. The \LaTeX{} format currently contains no
-% support for theses tasks. It either relies on the binaries to do the job,
-% or on external packages using the primitives of the binaries. These
-% approach is problematic for two reasons: packages trying to set the same resources
-% can clash, and as the primitives differ between the various binaries and backend with
-% which \LaTeX{} is used all packages have to write and maintain \enquote{driver} files
-% for the various backends.
-%
+
 % The project here tries to resolve this situation by providing interfaces to
 % the various resources and objects in a backend independent way.
 %
@@ -135,35 +127,6 @@
                 inserting~unknown~/#1~into~the~catalog
               }
 % pdfdict module
-\msg_new:nnn  { pdfdict } { show-dict }
-  {
-    The~\tl_if_empty:cTF {c_@@_dict_/#1_g_tl}{local}{global}~dictionary~'#1'~
-    \tl_if_empty:nTF {#2}
-      { is~empty \\>~ . }
-      { contains~the~pairs~(without~outer~braces): #2 . }
-  }
-\msg_new:nnn  { pdfdict } { unknown-dict }
-  {
-    The~dictionary~'#1'~is~not~declared.
-  }
-\msg_new:nnn  { pdfdict } { wrong-or-unknown-dict }
-  {
-    The~dictionary~'#1'~is~either~not~a~#2~dictionary\\
-    or~is~not~declared.
-  }
-\msg_new:nnn  { pdfdict } { dict-already-defined  }
-  {
-    The~dictionary~'#1'~is~already~defined.
-  }
-\msg_new:nnn  { pdfdict } { empty-value }
-              { The~value~for~#1~is~empty~and~will~be~ignored }
-
-\msg_new:nnn  { pdfdict } { no-removal }
-              { It~is~not~possible~to~remove~values~from~dictionary~'#1'.}
-
-\msg_new:nnn  { pdfdict } { no-show }
-              { It~is~not~possible~to~show~the~dictionary~'#1'.}
-
 %    \end{macrocode}
 % \section{Preparation/helper Code}
 %^^A still needed:
@@ -337,7 +300,7 @@
 \@@_BACKEND_end_run_gput:n
   {
     \@@_dict_Pages_gpush:            %pagesattr
-    \@@_dict_Info_gpush:             %pdfinfo
+    \__pdfgdict_Info_gpush:             %pdfinfo
     \@@_dict_Catalog_gpush:
   }
 %    \end{macrocode}
@@ -411,48 +374,8 @@
 % \cs{@@_backend_info_gput:nn} inserts one name/value pair.
 %
 % \subsubsection{\enquote{Info}/management}
-% \potentialclash If the primitive commands are used additionally there will
-% be double entries in the pdf with the backend pdftex and luatex.
-% How pdf viewer handles this is unpredictable.
-%
-%  \begin{function}
-%   {
-%     pdfdict: Info (global)
-%   }
-%   \begin{syntax}
-%     \cs{pdfdict_gput:nnn} \{Info\} \Arg{name} \Arg{value}
-%   \end{syntax}
-%   Adds |/|\meta{name} and the \meta{value} to the Info dictionary.
-%   \meta{name} should be a valid pdf name without the leading slash,
-%   \meta{value} should be a valid pdf value. Any escaping or (re)encoding must be
-%   done explicitly.
-%   If a \meta{name} is used twice, only the last \meta{value}
-%   set will be used. The info dictionary is written at the end of the compilation,
-%   so values can be set at any time.
-%   The info dictionary expects utf8 in the strings, so a conversion like this is
-%   normally sensible:
-%   \begin{verbatim}
-%   \str_set_convert:Nnnn \l_tmpa_str { Grüße }{ utf8 } {utf8/string}
-%   \pdfdict_gput:nnx {Info} {Title}{(\l_tmpa_str)}
-%   \end{verbatim}
-% \end{function}
-%    \begin{macrocode}
-\@@_dict_gnew:n {Info}
-%    \end{macrocode}
-%
-% \begin{macro}{\@@_dict_Info_gpush:}
-% \cs{@@_dict_Info_gpush:} is the command that outputs the info dictionary (currently
-% in the end-of-run hooks).
-%    \begin{macrocode}
-% push to the register command / issue the special
-\cs_new_protected:Npn \@@_dict_Info_gpush:
-  {
-    \prop_map_function:cN  { \@@_dict_gname:n {Info} } \@@_backend_info_gput:nn
-    \prop_gclear:c { \@@_dict_gname:n {Info} }
-  }
-%    \end{macrocode}
-% \end{macro}
-%
+% moved to l3pdfgdict
+% 
 % \subsection{The \enquote{Pages} dictionary (pdfpagesattr)}
 % The content of the property list associated with this dictionary name is written to the
 % /Pages object. This replaces \cs{pdfpagesattr}. This dictionary is global.

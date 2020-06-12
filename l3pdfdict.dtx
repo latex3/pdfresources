@@ -23,16 +23,14 @@
 % for those people who are interested.
 %
 %<*driver>
-\RequirePackage{expl3}
 \documentclass[full]{l3doc}
 \begin{document}
   \DocInput{\jobname.dtx}
 \end{document}
 %</driver>
 % \fi
-%
 % \title{^^A
-%   The \pkg{l3pdfdict} package\\ Managing local dictionaries ^^A
+%   The \pkg{l3pdfdict} package  Managing local dictionaries ^^A
 % }
 %
 % \author{^^A
@@ -56,12 +54,14 @@
 % The commands in this module offer an number of
 % tools to handle such dictionaries. The main purpose of the code
 % here is to give packages and users a better interface to add or
-% change values of such objects.
+% change values of such objects and to setup a sort of namespace for the
+% dictionary names.
 %
 % The dictionaries are implemented with local property lists.
 % All assignments are local.
 %
 % The following tabular summarize the dictionaries
+%
 % \begin{tabular}{lll}
 %  xform\ldots                           & argument of \cs{pdfxform} &local\\
 %  annot\ldots                           & argument of \cs{pdfannot},
@@ -80,29 +80,24 @@
 % This function create a new local dictionary.
 % \end{function}
 % \begin{function}[added = 2020-04-06]
-%   {\pdfdict_put:nnn, \pdfdict_gput:nnn}
+%   {\pdfdict_put:nnn}
 %   \begin{syntax}
 %     \cs{pdfdict_put:nnn} \Arg{local dictionary} \Arg{name} \Arg{value}
 %   \end{syntax}
 % This function puts \Arg{name} \Arg{value} locally in an internal
 % property lists.
-%
 % \Arg{dictionary} is a symbolic name for a concrete PDF dictionary to which the
 % content of these property lists will be written by the PDF resource management code.
-%
 % \Arg{name} should be a valid PDF Name without
 % the starting slash.
-%
 % \Arg{value} should be a valid PDF value for this Name in the
 % target dictionary.
 %
 % When adding a value keep in mind that
-% \begin{itemize}
-% \item the expansion behaviour of the backends can differ. Some backends expand a
+% the expansion behaviour of the backends can differ. Some backends expand a
 % value always fully when writing to the PDF, with other backends command names
 % could end as strings in the PDF. So one should neither rely on \Arg{name}
 % \Arg{value} to be expanded nor not expanded by the backend commands.
-% \end{itemize}
 % \end{function}
 % \begin{function}[EXP,added = 2020-04-21]
 %   {\pdfdict_map:n }
@@ -114,6 +109,9 @@
 %   This can be used e.g. when writing a dictionary object with
 %   \cs{pdf_object_write:nx}
 % \end{function}
+% \begin{NOTE}{UF}
+% I'm not sure about this reset idea. Probably it should be removed ...
+% \end{NOTE}
 % \begin{function}[added = 2020-04-25]
 %   {\pdfdict_reset:n }
 %   \begin{syntax}
@@ -173,11 +171,35 @@
 % \end{documentation}
 %
 % \begin{implementation}
+% \section{\pkg{l3pdfdict} implementation}
+%    \begin{macrocode}
 %<@@=pdfdict>
 %<*package>
 \ProvidesExplPackage {l3pdfdict} {2020-04-08} {0.5}
   {Managing local dictionaries}
-% \section{\pkg{l3pdfdict} implementation}
+%    \end{macrocode}
+% \subsection{messages}
+%    \begin{macrocode}
+\msg_new:nnn  { pdfdict } { show-dict }
+  {
+    The~local~dictionary~'#1'~
+    \tl_if_empty:nTF {#2}
+      { is~empty \\>~ . }
+      { contains~the~pairs~(without~outer~braces): #2 . }
+  }
+\msg_new:nnn  { pdfdict } { unknown-dict }
+  {
+    The~dictionary~'#1'~is~not~declared.
+  }
+\msg_new:nnn  { pdfdict } { dict-already-defined  }
+  {
+    The~dictionary~'#1'~is~already~defined.
+  }
+\msg_new:nnn  { pdfdict } { empty-value }
+              { The~value~for~#1~is~empty~and~will~be~ignored }
+
+%    \end{macrocode}
+% \subsection{user commands}
 % \begin{macro}{\pdfdict_new:n}
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdfdict_new:n #1
@@ -196,7 +218,7 @@
         \@@_handler_put:nnn { #1 }{ #2 }{ #3 }
       }
       {
-        \msg_error:nnnn{pdfdict}{wrong-or-unknown-dict}{#1}{local}
+        \msg_error:nnn{pdfdict}{unknown-dict}{#1}
       }
   }
 
@@ -422,7 +444,7 @@
         \prop_remove:cn { \@@_name:n { #1 } }{ #2 }
       }
       {
-        \msg_error:nnnn{pdfdict}{wrong-or-unknown-dict}{#1}{local}
+        \msg_error:nnn{pdfdict}{unknown-dict}{#1}
       }
   }
 %    \end{macrocode}

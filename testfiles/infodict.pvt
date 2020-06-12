@@ -5,10 +5,10 @@
 \ExplSyntaxOn
 \sys_if_engine_pdftex:TF
 {
- \str_set_convert:Nnnn \l_tmpa_str { Grüße }{ utf8 } {utf8/string}
+ \str_set_convert:Nnnn \l_tmpa_str { Grüße }{ utf8 } {utf16/string}
 }
 {
- \str_set_convert:Nnnn \l_tmpa_str { Grüße }{  } {utf8/string}
+ \str_set_convert:Nnnn \l_tmpa_str { Grüße }{  } {utf16/string}
 }
 \pdfdict_gput:nnx {Info} {Title}{(\l_tmpa_str)}
 \pdfdict_gput:nnx {Info} {Author}{(Some~Author)}

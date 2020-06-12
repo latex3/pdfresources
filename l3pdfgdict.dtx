@@ -25,6 +25,7 @@
 %<*driver>
 \RequirePackage{expl3}
 \documentclass[full]{l3doc}
+\providecommand\potentialclash{\noindent\llap{\dbend\ }}
 \begin{document}
   \DocInput{\jobname.dtx}
 \end{document}
@@ -50,10 +51,29 @@
 % \begin{documentation}
 %
 % \section{\pkg{l3pdfgdict} documentation}
-% The commands in this module offer interfaces to a number of core dictionaries
-% of a PDF. They unify a number of primitives like the pdftex
+% When creating a pdf a number of objects, dictionaries and entries to
+% dictionaries must be created. The \LaTeX{} format currently contains no
+% support for theses tasks. It either relies on the binaries to do the job,
+% or on external packages using the primitives of the binaries. These
+% approach is problematic for two reasons: packages trying to set the same resources
+% can clash, and as the primitives differ between the various binaries and backend with
+% which \LaTeX{} is used all packages have to write and maintain \enquote{driver} files
+% for the various backends.
+%
+% The commands in this module offer interfaces to this core PDF dictionaries
+% They unify a number of primitives like the pdftex
 % registers \cs{pdfcatalog}, \cs{pdfpagesattr}, \cs{pdfinfo} and similar commands
 % of the other backends  in a backend independant way.
+%
+% The supported backends are pdflatex, lualatex, (x)dvipdfmx (latex, xelatex)
+% and dvips with ps2pdf (not completely yet). dvips with distiller could work too
+% but is untested.
+%
+% That the interfaces are backend independent doesn't mean that the results and even
+% the compilation behavior is identical. The backends are too different to allow
+% this. Some backends expand arguments e.g. in a \cs{special} while other don't.
+% Some backends can insert a resource at the first compilation, while another uses
+% the aux-file and a label and so needs at least two.
 %
 % The dictionaries handled by these module are inserted only
 % once in a PDF or only once per page. Examples are the Catalog dictionary,
@@ -63,7 +83,7 @@
 % It is therefor necessary that all packages which want to add content to this
 % dictionaries uses the interface provided by this module.
 %
-% As this dictionaries are so central for the PDF format values to these
+% As these dictionaries are so central for the PDF format values to these
 % dictionaries are always added globally. Through the interface values
 % can be added (and in many cases also removed), but the actually writing of the
 % dictionary objects to the PDF are then handled by
@@ -71,11 +91,10 @@
 %
 % The names of this core dictionaries follow the names in the PDF reference.
 % They all have names starting with an uppercase letter.
-
-%  \end{description}
 %
 % The following tabular summarize the core dictionaries and which pdftex primitive they
 % replace:
+%
 % \begin{tabular}{ll}
 %  Info                                  & \cs{pdfinfo}           \\
 %  Catalog \&  various subdictionaries   & \cs{pdfcatalog}        \\
@@ -88,8 +107,8 @@
 %  \end{tabular}
 %
 %  There is no \texttt{Page/Resources/Properties} dictionary in the list
-%  as this is dictionary is not filled directly but
-%  filled and managed through side effects when setting BDC-marks.
+%  as this dictionary is not filled directly but
+%  managed through side effects when setting BDC-marks.
 %  \subsection{User Commands}
 %
 % \begin{function}[added = 2020-04-06]
@@ -99,14 +118,11 @@
 %   \end{syntax}
 % This function puts \Arg{name} \Arg{value}  globally in an internal
 % property lists.
-%
 % \Arg{core dictionary} is a symbolic name for a concrete PDF dictionary to
 % which the content of these property lists will be written by the PDF
 % resource management code.
-%
 % \Arg{name} should be a valid PDF Name without
 % the starting slash.
-%
 % \Arg{value} should be a valid PDF value for this Name in the
 % target dictionary.
 %
@@ -135,7 +151,7 @@
 %   This shows the content of \Arg{dictionary} in the log and on the terminal.
 %   It doesn't show the special catalog dictionaries with arrays as values
 %   as these are filled only at the end of the document. It is not reliable for
-%   page resources as these are filled a shipout.
+%   page resources as these are filled at shipout.
 %\end{function}
 % \begin{function}[added = 2020-04-07]
 %   {
@@ -152,22 +168,54 @@
 %   Values from the special Catalog entries with arrays as values can not be
 %   removed.
 % \end{function}
+% \subsection{The core dictionaries}
+% \subsubsection{The Info dictionary}
+% \potentialclash If the primitive commands of the engines are used too there will
+% be double entries in the pdf (at least with the backend pdftex and luatex).
+% How pdf viewer handles this is unpredictable.
+%
+%  \begin{function}
+%   {
+%     pdfgdict: Info
+%   }
+%   \begin{syntax}
+%     \cs{pdfgdict_gput:nnn} \{Info\} \Arg{name} \Arg{value}
+%   \end{syntax}
+%   Adds |/|\meta{name} and the \meta{value} to the Info dictionary.
+%   \meta{name} should be a valid pdf name without the leading slash,
+%   \meta{value} should be a valid pdf value. Any escaping or (re)encoding must be
+%   done explicitly.
+%   If a \meta{name} is used twice, only the last \meta{value}
+%   set will be used. The info dictionary is written at the end of the compilation,
+%   so values can be set at any time.
+%   The info dictionary expects utf16be in the strings, so a conversion like this is
+%   normally sensible:
+%   \begin{verbatim}
+%   \sys_if_engine_pdftex:TF
+%    {
+%     \str_set_convert:Nnnn \l_tmpa_str { Grüße }{ utf8 } {utf16/string}
+%    }
+%    {
+%     \str_set_convert:Nnnn \l_tmpa_str { Grüße }{  } {utf16/string}
+%    }
+%   \pdfgdict_gput:nnx {Info} {Title}{(\l_tmpa_str)}
+%   \end{verbatim}
+% \end{function}
 % \end{documentation}
 %
 % \begin{implementation}
+%  \section{\pkg{l3pdfgdict} implementation}
 %    \begin{macrocode}
 %<@@=pdfgdict>
 %<*package>
-%    \end{macrocode}
+%
 \ProvidesExplPackage {l3pdfgdict} {2020-04-08} {0.5}
   {Managing global and local dictionaries}
-% \section{\pkg{l3pdfgdict} implementation}
+%    \end{macrocode}
 % \subsection{Messages}
 %    \begin{macrocode}
 \msg_new:nnn  { pdfgdict } { unknown-dict }
-  {
-    The~dictionary~'#1'~is~not~declared.
-  }
+              { The~dictionary~'#1'~is~not~declared. }
 
 \msg_new:nnn  { pdfgdict } { empty-value }
               { The~value~for~#1~is~empty~and~will~be~ignored }
@@ -177,6 +225,18 @@
 
 \msg_new:nnn  { pdfgdict } { no-show }
               { It~is~not~possible~to~show~the~dictionary~'#1'.}
+
+\msg_new:nnn  { pdfgdict } { show-dict }
+  {
+    The~dictionary~'#1'~
+    \tl_if_empty:nTF {#2}
+      { is~empty \\>~ . }
+      { contains~the~pairs~(without~outer~braces): #2 . }
+  }
+\msg_new:nnn  { pdfgdict } { dict-already-defined  }
+  {
+    The~dictionary~'#1'~is~already~defined.
+  }
 %    \end{macrocode}
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdfgdict_gput:nnn #1 #2 #3
@@ -471,6 +531,23 @@
       }
   }
 %    \end{macrocode}
+% Initialization of the dictionary:
+%    \begin{macrocode}
+\@@_new:n {Info}
+%    \end{macrocode}
+%
+% \begin{macro}{\@@_Info_gpush:}
+% \cs{@@_dict_Info_gpush:} is the command that outputs the info dictionary (currently
+% in the end-of-run hooks).
+%    \begin{macrocode}
+% push to the register command / issue the special
+\cs_new_protected:Npn \@@_dict_Info_gpush:
+  {
+    \prop_map_function:cN  { \@@_dict_gname:n {Info} } \@@_backend_info_gput:nn
+    \prop_gclear:c { \@@_dict_gname:n {Info} }
+  }
+%    \end{macrocode}
+% \end{macro}
 %    \begin{macrocode}
 %</package>
 %    \end{macrocode}
