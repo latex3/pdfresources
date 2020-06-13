@@ -589,6 +589,17 @@
   }
 %    \end{macrocode}
 %  \end{macro}
+%  \begin{macro}{\@@_gclear:n}
+%    \begin{macrocode}
+  \cs_new_protected:Npn \@@_gclear:n #1
+  {
+    \@@_if_exist:nT { #1 }
+      {
+        \prop_gclear:c  { \@@_name:n { #1 } }
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
 %  \begin{macro}{
 %                \@@_handler_gput:nnn,
 %                \@@_gput:nnn,

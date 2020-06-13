@@ -1417,7 +1417,8 @@
 %  \begin{macro}{ \@@_backend_xform_use:n, \@@_backend_xform_ref:n }
 %    \begin{macrocode}
 %%pdftex
-\bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
+%<*pdfmode>
+\sys_if_engine_pdftex:T
   {
     \cs_new_protected:Npn \@@_backend_xform_new:nnnn #1 #2 #3 #4
     % #1 name
@@ -1428,7 +1429,7 @@
         \hbox_set:Nn \l_@@_tmpa_box
           {
             \bool_set_true:N \l_@@_backend_xform_bool
-            \@@_dict_clear:n {xform/Resources/Properties}
+            \__pdfgdict_gclear:n {xform/Resources/Properties}
             #4
           }
         %store the dimensions
@@ -1449,33 +1450,33 @@
           {
             #3
             \int_compare:nNnT
-              { \prop_count:c { \@@_dict_gname:n {xform/Resources/Properties} } }
+              { \prop_count:c { \__pdfgdict_name:n {xform/Resources/Properties} } }
               >
               { 0 }
               {
                 /Properties~
                   <<
-                    \@@_dict_map:n {xform/Resources/Properties}
+                    \__pdfgdict_map:n {xform/Resources/Properties}
                   >>
               }
 
             \prop_if_empty:cF
-              { \@@_dict_gname:n {Page/Resources/ExtGState} }
+              { \__pdfgdict_name:n {Page/Resources/ExtGState} }
               {
                 /ExtGState~ \pdf_object_ref:n {Page/Resources/ExtGState}
               }
             \prop_if_empty:cF
-              { \@@_dict_gname:n {Page/Resources/Pattern} }
+              { \__pdfgdict_name:n {Page/Resources/Pattern} }
               {
                 /Pattern~ \pdf_object_ref:n {Page/Resources/Pattern}
               }
             \prop_if_empty:cF
-              { \@@_dict_gname:n {Page/Resources/Shading} }
+              { \__pdfgdict_name:n {Page/Resources/Shading} }
               {
                 /Shading~ \pdf_object_ref:n {Page/Resources/Shading}
               }
             \prop_if_empty:cF
-              { \@@_dict_gname:n {Page/Resources/ColorSpace} }
+              { \__pdfgdict_name:n {Page/Resources/ColorSpace} }
               {
                 /ColorSpace~ \pdf_object_ref:n {Page/Resources/ColorSpace}
               }
@@ -1512,7 +1513,7 @@
         \hbox_set:Nn \l_@@_tmpa_box
           {
             \bool_set_true:N \l_@@_backend_xform_bool
-            \@@_dict_clear:n {xform/Resources/Properties}
+            \__pdfgdict_gclear:n {xform/Resources/Properties}
             #4
           }
         \tl_const:cx
@@ -1532,32 +1533,32 @@
           {
             #3
             \int_compare:nNnT
-              {\prop_count:c { \@@_dict_gname:n {xform/Resources/Properties} }}
+              {\prop_count:c { \__pdfgdict_name:n {xform/Resources/Properties} }}
               >
               { 0 }
               {
                 /Properties~
                   <<
-                    \@@_dict_map:n {xform/Resources/Properties}
+                    \__pdfgdict_map:n {xform/Resources/Properties}
                   >>
               }
             \prop_if_empty:cF
-              { \@@_dict_gname:n {Page/Resources/ExtGState} }
+              { \__pdfgdict_name:n {Page/Resources/ExtGState} }
               {
                 /ExtGState~ \pdf_object_ref:n {Page/Resources/ExtGState}
               }
             \prop_if_empty:cF
-              { \@@_dict_gname:n {Page/Resources/Pattern} }
+              { \__pdfgdict_name:n {Page/Resources/Pattern} }
               {
                 /Pattern~ \pdf_object_ref:n {Page/Resources/Pattern}
               }
             \prop_if_empty:cF
-              { \@@_dict_gname:n {Page/Resources/Shading} }
+              { \__pdfgdict_name:n {Page/Resources/Shading} }
               {
                 /Shading~ \pdf_object_ref:n {Page/Resources/Shading}
               }
             \prop_if_empty:cF
-              { \@@_dict_gname:n {Page/Resources/ColorSpace} }
+              { \__pdfgdict_name:n {Page/Resources/ColorSpace} }
               {
                 /ColorSpace~ \pdf_object_ref:n {Page/Resources/ColorSpace}
               }
@@ -1580,10 +1581,9 @@
     \cs_new:Npn \@@_backend_xform_ref:n #1
       { \int_use:c { c_@@_backend_xform_ \tl_to_str:n {#1} _int } ~ 0 ~ R }
   }
-
-
-\sys_if_engine_xetex:T
-  {
+%</pdfmode>
+%<*xdvipdfmx>
+% xetex
    % it needs a bit testing if it really works to set the box to 0 before the special ...
    % does it disturb viewing the xobject?
    % what happens with the resources (bdc)? (should work as they are specials too)
@@ -1687,7 +1687,8 @@
        \box_set_dp:Nn  \l_@@_tmpa_box { \pdf_xform_dp:n { #1 } }
        \box_use_drop:N \l_@@_tmpa_box
      }
-  }
+%</xdvipdfmx>
+%<*drivers>
 %% all
 \prg_new_conditional:Npnn \@@_backend_xform_if_exist:n #1 { p , T , F , TF }
   {
@@ -1699,9 +1700,10 @@
   { TF , T , F , p }
 
 %    \end{macrocode}
+%</drivers>
 % \end{macro}
 % \end{macro}
-%
+%<*package>
 %\subsection{Annotations}
 % \begin{NOTE}{UF}
 % The code/naming tries to unify general annotations and the special type of
@@ -1985,9 +1987,9 @@
     \exp_args:Nxx %xetex needs expansion
     \@@_backend_link_begin_user:nnw
       {
-         \@@_dict_if_exist:nT { annot/Link/#1 }
+         \pdfdict_if_exist:nT { annot/Link/#1 }
           {
-            \@@_dict_map:n {annot/Link/#1}
+            \pdfdict_map:n {annot/Link/#1}
           }
       }
       {
@@ -2045,9 +2047,9 @@
     \exp_args:Nxx %xetex needs expansion
       \@@_backend_link_begin_user:nnw
         {
-           \@@_dict_if_exist:nT { annot/Link/#1 }
+           \pdfdict_if_exist:nT { annot/Link/#1 }
             {
-              \@@_dict_map:n {annot/Link/#1}
+              \pdfdict_map:n {annot/Link/#1}
             }
         }
         { #2 }
@@ -2079,7 +2081,7 @@
     \exp_args:Nxx %xetex needs expansion
     \@@_backend_link_begin_goto:nnw
       {
-        \@@_dict_map:n {annot/Link/GoTo}
+        \pdfdict_map:n {annot/Link/GoTo}
 
       }
       { #1 }
@@ -2203,11 +2205,11 @@
 %avoid that destinations names are optimized.
 % is this still needed??
 %see https://tug.org/pipermail/dvipdfmx/2019-May/000002.html
-\sys_if_engine_xetex:T
-  {
+%</package>
+%<*xdvipdfmx>
     \__kernel_backend_literal:x { dvipdfmx:config~C~ 0x10 }
-  }
-
+%</xdvipdfmx>
+%<*package>
 %    \end{macrocode}
 % \section{Drop?}
 % \subsubsection{Doc View/Openaction}
