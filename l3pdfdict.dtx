@@ -215,7 +215,7 @@
   {
     \@@_if_exist:nTF { #1 }
       {
-        \@@_handler_put:nnn { #1 }{ #2 }{ #3 }
+        \@@_put:nnn { #1 }{ #2 }{ #3 }
       }
       {
         \msg_error:nnn{pdfdict}{unknown-dict}{#1}
@@ -253,15 +253,15 @@
 % \end{macro}
 % \begin{macro}
 %   {
-%    \@@_dict_name:n,
-%    \@@_dict_new:n,
+%    \@@_name:n,
+%    \@@_new:n,
 %    \g_@@_names_seq
 %   }
 %    \begin{macrocode}
 \seq_new:N \g_@@_names_seq
 
 %local
-\cs_new:Npn \@@_dict_name:n #1 % path name without the leading /
+\cs_new:Npn \@@_name:n #1 % path name without the leading /
   {
     l_@@_/#1_prop
   }
@@ -349,7 +349,7 @@
 \cs_new_protected:Npn \@@_get:nnN  #1 #2 #3 %path,key,macro
   {
     \prop_get:cnN
-      { \@@_name:n } { #1 } }
+      { \@@_name:n { #1 } }
       { #2 } #3
   }
 
@@ -383,7 +383,7 @@
   }
 \cs_new_protected:Npn \@@_show:n #1  %path
   {
-    \prop_show:c { \@@_name:n } { #1 } }
+    \prop_show:c { \@@_name:n { #1 } }
   }
 %    \end{macrocode}
 % \end{macro}
@@ -414,7 +414,7 @@
   }
 %    \end{macrocode}
 %    \begin{macrocode}
-\cs_new_protected:Npn \pdfdict_show:n
+\cs_new_protected:Npn \pdfdict_show:n #1
   {
     \@@_show:Nn \msg_show:nnxxxx {#1}
   }
