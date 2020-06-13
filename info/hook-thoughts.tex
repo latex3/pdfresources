@@ -1,0 +1,108 @@
+^^A the following is used in the experimental driver
+%^^A but it is unclear if is should stay / how the syntax should be
+% \section{Hook management}
+% hooks are commands that allow users and other packages to inject code. In the
+% pdfresources project hooks are used for links (see section \ref{sec:links}).
+% Some tools are need to add code and values to these hooks. The following
+% contains some code currently used in some experiments and some general remarks.
+% It should be move to some hook package.
+%
+% \subsection{hooks with token lists}
+%  Hook code can be stored in a simple token list variable (tl). An example is e.g.
+% \cs{@begindocumenthook}. In this case possible operations are
+% \begin{itemize}
+% \item \emph{appending} to the hook
+% \item \emph{prepending} to the hook
+% \item and perhaps some more or less complicated \emph{patching} to remove/replace parts
+% \end{itemize}
+%
+% Such a hook can be \emph{used} by using the variable.
+%
+% \subsection{hooks with sequences}
+% Hook code can also be stored in a sequence (seq). In this data structure every user adding
+% something to the hook can get an index back.
+% In this case possible operations are
+% \begin{itemize}
+% \item \emph{appending} to the hook (\cs{seq_put_right}),
+% \item \emph{prepending} to the hook (need to keep track of the \enquote{zero pointer} if the user
+% should get an index back)
+% \item \emph{changing} (e.g emptying) a hook item through the index. But as this
+% involves mapping through the sequence to find the right item, it is perhaps too slow.
+% \end{itemize}
+%
+% Such a hook can be \emph{used} by mapping over the sequence. It is possible to filter or
+% exclude items. It is also possible to insert code while processing the individual items.
+% It is not quite clear if the additional features of such sequence hooks are really needed
+% but the overhead is not so large, so it should be ok to use is. Probably if the type
+% is used at all, it would be sensible to drop the tl-type so that one doesn't have to define
+% \cs{hook_put_right_tl:nnn} and \cs{hook_put_right_seq:nnn} functions.
+%
+% \subsection{hooks with properties}
+% Hook code can also be stored in a property (prop). Here possible operations are
+% \begin{itemize}
+% \item \emph{adding} a new key and its value. It is possible to write the interface so
+% that only a specific set of keys are allowed.
+% \item \emph{changing} the value of an existing key, either by overwriting the
+% current value or by appending more code to the value -- the second could e.g. be used
+% to extend the /ExtGState or /ColorSpace values.
+% \item \emph{removing} a key
+% \end{itemize}
+%
+% A hook stored like this can be used by mapping over the properties, but selective
+% use and filtering is possible too.
+%
+% Such a hook is useful if -- like in the case of dictionary values in a pdf -- various
+% packages need to be able to manipulate the same key.
+%
+% \subsection{Naming hooks and access functions}
+% hooks are module specific. So set functions should probably do be something like
+%
+% \cs{hook_put_right:nnn}\verb+{<module>}{<hook-name>}{value}+ (seq- or tl-type)
+% or in the case of  properties
+% \cs{hook_put:nnnn} {<module>}{<hook-name>}{<key>}{<value>}
+%
+% hooks should be manipulated only through such access functions. So their
+% name should be an internal command of the module. E.g.
+% \verb+l__<module>_hook_<hook-name>_prop+
+%
+%    \begin{macrocode}
+%\cs_new:Nn \hook_put_right:nnn
+% {
+%  \seq_put_right:cn { l__#1_hook_#2_seq } { #3 }
+% }
+%
+%\cs_new:Nn \hook_put_left:nnn
+% {
+%  \seq_put_left:cn { l__#1_hook_#2_seq } { #3 }
+% }
+
+%\cs_new:Nn \hook_put:nnnn
+% {
+%  \prop_put:cnn { l__#1_hook_#2_prop } { #3 }{ #4 }
+% }
+%
+%\cs_new:Nn \hook_gput:nnnn
+% {
+%  \prop_gput:cnn { g__#1_hook_#2_prop } { #3 }{ #4 }
+% }
+
+%\cs_new:Nn \hook_remove:nnn
+% {
+%  \prop_remove:cn { l__#1_hook_#2_prop } { #3 }
+% }
+%
+%\cs_new:Nn \hook_gremove:nnn
+% {
+%  \prop_gremove:cn { g__#1_hook_#2_prop } { #3 }
+% }
+%    \end{macrocode}
+% \subsection{Passing external information to hooks}
+% hooks sometimes wants to know something about the arguments of the surrounding command.
+% E.g. a hook in \cs{@startsection} perhaps needs the current section level or
+% if it is a run-in or display sectioning. Using \#-arguments in the hook is possible
+% but rather fragile. It is probably better if the surrounding command offers a
+% documented interface through e.g. tl-variables. It should be also clear which
+% variables are read-only and which can be changed by the hook code.
+%
+% %%%%%%%%END HOOK
+%
