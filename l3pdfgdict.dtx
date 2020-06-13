@@ -1101,6 +1101,175 @@
   }
 %    \end{macrocode}
 % \end{macro}
+% %
+% \paragraph{Building catalog entries: MarkInfo}
+% \begin{macro}{\@@_/Catalog/MarkInfo_gpush:}
+%    \begin{macrocode}
+\cs_new_protected:cpn { @@_/Catalog/MarkInfo_gpush: }
+  {
+    \prop_if_empty:cF
+     { \@@_name:n { Catalog/MarkInfo } }
+     {
+       \@@_backend_object_new:nn  { g_@@_/Catalog/MarkInfo_obj } { dict }
+       \exp_args:Nnx
+         \@@_backend_object_write:nn
+            { g_@@_/Catalog/MarkInfo_obj }
+            { \@@_map:n {Catalog/MarkInfo } }
+       \exp_args:Nnx
+         \@@_backend_catalog_gput:nn
+           {MarkInfo}
+           {
+             \@@_backend_object_ref:n {g_@@_/Catalog/MarkInfo_obj}
+           }
+     }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+%\paragraph{Building catalog entries: OCProperties}
+%  This is a dictionary with three entries:
+%  \begin{description}
+%  \item[/OCGs] (required) An array of indirect references,
+%               access needed for more than one package.
+%  \item[/D] (required) a dict (given as an object name) to the default
+%            configuration
+%  \item[/Configs] (optional) an array of indirect references to more
+%        configurations.
+%  \end{description}
+%  The /D entry is also a config, it is the first of the seq.
+%  The overall structure is nested: a dict with arrays.
+% \begin{macro}{\@@_/Catalog/OCProperties_gpush:}
+%    \begin{macrocode}
+% Catalog/OCProperties: OCGs + D is required
+\cs_new_protected:cpn { @@_/Catalog/OCProperties_gpush: }
+  {
+   \int_compare:nNnT
+      {
+        ( \seq_count:c { g_@@_/Catalog/OCProperties/OCGs_seq }  )*
+        ( \seq_count:c { g_@@_/Catalog/OCProperties/Configs_seq } )
+      }
+      >
+      { 0 }
+      {
+        \@@_backend_object_new:nn  { g_@@_/Catalog/OCProperties_obj } { dict }
+        \seq_gpop_left:cN { g_@@_/Catalog/OCProperties/Configs_seq} \l_tmpa_tl
+        \exp_args:Nnx
+          \@@_backend_object_write:nn {g_@@_/Catalog/OCProperties_obj}
+            {
+              /OCGs~[ \seq_use:cn { g_@@_/Catalog/OCProperties/OCGs_seq } {~} ]
+              /D~\l_tmpa_tl~
+              \seq_if_empty:cF { g_@@_/Catalog/OCProperties/Configs_seq }
+                {
+                  /Configs~
+                  [ \seq_use:cn { g_@@_/Catalog/OCProperties/Configs_seq} {~} ]
+                }
+            }
+        \exp_args:Nnx
+          \@@_backend_catalog_gput:nn
+            { OCProperties }
+            { \@@_backend_object_ref:n {g_@@_/Catalog/OCProperties_obj} }
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \paragraph{Building catalog entries: OutputIntents}
+% OutputIntents is an array.
+% \begin{macro}{\@@_/Catalog/OutputIntents_gpush:}
+%    \begin{macrocode}
+\cs_new_protected:cpn { @@_/Catalog/OutputIntents_gpush: }
+  {
+    \seq_if_empty:cF
+     { g_@@_/Catalog/OutputIntents_seq }
+     {
+       \@@_backend_object_new:nn  { g_@@_/Catalog/OutputIntents_obj } { array }
+       \exp_args:Nnx
+         \@@_backend_object_write:nn
+            { g_@@_/Catalog/OutputIntents_obj }
+            { \seq_use:cn { g_@@_/Catalog/OutputIntents_seq } {~} }
+       \exp_args:Nnx
+         \@@_backend_catalog_gput:nn
+           {OutputIntents}
+           {
+             \@@_backend_object_ref:n {g_@@_/Catalog/OutputIntents_obj}
+           }
+     }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \paragraph{Building catalog entries: Requirements}
+% Requirements  is an array.
+% \begin{macro}{\@@_/Catalog/Requirements_gpush:}
+%    \begin{macrocode}
+\cs_new_protected:cpn { @@_/Catalog/Requirements_gpush: }
+  {
+    \seq_if_empty:cF
+     { g_@@_/Catalog/Requirements_seq }
+     {
+       \@@_backend_object_new:nn  { g_@@_/Catalog/Requirements_obj } { array }
+       \exp_args:Nnx
+         \@@_backend_object_write:nn
+            { g_@@_/Catalog/Requirements_obj }
+            { \seq_use:cn { g_@@_/Catalog/Requirements_seq } {~} }
+       \exp_args:Nnx
+         \@@_backend_catalog_gput:nn
+           {Requirements}
+           {
+             \@@_backend_object_ref:n { g_@@_/Catalog/Requirements_obj }
+           }
+     }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+%
+% \paragraph{Building catalog entries: ViewerPreferences}
+% \begin{macro}{\@@_/Catalog/ViewerPreferences_gpush:}
+%    \begin{macrocode}
+\cs_new_protected:cpn { @@_/Catalog/ViewerPreferences_gpush: }
+  {
+    \prop_if_empty:cF
+     { \@@_name:n { Catalog/ViewerPreferences } }
+     {
+       \@@_backend_object_new:nn  { g_@@_/Catalog/ViewerPreferences_obj } { dict }
+       \exp_args:Nnx
+         \@@_backend_object_write:nn
+            { g_@@_/Catalog/ViewerPreferences_obj }
+            { \@@_map:n {Catalog/ViewerPreferences } }
+       \exp_args:Nnx
+         \@@_backend_catalog_gput:nn
+           {ViewerPreferences}
+           {
+             \@@_backend_object_ref:n {g_@@_/Catalog/ViewerPreferences_obj}
+           }
+     }
+  }
+%    \end{macrocode}
+% \end{macro}
+% % \paragraph{Building catalog entries: Names/EmbeddedFiles}
+% The entry should only be added if there are actually embedded files.
+% This can be tested by checking the names_seq
+% \begin{macro}{\@@_/Catalog/Names/EmbeddedFiles_gpush:}
+%    \begin{macrocode}
+% !!!!!!!!!!!!!!! how to name this seq????
+\seq_new:N \g__pdf_file_tree_name_seq
+\cs_new_protected:cpn { @@_/Catalog/Names/EmbeddedFiles_gpush: }
+  {
+    \seq_if_empty:NF \g__pdf_file_tree_name_seq
+      {
+        \exp_args:Nx \@@_backend_NamesEmbeddedFiles_gpush:n
+          {
+            \seq_use:Nn \g__pdf_file_tree_name_seq {~}
+          }
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+% \subsection{ xform / Properties }
+%    \begin{macrocode}
+\@@_new:n {xform/Resources/Properties}
+%    \end{macrocode}
 %    \begin{macrocode}
 %</package>
 %    \end{macrocode}

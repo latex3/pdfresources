@@ -902,170 +902,7 @@
 % /Acroform/DR/ExtGState etc probably unneeded.
 % \end{NOTE}
 %
-
-
-%
-% \paragraph{Building catalog entries: MarkInfo}
-% \begin{macro}{\@@_dict_/Catalog/MarkInfo_gpush:}
-%    \begin{macrocode}
-\cs_new_protected:cpn { @@_dict_/Catalog/MarkInfo_gpush: }
-  {
-    \prop_if_empty:cF
-     { \@@_dict_gname:n { Catalog/MarkInfo } }
-     {
-       \@@_backend_object_new:nn  { g_@@_dict_/Catalog/MarkInfo_obj } { dict }
-       \exp_args:Nnx
-         \@@_backend_object_write:nn
-            { g_@@_dict_/Catalog/MarkInfo_obj }
-            { \@@_dict_map:n {Catalog/MarkInfo } }
-       \exp_args:Nnx
-         \@@_backend_catalog_gput:nn
-           {MarkInfo}
-           {
-             \@@_backend_object_ref:n {g_@@_dict_/Catalog/MarkInfo_obj}
-           }
-     }
-  }
-%    \end{macrocode}
-% \end{macro}
-%\paragraph{Building catalog entries: OCProperties}
-%  This is a dictionary with three entries:
-%  \begin{description}
-%  \item[/OCGs] (required) An array of indirect references,
-%               access needed for more than one package.
-%  \item[/D] (required) a dict (given as an object name) to the default
-%            configuration
-%  \item[/Configs] (optional) an array of indirect references to more
-%        configurations.
-%  \end{description}
-%  The /D entry is also a config, it is the first of the seq.
-%  The overall structure is nested: a dict with arrays.
-% \begin{macro}{\@@_dict_/Catalog/OCProperties_gpush:}
-%    \begin{macrocode}
-% Catalog/OCProperties: OCGs + D is required
-\cs_new_protected:cpn { @@_dict_/Catalog/OCProperties_gpush: }
-  {
-   \int_compare:nNnT
-      {
-        ( \seq_count:c { g_@@_dict_/Catalog/OCProperties/OCGs_seq }  )*
-        ( \seq_count:c { g_@@_dict_/Catalog/OCProperties/Configs_seq } )
-      }
-      >
-      { 0 }
-      {
-        \@@_backend_object_new:nn  { g_@@_dict_/Catalog/OCProperties_obj } { dict }
-        \seq_gpop_left:cN { g_@@_dict_/Catalog/OCProperties/Configs_seq} \l_tmpa_tl
-        \exp_args:Nnx
-          \@@_backend_object_write:nn {g_@@_dict_/Catalog/OCProperties_obj}
-            {
-              /OCGs~[ \seq_use:cn { g_@@_dict_/Catalog/OCProperties/OCGs_seq } {~} ]
-              /D~\l_tmpa_tl~
-              \seq_if_empty:cF { g_@@_dict_/Catalog/OCProperties/Configs_seq }
-                {
-                  /Configs~
-                  [ \seq_use:cn { g_@@_dict_/Catalog/OCProperties/Configs_seq} {~} ]
-                }
-            }
-        \exp_args:Nnx
-          \@@_backend_catalog_gput:nn
-            { OCProperties }
-            { \@@_backend_object_ref:n {g_@@_dict_/Catalog/OCProperties_obj} }
-      }
-  }
-%    \end{macrocode}
-% \end{macro}
-%
-% \paragraph{Building catalog entries: OutputIntents}
-% OutputIntents is an array.
-% \begin{macro}{\@@_dict_/Catalog/OutputIntents_gpush:}
-%    \begin{macrocode}
-\cs_new_protected:cpn { @@_dict_/Catalog/OutputIntents_gpush: }
-  {
-    \seq_if_empty:cF
-     { g_@@_dict_/Catalog/OutputIntents_seq }
-     {
-       \@@_backend_object_new:nn  { g_@@_dict_/Catalog/OutputIntents_obj } { array }
-       \exp_args:Nnx
-         \@@_backend_object_write:nn
-            { g_@@_dict_/Catalog/OutputIntents_obj }
-            { \seq_use:cn { g_@@_dict_/Catalog/OutputIntents_seq } {~} }
-       \exp_args:Nnx
-         \@@_backend_catalog_gput:nn
-           {OutputIntents}
-           {
-             \@@_backend_object_ref:n {g_@@_dict_/Catalog/OutputIntents_obj}
-           }
-     }
-  }
-%    \end{macrocode}
-% \end{macro}
-%
-% \paragraph{Building catalog entries: Requirements}
-% Requirements  is an array.
-% \begin{macro}{\@@_dict_/Catalog/Requirements _gpush:}
-%    \begin{macrocode}
-\cs_new_protected:cpn { @@_dict_/Catalog/Requirements _gpush: }
-  {
-    \seq_if_empty:cF
-     { g_@@_dict_/Catalog/Requirements _seq }
-     {
-       \@@_backend_object_new:nn  { g_@@_dict_/Catalog/Requirements _obj } { array }
-       \exp_args:Nnx
-         \@@_backend_object_write:nn
-            { g_@@_dict_/Catalog/Requirements_obj }
-            { \seq_use:cn { g_@@_dict_/Catalog/Requirements_seq } {~} }
-       \exp_args:Nnx
-         \@@_backend_catalog_gput:nn
-           {Requirements}
-           {
-             \@@_backend_object_ref:n { g_@@_dict_/Catalog/Requirements_obj }
-           }
-     }
-  }
-%    \end{macrocode}
-% \end{macro}
-%
-% \paragraph{Building catalog entries: ViewerPreferences}
-% \begin{macro}{\@@_dict_/Catalog/ViewerPreferences_gpush:}
-%    \begin{macrocode}
-\cs_new_protected:cpn { @@_dict_/Catalog/ViewerPreferences_gpush: }
-  {
-    \prop_if_empty:cF
-     { \@@_dict_gname:n { Catalog/ViewerPreferences } }
-     {
-       \@@_backend_object_new:nn  { g_@@_dict_/Catalog/ViewerPreferences_obj } { dict }
-       \exp_args:Nnx
-         \@@_backend_object_write:nn
-            { g_@@_dict_/Catalog/ViewerPreferences_obj }
-            { \@@_dict_map:n {Catalog/ViewerPreferences } }
-       \exp_args:Nnx
-         \@@_backend_catalog_gput:nn
-           {ViewerPreferences}
-           {
-             \@@_backend_object_ref:n {g_@@_dict_/Catalog/ViewerPreferences_obj}
-           }
-     }
-  }
-%    \end{macrocode}
-% \end{macro}
-% \paragraph{Building catalog entries: Names/EmbeddedFiles}
-% The entry should only be added if there are actually embedded files.
-% This can be tested by checking the names_seq
-% \begin{macro}{\@@_dict_/Catalog/Names/EmbeddedFiles_gpush:}
-%    \begin{macrocode}
-\seq_new:N \g_@@_file_tree_name_seq
-\cs_new_protected:cpn { @@_dict_/Catalog/Names/EmbeddedFiles_gpush: }
-  {
-    \seq_if_empty:NF \g_@@_file_tree_name_seq
-      {
-        \exp_args:Nx \@@_backend_NamesEmbeddedFiles_gpush:n
-          {
-            \seq_use:Nn \g_@@_file_tree_name_seq {~}
-          }
-      }
-  }
-%
-% \subsection{Local dictonaries}
+% \subsection{Local dictionaries}
 %
 % All dictionaries described above were global dictionaries and basically they
 % are written at most once (or at most once per page) to the PDF. The pdfdict module
@@ -1173,106 +1010,106 @@
 %    \begin{macrocode}
 % pdftex and luatex (and perhaps dvips ...) need to know if there are in a
 % xform stream ...
+%<*drivers>
 \bool_new:N \l_@@_backend_xform_bool
-\@@_dict_gnew:n {xform/Resources/Properties}
-
-% dvips
+%</drivers>
+%<*dvips>
 % dvips is easy: create an object, and reference it in the bdc
 % ghostscript will then automatically replace it by a name
 % and add the name to the /Properties dict
 % special variant von accsupp https://chat.stackexchange.com/transcript/message/50831812#50831812
-\bool_if:nT {\sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p: }
+%
+\cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
   {
-    \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
-      {
-        \special {ps:~mark~/#1~\@@_backend_object_ref:n{#2}~/BDC~pdfmark}
-      }
-    \cs_set_protected:Npn \@@_backend_bdc:n #1  % #1 eg. Span,
-      {
-        \special {ps:~mark~/#1~\@@_backend_object_last:~/BDC~pdfmark}
-      }
-    \cs_set_protected:Npn \@@_backend_emc:
-      {
-        \special {ps:~mark~/EMC~pdfmark} %
-      }
-    \cs_set_protected:Npn \@@_backend_bmc:n #1
-      {
-        \special {ps:~mark~/#1~/BMC~pdfmark} %
-      }
-    \cs_new_protected:Npn \@@_backend_PageResources_gpush:n #1 {}
- }
+    \special {ps:~mark~/#1~\@@_backend_object_ref:n{#2}~/BDC~pdfmark}
+  }
+\cs_set_protected:Npn \@@_backend_bdc:n #1  % #1 eg. Span,
+  {
+    \special {ps:~mark~/#1~\@@_backend_object_last:~/BDC~pdfmark}
+  }
+\cs_set_protected:Npn \@@_backend_emc:
+  {
+    \special {ps:~mark~/EMC~pdfmark} %
+  }
+\cs_set_protected:Npn \@@_backend_bmc:n #1
+  {
+    \special {ps:~mark~/#1~/BMC~pdfmark} %
+  }
+\cs_new_protected:Npn \@@_backend_PageResources_gpush:n #1 {}
+
+%</dvips>
 % xetex has to create the entries in the /Properties manually
 % (like the other backends)
 % use pdfbase special
 % https://chat.stackexchange.com/transcript/message/50832016#50832016
 % the property is added to xform resources automatically,
 % no need to worry about it.
-\sys_if_engine_xetex:T
+%<*xdvipdfmx>
+ \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
+   {
+     \int_gincr:N \g_@@_backend_name_int
+     \__kernel_backend_literal:x
+       {
+         pdf:code~/#1/l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC
+       }
+     \__kernel_backend_literal:x
+       {
+         pdf:put~@resources~
+           <<
+             /Properties~
+               <<
+                 /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl
+                 \@@_backend_object_ref:n { #2 }
+               >>
+           >>
+       }
+   }
+ \cs_set_protected:Npn \@@_backend_bdc:n #1  % #1 eg. Span
+   {
+     \int_gincr:N \g_@@_backend_name_int
+     \__kernel_backend_literal:x
+       {
+         pdf:code~/#1/l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC
+       }
+     \__kernel_backend_literal:x
+       {
+         pdf:put~@resources~
+           <<
+             /Properties~
+               <<
+                 /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl
+                 \@@_backend_object_last:
+               >>
+           >>
+       }
+   }
+\cs_set_protected:Npn \@@_backend_bmc:n #1
+   {
+     \__kernel_backend_literal:n {pdf:code~/#1~BMC}  %pdfbase
+   }
+\cs_set_protected:Npn \@@_backend_emc:
   {
-    \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
-      {
-        \int_gincr:N \g_@@_backend_name_int
-        \__kernel_backend_literal:x
-          {
-            pdf:code~/#1/l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC
-          }
-        \__kernel_backend_literal:x
-          {
-            pdf:put~@resources~
-              <<
-                /Properties~
-                  <<
-                    /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl
-                    \@@_backend_object_ref:n { #2 }
-                  >>
-              >>
-          }
-      }
-    \cs_set_protected:Npn \@@_backend_bdc:n #1  % #1 eg. Span
-      {
-        \int_gincr:N \g_@@_backend_name_int
-        \__kernel_backend_literal:x
-          {
-            pdf:code~/#1/l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC
-          }
-        \__kernel_backend_literal:x
-          {
-            pdf:put~@resources~
-              <<
-                /Properties~
-                  <<
-                    /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl
-                    \@@_backend_object_last:
-                  >>
-              >>
-          }
-      }
- \cs_set_protected:Npn \@@_backend_bmc:n #1
-    {
-      \__kernel_backend_literal:n {pdf:code~/#1~BMC}  %pdfbase
-    }
-  \cs_set_protected:Npn \@@_backend_emc:
-    {
-      \__kernel_backend_literal:n {pdf:code~EMC}  %pdfbase
-    }
+    \__kernel_backend_literal:n {pdf:code~EMC}  %pdfbase
+  }
   % properties are handled automatically, but the other resources should be added
   % at shipout
-  \cs_new_protected:Npn \@@_backend_PageResources_gpush:n #1
-    {
-      \clist_map_inline:Nn \c_@@_backend_PageResources_clist
-        {
-          \prop_if_empty:cF { \@@_dict_gname:n {Page/Resources/##1} }
-            {
-              \__kernel_backend_literal:x
-                {
-                  pdf:put~@resources~
-                    <</##1~\@@_backend_object_ref:n {Page/Resources/##1}>>
-                }
-            }
-        }
-    }
- }
+\cs_new_protected:Npn \@@_backend_PageResources_gpush:n #1
+  {
+    \clist_map_inline:Nn \c_@@_backend_PageResources_clist
+      {
+        \prop_if_empty:cF { \__pdfgdict_name:n {Page/Resources/##1} }
+          {
+            \__kernel_backend_literal:x
+              {
+                pdf:put~@resources~
+                  <</##1~\@@_backend_object_ref:n {Page/Resources/##1}>>
+              }
+          }
+      }
+  }
+%</xdvipdfmx>
 % luatex
+%<*pdfmode>
 \sys_if_engine_luatex:T
   {
     \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
@@ -1282,7 +1119,7 @@
           { /#1 ~ /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC }
         \bool_if:NTF \l_@@_backend_xform_bool
           {
-            \exp_args:Nnx\@@_dict_handler_put:nnn
+            \exp_args:Nnx\__pdfgdict_handler_gput:nnn
               { xform/Resources/Properties }
               { l3pdf\int_use:N\g_@@_backend_name_int }
               { \@@_backend_object_ref:n { #2 } }
@@ -1306,7 +1143,7 @@
           { /#1 ~ /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC }
         \bool_if:NTF \l_@@_backend_xform_bool
           {
-            \@@_dict_handler_put:nxx
+            \__pdfgdict_handler_gput:nxx
               { xform/Resources/Properties }
               { l3pdf\int_use:N\g_@@_backend_name_int }
               { \@@_backend_object_last: }
@@ -1337,7 +1174,7 @@
 
 % pdflatex is the most complicated as it has to go through the aux ...
 % the push command is extended to take other resources too
-\bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: }
+\sys_if_engine_pdftex:T
   {
     \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
       {
@@ -1348,7 +1185,7 @@
         \int_gincr:N\g_@@_backend_resourceid_int
         \bool_if:NTF \l_@@_backend_xform_bool
           {
-            \@@_dict_handler_put:nxx
+            \__pdfgdict_handler_gput:nxx
               { xform/Resources/Properties }
               { l3pdf\int_use:N\g_@@_backend_resourceid_int }
               { \@@_backend_object_ref:n { #2 } }
@@ -1364,11 +1201,11 @@
                   {pdf@abspage}
                   {0}
               }
-            \@@_dict_if_exist:nF { backend_Page\l_@@_tmpa_tl/Resources/Properties }
+            \pdfgdict_if_exist:nF { backend_Page\l_@@_tmpa_tl/Resources/Properties }
               {
-                \@@_dict_gnew:n  { backend_Page\l_@@_tmpa_tl/Resources/Properties }
+                \__pdfgdict_new:n  { backend_Page\l_@@_tmpa_tl/Resources/Properties }
               }
-            \@@_dict_handler_put:nxx
+            \__pdfgdict_handler_gput:nxx
               { backend_Page\l_@@_tmpa_tl/Resources/Properties }
               { l3pdf\int_use:N\g_@@_backend_resourceid_int }
               { \@@_backend_object_ref:n{#2} }
@@ -1383,7 +1220,7 @@
         \int_gincr:N\g_@@_backend_resourceid_int
         \bool_if:NTF \l_@@_backend_xform_bool
           {
-            \@@_dict_handler_put:nxx
+            \__pdfgdict_handler_gput:nxx
               { xform/Resources/Properties }
               { l3pdf\int_use:N\g_@@_backend_resourceid_int }
               { \@@_backend_object_last: }
@@ -1399,15 +1236,15 @@
                   {pdf@abspage}
                   {0}
               }
-            \@@_dict_if_exist:nF { backend_Page\l_@@_tmpa_tl/Resources/Properties }
+            \pdfgdict_if_exist:nF { backend_Page\l_@@_tmpa_tl/Resources/Properties }
               {
-                \@@_dict_gnew:n { backend_Page\l_@@_tmpa_tl/Resources/Properties }
+                \__pdfgdict_new:n { backend_Page\l_@@_tmpa_tl/Resources/Properties }
               }
-            \@@_dict_handler_put:nxx
+            \__pdfgdict_handler_gput:nxx
               { backend_Page\l_@@_tmpa_tl/Resources/Properties }
               { l3pdf\int_use:N\g_@@_backend_resourceid_int }
               { \@@_backend_object_last: }
-            %\@@_dict_show:n { backend_Page\l_@@_tmpa_tl/Resources/Properties }
+            %\pdfgdict_show:n { backend_Page\l_@@_tmpa_tl/Resources/Properties }
           }
       }
   \cs_set_protected:Npn \@@_backend_bmc:n #1
@@ -1422,9 +1259,9 @@
   \cs_new:Npn \@@_backend_PageResources_gpush_aux:n #1 %#1 ExtGState etc
     {
       \prop_if_empty:cF
-        { \@@_dict_gname:n {Page/Resources/#1} }
+        { \__pdfgdict_name:n {Page/Resources/#1} }
         {
-          \@@_dict_objref_item:nn { #1 }{Page/Resources/#1}
+          \__pdfgdict_objref_item:nn { #1 }{Page/Resources/#1}
         }
     }
 
@@ -1433,13 +1270,13 @@
        \exp_args:NNx \tex_global:D \tex_pdfpageresources:D
          {
            \prop_if_exist:cT
-             { \@@_dict_gname:n  { backend_Page#1/Resources/Properties } }
+             { \__pdfgdict_name:n  { backend_Page#1/Resources/Properties } }
              {
                /Properties~
                  <<
                    \prop_map_function:cN
-                     { \@@_dict_gname:n  { backend_Page#1/Resources/Properties } }
-                     \@@_dict_item:ne
+                     { \__pdfgdict_name:n  { backend_Page#1/Resources/Properties } }
+                     \__pdfgdict_item:ne
                  >>
              }
            %% add ExtGState etc
@@ -1449,6 +1286,7 @@
          }
     }
   }
+%</pdfmode>
 %    \end{macrocode}
 % \end{macro}
 %
