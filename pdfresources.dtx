@@ -832,37 +832,11 @@
       }
     \cs_new_protected:Npn \@@_PageResources_gpush: {}
 %</dvips>
-%<*package>
 %    \end{macrocode}
 % \end{macro}
 % \end{macro}
 % !!!!! check path names (backend or not ...)
 %
-%    \begin{macrocode}
-%
-% setter:  #1 is the name of the resource
-
-\cs_new_protected:cpn { @@_dict_handler/Page/Resources/ExtGState/?_gput:nn } #1 #2
-  {
-    \@@_backend_PageResources_gput:nnn {ExtGState} { #1 }{ #2 }
-  }
-
-\cs_new_protected:cpn { @@_dict_handler/Page/Resources/ColorSpace/?_gput:nn } #1 #2
-  {
-    \@@_backend_PageResources_gput:nnn {ColorSpace} { #1 }{ #2 }
-  }
-
-\cs_new_protected:cpn { @@_dict_handler/Page/Resources/Shading/?_gput:nn } #1 #2
-  {
-    \@@_backend_PageResources_gput:nnn {Shading} { #1 }{ #2 }
-  }
-
-\cs_new_protected:cpn { @@_dict_handler/Page/Resources/Pattern/?_gput:nn } #1 #2
-  {
-    \@@_backend_PageResources_gput:nnn {Pattern} { #1 }{ #2 }
-  }
-
-%    \end{macrocode}
 %
 % \subsection{\enquote{Catalog} \& subdirectories (pdfcatalog) }
 % \subsubsection{\enquote{Catalog} \& subdirectories / backend}
@@ -874,7 +848,8 @@
 % other special commands like \cs{pdfnames} must be used.
 %    \begin{macrocode}
 % pdflatex
-\bool_if:nT {\sys_if_engine_pdftex_p: && \sys_if_output_pdf_p:}
+%<*pdfmode>
+\sys_if_engine_pdftex:T
  {
    \cs_new_protected:Npn \@@_backend_NamesEmbeddedFiles_gpush:n #1 %array content
      {
@@ -891,23 +866,21 @@
        \pdfextension~names~{/EmbeddedFiles~\pdf_object_last: }
      }
  }
-
-\sys_if_engine_xetex:T
- {
-   \cs_new_protected:Npn \@@_backend_NamesEmbeddedFiles_gpush:n #1 %array content
-     {
-       \pdf_object_now:nn {dict} { /Names [#1] }
-       %n or x?
-       \__pdf_backend:x {put~@names~<</EmbeddedFiles~\pdf_object_last: >>}
-     }
- }
+%</pdfmode>
+%<*xdvipdfmx>
+\cs_new_protected:Npn \@@_backend_NamesEmbeddedFiles_gpush:n #1 %array content
+  {
+    \pdf_object_now:nn {dict} { /Names [#1] }
+    %n or x?
+    \__pdf_backend:x {put~@names~<</EmbeddedFiles~\pdf_object_last: >>}
+  }
+%</xdvipdfmx>
 
 %dvips: noop
-\bool_if:nT {\sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p:}
-  {
-    \cs_new_protected:Npn \@@_backend_NamesEmbeddedFiles_gpush:n #1 {}
-  }
-
+%<*dvips>
+\cs_new_protected:Npn \@@_backend_NamesEmbeddedFiles_gpush:n #1 {}
+%</dvips>
+%<*package>
 %    \end{macrocode}
 % \subsubsection{\enquote{Catalog} \& subdirectories / management }
 % \begin{NOTE}{UF}
@@ -928,269 +901,9 @@
 % /DSS                      (dict, pdf 2.0)
 % /Acroform/DR/ExtGState etc probably unneeded.
 % \end{NOTE}
-% The catalog is a central dictionary in a PDF with a number of subdictionaries.
-% Entries to the top level of the catalog can be added with
-% |\pdfdict_put:nnn {Catalog}|\Arg{Name}\Arg{Value}.
-% Entries to subdictionaries by using in the first
-% argument one of the pathes described later.
-% The entries in the catalog have varying requirements regarding the
-% PDF management. Some entries (like /Lang) are simple values where new values should
-% overwrite existing values, other like for example \texttt{/OutputIntents}
-% can contain a number of values and can be filled from more than one source.
-% In some cases the values that needs to be added are not at the top-level
-% but in some subsubdictionary or are actually part of an array.
-% To handle this some pathes use internally special handlers.
 %
-% \potentialclash In some cases entries are added implicitly.
-% For example entries to the name
-% tree of the \texttt{/EmbeddedFiles} key in the \texttt{/Names} directory are
-% added with the commands of the \texttt{l3pdffile} module. This clashes with
-% e.g. the embedfile package which should not be used!
-%
-%
-%   \paragraph{Entries at the top level of the catalog}
-%   The Names in the following tabular are entries that are added to the
-%   top level of the catalog.
-%
-%   If \meta{Name} gets assigned a value more than once the last one wins.
-%   There is no check that the values have the correct type and format.
-%   It is up to the user to ensure that the value does what is intended.
-%
-%   The required PDF version is only mentioned if it is larger than 1.5.
-%
-%   Example: |\pdfdict_gput:nnn {Catalog}{PageMode}{/UseNone}|
-%
-%% !!!!!!!! Warning for unknown names is currently not working!
-%   \medskip
-%   \noindent
-%   \begin{tabularx}{\linewidth}{ll>{\raggedright\arraybackslash}X}
-%    \bfseries Name           &  \bfseries Value  & \bfseries Remark \\\midrule
-%    Collection              &  objref or dict     & the content should be
-%     build by external packages (see eg embedfile)                   \\
-%    DPartRoot               &  objref or dict     & PDF 2.0           \\
-%    Lang                    &  string             & e.g. \texttt{(de-DE)} \\
-%    Legal                   &  objref or dict                             \\
-%    Metadata                &  obj ref or stream                       \\
-%    NeedsRendering          &  boolean            &   PDF 1.7\\
-%    OpenAction              &  array (dest) or dict (action) \\
-%    PageLabels              &  objref or dict     &  number tree \\
-%    PageLayout              &  name               & one of /SinglePage, /OneColumn,
-%                                        /TwoColumnLeft, /TwoColumnRight,
-%                                        /TwoPageLeft,
-%                                        /TwoPageRight \\
-%    PageMode                &  name               & one of /UseNone, /UseOutlines, /UseThumbs,
-%                                    /UseOC, /UseAttachments (PDF 1.6)\\
-%    Perms                   &  objref or dict     & permissions\\
-%    PieceInfo               &  objref or dict \\
-%    SpiderInfo              &  objref or dict \\
-%    StructTreeRoot          &  obj ref or dict \\
-%    Threads                 &  objref to an array\\
-%    URI                     &  objref or dict \\
-%    Version                 &  name           & eg. \texttt{/1.7} \\
-%    \meta{unknown}          &                 & an unknown \meta{name} will be
-%                                                inserted without a warning.\\
-%   \end{tabularx}
-%   \par\medskip
-%
-%   \paragraph{Simple entries in subdictionaries of the catalog}
-%   The following dictionaries have been predeclared and allow to
-%   add values to the respective subdictionaries of the catalog. The
-%   names of the dictionaries follow the naming and location of the dictionaries
-%   in the PDF reference.
-%   If \meta{Name} gets assigned two values the last one wins.
-%
-%   Example: |\pdfdict_gput:nnn {Catalog/MarkInfo}{Marked}{true}|
-%
-%   \medskip
-%   \noindent
-%   \begin{tabularx}{\linewidth}{llll>{\raggedright\arraybackslash}X}
-%    \bfseries Dictionary    & \bfseries Names & \bfseries Value  & \bfseries Remark
-%    \\\midrule
-%    Catalog/AA              &WC, WS, DS, WP,DP& all dict    \\
-%    Catalog/AcroFrom        &  NeedAppearances&  boolean & In pdf 2.0
-%                                                           NeedAppearances
-%                                                           is deprecated,
-%                                                           it is then required
-%                                                           that every widget has
-%                                                           an appearance streams.\\
-%                            &  SigFlags       & Integer\\
-%                            &  DA             & String \\
-%                            &  Q              & Integer\\
-%                            &  XFA            & stream or array & pdf 1.5\\
-%  Catalog/AcroForm/DR       & \meta{name}     &            & probably unneeded \\
-%  Catalog/AcroForm/DR/Font  & \meta{name}     & dict       & \\
-%  Catalog/MarkInfo          & Marked          & boolean      \\
-%                            & UserProperties  & boolean      \\
-%                            & Suspects        & boolean      \\
-%  Catalog/ViewerPreferences & HideToolbar     & boolean      \\
-%                            & Direction       & /R2L or /L2R \\
-%                            & \ldots          &              & many more, see the reference \\
-% \end{tabularx}
-%
-%
-% \paragraph{Catalog entries with multiple values in arrays}
-% The following entries are special: Their values are arrays and
-% it must be possible to append to such arrays. This means that a new
-% call to set this value doesn't replace the value but appends it.
-% The value is an object reference. It is sensible to declare the object
-% first. E.g.
-%  \begin{verbatim}
-%  \pdf_object_new:nn   {pkg@intent}{dict}
-%  \pdf_object_write:nn {pkg@intent}{...}
-%  \pdfdict_gput:nnx  {Catalog} {OutputIntents}{\pdf_object_ref:n {pkg@intent}}
-%  \end{verbatim}
-%
-%  or
-%  \begin{verbatim}
-%  \pdf_object_now:nn   {dict} { ... }
-%  \pdfdict_gput:nnx  {Catalog} {OutputIntents}{\pdf_object_last:}
-%  \end{verbatim}
-%
-%
-%   \medskip
-%   \noindent
-%   \begin{tabularx}{\linewidth}{lll>{\raggedright\arraybackslash}X}
-%    \bfseries Dictionary &\bfseries Name        & \bfseries Value   & \bfseries Remark \\\midrule
-%    Catalog/AcroForm     & Fields               & object reference\\
-%    Catalog/AcroForm     & CO                   & object reference\\
-%    Catalog              & AF                   & object reference\\
-%    Catalog/OCProperties & OCGs                 & object reference  &if there are OCProperties, OCGs and D are required.\\
-%    Catalog/OCProperties & Configs              & object reference \\
-%    Catalog/OCProperties & D                    & object reference & This actually a single value as
-%                                         there can be only one default.
-%                                         If the value is set twice, the
-%                                         second wins, and the first is
-%                                         added to OCProperties/Configs.\\
-%    Catalog              & OutputIntents        & object reference\\
-%    Catalog              & Requirements         & object reference & PDF 1.7 \\
-%   \end{tabularx}
-%
-%
-% \begin{variable}[added=2019-08-24]
-%     {
-%      \c_@@_dict_Catalog_toplevel_clist,
-%      \c_@@_dict_Catalog_sub_clist,
-%      \c_@@_dict_Catalog_seq_clist,
-%     }
-%  This variables hold the list of the various types of entries. With it
-%  the various \verb=_gput= commands are generated.
-%  \end{variable}
-%  \begin{macro}{ \@@_catalog_XX_gput:n }
-% Various commands to handle subentries and special cases.
-%    \begin{macrocode}
-\@@_dict_gnew:n {Catalog}
-
-\clist_const:Nn \c_@@_dict_Catalog_toplevel_clist
-  {
-    Collection,
-    DPartRoot,
-    Lang,
-    Legal,
-    Metadata,
-    NeedsRendering,
-    OCProperties/D,
-    OpenAction,
-    PageLabels,
-    PageLayout,
-    PageMode,
-    Perms,
-    PieceInfo,
-    SpiderInfo,
-    StructTreeRoot,
-    Threads,
-    URI,
-    Version
-  }
-
-\clist_const:Nn \c_@@_dict_Catalog_sub_clist
-  {
-    AA,
-    AcroForm,
-    AcroForm/DR,
-    AcroForm/DR/Font,
-    MarkInfo,
-    ViewerPreferences,
-    OCProperties
-  }
-
-\clist_map_inline:Nn \c_@@_dict_Catalog_sub_clist
-  {
-    \@@_dict_gnew:n {Catalog/#1}
-  }
 
 
-\clist_const:Nn \c_@@_dict_Catalog_seq_clist
-  {
-    AF,
-    OCProperties/OCGs,
-    OCProperties/Configs,
-    OutputIntents,
-    Requirements,
-    AcroForm/Fields,
-    AcroForm/CO
-  }
-
-
-
-\clist_map_inline:Nn \c_@@_dict_Catalog_seq_clist
- {
-   \seq_new:c { g_@@_dict_/Catalog/#1_seq } % new name later
-   \cs_new_protected:cpn { @@_dict_handler/Catalog/#1_gput:n } ##1
-     {
-       \seq_gput_right:cn { g_@@_dict_/Catalog/#1_seq } {  ##1  }
-     }
- }
-
-\cs_new_protected:cpn { @@_dict_handler/Catalog/OCProperties/D_gput:n } #1
-  {
-    \seq_gput_left:cn
-      { g_@@_dict_/Catalog/OCProperties/Configs_seq }
-      {  #1  }
-  }
-%    \end{macrocode}
-% \end{macro}
-% \paragraph {Building the catalog: Push order}
-% \begin{macro}{\@@_dict_Catalog_gpush:}
-%    \begin{macrocode}
-\cs_new_protected:Npn \@@_dict_Catalog_gpush:
-  {
-    \use:c { @@_dict_/Catalog/AA_gpush: }
-    \use:c { @@_dict_/Catalog/AcroForm_gpush: }
-    \use:c { @@_dict_/Catalog/AF_gpush: }
-    \use:c { @@_dict_/Catalog/MarkInfo_gpush: }
-    \use:c { @@_dict_/Catalog/OCProperties_gpush: }
-    \use:c { @@_dict_/Catalog/OutputIntents_gpush: }
-    \use:c { @@_dict_/Catalog/Requirements_gpush: }
-    \use:c { @@_dict_/Catalog/ViewerPreferences_gpush: }
-    % output the single values:
-    \prop_map_function:cN { \@@_dict_gname:n {Catalog} }  \@@_backend_catalog_gput:nn
-    % output names tree:
-    \use:c { @@_dict_/Catalog/Names/EmbeddedFiles_gpush: }
-  }
-%    \end{macrocode}
-% \end{macro}
-% \paragraph{Building catalog entries: AA}
-% \begin{macro}{\@@_dict_/Catalog/AA_gpush:}
-%    \begin{macrocode}
-\cs_new_protected:cpn { @@_dict_/Catalog/AA_gpush: }
-  {
-    \prop_if_empty:cF
-     { \@@_dict_gname:n { Catalog/AA } }
-     {
-       \@@_backend_object_new:nn  { g_@@_dict_/Catalog/AA_obj } { dict }
-       \@@_backend_object_write:nx
-            { g_@@_dict_/Catalog/AA_obj }
-            { \@@_dict_map:n { Catalog/AA } }
-       \exp_args:Nnx
-         \@@_backend_catalog_gput:nn
-           {AA}
-           {
-             \@@_backend_object_ref:n { g_@@_dict_/Catalog/AA_obj }
-           }
-     }
-  }
-%    \end{macrocode}
-% \end{macro}
 % \paragraph{Building catalog entries: AcroFrom}
 % This is the most complicated case.
 % The entries is build from
