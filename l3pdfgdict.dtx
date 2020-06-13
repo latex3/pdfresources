@@ -269,6 +269,39 @@
 %   Values added to \texttt{ThisPage} can not be removed. It is not possible to
 %   show the content of this dictionary with \cs{pdfgdict_show:n}.
 % \end{function}
+% \subsubsection{\enquote{Page/Resources}: ExtGState, ColorSpace, Shading, Pattern}
+% \begin{function}[updated = 2020-04-10]
+%   {
+%    pdfgdict: Page/Resources/ExtGState,
+%    pdfgdict: Page/Resources/ColorSpace,
+%    pdfgdict: Page/Resources/Shading,
+%    pdfgdict: Page/Resources/Pattern,
+%   }
+%   \begin{syntax}
+%     \cs{pdfgdict_gput:nnn} \{Page/Resources/\meta{resource}\} \Arg{name} \Arg{value}
+%   \end{syntax}
+%   Adds |/|\meta{name} \meta{value} to the page resource \meta{resource}.
+%   \meta{resource} can be |ExtGState|, |ColorSpace|, |Pattern| oder |Shading|.
+%   The values are always stored globally. The content is written to the pdf
+%   at the end of the compilation, so values can be added until then.
+%   \meta{name} should be a valid pdf name without the leading slash,
+%   \meta{value} should be a valid pdf value for the resource.
+%   Any escaping or (re)encoding must be done explicitly. If a \meta{name} is
+%   used twice, only the last \meta{value} set will be used.
+%
+%   With the dvips backend the command does nothing: resources are managed by
+%   ghostscript or the distiller if e.\,g. transparency is used.
+%
+%   The resources are added to all pages starting with the first where something has
+%   been added to a resources. That means that for example
+%   all ExtGState resources are combined in one
+%   dictionary object and every page with a ExtGState resource refer to this object.
+%
+%   \potentialclash The primitive commands to set the resources should not be used
+%   together with this code as the calls will overwrite each other and values
+%   will be lost. This means that currently there are clashes with the packages tikz,
+%   transparent and colorspace.
+% \end{function}
 % \end{documentation}
 %
 % \begin{implementation}
@@ -672,6 +705,30 @@
     \msg_warning:nnn { pdfgdict } { no-show }{ThisPage}
   }
 
+%    \end{macrocode}
+% \subsubsection{\enquote{Page/Resources}: ExtGState, ColorSpace, Shading, Pattern}
+%    \begin{macrocode}
+%
+% setter:  #1 is the name of the resource
+\cs_new_protected:cpn { @@_handler/Page/Resources/ExtGState/?_gput:nn } #1 #2
+  {
+    \@@_backend_PageResources_gput:nnn {ExtGState} { #1 }{ #2 }
+  }
+
+\cs_new_protected:cpn { @@_handler/Page/Resources/ColorSpace/?_gput:nn } #1 #2
+  {
+    \@@_backend_PageResources_gput:nnn {ColorSpace} { #1 }{ #2 }
+  }
+
+\cs_new_protected:cpn { @@_handler/Page/Resources/Shading/?_gput:nn } #1 #2
+  {
+    \@@_backend_PageResources_gput:nnn {Shading} { #1 }{ #2 }
+  }
+
+\cs_new_protected:cpn { @@_handler/Page/Resources/Pattern/?_gput:nn } #1 #2
+  {
+    \@@_backend_PageResources_gput:nnn {Pattern} { #1 }{ #2 }
+  }
 %    \end{macrocode}
 %    \begin{macrocode}
 %</package>
