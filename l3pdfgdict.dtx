@@ -994,6 +994,113 @@
   }
 %    \end{macrocode}
 % \end{macro}
+%
+% \paragraph{Building catalog entries: AcroFrom}
+% This is the most complicated case.
+% The entries is build from
+% /Catalog/AcroForm/Fields  (array),
+% /Catalog/AcroForm/CO      (array),
+% /Catalog/AcroForm/DR/Font (dict),
+% /Catalog/AcroForm/DR      (dict),
+% /Catalog/AcroForm
+%
+% \begin{macro}{\@@_/Catalog/AcroForm_gpush:}
+%    \begin{macrocode}
+\cs_new_protected:cpn { @@_/Catalog/AcroForm_gpush: }
+  {
+    \seq_if_empty:cF { g_@@_/Catalog/AcroForm/Fields_seq }
+      {
+        \@@_backend_object_new:nn  { g_@@_/Catalog/AcroForm/Fields_obj } { array }
+        \@@_backend_object_write:nx
+            { g_@@_/Catalog/AcroForm/Fields_obj }
+            { \seq_use:cn { g_@@_/Catalog/AcroForm/Fields_seq } {~} }
+        \exp_args:Nnnx
+          \prop_gput:cnn %we have to use \prop here to avoid the handler ...
+            { \@@_name:n { Catalog/AcroForm } }
+            { Fields }
+            { \@@_backend_object_ref:n { g_@@_/Catalog/AcroForm/Fields_obj } }
+      }
+    \seq_if_empty:cF { g_@@_/Catalog/AcroForm/CO_seq }
+      {
+        \@@_backend_object_new:nn  { g_@@_/Catalog/AcroForm/CO_obj } { array }
+        \exp_args:Nnx
+          \@@_backend_object_write:nn
+            { g_@@_/Catalog/AcroForm/CO_obj }
+            { \seq_use:cn { g_@@_/Catalog/AcroForm/CO_seq } {~} }
+        \exp_args:Nnnx
+          \prop_gput:cnn %we have to use \prop here to avoid the handler ...
+            { \@@_name:n { Catalog/AcroForm } }
+            { CO }
+            { \@@_backend_object_ref:n { g_@@_/Catalog/AcroForm/CO_obj } }
+      }
+     \prop_if_empty:cF { \@@_name:n { Catalog/AcroForm/DR/Font}}
+       {
+         \@@_backend_object_new:nn { g_@@_/Catalog/AcroForm/DR/Font_obj } {dict}
+         \exp_args:Nnx
+           \@@_backend_object_write:nn
+             { g_@@_/Catalog/AcroForm/DR/Font_obj }
+             { \@@_map:n { Catalog/AcroForm/DR/Font } }
+         \exp_args:Nnnx
+           \prop_gput:cnn %we have to use \prop here to avoid the handler ...
+             { \@@_name:n { Catalog/AcroForm/DR } }
+             { Font }
+             { \@@_backend_object_ref:n { g_@@_/Catalog/AcroForm/DR/Font_obj } }
+       }
+     \prop_if_empty:cF { \@@_name:n { Catalog/AcroForm/DR}}
+       {
+         \@@_backend_object_new:nn { g_@@_/Catalog/AcroForm/DR_obj } {dict}
+         \exp_args:Nnx
+           \@@_backend_object_write:nn
+             { g_@@_/Catalog/AcroForm/DR_obj }
+             { \@@_map:n { Catalog/AcroForm/DR } }
+         \exp_args:Nnnx
+           \prop_gput:cnn %we have to use \prop here to avoid the handler ...
+             { \@@_name:n { Catalog/AcroForm } }
+             { DR }
+             { \@@_backend_object_ref:n { g_@@_/Catalog/AcroForm/DR_obj } }
+       }
+     \prop_if_empty:cF { \@@_name:n { Catalog/AcroForm} }
+       {
+         \@@_backend_object_new:nn { g_@@_/Catalog/AcroForm_obj } {dict}
+         \exp_args:Nnx
+           \@@_backend_object_write:nn
+             { g_@@_/Catalog/AcroForm_obj }
+             { \@@_map:n { Catalog/AcroForm } }
+         \exp_args:Nnnx
+           \@@_handler_gput:nnn
+             { Catalog }
+             { AcroForm }
+             { \@@_backend_object_ref:n { g_@@_/Catalog/AcroForm_obj } }
+       }
+  }
+
+%    \end{macrocode}
+% \end{macro}
+%
+% \paragraph{Building catalog entries: AF}
+% AF is an array.
+% \begin{macro}{\@@_/Catalog/AF_gpush:}
+%    \begin{macrocode}
+\cs_new_protected:cpn { @@_/Catalog/AF_gpush: }
+  {
+    \seq_if_empty:cF
+     { g_@@_/Catalog/AF_seq }
+     {
+       \@@_backend_object_new:nn  { g_@@_/Catalog/AF_obj } { array }
+       \exp_args:Nnx
+         \@@_backend_object_write:nn
+            { g_@@_/Catalog/AF_obj }
+            { \seq_use:cn { g_@@_/Catalog/AF_seq } {~} }
+       \exp_args:Nnx
+         \@@_backend_catalog_gput:nn
+           {AF}
+           {
+             \@@_backend_object_ref:n {g_@@_/Catalog/AF_obj}
+           }
+     }
+  }
+%    \end{macrocode}
+% \end{macro}
 %    \begin{macrocode}
 %</package>
 %    \end{macrocode}
