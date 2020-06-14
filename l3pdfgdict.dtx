@@ -789,14 +789,14 @@
 %    \end{macrocode}
 %
 % \begin{macro}{\@@_Info_gpush:}
-% \cs{@@_dict_Info_gpush:} is the command that outputs the info dictionary (currently
+% \cs{@@_Info_gpush:} is the command that outputs the info dictionary (currently
 % in the end-of-run hooks).
 %    \begin{macrocode}
 % push to the register command / issue the special
-\cs_new_protected:Npn \@@_dict_Info_gpush:
+\cs_new_protected:Npn \@@_Info_gpush:
   {
-    \prop_map_function:cN  { \@@_dict_gname:n {Info} } \@@_backend_info_gput:nn
-    \prop_gclear:c { \@@_dict_gname:n {Info} }
+    \prop_map_function:cN  { \@@_name:n {Info} } \@@_backend_info_gput:nn
+    \prop_gclear:c { \@@_name:n {Info} }
   }
 %    \end{macrocode}
 % \end{macro}

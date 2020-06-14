@@ -292,6 +292,7 @@
   }
 
 %!!!!! check if pdftex/luatex can run this in the immediate end-of-run
+%!!!!!!! check the name. To which module does this belong??
 \@@_BACKEND_lastpage_shipout_gput:n
   {
     \@@_PageResources_gpush:          %ExtGState etc
@@ -880,7 +881,6 @@
 %<*dvips>
 \cs_new_protected:Npn \@@_backend_NamesEmbeddedFiles_gpush:n #1 {}
 %</dvips>
-%<*package>
 %    \end{macrocode}
 % \subsubsection{\enquote{Catalog} \& subdirectories / management }
 % \begin{NOTE}{UF}
@@ -1292,10 +1292,12 @@
 %
 % \subsubsection{BDC and Properties  / management}
 %    \begin{macrocode}
+%<*package>
 \cs_new_protected:Npn  \pdf_bdc:nn #1 #2 { \@@_backend_bdc:nn { #1 }{ #2 } }
 \cs_new_protected:Npn  \pdf_bdc:n #1     { \@@_backend_bdc:n  { #1 } }
 \cs_new_protected:Npn  \pdf_bmc:n #1     { \@@_backend_bmc:n  { #1 } }
 \cs_new_protected:Npn  \pdf_emc:         { \@@_backend_emc: }
+%</package>
 %    \end{macrocode}
 %
 % \subsection{Form XObject (pdfxform)}
@@ -1372,6 +1374,7 @@
 %    These command tests if an xform with name \Arg{name} has been already defined.
 %   \end{function}%
 %    \begin{macrocode}
+%<*package>
 \cs_new_protected:Npn  \pdf_xform_new:nnn #1 #2 #3
   {
     \@@_backend_xform_new:nnnn { #1 } { #2 } {  } { #3 }
@@ -1403,7 +1406,7 @@
   {
     \tl_use:c { c_@@_backend_xform_dp_ \tl_to_str:n { #1 } _tl }
   }
-
+%</package>
 %    \end{macrocode}
 %
 %  \subsubsection{Form XObject / backend }
