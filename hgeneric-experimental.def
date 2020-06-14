@@ -401,7 +401,7 @@
 % we simply hard code this for now until hyperref.sty itself can be adapted ...
 \cs_new_protected:Npn\__hyp_PageLabels_gpush:
   {
-    \pdfdict_gput:nnx {Catalog} {PageLabels}{<</Nums[\HyPL@Labels]>>}
+    \pdfgdict_gput:nnx {Catalog} {PageLabels}{<</Nums[\HyPL@Labels]>>}
   }
 
 
@@ -572,8 +572,8 @@
               /View  <</ViewState/OFF>>~
              >>
           }
-       \pdfdict_gput:nnx { Catalog / OCProperties }{OCGs }{ \pdf_object_ref:n {l__hyp_ocg_view_dict_obj} }
-       \pdfdict_gput:nnx { Catalog / OCProperties }{OCGs }{ \pdf_object_ref:n {l__hyp_ocg_print_dict_obj} }
+       \pdfgdict_gput:nnx { Catalog / OCProperties }{OCGs }{ \pdf_object_ref:n {l__hyp_ocg_view_dict_obj} }
+       \pdfgdict_gput:nnx { Catalog / OCProperties }{OCGs }{ \pdf_object_ref:n {l__hyp_ocg_print_dict_obj} }
        \pdf_object_write:nx { l__hyp_ocg_config_dict_obj }
          {
            /OFF[\pdf_object_ref:n { l__hyp_ocg_print_dict_obj }]
@@ -595,7 +595,7 @@
              >>
               ]
          }
-       \pdfdict_gput:nnx { Catalog / OCProperties }{ D }{ \pdf_object_ref:n { l__hyp_ocg_config_dict_obj} }
+       \pdfgdict_gput:nnx { Catalog / OCProperties }{ D }{ \pdf_object_ref:n { l__hyp_ocg_config_dict_obj} }
     }
     \Hy@AtBeginDocument
       {
@@ -882,24 +882,24 @@
        \__hyp_pstringdef:No \l__hyp_tmpa_tl {#1}%
         \tl_if_empty:NTF \l__hyp_tmpa_tl
           {
-             \pdfdict_gremove:nn {Catalog} { URI }
+             \pdfgdict_gremove:nn {Catalog} { URI }
           }
           {
-             \pdfdict_gput:nnx {Catalog} { URI }{ <</Base ( \l__hyp_tmpa_tl )>> }
+             \pdfgdict_gput:nnx {Catalog} { URI }{ <</Base ( \l__hyp_tmpa_tl )>> }
           }
      }
    ,pdfcenterwindow    .choice:
    ,pdfcenterwindow / false .code:n =
      {
-       \pdfdict_gremove:nn {Catalog / ViewerPreferences }{ CenterWindow }
+       \pdfgdict_gremove:nn {Catalog / ViewerPreferences }{ CenterWindow }
      }
    ,pdfcenterwindow / true .code:n =
      {
-       \pdfdict_gput:nnn {Catalog / ViewerPreferences } { CenterWindow }{ true }
+       \pdfgdict_gput:nnn {Catalog / ViewerPreferences } { CenterWindow }{ true }
      }
    ,pdfcenterwindow /  .code:n =
      {
-       \pdfdict_gremove:nn {Catalog / ViewerPreferences }{ CenterWindow }
+       \pdfgdict_gremove:nn {Catalog / ViewerPreferences }{ CenterWindow }
      }
    ,pdfcenterwindow / unknown .code:n =
      {
@@ -911,15 +911,15 @@
    ,pdfdirection    .choice:
    ,pdfdirection / L2R .code:n =
      {
-       \pdfdict_gput:nnn {Catalog / ViewerPreferences } { Direction }{ /L2R }
+       \pdfgdict_gput:nnn {Catalog / ViewerPreferences } { Direction }{ /L2R }
      }
    ,pdfdirection / R2L .code:n =
      {
-       \pdfdict_gput:nnn {Catalog / ViewerPreferences } { Direction }{ /R2L }
+       \pdfgdict_gput:nnn {Catalog / ViewerPreferences } { Direction }{ /R2L }
      }
    ,pdfdirection /  .code:n =
      {
-       \pdfdict_gremove:nn {Catalog / ViewerPreferences } { Direction }
+       \pdfgdict_gremove:nn {Catalog / ViewerPreferences } { Direction }
      }
    ,pdfdirection / unknown .code:n =
      {
@@ -931,11 +931,11 @@
    ,pdfdisplaydoctitle    .choice:
    ,pdfdisplaydoctitle / false .code:n =
      {
-       \pdfdict_gremove:nn {Catalog / ViewerPreferences } { DisplayDocTitle }
+       \pdfgdict_gremove:nn {Catalog / ViewerPreferences } { DisplayDocTitle }
      }
    ,pdfdisplaydoctitle / true .code:n =
      {
-       \pdfdict_gput:nnn {Catalog / ViewerPreferences } { DisplayDocTitle } { true }
+       \pdfgdict_gput:nnn {Catalog / ViewerPreferences } { DisplayDocTitle } { true }
      }
    ,pdfdisplaydoctitle    .default:n = true
    ,pdfduplex    .choices:nn =
@@ -943,7 +943,7 @@
      {
        \pdf_version_compare:NnTF > {1.6}
          {
-           \pdfdict_gput:nnn {Catalog / ViewerPreferences }
+           \pdfgdict_gput:nnn {Catalog / ViewerPreferences }
              { PrintDuplex } { /#1 }
          }
          {
@@ -956,7 +956,7 @@
      }%
    ,pdfduplex /  .code:n =
      {
-       \pdfdict_gremove:nn {Catalog / ViewerPreferences } { PrintDuplex }
+       \pdfgdict_gremove:nn {Catalog / ViewerPreferences } { PrintDuplex }
      }
    ,pdfduplex / unknown .code:n =
      {
@@ -968,15 +968,15 @@
    ,pdffitwindow    .choice:
    ,pdffitwindow / false .code:n =
      {
-       \pdfdict_gremove:nn {Catalog / ViewerPreferences }  { FitWindow }
+       \pdfgdict_gremove:nn {Catalog / ViewerPreferences }  { FitWindow }
      }
    ,pdffitwindow / true .code:n =
      {
-       \pdfdict_gput:nnn {Catalog / ViewerPreferences } { FitWindow } { true }
+       \pdfgdict_gput:nnn {Catalog / ViewerPreferences } { FitWindow } { true }
      }
    ,pdffitwindow /  .code:n =
      {
-       \pdfdict_gremove:nn {Catalog / ViewerPreferences } { FitWindow }
+       \pdfgdict_gremove:nn {Catalog / ViewerPreferences } { FitWindow }
      }
    ,pdffitwindow    .default:n = true
    ,pdffitwindow / unknown .code:n =
@@ -989,25 +989,25 @@
           {
             \tl_if_empty:nTF { #1 }
               {
-                \pdfdict_gremove:nn {Catalog} { Lang }
+                \pdfgdict_gremove:nn {Catalog} { Lang }
               }
               {
-                \pdfdict_gput:nnx {Catalog} { Lang } { (#1) }
+                \pdfgdict_gput:nnx {Catalog} { Lang } { (#1) }
               }
           }
    ,pdfmenubar    .choice:
    ,pdfmenubar / true .code:n =
      {
-       \pdfdict_gremove:nn {Catalog / ViewerPreferences } { HideMenubar }
+       \pdfgdict_gremove:nn {Catalog / ViewerPreferences } { HideMenubar }
      }
    ,pdfmenubar / false .code:n =
      {
-       \pdfdict_gput:nn {Catalog / ViewerPreferences }
+       \pdfgdict_gput:nn {Catalog / ViewerPreferences }
           { HideMenubar } { true }
      }
    ,pdfmenubar /  .code:n =
      {
-       \pdfdict_gremove:nn {Catalog / ViewerPreferences } { HideMenubar }
+       \pdfgdict_gremove:nn {Catalog / ViewerPreferences } { HideMenubar }
      }
    ,pdfmenubar    .default:n = true
    ,pdfmenubar / unknown .code:n =
@@ -1019,7 +1019,7 @@
    ,pdfnonfullscreenpagemode   .choices:nn =
      { UseNone, UseOutlines, UseThumbs, FullScreen, UseOC } %pdf 1.5
      {
-       \pdfdict_gput:nnx {Catalog / ViewerPreferences }
+       \pdfgdict_gput:nnx {Catalog / ViewerPreferences }
          { NonFullScreenPageMode} {/#1}
      }
    ,pdfnonfullscreenpagemode / UseAttachments .code:n =
@@ -1029,13 +1029,13 @@
            %message
          }
          {
-           \pdfdict_gput:nnx {Catalog / ViewerPreferences }
+           \pdfgdict_gput:nnx {Catalog / ViewerPreferences }
              {NonFullScreenPageMode}{/UseAttachments}
          }
      }
    ,pdfnonfullscreenpagemode /  .code:n =
      {
-       \pdfdict_gremove:nn {Catalog / ViewerPreferences } { NonFullScreenPageMode }
+       \pdfgdict_gremove:nn {Catalog / ViewerPreferences } { NonFullScreenPageMode }
      }
    ,pdfnonfullscreenpagemode / unknown .code:n =
      {
@@ -1050,10 +1050,10 @@
          {
            \tl_empty:nTF
              {
-               \pdfdict_gremove:nn {Catalog / ViewerPreferences } { NumCopies }
+               \pdfgdict_gremove:nn {Catalog / ViewerPreferences } { NumCopies }
              }
              {
-               \pdfdict_gput:nnx {Catalog / ViewerPreferences }
+               \pdfgdict_gput:nnx {Catalog / ViewerPreferences }
                  {NumCopies}{#1}
              }
          }
@@ -1067,9 +1067,9 @@
      }
    ,pdfpagelayout .choices:nn =
      { SinglePage, OneColumn, TwoColumnLeft, TwoColumnRight, TwoPageLeft, TwoPageRight}
-     { \pdfdict_gput:nnx {Catalog} { PageLayout }{ /#1 } }
+     { \pdfgdict_gput:nnx {Catalog} { PageLayout }{ /#1 } }
    ,pdfpagelayout / .code:n =
-     { \pdfdict_gremove:nn {Catalog} { PageLayout } }
+     { \pdfgdict_gremove:nn {Catalog} { PageLayout } }
    ,pdfpagelayout / unknown .code:n =
      {
        \msg_warning:nnxxx { hyp } { unknown-choice+empty }
@@ -1079,12 +1079,12 @@
      }
    ,pdfpagemode   .choices:nn =
      { UseNone, UseOutlines, UseThumbs, FullScreen, UseOC } %pdf 1.5
-     { \pdfdict_gput:nnx {Catalog} { PageMode }{ /#1 } }
+     { \pdfgdict_gput:nnx {Catalog} { PageMode }{ /#1 } }
    ,pdfpagemode / UseAttachments .code:n =
      {
        \pdf_version_compare:NnTF > {1.5}
          {
-           \pdfdict_gput:nnx {Catalog} { PageMode }{ /UseAttachments }
+           \pdfgdict_gput:nnx {Catalog} { PageMode }{ /UseAttachments }
          }
          {
            \msg_warning:nnxx
@@ -1106,10 +1106,10 @@
      {
        \tl_if_empty:nTF %or blank?
          {
-           \pdfdict_gremove:nn {Pages} { CropBox }
+           \pdfgdict_gremove:nn {Pages} { CropBox }
          }
          {
-           \pdfdict_gput:nnx {Pages} { CropBox } { [#1] }
+           \pdfgdict_gput:nnx {Pages} { CropBox } { [#1] }
          }
      }
    ,pdfpicktraybypdfsize    .choice:
@@ -1117,7 +1117,7 @@
      {
        \pdf_version_compare:NnTF > {1.6}
          {
-           \pdfdict_gput:nnn {Catalog / ViewerPreferences }
+           \pdfgdict_gput:nnn {Catalog / ViewerPreferences }
              { PickTrayByPDFSize } { true }
          }
          {
@@ -1132,7 +1132,7 @@
      {
        \pdf_version_compare:NnTF > {1.6}
          {
-           \pdfdict_gput:nnn {Catalog / ViewerPreferences }
+           \pdfgdict_gput:nnn {Catalog / ViewerPreferences }
              { PickTrayByPDFSize } { false }
          }
          {
@@ -1145,7 +1145,7 @@
      }
    ,pdfpicktraybypdfsize /  .code:n =
      {
-       \pdfdict_gremove:nn {Catalog / ViewerPreferences } { PickTrayByPDFSize }
+       \pdfgdict_gremove:nn {Catalog / ViewerPreferences } { PickTrayByPDFSize }
      }
    ,pdfpicktraybypdfsize / unknown .code:n =
      {
@@ -1158,7 +1158,7 @@
      {
        \pdf_version_compare:NnTF < {2.0}
          {
-           \pdfdict_gput:nnx {Catalog / ViewerPreferences }
+           \pdfgdict_gput:nnx {Catalog / ViewerPreferences }
              { PrintArea } { /#1 }
          }
          {
@@ -1170,7 +1170,7 @@
          }
      }%
    ,pdfprintarea /  .code:n =
-     { \pdfdict_gremove:nn {Catalog / ViewerPreferences } { PrintArea } }
+     { \pdfgdict_gremove:nn {Catalog / ViewerPreferences } { PrintArea } }
    ,pdfprintarea / unknown .code:n =
      {
        \msg_warning:nnxxx { hyp } { unknown-choice+empty }
@@ -1183,7 +1183,7 @@
      {
        \pdf_version_compare:NnTF < {2.0}
          {
-           \pdfdict_gput:nnx {Catalog / ViewerPreferences }
+           \pdfgdict_gput:nnx {Catalog / ViewerPreferences }
              { PrintClip } { /#1 }
          }
          {
@@ -1196,7 +1196,7 @@
      }%
    ,pdfprintclip /  .code:n =
      {
-       \pdfdict_gremove:nn {Catalog / ViewerPreferences } { PrintClip }
+       \pdfgdict_gremove:nn {Catalog / ViewerPreferences } { PrintClip }
      }
    ,pdfprintclip / unknown .code:n =
      {
@@ -1211,11 +1211,11 @@
          {
            \tl_if_empty:nTF { #1}
              {
-               \pdfdict_gremove:nn {Catalog / ViewerPreferences }
+               \pdfgdict_gremove:nn {Catalog / ViewerPreferences }
                  { PrintPageRange }
              }
              {
-              \pdfdict_gput:nnx {Catalog / ViewerPreferences }
+              \pdfgdict_gput:nnx {Catalog / ViewerPreferences }
                  {PrintPageRange}{[#1]}
              }
          }
@@ -1232,7 +1232,7 @@
      {
        \pdf_version_compare:NnTF > {1.5}
          {
-           \pdfdict_gput:nnx {Catalog / ViewerPreferences }
+           \pdfgdict_gput:nnx {Catalog / ViewerPreferences }
              { PrintScaling } { /#1 }
          }
          {
@@ -1245,7 +1245,7 @@
      }%
    ,pdfprintscaling /  .code:n =
      {
-       \pdfdict_gremove:nn {Catalog / ViewerPreferences } {PrintScaling }
+       \pdfgdict_gremove:nn {Catalog / ViewerPreferences } {PrintScaling }
      }
    ,pdfprintscaling / unknown .code:n =
      {
@@ -1261,10 +1261,10 @@
        \bool_if:nTF
          { \tl_if_empty_p:N \g__hyp_pdfstartpage_tl || \tl_if_empty_p:N \g__hyp_pdfstartview_tl }
          {
-           \pdfdict_gremove:nn {Catalog} { OpenAction }
+           \pdfgdict_gremove:nn {Catalog} { OpenAction }
          }
          {
-           \pdfdict_gput:nnx {Catalog} { OpenAction }
+           \pdfgdict_gput:nnx {Catalog} { OpenAction }
              {
                [\pdf_pageobject_ref:n {\g__hyp_pdfstartpage_tl}~/\g__hyp_pdfstartview_tl]
              }
@@ -1277,10 +1277,10 @@
        \bool_if:nTF
          { \tl_if_empty_p:N \g__hyp_pdfstartpage_tl || \tl_if_empty_p:N \g__hyp_pdfstartview_tl }
          {
-           \pdfdict_gremove:nn {Catalog} { OpenAction }
+           \pdfgdict_gremove:nn {Catalog} { OpenAction }
          }
          {
-           \pdfdict_gput:nnx {Catalog} { OpenAction }
+           \pdfgdict_gput:nnx {Catalog} { OpenAction }
              {
                [\pdf_pageobject_ref:n {\g__hyp_pdfstartpage_tl}~/\g__hyp_pdfstartview_tl]
              }
@@ -1290,16 +1290,16 @@
    ,pdftoolbar    .choice:
    ,pdftoolbar / true .code:n =
      {
-       \pdfdict_gremove:nn {Catalog / ViewerPreferences } { HideToolbar }
+       \pdfgdict_gremove:nn {Catalog / ViewerPreferences } { HideToolbar }
      }
    ,pdftoolbar / false .code:n =
      {
-       \pdfdict_gput:nnn {Catalog / ViewerPreferences }
+       \pdfgdict_gput:nnn {Catalog / ViewerPreferences }
          { HideToolbar } { true }
      }
    ,pdftoolbar / true .code:n =
      {
-       \pdfdict_gremove:nn {Catalog / ViewerPreferences } { HideToolbar }
+       \pdfgdict_gremove:nn {Catalog / ViewerPreferences } { HideToolbar }
      }
    ,pdftoolbar    .default:n = true
    ,pdftoolbar / unknown .code:n =
@@ -1313,7 +1313,7 @@
      {
        \pdf_version_compare:NnTF < {2.0}
          {
-           \pdfdict_gput:nnn {Catalog / ViewerPreferences }
+           \pdfgdict_gput:nnn {Catalog / ViewerPreferences }
              { ViewArea } { /#1 }
          }
          {
@@ -1326,7 +1326,7 @@
      }%
    ,pdfviewarea /  .code:n =
      {
-       \pdfdict_gremove:nn {Catalog / ViewerPreferences } { ViewArea }
+       \pdfgdict_gremove:nn {Catalog / ViewerPreferences } { ViewArea }
      }
    ,pdfviewarea / unknown .code:n =
      {
@@ -1340,7 +1340,7 @@
      {
        \pdf_version_compare:NnTF < {2.0}
          {
-           \pdfdict_gput:nnn {Catalog / ViewerPreferences }
+           \pdfgdict_gput:nnn {Catalog / ViewerPreferences }
              { ViewClip } { /#1 }
          }
          {
@@ -1353,7 +1353,7 @@
      }%
    ,pdfviewclip /  .code:n =
      {
-       \pdfdict_gremove:nn {Catalog / ViewerPreferences } { ViewClip }
+       \pdfgdict_gremove:nn {Catalog / ViewerPreferences } { ViewClip }
      }
    ,pdfviewclip / unknown .code:n =
      {
@@ -1365,16 +1365,16 @@
    ,pdfwindowui    .choice:
    ,pdfwindowui / true .code:n =
      {
-       \pdfdict_gremove:nn {Catalog / ViewerPreferences } { HideWindowUI }
+       \pdfgdict_gremove:nn {Catalog / ViewerPreferences } { HideWindowUI }
      }
    ,pdfwindowui / false .code:n =
      {
-       \pdfdict_gput:nnn {Catalog / ViewerPreferences }
+       \pdfgdict_gput:nnn {Catalog / ViewerPreferences }
           { HideWindowUI } { true }
      }
    ,pdfwindowui /  .code:n =
      {
-       \pdfdict_gremove:nn {Catalog / ViewerPreferences } {HideWindowUI }
+       \pdfgdict_gremove:nn {Catalog / ViewerPreferences } {HideWindowUI }
      }
    ,pdfwindowui / unknown .code:n =
      {
@@ -1423,7 +1423,7 @@
         pdf#1  .code:n =
           {
             \__hyp_text_convert_info:nN {##1}\l__hyp_tmpa_tl
-            \pdfdict_gput:nnx {Info}{#2}{\l__hyp_tmpa_tl}
+            \pdfgdict_gput:nnx {Info}{#2}{\l__hyp_tmpa_tl}
           }
       }
     \keys_define:nn { hyp / info }
@@ -1431,13 +1431,13 @@
         #2  .code:n =
           {
             \__hyp_text_convert_info:nN {##1}\l__hyp_tmpa_tl
-            \pdfdict_gput:nnx {Info}{#2}{\l__hyp_tmpa_tl}
+            \pdfgdict_gput:nnx {Info}{#2}{\l__hyp_tmpa_tl}
           }
         ,unknown .code:n =
          {
             \__hyp_text_convert_info:nN {##1}\l__hyp_tmpa_tl
             \exp_args:Nnx
-              \pdfdict_gput:nnx {Info}{\exp_args:No\pdftool_name:n{\l_keys_key_str}}{\l__hyp_tmpa_tl}
+              \pdfgdict_gput:nnx {Info}{\exp_args:No\pdftool_name:n{\l_keys_key_str}}{\l__hyp_tmpa_tl}
          }
       }
   }
@@ -1475,7 +1475,7 @@
       }
     ,__pdftrapped  .choices:nn = {TRUE,FALSE,UNKNOWN}
        {
-         \pdfdict_gput:nnx {Info}{Trapped}
+         \pdfgdict_gput:nnx {Info}{Trapped}
            {/
              \str_uppercase:f { \str_head:n { #1 } }
              \str_lowercase:f { \str_tail:n { #1 } }
@@ -1533,10 +1533,10 @@
      {
         \tl_if_blank:nTF { #1 }
           {
-            \pdfdict_gremove:nn {Page}{Dur}
+            \pdfgdict_gremove:nn {Page}{Dur}
           }
           {
-            \pdfdict_gput:nnn {Page}{Dur}{#1}
+            \pdfgdict_gput:nnn {Page}{Dur}{#1}
           }
      }
   }
@@ -1577,7 +1577,7 @@
      {
        \tl_if_blank:nTF {#1}
          {
-           \pdfdict_gremove:nn {Page}{Trans}
+           \pdfgdict_gremove:nn {Page}{Trans}
          }
          {
            \group_begin:
@@ -1586,7 +1586,7 @@
              {
                \pdfdict_map:n {page/Trans}
              }
-           \pdfdict_gput:nnx {Page}{Trans}{\pdf_object_last:}
+           \pdfgdict_gput:nnx {Page}{Trans}{\pdf_object_last:}
            \group_end:
          }
      }
@@ -1791,7 +1791,7 @@
         \Hy@FormObjects
         \prop_map_inline:Nn \g__hyp_AcroForm_Fields_prop
           {
-            \pdfdict_gput:nnx { Catalog / AcroForm } { Fields }{##1}
+            \pdfgdict_gput:nnx { Catalog / AcroForm } { Fields }{##1}
             %\pdfdict_show:n { Catalog / AcroForm }
             %\seq_show:c { g__pdf_/Catalog/AcroForm/Fields_seq} %!!!!!
           }
@@ -1810,24 +1810,24 @@
               }
             \seq_map_inline:Nn \l__hyp_tmpa_seq
              {
-                \pdfdict_gput:nnx { Catalog / AcroForm }
+                \pdfgdict_gput:nnx { Catalog / AcroForm }
                   { CO }
                   {
                     \prop_item:Nn \g__hyp_AcroForm_CoFields_prop {##1}
                   }
              }
           }
-       \pdfdict_gput:nnx {Catalog / AcroForm/DR/Font }
+       \pdfgdict_gput:nnx {Catalog / AcroForm/DR/Font }
          {ZaDb} {\pdf_object_ref:n {l__hyp_font_zapfdingbats_obj} }
-       \pdfdict_gput:nnx {Catalog / AcroForm/DR/Font }
+       \pdfgdict_gput:nnx {Catalog / AcroForm/DR/Font }
          {Helv} {\pdf_object_ref:n {l__hyp_font_helvetica_obj} }
-       \pdfdict_gput:nnx {Catalog /AcroForm}
+       \pdfgdict_gput:nnx {Catalog /AcroForm}
          {DA}{(/Helv~10~Tf~0~g)}
        \legacy_if:nF { Hy@pdfa } %?????? Standards?
          {
            \legacy_if:nT { HyField@NeedAppearances }
              {
-               \pdfdict_gput:nnx {Catalog / AcroForm }{NeedAppearances}{true}
+               \pdfgdict_gput:nnx {Catalog / AcroForm }{NeedAppearances}{true}
              }
          }
        }

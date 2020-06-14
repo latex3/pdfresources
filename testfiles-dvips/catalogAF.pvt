@@ -2,9 +2,9 @@
 \RequirePackage[debug]{pdfresources}
 \ExplSyntaxOn
 %%% for reproducible tests:
-\pdfdict_gput:nnn {Info}{CreationDate}{(D:20200202111111+01'00')}
-\pdfdict_gput:nnn {Info}{ModDate}{(D:20200202111111+01'00')}
-\pdfdict_gput:nnn {Info}{Creator}{(l3build test)}
+\pdfgdict_gput:nnn {Info}{CreationDate}{(D:20200202111111+01'00')}
+\pdfgdict_gput:nnn {Info}{ModDate}{(D:20200202111111+01'00')}
+\pdfgdict_gput:nnn {Info}{Creator}{(l3build test)}
 %%%%%
 \ExplSyntaxOff
 \DeclareDocumentMetaData
@@ -21,8 +21,8 @@
 \pdf_object_new:nn   {filespec2}{dict}
 \pdf_object_write:nn {filespec2} {/Type /Filespec /UF (example2.pdf)}
 
-\pdfdict_gput:nnx { Catalog } {AF} {\pdf_object_ref:n {filespec1}}
-\pdfdict_gput:nnx { Catalog } {AF} {\pdf_object_ref:n {filespec2}}
+\pdfgdict_gput:nnx { Catalog } {AF} {\pdf_object_ref:n {filespec1}}
+\pdfgdict_gput:nnx { Catalog } {AF} {\pdf_object_ref:n {filespec2}}
 \ExplSyntaxOff
 \begin{document}
 \START
