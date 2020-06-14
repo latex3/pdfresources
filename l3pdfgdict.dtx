@@ -522,26 +522,7 @@
 %  /Page/Resources/Properties
 %  /xform/Resources/Properties
 %  \end{verbatim}
-% \begin{macro}{\@@_item:nn,\@@_objref_item:nn}
-% Commands to output dict entries: The arguments are \meta{name}\meta{value} and
-% \meta{name}\meta{object name}, \meta{name} should be a valid pdf name without
-% the slash.
-% The commands don't check if the arguments are empty or valid. This should be done
-% in the pdf layer at the input.
-% \begin{NOTE}{UF}
-%TODO: check expansion behaviour of \cs{@@_objref_item:nn} in the various uses
-%This command could be shared with pdfdict, but is it worth the trouble?
-% \end{NOTE}
-%    \begin{macrocode}
-\cs_new:Npn \@@_item:nn #1 #2 { /#1~#2~ } %name, value
-\cs_generate_variant:Nn \@@_item:nn {ne}
 
-\cs_new:Npn \@@_objref_item:nn #1 #2      %name, object name
-  {
-    /#1~\pdf_object_ref:n { #2 }
-  }
-%    \end{macrocode}
-% \end{macro}
 % \begin{macro}
 %   {
 %    \@@_name:n,
@@ -741,7 +722,7 @@
 % !! is e-expansion the right thing?
 \cs_new:Npn \@@_map:n #1 %path
   {
-    \prop_map_function:cN { \@@_name:n { #1 } } \@@_item:ne
+    \prop_map_function:cN { \@@_name:n { #1 } } \pdfdict_item:ne
   }
 %    \end{macrocode}
 % \end{macro}

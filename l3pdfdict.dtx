@@ -53,11 +53,15 @@
 % Examples are attributes of links,
 % filespec dictionaries, xform dictionaries, the catalog, the info dictionary.
 % The commands in this module offer an number of
-% tools to handle such dictionaries. The module setups a sort of namespace for the
+% tools to handle such dictionaries. The module setups a namespace for the
 % dictionary names and offers some commands to output dictionaries.
 %
-% The dictionaries are implemented with property lists.
+% The dictionaries are implemented with property lists. But the keys are always
+% converted with \cs{str_convert_pdfname} to get a correct PDF name, and empty
+% values will be ignored.
 %
+% Local and global dictionaries can be created and for most commands both
+% a local and a global version exists.
 % \begin{NOTE}{UF}
 % Check which (local) dictionaries should be predefined.
 % Check also if the reset idea makes sense. (Removed for now)
@@ -80,6 +84,16 @@
 % small wrappers around \cs{prop_new:c}, but use a special name space.
 % It is possible to create a local and a global with the same name, but it is
 % recommended to use lowercase for global and uppercase for global dictionaries.
+% \end{function}
+% \begin{function}[EXP,added = 2020-06-14]
+%   {\pdfdict_name:n,\pdfdict_gname:n}
+%   \begin{syntax}
+%     \cs{pdfdict_name:n}  \Arg{local dictionary name}\\
+%     \cs{pdfdict_gname:n} \Arg{global dictionary name}\\
+%   \end{syntax}
+% This expands to the internal name. With it is possible to use standard commands
+% of the \texttt{prop} module to deak with the dictionaries. For example
+% |\prop_clear:c { \pdfdict_name:n { name }}|
 % \end{function}
 % \begin{function}[added = 2020-04-06]
 %   {\pdfdict_put:nnn, \pdfdict_gput:nnn}
@@ -122,45 +136,64 @@
 %   exists it will show both.
 %\end{function}
 %\begin{function}[EXP, pTF,added = 2020-04-08]
-%   {\pdfdict_if_exist:n }
+%   {\pdfdict_if_exist:n, \pdfdict_if_gexist:n,  }
 %   \begin{syntax}
-%     \cs{pdfdict_if_exist:n}  \Arg{dictionary}
+%     \cs{pdfdict_if_exist:n}  \Arg{local dictionary}\\
+%     \cs{pdfdict_if_gexist:n}  \Arg{global dictionary}
 %   \end{syntax}
 %   This tests if the dictionary exists.
 %\end{function}
 % \begin{function}[EXP, pTF,added = 2020-04-08]
-%   {\pdfdict_if_empty:n }
+%   {\pdfdict_if_empty:n, \pdfdict_if_gempty:n }
 %   \begin{syntax}
-%     \cs{pdfdict_if_empty:n}  \Arg{dictionary}
+%     \cs{pdfdict_if_empty:n}  \Arg{local dictionary}\\
+%     \cs{pdfdict_if_gempty:n}  \Arg{global dictionary}
 %   \end{syntax}
 %   This tests if the dictionary is empty. The result is false if the
 %   dictionary doesn't exist.
 %\end{function}
 % \begin{function}[added = 2020-04-07]
-%   {\pdfdict_get:nn }
+%   {\pdfdict_get:nn \pdfdict_gget:nn  }
 %   \begin{syntax}
-%     \cs{pdfdict_get:nnN}  \Arg{dictionary} \Arg{name} \meta{tl var}
+%     \cs{pdfdict_get:nnN}  \Arg{local dictionary} \Arg{name} \meta{tl var}\\
+%     \cs{pdfdict_gget:nnN}  \Arg{global dictionary} \Arg{name} \meta{tl var}\\
 %   \end{syntax}
-%   Recovers the \meta{value} stored by \cs{pdfdict_put:nnn}
+%   Recovers the \meta{value} stored by \cs{pdfdict_put:nnn} and
+%   \cs{pdfdict_gput:nnn}
 %   for \meta{name} and places this in the \meta{token list
 %   variable}. If \meta{name} is not found
 %   then the \meta{token list variable} is set
-%   to the special marker \cs{q_no_value}. The \meta{token list
+%   to the special marker \cs{q_no_value}. \meta{name} is first converted
+%   with \cs{str_convert_pdfname}.  The \meta{token list
 %   variable} is set within the current \TeX{} group.
 %\end{function}
 % \begin{function}[added = 2020-04-07]
 %   {
-%     \pdfdict_remove:nn,
+%     \pdfdict_remove:nn, \pdfdict_gremove:nn,
 %   }
 %   \begin{syntax}
-%     \cs{pdfdict_remove:nn} \Arg{dictionary} \Arg{name}\\
+%     \cs{pdfdict_remove:nn} \Arg{local dictionary} \Arg{name}\\
+%     \cs{pdfdict_gremove:nn} \Arg{global dictionary} \Arg{name}\\
 %   \end{syntax}
 %   Removes  |/|\meta{name} and its associated \meta{value} from
 %   the \Arg{dictionary}
-%   The removal is local.
+%   The removal is local from local dictionaries
+%   and global from global dictionaries.
 %   If \meta{name} is not found no change occurs,
 %   \emph{i.e}~there is no need to test for the existence of a name before
-%   trying to remove it.
+%   trying to remove it. \Arg{name} is first converted
+%   with \cs{str_convert_pdfname}.
+% \end{function}
+% \begin{function}[EXP,added = 2020-06-14]
+%   {
+%     \pdfdict_item:nn, \pdfdict_item:ne,
+%   }
+%   \begin{syntax}
+%     \cs{pdfdict_item:nn} \Arg{name} \Arg{value}
+%   \end{syntax}
+%   This outputs the arguments as needed in PDF dictionay by adding a slash
+%   before the name: |/|\Arg{name} \Arg{value}. It doesn't do any conversion or
+%   escaping. It does nothing if \Arg{value} is empty.
 % \end{function}
 % \end{documentation}
 %
@@ -170,40 +203,44 @@
 %<@@=pdfdict>
 %<*package>
 \ProvidesExplPackage {l3pdfdict} {2020-04-08} {0.5}
-  {Managing local dictionaries}
+  {Tools for PDF dictionaries}
 %    \end{macrocode}
 % \subsection{messages}
 %    \begin{macrocode}
 \msg_new:nnn  { pdfdict } { show-dict }
   {
-    The~local~dictionary~'#1'~
+    The~#3~dictionary~'#1'~
     \tl_if_empty:nTF {#2}
       { is~empty \\>~ . }
       { contains~the~pairs~(without~outer~braces): #2 . }
   }
 \msg_new:nnn  { pdfdict } { unknown-dict }
   {
-    The~dictionary~'#1'~is~not~declared.
+    The~dictionary~'#1'~is~not~a~declared~#2~dictionary.
   }
 \msg_new:nnn  { pdfdict } { dict-already-defined  }
   {
-    The~dictionary~'#1'~is~already~defined.
+    The~#2~dictionary~'#1'~is~already~defined.
   }
 \msg_new:nnn  { pdfdict } { empty-value }
               { The~value~for~#1~is~empty~and~will~be~ignored }
 
 %    \end{macrocode}
-% \subsection{user commands}
-% \begin{macro}{\pdfdict_new:n}
+% \subsection{User commands}
+% \begin{macro}{\pdfdict_new:n,\pdfdict_gnew:n}
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdfdict_new:n #1
   {
     \@@_new:n {#1}
   }
+
+\cs_new_protected:Npn \pdfdict_gnew:n #1
+  {
+    \@@_gnew:n {#1}
+  }
 %    \end{macrocode}
 % \end{macro}
-%    \begin{macrocode}
-%    \end{macrocode}
+% \begin{macro}{\pdfdict_put:nnn,\pdfdict_gput:nnn}
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdfdict_put:nnn #1 #2 #3
   {
@@ -212,68 +249,109 @@
         \@@_put:nnn { #1 }{ #2 }{ #3 }
       }
       {
-        \msg_error:nnn{pdfdict}{unknown-dict}{#1}
+        \msg_error:nnnn{pdfdict}{unknown-dict}{#1}{local}
       }
   }
 
 \cs_generate_variant:Nn \pdfdict_put:nnn {nnx,nno}
-%    \end{macrocode}
-% \subsection{Internal dictionary Code}
-%  Many code parts are quite similar: property lists for
-%  dictionaries are filled and output.
-%  So we define some generic commands to ensure systematic
-%  internal names. The names are based on paths separated by slashed.
-%  The first slash is not used in the names.
 
-% \begin{macro}{\@@_item:nn,\@@_objref_item:nn}
-% Commands to output dict entries: The arguments are \meta{name}\meta{value} and
-% \meta{name}\meta{object name}, \meta{name} should be a valid pdf name without
-% the slash.
+\cs_new_protected:Npn \pdfdict_gput:nnn #1 #2 #3
+  {
+    \@@_if_gexist:nTF { #1 }
+      {
+        \@@_gput:nnn { #1 }{ #2 }{ #3 }
+      }
+      {
+        \msg_error:nnnn{pdfdict}{unknown-dict}{#1}{global}
+      }
+  }
+
+\cs_generate_variant:Nn \pdfdict_gput:nnn {nnx,nno}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{ \pdfdict_item:nn }
+%    \begin{macrocode}
+\cs_new:Npn \pdfdict_item:nn #1 #2
+  {
+    \@@_item:nn {#1} {#2}
+  }
+
+\cs_generate_variant:Nn \pdfdict_item:nn {ne,nx}
+%    \end{macrocode}
+% \end{macro}
+% \subsection{Internal dictionary Code}
+
+% \begin{macro}{\@@_item:nn}
+% Commands to output dict entries: The arguments are \meta{name}\meta{value}.
+% \meta{name} should be a valid pdf name without the slash.
 % The commands don't check if the arguments are empty or valid. This should be done
 % in the pdf layer at the input.
-% \begin{NOTE}{UF}
-%TODO: check expansion behaviour of \cs{@@_dict_objref_item:nn} in the various uses
-%TODO: this should perhaps be move to the module for "content output"
-% \end{NOTE}
-%    \begin{macrocode}
-\cs_new:Npn \@@_item:nn #1 #2 { /#1~#2~ } %name, value
-\cs_generate_variant:Nn \@@_item:nn {ne}
+% The command is used in the mapping command, so normally the name
+% is already escaped!
+% If the value is blank nothing is output.
 
-\cs_new:Npn \@@_objref_item:nn #1 #2      %name, object name
-  {
-    /#1~\pdf_object_ref:n { #2 }
-  }
+%    \begin{macrocode}
+\cs_new:Npn \@@_item:nn #1 #2 { \tl_if_blank:nF {#2} { /#1~#2~} } %name, value
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}
 %   {
 %    \@@_name:n,
+%    \@@_gname:n,
 %    \@@_new:n,
-%    \g_@@_names_seq
+%    \@@_gnew:n,
+%    \g_@@_names_seq,
+%    \g_@@_gnames_seq
 %   }
+%   This are the commands to create new dictionaries and to access their internal
+%   name.
 %    \begin{macrocode}
 \seq_new:N \g_@@_names_seq
+\seq_new:N \g_@@_gnames_seq
 
 %local
 \cs_new:Npn \@@_name:n #1 % path name without the leading /
   {
     l_@@_/#1_prop
   }
-
-
+\cs_set_eq:NN \pdfdict_name:n \@@_name:n
+%global
+\cs_new:Npn \@@_gname:n #1 % path name without the leading /
+  {
+    g_@@_/#1_prop
+  }
+\cs_set_eq:NN \pdfdict_gname:n \@@_gname:n
 %local
 \cs_new_protected:Npn \@@_new:n #1
   {
     \@@_if_exist:nTF { #1 }
       {
-        \msg_error:nnx
+        \msg_error:nnxx
           { pdfdict }
           { dict-already-defined }
-          { #1}
+          { \tl_to_str:n {#1}}
+          { local }
        }
       {
         \prop_new:c  { \@@_name:n { #1 } }
         \seq_gput_right:Nn \g_@@_names_seq { #1 }
+      }
+  }
+
+%global
+\cs_new_protected:Npn \@@_gnew:n #1
+  {
+    \@@_if_gexist:nTF { #1 }
+      {
+        \msg_error:nnxx
+          { pdfdict }
+          { dict-already-defined }
+          { \tl_to_str:n {#1}}
+          { global }
+       }
+      {
+        \prop_new:c  { \@@_gname:n { #1 } }
+        \seq_gput_right:Nn \g_@@_gnames_seq { #1 }
       }
   }
 
@@ -285,6 +363,18 @@
       { \prg_return_true: }
       { \prg_return_false: }
   }
+\prg_set_eq_conditional:NNn \pdfdict_if_exist:n \@@_if_exist:n { p , T , F , TF }
+
+% test existence
+\prg_new_conditional:Npnn \@@_if_gexist:n #1 { p , T , F , TF }
+  {
+    \prop_if_exist:cTF
+      { \@@_gname:n { #1 } }
+      { \prg_return_true: }
+      { \prg_return_false: }
+  }
+
+\prg_set_eq_conditional:NNn \pdfdict_if_gexist:n \@@_if_exist:n { p , T , F , TF }
 
 \prg_new_conditional:Npnn \@@_if_empty:n #1 { p , T , F , TF }
   {
@@ -293,11 +383,23 @@
       { \prg_return_true: }
       { \prg_return_false: }
   }
+
+\prg_set_eq_conditional:NNn \pdfdict_if_empty:n \@@_if_empty:n { p , T , F , TF }
+
+\prg_new_conditional:Npnn \@@_if_gempty:n #1 { p , T , F , TF }
+  {
+    \prop_if_empty:cTF
+      { \@@_gname:n { #1 }}
+      { \prg_return_true: }
+      { \prg_return_false: }
+  }
+
+\prg_set_eq_conditional:NNn \pdfdict_if_gempty:n \@@_if_empty:n { p , T , F , TF }
+
+
 %    \end{macrocode}
 %  \end{macro}
 %  \begin{macro}{
-%                \@@_clear:n,
-%                \@@_reset:n,
 %                \@@_put:nnn,
 %                \@@_get:nnN,
 %                \@@_remove:nn,
@@ -305,22 +407,7 @@
 %                }
 %
 %    \begin{macrocode}
-\cs_new_protected:Npn \@@_clear:n #1
-  {
-    \@@_if_exist:nT { #1 }
-      {
-        \prop_clear:c  { \@@_name:n { #1 } }
-      }
-  }
 
-\cs_new_protected:Npn \@@_reset:n #1
-  {
-    \@@_if_exist:nT { #1 }
-      {
-        \prop_clear:c  { \@@_name:n { #1 } }
-        \use:c {  @@_#1_reset: }
-      }
-  }
 
 \cs_new_protected:Npn \@@_put:nnn #1 #2 #3  %#1 path, #2 name, #3 value
   {
@@ -331,11 +418,29 @@
       {
        \@@_if_exist:nTF { #1 }
          {
-           \prop_put:cnn
-             { \@@_name:n { #1 } }{ #2 } { #3 }
+          \exp_args:Nnx \prop_put:cnn
+             { \@@_name:n { #1 } }{ \str_convert_pdfname:n { #2 } } { #3 }
          }
          {
-           \msg_error:nnn { pdfdict } { unknown-dict } { /#1 }
+           \msg_error:nnnn { pdfdict } { unknown-dict } { #1 } { local }
+         }
+      }
+  }
+
+\cs_new_protected:Npn \@@_gput:nnn #1 #2 #3  %#1 path, #2 name, #3 value
+  {
+    \tl_if_empty:nTF { #3 }
+      {
+        \msg_none:nnn { pdfdict }{ empty-value }{ /#1/#2 }
+      }
+      {
+       \@@_if_exist:nTF { #1 }
+         {
+          \exp_argx:Npx \prop_gput:cnn
+             { \@@_gname:n { #1 } }{ \str_convert_pdfname:n { #2 } } { #3 }
+         }
+         {
+           \msg_error:nnnn { pdfdict } { unknown-dict } { #1 } { global }
          }
       }
   }
@@ -352,18 +457,32 @@
   {
     \@@_if_exist:nTF { #1 }
           {
-            \prop_remove:cn
-              { \@@_name:n { #1 } }{ #2 }
+            \exp_args:Nnx \prop_remove:cn
+              { \@@_name:n { #1 } }{ \str_convert_pdfname:n { #2 } }
           }
           {
-            \msg_error:nnn { pdfdict } { unknown-dict } { /#1 }
+            \msg_error:nnnn { pdfdict } { unknown-dict } { #1 } {local}
+          }
+  }
+\cs_set_eq:NN \pdfdict_remove:nn \@@_remove:nn
+
+\cs_new_protected:Npn \@@_gremove:nn #1 #2 %path,key
+  {
+    \@@_if_exist:nTF { #1 }
+          {
+            \exp_args:Nnx \prop_gremove:cn
+              { \@@_gname:n { #1 } }{ \str_convert_pdfname:n { #2 } }
+          }
+          {
+            \msg_error:nnnn { pdfdict } { unknown-dict } { #1 } {global}
           }
   }
 
+\cs_set_eq:NN \pdfdict_gremove:nn \@@_gremove:nn
 
 \cs_new_protected:Npn \@@_show:Nn #1#2
   {
-    \prop_if_exist:cTF { \@@_name:n { #2 } }
+    \prop_if_exist:cT { \@@_name:n { #2 } }
        {
          #1
             { pdfdict } { show-dict }
@@ -371,13 +490,22 @@
             { \prop_map_function:cN {\@@_name:n { #2 }} \msg_show_item:nn }
             { } { }
        }
+    \prop_if_exist:cT { \@@_gname:n { #2 } }
        {
-         #1 { pdfdict } { unknown-dict } {#2}{}{}{}
+         #1
+            { pdfdict } { show-dict }
+            { \tl_to_str:n {#2} }
+            { \prop_map_function:cN {\@@_gname:n { #2 }} \msg_show_item:nn }
+            { } { }
+       }
+    \bool_if:nF {\prop_if_exist_p:c {\@@_gname:n { #2 }} || \prop_if_exist_p:c {\@@_name:n { #2 }} }
+       {
+         #1 { pdfdict } { unknown-dict } {#2}{global~or~local}{}{}
        }
   }
-\cs_new_protected:Npn \@@_show:n #1  %path
+\cs_new_protected:Npn \pdfdict_show:n #1
   {
-    \prop_show:c { \@@_name:n { #1 } }
+    \@@_show:Nn \msg_show:nnxxxx {#1}
   }
 %    \end{macrocode}
 % \end{macro}
@@ -402,45 +530,12 @@
 %    \end{macrocode}
 %
 %    \begin{macrocode}
-\cs_new_protected:Npn \pdfdict_reset:n #1
-  {
-    \@@_reset:n { #1 }
-  }
-%    \end{macrocode}
-%    \begin{macrocode}
-\cs_new_protected:Npn \pdfdict_show:n #1
-  {
-    \@@_show:Nn \msg_show:nnxxxx {#1}
-  }
-%    \end{macrocode}
-%    \begin{macrocode}
-\prg_new_eq_conditional:NNn \pdfdict_if_exist:n \@@_if_exist:n
-  { TF , T , F , p }
-
-%    \end{macrocode}
-%    \begin{macrocode}
-\prg_new_eq_conditional:NNn \pdfdict_if_empty:n \@@_if_empty:n
-  { TF , T , F , p }
-%    \end{macrocode}
-%    \begin{macrocode}
 
 \cs_new_protected:Npn \pdfdict_get:nnN #1 #2 #3
   {
     \@@_get:nnN { #1 }{ #2 } #3
   }
 
-%    \end{macrocode}
-%    \begin{macrocode}
-\cs_new_protected:Npn \pdfdict_remove:nn #1 #2
-  {
-    \@@_if_exist:nTF { #1 }
-      {
-        \prop_remove:cn { \@@_name:n { #1 } }{ #2 }
-      }
-      {
-        \msg_error:nnn{pdfdict}{unknown-dict}{#1}
-      }
-  }
 %    \end{macrocode}
 %    \begin{macrocode}
 %</package>
