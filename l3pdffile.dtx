@@ -340,37 +340,20 @@
 % Here we define and setup the local dictionaries. We also define constants.
 %    \begin{macrocode}
 \pdfdict_new:n   { file }
-\cs_new_protected:Npn \@@_dict_file_reset:
-  {
-    \pdfdict_put:nnn { file }{Type}{/EmbeddedFile}
-  }
-\pdfdict_reset:n { file }
-
+\pdfdict_put:nnn { file }{Type}{/EmbeddedFile}
 \pdfdict_new:n   { file/Params }
-\cs_new_protected:cpn { @@_dict_file/Params_reset: }
-  {
-    \pdfdict_put:nnn { file/Params }
-      {ModDate}  { (\file_timestamp:n { \l_pdffile_source_full_name_str }) }
-    \pdfdict_put:nnn { file/Params }
-      {Size}     { \file_size:n { \l_pdffile_source_full_name_str } }
-    \pdfdict_put:nnn { file/Params }
-      {CheckSum} { (\file_mdfive_hash:n { \l_pdffile_source_full_name_str }) }
-  }
-\pdfdict_reset:n { file/Params }
+\pdfdict_put:nnn { file/Params }
+  {ModDate}  { (\file_timestamp:n { \l_pdffile_source_full_name_str }) }
+\pdfdict_put:nnn { file/Params }
+  {Size}     { \file_size:n { \l_pdffile_source_full_name_str } }
+\pdfdict_put:nnn { file/Params }
+  {CheckSum} { (\file_mdfive_hash:n { \l_pdffile_source_full_name_str }) }
 
 \pdfdict_new:n   { file/FileSpec }
-\cs_new_protected:cpn { @@_dict_file/FileSpec_reset: }
-  {
-    \pdfdict_put:nnn { file/FileSpec }
-      {Type} { /FileSpec }
-%   \pdfdict_put:nnn { file/FileSpec }
-%      {F}  { \l_pdffile_full_name_convert_str }
-%    \pdfdict_put:nnn { file/FileSpec }
-%      {UF} { \l_pdffile_full_name_convert_str }
-    \pdfdict_put:nnn { file/FileSpec }
-      {AFRelationship} { /Unspecified }
-  }
-\pdfdict_reset:n { file/FileSpec }
+\pdfdict_put:nnn { file/FileSpec }
+  {Type} { /FileSpec }
+\pdfdict_put:nnn { file/FileSpec }
+  {AFRelationship} { /Unspecified }
 
 %    \end{macrocode}
 % \end{variable}

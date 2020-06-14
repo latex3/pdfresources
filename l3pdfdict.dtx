@@ -30,7 +30,7 @@
 %</driver>
 % \fi
 % \title{^^A
-%   The \pkg{l3pdfdict} package  Managing local dictionaries ^^A
+%   The \pkg{l3pdfdict} package  -- tools for PDF dictionaries ^^A
 % }
 %
 % \author{^^A
@@ -48,18 +48,19 @@
 % \begin{documentation}
 %
 % \section{\pkg{l3pdfdict} documentation}
-% Many features of a PDF are set by adding a (pdf-)Name and a value
-% to specific PDF dictionaries. Examples are attributes of links,
-% filespec dictionaries, xform dictionaries.
+% Many PDF objects are or contain dictionaries -- structures
+% containing a number of (pdf-)Name/value pairs.
+% Examples are attributes of links,
+% filespec dictionaries, xform dictionaries, the catalog, the info dictionary.
 % The commands in this module offer an number of
-% tools to handle such dictionaries. The main purpose of the code
-% here is to give packages and users a better interface to add or
-% change values of such objects and to setup a sort of namespace for the
-% dictionary names.
+% tools to handle such dictionaries. The module setups a sort of namespace for the
+% dictionary names and offers some commands to output dictionaries.
 %
-% The dictionaries are implemented with local property lists.
-% All assignments are local.
+% The dictionaries are implemented with property lists.
 %
+% \begin{NOTE}{UF}
+% Check which (local) dictionaries should be predefined.
+% Check also if the reset idea makes sense. (Removed for now)
 % The following tabular summarize the dictionaries
 %
 % \begin{tabular}{lll}
@@ -67,65 +68,58 @@
 %  annot\ldots                           & argument of \cs{pdfannot},
 %                                          \cs{pdfstartlink} &local\\
 %  \end{tabular}
-
-%  \subsection{User Commands}
-% \begin{NOTE}{UF}
-% local:  lower case: annot/link/URI.
 % \end{NOTE}
+% \subsection{User Commands}
 % \begin{function}[added = 2020-04-21]
-%   {\pdfdict_new:n}
+%   {\pdfdict_new:n,\pdfdict_gnew:n}
 %   \begin{syntax}
-%     \cs{pdfdict_new:n} \Arg{local dictionary name}
+%     \cs{pdfdict_new:n}  \Arg{local dictionary name}\\
+%     \cs{pdfdict_gnew:n} \Arg{global dictionary name}\\
 %   \end{syntax}
-% This function create a new local dictionary.
+% This function create a new local or global dictionary. The commands are only
+% small wrappers around \cs{prop_new:c}, but use a special name space.
+% It is possible to create a local and a global with the same name, but it is
+% recommended to use lowercase for global and uppercase for global dictionaries.
 % \end{function}
 % \begin{function}[added = 2020-04-06]
-%   {\pdfdict_put:nnn}
+%   {\pdfdict_put:nnn, \pdfdict_gput:nnn}
 %   \begin{syntax}
-%     \cs{pdfdict_put:nnn} \Arg{local dictionary} \Arg{name} \Arg{value}
+%     \cs{pdfdict_put:nnn} \Arg{local dictionary} \Arg{name} \Arg{value} \\
+%     \cs{pdfdict_gput:nnn} \Arg{global dictionary} \Arg{name} \Arg{value}
 %   \end{syntax}
-% This function puts \Arg{name} \Arg{value} locally in an internal
-% property lists.
-% \Arg{dictionary} is a symbolic name for a concrete PDF dictionary to which the
-% content of these property lists will be written by the PDF resource management code.
-% \Arg{name} should be a valid PDF Name without
-% the starting slash.
+% This function puts \Arg{name} \Arg{value} locally or globally in the
+% \Arg{dictionary} setup with \cs{pdfdict_new:n} or \cs{pdfdict_gnew:n}
+% \Arg{name} should be a PDF Name without the starting slash. It will be stored
+% with \cs{str_convert_pdfname}, so will be automatically correctly escaped in case
+% in contains slashes, spaces or other chars not allowed in a PDF name.
 % \Arg{value} should be a valid PDF value for this Name in the
-% target dictionary.
+% target dictionary. The value is \emph{not} converted or escaped automatically.
 %
-% When adding a value keep in mind that
-% the expansion behaviour of the backends can differ. Some backends expand a
-% value always fully when writing to the PDF, with other backends command names
-% could end as strings in the PDF. So one should neither rely on \Arg{name}
+% When adding a value keep in mind that the expansion behaviour
+% of the backends can differ. Some backends expand a
+% value always fully when writing to the PDF, with other backends commands
+% could end as strings in the PDF. So one should neither rely on
 % \Arg{value} to be expanded nor not expanded by the backend commands.
 % \end{function}
 % \begin{function}[EXP,added = 2020-04-21]
-%   {\pdfdict_map:n }
+%   {\pdfdict_map:n , \pdfdict_gmap:n }
 %   \begin{syntax}
-%     \cs{pdfdict_map:n}  \Arg{dictionary}
+%     \cs{pdfdict_map:n}   \Arg{local dictionary}\\
+%     \cs{pdfdict_gmap:n}  \Arg{global dictionary}
 %   \end{syntax}
 %   This outputs the property list of the dictionary as a list of
 %   \texttt{/key value} pairs.
 %   This can be used e.g. when writing a dictionary object with
 %   \cs{pdf_object_write:nx}
 % \end{function}
-% \begin{NOTE}{UF}
-% I'm not sure about this reset idea. Probably it should be removed ...
-% \end{NOTE}
-% \begin{function}[added = 2020-04-25]
-%   {\pdfdict_reset:n }
-%   \begin{syntax}
-%     \cs{pdfdict_reset:n}  \Arg{(local) dictionary}
-%   \end{syntax}
-% This resets a dictionary: it clears the entries and then adds eventually
-% default values (normally at least the Type entry).
-%  \end{function}
 %  \begin{function}[added = 2020-04-08]
 %   {\pdfdict_show:n }
 %   \begin{syntax}
 %     \cs{pdfdict_show:n}  \Arg{dictionary}
 %   \end{syntax}
 %   This shows the content of \Arg{dictionary} in the log and on the terminal.
+%   If both a local and a global dictionary with the name \Arg{dictionary}
+%   exists it will show both.
 %\end{function}
 %\begin{function}[EXP, pTF,added = 2020-04-08]
 %   {\pdfdict_if_exist:n }
