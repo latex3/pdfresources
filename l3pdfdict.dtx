@@ -71,6 +71,7 @@
 %  xform\ldots                           & argument of \cs{pdfxform} &local\\
 %  annot\ldots                           & argument of \cs{pdfannot},
 %                                          \cs{pdfstartlink} &local\\
+%  trans                                 & for transitions (used in hyperref)
 %  \end{tabular}
 % \end{NOTE}
 % \subsection{User Commands}
@@ -89,16 +90,17 @@
 %   {\pdfdict_name:n,\pdfdict_gname:n}
 %   \begin{syntax}
 %     \cs{pdfdict_name:n}  \Arg{local dictionary name}\\
-%     \cs{pdfdict_gname:n} \Arg{global dictionary name}\\
+%     \cs{pdfdict_gname:n} \Arg{global dictionary name}
 %   \end{syntax}
-% This expands to the internal name. With it it is possible to use standard commands
-% of the \texttt{prop} module to deal with the dictionaries. For example\\
+% These command expand to the internal name. With these commands
+% it is possible to use standard commands of the \texttt{prop} module
+% to deal with the dictionaries. For example\\
 % |\prop_clear:c { \pdfdict_name:n { name }}|
 % \end{function}
 % \begin{function}[added = 2020-04-06]
 %   {\pdfdict_put:nnn, \pdfdict_gput:nnn}
 %   \begin{syntax}
-%     \cs{pdfdict_put:nnn} \Arg{local dictionary} \Arg{name} \Arg{value} \\
+%     \cs{pdfdict_put:nnn}  \Arg{local dictionary}  \Arg{name} \Arg{value} \\
 %     \cs{pdfdict_gput:nnn} \Arg{global dictionary} \Arg{name} \Arg{value}
 %   \end{syntax}
 % This function puts \Arg{name} \Arg{value} locally or globally in the
@@ -126,7 +128,7 @@
 %   This can be used e.g. when writing a dictionary object with
 %   \cs{pdf_object_write:nx}
 % \end{function}
-%  \begin{function}[added = 2020-04-08]
+% \begin{function}[added = 2020-04-08]
 %   {\pdfdict_show:n }
 %   \begin{syntax}
 %     \cs{pdfdict_show:n}  \Arg{dictionary}
@@ -136,27 +138,27 @@
 %   exists it will show both.
 %\end{function}
 %\begin{function}[EXP, pTF,added = 2020-04-08]
-%   {\pdfdict_if_exist:n, \pdfdict_if_gexist:n,  }
+%   { \pdfdict_if_exist:n, \pdfdict_if_gexist:n  }
 %   \begin{syntax}
-%     \cs{pdfdict_if_exist:n}  \Arg{local dictionary}\\
+%     \cs{pdfdict_if_exist:n}   \Arg{local dictionary}\\
 %     \cs{pdfdict_if_gexist:n}  \Arg{global dictionary}
 %   \end{syntax}
 %   This tests if the dictionary exists.
-%\end{function}
+% \end{function}
 % \begin{function}[EXP, pTF,added = 2020-04-08]
-%   {\pdfdict_if_empty:n, \pdfdict_if_gempty:n }
+%   { \pdfdict_if_empty:n, \pdfdict_if_gempty:n }
 %   \begin{syntax}
 %     \cs{pdfdict_if_empty:n}  \Arg{local dictionary}\\
 %     \cs{pdfdict_if_gempty:n}  \Arg{global dictionary}
 %   \end{syntax}
 %   This tests if the dictionary is empty. The result is false if the
 %   dictionary doesn't exist.
-%\end{function}
+% \end{function}
 % \begin{function}[added = 2020-04-07]
 %   {\pdfdict_get:nn \pdfdict_gget:nn  }
 %   \begin{syntax}
-%     \cs{pdfdict_get:nnN}  \Arg{local dictionary} \Arg{name} \meta{tl var}\\
-%     \cs{pdfdict_gget:nnN}  \Arg{global dictionary} \Arg{name} \meta{tl var}\\
+%     \cs{pdfdict_get:nnN}  \Arg{local dictionary}  \Arg{name} \meta{tl var}\\
+%     \cs{pdfdict_gget:nnN} \Arg{global dictionary} \Arg{name} \meta{tl var}
 %   \end{syntax}
 %   Recovers the \meta{value} stored by \cs{pdfdict_put:nnn} and
 %   \cs{pdfdict_gput:nnn}
@@ -166,14 +168,14 @@
 %   to the special marker \cs{q_no_value}. \meta{name} is first converted
 %   with \cs{str_convert_pdfname}.  The \meta{token list
 %   variable} is set within the current \TeX{} group.
-%\end{function}
+% \end{function}
 % \begin{function}[added = 2020-04-07]
 %   {
-%     \pdfdict_remove:nn, \pdfdict_gremove:nn,
+%     \pdfdict_remove:nn, \pdfdict_gremove:nn
 %   }
 %   \begin{syntax}
-%     \cs{pdfdict_remove:nn} \Arg{local dictionary} \Arg{name}\\
-%     \cs{pdfdict_gremove:nn} \Arg{global dictionary} \Arg{name}\\
+%     \cs{pdfdict_remove:nn}  \Arg{local dictionary}  \Arg{name}\\
+%     \cs{pdfdict_gremove:nn} \Arg{global dictionary} \Arg{name}
 %   \end{syntax}
 %   Removes  |/|\meta{name} and its associated \meta{value} from
 %   the \Arg{dictionary}
@@ -191,7 +193,7 @@
 %   \begin{syntax}
 %     \cs{pdfdict_item:nn} \Arg{name} \Arg{value}
 %   \end{syntax}
-%   This outputs the arguments as needed in PDF dictionay by adding a slash
+%   This outputs the arguments as needed in a PDF dictionary by adding a slash
 %   before the name: |/|\Arg{name} \Arg{value}. It doesn't do any conversion or
 %   escaping. It does nothing if \Arg{value} is empty.
 % \end{function}
@@ -204,11 +206,15 @@
 %<*package>
 \ProvidesExplPackage {l3pdfdict} {2020-04-08} {0.5}
   {Tools for PDF dictionaries}
+%</package>
 %    \end{macrocode}
 % \subsection{messages}
 %    \begin{macrocode}
+%<*package>
 \msg_new:nnn  { pdfdict } { show-dict }
-  {
+  { %#1: name of the dictionary
+    %#2: expanded content
+    %#3: "local" or "global"
     The~#3~dictionary~'#1'~
     \tl_if_empty:nTF {#2}
       { is~empty \\>~ . }

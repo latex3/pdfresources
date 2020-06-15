@@ -37,18 +37,17 @@
 %<@@=pdf>
 %<*package>
 \RequirePackage{xparse,l3pdf}
-%\RequirePackage{tmpl3shipout}
 \RequirePackage{lthooks,zref-lastpage,bitset}
-\ProvidesExplPackage {pdfresources} {2020-04-08} {0.5}
+\ProvidesExplPackage {pdfresources} {2020-06-15} {0.6}
   {experimental pdf-resource management}
 \DeclareOption { debug }
   {
-    %\msg_redirect_module:nnn { pdf } { warning }{ error }
     \msg_redirect_module:nnn { pdf } { none } { warning }
   }
 \bool_new:N\g_@@_patches_bool
 \DeclareOption { patches }{\bool_gset_true:N\g_@@_patches_bool}
 \ProcessOptions\relax
+%</package>
 %    \end{macrocode}
 %
 % \title{\pkg{pdfresources}}
@@ -82,12 +81,13 @@
 %
 % \section{messages}
 %    \begin{macrocode}
+%<*package>
 \msg_new:nnn  { pdf } { patches }
               { loading~patch~code }
 \msg_new:nnn  { pdf } { pgf-too-late }
               { pgf~is~already~loaded.~Patching~not~possible.}
 
-% pdfdict module
+%</package>
 %    \end{macrocode}
 % \section{Preparation/helper Code}
 %^^A still needed:
@@ -96,45 +96,49 @@
 % \begin{variable}{\l_@@_tmpa_prop, \l_@@_tmpa_tl }
 % Some scratch variables
 %    \begin{macrocode}
+%<*package>
 \prop_new:N \l_@@_tmpa_prop
 \prop_new:N \g_@@_tmpa_prop
 \tl_new:N   \l_@@_tmpa_tl
 \box_new:N  \l_@@_tmpa_box
 \box_new:N  \l_@@_tmpb_box
+%</package>
 %    \end{macrocode}
 % \end{variable}
-%</package>
 % \subsection{some zref code, needs to be replaced later}
-%<*drivers>
 % \begin{variable}
 %  {\g_@@_backend_resourceid_int, \g_@@_backend_name_int, \g_@@_backend_page_int}
 %  a counter to create labels for the resources, a counter
 %  to number properties in bdc marks, a counter for the \cs{pdfpageref} implementation.
 %    \begin{macrocode}
+%<*drivers>
 \int_new:N \g_@@_backend_resourceid_int
 \int_new:N \g_@@_backend_name_int
 \int_new:N \g_@@_backend_page_int
+%</drivers>
 %    \end{macrocode}
 % \end{variable}
-%</drivers>
-%<*package>
-% a reference for the absolute page counter
+% a reference for the absolute page counter. This use the counter from the
+% new lthooks/ltshipout package.
 %    \begin{macrocode}
+%<*package>
 \zref@newlist  { l3pdf }
 \zref@newprop* { pdf@abspage } [0] { \int_use:N \g_shipout_readonly_int }
 \zref@addprop  { l3pdf } { pdf@abspage }
-%    \end{macrocode}
 %</package>
+%    \end{macrocode}
+%
 % \subsection{luacode}
-%<*pdfmode>
 % Load the lua code.
 %    \begin{macrocode}
+%<*pdfmode>
 \sys_if_engine_luatex:T
   {
     \directlua { require("pdfresources.lua") }
   }
-%    \end{macrocode}
 %</pdfmode>
+%    \end{macrocode}
+%
 % \subsection{shipout and end of run code}
 % Code is executed in three places: At shipout of every page,
 % at shipout of the last page, at the end of the document
@@ -153,28 +157,36 @@
 % With pdflatex/lualatex |AtEndDocument{\clearpage|\meta{code}|}| is used,
 % so the code is executed at the first compilation.
 % To avoid that specials are lost the code is added to
-% \cs{@@_BACKEND_lastpage_shipout_code_tl} with dvips/dvipdfmx and so needs a
+% \cs{\g_@@_backend_lastpage_shipout_code_tl} with dvips/dvipdfmx and so needs a
 % second compilation.
 % ++++++++++++++++
-%<*drivers>
 % \begin{variable}
 %   {
 %    \g_@@_backend_end_run_tl,
 %    \g_@@_backend_lastpage_shipout_tl,
 %    \g_@@_backend_thispage_shipout_tl
 %   }
+% This variables contain the code run in the three place.
 %    \begin{macrocode}
-%  for all:
+%<*drivers>
 \tl_new:N\g_@@_backend_end_run_tl
 \tl_new:N\g_@@_backend_lastpage_shipout_tl
 \tl_new:N\g_@@_backend_thispage_shipout_tl
+%</drivers>
 %    \end{macrocode}
 % \end{variable}
-% \begin{macro}{\@@_BACKEND_end_run_gput:n,
-%               \@@_BACKEND_lastpage_shipout_gput:n,
-%               \@@_BACKEND_thispage_shipout_gput:n
-%               }
+% \begin{macro}
+%   {
+%     \@@_BACKEND_end_run_gput:n,
+%     \@@_BACKEND_lastpage_shipout_gput:n,
+%     \@@_BACKEND_thispage_shipout_gput:n
+%   }
+% These are the commands used to fill the three hook variables.
+% \begin{NOTE}{UF}
+% Check if these should be done with real hooks.
+% \end{NOTE}
 %    \begin{macrocode}
+%<*drivers>
 \cs_new_protected:Npn \@@_BACKEND_end_run_gput:n #1
   {
     \tl_gput_right:Nn \g_@@_backend_end_run_tl { #1 }
@@ -190,62 +202,50 @@
     \tl_gput_right:Nn \g_@@_backend_thispage_shipout_tl { #1 }
   }
 %    \end{macrocode}
-% \end{macro}
 %</drivers>
-% \begin{macro}{\@@_BACKEND_end_run:}
-% This command setups the hook for the end of run code. At the end
-% it can perhaps go and only the hook stay, so leave it in uppercase for now.
+% \end{macro}
+% Here we add the end run token list to suitable
+% end hooks.
 %    \begin{macrocode}
 %<*pdfmode>
-% pdftex,luatex
-\cs_new_protected:Npn \@@_BACKEND_end_run:
+\hook_gput_code:nnn {enddocument/afterlastpage}
+  {pdf/endrun}
   {
-    \hook_gput_code:nnn {enddocument/afterlastpage}
-      {pdf}
-      {
-        \g_@@_backend_end_run_tl
-      }
+    \g_@@_backend_end_run_tl
   }
 %</pdfmode>
 %<*xdvipdfmx>
-\cs_new_protected:Npn \@@_BACKEND_end_run:
+\hook_gput_code:nnn {shipout/lastpage}
+  {pdf/endrun}
   {
-    \hook_gput_code:nnn {shipout/lastpage}
-      {pdf_endrun}
-      {
-        \g_@@_backend_end_run_tl
-      }
-    \hook_gset_rule:nnnn {shipout/lastpage}{pdf}{<}{pdf_endrun}
+    \g_@@_backend_end_run_tl
   }
-
+\hook_gset_rule:nnnn {shipout/lastpage}{pdf}{<}{pdf/endrun}
 %</xdvipdfmx>
 %<*dvips>
-\cs_new_protected:Npn \@@_BACKEND_end_run:
+\hook_gput_code:nnn {shipout/lastpage}
+  {pdf/endrun}
   {
-    \hook_gput_code:nnn {shipout/lastpage}
-      {pdf_endrun}
-      {
-        \g_@@_backend_end_run_tl
-      }
-    \hook_gset_rule:nnnn {shipout/lastpage}{pdf}{<}{pdf_endrun}
+    \g_@@_backend_end_run_tl
   }
+\hook_gset_rule:nnnn {shipout/lastpage}{pdf}{<}{pdf/endrun}
 %</dvips>
 %    \end{macrocode}
-%<*drivers>
-% now run the command to setup the hooks:
-%    \begin{macrocode}
-\@@_BACKEND_end_run:
-%    \end{macrocode}
-% \end{macro}
 % Now we add to the shipout hooks the relevant token lists.
 %    \begin{macrocode}
+%<*drivers>
 \hook_gput_code:nnn{shipout/background}{pdf}
-  {\g_@@_backend_thispage_shipout_tl}
+  { \g_@@_backend_thispage_shipout_tl }
 \hook_gput_code:nnn {shipout/lastpage} {pdf}
-  {\g_@@_backend_lastpage_shipout_tl}
+  { \g_@@_backend_lastpage_shipout_tl }
+%</drivers>
 %    \end{macrocode}
 % Here we fill the shipout hooks with content. For now
+% \begin{NOTE}{UF}
+% Check the names here, this is still a bit messy ...
+% \end{NOTE}
 %    \begin{macrocode}
+%<*drivers>
 \@@_BACKEND_thispage_shipout_gput:n
   {
     \exp_args:NV \@@_backend_ThisPage_gpush:n      { \g_shipout_readonly_int }
@@ -265,10 +265,9 @@
     \__pdfgdict_Info_gpush:             %pdfinfo
     \__pdfgdict_Catalog_gpush:
   }
+%</drivers>
 %    \end{macrocode}
 %
-%</drivers>
-%<*package>
 % \subsection{references to page objects}
 % \begin{NOTE}{UF}
 % a reference to the current page would be useful, but difficult to
@@ -285,26 +284,36 @@
 % \end{function}
 % \begin{macro}{ \pdf_pageobject_ref:n }
 %    \begin{macrocode}
+%<*package>
 \cs_new:Npn \pdf_pageobject_ref:n #1 { \@@_backend_pageobject_ref:n { #1 }}
+%</package>
 %    \end{macrocode}
 % \end{macro}
-%</package>
-%<*package>
+% This loads the dict packages.
+% \begin{NOTE}{UF}
+% The loading order must be sorted ...
+% \end{NOTE}
 %    \begin{macrocode}
+%<*package>
 \RequirePackage{l3pdfdict}
 \RequirePackage{l3pdfgdict}
-
+%</package>
 %    \end{macrocode}
-
+%
 % \subsection{Convenience local dictionaries}
+% \begin{NOTE}{UF}
+% This must be reviewed and sorted along with other dictionaries.
+% Perhaps it should move into l3pdfdict.
+% \end{NOTE}
 % A number of predefined small, local dictionaries, that are perhaps needed.
 % \subsubsection{page/Trans}
 % This is a template for a Trans dictionary that can be used in a page dictionary.
 %    \begin{macrocode}
+%<*package>
 \pdfdict_new:n {page/Trans}
 \pdfdict_put:nnn {page/Trans}{Type}{/Trans}
- %keys: /S (name), /D integer, /Dm (name), /M (name), /SS number /B boolean.
- %decribes transition *to* the page.
+% keys: /S (name), /D integer, /Dm (name), /M (name), /SS number /B boolean.
+% decribes transition *to* the page.
 %    \end{macrocode}
 % \subsubsection{annot/Link}
 % The dictionaries \texttt{annot/Link/URI}, \texttt{annot/Link/GoToR},
