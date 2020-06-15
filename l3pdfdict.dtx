@@ -49,18 +49,18 @@
 %
 % \section{\pkg{l3pdfdict} documentation}
 % Many PDF objects are or contain dictionaries -- structures
-% containing a number of (pdf-)Name/value pairs.
+% containing a number of \mbox{(pdf-)}Name/value pairs.
 % Examples are attributes of links,
 % filespec dictionaries, xform dictionaries, the catalog, the info dictionary.
 % The commands in this module offer an number of
 % tools to handle such dictionaries. The module setups a namespace for the
 % dictionary names and offers some commands to output dictionaries.
 %
-% The dictionaries are implemented with property lists. But the keys are always
+% The dictionaries are implemented with property lists. The keys are always
 % converted with \cs{str_convert_pdfname} to get a correct PDF name, and empty
 % values will be ignored.
 %
-% Local and global dictionaries can be created and for most commands both
+% Local and global dictionaries can be created and for a number of commands both
 % a local and a global version exists.
 % \begin{NOTE}{UF}
 % Check which (local) dictionaries should be predefined.
@@ -91,8 +91,8 @@
 %     \cs{pdfdict_name:n}  \Arg{local dictionary name}\\
 %     \cs{pdfdict_gname:n} \Arg{global dictionary name}\\
 %   \end{syntax}
-% This expands to the internal name. With it is possible to use standard commands
-% of the \texttt{prop} module to deak with the dictionaries. For example
+% This expands to the internal name. With it it is possible to use standard commands
+% of the \texttt{prop} module to deal with the dictionaries. For example\\
 % |\prop_clear:c { \pdfdict_name:n { name }}|
 % \end{function}
 % \begin{function}[added = 2020-04-06]
@@ -102,12 +102,12 @@
 %     \cs{pdfdict_gput:nnn} \Arg{global dictionary} \Arg{name} \Arg{value}
 %   \end{syntax}
 % This function puts \Arg{name} \Arg{value} locally or globally in the
-% \Arg{dictionary} setup with \cs{pdfdict_new:n} or \cs{pdfdict_gnew:n}
+% \Arg{dictionary} created with \cs{pdfdict_new:n} or \cs{pdfdict_gnew:n}.
 % \Arg{name} should be a PDF Name without the starting slash. It will be stored
 % with \cs{str_convert_pdfname}, so will be automatically correctly escaped in case
-% in contains slashes, spaces or other chars not allowed in a PDF name.
-% \Arg{value} should be a valid PDF value for this Name in the
-% target dictionary. The value is \emph{not} converted or escaped automatically.
+% it contains slashes, spaces or other chars not allowed in a PDF name.
+% \Arg{value} should be a valid PDF value for this name in the
+% target dictionary. The value is \emph{not} converted nor escaped automatically.
 %
 % When adding a value keep in mind that the expansion behaviour
 % of the backends can differ. Some backends expand a
@@ -240,48 +240,11 @@
   }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\pdfdict_put:nnn,\pdfdict_gput:nnn}
-%    \begin{macrocode}
-\cs_new_protected:Npn \pdfdict_put:nnn #1 #2 #3
-  {
-    \@@_if_exist:nTF { #1 }
-      {
-        \@@_put:nnn { #1 }{ #2 }{ #3 }
-      }
-      {
-        \msg_error:nnnn{pdfdict}{unknown-dict}{#1}{local}
-      }
-  }
 
-\cs_generate_variant:Nn \pdfdict_put:nnn {nnx,nno}
 
-\cs_new_protected:Npn \pdfdict_gput:nnn #1 #2 #3
-  {
-    \@@_if_gexist:nTF { #1 }
-      {
-        \@@_gput:nnn { #1 }{ #2 }{ #3 }
-      }
-      {
-        \msg_error:nnnn{pdfdict}{unknown-dict}{#1}{global}
-      }
-  }
-
-\cs_generate_variant:Nn \pdfdict_gput:nnn {nnx,nno}
-%    \end{macrocode}
-% \end{macro}
-% \begin{macro}{ \pdfdict_item:nn }
-%    \begin{macrocode}
-\cs_new:Npn \pdfdict_item:nn #1 #2
-  {
-    \@@_item:nn {#1} {#2}
-  }
-
-\cs_generate_variant:Nn \pdfdict_item:nn {ne,nx}
-%    \end{macrocode}
-% \end{macro}
 % \subsection{Internal dictionary Code}
 
-% \begin{macro}{\@@_item:nn}
+% \begin{macro}{\@@_item:nn,\@@_item:ne,\@@_item:nx}
 % Commands to output dict entries: The arguments are \meta{name}\meta{value}.
 % \meta{name} should be a valid pdf name without the slash.
 % The commands don't check if the arguments are empty or valid. This should be done
@@ -292,6 +255,13 @@
 
 %    \begin{macrocode}
 \cs_new:Npn \@@_item:nn #1 #2 { \tl_if_blank:nF {#2} { /#1~#2~} } %name, value
+\cs_generate_variant:Nn \@@_item:nn {ne,nx}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{ \pdfdict_item:nn, \pdfdict_item:nx, \pdfdict_item:ne }
+%    \begin{macrocode}
+\cs_set_eq:NN \pdfdict_item:nn \@@_item:nn
+\cs_generate_variant:Nn \pdfdict_item:nn {ne,nx}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}
@@ -374,7 +344,7 @@
       { \prg_return_false: }
   }
 
-\prg_set_eq_conditional:NNn \pdfdict_if_gexist:n \@@_if_exist:n { p , T , F , TF }
+\prg_set_eq_conditional:NNn \pdfdict_if_gexist:n \@@_if_gexist:n { p , T , F , TF }
 
 \prg_new_conditional:Npnn \@@_if_empty:n #1 { p , T , F , TF }
   {
@@ -400,7 +370,8 @@
 %    \end{macrocode}
 %  \end{macro}
 %  \begin{macro}{
-%                \@@_put:nnn,
+%                \@@_put:nnn,\@@_gput:nnn,
+%                \pdfdict_put:nnn,\pdfdict_gput:nnn,
 %                \@@_get:nnN,
 %                \@@_remove:nn,
 %                \@@_show:n
@@ -427,6 +398,10 @@
       }
   }
 
+\cs_set_eq:NN \pdfdict_put:nnn \@@_put:nnn
+
+\cs_generate_variant:Nn \pdfdict_put:nnn {nnx,nno}
+
 \cs_new_protected:Npn \@@_gput:nnn #1 #2 #3  %#1 path, #2 name, #3 value
   {
     \tl_if_empty:nTF { #3 }
@@ -434,9 +409,9 @@
         \msg_none:nnn { pdfdict }{ empty-value }{ /#1/#2 }
       }
       {
-       \@@_if_exist:nTF { #1 }
+       \@@_if_gexist:nTF { #1 }
          {
-          \exp_argx:Npx \prop_gput:cnn
+          \exp_args:Nnx \prop_gput:cnn
              { \@@_gname:n { #1 } }{ \str_convert_pdfname:n { #2 } } { #3 }
          }
          {
@@ -444,6 +419,9 @@
          }
       }
   }
+
+\cs_set_eq:NN \pdfdict_gput:nnn \@@_gput:nnn
+\cs_generate_variant:Nn \pdfdict_gput:nnn {nnx,nno}
 
 \cs_new_protected:Npn \@@_get:nnN  #1 #2 #3 %path,key,macro
   {
@@ -468,7 +446,7 @@
 
 \cs_new_protected:Npn \@@_gremove:nn #1 #2 %path,key
   {
-    \@@_if_exist:nTF { #1 }
+    \@@_if_gexist:nTF { #1 }
           {
             \exp_args:Nnx \prop_gremove:cn
               { \@@_gname:n { #1 } }{ \str_convert_pdfname:n { #2 } }
@@ -510,8 +488,8 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{ \@@_map:n }
-% \cs{@@_map:n} outputs a prop as needed in a dictionary:
+% \begin{macro}{ \@@_map:n, \@@_gmap:n }
+% \cs{@@_map:n} and \cs{@@_gmap:n} output a prop as needed in a dictionary:
 %  as a list of /\meta{key} \meta{value} pairs.
 %    \begin{macrocode}
 % !! is e-expansion the right thing?
@@ -519,14 +497,17 @@
   {
     \prop_map_function:cN { \@@_name:n { #1 } } \@@_item:ne
   }
+
+\cs_new:Npn \@@_gmap:n #1 %path
+  {
+    \prop_map_function:cN { \@@_gname:n { #1 } } \@@_item:ne
+  }
 %    \end{macrocode}
 % \end{macro}
 %
 %    \begin{macrocode}
-\cs_new:Npn \pdfdict_map:n #1
-  {
-    \@@_map:n { #1 }
-  }
+\cs_set_eq:NN \pdfdict_map:n \@@_map:n
+\cs_set_eq:NN \pdfdict_gmap:n \@@_gmap:n
 %    \end{macrocode}
 %
 %    \begin{macrocode}

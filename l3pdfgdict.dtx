@@ -481,7 +481,7 @@
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdfgdict_gput:nnn #1 #2 #3
   {
-    \@@_if_exist:nTF { #1 }
+    \pdfdict_if_gexist:nTF { #1 }
       {
         \@@_handler_gput:nnn { #1 }{ #2 }{ #3 }
       }
@@ -520,70 +520,11 @@
 %  /Page/Resources/Pattern
 %  /Page/Resources/Shading
 %  /Page/Resources/Properties
-%  /xform/Resources/Properties
+%  /Xform/Resources/Properties
 %  \end{verbatim}
 
-% \begin{macro}
-%   {
-%    \@@_name:n,
-%    \@@_new:n,
-%    \g_@@_names_seq,
-%   }
-%    \begin{macrocode}
-\seq_new:N \g_@@_names_seq
-
-\cs_new:Npn \@@_name:n #1 % path name without the leading /
-  {
-    g_@@_/#1_prop
-  }
-
-\cs_new_protected:Npn \@@_new:n #1
-  {
-    \@@_if_exist:nTF { #1 }
-      {
-        \msg_error:nnx
-          { pdfgdict }
-          { dict-already-defined }
-          { #1}
-       }
-      {
-        \prop_new:c  { \@@_name:n { #1 } }
-        \seq_gput_right:Nn \g_@@_names_seq { #1 }
-      }
-  }
-
-% test existence
-\prg_new_conditional:Npnn \@@_if_exist:n #1 { p , T , F , TF }
-  {
-    \prop_if_exist:cTF
-      { \@@_name:n { #1 } }
-      { \prg_return_true: }
-      { \prg_return_false: }
-  }
-
-\prg_new_conditional:Npnn \@@_if_empty:n #1 { p , T , F , TF }
-  {
-    \prop_if_empty:cTF
-      { \@@_name:n { #1 } }
-      { \prg_return_true: }
-      { \prg_return_false: }
-  }
-%    \end{macrocode}
-%  \end{macro}
-%  \begin{macro}{\@@_gclear:n}
-%    \begin{macrocode}
-  \cs_new_protected:Npn \@@_gclear:n #1
-  {
-    \@@_if_exist:nT { #1 }
-      {
-        \prop_gclear:c  { \@@_name:n { #1 } }
-      }
-  }
-%    \end{macrocode}
-% \end{macro}
 %  \begin{macro}{
 %                \@@_handler_gput:nnn,
-%                \@@_gput:nnn,
 %                \@@_get:nnN,
 %                \@@_gremove:nn,
 %                \@@_show:n
@@ -603,7 +544,7 @@
         \msg_none:nnn { pdfgdict }{ empty-value }{ /#1/#2 }
       }
       {
-        \@@_if_exist:nTF { #1 }
+        \pdfdict_if_gexist:nTF { #1 }
           {
             \cs_if_exist:cTF
               { @@_handler/#1/?_gput:nn } %general, name independant handler
@@ -613,8 +554,8 @@
                   { @@_handler/#1/#2_gput:n }
                   { \use:c {@@_handler/#1/#2_gput:n} {#3} } %special handler
                   {
-                    \use:c { prop_gput:cnn }
-                      { \@@_name:n { #1 } }{ #2 } { #3 }
+                    \prop_gput:cnn
+                      { \pdfdict_gname:n { #1 } }{ #2 } { #3 }
                   }
               }
           }
@@ -627,35 +568,17 @@
 
 \cs_generate_variant:Nn \@@_handler_gput:nnn {nxx}
 
-\cs_new_protected:Npn \@@_gput:nnn #1 #2 #3  %#1 path, #2 name, #3 value
-  {
-    \tl_if_empty:nTF { #3 }
-      {
-        \msg_none:nnn { pdfgdict }{ empty-value }{ /#1/#2 }
-      }
-      {
-       \@@_if_exist:nTF { #1 }
-         {
-           \use:c { prop_gput:cnn }
-             { \@@_name:n { #1 } }{ #2 } { #3 }
-         }
-         {
-           \msg_error:nnn { pdfgdict } { unknown-dict } { #1 }
-         }
-      }
-  }
-
 \cs_new_protected:Npn \@@_get:nnN  #1 #2 #3 %path,key,macro
   {
     \prop_get:cnN
-      { \@@_name:n { #1 } }
+      { \pdfdict_gname:n { #1 } }
       { #2 } #3
   }
 
 
 \cs_new_protected:Npn \@@_handler_gremove:nn #1 #2 %path,key
   {
-    \@@_if_exist:nTF { #1 }
+    \pdfdict_if_gexist:nTF { #1 }
           {
             \cs_if_exist:cTF
               { @@_handler/#1/?_gremove:n } %general, name independant handler
@@ -666,7 +589,7 @@
                   { \use:c {@@_handler/#1/#2_gremove:} } %special handler
                   {
                     \prop_gremove:cn
-                      { \@@_name:n { #1 } }{ #2 }
+                      { \pdfdict_gname:n { #1 } }{ #2 }
                   }
               }
           }
@@ -677,13 +600,13 @@
 
 \cs_new_protected:Npn \@@_gremove:nn #1 #2 %path,key
   {
-    \@@_if_exist:nTF { #1 }
+    \pdfdict_if_gexist:nTF { #1 }
           {
             \prop_gremove:cn
-              { \@@_name:n { #1 } }{ #2 }
+              { \pdfdict_gname:n { #1 } }{ #2 }
           }
           {
-            \msg_error:nnn { pdfgdict } { unknown-dict } { #1 }
+            \msg_error:nnn { pdfgdict } { unknown-dict } { xx4#1 }
           }
   }
 
@@ -694,12 +617,12 @@
       { @@_handler/#2/?_show: } %general, name independant handler
       { \use:c {@@_handler/#2/?_show:} }
       {
-        \prop_if_exist:cTF { \@@_name:n { #2 } }
+        \prop_if_exist:cTF { \pdfdict_gname:n { #2 } }
           {
              #1
                { pdfgdict } { show-dict }
                { \tl_to_str:n {#2} }
-               { \prop_map_function:cN {\@@_name:n { #2 }} \msg_show_item:nn }
+               { \prop_map_function:cN {\pdfdict_gname:n { #2 }} \msg_show_item:nn }
                { } { }
           }
           {
@@ -710,22 +633,11 @@
 
 \cs_new_protected:Npn \@@_show:n #1  %path
   {
-    \prop_show:c { \@@_name:n { #1 } }
+    \prop_show:c { \pdfdict_gname:n { #1 } }
   }
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{ \@@_map:n }
-% \cs{@@_map:n} outputs a prop as needed in a dictionary:
-%  as a list of /\meta{key} \meta{value} pairs.
-%    \begin{macrocode}
-% !! is e-expansion the right thing?
-\cs_new:Npn \@@_map:n #1 %path
-  {
-    \prop_map_function:cN { \@@_name:n { #1 } } \pdfdict_item:ne
-  }
-%    \end{macrocode}
-% \end{macro}
 %
 % \begin{macro}{ \@@_gmerge:nnN }
 % \cs{@@_gmerge:nnN} merges at first the property \meta{name_1}
@@ -734,10 +646,10 @@
 
 \cs_new_protected:Npn \@@_gmerge:nnN #1 #2 #3
   {
-    \prop_gset_eq:Nc #3 { \@@_name:n  { #1 } }
-    \prop_if_exist:cT  { \@@_name:n  { #2 } }
+    \prop_gset_eq:Nc #3 { \pdfdict_gname:n  { #1 } }
+    \prop_if_exist:cT  { \pdfdict_gname:n  { #2 } }
       {
-        \prop_map_inline:cn { \@@_name:n  { #2 } }
+        \prop_map_inline:cn { \pdfdict_gname:n  { #2 } }
           {
             \prop_gput:Nnn #3 { ##1 }{ ##2 }
           }
@@ -754,7 +666,7 @@
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdfgdict_gremove:nn #1 #2
   {
-    \@@_if_exist:nTF { #1 }
+    \pdfdict_if_gexist:nTF { #1 }
       {
         \@@_handler_gremove:nn { #1 }{ #2 }
       }
@@ -766,7 +678,7 @@
 % \subsection{The Info dictionary}
 % Initialization of the dictionary:
 %    \begin{macrocode}
-\@@_new:n {Info}
+\pdfdict_gnew:n {Info}
 %    \end{macrocode}
 %
 % \begin{macro}{\@@_Info_gpush:}
@@ -776,15 +688,15 @@
 % push to the register command / issue the special
 \cs_new_protected:Npn \@@_Info_gpush:
   {
-    \prop_map_function:cN  { \@@_name:n {Info} } \__pdf_backend_info_gput:nn
-    \prop_gclear:c { \@@_name:n {Info} }
+    \prop_map_function:cN  { \pdfdict_gname:n {Info} } \__pdf_backend_info_gput:nn
+    \prop_gclear:c { \pdfdict_gname:n {Info} }
   }
 %    \end{macrocode}
 % \end{macro}
 % \subsection{The Pages dictionary code}
 % At first the initialisation
 %     \begin{macrocode}
-\@@_new:n {Pages}
+\pdfdict_gnew:n {Pages}
 %    \end{macrocode}
 %
 % \begin{macro}{\@@_Pages_gpush:}
@@ -796,7 +708,7 @@
   {
     \exp_args:Nx \__pdf_backend_Pages_primitive:n
       {
-        \@@_map:n {Pages}
+        \pdfdict_gmap:n {Pages}
       }
   }
 
@@ -805,8 +717,8 @@
 % \subsection{The Page and ThisPage dictionary}
 % At first the initialisation.
 %    \begin{macrocode}
-\@@_new:n { Page }
-\@@_new:n { ThisPage }
+\pdfdict_gnew:n { Page }
+\pdfdict_gnew:n { ThisPage }
 
 %handler for pdfgdict
 \cs_new_protected:cpn { @@_handler/Page/?_gput:nn } #1 #2
@@ -822,7 +734,7 @@
 % handler for pdfgdict
 \cs_new_protected:cpn { @@_handler/ThisPage/?_gput:nn } #1 #2
   {
-    \prop_gput:cnn  { \@@_name:n { ThisPage } }{ #1 } { #2 }
+    \prop_gput:cnn  { \pdfdict_gname:n { ThisPage } }{ #1 } { #2 }
     \__pdf_backend_ThisPage_gput:nn { #1 }{ #2 }
   }
 
@@ -873,7 +785,7 @@
 %  \begin{macro}{ \@@_catalog_XX_gput:n }
 % Various commands to handle subentries and special cases.
 %    \begin{macrocode}
-\@@_new:n {Catalog}
+\pdfdict_gnew:n {Catalog}
 
 \clist_const:Nn \c_@@_Catalog_toplevel_clist
   {
@@ -910,7 +822,7 @@
 
 \clist_map_inline:Nn \c_@@_Catalog_sub_clist
   {
-    \@@_new:n {Catalog/#1}
+    \pdfdict_gnew:n {Catalog/#1}
   }
 
 
@@ -958,7 +870,7 @@
     \use:c { @@_/Catalog/Requirements_gpush: }
     \use:c { @@_/Catalog/ViewerPreferences_gpush: }
     % output the single values:
-    \prop_map_function:cN { \@@_name:n {Catalog} }  \__pdf_backend_catalog_gput:nn
+    \prop_map_function:cN { \pdfdict_gname:n {Catalog} }  \__pdf_backend_catalog_gput:nn
     % output names tree:
     \use:c { @@_/Catalog/Names/EmbeddedFiles_gpush: }
   }
@@ -970,12 +882,12 @@
 \cs_new_protected:cpn { @@_/Catalog/AA_gpush: }
   {
     \prop_if_empty:cF
-     { \@@_name:n { Catalog/AA } }
+     { \pdfdict_gname:n { Catalog/AA } }
      {
        \__pdf_backend_object_new:nn  { g_@@_/Catalog/AA_obj } { dict }
        \__pdf_backend_object_write:nx
             { g_@@_/Catalog/AA_obj }
-            { \@@_map:n { Catalog/AA } }
+            { \pdfdict_gmap:n { Catalog/AA } }
        \exp_args:Nnx
          \__pdf_backend_catalog_gput:nn
            {AA}
@@ -1008,7 +920,7 @@
             { \seq_use:cn { g_@@_/Catalog/AcroForm/Fields_seq } {~} }
         \exp_args:Nnnx
           \prop_gput:cnn %we have to use \prop here to avoid the handler ...
-            { \@@_name:n { Catalog/AcroForm } }
+            { \pdfdict_gname:n { Catalog/AcroForm } }
             { Fields }
             { \__pdf_backend_object_ref:n { g_@@_/Catalog/AcroForm/Fields_obj } }
       }
@@ -1021,43 +933,43 @@
             { \seq_use:cn { g_@@_/Catalog/AcroForm/CO_seq } {~} }
         \exp_args:Nnnx
           \prop_gput:cnn %we have to use \prop here to avoid the handler ...
-            { \@@_name:n { Catalog/AcroForm } }
+            { \pdfdict_gname:n { Catalog/AcroForm } }
             { CO }
             { \__pdf_backend_object_ref:n { g_@@_/Catalog/AcroForm/CO_obj } }
       }
-     \prop_if_empty:cF { \@@_name:n { Catalog/AcroForm/DR/Font}}
+     \prop_if_empty:cF { \pdfdict_gname:n { Catalog/AcroForm/DR/Font}}
        {
          \__pdf_backend_object_new:nn { g_@@_/Catalog/AcroForm/DR/Font_obj } {dict}
          \exp_args:Nnx
            \__pdf_backend_object_write:nn
              { g_@@_/Catalog/AcroForm/DR/Font_obj }
-             { \@@_map:n { Catalog/AcroForm/DR/Font } }
+             { \pdfdict_gmap:n { Catalog/AcroForm/DR/Font } }
          \exp_args:Nnnx
            \prop_gput:cnn %we have to use \prop here to avoid the handler ...
-             { \@@_name:n { Catalog/AcroForm/DR } }
+             { \pdfdict_gname:n { Catalog/AcroForm/DR } }
              { Font }
              { \__pdf_backend_object_ref:n { g_@@_/Catalog/AcroForm/DR/Font_obj } }
        }
-     \prop_if_empty:cF { \@@_name:n { Catalog/AcroForm/DR}}
+     \prop_if_empty:cF { \pdfdict_gname:n { Catalog/AcroForm/DR}}
        {
          \__pdf_backend_object_new:nn { g_@@_/Catalog/AcroForm/DR_obj } {dict}
          \exp_args:Nnx
            \__pdf_backend_object_write:nn
              { g_@@_/Catalog/AcroForm/DR_obj }
-             { \@@_map:n { Catalog/AcroForm/DR } }
+             { \pdfdict_gmap:n { Catalog/AcroForm/DR } }
          \exp_args:Nnnx
            \prop_gput:cnn %we have to use \prop here to avoid the handler ...
-             { \@@_name:n { Catalog/AcroForm } }
+             { \pdfdict_gname:n { Catalog/AcroForm } }
              { DR }
              { \__pdf_backend_object_ref:n { g_@@_/Catalog/AcroForm/DR_obj } }
        }
-     \prop_if_empty:cF { \@@_name:n { Catalog/AcroForm} }
+     \prop_if_empty:cF { \pdfdict_gname:n { Catalog/AcroForm} }
        {
          \__pdf_backend_object_new:nn { g_@@_/Catalog/AcroForm_obj } {dict}
          \exp_args:Nnx
            \__pdf_backend_object_write:nn
              { g_@@_/Catalog/AcroForm_obj }
-             { \@@_map:n { Catalog/AcroForm } }
+             { \pdfdict_gmap:n { Catalog/AcroForm } }
          \exp_args:Nnnx
            \@@_handler_gput:nnn
              { Catalog }
@@ -1100,13 +1012,13 @@
 \cs_new_protected:cpn { @@_/Catalog/MarkInfo_gpush: }
   {
     \prop_if_empty:cF
-     { \@@_name:n { Catalog/MarkInfo } }
+     { \pdfdict_gname:n { Catalog/MarkInfo } }
      {
        \__pdf_backend_object_new:nn  { g_@@_/Catalog/MarkInfo_obj } { dict }
        \exp_args:Nnx
          \__pdf_backend_object_write:nn
             { g_@@_/Catalog/MarkInfo_obj }
-            { \@@_map:n {Catalog/MarkInfo } }
+            { \pdfdict_gmap:n {Catalog/MarkInfo } }
        \exp_args:Nnx
          \__pdf_backend_catalog_gput:nn
            {MarkInfo}
@@ -1222,13 +1134,13 @@
 \cs_new_protected:cpn { @@_/Catalog/ViewerPreferences_gpush: }
   {
     \prop_if_empty:cF
-     { \@@_name:n { Catalog/ViewerPreferences } }
+     { \pdfdict_gname:n { Catalog/ViewerPreferences } }
      {
        \__pdf_backend_object_new:nn  { g_@@_/Catalog/ViewerPreferences_obj } { dict }
        \exp_args:Nnx
          \__pdf_backend_object_write:nn
             { g_@@_/Catalog/ViewerPreferences_obj }
-            { \@@_map:n {Catalog/ViewerPreferences } }
+            { \pdfdict_gmap:n {Catalog/ViewerPreferences } }
        \exp_args:Nnx
          \__pdf_backend_catalog_gput:nn
            {ViewerPreferences}
@@ -1260,7 +1172,7 @@
 % \end{macro}
 % \subsection{ xform / Properties }
 %    \begin{macrocode}
-\@@_new:n {xform/Resources/Properties}
+\pdfdict_gnew:n {Xform/Resources/Properties}
 %    \end{macrocode}
 %    \begin{macrocode}
 %</package>

@@ -330,8 +330,8 @@
 %</package>
 %<*package>
 %    \begin{macrocode}
-\RequirePackage{l3pdfgdict}
 \RequirePackage{l3pdfdict}
+\RequirePackage{l3pdfgdict}
 
 %    \end{macrocode}
 
@@ -491,14 +491,14 @@
   % sets a lua table with lualatex
   \cs_new_protected:Npn \@@_backend_Page_gput:nn #1 #2 %key,value
     {
-      \__pdfgdict_gput:nnn {Page}{ #1 }{ #2 }
+      \pdfdict_gput:nnn {Page}{ #1 }{ #2 }
     }
   % the command to remove a default value.
   % Uses a prop with pdflatex + dvi,
   % changes a lua table with lualatex
   \cs_new_protected:Npn \@@_backend_Page_gremove:n #1
     {
-      \__pdfgdict_gremove:nn  {Page}{ #1 }
+      \pdfdict_gremove:nn  {Page}{ #1 }
     }
  % the command used in the document.
  % direct call of the primitive special with dvips/dvipdfmx
@@ -516,9 +516,9 @@
             {pdf@abspage}
             {0}
         }
-      \__pdfgdict_if_exist:nF {backend_Page\l_@@_tmpa_tl}
+      \pdfdict_if_gexist:nF {backend_Page\l_@@_tmpa_tl}
         {
-          \__pdfgdict_new:n          {backend_Page\l_@@_tmpa_tl}
+          \pdfdict_gnew:n          {backend_Page\l_@@_tmpa_tl}
         }
       \__pdfgdict_handler_gput:nnn {backend_Page\l_@@_tmpa_tl}{ #1 }{ #2 }
     }
@@ -616,14 +616,14 @@
   % sets a lua table with lualatex
 \cs_new_protected:Npn \@@_backend_Page_gput:nn #1 #2
   {
-    \__pdfgdict_gput:nnn {Page}{ #1 }{ #2 }
+    \pdfdict_gput:nnn {Page}{ #1 }{ #2 }
   }
   % the command to remove a default value.
   % Uses a prop with pdflatex + dvi,
   % changes a lua table with lualatex
 \cs_new_protected:Npn \@@_backend_Page_gremove:n #1
    {
-     \__pdfgdict_gremove:nn  {Page}{ #1 }
+     \pdfdict_gremove:nn  {Page}{ #1 }
    }
   % the command used in the document.
   % direct call of the primitive special with dvips/dvipdfmx
@@ -642,7 +642,7 @@
 \cs_new_protected:Npn \@@_backend_ThisPage_gpush:n #1
   {
     \exp_args:Nx \@@_backend_Page_primitive:n
-      { \__pdfgdict_map:n {Page} }
+      { \pdfdict_gmap:n {Page} }
   }
 %</xdvipdfmx>
 %<*dvips>
@@ -655,14 +655,14 @@
   % sets a lua table with lualatex
 \cs_new_protected:Npn \@@_backend_Page_gput:nn #1 #2
    {
-     \__pdfgdict_gput:nnn {Page}{ #1 }{ #2 }
+     \pdfdict_gput:nnn {Page}{ #1 }{ #2 }
    }
   % the command to remove a default value.
   % Uses a prop with pdflatex + dvi,
   % changes a lua table with lualatex
 \cs_new_protected:Npn \@@_backend_Page_gremove:n #1
   {
-    \__pdfgdict_gremove:nn  {Page}{ #1 }
+    \pdfdict_gremove:nn  {Page}{ #1 }
   }
   % the command used in the document.
   % direct call of the primitive special with dvips/dvipdfmx
@@ -681,7 +681,7 @@
 \cs_new_protected:Npn \@@_backend_ThisPage_gpush:n #1
   {
     \exp_args:Nx \@@_backend_Page_primitive:n
-          { \__pdfgdict_map:n {Page} }
+          { \pdfdict_gmap:n {Page} }
   }
 %</dvips>
 %    \end{macrocode}
@@ -739,7 +739,7 @@
 
 \clist_map_inline:Nn \c_@@_backend_PageResources_clist
       {
-        \__pdfgdict_new:n {Page/Resources/#1}
+        \pdfdict_gnew:n {Page/Resources/#1}
       }
 %</drivers>
 % pdftex and luatex
@@ -763,7 +763,7 @@
     {
       \cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
         {
-          \__pdfgdict_gput:nnn {Page/Resources/#1} { #2 }{ #3 }
+          \pdfdict_gput:nnn {Page/Resources/#1} { #2 }{ #3 }
           % luatex must also trigger the lua side
           \tex_latelua:D{l3kernel.@@.Page.Resources.#1=true}
           \tex_latelua:D
@@ -775,7 +775,7 @@
     { %pdftex
       \cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
         {
-          \__pdfgdict_gput:nnn {Page/Resources/#1} { #2 }{ #3 }
+          \pdfdict_gput:nnn {Page/Resources/#1} { #2 }{ #3 }
         }
     }
 
@@ -785,11 +785,11 @@
      \clist_map_inline:Nn \c_@@_backend_PageResources_clist
        {
          \prop_if_empty:cF
-           { \__pdfgdict_name:n {Page/Resources/##1} }
+           { \pdfdict_gname:n {Page/Resources/##1} }
            {
              \@@_backend_object_write:nx
                { Page/Resources/##1 }
-               { \__pdfgdict_map:n {Page/Resources/##1} }
+               { \pdfdict_gmap:n {Page/Resources/##1} }
            }
       }
    }
@@ -814,7 +814,7 @@
     \cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
       {
        % this is not used for output, but there is a test if the resource is empty
-       \prop_gput:cnn { \__pdfgdict_name:n {Page/Resources/#1} } { #2 }{ #3 }
+       \prop_gput:cnn { \pdfdict_gname:n {Page/Resources/#1} } { #2 }{ #3 }
        %objects are not filled with \pdf_object_write as this is not additive!
         \@@_backend:x
           {
@@ -829,7 +829,7 @@
     \cs_new_protected:Npn \@@_backend_PageResources:n #1 {}
     \cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
       { %only for the show command TEST!!
-        \__pdfgdict_gput:nnn {Page/Resources/#1} { #2 }{ #3 }
+        \pdfdict_gput:nnn {Page/Resources/#1} { #2 }{ #3 }
       }
     \cs_new_protected:Npn \@@_PageResources_gpush: {}
 %</dvips>
@@ -1097,7 +1097,7 @@
   {
     \clist_map_inline:Nn \c_@@_backend_PageResources_clist
       {
-        \prop_if_empty:cF { \__pdfgdict_name:n {Page/Resources/##1} }
+        \prop_if_empty:cF { \pdfdict_gname:n {Page/Resources/##1} }
           {
             \__kernel_backend_literal:x
               {
@@ -1120,7 +1120,7 @@
         \bool_if:NTF \l_@@_backend_xform_bool
           {
             \exp_args:Nnx\__pdfgdict_handler_gput:nnn
-              { xform/Resources/Properties }
+              { Xform/Resources/Properties }
               { l3pdf\int_use:N\g_@@_backend_name_int }
               { \@@_backend_object_ref:n { #2 } }
           }
@@ -1144,7 +1144,7 @@
         \bool_if:NTF \l_@@_backend_xform_bool
           {
             \__pdfgdict_handler_gput:nxx
-              { xform/Resources/Properties }
+              { Xform/Resources/Properties }
               { l3pdf\int_use:N\g_@@_backend_name_int }
               { \@@_backend_object_last: }
           }
@@ -1177,7 +1177,7 @@
 \sys_if_engine_pdftex:T
   {
     \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
-      { 
+      {
         \int_gincr:N \g_@@_backend_name_int
         \exp_args:Nx\__kernel_backend_literal_page:n
           { /#1 ~ /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC }
@@ -1186,7 +1186,7 @@
         \bool_if:NTF \l_@@_backend_xform_bool
           {
             \__pdfgdict_handler_gput:nxx
-              { xform/Resources/Properties }
+              { Xform/Resources/Properties }
               { l3pdf\int_use:N\g_@@_backend_resourceid_int }
               { \@@_backend_object_ref:n { #2 } }
           }
@@ -1201,9 +1201,9 @@
                   {pdf@abspage}
                   {0}
               }
-            \__pdfgdict_if_exist:nF { backend_Page\l_@@_tmpa_tl/Resources/Properties }
+            \pdfdict_if_gexist:nF { backend_Page\l_@@_tmpa_tl/Resources/Properties }
               {
-                \__pdfgdict_new:n  { backend_Page\l_@@_tmpa_tl/Resources/Properties }
+                \pdfdict_gnew:n  { backend_Page\l_@@_tmpa_tl/Resources/Properties }
               }
             \__pdfgdict_handler_gput:nxx
               { backend_Page\l_@@_tmpa_tl/Resources/Properties }
@@ -1221,7 +1221,7 @@
         \bool_if:NTF \l_@@_backend_xform_bool
           {
             \__pdfgdict_handler_gput:nxx
-              { xform/Resources/Properties }
+              { Xform/Resources/Properties }
               { l3pdf\int_use:N\g_@@_backend_resourceid_int }
               { \@@_backend_object_last: }
           }
@@ -1236,9 +1236,9 @@
                   {pdf@abspage}
                   {0}
               }
-            \__pdfgdict_if_exist:nF { backend_Page\l_@@_tmpa_tl/Resources/Properties }
+            \pdfdict_if_gexist:nF { backend_Page\l_@@_tmpa_tl/Resources/Properties }
               {
-                \__pdfgdict_new:n { backend_Page\l_@@_tmpa_tl/Resources/Properties }
+                \pdfdict_gnew:n { backend_Page\l_@@_tmpa_tl/Resources/Properties }
               }
             \__pdfgdict_handler_gput:nxx
               { backend_Page\l_@@_tmpa_tl/Resources/Properties }
@@ -1259,7 +1259,7 @@
   \cs_new:Npn \@@_backend_PageResources_gpush_aux:n #1 %#1 ExtGState etc
     {
       \prop_if_empty:cF
-        { \__pdfgdict_name:n {Page/Resources/#1} }
+        { \pdfdict_gname:n {Page/Resources/#1} }
         {
           \pdfdict_item:ne { #1 }{ \pdf_object_ref:n {Page/Resources/#1}}
         }
@@ -1270,12 +1270,12 @@
        \exp_args:NNx \tex_global:D \tex_pdfpageresources:D
          {
            \prop_if_exist:cT
-             { \__pdfgdict_name:n  { backend_Page#1/Resources/Properties } }
+             { \pdfdict_gname:n  { backend_Page#1/Resources/Properties } }
              {
                /Properties~
                  <<
                    \prop_map_function:cN
-                     { \__pdfgdict_name:n  { backend_Page#1/Resources/Properties } }
+                     { \pdfdict_gname:n  { backend_Page#1/Resources/Properties } }
                      \pdfdict_item:ne
                  >>
              }
@@ -1432,7 +1432,7 @@
         \hbox_set:Nn \l_@@_tmpa_box
           {
             \bool_set_true:N \l_@@_backend_xform_bool
-            \__pdfgdict_gclear:n {xform/Resources/Properties}
+            \prop_gclear:c {\pdfdict_gname:n{Xform/Resources/Properties}}
             #4
           }
         %store the dimensions
@@ -1453,33 +1453,33 @@
           {
             #3
             \int_compare:nNnT
-              { \prop_count:c { \__pdfgdict_name:n {xform/Resources/Properties} } }
+              { \prop_count:c { \pdfdict_gname:n {Xform/Resources/Properties} } }
               >
               { 0 }
               {
                 /Properties~
                   <<
-                    \__pdfgdict_map:n {xform/Resources/Properties}
+                    \pdfdict_gmap:n {Xform/Resources/Properties}
                   >>
               }
 
             \prop_if_empty:cF
-              { \__pdfgdict_name:n {Page/Resources/ExtGState} }
+              { \pdfdict_gname:n {Page/Resources/ExtGState} }
               {
                 /ExtGState~ \pdf_object_ref:n {Page/Resources/ExtGState}
               }
             \prop_if_empty:cF
-              { \__pdfgdict_name:n {Page/Resources/Pattern} }
+              { \pdfdict_gname:n {Page/Resources/Pattern} }
               {
                 /Pattern~ \pdf_object_ref:n {Page/Resources/Pattern}
               }
             \prop_if_empty:cF
-              { \__pdfgdict_name:n {Page/Resources/Shading} }
+              { \pdfdict_gname:n {Page/Resources/Shading} }
               {
                 /Shading~ \pdf_object_ref:n {Page/Resources/Shading}
               }
             \prop_if_empty:cF
-              { \__pdfgdict_name:n {Page/Resources/ColorSpace} }
+              { \pdfdict_gname:n {Page/Resources/ColorSpace} }
               {
                 /ColorSpace~ \pdf_object_ref:n {Page/Resources/ColorSpace}
               }
@@ -1516,7 +1516,7 @@
         \hbox_set:Nn \l_@@_tmpa_box
           {
             \bool_set_true:N \l_@@_backend_xform_bool
-            \__pdfgdict_gclear:n {xform/Resources/Properties}
+            \prop_gclear:c {\pdfdict_gname:n{Xform/Resources/Properties}}
             #4
           }
         \tl_const:cx
@@ -1536,32 +1536,32 @@
           {
             #3
             \int_compare:nNnT
-              {\prop_count:c { \__pdfgdict_name:n {xform/Resources/Properties} }}
+              {\prop_count:c { \pdfdict_gname:n {Xform/Resources/Properties} }}
               >
               { 0 }
               {
                 /Properties~
                   <<
-                    \__pdfgdict_map:n {xform/Resources/Properties}
+                    \pdfdict_gmap:n {Xform/Resources/Properties}
                   >>
               }
             \prop_if_empty:cF
-              { \__pdfgdict_name:n {Page/Resources/ExtGState} }
+              { \pdfdict_gname:n {Page/Resources/ExtGState} }
               {
                 /ExtGState~ \pdf_object_ref:n {Page/Resources/ExtGState}
               }
             \prop_if_empty:cF
-              { \__pdfgdict_name:n {Page/Resources/Pattern} }
+              { \pdfdict_gname:n {Page/Resources/Pattern} }
               {
                 /Pattern~ \pdf_object_ref:n {Page/Resources/Pattern}
               }
             \prop_if_empty:cF
-              { \__pdfgdict_name:n {Page/Resources/Shading} }
+              { \pdfdict_gname:n {Page/Resources/Shading} }
               {
                 /Shading~ \pdf_object_ref:n {Page/Resources/Shading}
               }
             \prop_if_empty:cF
-              { \__pdfgdict_name:n {Page/Resources/ColorSpace} }
+              { \pdfdict_gname:n {Page/Resources/ColorSpace} }
               {
                 /ColorSpace~ \pdf_object_ref:n {Page/Resources/ColorSpace}
               }
@@ -2370,15 +2370,16 @@
 
 \cs_new:Npn \@@_patch_pgfextgs:w  #1/#2<<#3>>#4\q_stop
   {
-    \@@_backend_PageResources_gput:nnn {ExtGState}{#2}{<<#3>>}
+    \exp_args:Nne \@@_backend_PageResources_gput:nnn {ExtGState}{\tl_trim_spaces:n{#2}}{<<#3>>}
   }
 \cs_new:Npn \@@_patch_pgfpatterns:w  #1/#2\space#3\q_stop
   {
-    \exp_args:Nnnx \@@_backend_PageResources_gput:nnn {Pattern}{#2}{#3}
+    \exp_args:Nnxx \@@_backend_PageResources_gput:nnn {Pattern}{\tl_trim_spaces:n{#2}}{#3}
   }
 \cs_new:Npn \@@_patch_pgfcolorspaces:w  #1/#2[#3]#4\q_stop
   {
-    \@@_backend_PageResources_gput:nnn {ColorSpace}{#2}{[#3]}
+    \exp_args:Nne
+    \@@_backend_PageResources_gput:nnn {ColorSpace}{\tl_trim_spaces:n{#2}}{[#3]}
   }
 
 %    \end{macrocode}
