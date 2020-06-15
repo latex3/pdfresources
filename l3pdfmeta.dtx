@@ -104,6 +104,12 @@
   }
 
 \msg_new:nnn {pdf}{unknown-standard}{The~standard~'#1'~is~unknown~and~has~been~ignored}
+
+\msg_new:nnn  { pdf } { setup-after-documentclass }
+              { \token_to_str:N \DeclareDocumentMetaData \c_space_tl
+                should~be~used~only~before~\token_to_str:N\documentclass
+              }
+
 \bool_new:N \g_@@_meta_bool
 
 \keys_define:nn { pdf / setup }

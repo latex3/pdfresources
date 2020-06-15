@@ -86,46 +86,7 @@
               { loading~patch~code }
 \msg_new:nnn  { pdf } { pgf-too-late }
               { pgf~is~already~loaded.~Patching~not~possible.}
-\msg_new:nnn  { pdf } { empty-value }
-              { The~value~for~#1~is~empty~and~will~be~ignored }
-\msg_new:nnn  { pdf } { wrong-path }
-              { This~resource~path~#1~doesn't~exist~--~perhaps~a~typo? }
 
-\msg_new:nnnn { pdf } { pagesattr-changed }
-              {
-                The~content~of~pagesattr ~has~changed.~
-                Check~if~it~is~correct.
-              }
-              {
-                This~is~probably~due~to~some~package~or~command~using~the~
-                primitive~\token_to_str:N\pdfpagesattr\c_space_tl
-                or~an~equivalent~command~instead~of~the~expl3~interface.
-              }
-\msg_new:nnnn { pdf }{ pageattr-changed }
-              {
-                The~content~of~pageattr ~has~changed.~
-                Check~if~it~is~correct.
-              }
-              {
-                This~is~probably~due~to~some~package~or~command~using~the~
-                primitive~\token_to_str:N\pdfpageattr\c_space_tl
-                or~an~equivalent~command~instead~of~the~expl3~interface.
-              }
-\msg_new:nnn  { pdf } { setup-after-documentclass }
-              { \token_to_str:N \DeclareDocumentMetaData \c_space_tl
-                should~be~used~only~before~\token_to_str:N\documentclass
-              }
-\msg_new:nnn  { pdf } { object-compression-disabled }
-              { object~compression~is~not~supported~in~pdf~version~#1 }
-\msg_new:nnn  { pdf } { catalog-special }
-              {
-                values~to~the~catalog~entry~#1~should~be~added~with~
-                \token_to_str:N\pdfgdict_gput:nnn
-              }
-\msg_new:nnn  { pdf } { catalog-unknown }
-              {
-                inserting~unknown~/#1~into~the~catalog
-              }
 % pdfdict module
 %    \end{macrocode}
 % \section{Preparation/helper Code}
