@@ -110,6 +110,7 @@
 % it contains slashes, spaces or other chars not allowed in a PDF name.
 % \Arg{value} should be a valid PDF value for this name in the
 % target dictionary. The value is \emph{not} converted nor escaped automatically.
+% If the value is blank nothing is added to the dictionary.
 %
 % When adding a value keep in mind that the expansion behaviour
 % of the backends can differ. Some backends expand a
@@ -188,13 +189,14 @@
 % \end{function}
 % \begin{function}[EXP,added = 2020-06-14]
 %   {
-%     \pdfdict_item:nn, \pdfdict_item:ne,
+%     \pdfdict_item:nn, \pdfdict_item:ne, \pdfdict_item:nx,
 %   }
 %   \begin{syntax}
 %     \cs{pdfdict_item:nn} \Arg{name} \Arg{value}
 %   \end{syntax}
 %   This outputs the arguments as needed in a PDF dictionary by adding a slash
-%   before the name: |/|\Arg{name} \Arg{value}. It doesn't do any conversion or
+%   before the name and adding a space before the value:
+%   |/|\Arg{name}| |\Arg{value}. It doesn't do any conversion or
 %   escaping. It does nothing if \Arg{value} is empty.
 % \end{function}
 % \end{documentation}
@@ -229,74 +231,50 @@
     The~#2~dictionary~'#1'~is~already~defined.
   }
 \msg_new:nnn  { pdfdict } { empty-value }
-              { The~value~for~#1~is~empty~and~will~be~ignored }
+              { The~value~#1~for~#2~is~blank~and~will~be~ignored }
+
 
 %    \end{macrocode}
-% \subsection{User commands}
-% \begin{macro}{\pdfdict_new:n,\pdfdict_gnew:n}
+
+
+% \subsection{Creating dictionaries}
+% \begin{variable}
+%    {\g_@@_names_seq,\g_@@_gnames_seq}
+% Two seq to store the used names for diagnostics.
 %    \begin{macrocode}
-\cs_new_protected:Npn \pdfdict_new:n #1
-  {
-    \@@_new:n {#1}
-  }
-
-\cs_new_protected:Npn \pdfdict_gnew:n #1
-  {
-    \@@_gnew:n {#1}
-  }
+%<*package>
+\seq_new:N \g_@@_names_seq
+\seq_new:N \g_@@_gnames_seq
+%</package>
 %    \end{macrocode}
-% \end{macro}
-
-
-% \subsection{Internal dictionary Code}
-
-% \begin{macro}{\@@_item:nn,\@@_item:ne,\@@_item:nx}
-% Commands to output dict entries: The arguments are \meta{name}\meta{value}.
-% \meta{name} should be a valid pdf name without the slash.
-% The commands don't check if the arguments are empty or valid. This should be done
-% in the pdf layer at the input.
-% The command is used in the mapping command, so normally the name
-% is already escaped!
-% If the value is blank nothing is output.
-
-%    \begin{macrocode}
-\cs_new:Npn \@@_item:nn #1 #2 { \tl_if_blank:nF {#2} { /#1~#2~} } %name, value
-\cs_generate_variant:Nn \@@_item:nn {ne,nx}
-%    \end{macrocode}
-% \end{macro}
-% \begin{macro}{ \pdfdict_item:nn, \pdfdict_item:nx, \pdfdict_item:ne }
-%    \begin{macrocode}
-\cs_set_eq:NN \pdfdict_item:nn \@@_item:nn
-\cs_generate_variant:Nn \pdfdict_item:nn {ne,nx}
-%    \end{macrocode}
-% \end{macro}
+% \end{variable}
+%
 % \begin{macro}
 %   {
-%    \@@_name:n,
-%    \@@_gname:n,
-%    \@@_new:n,
-%    \@@_gnew:n,
-%    \g_@@_names_seq,
-%    \g_@@_gnames_seq
+%    \@@_name:n, \pdfdict_name:n,
+%    \@@_gname:n,\pdfdict_gname:n,
+%    \@@_new:n,  \pdfdict_new:n,
+%    \@@_gnew:n, \pdfdict_gnew:n
 %   }
+%
 %   This are the commands to create new dictionaries and to access their internal
 %   name.
 %    \begin{macrocode}
-\seq_new:N \g_@@_names_seq
-\seq_new:N \g_@@_gnames_seq
-
+%<*package>
 %local
-\cs_new:Npn \@@_name:n #1 % path name without the leading /
+\cs_new:Npn \@@_name:n #1  % #1 dictionary name
   {
     l_@@_/#1_prop
   }
 \cs_set_eq:NN \pdfdict_name:n \@@_name:n
+
 %global
-\cs_new:Npn \@@_gname:n #1 % path name without the leading /
+\cs_new:Npn \@@_gname:n #1 % #1 dictionary name
   {
     g_@@_/#1_prop
   }
 \cs_set_eq:NN \pdfdict_gname:n \@@_gname:n
+
 %local
 \cs_new_protected:Npn \@@_new:n #1
   {
@@ -308,11 +286,13 @@
           { \tl_to_str:n {#1}}
           { local }
        }
-      {
-        \prop_new:c  { \@@_name:n { #1 } }
-        \seq_gput_right:Nn \g_@@_names_seq { #1 }
-      }
+       {
+         \prop_new:c  { \@@_name:n { #1 } }
+         \seq_gput_right:Nn \g_@@_names_seq { #1 }
+       }
   }
+
+\cs_set_eq:NN \pdfdict_new:n \@@_new:n
 
 %global
 \cs_new_protected:Npn \@@_gnew:n #1
@@ -330,204 +310,312 @@
         \seq_gput_right:Nn \g_@@_gnames_seq { #1 }
       }
   }
-
-% test existence
+\cs_set_eq:NN \pdfdict_gnew:n \@@_gnew:n
+%</package>
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}
+%   {
+%     \@@_if_exist:n,  \pdfdict_if_exist:n,
+%     \@@_if_gexist:n, \pdfdict_if_gexist:n,
+%   }
+%
+% Existence tests.
+%    \begin{macrocode}
+%<*package>
+%local
 \prg_new_conditional:Npnn \@@_if_exist:n #1 { p , T , F , TF }
   {
     \prop_if_exist:cTF
-      { \@@_name:n { #1 } }
-      { \prg_return_true: }
+      { \@@_name:n { #1 }  }
+      { \prg_return_true:  }
       { \prg_return_false: }
   }
-\prg_set_eq_conditional:NNn \pdfdict_if_exist:n \@@_if_exist:n { p , T , F , TF }
+\prg_set_eq_conditional:NNn
+  \pdfdict_if_exist:n \@@_if_exist:n { p , T , F , TF }
 
-% test existence
+%global
 \prg_new_conditional:Npnn \@@_if_gexist:n #1 { p , T , F , TF }
   {
     \prop_if_exist:cTF
       { \@@_gname:n { #1 } }
-      { \prg_return_true: }
+      { \prg_return_true:  }
       { \prg_return_false: }
   }
 
-\prg_set_eq_conditional:NNn \pdfdict_if_gexist:n \@@_if_gexist:n { p , T , F , TF }
-
+\prg_set_eq_conditional:NNn
+  \pdfdict_if_gexist:n \@@_if_gexist:n { p , T , F , TF }
+%</package>
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}
+%   {
+%     \@@_if_empty:n,  \pdfdict_if_empty:n,
+%     \@@_if_gempty:n, \pdfdict_if_gempty:n,
+%   }
+%
+% Tests for emptiness.
+%    \begin{macrocode}
+%<*package>
 \prg_new_conditional:Npnn \@@_if_empty:n #1 { p , T , F , TF }
   {
     \prop_if_empty:cTF
-      { \@@_name:n { #1 }}
-      { \prg_return_true: }
+      { \@@_name:n { #1 }  }
+      { \prg_return_true:  }
       { \prg_return_false: }
   }
 
-\prg_set_eq_conditional:NNn \pdfdict_if_empty:n \@@_if_empty:n { p , T , F , TF }
+\prg_set_eq_conditional:NNn
+  \pdfdict_if_empty:n \@@_if_empty:n { p , T , F , TF }
 
 \prg_new_conditional:Npnn \@@_if_gempty:n #1 { p , T , F , TF }
   {
     \prop_if_empty:cTF
-      { \@@_gname:n { #1 }}
-      { \prg_return_true: }
+      { \@@_gname:n { #1 } }
+      { \prg_return_true:  }
       { \prg_return_false: }
   }
 
-\prg_set_eq_conditional:NNn \pdfdict_if_gempty:n \@@_if_empty:n { p , T , F , TF }
+\prg_set_eq_conditional:NNn
+  \pdfdict_if_gempty:n \@@_if_gempty:n { p , T , F , TF }
 
-
+%</package>
 %    \end{macrocode}
 %  \end{macro}
-%  \begin{macro}{
-%                \@@_put:nnn,\@@_gput:nnn,
-%                \pdfdict_put:nnn,\pdfdict_gput:nnn,
-%                \@@_get:nnN,
-%                \@@_remove:nn,
-%                \@@_show:n
-%                }
-%
+%  \begin{macro}
+%    {
+%      \@@_item:nn,\@@_item:ne,\@@_item:nx,
+%      \pdfdict_item:nn, \pdfdict_item:nx, \pdfdict_item:ne
+%    }
+% Commands to output dict entries: The arguments are \meta{name}\meta{value}.
+% \meta{name} should be a valid pdf name without the slash. The commands don't
+% do any escaping. (It expects that the name has been escaped then the value
+% has been stored into the dictionary).
+% The commands don't check if the arguments are valid but if the value
+% is blank nothing is output. The commands are expandable if the content is.
+
 %    \begin{macrocode}
-
-
-\cs_new_protected:Npn \@@_put:nnn #1 #2 #3  %#1 path, #2 name, #3 value
+%<*package>
+\cs_new:Npn \@@_item:nn #1 #2 %#1 name, #2 value
   {
-    \tl_if_empty:nTF { #3 }
+    \tl_if_blank:nF {#2} { /#1~#2~ }
+  }
+\cs_generate_variant:Nn \@@_item:nn {ne,nx}
+
+\cs_set_eq:NN \pdfdict_item:nn \@@_item:nn
+\cs_generate_variant:Nn \pdfdict_item:nn {ne,nx}
+
+%</package>
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}
+%   {
+%     \@@_put:nnn, \pdfdict_put:nnn,
+%     \@@_gput:nnn,\pdfdict_gput:nnn
+%   }
+% These are the commands to store values into the dictionaries.
+% The main difference to adding values to a normal property list is,
+% that the keys are converted with \cs{str_convert_pdfname:n}
+% and that empty values are ignored.
+%    \begin{macrocode}
+%<*package>
+\cs_new_protected:Npn \@@_put:nnn #1 #2 #3  %#1 dict, #2 name, #3 value
+  {
+    \tl_if_blank:nTF { #3 }
       {
-        \msg_none:nnn { pdfdict }{ empty-value }{ /#1/#2 }
+        \msg_none:nnnn { pdfdict }{ empty-value }{ #2 } { #1 }
       }
       {
-       \@@_if_exist:nTF { #1 }
-         {
-          \exp_args:Nnx \prop_put:cnn
-             { \@@_name:n { #1 } }{ \str_convert_pdfname:n { #2 } } { #3 }
-         }
-         {
-           \msg_error:nnnn { pdfdict } { unknown-dict } { #1 } { local }
-         }
+        \@@_if_exist:nTF { #1 }
+          {
+            \exp_args:Nnx \prop_put:cnn
+              { \@@_name:n { #1 } }{ \str_convert_pdfname:n { #2 } } { #3 }
+          }
+          {
+            \msg_error:nnnn { pdfdict } { unknown-dict } { #1 } { local }
+          }
       }
   }
 
-\cs_set_eq:NN \pdfdict_put:nnn \@@_put:nnn
 
+\cs_set_eq:NN \pdfdict_put:nnn \@@_put:nnn
 \cs_generate_variant:Nn \pdfdict_put:nnn {nnx,nno}
 
-\cs_new_protected:Npn \@@_gput:nnn #1 #2 #3  %#1 path, #2 name, #3 value
+\cs_new_protected:Npn \@@_gput:nnn #1 #2 #3  %#1 dict, #2 name, #3 value
   {
     \tl_if_empty:nTF { #3 }
       {
-        \msg_none:nnn { pdfdict }{ empty-value }{ /#1/#2 }
+        \msg_none:nnn { pdfdict }{ empty-value }{ #2 } { #1 }
       }
       {
-       \@@_if_gexist:nTF { #1 }
-         {
-          \exp_args:Nnx \prop_gput:cnn
-             { \@@_gname:n { #1 } }{ \str_convert_pdfname:n { #2 } } { #3 }
-         }
-         {
-           \msg_error:nnnn { pdfdict } { unknown-dict } { #1 } { global }
-         }
+        \@@_if_gexist:nTF { #1 }
+          {
+            \exp_args:Nnx \prop_gput:cnn
+              { \@@_gname:n { #1 } }{ \str_convert_pdfname:n { #2 } } { #3 }
+          }
+          {
+            \msg_error:nnnn { pdfdict } { unknown-dict } { #1 } { global }
+          }
       }
   }
 
 \cs_set_eq:NN \pdfdict_gput:nnn \@@_gput:nnn
 \cs_generate_variant:Nn \pdfdict_gput:nnn {nnx,nno}
+%</package>
+%    \end{macrocode}
+% \end{macro}
 
-\cs_new_protected:Npn \@@_get:nnN  #1 #2 #3 %path,key,macro
-  {
-    \prop_get:cnN
-      { \@@_name:n { #1 } }
-      { #2 } #3
-  }
-
-
-\cs_new_protected:Npn \@@_remove:nn #1 #2 %path,key
+% \begin{macro}
+%   {
+%     \@@_get:nnN, \pdfdict_get:nnN,
+%     \@@_gget:nnN,\pdfdict_gget:nnN
+%   }
+% Recover the values. The name must be first escaped to match the stored name.
+%    \begin{macrocode}
+%<*package>
+\cs_new_protected:Npn \@@_get:nnN  #1 #2 #3 %dict,key,macro
   {
     \@@_if_exist:nTF { #1 }
-          {
-            \exp_args:Nnx \prop_remove:cn
-              { \@@_name:n { #1 } }{ \str_convert_pdfname:n { #2 } }
-          }
-          {
-            \msg_error:nnnn { pdfdict } { unknown-dict } { #1 } {local}
-          }
+      {
+        \exp_args:Nnx \prop_get:cnN
+          { \@@_name:n { #1 } }
+          { \str_convert_pdfname:n { #2 } } #3
+      }
+      {
+        \msg_error:nnnn { pdfdict } { unknown-dict } { #1 } { local }
+      }
+  }
+
+\cs_set_eq:NN \pdfdict_get:nnN \@@_get:nnN
+
+\cs_new_protected:Npn \@@_gget:nnN  #1 #2 #3 %dict,key,macro
+  {
+    \@@_if_gexist:nTF { #1 }
+      {
+        \exp_args:Nnx \prop_get:cnN
+          { \@@_gname:n { #1 } }
+          { \str_convert_pdfname:n { #2 } } #3
+      }
+      {
+        \msg_error:nnnn { pdfdict } { unknown-dict } { #1 } { global }
+      }
+  }
+
+\cs_set_eq:NN \pdfdict_gget:nnN \@@_gget:nnN
+
+%</package>
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}
+%   {
+%     \@@_remove:nnN, \pdfdict_remove:nnN,
+%     \@@_gremove:nnN,\pdfdict_gremove:nnN
+%   }
+% This removes a name/value pair from a dictionary.
+% The name has to be passed through the escaping.
+%    \begin{macrocode}
+%<*package>
+
+\cs_new_protected:Npn \@@_remove:nn #1 #2 %dict,name
+  {
+    \@@_if_exist:nTF { #1 }
+      {
+        \exp_args:Nnx \prop_remove:cn
+          { \@@_name:n { #1 } }{ \str_convert_pdfname:n { #2 } }
+      }
+      {
+        \msg_error:nnnn { pdfdict } { unknown-dict } { #1 } {local}
+      }
   }
 \cs_set_eq:NN \pdfdict_remove:nn \@@_remove:nn
 
-\cs_new_protected:Npn \@@_gremove:nn #1 #2 %path,key
+\cs_new_protected:Npn \@@_gremove:nn #1 #2 %dict,name
   {
     \@@_if_gexist:nTF { #1 }
-          {
-            \exp_args:Nnx \prop_gremove:cn
-              { \@@_gname:n { #1 } }{ \str_convert_pdfname:n { #2 } }
-          }
-          {
-            \msg_error:nnnn { pdfdict } { unknown-dict } { #1 } {global}
-          }
+       {
+         \exp_args:Nnx \prop_gremove:cn
+           { \@@_gname:n { #1 } }{ \str_convert_pdfname:n { #2 } }
+       }
+       {
+         \msg_error:nnnn { pdfdict } { unknown-dict } { #1 } {global}
+       }
   }
 
 \cs_set_eq:NN \pdfdict_gremove:nn \@@_gremove:nn
-
-\cs_new_protected:Npn \@@_show:Nn #1#2
+%</package>
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}
+%   { \@@_show:Nn, \pdfdict_show:n }
+% This allows to show the content of dictionaries. It also displays if a
+% dictionary is local or global. If both exists both are shown.
+%    \begin{macrocode}
+%<*package>
+\cs_new_protected:Npn \@@_show:Nn #1#2 %#1 message command, #2 dict
   {
     \prop_if_exist:cT { \@@_name:n { #2 } }
        {
          #1
-            { pdfdict } { show-dict }
+            { pdfdict }
+            { show-dict }
             { \tl_to_str:n {#2} }
             { \prop_map_function:cN {\@@_name:n { #2 }} \msg_show_item:nn }
-            { } { }
+            { local }
+            { }
        }
     \prop_if_exist:cT { \@@_gname:n { #2 } }
        {
          #1
-            { pdfdict } { show-dict }
+            { pdfdict }
+            { show-dict }
             { \tl_to_str:n {#2} }
             { \prop_map_function:cN {\@@_gname:n { #2 }} \msg_show_item:nn }
-            { } { }
+            { global }
+            { }
        }
     \bool_if:nF {\prop_if_exist_p:c {\@@_gname:n { #2 }} || \prop_if_exist_p:c {\@@_name:n { #2 }} }
        {
-         #1 { pdfdict } { unknown-dict } {#2}{global~or~local}{}{}
+         #1 { pdfdict } { unknown-dict } { #2 } { global~or~local }{}{}
        }
   }
 \cs_new_protected:Npn \pdfdict_show:n #1
   {
     \@@_show:Nn \msg_show:nnxxxx {#1}
   }
+%</package>
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{ \@@_map:n, \@@_gmap:n }
+% \begin{macro}
+%   {
+%     \@@_map:n, \@@_gmap:n
+%   }
 % \cs{@@_map:n} and \cs{@@_gmap:n} output a prop as needed in a dictionary:
 %  as a list of /\meta{key} \meta{value} pairs.
+% \begin{NOTE}{UF}
+%  !! is e-expansion the right thing?
+% \end{NOTE}
 %    \begin{macrocode}
-% !! is e-expansion the right thing?
-\cs_new:Npn \@@_map:n #1 %path
+%<*package>
+\cs_new:Npn \@@_map:n #1 %dict
   {
     \prop_map_function:cN { \@@_name:n { #1 } } \@@_item:ne
   }
 
-\cs_new:Npn \@@_gmap:n #1 %path
+\cs_set_eq:NN \pdfdict_map:n \@@_map:n
+
+\cs_new:Npn \@@_gmap:n #1 %dict
   {
     \prop_map_function:cN { \@@_gname:n { #1 } } \@@_item:ne
   }
-%    \end{macrocode}
-% \end{macro}
-%
-%    \begin{macrocode}
-\cs_set_eq:NN \pdfdict_map:n \@@_map:n
+
 \cs_set_eq:NN \pdfdict_gmap:n \@@_gmap:n
-%    \end{macrocode}
-%
-%    \begin{macrocode}
-
-\cs_new_protected:Npn \pdfdict_get:nnN #1 #2 #3
-  {
-    \@@_get:nnN { #1 }{ #2 } #3
-  }
-
-%    \end{macrocode}
-%    \begin{macrocode}
 %</package>
 %    \end{macrocode}
-%
+% \end{macro}
 % \end{implementation}
 %
 % \PrintIndex
