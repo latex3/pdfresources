@@ -62,18 +62,7 @@
 %
 % Local and global dictionaries can be created and for a number of commands both
 % a local and a global version exists.
-% \begin{NOTE}{UF}
-% Check which (local) dictionaries should be predefined.
-% Check also if the reset idea makes sense. (Removed for now)
-% The following tabular summarize the dictionaries
-%
-% \begin{tabular}{lll}
-%  xform\ldots                           & argument of \cs{pdfxform} &local\\
-%  annot\ldots                           & argument of \cs{pdfannot},
-%                                          \cs{pdfstartlink} &local\\
-%  trans                                 & for transitions (used in hyperref)
-%  \end{tabular}
-% \end{NOTE}
+
 % \subsection{User Commands}
 % \begin{function}[added = 2020-04-21]
 %   {\pdfdict_new:n,\pdfdict_gnew:n}
@@ -85,6 +74,18 @@
 % small wrappers around \cs{prop_new:c}, but use a special name space.
 % It is possible to create a local and a global with the same name, but it is
 % recommended to use lowercase for global and uppercase for global dictionaries.
+% \end{function}
+% \begin{function}[added = 2020-06-16]
+%   {\pdfdict_set_eq:nm,\pdfdict_gset_eq:nn}
+%   \begin{syntax}
+%     \cs{pdfdict_set_eq:nn}  \Arg{local dictionary name_1} \Arg{local dictionary name_2}\\
+%     \cs{pdfdict_gset_eq:nn} \Arg{global dictionary name_1}\Arg{global dictionary name_2}
+%   \end{syntax}
+% This functions copy \Arg{local/global dictionary name_2} into
+% \Arg{local/global dictionary name_1} locally or globally. If the
+% dictionary \Arg{local/global dictionary name_1} doesn't exist yet, it will be created.
+% If \Arg{local/global dictionary name_2} doesn't exist yet, an error will be raised.
+%
 % \end{function}
 % \begin{function}[EXP,added = 2020-06-14]
 %   {\pdfdict_name:n,\pdfdict_gname:n}
@@ -199,6 +200,21 @@
 %   |/|\Arg{name}| |\Arg{value}. It doesn't do any conversion or
 %   escaping. It does nothing if \Arg{value} is empty.
 % \end{function}
+% \subsection{Predeclared dictionaries}
+% The Module predeclares a number of dictionaries and fills them with
+% some standard values. This dictionaries can be used and copied.
+% \begin{NOTE}{UF}
+% Check which (local) dictionaries should be predefined.
+% Check also if the reset idea makes sense. (Removed for now)
+% The following tabular summarize the dictionaries
+%
+% \begin{tabular}{lll}
+%  xform\ldots                           & argument of \cs{pdfxform} &local\\
+%  annot\ldots                           & argument of \cs{pdfannot},
+%                                          \cs{pdfstartlink} &local\\
+%  trans                                 & for transitions (used in hyperref)
+%  \end{tabular}
+% \end{NOTE}
 % \end{documentation}
 %
 % \begin{implementation}
@@ -314,7 +330,48 @@
 %</package>
 %    \end{macrocode}
 % \end{macro}
-%
+% \begin{macro}
+%   {
+%     \@@_set_eq:nm,\pdfdict_set_eq:nn,
+%     \@@_gset_eq:nm,\pdfdict_gset_eq:nn
+%   }
+%    \begin{macrocode}
+%<*package>
+\cs_new_protected:Npn \@@_set_eq:nn #1 #2
+  {
+    \@@_if_exist:nTF { #2 }
+      {
+        \@@_if_exist:nF { #1 }
+          {
+            \@@_new:n { #1 }
+          }
+        \prop_set_eq:cc { \@@_name:n {#1} }{ \@@_name:n {#2} }
+      }
+      {
+         \msg_error:nnnn { pdfdict } { unknown-dict } { #1 } { local }
+      }
+  }
+
+\cs_set_eq:NN \pdfdict_set_eq:nn \@@_set_eq:nn
+
+\cs_new_protected:Npn \@@_gset_eq:nn #1 #2
+  {
+    \@@_if_gexist:nTF { #2 }
+      {
+        \@@_if_gexist:nF { #1 }
+          {
+            \@@_gnew:n { #1 }
+          }
+        \prop_set_eq:cc { \@@_gname:n {#1} }{ \@@_gname:n {#2} }
+      }
+      {
+         \msg_error:nnnn { pdfdict } { unknown-dict } { #1 } { global }
+      }
+  }
+
+\cs_set_eq:NN \pdfdict_gset_eq:nn \@@_gset_eq:nn  
+%</package>
+%    \end{macrocode}
 % \begin{macro}
 %   {
 %     \@@_if_exist:n,  \pdfdict_if_exist:n,
