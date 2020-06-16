@@ -256,7 +256,7 @@
 %!!!!!!! check the name. To which module does this belong??
 \@@_BACKEND_lastpage_shipout_gput:n
   {
-    \@@_PageResources_gpush:          %ExtGState etc
+    \@@_backend_PageResources_obj_gpush:          %ExtGState etc
   }
 
 \@@_BACKEND_end_run_gput:n
@@ -646,7 +646,7 @@
 %</dvips>
 %    \end{macrocode}
 % \end{macro}
-%<*package>
+%
 % \subsubsection{\enquote{Page} and \enquote{ThisPage} / management}
 % \begin{NOTE}{UF}
 % Open is the question if one need a command to set attribute on a page by page number.
@@ -654,8 +654,7 @@
 % See also https://tex.stackexchange.com/questions/479812/extension-of-rotating-package-to-set-pdf-rotation
 % (should work now)
 % \end{NOTE}
-% moved to l3pdfgdict ...
-%</package>
+% code moved to l3pdfgdict ...
 %
 % \subsection{\enquote{Page/Resources}: ExtGState, ColorSpace, Shading, Pattern }
 % \begin{NOTE}{UF}
@@ -681,7 +680,7 @@
 % \item a pdf name without slash
 % \item value
 % \end{arguments}
-% \begin{macro}{\@@_PageResources_gpush:}
+% \begin{macro}{\@@_backend_PageResources_obj_gpush:}
 % This pushes out the objects. It is a no-op with xdvipdfmx and dvips.
 %    \begin{macrocode}
 % backend commands the command to fill the register
@@ -705,54 +704,55 @@
 % pdftex and luatex
 %<*pdfmode>
  %create the backend objects:
-  \clist_map_inline:Nn \c_@@_backend_PageResources_clist
-    {
-      \@@_backend_object_new:nn {Page/Resources/#1} {dict}
-      \cs_if_exist:NT \tex_directlua:D
-        {
-          \tex_directlua:D
-            {
-              l3kernel.@@.object["Page/Resources/#1"]
-              =
-              "\@@_backend_object_ref:n{Page/Resources/#1}"
-            }
-        }
-     }
- %values are only stored in a prop and will be output at end document.
-  \sys_if_engine_luatex:TF
-    {
-      \cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
-        {
-          \pdfdict_gput:nnn {Page/Resources/#1} { #2 }{ #3 }
-          % luatex must also trigger the lua side
-          \tex_latelua:D{l3kernel.@@.Page.Resources.#1=true}
-          \tex_latelua:D
-            {
-              l3kernel.pdf.Page_Resources_gpush(tex.count["g_shipout_readonly_int"])
-            }
-        }
-    }
-    { %pdftex
-      \cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
-        {
-          \pdfdict_gput:nnn {Page/Resources/#1} { #2 }{ #3 }
-        }
-    }
-
- %code for end of document code
- \cs_new_protected:Npn \@@_PageResources_gpush:
-   {
-     \clist_map_inline:Nn \c_@@_backend_PageResources_clist
-       {
-         \prop_if_empty:cF
-           { \pdfdict_gname:n {Page/Resources/##1} }
-           {
-             \@@_backend_object_write:nx
-               { Page/Resources/##1 }
-               { \pdfdict_gmap:n {Page/Resources/##1} }
-           }
+\clist_map_inline:Nn \c_@@_backend_PageResources_clist
+  {
+    \@@_backend_object_new:nn {Page/Resources/#1} {dict}
+    \cs_if_exist:NT \tex_directlua:D
+      {
+        \tex_directlua:D
+          {
+            l3kernel.@@.object["Page/Resources/#1"]
+            =
+            "\@@_backend_object_ref:n{Page/Resources/#1}"
+          }
       }
    }
+ %values are only stored in a prop and will be output at end document.
+\sys_if_engine_luatex:T
+  {
+    \cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
+      {
+        \pdfdict_gput:nnn {Page/Resources/#1} { #2 }{ #3 }
+        % luatex must also trigger the lua side
+        \tex_latelua:D{l3kernel.@@.Page.Resources.#1=true}
+        \tex_latelua:D
+          {
+            l3kernel.pdf.Page_Resources_gpush(tex.count["g_shipout_readonly_int"])
+          }
+      }
+  }
+\sys_if_engine_pdftex:T
+  { %pdftex
+    \cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
+      {
+        \pdfdict_gput:nnn {Page/Resources/#1} { #2 }{ #3 }
+      }
+  }
+
+%code for end of document code
+\cs_new_protected:Npn \@@_backend_PageResources_obj_gpush:
+  {
+    \clist_map_inline:Nn \c_@@_backend_PageResources_clist
+      {
+        \prop_if_empty:cF
+          { \pdfdict_gname:n {Page/Resources/##1} }
+          {
+            \@@_backend_object_write:nx
+              { Page/Resources/##1 }
+              { \pdfdict_gmap:n {Page/Resources/##1} }
+          }
+     }
+  }
 %</pdfmode>
 % xdvipdfmx
 % \special{pdf:pageresources<<#1>>} doesn't work correctly with object names ...
@@ -760,38 +760,38 @@
 % so we use \special{pdf:put @resources}
 % this must be issued on every page!
 %<*xdvipdfmx>
-  %objects should not only be created but also "initialized"
-    \clist_map_inline:Nn \c_@@_backend_PageResources_clist
-      {
-        \@@_backend_object_new:nn   { Page/Resources/#1 } { dict }
-        \@@_backend_object_write:nn { Page/Resources/#1 } {}
-      }
+%objects should not only be created but also "initialized"
+\clist_map_inline:Nn \c_@@_backend_PageResources_clist
+  {
+    \@@_backend_object_new:nn   { Page/Resources/#1 } { dict }
+    \@@_backend_object_write:nn { Page/Resources/#1 } {}
+  }
 
-    \cs_new_protected:Npn \@@_backend_PageResources:n #1
+\cs_new_protected:Npn \@@_backend_PageResources:n #1
+  {
+    \@@_backend:n {put~@resources~<<#1>>}
+  }
+\cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
+  {
+   % this is not used for output, but there is a test if the resource is empty
+   \prop_gput:cnn { \pdfdict_gname:n {Page/Resources/#1} } { #2 }{ #3 }
+   %objects are not filled with \pdf_object_write as this is not additive!
+    \@@_backend:x
       {
-        \@@_backend:n {put~@resources~<<#1>>}
+        put~\@@_backend_object_ref:n {Page/Resources/#1}<</#2~#3>>
       }
-    \cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
-      {
-       % this is not used for output, but there is a test if the resource is empty
-       \prop_gput:cnn { \pdfdict_gname:n {Page/Resources/#1} } { #2 }{ #3 }
-       %objects are not filled with \pdf_object_write as this is not additive!
-        \@@_backend:x
-          {
-            put~\@@_backend_object_ref:n {Page/Resources/#1}<</#2~#3>>
-          }
-      }
+  }
 
-    \cs_new_protected:Npn \@@_PageResources_gpush: {}
+\cs_new_protected:Npn \@@_backend_PageResources_obj_gpush: {}
 %</xdvipdfmx>
 %<*dvips>
 % dvips unneeded, or no-op
-    \cs_new_protected:Npn \@@_backend_PageResources:n #1 {}
-    \cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
-      { %only for the show command TEST!!
-        \pdfdict_gput:nnn {Page/Resources/#1} { #2 }{ #3 }
-      }
-    \cs_new_protected:Npn \@@_PageResources_gpush: {}
+\cs_new_protected:Npn \@@_backend_PageResources:n #1 {}
+\cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
+  { %only for the show command TEST!!
+    \pdfdict_gput:nnn {Page/Resources/#1} { #2 }{ #3 }
+  }
+\cs_new_protected:Npn \@@_backend_PageResources_obj_gpush: {}
 %</dvips>
 %    \end{macrocode}
 % \end{macro}
@@ -870,7 +870,9 @@
 % link annotations (see the pdfannot module) which are written in varying
 % numbers to the PDF and allow to set their features and change them locally
 % if needed. The predefined dictionaries are
-%
+% \begin{NOTE}{UF}
+% sync that with the table in pdfdict ...
+% \end{NOTE}
 % \begin{tabular}{lp{6cm}}
 %  \multicolumn{2}{l}{annotation related: here are
 %                     \texttt{Border} and \texttt{C} (color)}\\
@@ -886,7 +888,7 @@
 %
 % \subsection{BDC operator / Properties resource}
 % \begin{NOTE}{UF}
-%  we still need a switch for the case that the resource should be added to
+%  we need a switch for the case that the resource should be added to
 %  xform resource instead of a page resources, see pdfbase.sty
 % - xdvipdfmx: looks fine, the resource is added to the xform resource automatically
 % - pdftex should now work okay too
@@ -942,7 +944,7 @@
 %     \cs{pdf_emc:}
 %   \end{syntax}
 %    This command closes the  BDC marked content operator opened with \cs{pdf_bdc:nn}.
-%    It should be one the same page as the bdc-command.
+%    It should be on the same page as the bdc-command.
 %
 %   \begin{verbatim}
 %   \pdf_object_new:nn   {objA}{dict}
@@ -965,7 +967,8 @@
 % \cs{@@_backend_bdc:nn}, \cs{@@_backend_bmc:n} and \cs{@@_backend_emc:}
 %  are the backend command that
 %  create the bdc/emc marker and store the properties.
-% \cs{@@_backend_PageResources_gpush:n} outputs the /Properties in
+% \cs{@@_backend_PageResources_gpush:n} outputs the /Properties and/or the other
+% resources  in
 % \cs{@@_BACKEND_thispage_shipout_gput:n} for the current page.
 %    \begin{macrocode}
 % pdftex and luatex (and perhaps dvips ...) need to know if there are in a
@@ -977,7 +980,8 @@
 % dvips is easy: create an object, and reference it in the bdc
 % ghostscript will then automatically replace it by a name
 % and add the name to the /Properties dict
-% special variant von accsupp https://chat.stackexchange.com/transcript/message/50831812#50831812
+% special variant von accsupp
+% https://chat.stackexchange.com/transcript/message/50831812#50831812
 %
 \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
   {
@@ -1079,7 +1083,7 @@
           { /#1 ~ /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC }
         \bool_if:NTF \l_@@_backend_xform_bool
           {
-            \exp_args:Nnx\__pdfgdict_handler_gput:nnn
+            \exp_args:Nnx\pdfdict_gput:nnn
               { Xform/Resources/Properties }
               { l3pdf\int_use:N\g_@@_backend_name_int }
               { \@@_backend_object_ref:n { #2 } }
@@ -1103,7 +1107,7 @@
           { /#1 ~ /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC }
         \bool_if:NTF \l_@@_backend_xform_bool
           {
-            \__pdfgdict_handler_gput:nxx
+            \exp_args:Nnx\pdfdict_gput:nnn %no handler needed
               { Xform/Resources/Properties }
               { l3pdf\int_use:N\g_@@_backend_name_int }
               { \@@_backend_object_last: }
@@ -1145,7 +1149,7 @@
         \int_gincr:N\g_@@_backend_resourceid_int
         \bool_if:NTF \l_@@_backend_xform_bool
           {
-            \__pdfgdict_handler_gput:nxx
+            \exp_args:Nnx\pdfdict_gput:nnn %no handler needed
               { Xform/Resources/Properties }
               { l3pdf\int_use:N\g_@@_backend_resourceid_int }
               { \@@_backend_object_ref:n { #2 } }
@@ -1165,7 +1169,7 @@
               {
                 \pdfdict_gnew:n  { backend_Page\l_@@_tmpa_tl/Resources/Properties }
               }
-            \__pdfgdict_handler_gput:nxx
+            \exp_args:Nnx\pdfdict_gput:nnn
               { backend_Page\l_@@_tmpa_tl/Resources/Properties }
               { l3pdf\int_use:N\g_@@_backend_resourceid_int }
               { \@@_backend_object_ref:n{#2} }
@@ -1180,7 +1184,7 @@
         \int_gincr:N\g_@@_backend_resourceid_int
         \bool_if:NTF \l_@@_backend_xform_bool
           {
-            \__pdfgdict_handler_gput:nxx
+            \exp_args:Nnx\pdfdict_gput:nnn
               { Xform/Resources/Properties }
               { l3pdf\int_use:N\g_@@_backend_resourceid_int }
               { \@@_backend_object_last: }
@@ -1200,11 +1204,11 @@
               {
                 \pdfdict_gnew:n { backend_Page\l_@@_tmpa_tl/Resources/Properties }
               }
-            \__pdfgdict_handler_gput:nxx
+            \exp_args:Nnx\pdfdict_gput:nnn
               { backend_Page\l_@@_tmpa_tl/Resources/Properties }
               { l3pdf\int_use:N\g_@@_backend_resourceid_int }
               { \@@_backend_object_last: }
-            %\pdfgdict_show:n { backend_Page\l_@@_tmpa_tl/Resources/Properties }
+            %\pdfdict_show:n { backend_Page\l_@@_tmpa_tl/Resources/Properties }
           }
       }
   \cs_set_protected:Npn \@@_backend_bmc:n #1
@@ -1379,7 +1383,6 @@
 %  \end{arguments}
 %  \begin{macro}{ \@@_backend_xform_use:n, \@@_backend_xform_ref:n }
 %    \begin{macrocode}
-%%pdftex
 %<*pdfmode>
 \sys_if_engine_pdftex:T
   {
@@ -1392,7 +1395,7 @@
         \hbox_set:Nn \l_@@_tmpa_box
           {
             \bool_set_true:N \l_@@_backend_xform_bool
-            \prop_gclear:c {\pdfdict_gname:n{Xform/Resources/Properties}}
+            \prop_gclear:c {\pdfdict_gname:n { Xform/Resources/Properties }}
             #4
           }
         %store the dimensions
@@ -1413,35 +1416,35 @@
           {
             #3
             \int_compare:nNnT
-              { \prop_count:c { \pdfdict_gname:n {Xform/Resources/Properties} } }
+              { \prop_count:c { \pdfdict_gname:n { Xform/Resources/Properties } } }
               >
               { 0 }
               {
                 /Properties~
                   <<
-                    \pdfdict_gmap:n {Xform/Resources/Properties}
+                    \pdfdict_gmap:n { Xform/Resources/Properties }
                   >>
               }
 
             \prop_if_empty:cF
-              { \pdfdict_gname:n {Page/Resources/ExtGState} }
+              { \pdfdict_gname:n { Page/Resources/ExtGState } }
               {
-                /ExtGState~ \pdf_object_ref:n {Page/Resources/ExtGState}
+                /ExtGState~ \pdf_object_ref:n { Page/Resources/ExtGState }
               }
             \prop_if_empty:cF
-              { \pdfdict_gname:n {Page/Resources/Pattern} }
+              { \pdfdict_gname:n { Page/Resources/Pattern } }
               {
-                /Pattern~ \pdf_object_ref:n {Page/Resources/Pattern}
+                /Pattern~ \pdf_object_ref:n { Page/Resources/Pattern }
               }
             \prop_if_empty:cF
-              { \pdfdict_gname:n {Page/Resources/Shading} }
+              { \pdfdict_gname:n { Page/Resources/Shading } }
               {
-                /Shading~ \pdf_object_ref:n {Page/Resources/Shading}
+                /Shading~ \pdf_object_ref:n { Page/Resources/Shading }
               }
             \prop_if_empty:cF
-              { \pdfdict_gname:n {Page/Resources/ColorSpace} }
+              { \pdfdict_gname:n { Page/Resources/ColorSpace } }
               {
-                /ColorSpace~ \pdf_object_ref:n {Page/Resources/ColorSpace}
+                /ColorSpace~ \pdf_object_ref:n { Page/Resources/ColorSpace }
               }
           }
           \l_@@_tmpa_box
@@ -1476,7 +1479,7 @@
         \hbox_set:Nn \l_@@_tmpa_box
           {
             \bool_set_true:N \l_@@_backend_xform_bool
-            \prop_gclear:c {\pdfdict_gname:n{Xform/Resources/Properties}}
+            \prop_gclear:c { \pdfdict_gname:n { Xform/Resources/Properties } }
             #4
           }
         \tl_const:cx
@@ -1496,34 +1499,34 @@
           {
             #3
             \int_compare:nNnT
-              {\prop_count:c { \pdfdict_gname:n {Xform/Resources/Properties} }}
+              {\prop_count:c { \pdfdict_gname:n { Xform/Resources/Properties } }}
               >
               { 0 }
               {
                 /Properties~
                   <<
-                    \pdfdict_gmap:n {Xform/Resources/Properties}
+                    \pdfdict_gmap:n { Xform/Resources/Properties }
                   >>
               }
             \prop_if_empty:cF
-              { \pdfdict_gname:n {Page/Resources/ExtGState} }
+              { \pdfdict_gname:n { Page/Resources/ExtGState } }
               {
-                /ExtGState~ \pdf_object_ref:n {Page/Resources/ExtGState}
+                /ExtGState~ \pdf_object_ref:n { Page/Resources/ExtGState }
               }
             \prop_if_empty:cF
-              { \pdfdict_gname:n {Page/Resources/Pattern} }
+              { \pdfdict_gname:n { Page/Resources/Pattern } }
               {
-                /Pattern~ \pdf_object_ref:n {Page/Resources/Pattern}
+                /Pattern~ \pdf_object_ref:n { Page/Resources/Pattern }
               }
             \prop_if_empty:cF
-              { \pdfdict_gname:n {Page/Resources/Shading} }
+              { \pdfdict_gname:n { Page/Resources/Shading } }
               {
-                /Shading~ \pdf_object_ref:n {Page/Resources/Shading}
+                /Shading~ \pdf_object_ref:n { Page/Resources/Shading }
               }
             \prop_if_empty:cF
-              { \pdfdict_gname:n {Page/Resources/ColorSpace} }
+              { \pdfdict_gname:n { Page/Resources/ColorSpace } }
               {
-                /ColorSpace~ \pdf_object_ref:n {Page/Resources/ColorSpace}
+                /ColorSpace~ \pdf_object_ref:n { Page/Resources/ColorSpace }
               }
           }
           \l_@@_tmpa_box
@@ -1599,21 +1602,21 @@
                {
                  put~ @resources ~
                    <<
-                     /ExtGState~ \pdf_object_ref:n {Page/Resources/ExtGState}
+                     /ExtGState~ \pdf_object_ref:n { Page/Resources/ExtGState }
                    >>
                }
              \@@_backend:x
                {
                  put~ @resources ~
                  <<
-                   /Pattern~ \pdf_object_ref:n {Page/Resources/Pattern}
+                   /Pattern~ \pdf_object_ref:n { Page/Resources/Pattern }
                  >>
                }
              \@@_backend:x
                {
                  put~ @resources ~
                  <<
-                   /Shading~ \pdf_object_ref:n {Page/Resources/Shading}
+                   /Shading~ \pdf_object_ref:n { Page/Resources/Shading }
                  >>
                }
              \@@_backend:x
@@ -1621,7 +1624,7 @@
                  put~ @resources ~
                  <<
                    /ColorSpace~
-                   \pdf_object_ref:n {Page/Resources/ColorSpace}
+                   \pdf_object_ref:n { Page/Resources/ColorSpace }
                  >>
                }
              \exp_args:Nx
@@ -1661,18 +1664,18 @@
   }
 \prg_new_eq_conditional:NNn \pdf_xform_if_exist:n\@@_backend_xform_if_exist:n
   { TF , T , F , p }
-
-%    \end{macrocode}
 %</drivers>
+%    \end{macrocode}
 % \end{macro}
 % \end{macro}
-%<*package>
+%
 %\subsection{Annotations}
 % \begin{NOTE}{UF}
 % The code/naming tries to unify general annotations and the special type of
 % link under a common name.
 % regarding naming and relation of annotation commands see
 % https://github.com/FrankMittelbach/AccessiblePDF/issues/73
+% This should probably be moved to l3annot. Or can it be merged with the xform?
 % \end{NOTE}
 
 %\subsubsection{Annotations / backend}
@@ -1723,6 +1726,7 @@
 %   available with xetex.
 % \end{function}
 %    \begin{macrocode}
+%<*package>
 \cs_new_protected:Npn \pdfannot_box:nnnn #1 #2 #3 #4
   {
     \@@_backend_annotation:nnnn {#1}{#2}{#3}{#4}
@@ -1745,14 +1749,16 @@
         #5
       }
   }
-
-
-
+%</package>
 %    \end{macrocode}
 % \subsection{Annotations, Flags}
 % Every flag should have an associated property that allows to set/clear flag positions by
 % name. The name is \c_pdfannot_flag_#1_prop
+% \begin{NOTE}{UF}
+% not sure about this yes, reconsider (naming, implementation ...)
+% \end{NOTE}
 %    \begin{macrocode}
+%<*package>
 \cs_new_protected:Npn \pdfannot_flag_new:nn #1 #2
   {
     \bitsetReset  { @@_#1_flag }
@@ -1764,57 +1770,57 @@
 
 \pdfannot_flag_new:nn {annot/Link}
   {
-    Invisible = 0,
-    Hidden    = 1,
-    Print     = 2,
-    NoZoom    = 3,
-    NoRotate  = 4,
-    NoView    = 5,
-    ReadOnly  = 6,
-    Locked    = 7,
-    ToggleNoView = 8,
+    Invisible      = 0,
+    Hidden         = 1,
+    Print          = 2,
+    NoZoom         = 3,
+    NoRotate       = 4,
+    NoView         = 5,
+    ReadOnly       = 6,
+    Locked         = 7,
+    ToggleNoView   = 8,
     LockedContents = 9
   }
 
 \pdfannot_flag_new:nn {annot/Field} %it is not really an annot, but we will put
   {                                 % form field in this module.
-    ReadOnly  = 0,
-    Required  = 1,
-    NoExport  = 2,
-    Multiline = 12,     %Tx
-    Password  = 13,
-    NoToggleToOff = 14, %Btn, radio button
-    Radio     = 15,     %Btn: Radio:    15=1, 16=0
-    Pushbutton = 16,    %Btn: Checkbox: 15=0, 16=0
-                        %Btn: Pushbutton: 16=1
-    Combo      = 17,    %Ch: Combo=1 List=0
-    Edit       = 18,    %Ch, Combo=1 -> + edit field
-    Sort       = 19,    %Ch, not relevant for view...
-    FileSelect = 20,    %Tx
-    MultiSelect =21,    %Ch
-    DoNotSpellCheck = 22,%Tx, Ch (if Combo + Edit set)
-    DoNotScroll     = 23,%Tx
-    Comb            = 24,%Tx, requires MaxLen in dict
-    RadiosInUnison  = 25, %Btn Radio
-    RichText        = 25,  %Tx
+    ReadOnly          = 0,
+    Required          = 1,
+    NoExport          = 2,
+    Multiline         = 12,%Tx
+    Password          = 13,
+    NoToggleToOff     = 14,%Btn, radio button
+    Radio             = 15,%Btn: Radio:    15=1, 16=0
+    Pushbutton        = 16,%Btn: Checkbox: 15=0, 16=0
+                           %Btn: Pushbutton: 16=1
+    Combo             = 17,%Ch: Combo=1 List=0
+    Edit              = 18,%Ch, Combo=1 -> + edit field
+    Sort              = 19,%Ch, not relevant for view...
+    FileSelect        = 20,%Tx
+    MultiSelect       = 21,%Ch
+    DoNotSpellCheck   = 22,%Tx, Ch (if Combo + Edit set)
+    DoNotScroll       = 23,%Tx
+    Comb              = 24,%Tx, requires MaxLen in dict
+    RadiosInUnison    = 25,%Btn Radio
+    RichText          = 25,%Tx
     CommitOnSelChange = 26
   }
 
 \pdfannot_flag_new:nn {annot/field/submit}
   {
-    Include/Exclude  = 0,
+    Include/Exclude       = 0,
     IncludeNoValueFields  = 1,
-    ExportFormat  = 2,
-    GetMethod = 3,     % if ExportFormat=0 -> =0 to
-    SubmitCoordinates = 4, % if ExportFormat=0 -> =0 to
-    XFDF = 5,
-    IncludeAppendSaves = 6,
-    IncludeAnnotations = 7,
-    SubmitPDF = 8,
-    CanonicalFormat = 9,
-    ExclNonUserAnnots = 10,
-    ExclFKey = 11,
-    EmbedForm = 12,
+    ExportFormat          = 2,
+    GetMethod             = 3, % if ExportFormat=0 -> =0 to
+    SubmitCoordinates     = 4, % if ExportFormat=0 -> =0 to
+    XFDF                  = 5,
+    IncludeAppendSaves    = 6,
+    IncludeAnnotations    = 7,
+    SubmitPDF             = 8,
+    CanonicalFormat       = 9,
+    ExclNonUserAnnots     = 10,
+    ExclFKey              = 11,
+    EmbedForm             = 12
   }
 
 % #1: type, e.g. annot/Link
@@ -1836,17 +1842,17 @@
   {
     \bitsetGetDec { @@_#1_flag }
   }
-
+%</package>
 %    \end{macrocode}
 % \subsection{Annotations, subtype Widget}\label{pdf:annot:widget}
 % The local dictionary \texttt{annot/Widget} is a sceleton
 % dictionary for this subtype. It currently contains as only entry
 % the subtype setting (the /Type is added by the backend).
 %    \begin{macrocode}
-
+%<*package>
 \pdfdict_new:n   {annot/Widget}
 \pdfdict_put:nnn {annot/Widget}{Subtype}{/Widget}
-
+%</package>
 %    \end{macrocode}
 % \subsection{Annotations, subtype Link}\label{sec:links}
 % Packages like hyperref, ocgx2 and tagpdf all wants to add code
@@ -1892,20 +1898,20 @@
 % \end{variable}
 %
 %    \begin{macrocode}
-
+%<*package>
 \seq_const_from_clist:Nn \c_pdfannot_link_types_seq { URI , GoToR , Launch , GoTo, Named }
 
 \seq_map_inline:Nn \c_pdfannot_link_types_seq
- {
-   \pdfdict_new:n   { annot/Link/#1 }
-   \pdfdict_put:nnn { annot/Link/#1}{ F }{ \pdfannot_flag_use:n { annot/Link} }
-   \hook_new_pair:nn
-     {pdf/annot/Link/#1/before}
-     {pdf/annot/Link/#1/after}
-   \seq_new:c  { l_@@_hook_annot/Link/#1_begin_seq }
-   \seq_new:c  { l_@@_hook_annot/Link/#1_end_seq }
- }
-
+  {
+    \pdfdict_new:n   { annot/Link/#1 }
+    \pdfdict_put:nnn { annot/Link/#1}{ F }{ \pdfannot_flag_use:n { annot/Link} }
+    \hook_new_pair:nn
+      {pdf/annot/Link/#1/before}
+      {pdf/annot/Link/#1/after}
+    \seq_new:c  { l_@@_hook_annot/Link/#1_begin_seq }
+    \seq_new:c  { l_@@_hook_annot/Link/#1_end_seq }
+  }
+%</package>
 %    \end{macrocode}
 
 
@@ -1938,13 +1944,10 @@
 % \end{function}
 %
 %    \begin{macrocode}
+%<*package>
 \cs_new_protected:Nn \pdfannot_link:nnn %#1 type (URI, GoTo etc),
                                         %#2 action spec, #3 link text
   {
-    %\seq_if_exist:cT { l_@@_hook_annot/Link/#1_begin_seq }
-%      {
-%        \seq_use:cn { l_@@_hook_annot/Link/#1_begin_seq }{}
-%      }
     \hook_use:n { pdf/annot/Link/#1/before}
     \mode_leave_vertical:
     \exp_args:Nxx %xetex needs expansion
@@ -1961,12 +1964,9 @@
       }
     #3
     \@@_backend_link_end:
-    %\seq_if_exist:cT { l_@@_hook_annot/Link/#1_end_seq }
-%      {
-%        \seq_use:cn { l_@@_hook_annot/Link/#1_end_seq }{}
-%      }
     \hook_use:n { pdf/annot/Link/#1/after}
   }
+%</package>
 %    \end{macrocode}
 % \begin{function}[added = 2020-03-12]{ \pdfannot_link_begin:nnw, \pdfannot_link_end:n }
 %   \begin{syntax}
@@ -2000,12 +2000,9 @@
 %    \end{verbatim}
 % \end{function}
 %    \begin{macrocode}
+%<*package>
 \cs_new_protected:Npn \pdfannot_link_begin:nnw #1 #2 %#1 type, #2 action spec
   {
-    %\seq_if_exist:cT { l_@@_hook_annot/Link/#1_begin_seq }
-%      {
-%        \seq_use:cn { l_@@_hook_annot/Link/#1_begin_seq }{}
-%      }
     \hook_use:n { pdf/annot/Link/#1/before}
     \exp_args:Nxx %xetex needs expansion
       \@@_backend_link_begin_user:nnw
@@ -2021,12 +2018,9 @@
 \cs_new_protected:Nn \pdfannot_link_end:n %#1 type, e.g. url
   {
     \@@_backend_link_end:
-  %  \seq_if_exist:cT {l_@@_hook_annot/Link/#1_end_seq}
-%      {
-%        \seq_use:cn { l_@@_hook_annot/Link/#1_end_seq }{}
-%      }
     \hook_use:n { pdf/annot/Link/#1/after}
   }
+%</package>
 %    \end{macrocode}
 % \begin{function}[updated = 2020-03-30]{ \pdfannot_link_goto_begin:nw, \pdfannot_link_goto_end: }
 %   \begin{syntax}
@@ -2037,9 +2031,9 @@
 % uses the hooks and dictionary of the |GoTo| link type.
 % \end{function}
 %     \begin{macrocode}
+%<*package>
 \cs_new_protected:Npn \pdfannot_link_goto_begin:nw #1 %#1 destination
   {
-    %\seq_use:cn { l_@@_hook_annot/Link/GoTo_begin_seq }{}
     \hook_use:n { pdf/annot/Link/GoTo/before}
     \exp_args:Nxx %xetex needs expansion
     \@@_backend_link_begin_goto:nnw
@@ -2053,17 +2047,18 @@
 \cs_new_protected:Nn \pdfannot_link_goto_end:
   {
     \@@_backend_link_end:
-    %\seq_use:cn { l_@@_hook_annot/Link/GoTo_end_seq }{}
-    \hook_use:n { pdf/annot/Link/GoTo/before}
+     \hook_use:n { pdf/annot/Link/GoTo/before}
   }
-
+%</package>
 %    \end{macrocode}
 % \begin{function}[added = 2020-03-12]{  \pdfannot_link_last: }
 %   This retrieves the object reference a previously link created with the commands
 %   above
 % \end{function}
 %    \begin{macrocode}
+%<*package>
 \cs_set_eq:NN \pdf_link_last: \@@_backend_link_last:
+%</package>
 %    \end{macrocode}
 % %!!!! only annot link or also annot??
 % \begin{function}[added = 2020-03-12]{  \pdfannot_link_margin:n }
@@ -2073,7 +2068,9 @@
 %   This sets the dimension of the link margin.
 % \end{function}
 %    \begin{macrocode}
+%<*package>
 \cs_set_eq:NN \pdfannot_link_margin:n \@@_backend_link_margin:n
+%</package>
 %    \end{macrocode}
 
 % \subsection{Destinations}
@@ -2124,6 +2121,7 @@
 %   creates a destination with |FitR| type encompassing this box.
 % \end{function}
 %    \begin{macrocode}
+%<*package>
 % perhaps some manipulation of the argument will be needed to map the current
 % hyperref syntax
 % unclear currently if is this is useful for anything.
@@ -2172,7 +2170,6 @@
 %<*xdvipdfmx>
     \__kernel_backend_literal:x { dvipdfmx:config~C~ 0x10 }
 %</xdvipdfmx>
-%<*package>
 %    \end{macrocode}
 % \section{Drop?}
 % \subsubsection{Doc View/Openaction}
@@ -2197,10 +2194,12 @@
 % \end{function}
 %
 %    \begin{macrocode}
+%<*package>
 \cs_new_protected:Npn \pdf_docview:nn #1 #2
   {
     \pdfgdict_gput:nnx {Catalog }{ OpenAction }{[\pdf_pageobject_ref:n {#1}~/#2]}
   }
+%</package>
 %    \end{macrocode}
 %
 % \section{Document metadata}
@@ -2213,15 +2212,16 @@
 % \end{NOTE}
 % \begin{function}[added=2019-08-25]{\DeclareDocumentMetaData}
 %    \begin{macrocode}
+%<*package>
 \RequirePackage{l3pdfmeta} %
-
-
+%</package>
 %    \end{macrocode}
 % \end{function}
 % %load backend driver
 %    \begin{macrocode}
+%<*package>
 \file_input:n {l3\g__sys_backend_tl-pdf.def}
-
+%</package>
 %    \end{macrocode}
 %
 % \section{Patches}
@@ -2252,6 +2252,7 @@
 % ColorSpace and Pattern (Shadings are added to the xform resources and so probably
 % unproblematic for now).
 %    \begin{macrocode}
+%<*package>
 % patches for xetex/dvips doesn't make much sense for colorspace and
 % transparent. But pgf should be tested sometimes.
 % currently only pdftex/luatex is handled here.
@@ -2341,16 +2342,15 @@
     \exp_args:Nne
     \@@_backend_PageResources_gput:nnn {ColorSpace}{\tl_trim_spaces:n{#2}}{[#3]}
   }
-
+%</package>
 %    \end{macrocode}
 % \subsection{\pkg{transparent}}
 % transparent, we assume that pdfresource is loaded first.
 % the code does nothing is with new-transparent ...
 %    \begin{macrocode}
-
+%<*package>
 %label??
 \hook_gput_code:nnn {begindocument/end} {pdf}
-%\AtEndPreamble
   {
     \def\TRP@addresource
       {
@@ -2368,13 +2368,15 @@
           }
        }
   }
+%</package>
 %    \end{macrocode}
 % \subsection{\pkg{colorspace}}
 % This is rather difficult as no real places to inject patches
-% at first a try to avoid that it's ExtGState is missing:
+% at first a try to avoid that its ExtGState is missing:
 % it can not be avoided to recreate the objects (and so to get duplicates)
 % as colorspace uses temporary macros whose contents is lost.
 %    \begin{macrocode}
+%<*package>
 % this must be earlier, to avoid problems with luatex which has two pageresources
 % lua/tex
 \hook_gput_code:nnn {begindocument} {pdf}
@@ -2387,7 +2389,6 @@
   }
 
 \hook_gput_code:nnn {begindocument/end} {pdf}
-%\AtEndPreamble
   {
     \tl_if_exist:NT \spc@op
       {
@@ -2417,8 +2418,6 @@
           {\@@_backend_object_ref:n {__spc_extgstate_op_true1}}
       }
   }
-%    \end{macrocode}
-%    \begin{macrocode}
 %</package>
 %    \end{macrocode}
 % \subsection{lua code for lualatex}

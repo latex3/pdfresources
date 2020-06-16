@@ -202,9 +202,14 @@
 % \end{function}
 % \subsection{Predeclared dictionaries}
 % The module predeclares a number of local dictionaries and fills them with
-% some standard values. These dictionaries are meant as templates. They can
-% be changed and used directly but this should be done only inside
-% groups when no other code is involved which tries to change them too.
+% some standard values. Some are not more than templates. But others are used
+% in core commands and can be used to change their settings.
+% For example an link created with \cs{\pdfannot_link:nnn}
+% will use the \texttt{annot/Link/URI} dictionary. By adding or changing entries
+% in this dictionary user or packages can for example adapt the border color or
+% add keys needed for ocg layers.
+%
+%
 % The following tabular summarize the predeclared dictionaries.
 % \begin{NOTE}{UF}
 % Check which (local) dictionaries should be predefined.
@@ -215,6 +220,11 @@
 % \noindent
 % \begin{tabular}{p{\dimexpr0.25\textwidth-6\tabcolsep}p{0.25\textwidth}>{\raggedright}p{0.5\textwidth}}
 %  name      & default keys & notes \tabularnewline\hline
+%  annot/Link/Goto   &F (Flag)& used in GoTo links (internal references) \tabularnewline
+%  annot/Link/URI    &F (Flag)& used in URI links (external uri references) \tabularnewline
+%  annot/Link/GotoR  &F (Flag)& used in GoToR links (file  references) \tabularnewline
+%  annot/Link/Named  &F (Flag)& used in Named actions (menu calls) \tabularnewline
+%  annot/Link/Launch &F (Flag)& used in Launch links (application calls) \tabularnewline
 %  page/Trans& /Type /Trans & for transitions dictionaries. Other keys:
 %                   /S (name), /D integer, /Dm (name),
 %                   /M (name), /SS number /B boolean.
