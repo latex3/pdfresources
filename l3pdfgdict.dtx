@@ -639,24 +639,6 @@
 % \end{macro}
 %
 %
-% \begin{macro}{ \@@_gmerge:nnN }
-% \cs{@@_gmerge:nnN} merges at first the property \meta{name_1}
-%  then optionally \meta{name_2} into property |#3|.
-%    \begin{macrocode}
-
-\cs_new_protected:Npn \@@_gmerge:nnN #1 #2 #3
-  {
-    \prop_gset_eq:Nc #3 { \pdfdict_gname:n  { #1 } }
-    \prop_if_exist:cT  { \pdfdict_gname:n  { #2 } }
-      {
-        \prop_map_inline:cn { \pdfdict_gname:n  { #2 } }
-          {
-            \prop_gput:Nnn #3 { ##1 }{ ##2 }
-          }
-      }
-  }
-%    \end{macrocode}
-% \end{macro}
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdfgdict_show:n #1
   {
