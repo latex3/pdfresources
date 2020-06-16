@@ -300,28 +300,6 @@
 %</package>
 %    \end{macrocode}
 %
-% \subsection{Convenience local dictionaries}
-% \begin{NOTE}{UF}
-% This must be reviewed and sorted along with other dictionaries.
-% Perhaps it should move into l3pdfdict.
-% \end{NOTE}
-% A number of predefined small, local dictionaries, that are perhaps needed.
-% \subsubsection{page/Trans}
-% This is a template for a Trans dictionary that can be used in a page dictionary.
-%    \begin{macrocode}
-%<*package>
-\pdfdict_new:n {page/Trans}
-\pdfdict_put:nnn {page/Trans}{Type}{/Trans}
-% keys: /S (name), /D integer, /Dm (name), /M (name), /SS number /B boolean.
-% decribes transition *to* the page.
-%    \end{macrocode}
-% \subsubsection{annot/Link}
-% The dictionaries \texttt{annot/Link/URI}, \texttt{annot/Link/GoToR},
-% \texttt{annot/Link/Launch}, \texttt{annot/Link/GoTo}, \texttt{annot/Link/Named}
-% are created in the pdfannot section \ref{pdf:annot:widget}
-% \subsubsection{annot/Widget}
-% \texttt{annot/Widget} see section \ref{sec:links}.
-%</package>
 % \subsection{The \enquote{Info} dictionary (pdfinfo)}
 % \begin{NOTE}{UF}
 % path: Info

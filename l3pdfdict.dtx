@@ -157,7 +157,7 @@
 %   dictionary doesn't exist.
 % \end{function}
 % \begin{function}[added = 2020-04-07]
-%   {\pdfdict_get:nn \pdfdict_gget:nn  }
+%   {\pdfdict_get:nn, \pdfdict_gget:nn  }
 %   \begin{syntax}
 %     \cs{pdfdict_get:nnN}  \Arg{local dictionary}  \Arg{name} \meta{tl var}\\
 %     \cs{pdfdict_gget:nnN} \Arg{global dictionary} \Arg{name} \meta{tl var}
@@ -201,20 +201,26 @@
 %   escaping. It does nothing if \Arg{value} is empty.
 % \end{function}
 % \subsection{Predeclared dictionaries}
-% The Module predeclares a number of dictionaries and fills them with
-% some standard values. This dictionaries can be used and copied.
+% The module predeclares a number of dictionaries and fills them with
+% some standard values. These dictionaries are meant has templates. They can
+% be changed and used directly but this should be done only inside
+% groups when no other code is involved which tries to change them too.
 % \begin{NOTE}{UF}
 % Check which (local) dictionaries should be predefined.
 % Check also if the reset idea makes sense. (Removed for now)
 % The following tabular summarize the dictionaries
 %
-% \begin{tabular}{lll}
-%  xform\ldots                           & argument of \cs{pdfxform} &local\\
-%  annot\ldots                           & argument of \cs{pdfannot},
-%                                          \cs{pdfstartlink} &local\\
-%  trans                                 & for transitions (used in hyperref)
-%  \end{tabular}
 % \end{NOTE}
+%
+% \medskip
+% \noindent
+% \begin{tabular}{p{\dimexpr0.25\textwidth-6\tabcolsep}p{0.25\textwidth}>{\raggedright}p{0.5\textwidth}}
+%  name      & default keys & notes \tabularnewline\hline
+%  page/Trans& /Type /Trans & for transitions dictionaries. Other keys:
+%                   /S (name), /D integer, /Dm (name),
+%                   /M (name), /SS number /B boolean.
+%  \end{tabular}
+
 % \end{documentation}
 %
 % \begin{implementation}
@@ -369,9 +375,10 @@
       }
   }
 
-\cs_set_eq:NN \pdfdict_gset_eq:nn \@@_gset_eq:nn  
+\cs_set_eq:NN \pdfdict_gset_eq:nn \@@_gset_eq:nn
 %</package>
 %    \end{macrocode}
+% \end{macro}
 % \begin{macro}
 %   {
 %     \@@_if_exist:n,  \pdfdict_if_exist:n,
@@ -673,6 +680,18 @@
 %</package>
 %    \end{macrocode}
 % \end{macro}
+% \subsection{Predeclared dictionaries}
+% \begin{variable}{page/Trans}
+%     \begin{macrocode}
+%<*package>
+\pdfdict_new:n {page/Trans}
+\pdfdict_put:nnn {page/Trans}{Type}{/Trans}
+% keys: /S (name), /D integer, /Dm (name), /M (name), /SS number /B boolean.
+% decribes transition *to* the page.
+%</package>
+%    \end{macrocode}
+% \end{variable}
+
 % \end{implementation}
 %
 % \PrintIndex
