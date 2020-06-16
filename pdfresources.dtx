@@ -261,9 +261,9 @@
 
 \@@_BACKEND_end_run_gput:n
   {
-    \__pdfgdict_Pages_gpush:            %pagesattr
-    \__pdfgdict_Info_gpush:             %pdfinfo
-    \__pdfgdict_Catalog_gpush:
+    \__pdfcoredict_Pages_gpush:            %pagesattr
+    \__pdfcoredict_Info_gpush:             %pdfinfo
+    \__pdfcoredict_Catalog_gpush:
   }
 %</drivers>
 %    \end{macrocode}
@@ -296,7 +296,7 @@
 %    \begin{macrocode}
 %<*package>
 \RequirePackage{l3pdfdict}
-\RequirePackage{l3pdfgdict}
+\RequirePackage{l3pdfcoredict}
 %</package>
 %    \end{macrocode}
 %
@@ -323,7 +323,7 @@
 % \cs{@@_backend_info_gput:nn} inserts one name/value pair.
 %
 % \subsubsection{\enquote{Info}/management}
-% moved to l3pdfgdict
+% moved to l3pdfcoredict
 %
 % \subsection{The \enquote{Pages} dictionary (pdfpagesattr)}
 % The content of the property list associated with this dictionary name is written to the
@@ -384,7 +384,7 @@
 % but with dvips/dvipdfmx this would disable removing entries.
 % So we issue the push code only at the end of the document.
 % \end{NOTE}
-%  code moved to l3pdfgdict
+%  code moved to l3pdfcoredict
 %
 % \subsection{\enquote{Page} and \enquote{ThisPage} (pdfpageattr)}
 % \subsubsection{\enquote{Page} and \enquote{ThisPage} /backend}
@@ -471,7 +471,7 @@
         {
           \pdfdict_gnew:n          {backend_Page\l_@@_tmpa_tl}
         }
-      %\__pdfgdict_handler_gput:nnn {backend_Page\l_@@_tmpa_tl}{ #1 }{ #2 }
+      %\__pdfcoredict_handler_gput:nnn {backend_Page\l_@@_tmpa_tl}{ #1 }{ #2 }
       %backend_Page has no handler.
       \pdfdict_gput:nnn {backend_Page\l_@@_tmpa_tl}{ #1 }{ #2 }
     }
@@ -654,7 +654,7 @@
 % See also https://tex.stackexchange.com/questions/479812/extension-of-rotating-package-to-set-pdf-rotation
 % (should work now)
 % \end{NOTE}
-% code moved to l3pdfgdict ...
+% code moved to l3pdfcoredict ...
 %
 % \subsection{\enquote{Page/Resources}: ExtGState, ColorSpace, Shading, Pattern }
 % \begin{NOTE}{UF}
@@ -2190,14 +2190,14 @@
 % is an absolute page number. \Arg{view} a string for the destination
 % without the leading slash. Examples are e.g. |XYZ left top zoom| or |Fit|.
 % The OpenAction uses (and could also be set directly with)
-% \cs{pdfgdict_gput:nnn}|{Catalog}|.
+% \cs{pdfcoredict_gput:nnn}|{Catalog}|.
 % \end{function}
 %
 %    \begin{macrocode}
 %<*package>
 \cs_new_protected:Npn \pdf_docview:nn #1 #2
   {
-    \pdfgdict_gput:nnx {Catalog }{ OpenAction }{[\pdf_pageobject_ref:n {#1}~/#2]}
+    \pdfcoredict_gput:nnx {Catalog }{ OpenAction }{[\pdf_pageobject_ref:n {#1}~/#2]}
   }
 %</package>
 %    \end{macrocode}
@@ -2396,7 +2396,7 @@
         \@@_backend_object_write:nn
           {__spc_extgstate_op_false}
           {/Type /ExtGState~/op~false~/OP~false}
-        \pdfgdict_gput:nnn
+        \pdfcoredict_gput:nnn
           {Page/Resources/ExtGState}
           {SPCko}
           {\@@_backend_object_ref:n {__spc_extgstate_op_false}}
@@ -2404,7 +2404,7 @@
         \@@_backend_object_write:nn
           {__spc_extgstate_op_true0}
           {/Type /ExtGState~/op~true~/OP~true~/OPM~0}%
-        \pdfgdict_gput:nnn
+        \pdfcoredict_gput:nnn
           {Page/Resources/ExtGState}
           {SPCmz}
           {\@@_backend_object_ref:n {__spc_extgstate_op_true0}}
@@ -2412,7 +2412,7 @@
         \@@_backend_object_write:nn
           {__spc_extgstate_op_true1}
           {/Type /ExtGState~/op~true~/OP~true~/OPM~1}%
-         \pdfgdict_gput:nnn
+         \pdfcoredict_gput:nnn
           {Page/Resources/ExtGState}
           {SPCop}
           {\@@_backend_object_ref:n {__spc_extgstate_op_true1}}

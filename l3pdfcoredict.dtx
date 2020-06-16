@@ -1,6 +1,6 @@
 % \iffalse meta-comment
 %
-%% File: l3pdfgdict.dtx
+%% File: l3pdfcoredict.dtx
 %
 % Copyright (C) 2018-2020 The LaTeX3 Project
 %
@@ -33,7 +33,7 @@
 % \fi
 %
 % \title{^^A
-%   The \pkg{l3pdfgdict} package\\ Managing core pdf dictionaries ^^A
+%   The \pkg{l3pdfcoredict} package\\ Managing core pdf dictionaries ^^A
 % }
 %
 % \author{^^A
@@ -50,7 +50,7 @@
 % \maketitle
 % \begin{documentation}
 %
-% \section{\pkg{l3pdfgdict} documentation}
+% \section{\pkg{l3pdfcoredict} documentation}
 % When creating a pdf a number of objects, dictionaries and entries to
 % dictionaries must be created. The \LaTeX{} format currently contains no
 % support for theses tasks. It either relies on the binaries to do the job,
@@ -112,9 +112,9 @@
 %  \subsection{User Commands}
 %
 % \begin{function}[added = 2020-04-06]
-%   {\pdfgdict_gput:nnn}
+%   {\pdfcoredict_gput:nnn}
 %   \begin{syntax}
-%     \cs{pdfgdict_gput:nnn} \Arg{core dictionary} \Arg{name} \Arg{value}\\
+%     \cs{pdfcoredict_gput:nnn} \Arg{core dictionary} \Arg{name} \Arg{value}\\
 %   \end{syntax}
 % This function puts \Arg{name} \Arg{value}  globally in an internal
 % property lists.
@@ -144,9 +144,9 @@
 % \end{itemize}
 % \end{function}
 % \begin{function}[added = 2020-04-08]
-%   {\pdfgdict_show:n }
+%   {\pdfcoredict_show:n }
 %   \begin{syntax}
-%     \cs{pdfgdict_show:n}  \Arg{dictionary}
+%     \cs{pdfcoredict_show:n}  \Arg{dictionary}
 %   \end{syntax}
 %   This shows the content of \Arg{dictionary} in the log and on the terminal.
 %   It doesn't show the special catalog dictionaries with arrays as values
@@ -155,10 +155,10 @@
 %\end{function}
 % \begin{function}[added = 2020-04-07]
 %   {
-%     \pdfgdict_gremove:nn,
+%     \pdfcoredict_gremove:nn,
 %   }
 %   \begin{syntax}
-%     \cs{pdfgdict_gremove:nn} \Arg{global dictionary} \Arg{name}
+%     \cs{pdfcoredict_gremove:nn} \Arg{global dictionary} \Arg{name}
 %   \end{syntax}
 %   Removes  |/|\meta{name} and its associated \meta{value} from the \Arg{dictionary}
 %   The removal is global.
@@ -176,10 +176,10 @@
 %
 %  \begin{function}
 %   {
-%     pdfgdict: Info
+%     pdfcoredict: Info
 %   }
 %   \begin{syntax}
-%     \cs{pdfgdict_gput:nnn} \{Info\} \Arg{name} \Arg{value}
+%     \cs{pdfcoredict_gput:nnn} \{Info\} \Arg{name} \Arg{value}
 %   \end{syntax}
 %   Adds |/|\meta{name} and the \meta{value} to the Info dictionary.
 %   \meta{name} should be a valid pdf name without the leading slash,
@@ -198,7 +198,7 @@
 %    {
 %     \str_set_convert:Nnnn \l_tmpa_str { Grüße }{  } {utf16/string}
 %    }
-%   \pdfgdict_gput:nnx {Info} {Title}{(\l_tmpa_str)}
+%   \pdfcoredict_gput:nnx {Info} {Title}{(\l_tmpa_str)}
 %   \end{verbatim}
 % \end{function}
 %
@@ -211,9 +211,9 @@
 % The content of the property list associated with this dictionary name
 % is written to the /Pages object. This replaces for example \cs{pdfpagesattr}.
 %
-% \begin{function}{pdfgdict: Pages}
+% \begin{function}{pdfcoredict: Pages}
 %   \begin{syntax}
-%     \cs{pdfgdict_gput:nnn} \{Pages\} \Arg{name} \Arg{value}
+%     \cs{pdfcoredict_gput:nnn} \{Pages\} \Arg{name} \Arg{value}
 %   \end{syntax}
 %
 %   Adds |/|\meta{name} \meta{value} to the |/Pages| dictionary.
@@ -230,9 +230,9 @@
 %
 % \subsubsection{\enquote{Page} and \enquote{ThisPage}}
 % \begin{function}[added = 2020-04-12]
-%   {pdfgdict: Page}
+%   {pdfcoredict: Page}
 %   \begin{syntax}
-%     \cs{pdfgdict_gput:nnn} \{Page\} \Arg{name} \Arg{value}
+%     \cs{pdfcoredict_gput:nnn} \{Page\} \Arg{name} \Arg{value}
 %   \end{syntax}
 %   Values added to the dictionary \texttt{Page} are added to the page dictionary
 %   of the current page and the following pages. The current page means the page
@@ -247,14 +247,14 @@
 %   and better not in a float.
 %   The value is assigned directly and is always stored globally.
 %   If a \meta{name} is used twice, only the last \meta{value}
-%   set will be used. Names set with \cs{pdfgdict_gput:nnn}|{ThisPage}| will overwrite
-%   names set with \cs{pdfgdict_gput:nnn}|{Page}| if there is a clash.
-%   Values can be removed again with \cs{pdfgdict_gremove:nn}
+%   set will be used. Names set with \cs{pdfcoredict_gput:nnn}|{ThisPage}| will overwrite
+%   names set with \cs{pdfcoredict_gput:nnn}|{Page}| if there is a clash.
+%   Values can be removed again with \cs{pdfcoredict_gremove:nn}
 % \end{function}
 % \begin{function}[added = 2020-04-12]
-%   { pdfgdict: ThisPage}
+%   { pdfcoredict: ThisPage}
 %   \begin{syntax}
-%     \cs{pdfgdict_gput:nnn} \{ThisPage\} \Arg{name} \Arg{value}
+%     \cs{pdfcoredict_gput:nnn} \{ThisPage\} \Arg{name} \Arg{value}
 %   \end{syntax}
 %   Adds |/|\meta{name} \meta{value} at \emph{shipout} to the page dictionary of the
 %   current page. Current page means here the \emph{shipout} page.
@@ -267,18 +267,18 @@
 %   set will be used.
 %   With the engine pdflatex (at least) a second compilation is needed.
 %   Values added to \texttt{ThisPage} can not be removed. It is not possible to
-%   show the content of this dictionary with \cs{pdfgdict_show:n}.
+%   show the content of this dictionary with \cs{pdfcoredict_show:n}.
 % \end{function}
 % \subsubsection{\enquote{Page/Resources}: ExtGState, ColorSpace, Shading, Pattern}
 % \begin{function}[updated = 2020-04-10]
 %   {
-%    pdfgdict: Page/Resources/ExtGState,
-%    pdfgdict: Page/Resources/ColorSpace,
-%    pdfgdict: Page/Resources/Shading,
-%    pdfgdict: Page/Resources/Pattern,
+%    pdfcoredict: Page/Resources/ExtGState,
+%    pdfcoredict: Page/Resources/ColorSpace,
+%    pdfcoredict: Page/Resources/Shading,
+%    pdfcoredict: Page/Resources/Pattern,
 %   }
 %   \begin{syntax}
-%     \cs{pdfgdict_gput:nnn} \{Page/Resources/\meta{resource}\} \Arg{name} \Arg{value}
+%     \cs{pdfcoredict_gput:nnn} \{Page/Resources/\meta{resource}\} \Arg{name} \Arg{value}
 %   \end{syntax}
 %   Adds |/|\meta{name} \meta{value} to the page resource \meta{resource}.
 %   \meta{resource} can be |ExtGState|, |ColorSpace|, |Pattern| oder |Shading|.
@@ -305,7 +305,7 @@
 % \subsubsection{\enquote{Catalog} \& subdirectories}
 % The catalog is a central dictionary in a PDF with a number of subdictionaries.
 % Entries to the top level of the catalog can be added with
-% |\pdfgdict_gput:nnn {Catalog}|\Arg{Name}\Arg{Value}.
+% |\pdfcoredict_gput:nnn {Catalog}|\Arg{Name}\Arg{Value}.
 % Entries to subdictionaries by using in the first
 % argument one of the pathes described later.
 % The entries in the catalog have varying requirements regarding the
@@ -334,7 +334,7 @@
 %
 %   The required PDF version is only mentioned if it is larger than 1.5.
 %
-%   Example: |\pdfgdict_gput:nnn {Catalog}{PageMode}{/UseNone}|
+%   Example: |\pdfcoredict_gput:nnn {Catalog}{PageMode}{/UseNone}|
 %
 %% !!!!!!!! Warning for unknown names is currently not working!
 %   \medskip
@@ -375,7 +375,7 @@
 %   in the PDF reference.
 %   If \meta{Name} gets assigned two values the last one wins.
 %
-%   Example: |\pdfgdict_gput:nnn {Catalog/MarkInfo}{Marked}{true}|
+%   Example: |\pdfcoredict_gput:nnn {Catalog/MarkInfo}{Marked}{true}|
 %
 %   \medskip
 %   \noindent
@@ -413,13 +413,13 @@
 %  \begin{verbatim}
 %  \pdf_object_new:nn   {pkg@intent}{dict}
 %  \pdf_object_write:nn {pkg@intent}{...}
-%  \pdfgdict_gput:nnx  {Catalog} {OutputIntents}{\pdf_object_ref:n {pkg@intent}}
+%  \pdfcoredict_gput:nnx  {Catalog} {OutputIntents}{\pdf_object_ref:n {pkg@intent}}
 %  \end{verbatim}
 %
 %  or
 %  \begin{verbatim}
 %  \pdf_object_now:nn   {dict} { ... }
-%  \pdfgdict_gput:nnx  {Catalog} {OutputIntents}{\pdf_object_last:}
+%  \pdfcoredict_gput:nnx  {Catalog} {OutputIntents}{\pdf_object_last:}
 %  \end{verbatim}
 %
 %
@@ -444,53 +444,53 @@
 % \end{documentation}
 %
 % \begin{implementation}
-%  \section{\pkg{l3pdfgdict} implementation}
+%  \section{\pkg{l3pdfcoredict} implementation}
 %    \begin{macrocode}
-%<@@=pdfgdict>
+%<@@=pdfcoredict>
 %<*package>
 %
-\ProvidesExplPackage {l3pdfgdict} {2020-04-08} {0.5}
+\ProvidesExplPackage {l3pdfcoredict} {2020-04-08} {0.5}
   {Managing global and local dictionaries}
 %    \end{macrocode}
 % \subsection{Messages}
 %    \begin{macrocode}
-\msg_new:nnn  { pdfgdict } { unknown-dict }
+\msg_new:nnn  { pdfcoredict } { unknown-dict }
               { The~dictionary~'#1'~is~not~declared. }
 
-\msg_new:nnn  { pdfgdict } { empty-value }
+\msg_new:nnn  { pdfcoredict } { empty-value }
               { The~value~for~#1~is~empty~and~will~be~ignored }
 
-\msg_new:nnn  { pdfgdict } { no-removal }
+\msg_new:nnn  { pdfcoredict } { no-removal }
               { It~is~not~possible~to~remove~values~from~dictionary~'#1'.}
 
-\msg_new:nnn  { pdfgdict } { no-show }
+\msg_new:nnn  { pdfcoredict } { no-show }
               { It~is~not~possible~to~show~the~dictionary~'#1'.}
 
-\msg_new:nnn  { pdfgdict } { show-dict }
+\msg_new:nnn  { pdfcoredict } { show-dict }
   {
     The~dictionary~'#1'~
     \tl_if_empty:nTF {#2}
       { is~empty \\>~ . }
       { contains~the~pairs~(without~outer~braces): #2 . }
   }
-\msg_new:nnn  { pdfgdict } { dict-already-defined  }
+\msg_new:nnn  { pdfcoredict } { dict-already-defined  }
   {
     The~dictionary~'#1'~is~already~defined.
   }
 %    \end{macrocode}
 %    \begin{macrocode}
-\cs_new_protected:Npn \pdfgdict_gput:nnn #1 #2 #3
+\cs_new_protected:Npn \pdfcoredict_gput:nnn #1 #2 #3
   {
     \pdfdict_if_gexist:nTF { #1 }
       {
         \@@_handler_gput:nnn { #1 }{ #2 }{ #3 }
       }
       {
-        \msg_error:nnn{pdfgdict}{unknown-dict}{#1}
+        \msg_error:nnn{pdfcoredict}{unknown-dict}{#1}
       }
   }
 
-\cs_generate_variant:Nn \pdfgdict_gput:nnn {nnx}
+\cs_generate_variant:Nn \pdfcoredict_gput:nnn {nnx}
 %    \end{macrocode}
 % \subsection{Internal dictionary Code}
 %  Many code parts are quite similar: property lists for
@@ -541,7 +541,7 @@
   {
     \tl_if_empty:nTF { #3 }
       {
-        \msg_none:nnn { pdfgdict }{ empty-value }{ /#1/#2 }
+        \msg_none:nnn { pdfcoredict }{ empty-value }{ /#1/#2 }
       }
       {
         \pdfdict_if_gexist:nTF { #1 }
@@ -560,7 +560,7 @@
               }
           }
           {
-            \msg_error:nnn { pdfgdict } { unknown-dict } { #1 }
+            \msg_error:nnn { pdfcoredict } { unknown-dict } { #1 }
           }
       }
   }
@@ -594,7 +594,7 @@
               }
           }
           {
-            \msg_error:nnn { pdfgdict } { unknown-dict } { #1 }
+            \msg_error:nnn { pdfcoredict } { unknown-dict } { #1 }
           }
   }
 
@@ -606,7 +606,7 @@
               { \pdfdict_gname:n { #1 } }{ #2 }
           }
           {
-            \msg_error:nnn { pdfgdict } { unknown-dict } { xx4#1 }
+            \msg_error:nnn { pdfcoredict } { unknown-dict } { xx4#1 }
           }
   }
 
@@ -620,13 +620,13 @@
         \prop_if_exist:cTF { \pdfdict_gname:n { #2 } }
           {
              #1
-               { pdfgdict } { show-dict }
+               { pdfcoredict } { show-dict }
                { \tl_to_str:n {#2} }
                { \prop_map_function:cN {\pdfdict_gname:n { #2 }} \msg_show_item:nn }
                { } { }
           }
           {
-            #1 { pdfgdict } { unknown-dict } {#2}{}{}{}
+            #1 { pdfcoredict } { unknown-dict } {#2}{}{}{}
           }
        }
   }
@@ -640,20 +640,20 @@
 %
 %
 %    \begin{macrocode}
-\cs_new_protected:Npn \pdfgdict_show:n #1
+\cs_new_protected:Npn \pdfcoredict_show:n #1
   {
     \@@_show:Nn \msg_show:nnxxxx {#1}
   }
 %    \end{macrocode}
 %    \begin{macrocode}
-\cs_new_protected:Npn \pdfgdict_gremove:nn #1 #2
+\cs_new_protected:Npn \pdfcoredict_gremove:nn #1 #2
   {
     \pdfdict_if_gexist:nTF { #1 }
       {
         \@@_handler_gremove:nn { #1 }{ #2 }
       }
       {
-        \msg_error:nnn{pdfgdict}{unknown-dict}{#1}
+        \msg_error:nnn{pdfcoredict}{unknown-dict}{#1}
       }
   }
 %    \end{macrocode}
@@ -702,7 +702,7 @@
 \pdfdict_gnew:n { Page }
 \pdfdict_gnew:n { ThisPage }
 
-%handler for pdfgdict
+%handler for pdfcoredict
 \cs_new_protected:cpn { @@_handler/Page/?_gput:nn } #1 #2
   {
     \__pdf_backend_Page_gput:nn { #1 }{ #2 }
@@ -713,7 +713,7 @@
     \__pdf_backend_Page_gremove:n { #1 }
   }
 
-% handler for pdfgdict
+% handler for pdfcoredict
 \cs_new_protected:cpn { @@_handler/ThisPage/?_gput:nn } #1 #2
   {
     \prop_gput:cnn  { \pdfdict_gname:n { ThisPage } }{ #1 } { #2 }
@@ -722,12 +722,12 @@
 
 \cs_new_protected:cpn { @@_handler/ThisPage/?_gremove:n } #1
   {
-    \msg_warning:nnn { pdfgdict } { no-removal }{ThisPage}
+    \msg_warning:nnn { pdfcoredict } { no-removal }{ThisPage}
   }
 
 \cs_new_protected:cpn { @@_handler/ThisPage/?_show: }
   {
-    \msg_warning:nnn { pdfgdict } { no-show }{ThisPage}
+    \msg_warning:nnn { pdfcoredict } { no-show }{ThisPage}
   }
 
 %    \end{macrocode}
