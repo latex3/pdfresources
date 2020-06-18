@@ -177,9 +177,9 @@
 % \end{variable}
 % \begin{macro}
 %   {
-%     \@@_BACKEND_end_run_gput:n,
-%     \@@_BACKEND_lastpage_shipout_gput:n,
-%     \@@_BACKEND_thispage_shipout_gput:n
+%     \@@_backend_end_run_gput:n,
+%     \@@_backend_lastpage_shipout_gput:n,
+%     \@@_backend_thispage_shipout_gput:n
 %   }
 % These are the commands used to fill the three hook variables.
 % \begin{NOTE}{UF}
@@ -187,17 +187,17 @@
 % \end{NOTE}
 %    \begin{macrocode}
 %<*drivers>
-\cs_new_protected:Npn \@@_BACKEND_end_run_gput:n #1
+\cs_new_protected:Npn \@@_backend_end_run_gput:n #1
   {
     \tl_gput_right:Nn \g_@@_backend_end_run_tl { #1 }
   }
 
-\cs_new_protected:Npn \@@_BACKEND_lastpage_shipout_gput:n #1
+\cs_new_protected:Npn \@@_backend_lastpage_shipout_gput:n #1
   {
     \tl_gput_right:Nn \g_@@_backend_lastpage_shipout_tl { #1 }
   }
 
-\cs_new_protected:Npn \@@_BACKEND_thispage_shipout_gput:n #1
+\cs_new_protected:Npn \@@_backend_thispage_shipout_gput:n #1
   {
     \tl_gput_right:Nn \g_@@_backend_thispage_shipout_tl { #1 }
   }
@@ -246,24 +246,25 @@
 % \end{NOTE}
 %    \begin{macrocode}
 %<*drivers>
-\@@_BACKEND_thispage_shipout_gput:n
+\@@_backend_thispage_shipout_gput:n
   {
-    \exp_args:NV \@@_backend_ThisPage_gpush:n      { \g_shipout_readonly_int }
-    \exp_args:NV \@@_backend_PageResources_gpush:n { \g_shipout_readonly_int }
+     \exp_args:NV \@@_backend_ThisPage_gpush:n      { \g_shipout_readonly_int }
+     \exp_args:NV \@@_backend_PageResources_gpush:n { \g_shipout_readonly_int }
   }
 
 %!!!!! check if pdftex/luatex can run this in the immediate end-of-run
-%!!!!!!! check the name. To which module does this belong??
-\@@_BACKEND_lastpage_shipout_gput:n
+\@@_backend_lastpage_shipout_gput:n
   {
-    \@@_backend_PageResources_obj_gpush:          %ExtGState etc
+     \@@_backend_PageResources_obj_gpush:          %ExtGState etc
   }
 
-\@@_BACKEND_end_run_gput:n
+%!!  check the command names. Should this be internal
+%\__pdfcoredict?
+\@@_backend_end_run_gput:n
   {
-    \__pdfcoredict_Pages_gpush:            %pagesattr
-    \__pdfcoredict_Info_gpush:             %pdfinfo
-    \__pdfcoredict_Catalog_gpush:
+     \__pdfcoredict_Pages_gpush:            %pagesattr
+     \__pdfcoredict_Info_gpush:             %pdfinfo
+     \__pdfcoredict_Catalog_gpush:
   }
 %</drivers>
 %    \end{macrocode}
