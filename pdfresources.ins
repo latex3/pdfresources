@@ -62,11 +62,50 @@ and all files in that bundle must be distributed together.
       }%
   }
 
-\generate{\file{l3dvipdfmx-pdf.def} {\from{pdfresources.dtx}{drivers,dvipdfmx} }}
-\generate{\file{l3dvips-pdf.def}    {\from{pdfresources.dtx}{drivers,dvips}    }}
-\generate{\file{l3dvisvgm-pdf.def}  {\from{pdfresources.dtx}{drivers,dvisvgm}  }}
-\generate{\file{l3pdfmode-pdf.def}  {\from{pdfresources.dtx}{drivers,pdfmode}  }}
-\generate{\file{l3xdvipdfmx-pdf.def}{\from{pdfresources.dtx}{drivers,xdvipdfmx}}}
+\generate
+  {
+   \file{l3dvipdfmx-pdf.def}
+     {
+       \from{l3backend-pdf-extra.dtx}{drivers,dvipdfmx}
+       \from{pdfresources.dtx}{drivers,dvipdfmx}
+     }
+  }
+
+\generate
+  {
+    \file{l3dvips-pdf.def}
+      {
+        \from{l3backend-pdf-extra.dtx}{drivers,dvips}
+        \from{pdfresources.dtx}{drivers,dvips}
+      }
+  }
+
+\generate
+  {
+    \file{l3dvisvgm-pdf.def}
+      {
+        \from{l3backend-pdf-extra.dtx}{drivers,dvisvgm}
+        \from{pdfresources.dtx}{drivers,dvisvgm}
+      }
+  }
+
+\generate
+  {
+    \file{l3pdfmode-pdf.def}
+      {
+        \from{l3backend-pdf-extra.dtx}{drivers,pdfmode}
+        \from{pdfresources.dtx}{drivers,pdfmode}
+      }
+  }
+
+\generate
+  {
+    \file {l3xdvipdfmx-pdf.def}
+      {
+       \from{l3backend-pdf-extra.dtx}{drivers,xdvipdfmx}
+        \from{pdfresources.dtx}{drivers,xdvipdfmx}
+      }
+  }
 
 \def\MetaPrefix{-- }
 \def\defaultpostamble{%

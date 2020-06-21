@@ -106,18 +106,6 @@
 %    \end{macrocode}
 % \end{variable}
 % \subsection{some zref code, needs to be replaced later}
-% \begin{variable}
-%  {\g_@@_backend_resourceid_int, \g_@@_backend_name_int, \g_@@_backend_page_int}
-%  a counter to create labels for the resources, a counter
-%  to number properties in bdc marks, a counter for the \cs{pdfpageref} implementation.
-%    \begin{macrocode}
-%<*drivers>
-\int_new:N \g_@@_backend_resourceid_int
-\int_new:N \g_@@_backend_name_int
-\int_new:N \g_@@_backend_page_int
-%</drivers>
-%    \end{macrocode}
-% \end{variable}
 % a reference for the absolute page counter. This use the counter from the
 % new lthooks/ltshipout package.
 %    \begin{macrocode}
@@ -128,16 +116,6 @@
 %</package>
 %    \end{macrocode}
 %
-% \subsection{luacode}
-% Load the lua code.
-%    \begin{macrocode}
-%<*pdfmode>
-\sys_if_engine_luatex:T
-  {
-    \directlua { require("pdfresources.lua") }
-  }
-%</pdfmode>
-%    \end{macrocode}
 %
 % \subsection{shipout and end of run code}
 % Code is executed in three places: At shipout of every page,
@@ -151,9 +129,9 @@
 % specific grouping.
 % +++++++++++++++++
 % \cs{@@_backend_end_run:} setups the end of run hook for the code stored in
-% \cs{g_@@_BACKEND_end_run_code_tl} at the end of the compilation.
-% \cs{@@_BACKEND_end_run_gput:n} adds its argument to
-% \cs{g_@@_BACKEND_end_run_code_tl}
+% \cs{g_@@_backend_end_run_code_tl} at the end of the compilation.
+% \cs{@@_backend_end_run_gput:n} adds its argument to
+% \cs{g_@@_backend_end_run_code_tl}
 % With pdflatex/lualatex |AtEndDocument{\clearpage|\meta{code}|}| is used,
 % so the code is executed at the first compilation.
 % To avoid that specials are lost the code is added to
@@ -172,6 +150,9 @@
 \tl_new:N\g_@@_backend_end_run_tl
 \tl_new:N\g_@@_backend_lastpage_shipout_tl
 \tl_new:N\g_@@_backend_thispage_shipout_tl
+\hook_new:n {pdf/core/end_run}
+\hook_new:n {pdf/core/lastpage_shipout}
+\hook_new:n {pdf/core/thispage_shipout}
 %</drivers>
 %    \end{macrocode}
 % \end{variable}
@@ -212,16 +193,17 @@
   {pdf/endrun}
   {
     \g_@@_backend_end_run_tl
+    %\hook_use_once:n
   }
 %</pdfmode>
-%<*xdvipdfmx>
+%<*dvipdfmx|xdvipdfmx>
 \hook_gput_code:nnn {shipout/lastpage}
   {pdf/endrun}
   {
     \g_@@_backend_end_run_tl
   }
 \hook_gset_rule:nnnn {shipout/lastpage}{pdf}{<}{pdf/endrun}
-%</xdvipdfmx>
+%</dvipdfmx|xdvipdfmx>
 %<*dvips>
 \hook_gput_code:nnn {shipout/lastpage}
   {pdf/endrun}
@@ -369,12 +351,12 @@
     \tex_special:D{ps:~[#1~/PAGES~pdfmark} %]
   }
 %</dvips>
-%<*xdvipdfmx>
+%<*dvipdfmx|xdvipdfmx>
 \cs_new_protected:Npn \@@_backend_Pages_primitive:n #1
   {
     \@@_backend:n{put~@pages~<<#1>>}
   }
-%</xdvipdfmx>
+%</dvipdfmx|xdvipdfmx>
 %    \end{macrocode}
 % \end{macro}
 %
@@ -566,7 +548,7 @@
     }
   }
 %</pdfmode>
-%<*xdvipdfmx>
+%<*dvipdfmx|xdvipdfmx>
   %the primitive
 \cs_new_protected:Npn \@@_backend_Page_primitive:n #1
   {
@@ -605,7 +587,7 @@
     \exp_args:Nx \@@_backend_Page_primitive:n
       { \pdfdict_gmap:n {Core/Page} }
   }
-%</xdvipdfmx>
+%</dvipdfmx|xdvipdfmx>
 %<*dvips>
 \cs_new_protected:Npn \@@_backend_Page_primitive:n #1
    {
@@ -760,7 +742,7 @@
 % https://tug.org/pipermail/dvipdfmx/2019-August/000021.html,
 % so we use \special{pdf:put @resources}
 % this must be issued on every page!
-%<*xdvipdfmx>
+%<*dvipdfmx|xdvipdfmx>
 %objects should not only be created but also "initialized"
 \clist_map_inline:Nn \c_@@_backend_PageResources_clist
   {
@@ -784,7 +766,7 @@
   }
 
 \cs_new_protected:Npn \@@_backend_PageResources_obj_gpush: {}
-%</xdvipdfmx>
+%</dvipdfmx|xdvipdfmx>
 %<*dvips>
 % dvips unneeded, or no-op
 \cs_new_protected:Npn \@@_backend_PageResources:n #1 {}
@@ -829,14 +811,14 @@
      }
  }
 %</pdfmode>
-%<*xdvipdfmx>
+%<*dvipdfmx|xdvipdfmx>
 \cs_new_protected:Npn \@@_backend_NamesEmbeddedFiles_gpush:n #1 %array content
   {
     \pdf_object_now:nn {dict} { /Names [#1] }
     %n or x?
     \__pdf_backend:x {put~@names~<</EmbeddedFiles~\pdf_object_last: >>}
   }
-%</xdvipdfmx>
+%</dvipdfmx|xdvipdfmx>
 
 %dvips: noop
 %<*dvips>
@@ -1009,7 +991,7 @@
 % https://chat.stackexchange.com/transcript/message/50832016#50832016
 % the property is added to xform resources automatically,
 % no need to worry about it.
-%<*xdvipdfmx>
+%<*dvipdfmx|xdvipdfmx>
  \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
    {
      \int_gincr:N \g_@@_backend_name_int
@@ -1072,7 +1054,7 @@
           }
       }
   }
-%</xdvipdfmx>
+%</dvipdfmx|xdvipdfmx>
 % luatex
 %<*pdfmode>
 \sys_if_engine_luatex:T
@@ -1549,7 +1531,7 @@
       { \int_use:c { c_@@_backend_xform_ \tl_to_str:n {#1} _int } ~ 0 ~ R }
   }
 %</pdfmode>
-%<*xdvipdfmx>
+%<*dvipdfmx|xdvipdfmx>
 % xetex
    % it needs a bit testing if it really works to set the box to 0 before the special ...
    % does it disturb viewing the xobject?
@@ -1654,7 +1636,7 @@
        \box_set_dp:Nn  \l_@@_tmpa_box { \pdf_xform_dp:n { #1 } }
        \box_use_drop:N \l_@@_tmpa_box
      }
-%</xdvipdfmx>
+%</dvipdfmx|xdvipdfmx>
 %<*drivers>
 %% all
 \prg_new_conditional:Npnn \@@_backend_xform_if_exist:n #1 { p , T , F , TF }
@@ -2168,9 +2150,9 @@
 % is this still needed??
 %see https://tug.org/pipermail/dvipdfmx/2019-May/000002.html
 %</package>
-%<*xdvipdfmx>
+%<*dvipdfmx|xdvipdfmx>
     \__kernel_backend_literal:x { dvipdfmx:config~C~ 0x10 }
-%</xdvipdfmx>
+%</dvipdfmx|xdvipdfmx>
 %    \end{macrocode}
 % \section{Drop?}
 % \subsubsection{Doc View/Openaction}

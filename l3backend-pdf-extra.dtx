@@ -1,0 +1,87 @@
+% \iffalse meta-comment
+%
+%% File: l3backend-pdf.dtx
+%
+% Copyright (C) 2019,2020 The LaTeX3 Project
+%
+% It may be distributed and/or modified under the conditions of the
+% LaTeX Project Public License (LPPL), either version 1.3c of this
+% license or (at your option) any later version.  The latest version
+% of this license is in the file
+%
+%    https://www.latex-project.org/lppl.txt
+%
+% This file is part of the "pdfresources bundle" (The Work in LPPL)
+% and all files in that bundle must be distributed together.
+%
+% -----------------------------------------------------------------------
+%
+% The development version of the bundle can be found at
+%
+%    https://github.com/latex3/pdfresources
+%
+% for those people who are interested.
+%
+%
+%<*driver>
+\documentclass[full,kernel]{l3doc}
+\begin{document}
+  \DocInput{\jobname.dtx}
+\end{document}
+%</driver>
+% \fi
+%
+% \title{^^A
+%   The \textsf{l3backend-pdf-extra} package\\ Additional backend PDF features^^A
+% }
+%
+% \author{^^A
+%  The \LaTeX3 Project\thanks
+%    {^^A
+%      E-mail:
+%        \href{mailto:latex-team@latex-project.org}
+%          {latex-team@latex-project.org}^^A
+%    }^^A
+% }
+%
+% \date{Released XXXX-XX-XX}
+%
+% \maketitle
+%
+% \begin{documentation}
+%
+% \end{documentation}
+%
+% \begin{implementation}
+%
+% \section{\pkg{l3backend-pdf-extra} Implementation}
+%
+%    \begin{macrocode}
+%<@@=pdf>
+%    \end{macrocode}
+%
+% \begin{variable}
+%  {\g_@@_backend_resourceid_int, \g_@@_backend_name_int, \g_@@_backend_page_int}
+%  a counter to create labels for the resources, a counter
+%  to number properties in bdc marks, a counter for the \cs{pdfpageref} implementation.
+%    \begin{macrocode}
+%<*drivers>
+\int_new:N \g_@@_backend_resourceid_int
+\int_new:N \g_@@_backend_name_int
+\int_new:N \g_@@_backend_page_int
+%</drivers>
+%    \end{macrocode}
+% \end{variable}
+% \subsection{luacode}
+% Load the lua code.
+%    \begin{macrocode}
+%<*pdfmode>
+\sys_if_engine_luatex:T
+  {
+    \directlua { require("pdfresources.lua") }
+  }
+%</pdfmode>
+%    \end{macrocode}
+% \end{implementation}
+%
+% \PrintIndex
