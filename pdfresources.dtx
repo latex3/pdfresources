@@ -192,15 +192,17 @@
 \hook_gput_code:nnn {enddocument/afterlastpage}
   {pdf/endrun}
   {
-    \g_@@_backend_end_run_tl
+    %\g_@@_backend_end_run_tl
     %\hook_use_once:n
+    \hook_use:n {pdf/core/end_run}
   }
 %</pdfmode>
 %<*dvipdfmx|xdvipdfmx>
 \hook_gput_code:nnn {shipout/lastpage}
   {pdf/endrun}
   {
-    \g_@@_backend_end_run_tl
+    %\g_@@_backend_end_run_tl
+    \hook_use:n {pdf/core/end_run}
   }
 \hook_gset_rule:nnnn {shipout/lastpage}{pdf}{<}{pdf/endrun}
 %</dvipdfmx|xdvipdfmx>
@@ -208,7 +210,8 @@
 \hook_gput_code:nnn {shipout/lastpage}
   {pdf/endrun}
   {
-    \g_@@_backend_end_run_tl
+    %\g_@@_backend_end_run_tl
+    \hook_use:n {pdf/core/end_run}
   }
 \hook_gset_rule:nnnn {shipout/lastpage}{pdf}{<}{pdf/endrun}
 %</dvips>
@@ -217,9 +220,15 @@
 %    \begin{macrocode}
 %<*drivers>
 \hook_gput_code:nnn{shipout/background}{pdf}
-  { \g_@@_backend_thispage_shipout_tl }
+  {
+    %\g_@@_backend_thispage_shipout_tl
+    \hook_use:n {pdf/core/thispage_shipout}
+  }
 \hook_gput_code:nnn {shipout/lastpage} {pdf}
-  { \g_@@_backend_lastpage_shipout_tl }
+  {
+    %\g_@@_backend_lastpage_shipout_tl
+    \hook_use:n {pdf/core/lastpage_shipout}
+  }
 %</drivers>
 %    \end{macrocode}
 % Here we fill the shipout hooks with content. For now
@@ -228,21 +237,24 @@
 % \end{NOTE}
 %    \begin{macrocode}
 %<*drivers>
-\@@_backend_thispage_shipout_gput:n
+%\@@_backend_thispage_shipout_gput:n
+\hook_gput_code:nnn {pdf/core/thispage_shipout} {pdf}
   {
      \exp_args:NV \@@_backend_ThisPage_gpush:n      { \g_shipout_readonly_int }
      \exp_args:NV \@@_backend_PageResources_gpush:n { \g_shipout_readonly_int }
   }
 
 %!!!!! check if pdftex/luatex can run this in the immediate end-of-run
-\@@_backend_lastpage_shipout_gput:n
+%\@@_backend_lastpage_shipout_gput:n
+\hook_gput_code:nnn {pdf/core/lastpage_shipout} {pdf}
   {
      \@@_backend_PageResources_obj_gpush:          %ExtGState etc
   }
 
 %!!  check the command names. Should this be internal
 %\__pdfcoredict?
-\@@_backend_end_run_gput:n
+%\@@_backend_end_run_gput:n
+\hook_gput_code:nnn {pdf/core/end_run} {pdf}
   {
      \__pdfcoredict_Pages_gpush:            %pagesattr
      \__pdfcoredict_Info_gpush:             %pdfinfo
