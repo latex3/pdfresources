@@ -116,48 +116,6 @@
 %</package>
 %    \end{macrocode}
 %
-%
-% Here we add the end run token list to suitable
-% end hooks.
-%    \begin{macrocode}
-%<*pdfmode>
-\hook_gput_code:nnn {enddocument/afterlastpage}
-  {pdf/endrun}
-  {
-    \hook_use:n {pdf/coredict/end_run}
-  }
-%</pdfmode>
-%<*dvipdfmx|xdvipdfmx>
-\hook_gput_code:nnn {shipout/lastpage}
-  {pdf/endrun}
-  {
-    \hook_use:n {pdf/coredict/end_run}
-  }
-\hook_gset_rule:nnnn {shipout/lastpage}{pdf}{<}{pdf/endrun}
-%</dvipdfmx|xdvipdfmx>
-%<*dvips>
-\hook_gput_code:nnn {shipout/lastpage}
-  {pdf/endrun}
-  {
-    \hook_use:n {pdf/coredict/end_run}
-  }
-\hook_gset_rule:nnnn {shipout/lastpage}{pdf}{<}{pdf/endrun}
-%</dvips>
-%    \end{macrocode}
-% Now we add to the shipout hooks the relevant token lists.
-%    \begin{macrocode}
-%<*drivers>
-\hook_gput_code:nnn{shipout/background}{pdf}
-  {
-    \hook_use:n {pdf/coredict/thispage_shipout}
-  }
-\hook_gput_code:nnn {shipout/lastpage} {pdf}
-  {
-     \hook_use:n {pdf/coredict/lastpage_shipout}
-  }
-%</drivers>
-%    \end{macrocode}
-%
 % \subsection{references to page objects}
 % \begin{NOTE}{UF}
 % a reference to the current page would be useful, but difficult to
@@ -226,46 +184,7 @@
 %  dvipdfmx syntax: \verb+\special{pdf:put @pages <</ABC /WEZ /EFG /XYZ /Rotate 0>>}+
 %  both remove duplicate entries automatically, so there is no need to be careful.
 % \end{NOTE}
-% \begin{macro}{\@@_backend_Pages_primitive:n}
-% This is the primitive command to add something to the /Pages dictionary.
-% It works differently for the backends: pdftex and luatex overwrite existing
-% content, dvips and dvipdfmx are additive. luatex sets it in lua.
-% The higher level code has to take this into account.
-%    \begin{macrocode}
-%<*pdfmode>
-\sys_if_engine_pdftex:T
-  {
-    \cs_new_protected:Npn \@@_backend_Pages_primitive:n #1
-      {
-        \tex_global:D \tex_pdfpagesattr:D { #1 }
-      }
-  }
-%luatex: does it in lua
-\sys_if_engine_luatex:T
-  {
-    \cs_new_protected:Npn \@@_backend_Pages_primitive:n #1
-      {
-        \tex_directlua:D
-          {
-            pdf.setpagesattributes( \@@_backend_luastring:n { #1 } )
-          }
-      }
-  }
-%</pdfmode>
-%<*dvips>
-\cs_new_protected:Npx \@@_backend_Pages_primitive:n #1
-  {
-    \tex_special:D{ps:~[#1~/PAGES~pdfmark} %]
-  }
-%</dvips>
-%<*dvipdfmx|xdvipdfmx>
-\cs_new_protected:Npn \@@_backend_Pages_primitive:n #1
-  {
-    \@@_backend:n{put~@pages~<<#1>>}
-  }
-%</dvipdfmx|xdvipdfmx>
-%    \end{macrocode}
-% \end{macro}
+
 %
 % \subsubsection{\enquote{Pages} / management}
 % \begin{NOTE}{UF}
