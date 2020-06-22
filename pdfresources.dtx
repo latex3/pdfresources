@@ -117,74 +117,6 @@
 %    \end{macrocode}
 %
 %
-% \subsection{shipout and end of run code}
-% Code is executed in three places: At shipout of every page,
-% at shipout of the last page, at the end of the document
-% (after the last clearpage). Due to backend differences the code in the
-% three places (and the exact timing) can be different. The code in
-% shipout of the last page relies on labels and so requires normally
-% a second compilation.
-% At first we define three tl-variables and commands to fill them.
-% The code added here shouldn't contain typesetting content and shouldn't rely on some
-% specific grouping.
-% +++++++++++++++++
-% \cs{@@_backend_end_run:} setups the end of run hook for the code stored in
-% \cs{g_@@_backend_end_run_code_tl} at the end of the compilation.
-% \cs{@@_backend_end_run_gput:n} adds its argument to
-% \cs{g_@@_backend_end_run_code_tl}
-% With pdflatex/lualatex |AtEndDocument{\clearpage|\meta{code}|}| is used,
-% so the code is executed at the first compilation.
-% To avoid that specials are lost the code is added to
-% \cs{\g_@@_backend_lastpage_shipout_code_tl} with dvips/dvipdfmx and so needs a
-% second compilation.
-% ++++++++++++++++
-% \begin{variable}
-%   {
-%    \g_@@_backend_end_run_tl,
-%    \g_@@_backend_lastpage_shipout_tl,
-%    \g_@@_backend_thispage_shipout_tl
-%   }
-% This variables contain the code run in the three place.
-%    \begin{macrocode}
-%<*drivers>
-\tl_new:N\g_@@_backend_end_run_tl
-\tl_new:N\g_@@_backend_lastpage_shipout_tl
-\tl_new:N\g_@@_backend_thispage_shipout_tl
-\hook_new:n {pdf/core/end_run}
-\hook_new:n {pdf/core/lastpage_shipout}
-\hook_new:n {pdf/core/thispage_shipout}
-%</drivers>
-%    \end{macrocode}
-% \end{variable}
-% \begin{macro}
-%   {
-%     \@@_backend_end_run_gput:n,
-%     \@@_backend_lastpage_shipout_gput:n,
-%     \@@_backend_thispage_shipout_gput:n
-%   }
-% These are the commands used to fill the three hook variables.
-% \begin{NOTE}{UF}
-% Check if these should be done with real hooks.
-% \end{NOTE}
-%    \begin{macrocode}
-%<*drivers>
-\cs_new_protected:Npn \@@_backend_end_run_gput:n #1
-  {
-    \tl_gput_right:Nn \g_@@_backend_end_run_tl { #1 }
-  }
-
-\cs_new_protected:Npn \@@_backend_lastpage_shipout_gput:n #1
-  {
-    \tl_gput_right:Nn \g_@@_backend_lastpage_shipout_tl { #1 }
-  }
-
-\cs_new_protected:Npn \@@_backend_thispage_shipout_gput:n #1
-  {
-    \tl_gput_right:Nn \g_@@_backend_thispage_shipout_tl { #1 }
-  }
-%    \end{macrocode}
-%</drivers>
-% \end{macro}
 % Here we add the end run token list to suitable
 % end hooks.
 %    \begin{macrocode}
@@ -192,17 +124,14 @@
 \hook_gput_code:nnn {enddocument/afterlastpage}
   {pdf/endrun}
   {
-    %\g_@@_backend_end_run_tl
-    %\hook_use_once:n
-    \hook_use:n {pdf/core/end_run}
+    \hook_use:n {pdf/coredict/end_run}
   }
 %</pdfmode>
 %<*dvipdfmx|xdvipdfmx>
 \hook_gput_code:nnn {shipout/lastpage}
   {pdf/endrun}
   {
-    %\g_@@_backend_end_run_tl
-    \hook_use:n {pdf/core/end_run}
+    \hook_use:n {pdf/coredict/end_run}
   }
 \hook_gset_rule:nnnn {shipout/lastpage}{pdf}{<}{pdf/endrun}
 %</dvipdfmx|xdvipdfmx>
@@ -210,8 +139,7 @@
 \hook_gput_code:nnn {shipout/lastpage}
   {pdf/endrun}
   {
-    %\g_@@_backend_end_run_tl
-    \hook_use:n {pdf/core/end_run}
+    \hook_use:n {pdf/coredict/end_run}
   }
 \hook_gset_rule:nnnn {shipout/lastpage}{pdf}{<}{pdf/endrun}
 %</dvips>
@@ -221,44 +149,11 @@
 %<*drivers>
 \hook_gput_code:nnn{shipout/background}{pdf}
   {
-    %\g_@@_backend_thispage_shipout_tl
-    \hook_use:n {pdf/core/thispage_shipout}
+    \hook_use:n {pdf/coredict/thispage_shipout}
   }
 \hook_gput_code:nnn {shipout/lastpage} {pdf}
   {
-    %\g_@@_backend_lastpage_shipout_tl
-    \hook_use:n {pdf/core/lastpage_shipout}
-  }
-%</drivers>
-%    \end{macrocode}
-% Here we fill the shipout hooks with content. For now
-% \begin{NOTE}{UF}
-% Check the names here, this is still a bit messy ...
-% \end{NOTE}
-%    \begin{macrocode}
-%<*drivers>
-%\@@_backend_thispage_shipout_gput:n
-\hook_gput_code:nnn {pdf/core/thispage_shipout} {pdf}
-  {
-     \exp_args:NV \@@_backend_ThisPage_gpush:n      { \g_shipout_readonly_int }
-     \exp_args:NV \@@_backend_PageResources_gpush:n { \g_shipout_readonly_int }
-  }
-
-%!!!!! check if pdftex/luatex can run this in the immediate end-of-run
-%\@@_backend_lastpage_shipout_gput:n
-\hook_gput_code:nnn {pdf/core/lastpage_shipout} {pdf}
-  {
-     \@@_backend_PageResources_obj_gpush:          %ExtGState etc
-  }
-
-%!!  check the command names. Should this be internal
-%\__pdfcoredict?
-%\@@_backend_end_run_gput:n
-\hook_gput_code:nnn {pdf/core/end_run} {pdf}
-  {
-     \__pdfcoredict_Pages_gpush:            %pagesattr
-     \__pdfcoredict_Info_gpush:             %pdfinfo
-     \__pdfcoredict_Catalog_gpush:
+     \hook_use:n {pdf/coredict/lastpage_shipout}
   }
 %</drivers>
 %    \end{macrocode}

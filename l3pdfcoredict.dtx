@@ -492,8 +492,46 @@
 
 \cs_generate_variant:Nn \pdfcoredict_gput:nnn {nnx}
 %    \end{macrocode}
-% \subsection{Hooks}
-% 
+% \subsection{Hooks -- shipout and end of run code}
+% Code is executed in three places: At shipout of every page,
+% at shipout of the last page, at the end of the document
+% (after the last clearpage). Due to backend differences the code in the
+% three places (and the exact timing) can be different: pdflatex/lualatex
+% can execute code after the last \cs{clearpage} which the dvi-based
+% drivers have to add on a shipout page.
+%
+% \begin{variable}
+%   {
+%    pdf/coredict/end_run,
+%    pdf/coredict/lastpage_shipout,
+%    pdf/coredict/thispage_shipout
+%   }
+% This hooks contain the code run in the three places.
+%    \begin{macrocode}
+\hook_new:n {pdf/coredict/end_run}
+\hook_new:n {pdf/coredict/lastpage_shipout}
+\hook_new:n {pdf/coredict/thispage_shipout}
+%    \end{macrocode}
+% \end{variable}
+%    \begin{macrocode}
+\hook_gput_code:nnn {pdf/coredict/thispage_shipout} {pdf}
+  {
+     \exp_args:NV \__pdf_backend_ThisPage_gpush:n      { \g_shipout_readonly_int }
+     \exp_args:NV \__pdf_backend_PageResources_gpush:n { \g_shipout_readonly_int }
+  }
+
+\hook_gput_code:nnn {pdf/coredict/lastpage_shipout} {pdf}
+  {
+     \__pdf_backend_PageResources_obj_gpush:          %ExtGState etc
+  }
+
+\hook_gput_code:nnn {pdf/coredict/end_run} {pdf}
+  {
+     \__pdfcoredict_Pages_gpush:            %pagesattr
+     \__pdfcoredict_Info_gpush:             %pdfinfo
+     \__pdfcoredict_Catalog_gpush:
+  }
+%    \end{macrocode}
 % \subsection{Internal dictionary Code}
 %  Many code parts are quite similar: property lists for
 %  dictionaries are filled and output.
