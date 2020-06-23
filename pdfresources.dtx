@@ -105,16 +105,6 @@
 %</package>
 %    \end{macrocode}
 % \end{variable}
-% \subsection{some zref code, needs to be replaced later}
-% a reference for the absolute page counter. This use the counter from the
-% new lthooks/ltshipout package.
-%    \begin{macrocode}
-%<*package>
-\zref@newlist  { l3pdf }
-\zref@newprop* { pdf@abspage } [0] { \int_use:N \g_shipout_readonly_int }
-\zref@addprop  { l3pdf } { pdf@abspage }
-%</package>
-%    \end{macrocode}
 %
 % \subsection{references to page objects}
 % \begin{NOTE}{UF}
@@ -221,177 +211,14 @@
 % As pgf does the same, there is a need to patch it for now. Ditto for package colorspace.
 % \end{NOTE}
 % \subsubsection{\enquote{Page/Resources}: ExtGState, ColorSpace, Shading, Pattern / backend}
-% Path: Page/Resources/ExtGState etc. The actual output of the resources is handled
-% together with the bdc/Properties. Here is only special code.
-% \begin{macro}{\@@_backend_PageResources_gput:nnn}
-% stores values for the page resources.
-% \begin{arguments}
-% \item name of the resource (ExtGState, ColorSpace, Shading, Pattern)
-% \item a pdf name without slash
-% \item value
-% \end{arguments}
-% \begin{macro}{\@@_backend_PageResources_obj_gpush:}
-% This pushes out the objects. It is a no-op with xdvipdfmx and dvips.
-%    \begin{macrocode}
-% backend commands the command to fill the register
-% and to push the values.
-%
-%quite often needed
-%<*drivers>
-\clist_const:Nn \c_@@_backend_PageResources_clist
-  {
-    ExtGState,
-    ColorSpace,
-    Pattern,
-    Shading,
-  }
-
-\clist_map_inline:Nn \c_@@_backend_PageResources_clist
-      {
-        \pdfdict_gnew:n {Core/Page/Resources/#1}
-      }
-%</drivers>
-% pdftex and luatex
-%<*pdfmode>
- %create the backend objects:
-\clist_map_inline:Nn \c_@@_backend_PageResources_clist
-  {
-    \@@_backend_object_new:nn {Page/Resources/#1} {dict}
-    \cs_if_exist:NT \tex_directlua:D
-      {
-        \tex_directlua:D
-          {
-            l3kernel.@@.object["Page/Resources/#1"]
-            =
-            "\@@_backend_object_ref:n{Page/Resources/#1}"
-          }
-      }
-   }
- %values are only stored in a prop and will be output at end document.
-\sys_if_engine_luatex:T
-  {
-    \cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
-      {
-        \pdfdict_gput:nnn {Core/Page/Resources/#1} { #2 }{ #3 }
-        % luatex must also trigger the lua side
-        \tex_latelua:D{l3kernel.@@.Page.Resources.#1=true}
-        \tex_latelua:D
-          {
-            l3kernel.pdf.Page_Resources_gpush(tex.count["g_shipout_readonly_int"])
-          }
-      }
-  }
-\sys_if_engine_pdftex:T
-  { %pdftex
-    \cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
-      {
-        \pdfdict_gput:nnn {Core/Page/Resources/#1} { #2 }{ #3 }
-      }
-  }
-
-%code for end of document code
-\cs_new_protected:Npn \@@_backend_PageResources_obj_gpush:
-  {
-    \clist_map_inline:Nn \c_@@_backend_PageResources_clist
-      {
-        \prop_if_empty:cF
-          { \pdfdict_gname:n {Core/Page/Resources/##1} }
-          {
-            \@@_backend_object_write:nx
-              { Page/Resources/##1 }
-              { \pdfdict_gmap:n {Core/Page/Resources/##1} }
-          }
-     }
-  }
-%</pdfmode>
-% xdvipdfmx
-% \special{pdf:pageresources<<#1>>} doesn't work correctly with object names ...
-% https://tug.org/pipermail/dvipdfmx/2019-August/000021.html,
-% so we use \special{pdf:put @resources}
-% this must be issued on every page!
-%<*dvipdfmx|xdvipdfmx>
-%objects should not only be created but also "initialized"
-\clist_map_inline:Nn \c_@@_backend_PageResources_clist
-  {
-    \@@_backend_object_new:nn   { Page/Resources/#1 } { dict }
-    \@@_backend_object_write:nn { Page/Resources/#1 } {}
-  }
-
-\cs_new_protected:Npn \@@_backend_PageResources:n #1
-  {
-    \@@_backend:n {put~@resources~<<#1>>}
-  }
-\cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
-  {
-   % this is not used for output, but there is a test if the resource is empty
-   \prop_gput:cnn { \pdfdict_gname:n {Core/Page/Resources/#1} } { #2 }{ #3 }
-   %objects are not filled with \pdf_object_write as this is not additive!
-    \@@_backend:x
-      {
-        put~\@@_backend_object_ref:n {Page/Resources/#1}<</#2~#3>>
-      }
-  }
-
-\cs_new_protected:Npn \@@_backend_PageResources_obj_gpush: {}
-%</dvipdfmx|xdvipdfmx>
-%<*dvips>
-% dvips unneeded, or no-op
-\cs_new_protected:Npn \@@_backend_PageResources:n #1 {}
-\cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
-  { %only for the show command TEST!!
-    \pdfdict_gput:nnn {Core/Page/Resources/#1} { #2 }{ #3 }
-  }
-\cs_new_protected:Npn \@@_backend_PageResources_obj_gpush: {}
-%</dvips>
-%    \end{macrocode}
-% \end{macro}
-% \end{macro}
-% !!!!! check path names (backend or not ...)
-%
+% moved to l3backend-pdf-extra
 %
 % \subsection{\enquote{Catalog} \& subdirectories (pdfcatalog) }
 % \subsubsection{\enquote{Catalog} \& subdirectories / backend}
 % the backend command is already in the driver:
 % \cs{@@_backend_catalog_gput:nn}
 %
-% \paragraph { Special case: the /Names dictionary }
-% Entries to /Names are handled differently, in part (/Desc) it is automatic, for
-% other special commands like \cs{pdfnames} must be used.
-%    \begin{macrocode}
-% pdflatex
-%<*pdfmode>
-\sys_if_engine_pdftex:T
- {
-   \cs_new_protected:Npn \@@_backend_NamesEmbeddedFiles_gpush:n #1 %array content
-     {
-        \pdf_object_now:nn {dict} {/Names [#1] }
-        \pdfnames{/EmbeddedFiles~\pdf_object_last:}
-     }
- }
 
-\sys_if_engine_luatex:T
- {
-   \cs_new_protected:Npn \@@_backend_NamesEmbeddedFiles_gpush:n #1 %array content
-     {
-       \pdf_object_now:nn {dict} {/Names [#1] }
-       \pdfextension~names~{/EmbeddedFiles~\pdf_object_last: }
-     }
- }
-%</pdfmode>
-%<*dvipdfmx|xdvipdfmx>
-\cs_new_protected:Npn \@@_backend_NamesEmbeddedFiles_gpush:n #1 %array content
-  {
-    \pdf_object_now:nn {dict} { /Names [#1] }
-    %n or x?
-    \__pdf_backend:x {put~@names~<</EmbeddedFiles~\pdf_object_last: >>}
-  }
-%</dvipdfmx|xdvipdfmx>
-
-%dvips: noop
-%<*dvips>
-\cs_new_protected:Npn \@@_backend_NamesEmbeddedFiles_gpush:n #1 {}
-%</dvips>
-%    \end{macrocode}
 % \subsubsection{\enquote{Catalog} \& subdirectories / management }
 % \begin{NOTE}{UF}
 % The catalog dictionary is filled by e.g. \cs{pdfcatalog}. Multiple appearances of
