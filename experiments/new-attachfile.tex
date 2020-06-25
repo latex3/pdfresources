@@ -11,13 +11,30 @@
 %t0\attachfilesetup{color=attachfilecolor}
 \begin{document}
 abc
+\ExplSyntaxOn
+%\tl_const:Nn \c__color_export_rgb_tl {rgb}
+%\attachfile[icon=Graph,mimetype=text/plain,color=red]{catalogue.tex} some text
+%
+
+\tl_set:Nn\l__atfi_annot_color_tl {red}
+
+\__atfi_annot_print_icon_Paperclip:
+\__atfi_annot_print_icon_Tag:
+\__atfi_annot_print_icon_Graph:
+\__atfi_annot_print_icon_PushPin:
+
+%\atfi@acroGraph
+%\atfi@acroPushPin
+
+\ExplSyntaxOff
+\end{document}
 \makeatletter
 \attachfilesetup{color=red,author=Müsterhaße,new-afrelationship=blub}
 \ExplSyntaxOn
 %\tl_show:N \l__atfi_annot_color_tl
 %\tl_show:N \l__atfi_setup_keyval_tl
 \keys_set:no {atfi} { \l__atfi_setup_keys_tl,afrelationship=blubx }
-\end{document}
+%\end{document}
 \pdfdict_show:n{annot/FileAttachment}
 \tl_show:N \l__atfi_annot_color_tl
 

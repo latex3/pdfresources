@@ -25,7 +25,7 @@
 %%
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{new-attachfile}%
-  [2020/04/13 v0.1 Attach files into PDF (HO/UF)]%
+  [2020/06/26 v0.2 Attach files into PDF (HO/UF)]%
 \RequirePackage{pdfresources}
 \RequirePackage{iftex}[2019/11/07]
 \RequirePackage{keyval}
@@ -549,19 +549,20 @@
 %data for the icons
 
 
-\cs_new_protected:Npn \__atfi_color_to_rgb_seq:nN #1 #2 % #1 name #2 seq
- {
-   \tl_set_eq:NN \l__color_ori_fixed_model_tl \l_color_fixed_model_tl
-   \tl_set:Nn \l_color_fixed_model_tl {rgb}
-   \color_parse:nN {#1}\l_tmpa_tl
-   \seq_set_split:NnV #2 { ~ }\l_tmpa_tl
-   \seq_pop_left:NN #2 \l_tmpa_tl
-   \tl_set_eq:NN  \l_color_fixed_model_tl \l__color_ori_fixed_model_tl
- }
-\cs_generate_variant:Nn \__atfi_color_to_rgb_seq:nN {oN}
-\cs_new:Npn \__atfi_arg_braced:n #1 {{#1}}
+%\cs_new_protected:Npn \__atfi_color_to_rgb_seq:nN #1 #2 % #1 name #2 seq
+% {
+%   %\tl_set_eq:NN \l__color_ori_fixed_model_tl \l_color_fixed_model_tl
+%   %\tl_set:Nn \l_color_fixed_model_tl {rgb}
+%   %\color_parse:nN {#1}\l_tmpa_tl
+%   \color_export:nnN {red}{space-sep-rgb}\l_tmpa_tl
+%   \seq_set_split:NnV #2 { ~ }\l_tmpa_tl
+%   %\seq_pop_left:NN #2 \l_tmpa_tl
+%   %\tl_set_eq:NN  \l_color_fixed_model_tl \l__color_ori_fixed_model_tl
+% }
+%\cs_generate_variant:Nn \__atfi_color_to_rgb_seq:nN {oN}
+%\cs_new:Npn \__atfi_arg_braced:n #1 {{#1}}
 
-\cs_new_protected:Npn \l__atfi_annot_icon_graph_tl
+\cs_new_protected:Npn \l__atfi_annot_icon_Graph_tl
   {
     \__draw_backend_scope_begin:
     \__draw_backend_color_fill_gray:n {0.5}
@@ -584,10 +585,8 @@
     \__draw_backend_rectangle:nnnn {14.7471bp}{4.1367bp}{3.9571bp}{11.8867bp}
     \__draw_backend_fill:
 
-    \__atfi_color_to_rgb_seq:oN {\l__atfi_annot_color_tl} \l_tmpa_seq
-    \exp_last_unbraced:Ne \__draw_backend_color_fill_rgb:nnn
-      { \seq_map_function:NN \l_tmpa_seq \__atfi_arg_braced:n }
-
+    \exp_args:No\color_export:nnN {\l__atfi_annot_color_tl}{space-sep-rgb}\l_tmpa_tl
+    \exp_args:No \__draw_backend_color_fill_rgb:n {\l_tmpa_tl}
     \__draw_backend_rectangle:nnnn {1.689bp}{3.0938bp}{3.9571bp}{13.8867bp}
     \__draw_backend_fill:
     \__draw_backend_rectangle:nnnn {7.6602bp}{3.0938bp}{3.9571bp}{9.8867bp}
@@ -636,9 +635,8 @@
     \__draw_backend_literal:x {6.9692~6.3301~6.9692~7.1572~v}
     \__draw_backend_literal:x {6.9692~7.9863~6.9692~12.21~y}
     \__draw_backend_stroke:
-    \__atfi_color_to_rgb_seq:oN {\l__atfi_annot_color_tl} \l_tmpa_seq
-       \exp_last_unbraced:Ne \__draw_backend_color_stroke_rgb:nnn
-         { \seq_map_function:NN \l_tmpa_seq \__atfi_arg_braced:n }
+    \exp_args:No\color_export:nnN {\l__atfi_annot_color_tl}{space-sep-rgb}\l_tmpa_tl
+    \exp_args:No \__draw_backend_color_stroke_rgb:n {\l_tmpa_tl}
     \__draw_backend_linewidth:n {1bp}
     \__draw_backend_moveto:nn {1.2495bp} {12.4404bp}
     \__draw_backend_literal:x {1.2495~3.9883~1.2495~3.1895~v}
@@ -679,9 +677,8 @@
      \__draw_backend_lineto:nn {12bp}{1bp}
      \__draw_backend_lineto:nn {11bp}{1bp}
      \__draw_backend_lineto:nn {11bp}{6bp}
-     \__atfi_color_to_rgb_seq:oN {\l__atfi_annot_color_tl} \l_tmpa_seq
-        \exp_last_unbraced:Ne \__draw_backend_color_fill_rgb:nnn
-          { \seq_map_function:NN \l_tmpa_seq \__atfi_arg_braced:n }
+     \exp_args:No\color_export:nnN {\l__atfi_annot_color_tl}{space-sep-rgb}\l_tmpa_tl
+     \exp_args:No \__draw_backend_color_fill_rgb:n {\l_tmpa_tl}
      \__draw_backend_color_stroke_gray:n {0}
      \__draw_backend_fillstroke:
      \__draw_backend_color_stroke_gray:n {0.5}
@@ -738,9 +735,8 @@
     \__draw_backend_curveto:nnnnnn{8.7344bp}{7.2715bp}{9.4463bp}{8.0879bp}{9.4463bp}{9.0957bp}
     \__draw_backend_curveto:nnnnnn{9.4463bp}{10.1035bp}{8.7344bp}{10.9199bp}{7.856bp}{10.9199bp}
     \__draw_backend_closepath:
-    \__atfi_color_to_rgb_seq:oN {\l__atfi_annot_color_tl} \l_tmpa_seq
-         \exp_last_unbraced:Ne \__draw_backend_color_fill_rgb:nnn
-           { \seq_map_function:NN \l_tmpa_seq \__atfi_arg_braced:n }
+    \exp_args:No\color_export:nnN {\l__atfi_annot_color_tl}{space-sep-rgb}\l_tmpa_tl
+    \exp_args:No \__draw_backend_color_fill_rgb:n {\l_tmpa_tl}
     \__draw_backend_color_stroke_gray:n {0}
     \__draw_backend_fillstroke:
     \__draw_backend_linewidth:n {1bp}
