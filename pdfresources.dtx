@@ -526,7 +526,7 @@
         \int_gincr:N\g_@@_backend_resourceid_int
         \bool_if:NTF \l_@@_backend_xform_bool
           {
-            \exp_args:Nnx\pdfdict_gput:nnn %no handler needed
+            \exp_args:Nnxx\pdfdict_gput:nnn %no handler needed
               { Core/Xform/Resources/Properties }
               { l3pdf\int_use:N\g_@@_backend_resourceid_int }
               { \@@_backend_object_ref:n { #2 } }
@@ -546,7 +546,7 @@
               {
                 \pdfdict_gnew:n  { Core/backend_Page\l_@@_tmpa_tl/Resources/Properties }
               }
-            \exp_args:Nnx\pdfdict_gput:nnn
+            \exp_args:Nnxx\pdfdict_gput:nnn
               { Core/backend_Page\l_@@_tmpa_tl/Resources/Properties }
               { l3pdf\int_use:N\g_@@_backend_resourceid_int }
               { \@@_backend_object_ref:n{#2} }
@@ -561,7 +561,7 @@
         \int_gincr:N\g_@@_backend_resourceid_int
         \bool_if:NTF \l_@@_backend_xform_bool
           {
-            \exp_args:Nnx\pdfdict_gput:nnn
+            \exp_args:Nnxx\pdfdict_gput:nnn
               { Core/Xform/Resources/Properties }
               { l3pdf\int_use:N\g_@@_backend_resourceid_int }
               { \@@_backend_object_last: }
@@ -581,7 +581,7 @@
               {
                 \pdfdict_gnew:n { Core/backend_Page\l_@@_tmpa_tl/Resources/Properties }
               }
-            \exp_args:Nnx\pdfdict_gput:nnn
+            \exp_args:Nnxx\pdfdict_gput:nnn
               { Core/backend_Page\l_@@_tmpa_tl/Resources/Properties }
               { l3pdf\int_use:N\g_@@_backend_resourceid_int }
               { \@@_backend_object_last: }
