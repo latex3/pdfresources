@@ -76,7 +76,7 @@
 % recommended to use lowercase for global and uppercase for global dictionaries.
 % \end{function}
 % \begin{function}[added = 2020-06-16]
-%   {\pdfdict_set_eq:nm,\pdfdict_gset_eq:nn}
+%   {\pdfdict_set_eq:nn,\pdfdict_gset_eq:nn}
 %   \begin{syntax}
 %     \cs{pdfdict_set_eq:nn}  \Arg{local dictionary name_1} \Arg{local dictionary name_2}\\
 %     \cs{pdfdict_gset_eq:nn} \Arg{global dictionary name_1}\Arg{global dictionary name_2}
@@ -204,7 +204,7 @@
 % The module predeclares a number of local dictionaries and fills them with
 % some standard values. Some are not more than templates. But others are used
 % in core commands and can be used to change their settings.
-% For example an link created with \cs{\pdfannot_link:nnn}
+% For example an link created with \cs{pdfannot_link:nnn}
 % will use the \texttt{annot/Link/URI} dictionary. By adding or changing entries
 % in this dictionary user or packages can for example adapt the border color or
 % add keys needed for ocg layers.
@@ -347,8 +347,8 @@
 % \end{macro}
 % \begin{macro}
 %   {
-%     \@@_set_eq:nm,\pdfdict_set_eq:nn,
-%     \@@_gset_eq:nm,\pdfdict_gset_eq:nn
+%     \@@_set_eq:nn,\pdfdict_set_eq:nn,
+%     \@@_gset_eq:nn,\pdfdict_gset_eq:nn
 %   }
 %    \begin{macrocode}
 %<*package>
@@ -584,8 +584,8 @@
 %
 % \begin{macro}
 %   {
-%     \@@_remove:nnN, \pdfdict_remove:nnN,
-%     \@@_gremove:nnN,\pdfdict_gremove:nnN
+%     \@@_remove:nn, \pdfdict_remove:nn,
+%     \@@_gremove:nn,\pdfdict_gremove:nn
 %   }
 % This removes a name/value pair from a dictionary.
 % The name has to be passed through the escaping.

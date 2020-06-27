@@ -37,7 +37,7 @@
 %<@@=pdf>
 %<*package>
 \RequirePackage{xparse,l3pdf}
-\RequirePackage{lthooks,zref-lastpage,bitset}
+\RequirePackage{lthooks,zref-base,bitset}
 \ProvidesExplPackage {pdfresources} {2020-06-15} {0.6}
   {experimental pdf-resource management}
 \DeclareOption { debug }
@@ -704,7 +704,7 @@
 %    These command give back the sizes of the XObject. The values are stored in
 %    tl-variables with the unit pt and not in dimensions!
 %   \end{function}
-%   \begin{function}[EXP,pTF,added = 220-04-29]
+%   \begin{function}[EXP,pTF,added = 2020-04-29]
 %     {
 %       \pdf_xform_if_exist:n
 %     }
@@ -1130,7 +1130,7 @@
 %    \end{macrocode}
 % \subsection{Annotations, Flags}
 % Every flag should have an associated property that allows to set/clear flag positions by
-% name. The name is \c_pdfannot_flag_#1_prop
+% name. The name is \cs{_pdfannot_flag_\#1_prop}
 % \begin{NOTE}{UF}
 % not sure about this yes, reconsider (naming, implementation ...)
 % \end{NOTE}
@@ -1697,14 +1697,6 @@
   }
 \tl_new:N \l_@@_name_tmp_tl
 \tl_new:N \l_@@_value_tmp_tl
-
-%\cs_generate_variant:Nn \pdf_pageresources_gput:nnn {noo}
-%
-%\cs_new_protected:Npn \pdf_pageresources_split_gput:nn  #1 #2  %#1  resources
-%  {
-%    \@@_split_dict_entry_aux:NNw \l_@@_name_tmp_tl \l_@@_value_tmp_tl #2 \q_stop
-%    \pdf_pageresources_gput:noo {#1}{\l_@@_name_tmp_tl}{\l_@@_value_tmp_tl}
-%  }
 
 \cs_new:Npn \@@_patch_pgfextgs:w  #1/#2<<#3>>#4\q_stop
   {
