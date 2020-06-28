@@ -6,6 +6,7 @@
 bundle  = ""
 module  = "pdfresources"
 
+
 installfiles = {"*.sty","*.cls","*.def","*.lua"}
 sourcefiles =  {"*.dtx","*.ins",
                 "hgeneric-experimental.def",

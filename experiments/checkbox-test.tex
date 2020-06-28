@@ -44,42 +44,42 @@
   {
     checkbox/Yes/dflt
   }
-  
-%default xform 
+
+%default xform
 
 \NewDocumentCommand \newcheckboxappearance { s  m m  }  %#2=name, #3 = content
  {
    \pdf_xform_new:nnn {#2}{}
      {
       \normalsize
-      \hbox_set:Nn   \l_tmpa_box { #3 \strut }      
+      \hbox_set:Nn   \l_tmpa_box { #3 \strut }
       \IfBooleanTF {#1}
        {
         \fboxsep 0pt
         \framebox
         [ \dim_max:nn { \box_wd:N \l_tmpa_box }{ \box_ht:N\strutbox+\box_dp:N\strutbox} ]
-        { \box_use:N \l_tmpa_box } 
+        { \box_use:N \l_tmpa_box }
        }
        {
         \makebox
         [ \dim_max:nn { \box_wd:N \l_tmpa_box }{\box_ht:N\strutbox+\box_dp:N\strutbox} ]
-        { \box_use:N \l_tmpa_box }               
-       } 
-     }    
+        { \box_use:N \l_tmpa_box }
+       }
+     }
  }
- 
+
 \newcheckboxappearance* {checkbox/Yes/dflt}
-  { 
+  {
     $\times$
-  }  
+  }
 
 \newcheckboxappearance* {checkbox/Off/dflt}
-  {  }  
-  
+  {  }
+
 \usepackage{tikz,bearwear}
 \usepackage[default]{sourcesanspro}
 
-  
+
 \newcheckboxappearance {checkbox/Off/unicode}
  {\normalfont ☐}
 \newcheckboxappearance {checkbox/Yes/unicode}
@@ -91,12 +91,12 @@
     \path[draw=white,fill=magenta](0,-1pt)rectangle(8pt,7pt);
   }
 
-\newcheckboxappearance {checkbox/Yes/tikz}  
+\newcheckboxappearance {checkbox/Yes/tikz}
    {
     \tikz[baseline]
       \path[draw=white,fill=cyan](0,-1pt)rectangle(8pt,7pt);
    }
-     
+
 
 \newcheckboxappearance {checkbox/Off/bear}
   {
@@ -107,7 +107,7 @@
    {
     \tikz[scale=0.5]\bear\bearwear;
    }
-     
+
 
 \keys_define:nn { uf }
   {
@@ -118,7 +118,7 @@
   }
 
 \cs_new_protected:Nn \__uf_normalise_boxes:
-  {    
+  {
     \dim_set:Nn \l__uf_field_wd_dim
        { \dim_max:nn { \pdf_xform_wd:e {\l__uf_normal_off_tl} }{ \pdf_xform_wd:e {\l__uf_normal_yes_tl} } }
     \dim_set:Nn \l__uf_field_ht_dim
@@ -151,19 +151,19 @@
       \pdfdict_put:nnn {annot/Field}{V}{/Off}  %should be configurable/in sync with /AS/DV
       \pdfdict_put:nnn {annot/Field}{DV}{/Off} %should be configurable/in sync with /AS/DV
       \pdfdict_put:nnx {annot/Field}{Kids}{\pdf_object_ref:n {annot/Field/Btn/#1/Kids}}
-      \pdfannot_flag_clear:nn {annot/Field}{Radio}      %just in case
-      \pdfannot_flag_clear:nn {annot/Field}{Pushbutton} %just in case
-      \pdfannot_flag_set:nn {annot/Field}{NoExport}
-      \pdfdict_put:nnx {annot/Field}{Ff}{\pdfannot_flag_use:n{annot/Field}}
+      \pdf_flag_clear:nn {annot/Field}{Radio}      %just in case
+      \pdf_flag_clear:nn {annot/Field}{Pushbutton} %just in case
+      \pdf_flag_set:nn {annot/Field}{NoExport}
+      \pdfdict_put:nnx {annot/Field}{Ff}{\pdf_flag_use:n{annot/Field}}
       \pdf_object_write:nx {annot/Field/Btn/#1} { \pdfdict_map:n {annot/Field} }
-      \pdfdict_gput:nnx { Catalog / AcroForm } { Fields }{\pdf_object_ref:n {annot/Field/Btn/#1} }
+      \pdfcoredict_gput:nnx { Catalog / AcroForm } { Fields }{\pdf_object_ref:n {annot/Field/Btn/#1} }
       \group_end:
      }
   }
 
 \cs_new_protected:Npn \__uf_checkbox_annot:n #1
   {
-    \group_begin:    
+    \group_begin:
      \hbox_to_wd:nn
        { \l__uf_field_wd_dim  }
        {
@@ -295,4 +295,4 @@ AA: Submit:
   /Fields array
 
   /S /JavaScript
-  /JS text string or stream
+  /JS text string or stream 
