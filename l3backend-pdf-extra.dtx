@@ -110,7 +110,7 @@
   {
     \hook_use:n {pdf/coredict/end_run}
   }
-\hook_gset_rule:nnnn {shipout/lastpage}{pdf}{<}{pdf/endrun}
+\hook_gset_rule:nnnn {shipout/lastpage}{pdf}{before}{pdf/endrun}
 %</dvipdfmx|xdvipdfmx>
 %<*dvips>
 \hook_gput_code:nnn {shipout/lastpage}
@@ -118,7 +118,7 @@
   {
     \hook_use:n {pdf/coredict/end_run}
   }
-\hook_gset_rule:nnnn {shipout/lastpage}{pdf}{<}{pdf/endrun}
+\hook_gset_rule:nnnn {shipout/lastpage}{pdf}{before}{pdf/endrun}
 %</dvips>
 %    \end{macrocode}
 % \subsubsection{Add the \enquote{shipout} hooks}
