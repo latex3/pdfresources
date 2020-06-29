@@ -1129,22 +1129,22 @@
 %    \end{macrocode}
 % \subsection{Annotations, Flags}
 % Every flag should have an associated property that allows to set/clear flag positions by
-% name. The name is \cs{_pdfannot_flag_\#1_prop}
+% name. The name is \cs{c_@@_flag_\#1_prop}
 % \begin{NOTE}{UF}
 % not sure about this yes, reconsider (naming, implementation ...)
 % \end{NOTE}
 %    \begin{macrocode}
 %<*package>
-\cs_new_protected:Npn \pdfannot_flag_new:nn #1 #2
+\cs_new_protected:Npn \pdf_flag_new:nn #1 #2
   {
     \bitsetReset  { @@_#1_flag }
-    \prop_const_from_keyval:cn { c_pdfannot_flag_#1_prop }
+    \prop_const_from_keyval:cn { c_@@_flag_#1_prop }
       {
         #2
       }
   }
 
-\pdfannot_flag_new:nn {annot/Link}
+\pdf_flag_new:nn {annot/Link}
   {
     Invisible      = 0,
     Hidden         = 1,
@@ -1158,7 +1158,7 @@
     LockedContents = 9
   }
 
-\pdfannot_flag_new:nn {annot/Field} %it is not really an annot, but we will put
+\pdf_flag_new:nn {annot/Field} %it is not really an annot, but we will put
   {                                 % form field in this module.
     ReadOnly          = 0,
     Required          = 1,
@@ -1182,7 +1182,7 @@
     CommitOnSelChange = 26
   }
 
-\pdfannot_flag_new:nn {annot/field/submit}
+\pdf_flag_new:nn {annot/field/submit}
   {
     Include/Exclude       = 0,
     IncludeNoValueFields  = 1,
@@ -1201,20 +1201,20 @@
 
 % #1: type, e.g. annot/Link
 % #2: name of flag, e.g. Print
-\cs_new_protected:Npn \pdfannot_flag_set:nn #1 #2
+\cs_new_protected:Npn \pdf_flag_set:nn #1 #2
   {
     \bitsetSet  { @@_#1_flag }
-      { \prop_item:cn {c_pdfannot_flag_#1_prop} {#2} }
+      { \prop_item:cn {c_@@_flag_#1_prop} {#2} }
   }
 
-\cs_new_protected:Npn \pdfannot_flag_clear:nn #1 #2
+\cs_new_protected:Npn \pdf_flag_clear:nn #1 #2
   {
     \bitsetClear{ @@_#1_flag }
-      { \prop_item:cn {c_pdfannot_flag_#1_prop} {#2} }
+      { \prop_item:cn {c_@@_flag_#1_prop} {#2} }
   }
 
 %flags are output as decimals.
-\cs_new:Npn \pdfannot_flag_use:n #1
+\cs_new:Npn \pdf_flag_use:n #1
   {
     \bitsetGetDec { @@_#1_flag }
   }
@@ -1280,7 +1280,7 @@
 \seq_map_inline:Nn \c_pdfannot_link_types_seq
   {
     \pdfdict_new:n   { annot/Link/#1 }
-    \pdfdict_put:nnn { annot/Link/#1}{ F }{ \pdfannot_flag_use:n { annot/Link} }
+    \pdfdict_put:nnn { annot/Link/#1}{ F }{ \pdf_flag_use:n { annot/Link} }
     \hook_new_pair:nn
       {pdf/annot/Link/#1/before}
       {pdf/annot/Link/#1/after}

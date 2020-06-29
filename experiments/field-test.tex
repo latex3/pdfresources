@@ -149,13 +149,13 @@
                 {pdf/annot/Field/#1/#2/Kids}
                 { \seq_use:cn{g__pdf/annot/Field/#1/#2/Kids_seq}{~} }
             }
-          \pdfdict_gput:nnx
+          \pdfcoredict_gput:nnx
             { Catalog / AcroForm }
             { Fields }
             { \pdf_object_ref:n {pdf/annot/Field/#1/#2} }
           % Standard dictionary entries:
           \pdfdict_put:nnx  %flags, Ff
-            {annot/Field}{Ff}{\pdfannot_flag_use:n{annot/Field}}
+            {annot/Field}{Ff}{\pdf_flag_use:n{annot/Field}}
           \pdfdict_put:nnn  %type, FT
             {annot/Field}{FT}{/#1}
           \pdfdict_put:nnx  %Kids
@@ -176,9 +176,9 @@
     \group_begin:
     \pdfdict_put:nnn {annot/Field}{V}{/Off}  %should be configurable/in sync with /AS/DV
     \pdfdict_put:nnn {annot/Field}{DV}{/Off} %should be configurable/in sync with /AS/DV
-    \pdfannot_flag_clear:nn {annot/Field}{Radio}      %just in case
-    \pdfannot_flag_clear:nn {annot/Field}{Pushbutton} %just in case
-    \pdfannot_flag_set:nn {annot/Field}{NoExport}
+    \pdf_flag_clear:nn {annot/Field}{Radio}      %just in case
+    \pdf_flag_clear:nn {annot/Field}{Pushbutton} %just in case
+    \pdf_flag_set:nn {annot/Field}{NoExport}
 
 
     \pdfannot_field:nn {Btn}{#1}
