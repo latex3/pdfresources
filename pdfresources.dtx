@@ -1061,6 +1061,15 @@
 % \cs{@@_backend_link_begin_user:nnw}, etc
 %
 % \subsubsection{ general Annotation/management }
+% \begin{variable}
+%  { \g__pdfannot_use_lastlink_bool }
+% The pdf engines have two different primitive commands to refer to the last created
+% annotation: one for links, one for boxed annotation. We use a boolean to decide
+% which one should be used, so that only one user command is needed.
+%    \begin{macrocode}
+\bool_new:N \g__pdfannot_use_lastlink_bool
+%    \end{macrocode}
+% \end{variable}
 % \begin{NOTE}{UF}
 % !!!type or not type? Syntax for type???
 % \end{NOTE}
@@ -1106,11 +1115,13 @@
 \cs_new_protected:Npn \pdfannot_box:nnnn #1 #2 #3 #4
   {
     \@@_backend_annotation:nnnn {#1}{#2}{#3}{#4}
+    \bool_gset_false:N\g__pdfannot_use_lastlink_bool
   }
 
 \cs_new:Npn \pdfannot_box_last:
   {
     \@@_backend_annotation_last:
+    \bool_gset_false:N\g__pdfannot_use_lastlink_bool
   }
 
 \cs_new_protected:Npn \pdfannot_box:nnnnn #1 #2 #3 #4 #5
@@ -1124,6 +1135,7 @@
           }
         #5
       }
+    \bool_gset_false:N\g__pdfannot_use_lastlink_bool
   }
 %</package>
 %    \end{macrocode}
@@ -1292,6 +1304,7 @@
 
 
 % \subsubsection{Annotations, subtype Link /management}
+%
 % \begin{function}[added = 2020-03-12, updated = 2020-04-14]{ \pdfannot_link:nnn }
 %   \begin{syntax}
 %     \cs{pdfannot_link:nnn} \Arg{type} \Arg{user action spec} \Arg{link text}
@@ -1320,6 +1333,7 @@
 % \end{function}
 %
 %    \begin{macrocode}
+%
 %<*package>
 \cs_new_protected:Nn \pdfannot_link:nnn %#1 type (URI, GoTo etc),
                                         %#2 action spec, #3 link text
@@ -1338,8 +1352,10 @@
         /Subtype/Link
         #2
       }
+    \bool_gset_true:N \g__pdfannot_use_lastlink_bool
     #3
     \@@_backend_link_end:
+    \bool_gset_true:N \g__pdfannot_use_lastlink_bool
     \hook_use:n { pdf/annot/Link/#1/after}
   }
 %</package>
@@ -1389,11 +1405,13 @@
             }
         }
         { #2 }
+      \bool_gset_true:N \g__pdfannot_use_lastlink_bool
   }
 
 \cs_new_protected:Nn \pdfannot_link_end:n %#1 type, e.g. url
   {
     \@@_backend_link_end:
+    \bool_gset_true:N \g__pdfannot_use_lastlink_bool
     \hook_use:n { pdf/annot/Link/#1/after}
   }
 %</package>
@@ -1418,18 +1436,20 @@
 
       }
       { #1 }
+     \bool_gset_true:N \g__pdfannot_use_lastlink_bool 
   }
 
 \cs_new_protected:Nn \pdfannot_link_goto_end:
   {
     \@@_backend_link_end:
+    \bool_gset_true:N \g__pdfannot_use_lastlink_bool
      \hook_use:n { pdf/annot/Link/GoTo/before}
   }
 %</package>
 %    \end{macrocode}
 % \begin{function}[added = 2020-03-12]{  \pdfannot_link_last: }
 %   This retrieves the object reference a previously link created with the commands
-%   above
+%   above. This doesn't work with xelatex.
 % \end{function}
 %    \begin{macrocode}
 %<*package>
