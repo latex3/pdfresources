@@ -1067,7 +1067,9 @@
 % annotation: one for links, one for boxed annotation. We use a boolean to decide
 % which one should be used, so that only one user command is needed.
 %    \begin{macrocode}
+%<*package>
 \bool_new:N \g__pdfannot_use_lastlink_bool
+%</package>
 %    \end{macrocode}
 % \end{variable}
 % \begin{NOTE}{UF}
@@ -1121,7 +1123,6 @@
 \cs_new:Npn \pdfannot_box_last:
   {
     \@@_backend_annotation_last:
-    \bool_gset_false:N\g__pdfannot_use_lastlink_bool
   }
 
 \cs_new_protected:Npn \pdfannot_box:nnnnn #1 #2 #3 #4 #5
@@ -1436,7 +1437,7 @@
 
       }
       { #1 }
-     \bool_gset_true:N \g__pdfannot_use_lastlink_bool 
+     \bool_gset_true:N \g__pdfannot_use_lastlink_bool
   }
 
 \cs_new_protected:Nn \pdfannot_link_goto_end:
@@ -1454,6 +1455,25 @@
 %    \begin{macrocode}
 %<*package>
 \cs_set_eq:NN \pdfannot_link_last: \@@_backend_link_last:
+%</package>
+%    \end{macrocode}
+% \begin{function}[added = 2020-06-29]{  \pdfannot_last: }
+%   This retrieves the object reference a previously annotation
+%   created either with a link or a box command. When the last was a link
+%   it won't work with xelatex.
+% \end{function}
+%    \begin{macrocode}
+%<*package>
+\cs_new:Npn \pdfannot_last:
+  {
+    \bool_if:NTF \g__pdfannot_use_lastlink_bool
+      {
+        \@@_backend_link_last:
+      }
+      {
+        \@@_backend_annotation_last:
+      }
+  }
 %</package>
 %    \end{macrocode}
 % %!!!! only annot link or also annot??
