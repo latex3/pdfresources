@@ -1589,6 +1589,7 @@
 %    \end{macrocode}
 % \section{Drop?}
 % \subsubsection{Doc View/Openaction}
+% Dropped for now. Is probably not needed
 % \begin{NOTE}{UF}
 %   /OpenAction can be an array:
 %   |/OpenAction [5 0 R /Fit]| or an action: |<< /S /GoTo /D [ 7 0 R /Fit ] >>|.
@@ -1611,10 +1612,10 @@
 %
 %    \begin{macrocode}
 %<*package>
-\cs_new_protected:Npn \pdf_docview:nn #1 #2
-  {
-    \pdfcoredict_gput:nnx {Catalog }{ OpenAction }{[\pdf_pageobject_ref:n {#1}~/#2]}
-  }
+%\cs_new_protected:Npn \pdf_docview:nn #1 #2
+%  {
+%    \pdfcoredict_gput:nnx {Catalog }{ OpenAction }{[\pdf_pageobject_ref:n {#1}~/#2]}
+%  }
 %</package>
 %    \end{macrocode}
 %
