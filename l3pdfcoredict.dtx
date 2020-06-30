@@ -1179,15 +1179,14 @@
 % This can be tested by checking the names_seq
 % \begin{macro}{\@@_/Catalog/Names/EmbeddedFiles_gpush:}
 %    \begin{macrocode}
-% !!!!!!!!!!!!!!! how to name this seq????
-\seq_new:N \g__pdf_file_tree_name_seq
+%
 \cs_new_protected:cpn { @@_/Catalog/Names/EmbeddedFiles_gpush: }
   {
-    \seq_if_empty:NF \g__pdf_file_tree_name_seq
+    \seq_if_empty:NF \g__pdf_backend_EmbeddedFiles_seq
       {
         \exp_args:Nx \__pdf_backend_NamesEmbeddedFiles_gpush:n
           {
-            \seq_use:Nn \g__pdf_file_tree_name_seq {~}
+            \seq_use:Nn \g__pdf_backend_EmbeddedFiles_seq {~}
           }
       }
   }

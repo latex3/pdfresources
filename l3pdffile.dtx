@@ -494,19 +494,19 @@
 % if the sequence is not empty.
 % dvips wants code for every file and then sorts this itself.
 %    \begin{macrocode}
-\int_new:N \g_@@_file_tree_name_int
-% \seq_new:N \g_@@_file_tree_name_seq %moved to resource file, to the push command
-\cs_new:Npn \@@_file_tree_name:
+\int_new:N \g_@@_backend_EmbeddedFiles_int
+\seq_new:N \g_@@_backend_EmbeddedFiles_seq
+\cs_new:Npn \@@_backend_EmbeddedFiles_name:
  {
    (
     l3ef
-    \int_compare:nNnT {\g_@@_file_tree_name_int} < {10}
+    \int_compare:nNnT {\g_@@_backend_EmbeddedFiles_int} < {10}
      {0}
-    \int_compare:nNnT {\g_@@_file_tree_name_int} < {100}
+    \int_compare:nNnT {\g_@@_backend_EmbeddedFiles_int} < {100}
      {0}
-    \int_compare:nNnT {\g_@@_file_tree_name_int} < {1000}
+    \int_compare:nNnT {\g_@@_backend_EmbeddedFiles_int} < {1000}
      {0}
-    \int_use:N \g_@@_file_tree_name_int
+    \int_use:N \g_@@_backend_EmbeddedFiles_int
    )
  }
 
@@ -519,55 +519,22 @@
      \sys_if_engine_xetex_p:
   }
  {
-  \cs_new_protected:Npn  \@@_backend_attach_tree_name:nN #1 #2
+  \cs_new_protected:Npn  \@@_backend_NamesEmbeddedFiles_add:nN #1 #2
     %#1 object ref , #2 in case the name must be retourned
     {
-      \int_gincr:N \g_@@_file_tree_name_int
-      \tl_set:Nx #2 { \@@_file_tree_name: }
-      \seq_gput_right:Nx \g_@@_file_tree_name_seq { #2 ~#1 }
+      \int_gincr:N \g_@@_backend_EmbeddedFiles_int
+      \tl_set:Nx #2 { \@@_backend_EmbeddedFiles_name: }
+      \seq_gput_right:Nx \g_@@_backend_EmbeddedFiles_seq { #2 ~#1 }
     }
  }
 
 % dvips
 \bool_if:nT {\sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p:}
   {
-    % https://github.com/latex3/latex3/issues/710
-    \cs_if_free:NT \__pdf_backend_object_write_fstream:nn
+    \cs_new_protected:Npn  \@@_backend_NamesEmbeddedFiles_add:nN #1 #2
       {
-        \cs_new_protected:Npn \__pdf_backend_object_write_fstream:nn #1#2
-          {
-            \exp_args:Nx
-              \__pdf_backend_object_write_fstream:nnn {#1} #2
-          }
-
-        \cs_new_protected:Npn \__pdf_backend_object_write_fstream:nnn #1#2#3
-          {
-            \__kernel_backend_literal:n
-              { ps::[nobreak]~
-                SDict ~ begin ~
-                mark ~ #1 ~ << #2 >> /PUT ~ pdfmark ~
-                mark ~ #1 ~ ( #3 )~ (r)~ file ~ /PUT ~ pdfmark ~
-                end
-              }
-          }
-       }
-     % https://github.com/latex3/latex3/issues/709
-     \cs_set_protected:Npn \__pdf_backend_object_write_stream:nnn #1#2#3
-        {
-         \__kernel_backend_literal:n
-           {
-            ps::[nobreak]~
-             SDict ~ begin ~
-              mark ~ #1 ~ ( #3 ) /PUT ~ pdfmark ~
-              mark ~ #1 ~ << #2 >> /PUT ~ pdfmark ~
-              end
-           }
-        }
-
-    \cs_new_protected:Npn  \@@_backend_attach_tree_name:nN #1 #2
-      {
-        \int_gincr:N \g_@@_file_tree_name_int
-        \tl_set:Nx #2 { \@@_file_tree_name: }
+        \int_gincr:N \g_@@_backend_EmbeddedFiles_int
+        \tl_set:Nx #2 { \@@_backend_EmbeddedFiles_name: }
         \@@_backend_pdfmark:x
           {
             /Name~#2~
@@ -595,7 +562,7 @@
     \prop_get:NnNTF \g_@@_file_embed_sources_prop { #1 } \l_tmpa_str
       {
         \exp_args:Nx
-          \@@_backend_attach_tree_name:nN {\pdf_object_ref:n{#1}} #2
+          \@@_backend_NamesEmbeddedFiles_add:nN {\pdf_object_ref:n{#1}} #2
       }
       {
         \msg_warning:nnn { pdffile } { no-file-embedded } { #1 }
@@ -630,14 +597,14 @@
  {
    \tl_set:Nx \l_@@_file_tmpa_tl {\pdf_object_last:}
    \exp_args:Nx
-     \@@_backend_attach_tree_name:nN { \l_@@_file_tmpa_tl } #1
+     \@@_backend_NamesEmbeddedFiles_add:nN { \l_@@_file_tmpa_tl } #1
  }
 
 \cs_new_protected:Npn \pdffile_attach_last:
  {
    \tl_set:Nx \l_@@_file_tmpa_tl {\pdf_object_last:}
    \exp_args:Nx
-     \@@_backend_attach_tree_name:nN { \l_@@_file_tmpa_tl } \l_@@_file_tmpa_tl
+     \@@_backend_NamesEmbeddedFiles_add:nN { \l_@@_file_tmpa_tl } \l_@@_file_tmpa_tl
  }
 
 
