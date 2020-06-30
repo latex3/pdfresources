@@ -571,9 +571,11 @@
 % \subsection{\enquote{Catalog} \& subdirectories (pdfcatalog) }
 % The backend command is already in the driver:
 % \cs{@@_backend_catalog_gput:nn}
-% \subsubsection { Special case: the /Names dictionary }
+% \subsubsection { Special case: the /Names/EmbeddedFiles dictionary }
 % Entries to /Names are handled differently, in part (/Desc) it is automatic, for
-% other special commands like \cs{pdfnames} must be used.
+% other special commands like \cs{pdfnames} must be used. For EmbeddedFiles
+% we need some code to push the tree if files have been added. dvips wants code
+% for every file and then creates the Name tree automatically.
 %    \begin{macrocode}
 % pdflatex
 %<*pdfmode>
@@ -609,6 +611,67 @@
 \cs_new_protected:Npn \@@_backend_NamesEmbeddedFiles_gpush:n #1 {}
 %</dvips>
 %    \end{macrocode}
+% Names in the EmbeddedFiles name tree must sorted alphabetically,
+% so we need commands to create this names. And we need a sequence to store
+% the names and the objects. We use the prefix l3ef, and we assume that at
+% most 9999 files will be used.
+% \begin{variable}{\g_@@_backend_EmbeddedFiles_int}
+% \end{variable}
+% \begin{macro}{\@@_backend_EmbeddedFiles_name:}
+%    \begin{macrocode}
+%<*drivers>
+\int_new:N \g_@@_backend_EmbeddedFiles_int
+\cs_new:Npn \@@_backend_EmbeddedFiles_name:
+ {
+   (
+    l3ef
+    \int_compare:nNnT {\g_@@_backend_EmbeddedFiles_int} < {10}
+     {0}
+    \int_compare:nNnT {\g_@@_backend_EmbeddedFiles_int} < {100}
+     {0}
+    \int_compare:nNnT {\g_@@_backend_EmbeddedFiles_int} < {1000}
+     {0}
+    \int_use:N \g_@@_backend_EmbeddedFiles_int
+   )
+ }
+%</drivers>
+%    \end{macrocode}
+% \end{macro}
+% \begin{variable}{\g_@@_backend_EmbeddedFiles_seq}
+%    \begin{macrocode}
+%<*drivers>
+\seq_new:N \g_@@_backend_EmbeddedFiles_seq
+%</drivers>
+%    \end{macrocode}
+% \begin{macro}{\@@_backend_NamesEmbeddedFiles_add:nN}
+% This command saves an object reference of a filespec dictionary in the
+% EmbeddedFiles name tree.
+%    \begin{macrocode}
+%<*pdfmode|dvipdfmx|xdvipdfmx>
+\cs_new_protected:Npn  \@@_backend_NamesEmbeddedFiles_add:nN #1 #2
+    %#1 object ref , #2 in case the name must be retourned
+    {
+      \int_gincr:N \g_@@_backend_EmbeddedFiles_int
+      \tl_set:Nx #2 { \@@_backend_EmbeddedFiles_name: }
+      \seq_gput_right:Nx \g_@@_backend_EmbeddedFiles_seq { #2 ~#1 }
+    }
+
+%</pdfmode|dvipdfmx|xdvipdfmx>
+%<*dvips>
+\cs_new_protected:Npn  \@@_backend_NamesEmbeddedFiles_add:nN #1 #2
+      {
+        \int_gincr:N \g_@@_backend_EmbeddedFiles_int
+        \tl_set:Nx #2 { \@@_backend_EmbeddedFiles_name: }
+        \@@_backend_pdfmark:x
+          {
+            /Name~#2~
+            /FS~#1~
+            /EMBED
+          }
+      }
+%</dvips>
+%    \end{macrocode}
+% \end{macro}
 % \end{implementation}
 %
 % \PrintIndex

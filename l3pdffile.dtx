@@ -494,56 +494,6 @@
 % if the sequence is not empty.
 % dvips wants code for every file and then sorts this itself.
 %    \begin{macrocode}
-\int_new:N \g_@@_backend_EmbeddedFiles_int
-\seq_new:N \g_@@_backend_EmbeddedFiles_seq
-\cs_new:Npn \@@_backend_EmbeddedFiles_name:
- {
-   (
-    l3ef
-    \int_compare:nNnT {\g_@@_backend_EmbeddedFiles_int} < {10}
-     {0}
-    \int_compare:nNnT {\g_@@_backend_EmbeddedFiles_int} < {100}
-     {0}
-    \int_compare:nNnT {\g_@@_backend_EmbeddedFiles_int} < {1000}
-     {0}
-    \int_use:N \g_@@_backend_EmbeddedFiles_int
-   )
- }
-
-\bool_if:nT %pdftex,luatex,xetex
-  {
-    ( \sys_if_engine_pdftex_p: && \sys_if_output_pdf_p: ) %
-    ||
-     \sys_if_engine_luatex_p:
-    ||
-     \sys_if_engine_xetex_p:
-  }
- {
-  \cs_new_protected:Npn  \@@_backend_NamesEmbeddedFiles_add:nN #1 #2
-    %#1 object ref , #2 in case the name must be retourned
-    {
-      \int_gincr:N \g_@@_backend_EmbeddedFiles_int
-      \tl_set:Nx #2 { \@@_backend_EmbeddedFiles_name: }
-      \seq_gput_right:Nx \g_@@_backend_EmbeddedFiles_seq { #2 ~#1 }
-    }
- }
-
-% dvips
-\bool_if:nT {\sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p:}
-  {
-    \cs_new_protected:Npn  \@@_backend_NamesEmbeddedFiles_add:nN #1 #2
-      {
-        \int_gincr:N \g_@@_backend_EmbeddedFiles_int
-        \tl_set:Nx #2 { \@@_backend_EmbeddedFiles_name: }
-        \@@_backend_pdfmark:x
-          {
-            /Name~#2~
-            /FS~#1~
-            /EMBED
-          }
-      }
-  }
-
 %    \end{macrocode}
 % \begin{function}[added = 2020-04-24]
 %   {\pdffile_attach:n, \pdffile_attach:nN,}
