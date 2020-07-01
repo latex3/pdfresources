@@ -113,7 +113,7 @@
 %       \end{verbatim}
 %       The strings (keys) in the /Names dictionary must be sorted lexically. But they
 %       don't have to be the file name or anything related to the file name. So the code will
-%       use l3emb0001, l3emb0002. The key  used for a is perhaps needed once:
+%       use l3emb0001, l3emb0002. The key  used for it is perhaps needed once:
 %       to identify the start file in a collection, so there must be a way to retrieve it.
 %
 %       \item Through the /AF key in various objects (pdf 2.0). The value is normally an array of object
@@ -200,12 +200,12 @@
 % are preset in the dictionary:
 %
 % \begin{tabular}{lll}
-% dictionary & key  & value\\\hline
-% file       & Type  & /EmbeddedFile\\
+% dictionary & key      & value\\\hline
+% file       & Type     & /EmbeddedFile\\
 % file/Params& Size     & \cs{file_size:n}\\
 % file/Params& ModDate  & (\cs{file_timestamp:n})\\
 % file/Params& CheckSum & (\cs{file_mdfive_hash:n})\\
-% file/FileSpec & Type & /FileSpec\\
+% file/FileSpec & Type  & /FileSpec\\
 % file/FileSpec & AFRelationship &Unspecified
 %
 % \end{tabular}
@@ -252,7 +252,7 @@
 %    \end{macrocode}
 %
 %    \begin{macrocode}
-%<@@=pdf>
+%<@@=pdffile>
 \cs_set_eq:NN \@@_file_filename_convert_to_print:nN \pdftool_textstringhex_print:nN
 %    \end{macrocode}
 % \subsection{Messages}
@@ -291,7 +291,9 @@
 % \begin{variable}
 %   {
 %     \l_@@_file_tmpa_tl,
+%     \l_@@_file_tmpb_tl,
 %     \l_@@_file_tmpa_str,
+%     \l_@@_file_tmpb_str,
 %     \l_@@_file_ext_str,
 %     \l_@@_file_automimetype_tl
 %   }
@@ -335,7 +337,7 @@
 % \end{variable}
 %    \begin{macrocode}
 \str_new:N  \l_pdffile_source_full_name_str
-\str_new:N  \l_pdffile_full_name_convert_str
+\str_new:N  \l_pdffile_full_name_convert_str %???
 %    \end{macrocode}
 % Here we define and setup the local dictionaries. We also define constants.
 %    \begin{macrocode}
@@ -357,22 +359,25 @@
 
 %    \end{macrocode}
 %
-% \begin{macro}{\pdffile_embed:nnn}
+% \begin{macro}{\pdffile_embed_file:nnn, \pdffile_embed_stream:nnn}
+% At first a command to set the mimetype. It either uses the current value
+% in the file dictionary, or tries to guess it from the extension.
 %    \begin{macrocode}
-\cs_new_protected:Npn \@@_file_mimetype_set:NN #1 #2 %#1 file name, #2 tl for guessed mimetype
+\cs_new_protected:Npn \@@_file_mimetype_set:nN #1 #2 %#1 file name, #2 tl for guessed mimetype
   {
-    \file_parse_full_name:VNNN
-          #1
-          \l_tmpa_tl
-          \l_tmpb_tl
+    \file_parse_full_name:nNNN
+          {#1}
+          \l_@@_file_tmpa_str %unneeded
+          \l_@@_file_tmpb_str %unneeded
           \l_@@_file_ext_str
         %check if Subtype has been set
         \pdfdict_get:nnN {file}{Subtype}\l_@@_file_tmpa_tl
+        %if not look up in the prop:
         \quark_if_no_value:NT \l_@@_file_tmpa_tl
           {
-            \prop_get:NVNTF \g_pdffile_mimetypes_prop \l_@@_file_ext_str \l_tmpa_tl
+            \prop_get:NVNTF \g_pdffile_mimetypes_prop \l_@@_file_ext_str \l_@@_file_tmpb_tl
               {
-                \tl_set:Nx #2 {/Subtype~\pdftool_name_print:V \l_tmpa_tl}
+                \tl_set:Nx #2 {/Subtype~\pdftool_name_print:V \l_@@_file_tmpb_tl}
               }
               {
                 \msg_warning:nnx { pdffile }{ mimetype-missing} {#1}
@@ -381,7 +386,13 @@
           }
     }
 
-\cs_new_protected:Npn \@@_file_fstream_write:NN #1 #2 %#1 file name, #2 guessed mimetype
+\cs_generate_variant:Nn \@@_file_mimetype_set:nN {VN}
+
+\cs_new_protected:Npn \@@_file_fstream_write:nN #1 #2
+                                   %#1 file name,
+                                   %#2 tl, should be empty or contain /Subtype /mimtype
+                                   %   e.g. result from \@@_file_mimetype_set:NN
+
   {
     \pdf_object_now:nx { fstream }
       {
@@ -401,7 +412,11 @@
      \tl_clear:N \l_@@_file_automimetype_tl
    }
 
-\cs_new_protected:Npn \@@_file_filespec_write:nnn #1 #2 #3 %#1 dict, #2 target file name, #3 object ref
+\cs_generate_variant:Nn \@@_file_fstream_write:nN {VN}
+
+\cs_new_protected:Npn \@@_file_filespec_write:nnn #1 #2 #3 %#1 name of dict object,
+                                                           %#2 target file name,
+                                                           %#3 object ref
   {
     \tl_if_blank:nT { #2 }
       {
@@ -411,7 +426,7 @@
         \pdf_object_new:nn   { #1 } {dict}
         \group_begin:
             \@@_file_filename_convert_to_print:nN  { #2 } \l_@@_file_tmpa_str
-            \str_show:N\l_@@_file_tmpa_str
+            %\str_show:N\l_@@_file_tmpa_str
             \pdfdict_put:nnx {file/FileSpec}{F} { \l_@@_file_tmpa_str }
             \pdfdict_put:nnx {file/FileSpec}{UF}{ \l_@@_file_tmpa_str }
             \pdf_object_write:nx { #1 }
@@ -432,10 +447,64 @@
 \prop_new:N \g_@@_file_embed_sources_prop
 
 \cs_new_protected:Npn \pdffile_embed_file:nnn #1 #2 #3
-   %\Arg{source filename} \Arg{target filename} \Arg{ object name }
+   %\Arg{source filename} \Arg{target filename} \Arg{ file object name }
   { %               if #1 empty => only filespec
     %               if #2 empty => = #1
-    \pdf_object_if_exist:nTF { #3 }
+    \pdf_object_if_exist:nTF { @@_#3 }
+      {
+        \msg_error:nnn { pdffile }{ object-exists } { #3 }
+      }
+      {
+        \tl_if_blank:nTF { #1 }
+          {
+            \tl_set:Nn \l_@@_file_embed_ref_tl {}
+          }
+          {
+            \file_get_full_name:nNTF {#1} \l_pdffile_source_full_name_str
+              {
+                \prop_gput:NnV
+                  \g_@@_file_embed_sources_prop
+                  { #3 }
+                  \l_pdffile_source_full_name_str
+                \@@_file_mimetype_set:VN
+                  \l_pdffile_source_full_name_str
+                  \l_@@_file_automimetype_tl
+                \@@_file_fstream_write:VN
+                  \l_pdffile_source_full_name_str
+                  \l_@@_file_automimetype_tl
+                \tl_set:Nx \l_@@_file_embed_ref_tl { \pdf_object_last: }
+              }
+              {
+                \msg_error:nnn { pdffile }{ file-not-found }{ #1 }
+              }
+
+           }
+        \tl_if_blank:nTF { #2 }
+          {
+            \exp_args:Nnnx
+              \@@_file_filespec_write:nnn
+                %#1 dict, #2 target file name, #3 object ref
+                { @@_#3 }
+                { #1 }
+                {\l_@@_file_embed_ref_tl}
+          }
+          {
+            \exp_args:Nnnx
+              \@@_file_filespec_write:nnn
+                %#1 dict, #2 target file name, #3 object ref
+                { @@_#3 }
+                { #2 }
+                {\l_@@_file_embed_ref_tl}
+          }
+      }
+  }
+
+
+\cs_new_protected:Npn \pdffile_embed_stream:nnn #1 #2 #3
+   %\Arg{source filename} \Arg{target filename} \Arg{ file object name }
+  { %               if #1 empty => only filespec
+    %               if #2 empty => = #1
+    \pdf_object_if_exist:nTF { @@_#3 }
       {
         \msg_error:nnn { pdffile }{ object-exists } { #3 }
       }
@@ -469,7 +538,7 @@
             \exp_args:Nnnx
               \@@_file_filespec_write:nnn
                 %#1 dict, #2 target file name, #3 object ref
-                { #3 }
+                { @@_#3 }
                 { #1 }
                 {\l_@@_file_embed_ref_tl}
           }
@@ -477,14 +546,17 @@
             \exp_args:Nnnx
               \@@_file_filespec_write:nnn
                 %#1 dict, #2 target file name, #3 object ref
-                { #3 }
+                { @@_#3 }
                 { #2 }
                 {\l_@@_file_embed_ref_tl}
           }
       }
   }
 
-
+\cs_new:Npn \pdffile_embed_ref:n #1 % #1 is the symbolic name used above
+  {
+    \pdf_object_ref:n {@@_#1}
+  }
 %    \end{macrocode}
 % \end{macro}
 
