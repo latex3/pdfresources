@@ -350,7 +350,7 @@
   {Size}     { \file_size:n { \l_pdffile_source_full_name_str } }
 \pdfdict_put:nnn { file/Params }
   {CheckSum} { (\file_mdfive_hash:n { \l_pdffile_source_full_name_str }) }
-
+\pdfdict_new:n   { file/streamParams }
 \pdfdict_new:n   { file/FileSpec }
 \pdfdict_put:nnn { file/FileSpec }
   {Type} { /FileSpec }
@@ -388,11 +388,10 @@
 
 \cs_generate_variant:Nn \@@_file_mimetype_set:nN {VN}
 
+%#1 file name,
+%#2 tl, should be empty or contain /Subtype /mimtype
+  %   e.g. result from \@@_file_mimetype_set:NN
 \cs_new_protected:Npn \@@_file_fstream_write:nN #1 #2
-                                   %#1 file name,
-                                   %#2 tl, should be empty or contain /Subtype /mimtype
-                                   %   e.g. result from \@@_file_mimetype_set:NN
-
   {
     \pdf_object_now:nx { fstream }
       {
@@ -414,9 +413,35 @@
 
 \cs_generate_variant:Nn \@@_file_fstream_write:nN {VN}
 
-\cs_new_protected:Npn \@@_file_filespec_write:nnn #1 #2 #3 %#1 name of dict object,
-                                                           %#2 target file name,
-                                                           %#3 object ref
+%#1 file content
+%#2 tl, should be empty or contain /Subtype /mimtype
+    %e.g. result from \@@_file_mimetype_set:NN
+\cs_new_protected:Npn \@@_file_stream_write:nN #1 #2
+  {
+    \pdf_object_now:nx { stream }
+      {
+        {
+          #2
+          \pdfdict_map:n {file}
+          \pdfdict_if_empty:nF {file/streamParams}
+            {
+              /Params
+                <<
+                  \pdfdict_map:n {file/streamParams}
+                >>
+            }
+        }
+        { \exp_not:n { #1 } }
+      }
+     \tl_clear:N \l_@@_file_automimetype_tl
+   }
+
+\cs_generate_variant:Nn \@@_file_stream_write:nN {VN}
+
+%#1 symbolic name of dict object -- a prefix is added to have some namespace,
+%#2 target file name,
+%#3 object ref of the file stream.
+\cs_new_protected:Npn \@@_file_filespec_write:nnn #1 #2 #3
   {
     \tl_if_blank:nT { #2 }
       {
@@ -443,11 +468,13 @@
 %% separate file name to embed and file name to display!
 % we record here the source file. This allows also to test if an object name
 % has an embedded file or is only a filespec
-%
+
 \prop_new:N \g_@@_file_embed_sources_prop
 
+%#1 {source filename}
+%#2 {target filename}
+%#3 { filespec object name } (will internally get a prefix!)
 \cs_new_protected:Npn \pdffile_embed_file:nnn #1 #2 #3
-   %\Arg{source filename} \Arg{target filename} \Arg{ file object name }
   { %               if #1 empty => only filespec
     %               if #2 empty => = #1
     \pdf_object_if_exist:nTF { @@_#3 }
@@ -500,49 +527,33 @@
   }
 
 
+%#1{stream content}
+%#2{target filename}
+%#3{file object name }
 \cs_new_protected:Npn \pdffile_embed_stream:nnn #1 #2 #3
-   %\Arg{source filename} \Arg{target filename} \Arg{ file object name }
-  { %               if #1 empty => only filespec
-    %               if #2 empty => = #1
+  {
+    %               if #2 empty => error
     \pdf_object_if_exist:nTF { @@_#3 }
       {
-        \msg_error:nnn { pdffile }{ object-exists } { #3 }
+         \msg_error:nnn { pdffile }{ object-exists } { #3 }
       }
       {
-        \tl_if_blank:nTF { #1 }
+        \tl_if_blank:nTF {#2}
           {
-            \tl_set:Nn \l_@@_file_embed_ref_tl {}
+            %error or use #3 instead??
           }
           {
-            \file_get_full_name:nNTF {#1} \l_pdffile_source_full_name_str
-              {
-                \prop_gput:NnV
-                  \g_@@_file_embed_sources_prop
-                  { #3 }
-                  \l_pdffile_source_full_name_str
-                \@@_file_mimetype_set:NN
-                  \l_pdffile_source_full_name_str
-                  \l_@@_file_automimetype_tl
-                \@@_file_fstream_write:NN
-                  \l_pdffile_source_full_name_str
-                  \l_@@_file_automimetype_tl
-                \tl_set:Nx \l_@@_file_embed_ref_tl { \pdf_object_last: }
-              }
-              {
-                \msg_error:nnn { pdffile }{ file-not-found }{ #1 }
-              }
-
-           }
-        \tl_if_blank:nTF { #2 }
-          {
-            \exp_args:Nnnx
-              \@@_file_filespec_write:nnn
-                %#1 dict, #2 target file name, #3 object ref
-                { @@_#3 }
-                { #1 }
-                {\l_@@_file_embed_ref_tl}
-          }
-          {
+            \prop_gput:NnV
+               \g_@@_file_embed_sources_prop
+               { #3 }
+               {(stream)~#2}
+            \@@_file_mimetype_set:nN
+              { #2 }
+              \l_@@_file_automimetype_tl
+            \@@_file_stream_write:nN
+              { #1 }
+              \l_@@_file_automimetype_tl
+            \tl_set:Nx \l_@@_file_embed_ref_tl { \pdf_object_last: }
             \exp_args:Nnnx
               \@@_file_filespec_write:nnn
                 %#1 dict, #2 target file name, #3 object ref

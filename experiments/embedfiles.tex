@@ -26,10 +26,15 @@
 \group_begin:
 \pdfdict_put:nnn  {file/FileSpec} {AFRelationship}{/Source}
 \pdfdict_put:nnn  {file/FileSpec} {Desc}{(this~is~a~eps)}
+
 \pdffile_embed_file:nnn {testinput.txt}{grüße.tex}{example1}
 
-\prop_show:N \g__pdf_file_embed_sources_prop
-\pdffile_attach:n {example1}
+\pdfdict_put:nnn  {file/FileSpec} {AFRelationship}{/Data}
+\pdfdict_put:nnn  {file/FileSpec} {Desc}{(this~is~a~text~file)}
+\pdffile_embed_stream:nnn {testinput.txt} {stream.txt} {example2}
+
+\prop_show:N \g__pdffile_file_embed_sources_prop
+%\pdffile_attach:n {example1}
 \group_end:
 \end{document}
 %
@@ -37,7 +42,7 @@
 \pdfdict_put:nnn  {file/FileSpec} {AFRelationship}{/Data}
 \pdfdict_put:nnn  {file/FileSpec} {Desc}{(this~is~a~text~file)}
 \pdffile_embed_file:nnn {testinput.txt} {} {example2}
-\pdffile_attach:n {example2}
+%\pdffile_attach:n {example2}
 \group_end:
 
 \group_begin:
