@@ -637,34 +637,43 @@
 %</drivers>
 %    \end{macrocode}
 % \end{macro}
-% \begin{variable}{\g_@@_backend_EmbeddedFiles_seq}
+% \begin{variable}{\g_@@_backend_EmbeddedFiles_seq,\g_@@_backend_EmbeddedFiles_named_prop}
+% The sequence will hold the content of the array that is pushed out at then
+% end (not with dvips), the prop holds the obj names-names relation.
 %    \begin{macrocode}
 %<*drivers>
 \seq_new:N \g_@@_backend_EmbeddedFiles_seq
+\prop_new:N \g_@@_backend_EmbeddedFiles_named_prop
 %</drivers>
 %    \end{macrocode}
-% \begin{macro}{\@@_backend_NamesEmbeddedFiles_add:nN}
+% \begin{macro}{\@@_backend_NamesEmbeddedFiles_add:n}
 % This command saves an object reference of a filespec dictionary in the
-% EmbeddedFiles name tree.
+% EmbeddedFiles name tree. We define a prop to store the relation between
+% object name and name in the name tree.
 %    \begin{macrocode}
 %<*pdfmode|dvipdfmx|xdvipdfmx>
-\cs_new_protected:Npn  \@@_backend_NamesEmbeddedFiles_add:nN #1 #2
-    %#1 object ref , #2 in case the name must be retourned
+\cs_new_protected:Npn  \@@_backend_NamesEmbeddedFiles_add:n #1
+    %#1 object ref
     {
       \int_gincr:N \g_@@_backend_EmbeddedFiles_int
-      \tl_set:Nx #2 { \@@_backend_EmbeddedFiles_name: }
-      \seq_gput_right:Nx \g_@@_backend_EmbeddedFiles_seq { #2 ~#1 }
+      \prop_gput:Nnx \g_@@_backend_EmbeddedFiles_named_prop
+        { #1 }
+        { \@@_backend_EmbeddedFiles_name: }
+      \seq_gput_right:Nx \g_@@_backend_EmbeddedFiles_seq
+        { \@@_backend_EmbeddedFiles_name: \c_space_tl #1 }
     }
 
 %</pdfmode|dvipdfmx|xdvipdfmx>
 %<*dvips>
-\cs_new_protected:Npn  \@@_backend_NamesEmbeddedFiles_add:nN #1 #2
+\cs_new_protected:Npn  \@@_backend_NamesEmbeddedFiles_add:n #1
       {
         \int_gincr:N \g_@@_backend_EmbeddedFiles_int
-        \tl_set:Nx #2 { \@@_backend_EmbeddedFiles_name: }
+        \prop_gput:Nnx \g_@@_backend_EmbeddedFiles_named_prop
+         { #1 }
+         { \@@_backend_EmbeddedFiles_name: }
         \@@_backend_pdfmark:x
           {
-            /Name~#2~
+            /Name~\@@_backend_EmbeddedFiles_name:~
             /FS~#1~
             /EMBED
           }
