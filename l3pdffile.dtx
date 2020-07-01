@@ -489,10 +489,10 @@
           {
             \file_get_full_name:nNTF {#1} \l_pdffile_source_full_name_str
               {
-                \prop_gput:NnV
+                \prop_gput:Nnx
                   \g_@@_file_embed_sources_prop
                   { #3 }
-                  \l_pdffile_source_full_name_str
+                  {\l_pdffile_source_full_name_str=>\tl_to_str:n{#2}}
                 \@@_file_mimetype_set:VN
                   \l_pdffile_source_full_name_str
                   \l_@@_file_automimetype_tl
@@ -543,10 +543,10 @@
             %error or use #3 instead??
           }
           {
-            \prop_gput:NnV
+            \prop_gput:Nnn
                \g_@@_file_embed_sources_prop
                { #3 }
-               {(stream)~#2}
+               {stream=>#2}
             \@@_file_mimetype_set:nN
               { #2 }
               \l_@@_file_automimetype_tl
