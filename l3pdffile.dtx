@@ -333,7 +333,7 @@
 %
 %    \begin{macrocode}
 %<@@=pdffile>
-\cs_set_eq:NN \@@_file_filename_convert_to_print:nN \pdftool_textstringhex_print:nN
+\cs_set_eq:NN \@@_filename_convert_to_print:nN \pdftool_textstringhex_print:nN
 %    \end{macrocode}
 % \subsection{Messages}
 %    \begin{macrocode}
@@ -370,21 +370,21 @@
 %    \end{macrocode}
 % \begin{variable}
 %   {
-%     \l_@@_file_tmpa_tl,
-%     \l_@@_file_tmpb_tl,
-%     \l_@@_file_tmpa_str,
-%     \l_@@_file_tmpb_str,
-%     \l_@@_file_ext_str,
-%     \l_@@_file_automimetype_tl
+%     \l_@@_tmpa_tl,
+%     \l_@@_tmpb_tl,
+%     \l_@@_tmpa_str,
+%     \l_@@_tmpb_str,
+%     \l_@@_ext_str,
+%     \l_@@_automimetype_tl
 %   }
 % temporary variables: generic, for extension, subtype
 % \end{variable}
 %    \begin{macrocode}
-\tl_new:N  \l_@@_file_tmpa_tl
-\str_new:N \l_@@_file_tmpa_str
+\tl_new:N  \l_@@_tmpa_tl
+\str_new:N \l_@@_tmpa_str
 
-\str_new:N \l_@@_file_ext_str
-\tl_new:N  \l_@@_file_automimetype_tl
+\str_new:N \l_@@_ext_str
+\tl_new:N  \l_@@_automimetype_tl
 
 %    \end{macrocode}
 % \begin{variable} {\g_pdffile_mimetypes_prop}
@@ -443,21 +443,21 @@
 % At first a command to set the mimetype. It either uses the current value
 % in the file dictionary, or tries to guess it from the extension.
 %    \begin{macrocode}
-\cs_new_protected:Npn \@@_file_mimetype_set:nN #1 #2 %#1 file name, #2 tl for guessed mimetype
+\cs_new_protected:Npn \@@_mimetype_set:nN #1 #2 %#1 file name, #2 tl for guessed mimetype
   {
     \file_parse_full_name:nNNN
           {#1}
-          \l_@@_file_tmpa_str %unneeded
-          \l_@@_file_tmpb_str %unneeded
-          \l_@@_file_ext_str
+          \l_@@_tmpa_str %unneeded
+          \l_@@_tmpb_str %unneeded
+          \l_@@_ext_str
         %check if Subtype has been set
-        \pdfdict_get:nnN {file}{Subtype}\l_@@_file_tmpa_tl
+        \pdfdict_get:nnN {file}{Subtype}\l_@@_tmpa_tl
         %if not look up in the prop:
-        \quark_if_no_value:NT \l_@@_file_tmpa_tl
+        \quark_if_no_value:NT \l_@@_tmpa_tl
           {
-            \prop_get:NVNTF \g_pdffile_mimetypes_prop \l_@@_file_ext_str \l_@@_file_tmpb_tl
+            \prop_get:NVNTF \g_pdffile_mimetypes_prop \l_@@_ext_str \l_@@_tmpb_tl
               {
-                \tl_set:Nx #2 {/Subtype~\pdftool_name_print:V \l_@@_file_tmpb_tl}
+                \tl_set:Nx #2 {/Subtype~\pdftool_name_print:V \l_@@_tmpb_tl}
               }
               {
                 \msg_warning:nnx { pdffile }{ mimetype-missing} {#1}
@@ -466,12 +466,12 @@
           }
     }
 
-\cs_generate_variant:Nn \@@_file_mimetype_set:nN {VN}
+\cs_generate_variant:Nn \@@_mimetype_set:nN {VN}
 
 %#1 file name,
 %#2 tl, should be empty or contain /Subtype /mimtype
-  %   e.g. result from \@@_file_mimetype_set:NN
-\cs_new_protected:Npn \@@_file_fstream_write:nN #1 #2
+  %   e.g. result from \@@_mimetype_set:NN
+\cs_new_protected:Npn \@@_fstream_write:nN #1 #2
   {
     \pdf_object_now:nx { fstream }
       {
@@ -488,15 +488,15 @@
         }
         { #1 }
       }
-     \tl_clear:N \l_@@_file_automimetype_tl
+     \tl_clear:N \l_@@_automimetype_tl
    }
 
-\cs_generate_variant:Nn \@@_file_fstream_write:nN {VN}
+\cs_generate_variant:Nn \@@_fstream_write:nN {VN}
 
 %#1 file content
 %#2 tl, should be empty or contain /Subtype /mimtype
-    %e.g. result from \@@_file_mimetype_set:NN
-\cs_new_protected:Npn \@@_file_stream_write:nN #1 #2
+    %e.g. result from \@@_mimetype_set:NN
+\cs_new_protected:Npn \@@_stream_write:nN #1 #2
   {
     \pdf_object_now:nx { stream }
       {
@@ -513,15 +513,15 @@
         }
         { \exp_not:n { #1 } }
       }
-     \tl_clear:N \l_@@_file_automimetype_tl
+     \tl_clear:N \l_@@_automimetype_tl
    }
 
-\cs_generate_variant:Nn \@@_file_stream_write:nN {VN}
+\cs_generate_variant:Nn \@@_stream_write:nN {VN}
 
 %#1 symbolic name of dict object -- a prefix is added to have some namespace,
 %#2 target file name,
 %#3 object ref of the file stream.
-\cs_new_protected:Npn \@@_file_filespec_write:nnn #1 #2 #3
+\cs_new_protected:Npn \@@_filespec_write:nnn #1 #2 #3
   {
     \tl_if_blank:nT { #2 }
       {
@@ -530,10 +530,10 @@
       {
         \pdf_object_new:nn   { #1 } {dict}
         \group_begin:
-            \@@_file_filename_convert_to_print:nN  { #2 } \l_@@_file_tmpa_str
-            %\str_show:N\l_@@_file_tmpa_str
-            \pdfdict_put:nnx {file/FileSpec}{F} { \l_@@_file_tmpa_str }
-            \pdfdict_put:nnx {file/FileSpec}{UF}{ \l_@@_file_tmpa_str }
+            \@@_filename_convert_to_print:nN  { #2 } \l_@@_tmpa_str
+            %\str_show:N\l_@@_tmpa_str
+            \pdfdict_put:nnx {file/FileSpec}{F} { \l_@@_tmpa_str }
+            \pdfdict_put:nnx {file/FileSpec}{UF}{ \l_@@_tmpa_str }
             \pdf_object_write:nx { #1 }
               {
                 \pdfdict_map:n {file/FileSpec}
@@ -550,7 +550,7 @@
 % has an embedded file or is only a filespec
 
 
-\prop_new:N \g_@@_file_embed_sources_prop
+\prop_new:N \g_@@_embed_sources_prop
 
 %#1 {source filename}
 %#2 {target filename}
@@ -565,22 +565,22 @@
       {
         \tl_if_blank:nTF { #1 }
           {
-            \tl_set:Nn \l_@@_file_embed_ref_tl {}
+            \tl_set:Nn \l_@@_embed_ref_tl {}
           }
           {
             \file_get_full_name:nNTF {#1} \l_pdffile_source_full_name_str
               {
                 \prop_gput:Nnx
-                  \g_@@_file_embed_sources_prop
+                  \g_@@_embed_sources_prop
                   { #3 }
                   {\l_pdffile_source_full_name_str=>\tl_to_str:n{#2}}
-                \@@_file_mimetype_set:VN
+                \@@_mimetype_set:VN
                   \l_pdffile_source_full_name_str
-                  \l_@@_file_automimetype_tl
-                \@@_file_fstream_write:VN
+                  \l_@@_automimetype_tl
+                \@@_fstream_write:VN
                   \l_pdffile_source_full_name_str
-                  \l_@@_file_automimetype_tl
-                \tl_set:Nx \l_@@_file_embed_ref_tl { \pdf_object_last: }
+                  \l_@@_automimetype_tl
+                \tl_set:Nx \l_@@_embed_ref_tl { \pdf_object_last: }
               }
               {
                 \msg_error:nnn { pdffile }{ file-not-found }{ #1 }
@@ -590,19 +590,19 @@
         \tl_if_blank:nTF { #2 }
           {
             \exp_args:Nnnx
-              \@@_file_filespec_write:nnn
+              \@@_filespec_write:nnn
                 %#1 dict, #2 target file name, #3 object ref
                 { #3 }
                 { #1 }
-                {\l_@@_file_embed_ref_tl}
+                {\l_@@_embed_ref_tl}
           }
           {
             \exp_args:Nnnx
-              \@@_file_filespec_write:nnn
+              \@@_filespec_write:nnn
                 %#1 dict, #2 target file name, #3 object ref
                 { #3 }
                 { #2 }
-                {\l_@@_file_embed_ref_tl}
+                {\l_@@_embed_ref_tl}
           }
       }
   }
@@ -620,22 +620,22 @@
       }
       {
          \prop_gput:Nnn
-            \g_@@_file_embed_sources_prop
+            \g_@@_embed_sources_prop
             { #3 }
             {stream=>#2}
          \tl_if_blank:nTF {#2}
-          { \@@_file_mimetype_set:nN {stream.txt}\l_@@_file_automimetype_tl}
-          { \@@_file_mimetype_set:nN { #2 } \l_@@_file_automimetype_tl }
-         \@@_file_stream_write:nN
+          { \@@_mimetype_set:nN {stream.txt}\l_@@_automimetype_tl}
+          { \@@_mimetype_set:nN { #2 } \l_@@_automimetype_tl }
+         \@@_stream_write:nN
            { #1 }
-           \l_@@_file_automimetype_tl
-         \tl_set:Nx \l_@@_file_embed_ref_tl { \pdf_object_last: }
+           \l_@@_automimetype_tl
+         \tl_set:Nx \l_@@_embed_ref_tl { \pdf_object_last: }
          \exp_args:Nnxx
-           \@@_file_filespec_write:nnn
+           \@@_filespec_write:nnn
              %#1 dict, #2 target file name, #3 object ref
              { #3 }
              { \tl_if_blank:nTF {#2}{stream.txt}{\exp_not:n{#2}} }
-             {\l_@@_file_embed_ref_tl}
+             {\l_@@_embed_ref_tl}
      }
   }
 
@@ -662,9 +662,9 @@
 %   case it is needed to setup up for example a collection.
 %\end{function}
 %    \begin{macrocode}
-\cs_new_protected:Npn \@@_file_check_attach_aux:n #1
+\cs_new_protected:Npn \@@_check_attach_aux:n #1
   {
-    \prop_get:NnNTF \g_@@_file_embed_sources_prop { #1 } \l_tmpa_str
+    \prop_get:NnNTF \g_@@_embed_sources_prop { #1 } \l_tmpa_str
       {
         \exp_args:Nx
           \__pdf_backend_NamesEmbeddedFiles_add:n {\pdf_object_ref:n{#1}}
@@ -678,7 +678,7 @@
 % {
 %   \@@_backend_object_if_exist:nTF { #1 }
 %     {
-%       \@@_file_check_attach_aux:n { #1 }
+%       \@@_check_attach_aux:n { #1 }
 %     }
 %     {
 %       \msg_error:nnn { pdffile } { file-object-no-found } { #1 }
@@ -689,7 +689,7 @@
 % {
 %   \@@_backend_object_if_exist:nTF { #1}
 %     {
-%       \@@_file_check_attach_aux:nN { #1 } \l_@@_file_tmpa_tl
+%       \@@_check_attach_aux:nN { #1 } \l_@@_tmpa_tl
 %     }
 %     {
 %       \msg_error:nnn { pdffile } { file-object-no-found } { #1 }
@@ -700,16 +700,16 @@
 % created with l3 commands / naming. Testing if there is a file is not possible here
 %\cs_new_protected:Npn \pdffile_attach_last:N #1 % #1 in case the name must be retourned
 % {
-%   \tl_set:Nx \l_@@_file_tmpa_tl {\pdf_object_last:}
+%   \tl_set:Nx \l_@@_tmpa_tl {\pdf_object_last:}
 %   \exp_args:Nx
-%     \@@_backend_NamesEmbeddedFiles_add:n { \l_@@_file_tmpa_tl }
+%     \@@_backend_NamesEmbeddedFiles_add:n { \l_@@_tmpa_tl }
 % }
 %
 %\cs_new_protected:Npn \pdffile_attach_last:
 % {
-%   \tl_set:Nx \l_@@_file_tmpa_tl {\pdf_object_last:}
+%   \tl_set:Nx \l_@@_tmpa_tl {\pdf_object_last:}
 %   \exp_args:Nx
-%     \@@_backend_NamesEmbeddedFiles_add:nN { \l_@@_file_tmpa_tl } \l_@@_file_tmpa_tl
+%     \@@_backend_NamesEmbeddedFiles_add:nN { \l_@@_tmpa_tl } \l_@@_tmpa_tl
 % }
 
 
