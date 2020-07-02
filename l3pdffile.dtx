@@ -541,7 +541,8 @@
       {
         \tl_if_blank:nTF {#2}
           {
-            %error or use #3 instead??
+            %ignore, error or use #3 instead??
+            \msg_error:nnn { pdffile } { target-name-missing } { #3 }
           }
           {
             \prop_gput:Nnn
@@ -600,16 +601,16 @@
       }
   }
 
-\cs_new_protected:Npn \pdffile_attach:n #1% #1 name of filespec object, #2 in case the name must be retourned
- {
-   \@@_backend_object_if_exist:nTF { #1 }
-     {
-       \@@_file_check_attach_aux:n { #1 }
-     }
-     {
-       \msg_error:nnn { pdffile } { file-object-no-found } { #1 }
-     }
- }
+%\cs_new_protected:Npn \pdffile_attach:n #1% #1 name of filespec object, #2 in case the name must be retourned
+% {
+%   \@@_backend_object_if_exist:nTF { #1 }
+%     {
+%       \@@_file_check_attach_aux:n { #1 }
+%     }
+%     {
+%       \msg_error:nnn { pdffile } { file-object-no-found } { #1 }
+%     }
+% }
 
 %\cs_new_protected:Npn \pdffile_attach:n #1 % name of filespec object
 % {

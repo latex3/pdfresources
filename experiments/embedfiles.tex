@@ -1,50 +1,102 @@
 % !Mode:: "TeX:UTF-8:Main"
+\input{regression-test}
 \RequirePackage{pdfresources}
 \DeclareDocumentMetaData{pdfversion=1.6}
-\documentclass{article}
-\usepackage{pdfresources}
-\usepackage{l3pdffile}
-\usepackage[customdriver=hgeneric-experimental]{hyperref}
-\hypersetup{pdfversion=1.6,pdfpagemode=UseAttachments}
 \ExplSyntaxOn
 \pdf_uncompress:
 \ExplSyntaxOff
+\documentclass{article}
+\usepackage{l3pdffile}
+\usepackage[customdriver=hgeneric-experimental]{hyperref}
+\hypersetup{pdfversion=1.6,pdfpagemode=UseAttachments}
 \usepackage{bookmark}
+
 \begin{document}
-\section{grüße Testing embedding and attaching files}
+\section{Testing embedding and attaching files}
 \ExplSyntaxOn
 %\pdftool_textstringlit_print:nN {xxxgrüße}\l_tmpa_str
 %\pdfextension outline goto name {Doc-Start}{\l_tmpa_str}
 \group_begin:
 \pdfdict_put:nnn  {file/FileSpec} {AFRelationship}{/Source}
+\pdftool_textstringlit_print:nN {this~is~something~odd~with~öäü}\l_tmpa_str
+\pdfdict_put:nnx  {file/FileSpec} {Desc}{\l_tmpa_str}
+\pdffile_embed_file:nnn {testinput.txt}{grüße.txt}{example1}
+\group_end:
+
+
+%\group_begin:
+%\pdfdict_put:nnn  {file/FileSpec} {AFRelationship}{/Source}
+%\pdftool_textstringlit_print:nN {this~is~something~odd~with~öäü}\l_tmpa_str
+%\pdfdict_put:nnx  {file/FileSpec} {Desc}{\l_tmpa_str}
+%\pdffile_embed_file:nnn {grüße.txt}{echtegrüße.txt}{example2}
+%\group_end:
+
+\group_begin:
+\pdfdict_put:nnn  {file/FileSpec} {AFRelationship}{/Source}
 \pdfdict_put:nnn  {file/FileSpec} {Desc}{(this~is~a~eps)}
-%\pdfdict_show:n   {file/FileSpec}
-%\pdffile_embed:nn {example}{grüße.txt}
-%\pdffile_attach:n {example}
+\pdffile_embed_file:nnn {testinput.txt}{some~text}{example3}
+
+\pdfdict_put:nnn  {file/FileSpec} {AFRelationship}{/Data}
+\pdfdict_put:nnn  {file/FileSpec} {Desc}{(this~is~a~text~file)}
+\pdffile_embed_stream:nnn {stream content} {stream.txt} {example4}
+
+
+
+\pdfcoredict_gput:nnx{Catalog/Names}{EmbeddedFiles}{\pdf_object_ref:n{example1}}
+%\pdfcoredict_gput:nnx{Catalog/Names}{EmbeddedFiles}{\pdf_object_ref:n{example2}}
+\pdfcoredict_gput:nnx{Catalog/Names}{EmbeddedFiles}{\pdf_object_ref:n{example3}}
+\pdfcoredict_gput:nnx{Catalog/Names}{EmbeddedFiles}{\pdf_object_ref:n{example4}}
+
+%\prop_show:N \g__pdffile_file_embed_sources_prop
+%\seq_show:N \g__pdf_backend_EmbeddedFiles_seq
+%\prop_show:N \g__pdf_backend_EmbeddedFiles_named_prop
+\group_end:
+\end{document}
+\RequirePackage{pdfresources}
+\DeclareDocumentMetaData{pdfversion=1.6}
+\ExplSyntaxOn
+\pdf_uncompress:
+\ExplSyntaxOff
+\documentclass{article}
+\usepackage{l3pdffile}
+\usepackage[customdriver=hgeneric-experimental]{hyperref}
+\hypersetup{pdfversion=1.6,pdfpagemode=UseAttachments}
+\usepackage{bookmark}
+
+\begin{document}
+\section{Testing embedding and attaching files}
+\ExplSyntaxOn
+%\pdftool_textstringlit_print:nN {xxxgrüße}\l_tmpa_str
+%\pdfextension outline goto name {Doc-Start}{\l_tmpa_str}
+\group_begin:
+\pdfdict_put:nnn  {file/FileSpec} {AFRelationship}{/Source}
+\pdftool_textstringlit_print:nN {this~is~something~odd~with~öäü}\l_tmpa_str
+\pdfdict_put:nnx  {file/FileSpec} {Desc}{\l_tmpa_str}
+\pdffile_embed_file:nnn {testinput.txt}{grüße.txt}{example0}
 \group_end:
 
 \group_begin:
 \pdfdict_put:nnn  {file/FileSpec} {AFRelationship}{/Source}
 \pdfdict_put:nnn  {file/FileSpec} {Desc}{(this~is~a~eps)}
-
-\pdffile_embed_file:nnn {testinput.txt}{xxxxx.tex}{example1}
+\pdffile_embed_file:nnn {testinput.txt}{Some~txt~file}{example1}
 
 \pdfdict_put:nnn  {file/FileSpec} {AFRelationship}{/Data}
 \pdfdict_put:nnn  {file/FileSpec} {Desc}{(this~is~a~text~file)}
-\pdffile_embed_stream:nnn {stream text} {xxxxx.txt} {example2}
+\pdffile_embed_stream:nnn {stream content} {Some~stream} {example2}
+
+
+
+\pdfcoredict_gput:nnx{Catalog/Names}{EmbeddedFiles}{\pdf_object_ref:n{example0}}
+\pdfcoredict_gput:nnx{Catalog/Names}{EmbeddedFiles}{\pdf_object_ref:n{example2}}
+\pdfcoredict_gput:nnx{Catalog/Names}{EmbeddedFiles}{\pdf_object_ref:n{example1}}
 
 \prop_show:N \g__pdffile_file_embed_sources_prop
-\exp_args:Nx
-          \__pdf_backend_NamesEmbeddedFiles_add:n {\pdf_object_ref:n{example2}} 
-\exp_args:Nx
-          \__pdf_backend_NamesEmbeddedFiles_add:n {\pdf_object_ref:n{example1}} 
-
 \seq_show:N \g__pdf_backend_EmbeddedFiles_seq
 \prop_show:N \g__pdf_backend_EmbeddedFiles_named_prop
-%\pdffile_attach:n {example1}
 \group_end:
 \end{document}
 %
+there is place for improvement here ;-)
 \group_begin:
 \pdfdict_put:nnn  {file/FileSpec} {AFRelationship}{/Data}
 \pdfdict_put:nnn  {file/FileSpec} {Desc}{(this~is~a~text~file)}

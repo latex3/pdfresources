@@ -440,6 +440,8 @@
 %                                         added to OCProperties/Configs.\\
 %    Catalog              & OutputIntents        & object reference\\
 %    Catalog              & Requirements         & object reference & PDF 1.7 \\
+%    Catalog/Names        & EmbeddedFiles        & object reference & This should reference a filespec dictionary. It will
+%                                                  attach the file to the file panel.  
 %   \end{tabularx}
 %
 % \end{documentation}
@@ -573,7 +575,6 @@
 %  \cs{@@_handler_gput:nnn} is the main command to fill the dictionaries.
 %  In simple cases it directly fill the property list, but if a handler exists
 %  this is called. It is important to use it only in places where this make sense.
-%  \cs{@@_put:nnn} is a simpler variant which only fills the property list.
 %
 %    \begin{macrocode}
 
@@ -1174,7 +1175,18 @@
   }
 %    \end{macrocode}
 % \end{macro}
-% % \paragraph{Building catalog entries: Names/EmbeddedFiles}
+% \paragraph{Building catalog entries: Names/EmbeddedFiles}
+% \begin{macro}{ Handler}
+% EmbeddedFiles is an array and needs a special handler to add values.
+%    \begin{macrocode}
+\pdfdict_gnew:n { Core/Catalog/Names }
+
+\cs_new_protected:cpn { @@_handler/Catalog/Names/EmbeddedFiles_gput:n } #1
+  {
+    \__pdf_backend_NamesEmbeddedFiles_add:n { #1 }
+  }
+%    \end{macrocode}
+% \end{macro}
 % The entry should only be added if there are actually embedded files.
 % This can be tested by checking the names_seq
 % \begin{macro}{\@@_/Catalog/Names/EmbeddedFiles_gpush:}
