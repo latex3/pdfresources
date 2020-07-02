@@ -24,7 +24,7 @@
 %\pdftool_textstringlit_print:nN {this~is~an~odd~description~with~öäü}\l_tmpa_str
 %\pdfdict_put:nnx  {file/FileSpec} {Desc}{\l_tmpa_str}
 %%embeds testinput.txt and calls it grüße.txt
-\pdffile_embed_file:nnn {testinput.txt}{grüße.txt}{file:example1}
+\pdffile_embed_file:nnn {testinput.txt}{blub.txt}{file:example1}
 %%reference it in the panel
 %\pdfcoredict_gput:nnx
 %  {Catalog/Names}
@@ -47,7 +47,7 @@
 
 \pdfdict_put:nnn  {file/FileSpec} {AFRelationship}{/Data}
 \pdfdict_put:nnn  {file/FileSpec} {Desc}{(this~is~a~text~file)}
-\pdffile_embed_stream:nnn {stream content} {grüße.pdf} {example4}
+\pdffile_embed_stream:nnn {stream content} {abc.txt} {example4}
 
 
 
@@ -56,9 +56,10 @@
 %\pdfcoredict_gput:nnx{Catalog/Names}{EmbeddedFiles}{\pdf_object_ref:n{example3}}
 \pdfcoredict_gput:nnx{Catalog/Names}{EmbeddedFiles}{\pdf_object_ref:n{example4}}
 
-%\prop_show:N \g__pdffile_file_embed_sources_prop
-%\seq_show:N \g__pdf_backend_EmbeddedFiles_seq
-%\prop_show:N \g__pdf_backend_EmbeddedFiles_named_prop
+\pdffile_embed_show:
+%\prop_show:N \g__pdffile_embed_prop
+\seq_show:N  \g__pdf_backend_EmbeddedFiles_seq
+\prop_show:N \g__pdf_backend_EmbeddedFiles_named_prop
 \group_end:
 \end{document}
 \RequirePackage{pdfresources}

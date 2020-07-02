@@ -326,6 +326,16 @@
 % (and is) used in the file dictionaries, see table~\ref{tab:filedict} for examples.
 % \end{variable}
 %
+% \begin{variable} {\g_pdffile_embed_prop}
+% This property holds a list of embedded files. It is used by the following
+% show command. The keys are the object names, the argument holds a key word,
+% the source file name and the target file name. 
+% \end{variable}
+%
+% \begin{function}{\pdffile_embed_show:}
+% This shows the embedded files with their source and target name.
+% \end{function}
+%
 % \subsection{Example}
 % \begin{verbatim}
 % \group_begin:
@@ -344,7 +354,7 @@
 %  {EmbeddedFiles}
 %   {\pdf_object_ref:n{file:example1}}
 % \group_end:
-\end{verbatim}
+% \end{verbatim}
 % \end{documentation}
 %
 % \begin{implementation}
@@ -360,7 +370,8 @@
 %
 %    \begin{macrocode}
 %<@@=pdffile>
-\cs_set_eq:NN \@@_filename_convert_to_print:nN \pdftool_textstringhex_print:nN
+\cs_set_eq:NN \@@_filename_convert_to_print:nN
+              \pdftool_textstringhex_print:nN
 %    \end{macrocode}
 % \subsection{Messages}
 %    \begin{macrocode}
@@ -384,6 +395,11 @@
     object~name~'#1'~is~already~used.
   }
 
+\msg_new:nnn  { pdffile } { show-files }
+  {
+    The~following~files~have~been~embedded\\
+     #1
+  }
 %    \end{macrocode}
 % \begin{variable}
 %   {
@@ -407,8 +423,8 @@
 \tl_new:N  \l_@@_embed_ref_tl
 %    \end{macrocode}
 % \begin{variable} {\g_pdffile_mimetypes_prop}
-% This variable holds common mimetypes. The key is an extension with (one) period, the
-% value the description, e.g. \texttt{text/csv}.
+% This variable holds common mimetypes. The key is an extension with (one) period,
+% the value the description, e.g. \texttt{text/csv}.
 % \end{variable}
 %    \begin{macrocode}
 \prop_new:N \g_pdffile_mimetypes_prop
@@ -436,9 +452,8 @@
 % \end{variable}
 %    \begin{macrocode}
 \str_new:N  \l_pdffile_source_name_str
-\str_new:N  \l_pdffile_full_name_convert_str %???
 %    \end{macrocode}
-% Here we define and setup the local dictionaries. We also define constants.
+% Here we define and setup the local dictionaries.
 %    \begin{macrocode}
 \pdfdict_new:n   { file }
 \pdfdict_put:nnn { file }{Type}{/EmbeddedFile}
@@ -457,17 +472,43 @@
   {AFRelationship} { /Unspecified }
 
 %    \end{macrocode}
+% \begin{variable}{\g_pdffile_embed_prop}
+% we record here the relation\\%
+% \meta{object name} $\Rightarrow$
+%  \Arg{file/stream or empty}\Arg{sourcename}\Arg{targetname}}
+%
+%    \begin{macrocode}
+\prop_new:N \g_pdffile_embed_prop
+%    \end{macrocode}
+% \end{variable}
+% \begin{macro}{\pdffile_embed_show:}
+%    \begin{macrocode}
+\cs_new_protected:Npn \pdffile_embed_show:
+  {
+    \msg_show:nnx
+     {pdffile}{show-files}
+     {
+       \prop_map_function:NN {\g_pdffile_embed_prop} \msg_show_item:nn
+     }
+  }
+%    \end{macrocode}
+% \end{macro}
 %
 % \begin{macro}{\pdffile_embed_file:nnn, \pdffile_embed_stream:nnn}
 % At first a command to set the mimetype. It either uses the current value
 % in the file dictionary, or tries to guess it from the extension.
+% \begin{macro}{\@@_mimetype_set:nN,\@@_mimetype_set:VN}
+% \begin{macro}{\@@_fstream_write:nN, \@@_fstream_write:VN}
+% \begin{macro}{\@@_stream_write:nN, \@@_stream_write:VN}
 %    \begin{macrocode}
-\cs_new_protected:Npn \@@_mimetype_set:nN #1 #2 %#1 file name, #2 tl for guessed mimetype
+%#1 file name,
+%#2 tl to return the (printed) value for the guessed mimetype
+\cs_new_protected:Npn \@@_mimetype_set:nN #1 #2
   {
     \file_parse_full_name:nNNN
           {#1}
-          \l_@@_tmpa_str %unneeded
-          \l_@@_tmpb_str %unneeded
+          \l_@@_tmpa_str %unused
+          \l_@@_tmpb_str %unused
           \l_@@_ext_str
         %check if Subtype has been set
         \pdfdict_get:nnN {file}{Subtype}\l_@@_tmpa_tl
@@ -488,8 +529,8 @@
 \cs_generate_variant:Nn \@@_mimetype_set:nN {VN}
 
 %#1 file name,
-%#2 tl, should be empty or contain /Subtype /mimtype
-  %   e.g. result from \@@_mimetype_set:NN
+%#2 tl, should be empty or contain /Subtype /mimetype
+%   e.g. result from \@@_mimetype_set:NN
 \cs_new_protected:Npn \@@_fstream_write:nN #1 #2
   {
     \pdf_object_now:nx { fstream }
@@ -514,7 +555,7 @@
 
 %#1 file content
 %#2 tl, should be empty or contain /Subtype /mimtype
-    %e.g. result from \@@_mimetype_set:NN
+%   e.g. result from \@@_mimetype_set:NN
 \cs_new_protected:Npn \@@_stream_write:nN #1 #2
   {
     \pdf_object_now:nx { stream }
@@ -537,7 +578,7 @@
 
 \cs_generate_variant:Nn \@@_stream_write:nN {VN}
 
-%#1 symbolic name of dict object -- a prefix is added to have some namespace,
+%#1 symbolic name of dict object
 %#2 target file name,
 %#3 object ref of the file stream.
 \cs_new_protected:Npn \@@_filespec_write:nnn #1 #2 #3
@@ -549,27 +590,21 @@
       {
         \pdf_object_new:nn   { #1 } {dict}
         \group_begin:
-            \@@_filename_convert_to_print:nN  { #2 } \l_@@_tmpa_str
-            %\str_show:N\l_@@_tmpa_str
-            \pdfdict_put:nnx {file/FileSpec}{F} { \l_@@_tmpa_str }
-            \pdfdict_put:nnx {file/FileSpec}{UF}{ \l_@@_tmpa_str }
-            \pdf_object_write:nx { #1 }
-              {
-                \pdfdict_map:n {file/FileSpec}
-                \tl_if_empty:nF { #3 }
-                  {
-                    /EF <</F~#3 /UF~#3>>
-                  }
-              }
+          \@@_filename_convert_to_print:nN  { #2 } \l_@@_tmpa_str
+          \pdfdict_put:nnx {file/FileSpec}{F} { \l_@@_tmpa_str }
+          \pdfdict_put:nnx {file/FileSpec}{UF}{ \l_@@_tmpa_str }
+          \pdf_object_write:nx { #1 }
+            {
+              \pdfdict_map:n {file/FileSpec}
+              \tl_if_empty:nF { #3 }
+                {
+                  /EF <</F~#3 /UF~#3>>
+                }
+            }
         \group_end:
-       }
+      }
   }
-%% separate file name to embed and file name to display!
-% we record here the source file. This allows also to test if an object name
-% has an embedded file or is only a filespec
 
-
-\prop_new:N \g_@@_embed_sources_prop
 
 %#1 {source filename}
 %#2 {target filename}
@@ -589,10 +624,6 @@
           {
             \file_get_full_name:nNTF {#1} \l_pdffile_source_name_str
               {
-                \prop_gput:Nnx
-                  \g_@@_embed_sources_prop
-                  { #3 }
-                  {\l_pdffile_source_name_str=>\tl_to_str:n{#2}}
                 \@@_mimetype_set:VN
                   \l_pdffile_source_name_str
                   \l_@@_automimetype_tl
@@ -605,6 +636,18 @@
                 \msg_error:nnn { pdffile }{ file-not-found }{ #1 }
               }
 
+           }
+        \prop_gput:Nnx
+           \g_pdffile_embed_prop
+           { #3 }
+           {
+             { \tl_if_blank:nTF { #1 } {filespec}{file} }
+             {\l_pdffile_source_name_str}
+             {
+               \tl_if_blank:nTF { #2 }
+                 { \l_pdffile_source_name_str }
+                 { \tl_to_str:n{#2}}
+             }
            }
         \tl_if_blank:nTF { #2 }
           {
@@ -638,10 +681,10 @@
          \msg_error:nnn { pdffile }{ object-exists } { #3 }
       }
       {
-         \prop_gput:Nnn
-            \g_@@_embed_sources_prop
+         \prop_gput:Nnx
+            \g_pdffile_embed_prop
             { #3 }
-            {stream=>#2}
+            {{stream}{}{\tl_if_blank:nTF {#2}{stream.txt}{\exp_not:n{#2}}}}
          \tl_if_blank:nTF {#2}
           { \@@_mimetype_set:nN {stream.txt}\l_@@_automimetype_tl}
           { \@@_mimetype_set:nN { #2 } \l_@@_automimetype_tl }
@@ -661,7 +704,9 @@
 
 %    \end{macrocode}
 % \end{macro}
-
+% \end{macro}
+% \end{macro}
+% \end{macro}
 %    \begin{macrocode}
 %</package>
 %    \end{macrocode}
