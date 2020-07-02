@@ -26,6 +26,7 @@ grüße
 \pdfdict_put:nnn  {file/FileSpec} {AFRelationship}{/Source}
 \pdftool_textstringlit_print:nN {this~is~something~odd~with~öäü}\l_tmpa_str
 \pdfdict_put:nnx  {file/FileSpec} {Desc}{\l_tmpa_str}
+\pdfdict_put:nnx  {file/Params} {ModDate}{(D:20200422135851Z)}
 \pdffile_embed_file:nnn {testinput.txt}{grüße.txt}{example1}
 \group_end:
 
@@ -41,6 +42,7 @@ grüße
 \group_begin:
 \pdfdict_put:nnn  {file/FileSpec} {AFRelationship}{/Source}
 \pdfdict_put:nnn  {file/FileSpec} {Desc}{(this~is~a~eps)}
+\pdfdict_put:nnx  {file/Params} {ModDate}{(D:20200422135851Z)} %for test
 \pdffile_embed_file:nnn {testinput.txt}{Some~txt~file}{example3}
 
 \pdfdict_put:nnn  {file/FileSpec} {AFRelationship}{/Data}
@@ -58,4 +60,4 @@ grüße
 %\seq_show:N \g__pdf_backend_EmbeddedFiles_seq
 %\prop_show:N \g__pdf_backend_EmbeddedFiles_named_prop
 \group_end:
-\end{document}
+\end{document} 
