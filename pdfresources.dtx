@@ -362,20 +362,24 @@
 %
 \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
   {
-    \special {ps:~mark~/#1~\@@_backend_object_ref:n{#2}~/BDC~pdfmark}
+    \__pdf_backend_pdfmark:x{/#1~\@@_backend_object_ref:n{#2}~/BDC}
   }
 \cs_set_protected:Npn \@@_backend_bdc:n #1  % #1 eg. Span,
   {
-    \special {ps:~mark~/#1~\@@_backend_object_last:~/BDC~pdfmark}
+    \__pdf_backend_pdfmark:x{/#1~\@@_backend_object_last:~/BDC}
   }
 \cs_set_protected:Npn \@@_backend_emc:
   {
-    \special {ps:~mark~/EMC~pdfmark} %
+    \__pdf_backend_pdfmark:n{/EMC} %
   }
 \cs_set_protected:Npn \@@_backend_bmc:n #1
   {
-    \special {ps:~mark~/#1~/BMC~pdfmark} %
+    \__pdf_backend_pdfmark:n{/#1~/BMC} %
   }
+\cs_set_protected:Npn \@@_backend_bdc_direct:nn #1 #2
+   {
+    \__pdf_backend_pdfmark:n{/#1~<<#2>>~/BDC}
+   }
 \cs_new_protected:Npn \@@_backend_PageResources_gpush:n #1 {}
 
 %</dvips>
@@ -427,6 +431,10 @@
 \cs_set_protected:Npn \@@_backend_bmc:n #1
    {
      \__kernel_backend_literal:n {pdf:code~/#1~BMC}  %pdfbase
+   }
+\cs_set_protected:Npn \@@_backend_bdc_direct:nn #1 #2
+   {
+     \__kernel_backend_literal_page:n {pdf:code~ /#1~<<#2>>~BDC }
    }
 \cs_set_protected:Npn \@@_backend_emc:
   {
@@ -505,6 +513,10 @@
       {
         \__kernel_backend_literal_page:n { /#1~BMC }
       }
+   \cs_set_protected:Npn \@@_backend_bdc_direct:nn #1 #2
+     {
+        \__kernel_backend_literal_page:n { /#1~<<#2>>~BDC }
+     }
     \cs_set_protected:Npn \@@_backend_emc:
       {
         \__kernel_backend_literal_page:n { EMC }
@@ -592,6 +604,11 @@
     {
       \__kernel_backend_literal_page:n { /#1~BMC }
     }
+  \cs_set_protected:Npn \@@_backend_bdc_direct:nn #1 #2
+    {
+      \__kernel_backend_literal_page:n { /#1~<<#2>>~BDC }
+    }
+
   \cs_set_protected:Npn \@@_backend_emc:
     {
       \__kernel_backend_literal_page:n { EMC }
@@ -1953,4 +1970,5 @@ function l3kernel.pdf.object_ref (objname)
 end
 %</lua>
 %    \end{macrocode}
+% \newpage
 % \PrintIndex
