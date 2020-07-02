@@ -289,7 +289,7 @@
 %
 % \begin{function}{\pdffile_embed_stream:nnn}
 %   \begin{syntax}
-%     \cs{pdffile_embed_stream:nnN} \Arg{content} \Arg{target filename} \Arg{object name }
+%     \cs{pdffile_embed_stream:nnn} \Arg{content} \Arg{target filename} \Arg{object name }
 %   \end{syntax}
 %   This commands embeds the \Arg{content} in the PDF in a stream objects and
 %   creates a /FileSpec dictionary object named \Arg { object name }.
@@ -329,7 +329,7 @@
 % \begin{variable} {\g_pdffile_embed_prop}
 % This property holds a list of embedded files. It is used by the following
 % show command. The keys are the object names, the argument holds a key word,
-% the source file name and the target file name. 
+% the source file name and the target file name.
 % \end{variable}
 %
 % \begin{function}{\pdffile_embed_show:}
@@ -341,7 +341,7 @@
 % \group_begin:
 % %set the relationship:
 % \pdfdict_put:nnn  {file/FileSpec} {AFRelationship}{/Source}
-% %set the description key. The text must be made converted first:
+% %set the description key. The text must first be converted:
 % \pdftool_textstringlit_print:nN
 %    {this~is~an~odd~description~with~öäü}
 %    \l_tmpa_str
@@ -408,7 +408,7 @@
 %     \l_@@_tmpa_str,
 %     \l_@@_tmpb_str,
 %     \l_@@_ext_str,
-%     \l_@@_automimetype_tl
+%     \l_@@_automimetype_tl,
 %     \l_@@_embed_ref_tl
 %   }
 % temporary variables: generic, for extension, subtype, to store the ref.
@@ -475,7 +475,7 @@
 % \begin{variable}{\g_pdffile_embed_prop}
 % we record here the relation\\%
 % \meta{object name} $\Rightarrow$
-%  \Arg{file/stream or empty}\Arg{sourcename}\Arg{targetname}}
+%  \Arg{file/stream or empty}\Arg{sourcename}\Arg{targetname}
 %
 %    \begin{macrocode}
 \prop_new:N \g_pdffile_embed_prop
@@ -515,7 +515,10 @@
         %if not look up in the prop:
         \quark_if_no_value:NT \l_@@_tmpa_tl
           {
-            \prop_get:NVNTF \g_pdffile_mimetypes_prop \l_@@_ext_str \l_@@_tmpb_tl
+            \prop_get:NVNTF
+              \g_pdffile_mimetypes_prop
+              \l_@@_ext_str
+              \l_@@_tmpb_tl
               {
                 \tl_set:Nx #2 {/Subtype~\pdftool_name_print:V \l_@@_tmpb_tl}
               }
