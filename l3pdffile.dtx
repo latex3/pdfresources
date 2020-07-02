@@ -225,28 +225,30 @@
 % |\pdfcoredict_gput:nnx{Catalog/Names}{EmbeddedFiles}{|\meta{objref}|}|
 %
 % \subsection{Commands and tools of these module}
-% \subsubsection{Dictionaries}
+% \begin{function}{file, file/Params, file/streamParams,file/FileSpec}
 % The module predefines and uses a number of local dictionaries for the
 % components of the stream and the /FileSpec object. These dictionaries are
-% are used by the \cs{pdffile_embed_XX}
-% These dictionaries can be changed by users, but it should be done only locally
+% are used by the \cs{pdffile_embed_XX}.
+% The content of these dictionaries can be changed by users with the commands
+% from the \texttt{l3pdfdict} module, but it should be done only locally
 % to avoid side effects on uses by other packages/commands.
-% \begin{function}{file, file/Params, file/streamParams,file/FileSpec}
-% The following values are preset in these dictionaries:
-% \smallskip
+
+% The preset values are of these dictionaries are shown in table~\ref{tab:filedict}.
 %
-% \noindent\begin{tabular}{lll}
+% \end{function}
+% \begin{table}
+% \caption{Preset values in the file dictionaries\label{tab:filedict}}
+% \begin{tabular}{lll}
 % dictionary & key      & value \\\hline
 % file       & Type     & /EmbeddedFile\\
-% file/Params& Size     & \cs{file_size:n}\\
-% file/Params& ModDate  & (\cs{file_timestamp:n})\\
-% file/Params& CheckSum & (\cs{file_mdfive_hash:n})\\
+% file/Params& Size     & |\file_size:n{\l_pdffile_source_name_str}|\\
+% file/Params& ModDate  & |(\file_timestamp:n {\l_pdffile_source_name_str})|\\
+% file/Params& CheckSum & |(\file_mdfive_hash:n{\l_pdffile_source_name_str})|\\
 % file/streamParams&    &  empty (used with \cs{pdffile_embed_stream:nnn})\\
 % file/FileSpec & Type  & /FileSpec\\
 % file/FileSpec & AFRelationship &Unspecified
 % \end{tabular}
-% \end{function}
-%
+% \end{table}
 % \begin{function}{\pdffile_embed_file:nnn}
 %   \begin{syntax}
 %     \cs{pdffile_embed_file:nnn} \Arg{source filename} \Arg{target filename} \Arg{object name }
@@ -318,6 +320,31 @@
 %   as plain text (it will be escaped internally). Extensions with two periods
 %   are not supported.
 % \end{variable}
+%
+% \begin{variable}{\l_pdffile_source_name_str}
+% This variable is set at the begin of \cs{pdffile_embed_file:nnn}. It can be
+% (and is) used in the file dictionaries, see table~\ref{tab:filedict} for examples.
+% \end{variable}
+%
+% \subsection{Example}
+% \begin{verbatim}
+% \group_begin:
+% %set the relationship:
+% \pdfdict_put:nnn  {file/FileSpec} {AFRelationship}{/Source}
+% %set the description key. The text must be made converted first:
+% \pdftool_textstringlit_print:nN
+%    {this~is~an~odd~description~with~öäü}
+%    \l_tmpa_str
+% \pdfdict_put:nnx  {file/FileSpec} {Desc}{\l_tmpa_str}
+% %embeds testinput.txt and calls it grüße.txt
+% \pdffile_embed_file:nnn {testinput.txt}{grüße.txt}{file:example1}
+% %reference it in the panel
+% \pdfcoredict_gput:nnx
+%  {Catalog/Names}
+%  {EmbeddedFiles}
+%   {\pdf_object_ref:n{file:example1}}
+% \group_end:
+\end{verbatim}
 % \end{documentation}
 %
 % \begin{implementation}
@@ -326,7 +353,7 @@
 %
 %    \begin{macrocode}
 %<*package>
-\ProvidesExplPackage {l3pdffile} {2020-04-21} {0.1}
+\ProvidesExplPackage {l3pdffile} {2020-07-02} {0.2}
   {embedding and referencing files in PDF}
 \RequirePackage{new-pdfescape}  %temporarly!!
 %    \end{macrocode}
@@ -376,16 +403,18 @@
 %     \l_@@_tmpb_str,
 %     \l_@@_ext_str,
 %     \l_@@_automimetype_tl
+%     \l_@@_embed_ref_tl
 %   }
-% temporary variables: generic, for extension, subtype
+% temporary variables: generic, for extension, subtype, to store the ref.
 % \end{variable}
 %    \begin{macrocode}
 \tl_new:N  \l_@@_tmpa_tl
+\tl_new:N  \l_@@_tmpb_tl
 \str_new:N \l_@@_tmpa_str
-
+\str_new:N \l_@@_tmpb_str
 \str_new:N \l_@@_ext_str
 \tl_new:N  \l_@@_automimetype_tl
-
+\tl_new:N  \l_@@_embed_ref_tl
 %    \end{macrocode}
 % \begin{variable} {\g_pdffile_mimetypes_prop}
 % This variable holds common mimetypes. The key is an extension with (one) period, the
@@ -410,13 +439,13 @@
 %    \end{macrocode}
 % \begin{variable}
 %  {
-%   \l_pdffile_source_full_name_str,
+%   \l_pdffile_source_name_str
 %  }
-% \cs{l_pdffile_source_full_name_str} will be set at the begin of the command and
+% \cs{l_pdffile_source_name_str} will be set at the begin of the command and
 % contains the full file name and can be used e.g. with \cs{file_timestamp:n}.
 % \end{variable}
 %    \begin{macrocode}
-\str_new:N  \l_pdffile_source_full_name_str
+\str_new:N  \l_pdffile_source_name_str
 \str_new:N  \l_pdffile_full_name_convert_str %???
 %    \end{macrocode}
 % Here we define and setup the local dictionaries. We also define constants.
@@ -425,11 +454,11 @@
 \pdfdict_put:nnn { file }{Type}{/EmbeddedFile}
 \pdfdict_new:n   { file/Params }
 \pdfdict_put:nnn { file/Params }
-  {ModDate}  { (\file_timestamp:n { \l_pdffile_source_full_name_str }) }
+  {ModDate}  { (\file_timestamp:n { \l_pdffile_source_name_str }) }
 \pdfdict_put:nnn { file/Params }
-  {Size}     { \file_size:n { \l_pdffile_source_full_name_str } }
+  {Size}     { \file_size:n { \l_pdffile_source_name_str } }
 \pdfdict_put:nnn { file/Params }
-  {CheckSum} { (\file_mdfive_hash:n { \l_pdffile_source_full_name_str }) }
+  {CheckSum} { (\file_mdfive_hash:n { \l_pdffile_source_name_str }) }
 \pdfdict_new:n   { file/streamParams }
 \pdfdict_new:n   { file/FileSpec }
 \pdfdict_put:nnn { file/FileSpec }
@@ -568,17 +597,17 @@
             \tl_set:Nn \l_@@_embed_ref_tl {}
           }
           {
-            \file_get_full_name:nNTF {#1} \l_pdffile_source_full_name_str
+            \file_get_full_name:nNTF {#1} \l_pdffile_source_name_str
               {
                 \prop_gput:Nnx
                   \g_@@_embed_sources_prop
                   { #3 }
-                  {\l_pdffile_source_full_name_str=>\tl_to_str:n{#2}}
+                  {\l_pdffile_source_name_str=>\tl_to_str:n{#2}}
                 \@@_mimetype_set:VN
-                  \l_pdffile_source_full_name_str
+                  \l_pdffile_source_name_str
                   \l_@@_automimetype_tl
                 \@@_fstream_write:VN
-                  \l_pdffile_source_full_name_str
+                  \l_pdffile_source_name_str
                   \l_@@_automimetype_tl
                 \tl_set:Nx \l_@@_embed_ref_tl { \pdf_object_last: }
               }
@@ -662,17 +691,17 @@
 %   case it is needed to setup up for example a collection.
 %\end{function}
 %    \begin{macrocode}
-\cs_new_protected:Npn \@@_check_attach_aux:n #1
-  {
-    \prop_get:NnNTF \g_@@_embed_sources_prop { #1 } \l_tmpa_str
-      {
-        \exp_args:Nx
-          \__pdf_backend_NamesEmbeddedFiles_add:n {\pdf_object_ref:n{#1}}
-      }
-      {
-        \msg_warning:nnn { pdffile } { no-file-embedded } { #1 }
-      }
-  }
+%\cs_new_protected:Npn \@@_check_attach_aux:n #1
+%  {
+%    \prop_get:NnNTF \g_@@_embed_sources_prop { #1 } \l_tmpa_str
+%      {
+%        \exp_args:Nx
+%          \__pdf_backend_NamesEmbeddedFiles_add:n {\pdf_object_ref:n{#1}}
+%      }
+%      {
+%        \msg_warning:nnn { pdffile } { no-file-embedded } { #1 }
+%      }
+%  }
 
 %\cs_new_protected:Npn \pdffile_attach:n #1% #1 name of filespec object, #2 in case the name must be retourned
 % {
