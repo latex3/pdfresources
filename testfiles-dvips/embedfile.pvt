@@ -3,6 +3,14 @@
 \DeclareDocumentMetaData{pdfversion=1.6}
 \documentclass{article}
 \usepackage{l3pdffile}
+\ExplSyntaxOn
+%%% for reproducible tests:
+\pdfcoredict_gput:nnn {Info}{CreationDate}{(D:20200202111111+01'00')}
+\pdfcoredict_gput:nnn {Info}{ModDate}{(D:20200202111111+01'00')}
+\pdfcoredict_gput:nnn {Info}{Creator}{(l3build test)}
+%%%%%
+\ExplSyntaxOff
+
 \usepackage[customdriver=hgeneric-experimental]{hyperref}
 \hypersetup{pdfversion=1.6,pdfpagemode=UseAttachments}
 \usepackage{bookmark}
