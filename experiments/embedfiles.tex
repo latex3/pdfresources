@@ -1,5 +1,5 @@
 % !Mode:: "TeX:UTF-8:Main"
-\input{regression-test}
+%\input{regression-test}
 \RequirePackage{pdfresources}
 \DeclareDocumentMetaData{pdfversion=1.6}
 \ExplSyntaxOn
@@ -33,18 +33,18 @@
 
 \group_begin:
 \pdfdict_put:nnn  {file/FileSpec} {AFRelationship}{/Source}
-\pdfdict_put:nnn  {file/FileSpec} {Desc}{(this~is~a~eps)}
-\pdffile_embed_file:nnn {testinput.txt}{some~text}{example3}
+\pdfdict_put:nnn  {file/FileSpec} {Desc}{(no file)}
+%\pdffile_embed_file:nnn {}{}{example3}
 
 \pdfdict_put:nnn  {file/FileSpec} {AFRelationship}{/Data}
 \pdfdict_put:nnn  {file/FileSpec} {Desc}{(this~is~a~text~file)}
-\pdffile_embed_stream:nnn {stream content} {stream.txt} {example4}
+\pdffile_embed_stream:nnn {stream content} {grüße.pdf} {example4}
 
 
 
 \pdfcoredict_gput:nnx{Catalog/Names}{EmbeddedFiles}{\pdf_object_ref:n{example1}}
 %\pdfcoredict_gput:nnx{Catalog/Names}{EmbeddedFiles}{\pdf_object_ref:n{example2}}
-\pdfcoredict_gput:nnx{Catalog/Names}{EmbeddedFiles}{\pdf_object_ref:n{example3}}
+%\pdfcoredict_gput:nnx{Catalog/Names}{EmbeddedFiles}{\pdf_object_ref:n{example3}}
 \pdfcoredict_gput:nnx{Catalog/Names}{EmbeddedFiles}{\pdf_object_ref:n{example4}}
 
 %\prop_show:N \g__pdffile_file_embed_sources_prop
