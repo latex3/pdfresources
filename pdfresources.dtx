@@ -90,6 +90,13 @@
 %</package>
 %    \end{macrocode}
 % \section{Preparation/helper Code}
+% \begin{variable}{\g_@@_Core_active_bool}
+% This boolean will control the activation of the management code.
+% It is used in the hooks, and in some backend files.
+% \cs{DeclareDocumentMetadata} should set it to true
+%    \begin{macrocode}
+\bool_new:N \g_@@_Core_active_bool
+%    \end{macrocode}
 %^^A still needed:
 %^^A \pdf@strcmp??
 %^^A \pdf@escapestring?? \pdfescapestring
@@ -649,15 +656,25 @@
 % \end{macro}
 %
 % \subsubsection{BDC and Properties  / management}
+% \begin{macro}{\pdf_bdc:nn}
+% \begin{macro}{\pdf_bdc:n}
+% \begin{macro}{\pdf_bdc_direct:nn}
+% \begin{macro}{\pdf_bmc:n}
+% \begin{macro}{\pdf_emc:}
 %    \begin{macrocode}
 %<*package>
 \cs_new_protected:Npn  \pdf_bdc:nn #1 #2 { \@@_backend_bdc:nn { #1 }{ #2 } }
+\cs_new_protected:Npn  \pdf_bdc_direct:nn #1 #2 { \@@_backend_bdc_direct:nn { #1 }{ #2 } }
 \cs_new_protected:Npn  \pdf_bdc:n #1     { \@@_backend_bdc:n  { #1 } }
 \cs_new_protected:Npn  \pdf_bmc:n #1     { \@@_backend_bmc:n  { #1 } }
 \cs_new_protected:Npn  \pdf_emc:         { \@@_backend_emc: }
 %</package>
 %    \end{macrocode}
-%
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
 % \subsection{Form XObject (pdfxform)}
 % \begin{NOTE}{UF}
 %  - As in dvi mode the xform is immediate, this is done for pdftex/luatex too.

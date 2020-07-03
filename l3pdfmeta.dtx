@@ -100,7 +100,10 @@
   {
     \cs_if_eq:NNTF \documentclass \@twoclasseserror
       { \msg_error:nn { pdf }{ setup-after-documentclass } }
-      { \keys_set:nn  { pdf / setup } { #1 } }
+      {
+        \bool_gset_true:N \g_@@_Core_active_bool
+        \keys_set:nn  { pdf / setup } { #1 }
+      }
   }
 
 \msg_new:nnn {pdf}{unknown-standard}{The~standard~'#1'~is~unknown~and~has~been~ignored}
