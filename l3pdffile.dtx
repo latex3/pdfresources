@@ -286,7 +286,10 @@
 %   viewer can restrict access to known file types.
 %
 % \end{function}
-%
+% \begin{NOTE}{UF}
+%  we should perhaps also consider the chunk method see pdfbase and
+%  https://chat.stackexchange.com/transcript/message/54181193#54181193
+% \end{NOTE}
 % \begin{function}{\pdffile_embed_stream:nnn}
 %   \begin{syntax}
 %     \cs{pdffile_embed_stream:nnn} \Arg{content} \Arg{target filename} \Arg{object name }
@@ -308,6 +311,9 @@
 %   \Arg{target filename} doesn't need to be a file name with an extension,
 %   but it is recommended as security settings in the pdf
 %   viewer can restrict access to known file types.
+%
+%   The stream should not be too long, at least PS imposes a size limit for strings.
+%
 
 % \end{function}
 %  \begin{variable}{\g_pdffile_mimetypes_prop}
