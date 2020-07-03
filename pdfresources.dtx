@@ -95,7 +95,11 @@
 % It is used in the hooks, and in some backend files.
 % \cs{DeclareDocumentMetadata} should set it to true
 %    \begin{macrocode}
+%<*package>
 \bool_new:N \g_@@_Core_active_bool
+% temporarly
+\bool_gset_true:N \g_@@_Core_active_bool
+%</package>
 %    \end{macrocode}
 %^^A still needed:
 %^^A \pdf@strcmp??
@@ -283,31 +287,53 @@
 % To get a sensible abstraction the code does the same for the other backends:
 % There are no public commands to add values to the /Properties dictionary
 % directly, only commands to set BDC-marks.
-% \begin{function}[added = 2019-06-29]
+% \begin{function}[updated = 2020-07-03]
 %   {
 %     \pdf_bdc:nn
 %   }
 %   \begin{syntax}
-%     \cs{pdf_bdc:nn} \Arg{tag} \Arg{object name}
+%     \cs{pdf_bdc:nn} \Arg{tag} \Arg{dictionary content}
 %   \end{syntax}
 %    This command adds a BDC marked content operator to the current page stream.
 %   \meta{tag} is the tag of this operator (without the leading slash),
-%   \meta{object name}  is a the name of an dictionary object reserved with
-%   \cs{pdf_object_new:nn} and filled with \cs{pdf_object_write:n} with
-%   the properties of the BDC.
+%   \meta{dictionary content} is the content of the second argument.
+%   If the PDF resource management is active an dictionary object with the
+%   content is created and referenced with a name in the BDC operator.
+%   Without the resource management the content is use directly. It then
+%   depends on the backend how it is handled: with dvips and dvipdfmx a name is used
+%   while the pdfmode engines write the content into the stream.
+%
 % \end{function}
-% \begin{function}[added = 2019-10-18]
+% \begin{function}[added = 2020-07-03]
 %   {
-%     \pdf_bdc:n
+%     \pdf_bdc_obj:nn
 %   }
 %   \begin{syntax}
-%     \cs{pdf_bdc:n} \Arg{tag}
+%     \cs{pdf_bdc_obj:nn} \Arg{tag} \Arg{object name}
+%   \end{syntax}
+%   This command adds a BDC marked content operator to the current page stream.
+%   \meta{tag} is the tag of this operator (without the leading slash),
+%   \meta{object name}  is a the name of an dictionary object reserved with
+%   \cs{pdf_object_new:nn} and filled with \cs{pdf_object_write:n} with
+%   the properties of the BDC. Reusing a predefined object can save space
+%   but the command works correctly
+%   only if the resources management has been activated and should be used only
+%   if this can be ensured.
+% \end{function}
+% \begin{function}[updated = 2020-07-03]
+%   {
+%     \pdf_bdc_obj:n
+%   }
+%   \begin{syntax}
+%     \cs{pdf_bdc_obj:n} \Arg{tag}
 %   \end{syntax}
 %    This command adds a BDC marked content operator to the current page stream.
 %   \meta{tag} is the tag of this operator (without the leading slash).
 %   As object this commands uses the last anonymous dictionary object created with
 %   \cs{pdf_object_now:nn}. It lies in the responsibility of the user that the last
-%   object is the wanted one.
+%   object is the wanted one. Like with \cs{pdf_bdc_obj:nn} the command works correctly
+%   only if the resources management has been activated and should be used only
+%   if this can be ensured.
 % \end{function}
 % \begin{function}[added = 2019-10-17]
 %   {
@@ -343,12 +369,14 @@
 % \begin{macro}
 %   {
 %     \@@_backend_bdc:nn,
-%     \@@_backend_bdc:n,
+%     \@@_backend_bdc_obj:nn,
+%     \@@_backend_bdc_obj:n,
 %     \@@_backend_bmc:n,
 %     \@@_backend_emc:,
 %     \@@_backend_PageResources_gpush:n
 %   }
-% \cs{@@_backend_bdc:nn}, \cs{@@_backend_bmc:n} and \cs{@@_backend_emc:}
+% \cs{@@_backend_bdc:nn}, \cs{@@_backend_bdc_obj:nn}, \cs{@@_backend_bdc_obj:n},
+% \cs{@@_backend_bmc:n} and \cs{@@_backend_emc:}
 %  are the backend command that
 %  create the bdc/emc marker and store the properties.
 % \cs{@@_backend_PageResources_gpush:n} outputs the /Properties and/or the other
@@ -367,11 +395,15 @@
 % special variant von accsupp
 % https://chat.stackexchange.com/transcript/message/50831812#50831812
 %
-\cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
+\cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: dict_content
+  {
+    \__pdf_backend_pdfmark:x{/#1~<<#2>>~/BDC}
+  }
+\cs_set_protected:Npn \@@_backend_bdc_obj:nn #1 #2 % #1 eg. Span, #2: object name
   {
     \__pdf_backend_pdfmark:x{/#1~\@@_backend_object_ref:n{#2}~/BDC}
   }
-\cs_set_protected:Npn \@@_backend_bdc:n #1  % #1 eg. Span,
+\cs_set_protected:Npn \@@_backend_bdc_obj:n #1  % #1 eg. Span,
   {
     \__pdf_backend_pdfmark:x{/#1~\@@_backend_object_last:~/BDC}
   }
@@ -383,10 +415,6 @@
   {
     \__pdf_backend_pdfmark:n{/#1~/BMC} %
   }
-\cs_set_protected:Npn \@@_backend_bdc_direct:nn #1 #2
-   {
-    \__pdf_backend_pdfmark:n{/#1~<<#2>>~/BDC}
-   }
 \cs_new_protected:Npn \@@_backend_PageResources_gpush:n #1 {}
 
 %</dvips>
@@ -397,7 +425,7 @@
 % the property is added to xform resources automatically,
 % no need to worry about it.
 %<*dvipdfmx|xdvipdfmx>
- \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
+ \cs_set_protected:Npn \@@_backend_bdc_obj:nn #1 #2 % #1 eg. Span, #2: object name
    {
      \int_gincr:N \g_@@_backend_name_int
      \__kernel_backend_literal:x
@@ -416,7 +444,7 @@
            >>
        }
    }
- \cs_set_protected:Npn \@@_backend_bdc:n #1  % #1 eg. Span
+ \cs_set_protected:Npn \@@_backend_bdc_obj:n #1  % #1 eg. Span
    {
      \int_gincr:N \g_@@_backend_name_int
      \__kernel_backend_literal:x
@@ -439,10 +467,20 @@
    {
      \__kernel_backend_literal:n {pdf:code~/#1~BMC}  %pdfbase
    }
-\cs_set_protected:Npn \@@_backend_bdc_direct:nn #1 #2
-   {
-     \__kernel_backend_literal_page:n {pdf:code~ /#1~<<#2>>~BDC }
-   }
+\bool_if:NTF  \g_@@_Core_active_bool
+  {
+    \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2
+      {
+        \pdf_object_now:nn { dict }{ #2 }
+        \@@_backend_bdc_obj:n { #1 }
+      }
+  }
+  {
+    \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2
+      {
+        \__kernel_backend_literal:n {pdf:code~ /#1~<<#2>>~BDC }
+      }
+  }
 \cs_set_protected:Npn \@@_backend_emc:
   {
     \__kernel_backend_literal:n {pdf:code~EMC}  %pdfbase
@@ -468,7 +506,7 @@
 %<*pdfmode>
 \sys_if_engine_luatex:T
   {
-    \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
+    \cs_set_protected:Npn \@@_backend_bdc_obj:nn #1 #2 % #1 eg. Span, #2: object name
       {
         \int_gincr:N \g_@@_backend_name_int
         \exp_args:Nx\__kernel_backend_literal_page:n
@@ -492,7 +530,7 @@
               }
           }
     }
-    \cs_set_protected:Npn \@@_backend_bdc:n #1% #1 eg. Span
+    \cs_set_protected:Npn \@@_backend_bdc_obj:n #1% #1 eg. Span
       {
         \int_gincr:N \g_@@_backend_name_int
         \exp_args:Nx\__kernel_backend_literal_page:n
@@ -520,10 +558,20 @@
       {
         \__kernel_backend_literal_page:n { /#1~BMC }
       }
-   \cs_set_protected:Npn \@@_backend_bdc_direct:nn #1 #2
-     {
-        \__kernel_backend_literal_page:n { /#1~<<#2>>~BDC }
-     }
+  \bool_if:NTF \g_@@_Core_active_bool
+    {
+      \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2
+        {
+          \pdf_object_now:nn { dict } { #2 }
+          \@@_backend_bdc_obj:n { #1 }
+        }
+    }
+    {
+      \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2
+        {
+          \__kernel_backend_literal_page:n { /#1~<<#2>>~BDC }
+        }
+    }
     \cs_set_protected:Npn \@@_backend_emc:
       {
         \__kernel_backend_literal_page:n { EMC }
@@ -536,7 +584,7 @@
 % the push command is extended to take other resources too
 \sys_if_engine_pdftex:T
   {
-    \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: object name
+    \cs_set_protected:Npn \@@_backend_bdc_obj:nn #1 #2 % #1 eg. Span, #2: object name
       {
         \int_gincr:N \g_@@_backend_name_int
         \exp_args:Nx\__kernel_backend_literal_page:n
@@ -571,7 +619,7 @@
               { \@@_backend_object_ref:n{#2} }
           }
       }
-    \cs_set_protected:Npn \@@_backend_bdc:n #1% #1 eg. Span
+    \cs_set_protected:Npn \@@_backend_bdc_obj:n #1% #1 eg. Span
       {
         \int_gincr:N \g_@@_backend_name_int
         \exp_args:Nx\__kernel_backend_literal_page:n
@@ -611,9 +659,19 @@
     {
       \__kernel_backend_literal_page:n { /#1~BMC }
     }
-  \cs_set_protected:Npn \@@_backend_bdc_direct:nn #1 #2
+  \bool_if:NTF \g_@@_Core_active_bool
     {
-      \__kernel_backend_literal_page:n { /#1~<<#2>>~BDC }
+      \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2
+        {
+          \pdf_object_now:nn { dict }{ #2 }
+          \@@_backend_bdc_obj:n { #1 }
+        }
+    }
+    {
+      \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2
+        {
+          \__kernel_backend_literal_page:n { /#1~<<#2>>~BDC }
+        }
     }
 
   \cs_set_protected:Npn \@@_backend_emc:
@@ -657,15 +715,15 @@
 %
 % \subsubsection{BDC and Properties  / management}
 % \begin{macro}{\pdf_bdc:nn}
-% \begin{macro}{\pdf_bdc:n}
-% \begin{macro}{\pdf_bdc_direct:nn}
+% \begin{macro}{\pdf_bdc_obj:nn}
+% \begin{macro}{\pdf_bdc_obj:n}
 % \begin{macro}{\pdf_bmc:n}
 % \begin{macro}{\pdf_emc:}
 %    \begin{macrocode}
 %<*package>
 \cs_new_protected:Npn  \pdf_bdc:nn #1 #2 { \@@_backend_bdc:nn { #1 }{ #2 } }
-\cs_new_protected:Npn  \pdf_bdc_direct:nn #1 #2 { \@@_backend_bdc_direct:nn { #1 }{ #2 } }
-\cs_new_protected:Npn  \pdf_bdc:n #1     { \@@_backend_bdc:n  { #1 } }
+\cs_new_protected:Npn  \pdf_bdc_obj:nn #1 #2 { \@@_backend_bdc_obj:nn { #1 }{ #2 } }
+\cs_new_protected:Npn  \pdf_bdc_obj:n #1     { \@@_backend_bdc_obj:n  { #1 } }
 \cs_new_protected:Npn  \pdf_bmc:n #1     { \@@_backend_bmc:n  { #1 } }
 \cs_new_protected:Npn  \pdf_emc:         { \@@_backend_emc: }
 %</package>
