@@ -1,0 +1,265 @@
+% \iffalse meta-comment
+%
+%% File: l3pdftools.dtx
+%
+% Copyright (C) 2018-2020 The LaTeX3 Project
+%
+% It may be distributed and/or modified under the conditions of the
+% LaTeX Project Public License (LPPL), either version 1.3c of this
+% license or (at your option) any later version.  The latest version
+% of this license is in the file
+%
+%    http://www.latex-project.org/lppl.txt
+%
+% This file is part of the "(experimental) pdfresources bundle" (The Work in LPPL)
+% and all files in that bundle must be distributed together.
+%
+% -----------------------------------------------------------------------
+%
+% The development version of the bundle can be found at
+%
+%    https://github.com/latex3/pdfresources
+%
+% for those people who are interested.
+%
+%<*driver>
+\RequirePackage{expl3}
+\documentclass[full]{l3doc}
+\providecommand\potentialclash{\noindent\llap{\dbend\ }}
+\begin{document}
+  \DocInput{\jobname.dtx}
+\end{document}
+%</driver>
+% \fi
+%
+% \title{^^A
+%   The \pkg{l3pdftools} package\\ collection of pdf related commands ^^A
+% }
+%
+% \author{^^A
+%  The \LaTeX3 Project\thanks
+%    {^^A
+%      E-mail:
+%        \href{mailto:latex-team@latex-project.org}
+%          {latex-team@latex-project.org}^^A
+%    }^^A
+% }
+%
+% \date{Released XXXX-XX-XX}
+%
+% \maketitle
+% \begin{documentation}
+%
+% \section{\pkg{l3pdftools} documentation}
+%
+% This module collects a number of commands of the tool type which haven't found
+% another home yet ... Probably this module will disappear again at some time.
+%
+% \begin{function}[EXP,added=2020-07-04]
+%   {\pdf_text_convert:nn}
+%  \begin{syntax}
+%   \cs{pdf_text_convert:nn}  \Arg{format}  \Arg{content}
+%  \end{syntax}
+%  This converts \Arg{content} following the rules defined by \Arg{format}.
+%  Non-ascii input should be utf8 encoded.
+%  Currently the following formats exist:
+%  \begin{description}
+%     \item[name] This will first expand the content with \cs{text_expand:n} and
+%      then escape it in the way needed in a PDF Name with
+%      \cs{str_convert_pdfname:e}.
+%     \item[name-print] This does the same as the \texttt{name} format, but also
+%     adds a slash before, so |\pdf_text_convert:nn{name-print}{abc}| will
+%     output \texttt{/abc}.
+%   \end{description}
+% \end{function}
+% \begin{function}[added=2020-07-04]
+%   {\pdf_text_convert:nnN}
+%  \begin{syntax}
+%   \cs{pdf_text_convert:nn}  \Arg{format}  \Arg{content} \Arg{tlvar}
+%  \end{syntax}
+%  This converts \Arg{content} following the rules defined by \Arg{format} and stores
+%  the result in \Arg{tlvar}. The assignment is done locally.
+%  Non-ascii input should be utf8 encoded.
+%  Currently the following formats exist:
+%  \begin{description}
+%     \item[name] see above
+%     \item[name-print] see above
+%     \item[string-lit]
+%      this converts with \cs{\str_set_convert:Nnnn} into utf16/string.
+%     \item[string-lit-print]
+%      this converts into utf16/string and add parentheses around.
+%     \item[string-hex]
+%      this converts into utf16/hex
+%     \item[string-hex-print]
+%     this converts into utf16/hex and add bracket around.
+%   \end{description}
+% \end{function}
+% \end{documentation}
+%
+% \begin{implementation}
+%
+% \section{\pkg{l3pdftools} implementation}
+%
+%    \begin{macrocode}
+%<*package>
+\ProvidesExplPackage {l3pdftools} {2020-07-04} {0.1}
+  {various PDF tools}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%<@@=pdf>
+%    \end{macrocode}
+% \subsection{Conversions}
+% \begin{macro}{\pdf_text_convert:nn}
+% \begin{macro}{\pdf_text_convert:nnN}
+% \begin{macro}{\@@_text_convert_name:n}
+% \begin{macro}{\@@_text_convert_name:nN}
+% \begin{macro}{\@@_text_convert_name-print:n}
+% \begin{macro}{\@@_text_convert_name-print:n}
+%    \begin{macrocode}
+
+\cs_new:Npn \pdf_text_convert:nn #1 #2
+  {
+    \cs_if_exist_use:cF { @@_text_convert_#1:n }
+      {
+        \__kernel_msg_error:nnn { pdf } { unknown-exp-convert } {#1}
+        \use_none:n
+      }
+    { #2 }
+  }
+\cs_generate_variant:Nn \pdf_text_convert:nn {nV}
+
+\cs_new:Npn \pdf_text_convert:nnN #1 #2 #3
+  {
+    \cs_if_exist_use:cF { @@_text_convert_#1:nN }
+      {
+        \__kernel_msg_error:nnn { pdf } { unknown-convert } {#1}
+        \use_none:nn
+      }
+    { #2 } #3
+  }
+%% tool command escape name
+%% commands in the argument are expanded if possible
+%% with \text_expand:n
+%% name: only name,
+%% name_print: with / before, see also string naming
+
+\cs_generate_variant:Nn \str_convert_pdfname:n { e }
+
+\cs_new:Npn \@@_text_convert_name:n #1
+  {
+    \str_convert_pdfname:e { \text_expand:n { #1 } }
+  }
+
+\cs_new_protected:Npn \@@_text_convert_name:nN #1 #2
+  {
+    \tl_set:Nx #2 {\@@_text_convert_name:n {#1} }
+  }
+
+\cs_new:cpn { @@_text_convert_name-print:n } #1
+  {
+    / \str_convert_pdfname:e { \text_expand:n { #1 } }
+  }
+
+\cs_new_protected:cpn { @@_text_convert_name-print:nN } #1 #2
+  {
+    \tl_set:Nx #2 {\use:c { @@_text_convert_name-print:n } {#1} }
+  }
+
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{ \@@_text_convert_string-lit:nN }
+% \begin{macro}{ \@@_text_convert_string-lit-print:nN }
+% \begin{macro}{ @@_text_convert_string-hex:nN }
+% \begin{macro}{ @@_text_convert_string-hex-print:nN }
+%    \begin{macrocode}
+%% string conversions and printing
+%% we assume here that the text purify step has been done. The input is
+%% a list of (utf8) chars.
+%% str convert, not expandable.
+%  filespec (attachment view)  tests:
+%  utf8:  gr\303\274\303\237e.txt                    %doesn't work, umlaut wrong,
+%  utf8 with BOM \357\273\277gr\303\274\303\237e.txt %doesn't work, umlaut wrong, bom visible
+%  utf16 with BE: (FEFF)  \376\377\000g\000r\000\374\000\337\000e\000.\000t\000x\000t %works
+%                xetex converts to <feff0067007200fc00df0065002e007400780074>
+%  utf16 with BE / HEX: <FEFF0067007200FC00DF0065002E007400780074> works
+
+% bookmarks: as pdfoutline uses () currently only utf16 with BE is usable.
+% check if one can use HEX too when directly writing the object
+
+% "input" is utf8 for pdftex, empty (native) for unicode engine
+% commands to output literal strings  (...)
+\sys_if_engine_pdftex:TF
+  {
+    \cs_new_protected:cpn { @@_text_convert_string-lit:nN }  #1 #2
+      {
+         \str_set_convert:Nnnn #2 { #1 }{ utf8 } {utf16/string}
+      }
+
+    \cs_new_protected:cpn { @@_text_convert_string-lit-print:nN } #1 #2
+      {
+         \str_set_convert:Nnnn #2 { #1 }{ utf8 } {utf16/string}
+         \str_put_left:Nn #2  {(}
+         \str_put_right:Nn #2 {)}
+      }
+  }
+  {
+     \cs_new_protected:cpn { @@_text_convert_string-lit:nN } #1 #2
+      {
+        \str_set_convert:Nnnn #2 { #1 }{  } {utf16/string}
+      }
+
+    \cs_new_protected:cpn { @@_text_convert_string-lit-print:nN } #1 #2
+      {
+        \str_set_convert:Nnnn #2 { #1 }{  } {utf16/string}
+        \str_put_left:Nn #2  {(}
+        \str_put_right:Nn #2 {)}
+      }
+  }
+% commands to output hex strings  (...)
+
+\sys_if_engine_pdftex:TF
+  {
+    \cs_new:cpn { @@_text_convert_string-hex:nN } #1 #2
+      {
+         \str_set_convert:Nnnn #2 { #1 }{ utf8 } {utf16/hex}
+      }
+    \cs_new:cpn { @@_text_convert_string-hex-print:nN } #1 #2
+      {
+         \str_set_convert:Nnnn #2 { #1 }{ utf8 } {utf16/hex}
+         \str_put_left:Nn #2  {<}
+         \str_put_right:Nn #2 {>}
+      }
+  }
+  {
+    \cs_new:cpn { @@_text_convert_string-hex:nN } #1 #2
+      {
+        \str_set_convert:Nnnn #2 { #1 }{  } {utf16/hex}
+      }
+
+    \cs_new:cpn { @@_text_convert_string-hex-print:nN } #1 #2
+      {
+        \str_set_convert:Nnnn #2 { #1 }{  } {utf16/hex}
+         \str_put_left:Nn #2  {<}
+         \str_put_right:Nn #2 {>}
+      }
+  }
+
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%    \begin{macrocode}
+%</package>
+%    \end{macrocode}
+%
+% \end{implementation}
+%
+% \PrintIndex
