@@ -300,9 +300,9 @@
 %   \meta{dictionary content} is the content of the second argument.
 %   If the PDF resource management is active an dictionary object with the
 %   content is created and referenced with a name in the BDC operator.
-%   Without the resource management the content is use directly. It then
-%   depends on the backend how it is handled: with dvips and dvipdfmx a name is used
-%   while the pdfmode engines write the content into the stream.
+%   Without the resource management the content is used directly. It then
+%   depends on the backend how it is handled: with dvips a name is used
+%   while the pdfmode engines and dvipdfmx write the content into the stream.
 %
 % \end{function}
 % \begin{function}[added = 2020-07-03]
@@ -467,19 +467,25 @@
    {
      \__kernel_backend_literal:n {pdf:code~/#1~BMC}  %pdfbase
    }
-\bool_if:NTF  \g_@@_Core_active_bool
+
+%this require management
+\cs_set_protected:Npn \@@_backend_bdc_contobj:nn #1 #2
   {
-    \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2
-      {
-        \pdf_object_now:nn { dict }{ #2 }
-        \@@_backend_bdc_obj:n { #1 }
-      }
+    \pdf_object_now:nn { dict }{ #2 }
+    \@@_backend_bdc_obj:n { #1 }
   }
+
+\cs_set_protected:Npn \@@_backend_bdc_contstream:nn #1 #2
   {
-    \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2
-      {
-        \__kernel_backend_literal:n {pdf:code~ /#1~<<#2>>~BDC }
-      }
+    \__kernel_backend_literal:n {pdf:code~ /#1~<<#2>>~BDC }
+  }
+
+\cs_set_protected:Npn \@@_backend_bdc:nn #1 #2
+  {
+    \bool_if:NTF  \g_@@_Core_active_bool
+      {\cs_gset_eq:NN \@@_backend_bdc:nn \@@_backend_bdc_contobj:nn}
+      {\cs_gset_eq:NN \@@_backend_bdc:nn \@@_backend_bdc_contstream:nn}
+      \@@_backend_bdc:nn {#1}{#1}
   }
 \cs_set_protected:Npn \@@_backend_emc:
   {
@@ -558,19 +564,21 @@
       {
         \__kernel_backend_literal_page:n { /#1~BMC }
       }
-  \bool_if:NTF \g_@@_Core_active_bool
+   \cs_set_protected:Npn \@@_backend_bdc_contobj:nn #1 #2
+     {
+       \pdf_object_now:nn { dict } { #2 }
+       \@@_backend_bdc_obj:n { #1 }
+     }
+   \cs_set_protected:Npn \@@_backend_bdc_contstream:nn #1 #2
+     {
+       \__kernel_backend_literal_page:n { /#1~<<#2>>~BDC }
+     }
+  \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2
     {
-      \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2
-        {
-          \pdf_object_now:nn { dict } { #2 }
-          \@@_backend_bdc_obj:n { #1 }
-        }
-    }
-    {
-      \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2
-        {
-          \__kernel_backend_literal_page:n { /#1~<<#2>>~BDC }
-        }
+      \bool_if:NTF  \g_@@_Core_active_bool
+        {\cs_gset_eq:NN \@@_backend_bdc:nn \@@_backend_bdc_contobj:nn}
+        {\cs_gset_eq:NN \@@_backend_bdc:nn \@@_backend_bdc_contstream:nn}
+        \@@_backend_bdc:nn {#1}{#1}
     }
     \cs_set_protected:Npn \@@_backend_emc:
       {
@@ -659,21 +667,22 @@
     {
       \__kernel_backend_literal_page:n { /#1~BMC }
     }
-  \bool_if:NTF \g_@@_Core_active_bool
+  \cs_set_protected:Npn \@@_backend_bdc_contobj:nn #1 #2
+     {
+       \pdf_object_now:nn { dict } { #2 }
+       \@@_backend_bdc_obj:n { #1 }
+     }
+  \cs_set_protected:Npn \@@_backend_bdc_contstream:nn #1 #2
+     {
+       \__kernel_backend_literal_page:n { /#1~<<#2>>~BDC }
+     }
+  \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2
     {
-      \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2
-        {
-          \pdf_object_now:nn { dict }{ #2 }
-          \@@_backend_bdc_obj:n { #1 }
-        }
+      \bool_if:NTF  \g_@@_Core_active_bool
+        {\cs_gset_eq:NN \@@_backend_bdc:nn \@@_backend_bdc_contobj:nn}
+        {\cs_gset_eq:NN \@@_backend_bdc:nn \@@_backend_bdc_contstream:nn}
+        \@@_backend_bdc:nn {#1}{#1}
     }
-    {
-      \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2
-        {
-          \__kernel_backend_literal_page:n { /#1~<<#2>>~BDC }
-        }
-    }
-
   \cs_set_protected:Npn \@@_backend_emc:
     {
       \__kernel_backend_literal_page:n { EMC }

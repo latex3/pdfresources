@@ -53,7 +53,7 @@
 %
 % \section{\pkg{l3pdfcoredict} documentation}
 % When creating a pdf a number of objects, dictionaries and entries to
-% dictionaries must be created. The \LaTeX{} format currently contains no
+% central dictionaries must be created. The \LaTeX{} format currently contains no
 % support for theses tasks. It either relies on the binaries to do the job,
 % or on external packages using the primitives of the binaries. These
 % approach is problematic for two reasons: packages trying to set the same resources
@@ -111,7 +111,15 @@
 %  as this dictionary is not filled directly but
 %  managed through side effects when setting BDC-marks.
 %  \subsection{User Commands}
-%
+%  The avoid problems with older documents the resource management of this
+%  module is not activated unconditionally. The values are pushed out to the
+%  dictionaries only if a boolean has been set to true. The state can be testet
+%  with a conditional.
+%  \begin{function}[EXP,pTF,added=2020-07-04]
+%   {\pdfcoredict_if_active:}
+%   This conditional tests if the resource management code is active.
+%   
+%  \end{function}
 % \begin{function}[added = 2020-04-06]
 %   {\pdfcoredict_gput:nnn}
 %   \begin{syntax}
@@ -480,6 +488,18 @@
   {
     The~dictionary~'#1'~is~already~defined.
   }
+%    \end{macrocode}
+% A predicate to test if the core code should be active
+%    \begin{macrocode}
+\prg_new_conditional:Npnn \@@_if_active:  { p , T , F , TF }
+  {
+    \bool_if:NTF \g__pdf_Core_active_bool
+      { \prg_return_true:  }
+      { \prg_return_false: }
+  }
+\prg_set_eq_conditional:NNn
+  \pdfcoredict_if_active: \@@_if_active: { p , T , F , TF }
+
 %    \end{macrocode}
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdfcoredict_gput:nnn #1 #2 #3
