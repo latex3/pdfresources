@@ -88,7 +88,7 @@
 %<*pdfmode>
 \sys_if_engine_luatex:T
   {
-    \directlua { require("pdfresources.lua") }
+    \directlua { require("l3backend-pdf.lua") }
   }
 %</pdfmode>
 %    \end{macrocode}
@@ -1037,6 +1037,130 @@
 %</dvips>
 %    \end{macrocode}
 % \end{macro}
+% \subsection{lua code for lualatex}
+%    \begin{macrocode}
+%<*lua>
+l3kernel= l3kernel or {}
+l3kernel.@@      = l3kernel.@@ or {}
+l3kernel.@@.Page = l3kernel.@@.Page or {}
+l3kernel.@@.Page.dflt = l3kernel.@@.Page.dflt or {}
+l3kernel= l3kernel or {}
+l3kernel.@@.Page.Resources = l3kernel.@@.Resources or {}
+l3kernel.@@.Page.Resources.Properties = l3kernel.@@.Page.Resources.Properties or {}
+l3kernel.@@.Page.Resources.List={"ExtGState","ColorSpace","Pattern","Shading"}
+l3kernel.@@.object = l3kernel.@@.object or {}
+
+l3kernel.pdf= l3kernel.pdf or {} -- for "public" functions
+
+local @@ = l3kernel.@@
+local pdf = pdf
+
+local function @@_backend_Page_gput (name,value)
+ @@.Page.dflt[name]=value
+end
+
+local function @@_backend_Page_gremove (name)
+ @@.Page.dflt[name]=nil
+end
+
+local function @@_backend_Page_gclear ()
+ @@.Page.dflt={}
+end
+
+local function @@_backend_ThisPage_gput (page,name,value)
+ @@.Page[page] = @@.Page[page] or {}
+ @@.Page[page][name]=value
+end
+
+local function @@_backend_ThisPage_gpush (page)
+ local token=""
+ local t = {}
+ local tkeys= {}
+ for name,value in pairs(@@.Page.dflt) do
+   t[name]=value
+ end
+ if @@.Page[page] then
+  for name,value in pairs(@@.Page[page]) do
+   t[name] = value
+  end
+ end
+ -- sort the table to get reliable test files.
+ for name,value in pairs(t) do
+  table.insert(tkeys,name)
+ end
+ table.sort(tkeys)
+ for _,name in ipairs(tkeys) do
+   token = token .. "/"..name.." "..t[name]
+ end
+ return token
+end
+
+function l3kernel.@@.backend_ThisPage_gput (page,name,value) -- tex.count["g_shipout_readonly_int"]
+ @@_backend_ThisPage_gput (page,name,value)
+end
+
+function l3kernel.@@.backend_ThisPage_gpush (page)
+  pdf.setpageattributes(@@_backend_ThisPage_gpush (page))
+end
+
+function l3kernel.@@.backend_Page_gput (name,value)
+  @@_backend_Page_gput (name,value)
+end
+
+function l3kernel.@@.backend_Page_gremove (name)
+  @@_backend_Page_gremove (name)
+end
+
+function l3kernel.@@.backend_Page_gclear ()
+  @@_backend_Page_gclear ()
+end
+
+
+local Properties  = l3kernel.@@.Page.Resources.Properties
+local ResourceList= l3kernel.@@.Page.Resources.List
+local function @@_backend_PageResources_gpush (page)
+ local token=""
+ if Properties[page] then
+-- we sort the table, so that the pdf test works
+  local t = {}
+  for name,value in pairs  (Properties[page]) do
+   table.insert (t,name)
+  end
+  table.sort (t)
+  for _,name in ipairs(t) do
+   token = token .. "/"..name.." ".. Properties[page][name]
+  end
+  token = "/Properties <<"..token..">>"
+ end
+  for i,name in ipairs(ResourceList) do
+   if l3kernel.@@.Page.Resources[name] then
+   token = token .. "/"..name.." "..l3kernel.pdf.object_ref("Page/Resources/"..name)
+   end
+  end
+ return token
+end
+
+-- the function is public, as I probably need it in tagpdf too ...
+function l3kernel.pdf.Page_Resources_Properties_gput (page,name,value) -- tex.count["g_shipout_readonly_int"]
+ Properties[page] = Properties[page] or {}
+ Properties[page][name]=value
+ pdf.setpageresources(@@_backend_PageResources_gpush (page))
+end
+
+function l3kernel.pdf.Page_Resources_gpush(page)
+ pdf.setpageresources(@@_backend_PageResources_gpush (page))
+end
+
+function l3kernel.pdf.object_ref (objname)
+ if l3kernel.@@.object[objname] then
+  local ref= l3kernel.@@.object[objname]
+  return ref
+ else
+  return "false"
+ end
+end
+%</lua>
+%    \end{macrocode}
 % \end{implementation}
 %
 % \PrintIndex

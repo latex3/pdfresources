@@ -94,6 +94,114 @@
 %     this converts into utf16/hex and add bracket around.
 %   \end{description}
 % \end{function}
+%
+% \subsection{BDC operator / Properties resource}
+% \begin{NOTE}{UF}
+%  we need a switch for the case that the resource should be added to
+%  xform resource instead of a page resources, see pdfbase.sty
+% - xdvipdfmx: looks fine, the resource is added to the xform resource automatically
+% - pdftex should now work okay too
+% \end{NOTE}
+% Entries to the /Properties dictionary in the page resources can
+% be added with dvips only through side-effects: if a BDC-mark is created
+% dvips/ghostscript will automatically create the necessary objects and names.
+% To get a sensible abstraction the code does the same for the other backends if the
+% core management code has been activated. This means that the behaviour
+% of the command is different then. The \cs{pdf_bdc_obj:..} should only be used
+% if the management is active.
+% \begin{function}[updated = 2020-07-03]
+%   {
+%     \pdf_bdc:nn
+%   }
+%   \begin{syntax}
+%     \cs{pdf_bdc:nn} \Arg{tag} \Arg{dictionary content}
+%   \end{syntax}
+%    This command adds a BDC marked content operator to the current page stream.
+%   \meta{tag} is the tag of this operator (without the leading slash),
+%   \meta{dictionary content} is the content of the second argument.
+%   If the PDF resource management is active an dictionary object with the
+%   content is created and referenced with a name in the BDC operator.
+%   Without the resource management the content is used directly. It then
+%   depends on the backend how it is handled: with dvips a name is used
+%   while the pdfmode engines and dvipdfmx write the content into the stream.
+%
+% \end{function}
+% \begin{function}[added = 2020-07-03]
+%   {
+%     \pdf_bdc_obj:nn
+%   }
+%   \begin{syntax}
+%     \cs{pdf_bdc_obj:nn} \Arg{tag} \Arg{object name}
+%   \end{syntax}
+%   This command adds a BDC marked content operator to the current page stream.
+%   \meta{tag} is the tag of this operator (without the leading slash),
+%   \meta{object name}  is a the name of an dictionary object reserved with
+%   \cs{pdf_object_new:nn} and filled with \cs{pdf_object_write:n} with
+%   the properties of the BDC. Reusing a predefined object can save space
+%   but the command works correctly
+%   only if the resources management has been activated and should be used only
+%   if this can be ensured.
+% \end{function}
+% \begin{function}[updated = 2020-07-03]
+%   {
+%     \pdf_bdc_obj:n
+%   }
+%   \begin{syntax}
+%     \cs{pdf_bdc_obj:n} \Arg{tag}
+%   \end{syntax}
+%    This command adds a BDC marked content operator to the current page stream.
+%   \meta{tag} is the tag of this operator (without the leading slash).
+%   As object this commands uses the last anonymous dictionary object created with
+%   \cs{pdf_object_now:nn}. It lies in the responsibility of the user that the last
+%   object is the wanted one. Like with \cs{pdf_bdc_obj:nn} the command works correctly
+%   only if the resources management has been activated and should be used only
+%   if this can be ensured.
+% \end{function}
+% \begin{function}[added = 2019-10-17]
+%   {
+%     \pdf_bmc:n
+%   }
+%   \begin{syntax}
+%     \cs{pdf_bmc:n} \Arg{tag}
+%   \end{syntax}
+%    This command created a BMC marked content operator. The argument is the
+%    tag without the leading slash. It can be e.g. used for simple artifact
+%    markers.
+% \end{function}
+% \begin{function}[added = 2019-06-30]
+%   {
+%     \pdf_emc:
+%   }
+%   \begin{syntax}
+%     \cs{pdf_emc:}
+%   \end{syntax}
+%    This command closes the  BDC marked content operator opened with \cs{pdf_bdc:nn}.
+%    It should be on the same page as the bdc-command.
+%
+%   \begin{verbatim}
+%   \pdf_object_new:nn   {objA}{dict}
+%   \pdf_object_write:nn {objA}{/Type/Artifact}
+%   \pdf_bdc:nn {Span}{objA}
+%   text
+%   \pdf_emc:
+%   \end{verbatim}
+% \end{function}
+%
+%\subsection{references to page objects}
+% \begin{NOTE}{UF}
+% a reference to the current page would be useful, but difficult to
+% abstract in a sensible way. With xetex it is simply @thispage, but the other
+% engines are unclear.
+% \end{NOTE}
+% \begin{function}[EXP, added = 2019-08-18]
+%   {\pdf_pageobject_ref:n}
+%   \begin{syntax}
+%     \cs{pdf_pageobject_ref:n} \Arg{number}
+%   \end{syntax}
+%   This returns the object reference of a page object. The \Arg{number} is
+%   the absolute page number. The count starts with one.
+% \end{function}
+%
 % \end{documentation}
 %
 % \begin{implementation}
@@ -258,10 +366,39 @@
 % \end{macro}
 % \end{macro}
 % \end{macro}
+%
+% \subsubsection{BDC  operator commands}
+% \begin{macro}{\pdf_bdc:nn}
+% \begin{macro}{\pdf_bdc_obj:nn}
+% \begin{macro}{\pdf_bdc_obj:n}
+% \begin{macro}{\pdf_bmc:n}
+% \begin{macro}{\pdf_emc:}
+%    \begin{macrocode}
+%<*package>
+\cs_new_protected:Npn  \pdf_bdc:nn #1 #2 { \@@_backend_bdc:nn { #1 }{ #2 } }
+\cs_new_protected:Npn  \pdf_bdc_obj:nn #1 #2 { \@@_backend_bdc_obj:nn { #1 }{ #2 } }
+\cs_new_protected:Npn  \pdf_bdc_obj:n #1     { \@@_backend_bdc_obj:n  { #1 } }
+\cs_new_protected:Npn  \pdf_bmc:n #1     { \@@_backend_bmc:n  { #1 } }
+\cs_new_protected:Npn  \pdf_emc:         { \@@_backend_emc: }
+%</package>
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
 %    \begin{macrocode}
 %</package>
 %    \end{macrocode}
 %
+% \subsection{Reference to the page object}
+% \begin{macro}{ \pdf_pageobject_ref:n }
+%    \begin{macrocode}
+%<*package>
+\cs_new:Npn \pdf_pageobject_ref:n #1 { \@@_backend_pageobject_ref:n { #1 }}
+%</package>
+%    \end{macrocode}
+% \end{macro}
 % \end{implementation}
 %
 % \PrintIndex
