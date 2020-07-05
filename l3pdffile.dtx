@@ -348,7 +348,7 @@
 % %set the relationship:
 % \pdfdict_put:nnn  {file/FileSpec} {AFRelationship}{/Source}
 % %set the description key. The text must first be converted:
-% \pdftool_textstringlit_print:nN
+% \pdf_text_convert:nnN {string-lit-print}
 %    {this~is~an~odd~description~with~öäü}
 %    \l_tmpa_str
 % \pdfdict_put:nnx  {file/FileSpec} {Desc}{\l_tmpa_str}
@@ -371,13 +371,13 @@
 %<*package>
 \ProvidesExplPackage {l3pdffile} {2020-07-02} {0.2}
   {embedding and referencing files in PDF}
-\RequirePackage{new-pdfescape}  %temporarly!!
+\RequirePackage{l3pdftools}  %temporarly!!
 %    \end{macrocode}
 %
 %    \begin{macrocode}
 %<@@=pdffile>
-\cs_set_eq:NN \@@_filename_convert_to_print:nN
-              \pdftool_textstringhex_print:nN
+\cs_new_protected:Npn \@@_filename_convert_to_print:nN #1 #2
+  {\pdf_text_convert:nnN {string-hex-print}{#1}{#2}}
 %    \end{macrocode}
 % \subsection{Messages}
 %    \begin{macrocode}
@@ -526,7 +526,7 @@
               \l_@@_ext_str
               \l_@@_tmpb_tl
               {
-                \tl_set:Nx #2 {/Subtype~\pdftool_name_print:V \l_@@_tmpb_tl}
+                \tl_set:Nx #2 {/Subtype~\pdf_text_convert:nV {name-print} \l_@@_tmpb_tl}
               }
               {
                 \msg_warning:nnx { pdffile }{ mimetype-missing} {#1}

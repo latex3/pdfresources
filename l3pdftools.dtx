@@ -110,7 +110,7 @@
 %<@@=pdf>
 %    \end{macrocode}
 % \subsection{Conversions}
-% \begin{macro}{\pdf_text_convert:nn}
+% \begin{macro}{\pdf_text_convert:nn,\pdf_text_convert:nV}
 % \begin{macro}{\pdf_text_convert:nnN}
 % \begin{macro}{\@@_text_convert_name:n}
 % \begin{macro}{\@@_text_convert_name:nN}
@@ -138,6 +138,8 @@
       }
     { #2 } #3
   }
+
+\cs_generate_variant:Nn \pdf_text_convert:nnN {nVN}
 %% tool command escape name
 %% commands in the argument are expanded if possible
 %% with \text_expand:n

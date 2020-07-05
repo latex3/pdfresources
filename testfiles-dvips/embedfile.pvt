@@ -20,11 +20,9 @@ grüße
 \begin{document}
 \section{Testing embedding and attaching files}
 \ExplSyntaxOn
-%\pdftool_textstringlit_print:nN {xxxgrüße}\l_tmpa_str
-%\pdfextension outline goto name {Doc-Start}{\l_tmpa_str}
 \group_begin:
 \pdfdict_put:nnn  {file/FileSpec} {AFRelationship}{/Source}
-\pdftool_textstringlit_print:nN {this~is~something~odd~with~öäü}\l_tmpa_str
+\pdf_text_convert:nnN {string-lit-print} {this~is~something~odd~with~öäü}\l_tmpa_str
 \pdfdict_put:nnx  {file/FileSpec} {Desc}{\l_tmpa_str}
 \pdfdict_put:nnx  {file/Params} {ModDate}{(D:20200422135851Z)}
 \pdffile_embed_file:nnn {testinput.txt}{grüße.txt}{example1}
@@ -33,7 +31,7 @@ grüße
 
 \group_begin:
 \pdfdict_put:nnn  {file/FileSpec} {AFRelationship}{/Source}
-\pdftool_textstringlit_print:nN {this~is~something~odd~with~öäü}\l_tmpa_str
+\pdf_text_convert:nnN {string-lit-print} {this~is~something~odd~with~öäü}\l_tmpa_str
 \pdfdict_put:nnx  {file/FileSpec} {Desc}{\l_tmpa_str}
 \pdfdict_put:nnx  {file/Params} {ModDate}{(D:20200422155851+02'00')}
 \pdffile_embed_file:nnn {grüße.txt}{echtegrüße.txt}{example2}

@@ -42,7 +42,7 @@
   Hyperref driver for luaTeX]
 \RequirePackage{pdfresources}
 \RequirePackage{xparse,etoolbox}
-\RequirePackage{new-pdfescape} %temporarly!
+\RequirePackage{l3pdftools} %temporarly!
 \chardef\Hy@VersionChecked=1 %don't check the version!
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \ExplSyntaxOn
@@ -262,13 +262,13 @@
 
 % this takes the output of \__hyp_text_purify and applies a converter
 % #1 = text, #2 = converter #3 output
-% #2 should be hex_print for \pdftool_textstringhex_print:nN
-%              hex for \pdftool_textstringhex:nN
-%           or lit_print for \pdftool_textstringlit_print:nN
-%           or lit for \pdftool_textstringlit:nN
+% #2 should be string-hex-print for \pdf_text_convert:nnN {string-hex-print}
+%              string-hex for \pdf_text_convert:nnN {string-hex}
+%           or string-lit_print for \pdf_text_convert:nnN {string-lit-print}
+%           or lit for \pdf_text_convert:nnN {string-lit}
 \cs_new_protected:Npn \__hyp_text_to_string:NnN #1 #2 #3
   {
-     \use:c { pdftool_textstring#2:VN } #1 #3
+     \pdf_text_convert:nVN {#2 } #1 #3
   }
 
 %% combining both:
@@ -283,7 +283,7 @@
 %info keys use hex_print for now:
 \cs_new_protected:Npn \__hyp_text_convert_info:nN #1 #2
  {
-   \__hyp_text_purify_to_string:nnN { #1 }{ hex_print } #2
+   \__hyp_text_purify_to_string:nnN { #1 }{ string-hex-print } #2
  }
 
 
@@ -1437,7 +1437,7 @@
          {
             \__hyp_text_convert_info:nN {##1}\l__hyp_tmpa_tl
             \exp_args:Nnx
-              \pdfcoredict_gput:nnx {Info}{\exp_args:No\pdftool_name:n{\l_keys_key_str}}{\l__hyp_tmpa_tl}
+              \pdfcoredict_gput:nnx {Info}{\pdf_text_convert:nV {name }\l_keys_key_str}{\l__hyp_tmpa_tl}
          }
       }
   }
@@ -1672,7 +1672,7 @@
            /A
              <<
                /S/Named
-               /N\pdftool_name_print:n{#1}
+               /N\pdf_text_convert:nn{name-print}{#1}
                \Hy@href@nextactionraw
              >>
          }

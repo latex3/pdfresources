@@ -15,13 +15,13 @@
 \begin{document}
 \section{Testing embedding and attaching files}
 \ExplSyntaxOn
-%\pdftool_textstringlit_print:nN {xxxgrüße}\l_tmpa_str
+%\pdf_text_convert:nnN {string-lit-print} {xxxgrüße}\l_tmpa_str
 %\pdfextension outline goto name {Doc-Start}{\l_tmpa_str}
 %\group_begin:
 %%set the relationship:
 %\pdfdict_put:nnn  {file/FileSpec} {AFRelationship}{/Source}
 %%set the description key. The text must be made safe first:
-%\pdftool_textstringlit_print:nN {this~is~an~odd~description~with~öäü}\l_tmpa_str
+%\pdf_text_convert:nnN {string-lit-print} {this~is~an~odd~description~with~öäü}\l_tmpa_str
 %\pdfdict_put:nnx  {file/FileSpec} {Desc}{\l_tmpa_str}
 %%embeds testinput.txt and calls it grüße.txt
 \pdffile_embed_file:nnn {testinput.txt}{blub.txt}{file:example1}
@@ -35,7 +35,7 @@
 
 %\group_begin:
 %\pdfdict_put:nnn  {file/FileSpec} {AFRelationship}{/Source}
-%\pdftool_textstringlit_print:nN {this~is~something~odd~with~öäü}\l_tmpa_str
+%\pdf_text_convert:nnN {string-lit-print} {this~is~something~odd~with~öäü}\l_tmpa_str
 %\pdfdict_put:nnx  {file/FileSpec} {Desc}{\l_tmpa_str}
 %\pdffile_embed_file:nnn {grüße.txt}{echtegrüße.txt}{example2}
 %\group_end:
@@ -76,11 +76,11 @@
 \begin{document}
 \section{Testing embedding and attaching files}
 \ExplSyntaxOn
-%\pdftool_textstringlit_print:nN {xxxgrüße}\l_tmpa_str
+%\pdf_text_convert:nnN {string-lit-print} {xxxgrüße}\l_tmpa_str
 %\pdfextension outline goto name {Doc-Start}{\l_tmpa_str}
 \group_begin:
 \pdfdict_put:nnn  {file/FileSpec} {AFRelationship}{/Source}
-\pdftool_textstringlit_print:nN {this~is~something~odd~with~öäü}\l_tmpa_str
+\pdf_text_convert:nnN {string-lit-print} {this~is~something~odd~with~öäü}\l_tmpa_str
 \pdfdict_put:nnx  {file/FileSpec} {Desc}{\l_tmpa_str}
 \pdffile_embed_file:nnn {testinput.txt}{grüße.txt}{example0}
 \group_end:
