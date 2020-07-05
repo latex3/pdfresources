@@ -118,7 +118,7 @@
 %  \begin{function}[EXP,pTF,added=2020-07-04]
 %   {\pdfcoredict_if_active:}
 %   This conditional tests if the resource management code is active.
-%   
+%
 %  \end{function}
 % \begin{function}[added = 2020-04-06]
 %   {\pdfcoredict_gput:nnn}
@@ -539,20 +539,29 @@
 %    \begin{macrocode}
 \hook_gput_code:nnn {pdf/coredict/thispage_shipout} {pdf}
   {
-     \exp_args:NV \__pdf_backend_ThisPage_gpush:n      { \g_shipout_readonly_int }
-     \exp_args:NV \__pdf_backend_PageResources_gpush:n { \g_shipout_readonly_int }
+     \bool_if:NT \g__pdf_Core_active_bool
+       {
+         \exp_args:NV \__pdf_backend_ThisPage_gpush:n      { \g_shipout_readonly_int }
+         \exp_args:NV \__pdf_backend_PageResources_gpush:n { \g_shipout_readonly_int }
+       }
   }
 
 \hook_gput_code:nnn {pdf/coredict/lastpage_shipout} {pdf}
   {
-     \__pdf_backend_PageResources_obj_gpush:          %ExtGState etc
+    \bool_if:NT \g__pdf_Core_active_bool
+       {
+         \__pdf_backend_PageResources_obj_gpush:          %ExtGState etc
+       }
   }
 
 \hook_gput_code:nnn {pdf/coredict/end_run} {pdf}
   {
-     \__pdfcoredict_Pages_gpush:            %pagesattr
-     \__pdfcoredict_Info_gpush:             %pdfinfo
-     \__pdfcoredict_Catalog_gpush:
+    \bool_if:NT \g__pdf_Core_active_bool
+       {
+         \__pdfcoredict_Pages_gpush:            %pagesattr
+         \__pdfcoredict_Info_gpush:             %pdfinfo
+         \__pdfcoredict_Catalog_gpush:
+       }
   }
 %    \end{macrocode}
 % \subsection{Internal dictionary Code}
@@ -779,7 +788,10 @@
 \cs_new_protected:cpn { @@_handler/ThisPage/?_gput:nn } #1 #2
   {
     \prop_gput:cnn  { \pdfdict_gname:n { Core/ThisPage } }{ #1 } { #2 }
-    \__pdf_backend_ThisPage_gput:nn { #1 }{ #2 }
+    \bool_if:NT \g__pdf_Core_active_bool
+      {
+        \__pdf_backend_ThisPage_gput:nn { #1 }{ #2 }
+      }
   }
 
 \cs_new_protected:cpn { @@_handler/ThisPage/?_gremove:n } #1

@@ -1,16 +1,11 @@
 \PassOptionsToPackage{enable-debug,check-declarations}{expl3}
 \RequirePackage[debug]{pdfresources}
+\DeclareDocumentMetaData { }
 \input{regression-test}
 \documentclass{article}
 \ExplSyntaxOn
-\sys_if_engine_pdftex:TF
-{
- \str_set_convert:Nnnn \l_tmpa_str { Grüße }{ utf8 } {utf16/string}
-}
-{
- \str_set_convert:Nnnn \l_tmpa_str { Grüße }{  } {utf16/string}
-}
-\pdfcoredict_gput:nnx {Info} {Title}{(\l_tmpa_str)}
+\pdf_text_convert:nnN {string-lit-print}{Grüße}\l_tmpa_str
+\pdfcoredict_gput:nnx {Info} {Title}{\l_tmpa_str}
 \pdfcoredict_gput:nnx {Info} {Author}{(Some~Author)}
 \ExplSyntaxOff
 \begin{document}

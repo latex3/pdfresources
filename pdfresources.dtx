@@ -98,7 +98,7 @@
 %<*package>
 \bool_new:N \g_@@_Core_active_bool
 % temporarly
-\bool_gset_true:N \g_@@_Core_active_bool
+%\bool_gset_true:N \g_@@_Core_active_bool
 %</package>
 %    \end{macrocode}
 % \end{variable}
@@ -1325,10 +1325,21 @@
         \@@_patch_pgfcolorspaces:w ##1\q_stop
       }
   }
-\def\pgfutil@setuppdfresources{\@@_pgf_sys_setuppdfresources_plain:}
+\cs_set_eq:NN \@@_pgfori_pgfutil@setuppdfresources\pgfutil@setuppdfresources
+\def\pgfutil@setuppdfresources
+  {
+    \bool_if:NTF \g_@@_Core_active_bool
+      {
+        \@@_pgf_sys_setuppdfresources_plain:
+      }
+      {
+        \@@_pgfori_pgfutil@setuppdfresources
+      }
+  }
 
-%label??
-\hook_gput_code:nnn {begindocument/end} {pdf} { \pgfutil@setuppdfresources }
+% Why on earth do I explicitly call the command? Doesn't pgf do it?
+%\hook_gput_code:nnn {begindocument/end} {pdf} { \pgfutil@setuppdfresources }
+
 %\AtEndPreamble{\pgfutil@setuppdfresources}
 % helper commands as pgf doesn't pass resources as two arguments
 % code to add to the resources existing stuff in the format "/name value":

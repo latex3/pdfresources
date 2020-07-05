@@ -2,12 +2,9 @@
 % ok for pdftex and luatex. Perhaps some changes to avoid a two pass are possible/needed
 % fails with xetex because of the missing \pdf_link_last:
 \input{regression-test}
-\RequirePackage{lthooks}
+\RequirePackage{pdfresources}
+\DeclareDocumentMetaData { }
 \documentclass{article}
-\usepackage{l3pdf}
-\ExplSyntaxOn
-\pdf_uncompress:
-\ExplSyntaxOff
 \usepackage[customdriver=hgeneric-experimental]
 {hyperref}
 \begin{document}
