@@ -43,9 +43,9 @@ blblb
  % not good there should be only one ...
  %\pdfcatalog{/Lang (de-DE)}
  \exp_args:Nnx
- \__pdf_backend_catalog_gput:nn {Openaction}{[\pdf_pageobject_ref:n {2}~/FitH]}
+ \__pdf_backend_catalog_gput:nn {Openaction}{[\pdf_object_pageref:n {2}~/FitH]}
 
- %\pdfcatalog{/OpenAction~[\pdf_pageobject_ref:n {2}~/FitH]}
+ %\pdfcatalog{/OpenAction~[\pdf_object_pageref:n {2}~/FitH]}
 }
 xxx
 %\special{pdf: docview << /PageMode /UseThumbs >> }
@@ -62,9 +62,9 @@ xxx
 %\special{pdf:put @catalog << /PageLayout /TwoColumnRight >> }
 %\special{pdf:put @catalog << /PageMode /UseThumbs >> }
 %\special{pdf:docview <</OpenAction[@page2 /FitH]>>}
-%\special{pdf:put @catalog <</OpenAction[\pdf_pageobject_ref:n {2}~/FitH]>>}
+%\special{pdf:put @catalog <</OpenAction[\pdf_object_pageref:n {2}~/FitH]>>}
 \exp_args:Nnx
-\__pdf_backend_catalog_gput:nn {OpenAction}{[\pdf_pageobject_ref:n {2}~/FitH]}
+\__pdf_backend_catalog_gput:nn {OpenAction}{[\pdf_object_pageref:n {2}~/FitH]}
 }
 
 \bool_if:nT {\sys_if_engine_pdftex_p: && !\sys_if_output_pdf_p: }
@@ -76,21 +76,21 @@ xxx
   %\special{ps:~SDict~begin~mark~{Catalog}~<</PageMode  /UseThumbs>>~/PUT~pdfmark~end}
   %\special{ps:~SDict~begin~mark~{Catalog}~<</Lang~(en-UK)>>~/PUT~pdfmark~end}
   %\special{ps:~SDict~begin~mark~{Catalog}~<</Lang~(de-DE)>>~/PUT~pdfmark~end}
-  %\special{ps:~SDict~begin~mark~{Catalog}~<</OpenAction~[\pdf_pageobject_ref:n {2}~/FitH]>>~/PUT~pdfmark~end}
+  %\special{ps:~SDict~begin~mark~{Catalog}~<</OpenAction~[\pdf_object_pageref:n {2}~/FitH]>>~/PUT~pdfmark~end}
   \exp_args:Nnx
-\__pdf_backend_catalog_gput:nn {OpenAction}{[\pdf_pageobject_ref:n {2}~/FitH]}
+\__pdf_backend_catalog_gput:nn {OpenAction}{[\pdf_object_pageref:n {2}~/FitH]}
 %\pbs_special:n{~mark~{Catalog}~<<#1>>~/PUT~pdfmark}
 }
 
 \bool_if:NT {\sys_if_engine_luatex_p:}
 {
-%\pdfextension catalog {/OpenAction~[\pdf_pageobject_ref:n {2}~/FitH]} %openaction~goto~page 2 {/FitH}
+%\pdfextension catalog {/OpenAction~[\pdf_object_pageref:n {2}~/FitH]} %openaction~goto~page 2 {/FitH}
 \__pdf_backend_catalog_gput:nn {Lang}{(en-UK)}
  %\pdfcatalog{/Lang~(en-UK)}
  % not good there should be only one ...
  %\pdfcatalog{/Lang (de-DE)}
  \exp_args:Nnx
- \__pdf_backend_catalog_gput:nn {Openaction}{[\pdf_pageobject_ref:n {2}~/FitH]}
+ \__pdf_backend_catalog_gput:nn {Openaction}{[\pdf_object_pageref:n {2}~/FitH]}
 
 }
 \newpage blb
