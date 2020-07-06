@@ -1584,7 +1584,7 @@
            \keys_set:nn { hyp / trans }{style=R,#1}
            \pdf_object_now:nx { dict }
              {
-               \pdfdict_use:n {page/Trans}
+               \pdfdict_use:nn { l } {page/Trans}
              }
            \pdfcoredict_gput:nnx {Page}{Trans}{\pdf_object_last:}
            \group_end:

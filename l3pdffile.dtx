@@ -461,17 +461,17 @@
 %    \end{macrocode}
 % Here we define and setup the local dictionaries.
 %    \begin{macrocode}
-\pdfdict_new:n   { file }
+\pdfdict_new:nn { l }   { file }
 \pdfdict_put:nnn { file }{Type}{/EmbeddedFile}
-\pdfdict_new:n   { file/Params }
+\pdfdict_new:nn { l }   { file/Params }
 \pdfdict_put:nnn { file/Params }
   {ModDate}  { (\file_timestamp:n { \l_pdffile_source_name_str }) }
 \pdfdict_put:nnn { file/Params }
   {Size}     { \file_size:n { \l_pdffile_source_name_str } }
 \pdfdict_put:nnn { file/Params }
   {CheckSum} { (\file_mdfive_hash:n { \l_pdffile_source_name_str }) }
-\pdfdict_new:n   { file/streamParams }
-\pdfdict_new:n   { file/FileSpec }
+\pdfdict_new:nn { l }   { file/streamParams }
+\pdfdict_new:nn { l }   { file/FileSpec }
 \pdfdict_put:nnn { file/FileSpec }
   {Type} { /FileSpec }
 \pdfdict_put:nnn { file/FileSpec }
@@ -517,7 +517,7 @@
           \l_@@_tmpb_str %unused
           \l_@@_ext_str
         %check if Subtype has been set
-        \pdfdict_get:nnN {file}{Subtype}\l_@@_tmpa_tl
+        \pdfdict_get:nnnN { l } {file}{Subtype}\l_@@_tmpa_tl
         %if not look up in the prop:
         \quark_if_no_value:NT \l_@@_tmpa_tl
           {
@@ -546,12 +546,12 @@
       {
         {
           #2
-          \pdfdict_use:n {file}
-          \pdfdict_if_empty:nF {file/Params}
+          \pdfdict_use:nn { l } {file}
+          \pdfdict_if_empty:nnF { l } {file/Params}
             {
               /Params
                 <<
-                  \pdfdict_use:n {file/Params}
+                  \pdfdict_use:nn { l } {file/Params}
                 >>
             }
         }
@@ -571,12 +571,12 @@
       {
         {
           #2
-          \pdfdict_use:n {file}
-          \pdfdict_if_empty:nF {file/streamParams}
+          \pdfdict_use:nn { l } {file}
+          \pdfdict_if_empty:nnF { l } {file/streamParams}
             {
               /Params
                 <<
-                  \pdfdict_use:n {file/streamParams}
+                  \pdfdict_use:nn { l } {file/streamParams}
                 >>
             }
         }
@@ -604,7 +604,7 @@
           \pdfdict_put:nnx {file/FileSpec}{UF}{ \l_@@_tmpa_str }
           \pdf_object_write:nx { #1 }
             {
-              \pdfdict_use:n {file/FileSpec}
+              \pdfdict_use:nn { l } {file/FileSpec}
               \tl_if_empty:nF { #3 }
                 {
                   /EF <</F~#3 /UF~#3>>
