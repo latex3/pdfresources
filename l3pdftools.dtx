@@ -217,7 +217,22 @@
 %    \begin{macrocode}
 %<@@=pdf>
 %    \end{macrocode}
-% \subsection{Conversions}
+% \subsection{Conversions and export functions}
+% At first a simple internal command to output key-value to |/key~value|. This is
+% needed in mapping commands. The commands don't
+% do any escaping, they expect that the name has been escaped then the value
+% has been stored into the dictionary.
+% The commands don't check if the arguments are valid but if the value
+% is blank nothing is output. The commands are expandable if the content is.
+% \begin{macro}{\@@_dict_item:nn, \@@_dict_item:ne,\@@_dict_item:nx,}
+%   \begin{macrocode}
+\cs_new:Npn \@@_dict_item:nn #1 #2 %#1 name, #2 value
+  {
+    \tl_if_blank:nF {#2} { /#1~#2~ }
+  }
+\cs_generate_variant:Nn \@@_dict_item:nn {ne,nx}
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\pdf_text_convert:nn,\pdf_text_convert:nV}
 % \begin{macro}{\pdf_text_convert:nnN}
 % \begin{macro}{\@@_text_convert_name:n}
