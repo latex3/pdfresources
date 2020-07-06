@@ -419,7 +419,7 @@
               {
                 /Properties~
                   <<
-                    \pdfdict_gmap:n { Core/Xform/Resources/Properties }
+                    \pdfdict_guse:n { Core/Xform/Resources/Properties }
                   >>
               }
 
@@ -502,7 +502,7 @@
               {
                 /Properties~
                   <<
-                    \pdfdict_gmap:n { Core/Xform/Resources/Properties }
+                    \pdfdict_guse:n { Core/Xform/Resources/Properties }
                   >>
               }
             \prop_if_empty:cF
@@ -752,7 +752,7 @@
       {
         \pdfdict_if_exist:nT { annot/#1 }
           {
-            \pdfdict_map:n {annot/#1}
+            \pdfdict_use:n {annot/#1}
           }
         #5
       }
@@ -966,7 +966,7 @@
       {
          \pdfdict_if_exist:nT { annot/Link/#1 }
           {
-            \pdfdict_map:n {annot/Link/#1}
+            \pdfdict_use:n {annot/Link/#1}
           }
       }
       {
@@ -1022,7 +1022,7 @@
         {
            \pdfdict_if_exist:nT { annot/Link/#1 }
             {
-              \pdfdict_map:n {annot/Link/#1}
+              \pdfdict_use:n {annot/Link/#1}
             }
         }
         { #2 }
@@ -1053,7 +1053,7 @@
     \exp_args:Nxx %xetex needs expansion
     \@@_backend_link_begin_goto:nnw
       {
-        \pdfdict_map:n {annot/Link/GoTo}
+        \pdfdict_use:n {annot/Link/GoTo}
 
       }
       { #1 }

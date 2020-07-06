@@ -459,12 +459,12 @@
             }
         }
         {
-          \pdfdict_map:n {annot/FileAttachment}
+          \pdfdict_use:n {annot/FileAttachment}
           \bool_if:NT \l__atfi_annot_appearance_bool
             {
               /AF
                 <<
-                  \pdfdict_map:n {annot/FileAttachment/AF}
+                  \pdfdict_use:n {annot/FileAttachment/AF}
                 >>
             }
 

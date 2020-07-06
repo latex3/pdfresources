@@ -155,7 +155,7 @@
       \pdf_flag_clear:nn {annot/Field}{Pushbutton} %just in case
       \pdf_flag_set:nn {annot/Field}{NoExport}
       \pdfdict_put:nnx {annot/Field}{Ff}{\pdf_flag_use:n{annot/Field}}
-      \pdf_object_write:nx {annot/Field/Btn/#1} { \pdfdict_map:n {annot/Field} }
+      \pdf_object_write:nx {annot/Field/Btn/#1} { \pdfdict_use:n {annot/Field} }
       \pdfcoredict_gput:nnx { Catalog / AcroForm } { Fields }{\pdf_object_ref:n {annot/Field/Btn/#1} }
       \group_end:
      }

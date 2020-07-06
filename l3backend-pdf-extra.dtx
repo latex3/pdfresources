@@ -397,7 +397,7 @@
 \cs_new_protected:Npn \@@_backend_ThisPage_gpush:n #1
   {
     \exp_args:Nx \@@_backend_Page_primitive:n
-      { \pdfdict_gmap:n {Core/Page} }
+      { \pdfdict_guse:n {Core/Page} }
   }
 %</dvipdfmx|xdvipdfmx>
 %<*dvips>
@@ -436,7 +436,7 @@
 \cs_new_protected:Npn \@@_backend_ThisPage_gpush:n #1
   {
     \exp_args:Nx \@@_backend_Page_primitive:n
-          { \pdfdict_gmap:n {Core/Page} }
+          { \pdfdict_guse:n {Core/Page} }
   }
 %</dvips>
 %    \end{macrocode}
@@ -521,7 +521,7 @@
           {
             \@@_backend_object_write:nx
               { Page/Resources/##1 }
-              { \pdfdict_gmap:n {Core/Page/Resources/##1} }
+              { \pdfdict_guse:n {Core/Page/Resources/##1} }
           }
      }
   }

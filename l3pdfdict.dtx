@@ -120,10 +120,10 @@
 % \Arg{value} to be expanded nor not expanded by the backend commands.
 % \end{function}
 % \begin{function}[EXP,added = 2020-04-21]
-%   {\pdfdict_map:n , \pdfdict_gmap:n }
+%   {\pdfdict_use:n , \pdfdict_guse:n }
 %   \begin{syntax}
-%     \cs{pdfdict_map:n}   \Arg{local dictionary}\\
-%     \cs{pdfdict_gmap:n}  \Arg{global dictionary}
+%     \cs{pdfdict_use:n}   \Arg{local dictionary}\\
+%     \cs{pdfdict_guse:n}  \Arg{global dictionary}
 %   \end{syntax}
 %   This outputs the property list of the dictionary as a list of
 %   \texttt{/key value} pairs.
@@ -638,28 +638,28 @@
 %
 % \begin{macro}
 %   {
-%     \@@_map:n, \@@_gmap:n
+%     \@@_use:n, \@@_guse:n
 %   }
-% \cs{@@_map:n} and \cs{@@_gmap:n} output a prop as needed in a dictionary:
+% \cs{@@_use:n} and \cs{@@_guse:n} output a prop as needed in a dictionary:
 %  as a list of /\meta{key} \meta{value} pairs.
 % \begin{NOTE}{UF}
 %  !! is e-expansion the right thing?
 % \end{NOTE}
 %    \begin{macrocode}
 %<*package>
-\cs_new:Npn \@@_map:n #1 %dict
+\cs_new:Npn \@@_use:n #1 %dict
   {
     \prop_map_function:cN { \@@_name:n { #1 } } \__pdf_dict_item:ne
   }
 
-\cs_set_eq:NN \pdfdict_map:n \@@_map:n
+\cs_set_eq:NN \pdfdict_use:n \@@_use:n
 
-\cs_new:Npn \@@_gmap:n #1 %dict
+\cs_new:Npn \@@_guse:n #1 %dict
   {
     \prop_map_function:cN { \@@_gname:n { #1 } } \__pdf_dict_item:ne
   }
 
-\cs_set_eq:NN \pdfdict_gmap:n \@@_gmap:n
+\cs_set_eq:NN \pdfdict_guse:n \@@_guse:n
 %</package>
 %    \end{macrocode}
 % \end{macro}

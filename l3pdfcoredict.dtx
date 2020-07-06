@@ -761,7 +761,7 @@
   {
     \exp_args:Nx \__pdf_backend_Pages_primitive:n
       {
-        \pdfdict_gmap:n {Core/Pages}
+        \pdfdict_guse:n {Core/Pages}
       }
   }
 
@@ -943,7 +943,7 @@
        \__pdf_backend_object_new:nn  { g_@@_/Catalog/AA_obj } { dict }
        \__pdf_backend_object_write:nx
             { g_@@_/Catalog/AA_obj }
-            { \pdfdict_gmap:n { Core/Catalog/AA } }
+            { \pdfdict_guse:n { Core/Catalog/AA } }
        \exp_args:Nnx
          \__pdf_backend_catalog_gput:nn
            {AA}
@@ -999,7 +999,7 @@
          \exp_args:Nnx
            \__pdf_backend_object_write:nn
              { g_@@_/Catalog/AcroForm/DR/Font_obj }
-             { \pdfdict_gmap:n { Core/Catalog/AcroForm/DR/Font } }
+             { \pdfdict_guse:n { Core/Catalog/AcroForm/DR/Font } }
          \exp_args:Nnnx
            \prop_gput:cnn %we have to use \prop here to avoid the handler ...
              { \pdfdict_gname:n { Core/Catalog/AcroForm/DR } }
@@ -1012,7 +1012,7 @@
          \exp_args:Nnx
            \__pdf_backend_object_write:nn
              { g_@@_/Catalog/AcroForm/DR_obj }
-             { \pdfdict_gmap:n { Core/Catalog/AcroForm/DR } }
+             { \pdfdict_guse:n { Core/Catalog/AcroForm/DR } }
          \exp_args:Nnnx
            \prop_gput:cnn %we have to use \prop here to avoid the handler ...
              { \pdfdict_gname:n {Core/Catalog/AcroForm } }
@@ -1025,7 +1025,7 @@
          \exp_args:Nnx
            \__pdf_backend_object_write:nn
              { g_@@_/Catalog/AcroForm_obj }
-             { \pdfdict_gmap:n { Core/Catalog/AcroForm } }
+             { \pdfdict_guse:n { Core/Catalog/AcroForm } }
          \exp_args:Nnnx
            \@@_handler_gput:nnn
              { Catalog }
@@ -1074,7 +1074,7 @@
        \exp_args:Nnx
          \__pdf_backend_object_write:nn
             { g_@@_/Catalog/MarkInfo_obj }
-            { \pdfdict_gmap:n {Core/Catalog/MarkInfo } }
+            { \pdfdict_guse:n {Core/Catalog/MarkInfo } }
        \exp_args:Nnx
          \__pdf_backend_catalog_gput:nn
            {MarkInfo}
@@ -1196,7 +1196,7 @@
        \exp_args:Nnx
          \__pdf_backend_object_write:nn
             { g_@@_/Catalog/ViewerPreferences_obj }
-            { \pdfdict_gmap:n {Core/Catalog/ViewerPreferences } }
+            { \pdfdict_guse:n {Core/Catalog/ViewerPreferences } }
        \exp_args:Nnx
          \__pdf_backend_catalog_gput:nn
            {ViewerPreferences}

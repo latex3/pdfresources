@@ -163,7 +163,7 @@
           \pdfdict_put:nnn
             {annot/Field}{T}{(#2)}
           %write the field object and put in the field entry
-          \pdf_object_write:nx {pdf/annot/Field/#1/#2} { \pdfdict_map:n {annot/Field} }
+          \pdf_object_write:nx {pdf/annot/Field/#1/#2} { \pdfdict_use:n {annot/Field} }
           %\pdfdict_gput:nnx { Catalog / AcroForm } { Fields }{\pdf_object_ref:n {pdf/annot/Field/#1/#2} }
         \group_end:
       }
