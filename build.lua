@@ -17,7 +17,7 @@ sourcefiles =  {"*.dtx","*.ins",
                 "newpackages/bkm-generic.def",
                 "newpackages/new-attachfile.sty",
                 "newpackages/atfi-generic.def",
-                "newpackages/new-pdfescape.sty",
+                "newpackages/new-hyperxmp.sty"                
                 }
 
 checkruns = 3
