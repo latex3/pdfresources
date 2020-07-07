@@ -17,7 +17,8 @@ sourcefiles =  {"*.dtx","*.ins",
                 "newpackages/bkm-generic.def",
                 "newpackages/new-attachfile.sty",
                 "newpackages/atfi-generic.def",
-                "newpackages/new-hyperxmp.sty"                
+                "newpackages/new-hyperxmp.sty",                
+                "newpackages/pgfutil-latex.def"
                 }
 
 checkruns = 3
