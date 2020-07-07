@@ -83,17 +83,16 @@
 \ProvidesExplPackage {l3pdfmeta} {2020-05-17} {0.2}
   {XMP-Metadata}
 \RequirePackage{pdfresources}
-\RequirePackage{l3pdftools}  %temporarly!!
 %    \end{macrocode}
 % \section{Document metadata}
 % We plan a \cs{DeclareDocumentMetaData} so let's start with it.
 % It should for the begin allow to set the version, to uncompress a pdf,
 % and set the language. We also add a key to activate the metadata stream and
-% to set a standard. 
+% to set a standard. The command triggers the use of the core resource management.
 % \begin{NOTE}{UF}
 % how to setup a backend/driver key? Can it be copied from expl3?
 % \end{NOTE}
-% \begin{function}[added=2019-08-25]{\DeclareDocumentMetaData}
+% \begin{function}[updated=2020-07-05]{\DeclareDocumentMetaData}
 %    \begin{macrocode}
 %<@@=pdf>
 \NewDocumentCommand\DeclareDocumentMetaData { m }
@@ -106,7 +105,7 @@
       }
   }
 
-\msg_new:nnn {pdf}{unknown-standard}{The~standard~'#1'~is~unknown~and~has~been~ignored}
+\msg_new:nnn  {pdf }{unknown-standard}{The~standard~'#1'~is~unknown~and~has~been~ignored}
 
 \msg_new:nnn  { pdf } { setup-after-documentclass }
               { \token_to_str:N \DeclareDocumentMetaData \c_space_tl
