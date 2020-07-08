@@ -1,0 +1,30 @@
+\RequirePackage{l3pdf}
+\ExplSyntaxOn
+\pdf_uncompress:
+\ExplSyntaxOff
+
+%\input{regression-test}
+\PassOptionsToPackage{debug}{pdfresources}
+\RequirePackage{pdfresources}
+\DeclareDocumentMetaData { }
+\documentclass{article}
+
+\usepackage{new-hyperxmp}
+\usepackage{lipsum}
+
+\usepackage[customdriver=hgeneric-experimental,
+   ocgcolorlinks]
+   {hyperref}
+
+\hypersetup{  pdftoolbar=false,
+   pdfauthor={Ulrike Fischer},
+   pdftitle={A test of metadata},
+   pdfnonfullscreenpagemode=UseNone,
+   pdfnumcopies=4,
+   pdfpagelayout=SinglePage
+   }
+
+
+ \begin{document}
+abc
+\end{document}

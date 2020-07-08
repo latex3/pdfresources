@@ -25,12 +25,12 @@
     [2020/07/06 v5.4 Store hyperref metadata in XMP format / testing pdfresource management ...UF]
 \edef\hyxmp@dq@code{\the\catcode`\"}
 \catcode`\"=12
-\@ifundefined{AtEndDocument}{%
-  \RequirePackage{atenddvi}
-  \let\hyxmp@at@end=\AtEndDvi
-}{%
-  \let\hyxmp@at@end=\AtEndDocument
-}
+%\@ifundefined{AtEndDocument}{%
+%  \RequirePackage{atenddvi}
+%  \let\hyxmp@at@end=\AtEndDvi
+%}{%
+%  \let\hyxmp@at@end=\AtEndDocument
+%}
 \RequirePackage{kvoptions}
 \RequirePackage{pdfescape}
 \RequirePackage{stringenc}
@@ -377,6 +377,7 @@
     {}%
   }%
 }
+\DeclareHookRule{shipout/lastpage}{hyperxmp}{before}{pdf}
 \AtEndPreamble{%
   \@ifpackageloaded{hyperref}{%
     \@if@def@and@nonempty{@pdflang}{%
@@ -392,7 +393,9 @@
     }%
     \hyxmp@check@standards
     \hyxmp@no@info@lists
-    \hyxmp@at@end{%
+    \AddToHook{shipout/lastpage}[hyperxmp]
+    %\hyxmp@at@end
+     {%
       \hyxmp@find@metadata
       \hyxmp@embed@packet
     }%
@@ -405,7 +408,7 @@
       disabled}%
   }%
 }
-\hyxmp@at@end{%
+\AddToHook{shipout/lastpage}[hyperxmp]{%
   \hyxmp@set@dc@lang
   \ifx\@pdfmetalang\@empty
     \ifx\@pdflang\@empty
@@ -1982,9 +1985,10 @@ __</rdf:RDF>^^J%
 % uncompressed stream??
 \newcommand*{\hyxmp@embed@packet@generic}
  {%
+   \hyxmp@construct@packet
    \exp_args:Nnx
     \pdf_object_now:nn{stream}{{/Type~/Metadata~/Subtype~/XML}{\hyxmp@xml}}%
-   \pdfcoredict_gput:nnx {Catalog} {Metadata}{\pdf_object_last:}
+    \pdfcoredict_gput:nnx {Catalog} {Metadata}{\pdf_object_last:}
  }
 \ExplSyntaxOff
 
