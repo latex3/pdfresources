@@ -107,6 +107,15 @@ and all files in that bundle must be distributed together.
       }
   }
 
+\generate
+  {
+    \file {l3dvisvgm-pdf.def}
+      {
+       \from{l3backend-pdf-extra.dtx}{drivers,dvisvgm}
+        \from{pdfresources.dtx}{drivers,dvisvgm}
+      }
+  }
+
 \def\MetaPrefix{-- }
 \def\defaultpostamble{%
   \MetaPrefix^^J%

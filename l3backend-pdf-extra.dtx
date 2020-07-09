@@ -174,6 +174,10 @@
     \@@_backend:n{put~@pages~<<#1>>}
   }
 %</dvipdfmx|xdvipdfmx>
+%<*dvisvgm>
+\cs_new_protected:Npn \@@_backend_Pages_primitive:n #1
+  {}
+%</dvisvgm>
 %    \end{macrocode}
 % \end{macro}
 %
@@ -439,6 +443,28 @@
           { \pdfdict_use:nn { g } {Core/Page} }
   }
 %</dvips>
+%<*dvisvgm>
+% mostly only dummies ...
+\cs_new_protected:Npn \@@_backend_Page_primitive:n #1
+   {}
+  % Uses a prop with pdflatex + dvi,
+\cs_new_protected:Npn \@@_backend_Page_gput:nn #1 #2
+   {
+     \pdfdict_gput:nnn {Core/Page}{ #1 }{ #2 }
+   }
+  % the command to remove a default value.
+  % Uses a prop with pdflatex + dvi,
+\cs_new_protected:Npn \@@_backend_Page_gremove:n #1
+  {
+    \pdfdict_gremove:nn  {Core/Page}{ #1 }
+  }
+  % the command used in the document.
+\cs_new_protected:Npn \@@_backend_ThisPage_gput:nn #1 #2
+  {}
+  %the code to push the values, used in shipout
+\cs_new_protected:Npn \@@_backend_ThisPage_gpush:n #1
+  {}
+%</dvisvgm>
 %    \end{macrocode}
 % \end{macro}
 %
@@ -565,6 +591,15 @@
   }
 \cs_new_protected:Npn \@@_backend_PageResources_obj_gpush: {}
 %</dvips>
+%<*dvisvgm>
+% dvips unneeded, or no-op
+\cs_new_protected:Npn \@@_backend_PageResources:n #1 {}
+\cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
+  { %only for the show command TEST!!
+    \pdfdict_gput:nnn {Core/Page/Resources/#1} { #2 }{ #3 }
+  }
+\cs_new_protected:Npn \@@_backend_PageResources_obj_gpush: {}
+%</dvisvgm>
 %    \end{macrocode}
 % \end{macro}
 % \end{macro}
@@ -620,6 +655,23 @@
 \cs_new_protected:Npn \@@_backend_PageResources_gpush:n #1 {}
 
 %</dvips>
+%<*dvisvgm>
+% dvisvgm should do nothing
+%
+\cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: dict_content
+  {}
+\cs_set_protected:Npn \@@_backend_bdc_obj:nn #1 #2 % #1 eg. Span, #2: object name
+  {}
+\cs_set_protected:Npn \@@_backend_bdc_obj:n #1  % #1 eg. Span,
+  {}
+\cs_set_protected:Npn \@@_backend_emc:
+  {}
+\cs_set_protected:Npn \@@_backend_bmc:n #1
+  {}
+\cs_new_protected:Npn \@@_backend_PageResources_gpush:n #1 {}
+
+%</dvisvgm>
+
 % xetex has to create the entries in the /Properties manually
 % (like the other backends)
 % use pdfbase special
@@ -965,6 +1017,11 @@
 %<*dvips>
 \cs_new_protected:Npn \@@_backend_NamesEmbeddedFiles_gpush:n #1 {}
 %</dvips>
+%dvisvgm: noop
+%<*dvisvgm>
+\cs_new_protected:Npn \@@_backend_NamesEmbeddedFiles_gpush:n #1 {}
+%</dvisvgm>
+
 %    \end{macrocode}
 % Names in the EmbeddedFiles name tree must sorted alphabetically,
 % so we need commands to create this names. And we need a sequence to store
@@ -1035,6 +1092,11 @@
           }
       }
 %</dvips>
+%<*dvisvgm>
+%no op. Or is there any sensible use for it?
+\cs_new_protected:Npn  \@@_backend_NamesEmbeddedFiles_add:n #1
+      {}
+%</dvisvgm>
 %    \end{macrocode}
 % \end{macro}
 % \subsection{lua code for lualatex}
