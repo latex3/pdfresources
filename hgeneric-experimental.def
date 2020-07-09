@@ -40,9 +40,8 @@
 \ProvidesFile{hgeneric-experimental.def}
   [2020/05/17 v0.6 %
   Hyperref driver for luaTeX]
-\RequirePackage{pdfresources}
+
 \RequirePackage{xparse,etoolbox}
-\RequirePackage{l3pdftools} %temporarly!
 \chardef\Hy@VersionChecked=1 %don't check the version!
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \ExplSyntaxOn
@@ -50,6 +49,15 @@
 \prop_gput:Nnn \g_msg_module_name_prop { hyp }{ hyperref }
 
 \cs_new:Npn \__hyp_clist_display:n #1 {*~#1\\}
+\msg_new:nnn
+  { hyp }
+  { missing-resource-management }
+  { The~resource~management~is~required~for~this~hyperref~driver! }
+
+\bool_lazy_and:nnF
+  { \cs_if_exist_p:N \pdfcoredict_if_active_p: }{ \pdfcoredict_if_active_p: }
+  { \msg_error:nn { hyp}{ missing-resource-management}}
+
 \msg_new:nnn
   { hyp }
   { missing-bookmark-package }
@@ -1491,38 +1499,16 @@
   }
 
 \cs_set_protected:Npn \PDF@SetupDoc
-  {
-    %\bool_if:nF
-%      {
-%        \tl_if_empty_p:N \@pdfstartpage
-%        ||
-%        \tl_if_empty_p:N \@pdfstartview
-%      }
-%      {
-%        \exp_args:Noo
-%        \pdf_docview:nn {\@pdfstartpage} {\tl_tail:N\@pdfstartview}
-%      }
-}
+  {}
 
 \def\PDF@FinishDoc{}% dummy needed for hyperref ...
 
 
-\AtEndPreamble{
+\AddToHook{env/document/before}{
   \pdf@ifdraftmode{}{
     %!!!!! this must be handled somehow
     \Hy@UseMaketitleInfos %get/set Title/Author from \title if pdfusetitle is true
-    }
-  %is this still needed?
-  \Hy@DisableOption{pdfauthor}%
-  \Hy@DisableOption{pdftitle}%
-  \Hy@DisableOption{pdfsubject}%
-  \Hy@DisableOption{pdfcreator}%
-  \Hy@DisableOption{pdfcreationdate}%
-  \Hy@DisableOption{pdfmoddate}%
-  \Hy@DisableOption{pdfproducer}%
-  \Hy@DisableOption{pdfkeywords}%
-  \Hy@DisableOption{pdfinfo}%
-}
+    }}
 
 
 % pdfpageduration sets the duration a page is shown in full screen mode.
@@ -2843,7 +2829,5 @@
 \expandafter\def\csname Parent4\endcsname{}
 
 %%
-%% End of file `hluatex.def'.
+%% End of file `hgeneric-experimental.def'.
 \endinput
-%%
-%% End of file `hluatex.def'.

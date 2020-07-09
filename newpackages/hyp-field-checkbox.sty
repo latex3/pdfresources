@@ -1,48 +1,62 @@
 % !Mode:: "TeX:DE:UTF-8:Main"
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesExplPackage{field-checkbox}{2020-07-10}{v0.1}{new form field checkbox for hyperref]%
 
-\RequirePackage{pdfresources}
-\DeclareDocumentMetaData{uncompress}
-%adapted from https://chat.stackexchange.com/transcript/message/54421537#54421537
-\documentclass{article}
-
-\pagestyle{empty}
-
-\usepackage[customdriver=hgeneric-experimental]{hyperref}
-
-\ExplSyntaxOn
-
+% values from hyperref:
+% \def\DefaultOptionsofCheckBox{print}
+%\def\DefaultHeightofCheckBox{\normalbaselineskip}
+%\def\DefaultWidthofCheckBox{\normalbaselineskip}
 
 \cs_generate_variant:Nn \pdf_xform_wd:n {e}
 \cs_generate_variant:Nn \pdf_xform_ht:n {e}
 \cs_generate_variant:Nn \pdf_xform_dp:n {e}
 \cs_generate_variant:Nn \pdf_xform_ref:n{e}
 
-\pdfdict_new:nn {l} {annot/Field}
+\pdfdict_new:nn {l} {hyp/checkbox/Field}
+\pdfdict_new:nn {l} {hyp/checkbox/Annot}
 
-\tl_new:N \g__uf_normal_off_default_tl
-\tl_new:N \g__uf_normal_yes_default_tl
 
-% # local variables
-\dim_new:N \l__uf_field_ht_dim
-\dim_new:N \l__uf_field_wd_dim
-\dim_new:N \l__uf_field_dp_dim
-\int_new:N \l__uf_field_flags_int
+\tl_new:N \g__hyp_normal_off_default_tl
+\tl_new:N \g__hyp_normal_yes_default_tl
 
-% # l3keys variables
-
-\tl_new:N \l__uf_normal_off_tl
-\tl_new:N \l__uf_normal_yes_tl
-
-\tl_set:Nn \g__uf_normal_off_default_tl
+\tl_set:Nn \g__hyp_normal_off_default_tl
   {
     checkbox/Off/dflt
   }
-\tl_set:Nn \g__uf_normal_yes_default_tl
+\tl_set:Nn \g__hyp_normal_yes_default_tl
   {
     checkbox/Yes/dflt
   }
 
-%default xform
+% # local variables
+\dim_new:N \l__hyp_field_ht_dim
+\dim_new:N \l__hyp_field_wd_dim
+\dim_new:N \l__hyp_field_dp_dim
+\int_new:N \l__hyp_field_flags_int
+
+% # l3keys variables
+
+\tl_new:N \l__hyp_normal_off_tl
+\tl_new:N \l__hyp_normal_yes_tl
+
+\keys_define:nn { hyp / checkbox }
+ {
+   checked .choice: ,
+   checked / false .code:n =
+     {
+       \pdfdict_put:nnn {hyp/checkbox/Field}{V}{/Off}
+       \pdfdict_put:nnn {hyp/checkbox/Annot}{AS}{/Off}
+       \pdfdict_put:nnn {hyp/checkbox/Annot}{DV}{/Off}
+     },
+   checked / true .code:n =
+     {
+       \pdfdict_put:nnn {hyp/checkbox/Field}{V}{/Yes}
+       \pdfdict_put:nnn {hyp/checkbox/Annot}{AS}{/Yes}
+       \pdfdict_put:nnn {hyp/checkbox/Annot}{DV}{/Yes}
+     }
+
+ }
+
 
 \NewDocumentCommand \newcheckboxappearance { s  m m  }  %#2=name, #3 = content
  {
@@ -130,30 +144,30 @@
 \cs_new_protected:Npn \__uf_checkbox_fielddict:n #1
   {
     %#1 should pass through some escaping!
-    \pdf_object_if_exist:nTF {annot/Field/Btn/#1}
+    \pdf_object_if_exist:nTF {hyp/checkbox/Field/Btn/#1}
      {
       %needed ? later
      }
      {
       \group_begin:
-      \pdf_object_new:nn {annot/Field/Btn/#1}      {dict}
-      \pdf_object_new:nn {annot/Field/Btn/#1/Kids} {array}
-      \seq_new:c {g_annot/Field/Btn/#1/Kids_seq}
+      \pdf_object_new:nn {hyp/checkbox/Field/Btn/#1}      {dict}
+      \pdf_object_new:nn {hyp/checkbox/Field/Btn/#1/Kids} {array}
+      \seq_new:c {g_hyp/checkbox/Field/Btn/#1/Kids_seq}
       \hook_gput_code:nnn {shipout/lastpage}{pdf} %xetex needs this ...
         {
-          \pdf_object_write:nx {annot/Field/Btn/#1/Kids} { \seq_use:cn{g_annot/Field/Btn/#1/Kids_seq}{~} }
+          \pdf_object_write:nx {hyp/checkbox/Field/Btn/#1/Kids} { \seq_use:cn{g_hyp/checkbox/Field/Btn/#1/Kids_seq}{~} }
         }
-      \pdfdict_put:nnn {annot/Field}{FT}{/Btn}
-      \pdfdict_put:nnn {annot/Field}{T}{(#1)}
-      \pdfdict_put:nnn {annot/Field}{V}{/Off}  %should be configurable/in sync with /AS/DV
-      \pdfdict_put:nnn {annot/Field}{DV}{/Off} %should be configurable/in sync with /AS/DV
-      \pdfdict_put:nnx {annot/Field}{Kids}{\pdf_object_ref:n {annot/Field/Btn/#1/Kids}}
-      \pdf_flag_clear:nn {annot/Field}{Radio}      %just in case
-      \pdf_flag_clear:nn {annot/Field}{Pushbutton} %just in case
-      \pdf_flag_set:nn {annot/Field}{NoExport}
-      \pdfdict_put:nnx {annot/Field}{Ff}{\pdf_flag_use:n{annot/Field}}
-      \pdf_object_write:nx {annot/Field/Btn/#1} { \pdfdict_use:n {annot/Field} }
-      \pdfcoredict_gput:nnx { Catalog / AcroForm } { Fields }{\pdf_object_ref:n {annot/Field/Btn/#1} }
+      \pdfdict_put:nnn {hyp/checkbox/Field}{FT}{/Btn}
+      \pdfdict_put:nnn {hyp/checkbox/Field}{T}{(#1)}
+      \pdfdict_put:nnn {hyp/checkbox/Field}{V}{/Off}  %should be configurable/in sync with /AS/DV
+      \pdfdict_put:nnn {hyp/checkbox/Field}{DV}{/Off} %should be configurable/in sync with /AS/DV
+      \pdfdict_put:nnx {hyp/checkbox/Field}{Kids}{\pdf_object_ref:n {hyp/checkbox/Field/Btn/#1/Kids}}
+      \pdf_flag_clear:nn {hyp/checkbox/Field}{Radio}      %just in case
+      \pdf_flag_clear:nn {hyp/checkbox/Field}{Pushbutton} %just in case
+      \pdf_flag_set:nn {hyp/checkbox/Field}{NoExport}
+      \pdfdict_put:nnx {hyp/checkbox/Field}{Ff}{\pdf_flag_use:n{hyp/checkbox/Field}}
+      \pdf_object_write:nx {hyp/checkbox/Field/Btn/#1} { \pdfdict_use:n {hyp/checkbox/Field} }
+      \pdfcoredict_gput:nnx { Catalog / AcroForm } { Fields }{\pdf_object_ref:n {hyp/checkbox/Field/Btn/#1} }
       \group_end:
      }
   }
@@ -171,7 +185,7 @@
            { \dim_use:N \l__uf_field_ht_dim }
            { \dim_use:N \l__uf_field_dp_dim }
            {
-            /Parent~ \pdf_object_ref:n{annot/Field/Btn/#1}
+            /Parent~ \pdf_object_ref:n{hyp/checkbox/Field/Btn/#1}
             /AS ~ /Off
             /AP ~
               <<
@@ -183,7 +197,7 @@
            }
          \hfill
         }
-    \seq_gput_right:cx {g_annot/Field/Btn/#1/Kids_seq}{ \pdfannot_box_last:}
+    \seq_gput_right:cx {g_hyp/checkbox/Field/Btn/#1/Kids_seq}{ \pdfannot_box_last:}
     \group_end:
   }
 % # form and field interface macros
@@ -251,7 +265,7 @@ T: partial fieldname (test string)
 TU: alternate description (test string)
 TM: mapping name
 Q integer (variable text field)
-Ff: flags ->annot/Field
+Ff: flags ->hyp/checkbox/Field
 V: value            % not pushbutton
 DV: default value   % not pushbutton
 AA: Action dict ... -> see below
