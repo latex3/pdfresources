@@ -90,18 +90,6 @@
 %</package>
 %    \end{macrocode}
 % \section{Preparation/helper Code}
-% \begin{variable}{\g_@@_Core_active_bool}
-% This boolean will control the activation of the management code.
-% It is used in the hooks, and in some backend files.
-% \cs{DeclareDocumentMetadata} should set it to true
-%    \begin{macrocode}
-%<*package>
-\bool_new:N \g_@@_Core_active_bool
-% temporarly
-%\bool_gset_true:N \g_@@_Core_active_bool
-%</package>
-%    \end{macrocode}
-% \end{variable}
 %^^A still needed:
 %^^A \pdf@strcmp??
 %^^A \pdf@escapestring?? \pdfescapestring
@@ -124,9 +112,9 @@
 % \end{NOTE}
 %    \begin{macrocode}
 %<*package>
+\RequirePackage{l3pdfmeta} %
 \RequirePackage{l3pdfdict}
 \RequirePackage{l3pdftools}
-\RequirePackage{l3pdfmeta} %
 \RequirePackage{l3pdfcoredict}
 % %load backend driver
 \file_input:n {l3\g__sys_backend_tl-pdf.def}

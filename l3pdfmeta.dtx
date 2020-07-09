@@ -82,7 +82,7 @@
 %<*package>
 \ProvidesExplPackage {l3pdfmeta} {2020-05-17} {0.2}
   {XMP-Metadata}
-\RequirePackage{pdfresources}
+\RequirePackage{lthooks}
 %    \end{macrocode}
 % \section{Document metadata}
 % We plan a \cs{DeclareDocumentMetaData} so let's start with it.
@@ -92,16 +92,28 @@
 % \begin{NOTE}{UF}
 % how to setup a backend/driver key? Can it be copied from expl3?
 % \end{NOTE}
-% \begin{function}[updated=2020-07-05]{\DeclareDocumentMetaData}
+%%
+% \begin{variable}{\g_@@_Core_active_bool}
+% This boolean will control the activation of the management code.
+% It is used in the hooks, and in some backend files.
+% \cs{DeclareDocumentMetadata} should set it to true
 %    \begin{macrocode}
 %<@@=pdf>
+%<*package>
+\bool_new:N \g_@@_Core_active_bool
+%    \end{macrocode}
+% \end{variable}
+% \begin{function}[updated=2020-07-05]{\DeclareDocumentMetaData}
+%    \begin{macrocode}
 \NewDocumentCommand\DeclareDocumentMetaData { m }
   {
     \cs_if_eq:NNTF \documentclass \@twoclasseserror
       { \msg_error:nn { pdf }{ setup-after-documentclass } }
       {
+        \keys_set_groups:nnn { pdf / setup} {init}{ #1 }
+        \RequirePackage{pdfresources}
         \bool_gset_true:N \g_@@_Core_active_bool
-        \keys_set:nn  { pdf / setup } { #1 }
+        \keys_set_filter:nnn  { pdf / setup } { init } { #1 }
       }
   }
 
@@ -113,6 +125,11 @@
               }
 
 \bool_new:N \g_@@_meta_bool
+\keys_define:nn { pdf / setup }
+  {
+    expl3 .code:n = { \PassOptionsToPackage { #1 } {expl3} },
+    expl3 .groups:n = { init } ,
+  }
 
 \keys_define:nn { pdf / setup }
   {
