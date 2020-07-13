@@ -1,0 +1,244 @@
+% \iffalse meta-comment
+%
+%% File: pdfresources-patches.dtx
+%
+% Copyright (C) 2018-2020 The LaTeX3 Project
+%
+% It may be distributed and/or modified under the conditions of the
+% LaTeX Project Public License (LPPL), either version 1.3c of this
+% license or (at your option) any later version.  The latest version
+% of this license is in the file
+%
+%    http://www.latex-project.org/lppl.txt
+%
+% This file is part of the "(experimental) pdfresources bundle" (The Work in LPPL)
+% and all files in that bundle must be distributed together.
+%
+% -----------------------------------------------------------------------
+%
+% The development version of the bundle can be found at
+%
+%    https://github.com/latex3/pdfresources
+%
+% for those people who are interested.
+%
+%<*driver>
+\documentclass[full]{l3doc}
+\begin{document}
+  \DocInput{\jobname.dtx}
+\end{document}
+%</driver>
+% \fi
+% \title{^^A
+%   The \pkg{pdfresources-patches} package  -- temporarly patches  ^^A
+% }
+%
+% \author{^^A
+%  The \LaTeX3 Project\thanks
+%    {^^A
+%      E-mail:
+%        \href{mailto:latex-team@latex-project.org}
+%          {latex-team@latex-project.org}^^A
+%    }^^A
+% }
+%
+% \date{Released XXXX-XX-XX}
+%
+% \maketitle
+% \begin{documentation}
+%
+% \section{\pkg{pdfresources-patches} documentation}
+% This code is temporary! It tries to patch commands of other packages which
+% fills pdfresources too, to remove clashes and test if everything works as expected.
+% This code should disappear when packages adapt to the central interfaces.
+%
+% \subsection{\pkg{pgf}}
+%
+% In \pkg{pgf}, resource management is set up in the file |pgfutil-common.tex|.
+% This then provides three functions for adding to the resources, all of which
+% are objects:
+% \begin{itemize}
+%   \item \cs{pgfutil@addpdfresource@extgs}: Extended graphics state
+%   \item \cs{pgfutil@addpdfresource@colorspaces}: Color spaces
+%   \item \cs{pgfutil@addpdfresource@patterns}: Patterns
+% \end{itemize}
+%
+% These resource dictionaries are used by adding entries in a cumulative sense;
+% the macro layer deals with ensuring that each entry is only given once. Note
+% that the objects themselves must be given only once for each page.
+%
+% To support these functions, there are a series of set-up macros which install
+% these resources. That has to take place for every page: the exact route
+% therefore depends on the driver.
+%
+% For the pdfresources project we need to avoid that pgf interferes in ExtGState,
+% ColorSpace and Pattern (Shadings are added to the xform resources and so probably
+% unproblematic for now).
+%    \begin{macrocode}
+%<*package>
+% patches for xetex/dvips doesn't make much sense for colorspace and
+% transparent. But pgf should be tested sometimes.
+\RequirePackage{etoolbox}
+\@ifpackageloaded{pgfrcs}
+ {
+  \msg_warning:nn{pdf}{pgf-too-late}
+  \file_input_stop:
+ }
+ {
+  \msg_info:nn{pdf}{patches}
+ }
+\RequirePackage{pgfrcs}
+%
+%\def\pgfutil@addpdfresource@extgs#1{\pgf@sys@addpdfresource@extgs@plain{#1}}
+%\def\pgfutil@addpdfresource@colorspaces#1{\pgf@sys@addpdfresource@colorspaces@plain{#1}}
+%\def\pgfutil@addpdfresource@patterns#1{\pgf@sys@addpdfresource@patterns@plain{#1}}
+%\def\pgfutil@setuppdfresources{\pgf@sys@setuppdfresources@plain}
+% \pgf@sys@pdf@possible@resources %used in xform
+%Trying to patch pgf ..
+\cs_new_protected:Npn \@@_pgf_sys_setuppdfresources_plain:
+  {
+   %objects are already created ...
+    \def\pgf@sys@pdf@possible@resources
+      {
+        /ColorSpace~\pdf_object_ref:n {Page/Resources/ColorSpace}
+        /Pattern   ~\pdf_object_ref:n {Page/Resources/Pattern}
+        /ExtGState ~\pdf_object_ref:n {Page/Resources/ExtGState}
+      }
+    \let\pgf@sys@pdf@check@resources=\relax%
+    %not sure if needed, but perhaps the lists are used somewhere else ...
+    \let\pgf@sys@pgf@resource@list@extgs=\pgfutil@empty%
+    \let\pgf@sys@pgf@resource@list@patterns=\pgfutil@empty%
+    \let\pgf@sys@pgf@resource@list@colorspaces=\pgfutil@empty%
+    % the commands to add page resources
+    \def\pgf@sys@addpdfresource@extgs@plain##1
+      {
+        \exp_after:wN %for transparent which passes a command
+          \@@_patch_pgfextgs:w ##1\q_stop
+      }
+    \def\pgf@sys@addpdfresource@patterns@plain##1
+      {
+        \@@_patch_pgfpatterns:w ##1\q_stop
+      }
+   \def\pgf@sys@addpdfresource@colorspaces@plain##1
+      {
+        \@@_patch_pgfcolorspaces:w ##1\q_stop
+      }
+  }
+\cs_set_eq:NN \@@_pgfori_pgfutil@setuppdfresources\pgfutil@setuppdfresources
+\def\pgfutil@setuppdfresources
+  {
+    \bool_if:NTF \g_@@_Core_active_bool
+      {
+        \@@_pgf_sys_setuppdfresources_plain:
+      }
+      {
+        \@@_pgfori_pgfutil@setuppdfresources
+      }
+  }
+
+% Why on earth do I explicitly call the command? Doesn't pgf do it?
+%\hook_gput_code:nnn {begindocument/end} {pdf} { \pgfutil@setuppdfresources }
+
+%\AtEndPreamble{\pgfutil@setuppdfresources}
+% helper commands as pgf doesn't pass resources as two arguments
+% code to add to the resources existing stuff in the format "/name value":
+\cs_new:Npn \@@_split_dict_entry_aux:NNw #1 #2 /#3~#4\q_stop
+  {
+    \tl_set:Nn #1 {#3}
+    \tl_set:Nn #2 {#4}
+  }
+\tl_new:N \l_@@_name_tmp_tl
+\tl_new:N \l_@@_value_tmp_tl
+
+\cs_new:Npn \@@_patch_pgfextgs:w  #1/#2<<#3>>#4\q_stop
+  {
+    \exp_args:Nne \@@_backend_PageResources_gput:nnn {ExtGState}{\tl_trim_spaces:n{#2}}{<<#3>>}
+  }
+\cs_new:Npn \@@_patch_pgfpatterns:w  #1/#2\space#3\q_stop
+  {
+    \exp_args:Nnxx \@@_backend_PageResources_gput:nnn {Pattern}{\tl_trim_spaces:n{#2}}{#3}
+  }
+\cs_new:Npn \@@_patch_pgfcolorspaces:w  #1/#2[#3]#4\q_stop
+  {
+    \exp_args:Nne
+    \@@_backend_PageResources_gput:nnn {ColorSpace}{\tl_trim_spaces:n{#2}}{[#3]}
+  }
+%</package>
+%    \end{macrocode}
+% \subsection{\pkg{transparent}}
+% transparent, we assume that pdfresources is loaded first.
+% the code does nothing is with new-transparent ...
+%    \begin{macrocode}
+%<*package>
+%label??
+\hook_gput_code:nnn {begindocument/end} {pdf}
+  {
+    \def\TRP@addresource
+      {
+        \@@_backend_PageResources_gput:nnn{ExtGState}{TRP1}{<</ca~1/CA~1>>}
+      }
+    \def\transparent@use#1
+      {
+        \tl_if_exist:cF{TRP#1}
+          {
+            \@@_backend_PageResources_gput:nnn
+              {ExtGState}
+              {TRP#1}
+              {<</ca~#1/CA~#1>>}
+            \tl_const:cn{TRP#1}{/TRP#1~gs}
+          }
+       }
+  }
+%</package>
+%    \end{macrocode}
+% \subsection{\pkg{colorspace}}
+% This is rather difficult as no real places to inject patches
+% at first a try to avoid that its ExtGState is missing:
+% it can not be avoided to recreate the objects (and so to get duplicates)
+% as colorspace uses temporary macros whose contents is lost.
+%    \begin{macrocode}
+%<*package>
+% this must be earlier, to avoid problems with luatex which has two pageresources
+% lua/tex
+\hook_gput_code:nnn {begindocument} {pdf}
+  {
+    \tl_if_exist:NT \spc@op
+      {
+        \def\spc@Pageresources#1{}
+      }
+
+  }
+
+\hook_gput_code:nnn {begindocument/end} {pdf}
+  {
+    \tl_if_exist:NT \spc@op
+      {
+        \@@_backend_object_new:nn  {__spc_extgstate_op_false}{dict}
+        \@@_backend_object_write:nn
+          {__spc_extgstate_op_false}
+          {/Type /ExtGState~/op~false~/OP~false}
+        \pdfcoredict_gput:nnn
+          {Page/Resources/ExtGState}
+          {SPCko}
+          {\@@_backend_object_ref:n {__spc_extgstate_op_false}}
+        \@@_backend_object_new:nn  {__spc_extgstate_op_true0}{dict}
+        \@@_backend_object_write:nn
+          {__spc_extgstate_op_true0}
+          {/Type /ExtGState~/op~true~/OP~true~/OPM~0}%
+        \pdfcoredict_gput:nnn
+          {Page/Resources/ExtGState}
+          {SPCmz}
+          {\@@_backend_object_ref:n {__spc_extgstate_op_true0}}
+        \@@_backend_object_new:nn  {__spc_extgstate_op_true1}{dict}
+        \@@_backend_object_write:nn
+          {__spc_extgstate_op_true1}
+          {/Type /ExtGState~/op~true~/OP~true~/OPM~1}%
+         \pdfcoredict_gput:nnn
+          {Page/Resources/ExtGState}
+          {SPCop}
+          {\@@_backend_object_ref:n {__spc_extgstate_op_true1}}
+      }
+  }
+%</package>
+%    \end{macrocode}%
+% \PrintIndex

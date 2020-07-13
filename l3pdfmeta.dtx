@@ -23,7 +23,6 @@
 % for those people who are interested.
 %
 %<*driver>
-\RequirePackage{expl3}
 \documentclass[full]{l3doc}
 \begin{document}
   \DocInput{\jobname.dtx}
@@ -82,7 +81,6 @@
 %<*package>
 \ProvidesExplPackage {l3pdfmeta} {2020-05-17} {0.2}
   {XMP-Metadata}
-\RequirePackage{lthooks}
 %    \end{macrocode}
 % \section{Document metadata}
 % We plan a \cs{DeclareDocumentMetaData} so let's start with it.
@@ -111,7 +109,10 @@
       { \msg_error:nn { pdf }{ setup-after-documentclass } }
       {
         \keys_set_groups:nnn { pdf / setup} {init}{ #1 }
-        \RequirePackage{pdfresources}
+        \RequirePackage{l3pdf}
+        \RequirePackage{lthooks} %
+        % %load backend driver
+        %\file_input:n {l3\g__sys_backend_tl-pdf.def}
         \bool_gset_true:N \g_@@_Core_active_bool
         \keys_set_filter:nnn  { pdf / setup } { init } { #1 }
       }
