@@ -112,7 +112,9 @@
         \RequirePackage{l3pdf}
         \RequirePackage{lthooks} %
         % %load backend driver
-        %\file_input:n {l3\g__sys_backend_tl-pdf.def}
+        \ExplSyntaxOn\makeatletter
+        \file_input:n {l3\g__sys_backend_tl-pdf.def}
+        \ExplSyntaxOff\makeatother
         \bool_gset_true:N \g_@@_Core_active_bool
         \keys_set_filter:nnn  { pdf / setup } { init } { #1 }
       }

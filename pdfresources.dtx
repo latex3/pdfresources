@@ -752,7 +752,7 @@
 % \end{function}
 %    \begin{macrocode}
 %<*package>
-\cs_set_eq:NN \pdfannot_link_last: \@@_backend_link_last:
+\cs_new:Nn \pdfannot_link_last: { \@@_backend_link_last: }
 %</package>
 %    \end{macrocode}
 % \begin{function}[added = 2020-06-29]{  \pdfannot_last: }
@@ -783,7 +783,11 @@
 % \end{function}
 %    \begin{macrocode}
 %<*package>
-\cs_set_eq:NN \pdfannot_link_margin:n \@@_backend_link_margin:n
+\cs_new_protected:Npn \pdfannot_link_margin:n #1
+  {
+    \@@_backend_link_margin:n { #1 }
+  }
+
 %</package>
 %    \end{macrocode}
 
