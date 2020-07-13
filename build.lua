@@ -34,8 +34,10 @@ else
   specialformats = specialformats or {}
   specialformats["latex"] = specialformats["latex"] or 
    {
-    luatex     = {binary="luahbtex",format = "lualatex"},
-    latexdvips = {binary="latex.exe",format = ""}
+    luatex     = {binary="luahbtex",format = "lualatex-dev"},
+    pdftex     = {format = "pdflatex-dev"},
+    xetex     = {format = "xelatex-dev"},
+    latexdvips = {binary="latex.exe",format = "latex-dev"}
     }
 end
 
