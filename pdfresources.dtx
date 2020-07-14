@@ -63,7 +63,18 @@
 %
 % \maketitle
 % \section{Introduction}
-
+% The \LaTeX{} format currently contains nearly no code specific to the now quite
+% central output format, PDF.
+% It delegates important tasks like supporting PDF standards,
+% creating links, adding special colors, managing the content of
+% central PDF-directories to external packages.
+% This is problematic as it can lead easily to clashes if two packages try
+% to access the same resource in an incompatible way.  Also as
+% the primitives differ between the various binaries and backend with
+% which \LaTeX{} is used all packages have to write and maintain \enquote{driver} files
+% for the various backends.
+%
+%
 % The project here tries to resolve this situation by providing interfaces to
 % the various resources and objects in a backend independent way.
 %
