@@ -62,11 +62,48 @@ and all files in that bundle must be distributed together.
       }%
   }
 
+\generate{\file{l3pdfinit.sty}
+  {
+    \from{l3pdfinit.dtx}            {package}
+  }
+}
+\generate{\file{l3pdfdict.sty}
+  {
+    \from{l3pdfdict.dtx}            {package}
+  }
+}
+
+\generate{\file{l3pdfcoredict.sty}
+  {
+    \from{l3pdfcoredict.dtx}            {package}
+  }
+}
+
+\generate{\file{l3pdfmeta.sty}
+  {
+    \from{l3pdfmeta.dtx}            {package}
+  }
+}
+
+\generate{\file{l3pdftools.sty}
+  {
+    \from{l3pdftools.dtx}            {package}
+  }
+}
+
 \generate
   {%
     \file{pdfresources-patches.sty}
       {%
         \from{pdfresources-patches.dtx}{package}
+      }%
+  }
+
+\generate
+  {%
+    \file{l3pdffile.sty}
+      {%
+        \from{l3pdffile.dtx}{package}
       }%
   }
 
