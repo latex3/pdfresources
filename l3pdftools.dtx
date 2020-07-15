@@ -351,11 +351,11 @@
 
 \sys_if_engine_pdftex:TF
   {
-    \cs_new:cpn { @@_text_convert_string-hex:nN } #1 #2
+    \cs_new_protected:cpn { @@_text_convert_string-hex:nN } #1 #2
       {
          \str_set_convert:Nnnn #2 { #1 }{ utf8 } {utf16/hex}
       }
-    \cs_new:cpn { @@_text_convert_string-hex-print:nN } #1 #2
+    \cs_new_protected:cpn { @@_text_convert_string-hex-print:nN } #1 #2
       {
          \str_set_convert:Nnnn #2 { #1 }{ utf8 } {utf16/hex}
          \str_put_left:Nn #2  {<}
@@ -363,12 +363,12 @@
       }
   }
   {
-    \cs_new:cpn { @@_text_convert_string-hex:nN } #1 #2
+    \cs_new_protected:cpn { @@_text_convert_string-hex:nN } #1 #2
       {
         \str_set_convert:Nnnn #2 { #1 }{  } {utf16/hex}
       }
 
-    \cs_new:cpn { @@_text_convert_string-hex-print:nN } #1 #2
+    \cs_new_protected:cpn { @@_text_convert_string-hex-print:nN } #1 #2
       {
         \str_set_convert:Nnnn #2 { #1 }{  } {utf16/hex}
          \str_put_left:Nn #2  {<}
