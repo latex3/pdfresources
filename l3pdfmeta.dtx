@@ -1,6 +1,6 @@
 % \iffalse meta-comment
 %
-%% File: l3pdffile.dtx
+%% File: l3pdfmeta.dtx
 %
 % Copyright (C) 2018-2020 The LaTeX3 Project
 %
@@ -79,92 +79,22 @@
 %
 %    \begin{macrocode}
 %<*package>
+%<@@=pdfmeta>
 \ProvidesExplPackage {l3pdfmeta} {2020-05-17} {0.2}
   {XMP-Metadata}
 %    \end{macrocode}
-% \section{Document metadata}
-% We plan a \cs{DeclareDocumentMetaData} so let's start with it.
-% It should for the begin allow to set the version, to uncompress a pdf,
-% and set the language. We also add a key to activate the metadata stream and
-% to set a standard. The command triggers the use of the core resource management.
-% \begin{NOTE}{UF}
-% how to setup a backend/driver key? Can it be copied from expl3?
-% \end{NOTE}
-%%
-% \begin{variable}{\g_@@_Core_active_bool}
-% This boolean will control the activation of the management code.
-% It is used in the hooks, and in some backend files.
-% \cs{DeclareDocumentMetadata} should set it to true
 %    \begin{macrocode}
-%<@@=pdf>
-%<*package>
-\bool_new:N \g_@@_Core_active_bool
+\msg_new:nnn  {pdf }{unknown-standard}{The~standard~'#1'~is~unknown~and~has~been~ignored}
+%    \end{macrocode}
+% \begin{variable}{\l_@@_tmpa_tl}
+%    \begin{macrocode}
+\tl_new:N\l_@@_tmpa_tl
 %    \end{macrocode}
 % \end{variable}
-% \begin{function}[updated=2020-07-05]{\DeclareDocumentMetaData}
-%    \begin{macrocode}
-\NewDocumentCommand\DeclareDocumentMetaData { m }
-  {
-    \cs_if_eq:NNTF \documentclass \@twoclasseserror
-      { \msg_error:nn { pdf }{ setup-after-documentclass } }
-      {
-        \keys_set_groups:nnn { pdf / setup} {init}{ #1 }
-        \RequirePackage{l3pdf}
-        \RequirePackage{lthooks} %
-        % %load backend driver
-        \ExplSyntaxOn\makeatletter
-        \file_input:n {l3\g__sys_backend_tl-pdf.def}
-        \ExplSyntaxOff\makeatother
-        \bool_gset_true:N \g_@@_Core_active_bool
-        \keys_set_filter:nnn  { pdf / setup } { init } { #1 }
-      }
-  }
-
-\msg_new:nnn  {pdf }{unknown-standard}{The~standard~'#1'~is~unknown~and~has~been~ignored}
-
-\msg_new:nnn  { pdf } { setup-after-documentclass }
-              { \token_to_str:N \DeclareDocumentMetaData \c_space_tl
-                should~be~used~only~before~\token_to_str:N\documentclass
-              }
-
-\bool_new:N \g_@@_meta_bool
-\keys_define:nn { pdf / setup }
-  {
-    expl3 .code:n = { \PassOptionsToPackage { #1 } {expl3} },
-    expl3 .groups:n = { init } ,
-  }
-
-\keys_define:nn { pdf / setup }
-  {
-    ,pdfversion .code:n =
-      {
-        \pdf_version_gset:n { #1 }
-      }
-    ,uncompress .code:n =
-      {
-        \pdf_uncompress:
-      }
-    ,lang .code:n =
-      {
-        \pdfcoredict_gput:nnn {Catalog} {Lang}{(#1)}
-      }
-    ,meta .bool_gset:N = \g_@@_meta_bool
-    ,standard .choices:nn =
-      {A-1b,A-2b,A-3b}
-      {
-        \prop_gset_eq:Nc \g_pdfmeta_standard_prop { g_@@_meta_standard_pdf/#1_prop }
-      }
-    ,standard / unknown .code:n =
-      {
-        \msg_warning:nnn{pdf}{unknown-standard}{#1}
-      }
-  }
-%    \end{macrocode}
-% \end{function}
 % \section{XMP-metadata}
 %    \begin{macrocode}
 % we need a command to write a BOM to the pdf:
-\str_const:Nx\c_@@_meta_bom_str
+\str_const:Nx\c_@@_bom_str
  {
   \bool_if:nTF
     {
@@ -180,15 +110,15 @@
     }
  }
 % writing the stream:
-\str_new:N \g_@@_xmpmeta_str
+\str_new:N \g_@@_xmppacket_str
 
-\str_gset:Nx      \g_@@_xmpmeta_str {<?xpacket~begin="\c_@@_meta_bom_str"~id="W5M0MpCehiHzreSzNTczkc9d"?>\iow_newline:}
-\str_gput_right:Nx \g_@@_xmpmeta_str {<x:xmpmeta~xmlns:x="adobe:ns:meta/">\iow_newline:}
+\str_gset:Nx      \g_@@_xmppacket_str {<?xpacket~begin="\c_@@_bom_str"~id="W5M0MpCehiHzreSzNTczkc9d"?>\iow_newline:}
+\str_gput_right:Nx \g_@@_xmppacket_str {<x:xmpmeta~xmlns:x="adobe:ns:meta/">\iow_newline:}
 
 %here more contents ...
-\str_gput_right:Nx \g_@@_xmpmeta_str { </x:xmpmeta> \iow_newline: }
+\str_gput_right:Nx \g_@@_xmppacket_str { </x:xmpmeta> \iow_newline: }
 %here padding??
-\str_gput_right:Nn \g_@@_xmpmeta_str { <?xpacket~end="w"?> }
+\str_gput_right:Nn \g_@@_xmppacket_str { <?xpacket~end="w"?> }
 %
 %    \end{macrocode}
 % \subsection{The stream object}
@@ -197,13 +127,13 @@
 
 \hook_gput_code:nnn {shipout/lastpage}{pdf}
   {
-    \bool_if:NT \g_@@_meta_bool
+    \bool_if:NT \g_pdfmeta_xmp_bool
       {
         \pdf_object_new:nn {__pdf_Metadata} {stream}
         \pdf_object_write:nx {__pdf_Metadata}
          {
            { /Type /Metadata /Subtype /XML }
-           {\g_@@_xmpmeta_str}
+           {\g_@@_xmppacket_str}
          }
       }
   }
@@ -212,9 +142,11 @@
 % \section{standards (work in progress)}
 % \subsection{Tools and tests}
 % This public property will contain the settings for the document.
+% \begin{variable}{\g_pdfmeta_standard_prop}
 %    \begin{macrocode}
 \prop_new:N \g_pdfmeta_standard_prop
 %    \end{macrocode}
+% \end{variable}
 % This conditional tests if the value for /N in a named action is allowed
 % (pdf/A restrict the names).
 %    \begin{macrocode}
@@ -242,41 +174,46 @@
   }
 %    \end{macrocode}
 %  \subsection{pdf/A}
+%  \begin{variable}{
+%   \g_pdfmeta_standard_pdf/A-1b_prop ,
+%   \g_pdfmeta_standard_pdf/A-2b_prop,
+%   \g_pdfmeta_standard_pdf/A-3b_prop
+%   }
 %     \begin{macrocode}
-\prop_new:c { g_@@_meta_standard_pdf/A-1b_prop }
-\prop_set_from_keyval:cn { g_@@_meta_standard_pdf/A-1b_prop }
+\prop_new:c { g_pdfmeta_standard_pdf/A-1b_prop }
+\prop_set_from_keyval:cn { g_pdfmeta_standard_pdf/A-1b_prop }
   {
-    ,name         = pdf/A-1b
-    ,year         = 2005
-    ,pdf_version  = 1.4        %minimum
-    ,encryption   = false
+    ,name             = pdf/A-1b
+    ,year             = 2005
+    ,pdf_version      = 1.4        %minimum
+    ,encryption       = false
     ,external_content = false  % no F, FFilter, or FDecodeParms in stream dicts
-    ,embed_content = false,    %no EF key in filespec, no /Type/EmbeddedFiles
+    ,embed_content    = false, % no EF key in filespec, no /Type/EmbeddedFiles
     ,max_string_size  = 65535
     ,max_array_size   = 8191
     ,max_dict_size    = 4095
-    ,max_obj_num     =  8388607
-    ,max_nest_qQ     = 28
+    ,max_obj_num      =  8388607
+    ,max_nest_qQ      = 28
     ,Catalog/OCProperties    = false
-    ,named_actions   = {NextPage, PrevPage, FirstPage, LastPage}
-    ,annot_flags     = {
-                         \pdf_flag_set:nn   {annot/Link}{Print}
-                         \pdf_flag_clear:nn {annot/Link}{Hidden}
-                         \pdf_flag_clear:nn {annot/Link}{Invisible}
-                         \pdf_flag_clear:nn {annot/Link}{NoView}
-                       }
+    ,named_actions    = {NextPage, PrevPage, FirstPage, LastPage}
+    ,annot_flags      = {
+                          \pdf_flag_set:nn   {annot/Link}{Print}
+                          \pdf_flag_clear:nn {annot/Link}{Hidden}
+                          \pdf_flag_clear:nn {annot/Link}{Invisible}
+                          \pdf_flag_clear:nn {annot/Link}{NoView}
+                        }
     % to be continued https://docs.verapdf.org/validation/pdfa-part1/
   }
 
-\prop_new:c { g_@@_meta_standard_pdf/A-2b_prop }
+\prop_new:c { g_pdfmeta_standard_pdf/A-2b_prop }
 \prop_gset_eq:cc
-  { g_@@_meta_standard_pdf/A-2b_prop }
-  { g_@@_meta_standard_pdf/A-1b_prop }
+  { g_pdfmeta_standard_pdf/A-2b_prop }
+  { g_pdfmeta_standard_pdf/A-1b_prop }
 
-\prop_new:c { g_@@_meta_standard_pdf/A-3b_prop }
+\prop_new:c { g_pdfmeta_standard_pdf/A-3b_prop }
 \prop_gset_eq:cc
-  { g_@@_meta_standard_pdf/A-3b_prop }
-  { g_@@_meta_standard_pdf/A-2b_prop }
+  { g_pdfmeta_meta_standard_pdf/A-3b_prop }
+  { g_pdfmeta_meta_standard_pdf/A-2b_prop }
 
 
 %   ["pdf/a-1b:2005"] = {
@@ -300,6 +237,7 @@
 %            end
 %        },
 %    \end{macrocode}
+% \end{variable}
 %    \begin{macrocode}
 %</package>
 %    \end{macrocode}
