@@ -59,6 +59,14 @@
 %    \begin{macrocode}
 %<@@=pdf>
 %    \end{macrocode}
+%    \begin{macrocode}
+%<*dvipdfmx|xdvipdfmx>
+% avoid that destinations names are optimized.
+% is this still needed??
+% see https://tug.org/pipermail/dvipdfmx/2019-May/000002.html
+    \__kernel_backend_literal:x { dvipdfmx:config~C~ 0x10 }
+%</dvipdfmx|xdvipdfmx>
+%    \end{macrocode}
 % \begin{variable}{\g_@@_tmpa_prop, \l_@@_tmpa_tl, \l_@@_tmpa_box }
 % Some scratch variables
 %    \begin{macrocode}

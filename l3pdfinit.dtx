@@ -114,12 +114,13 @@
       { \msg_error:nn { pdf }{ setup-after-documentclass } }
       {
         \keys_set_groups:nnn { pdf / setup} {init}{ #1 }
-        \RequirePackage{l3pdf}
-        \RequirePackage{lthooks} %
+        \RequirePackage{l3pdf}   %should be loader after the backend is set.
+        \RequirePackage{lthooks} % should be removed later
         % %load backend driver
         \ExplSyntaxOn\makeatletter
-        \file_input:n {l3\g__sys_backend_tl-pdf.def}
+        \file_input:n {l3\g__sys_backend_tl-pdf.def} %should be inside the normal backend
         \ExplSyntaxOff\makeatother
+        \RequirePackage{l3pdfutils}
         \bool_gset_true:N \g_@@_Core_active_bool
         \keys_set_filter:nnn  { pdf / setup } { init } { #1 }
       }
@@ -155,7 +156,7 @@
       {
         \msg_warning:nnn{pdf}{unknown-standard}{#1}
       }
-    ,core .bool_gset:N = \g__pdf_Core_active_bool  
+    ,core .bool_gset:N = \g__pdf_Core_active_bool
   }
 %    \end{macrocode}
 % \end{function}
