@@ -38,7 +38,7 @@
 %<*package>
 \ProvidesExplPackage {pdfresources} {2020-07-13} {0.7}
   {experimental pdf-resource management}
-\RequirePackage{zref-base,bitset}
+\RequirePackage{lthooks,zref-base,bitset}
 \DeclareOption { debug }
   {
     \msg_redirect_module:nnn { pdf } { none } { warning }
@@ -62,6 +62,7 @@
 % \date{Released 2020-XX-XX}
 %
 % \maketitle
+% \begin{documentation}
 % \section{Introduction}
 % The \LaTeX{} format currently contains nearly no code specific to the now quite
 % central output format, PDF.
@@ -88,6 +89,71 @@
 % Some backends can insert a resource at the first compilation, while another uses
 % the aux-file and a label and so needs at least two.
 %
+% \section{Use}
+% The package should be loaded before \cs{documentclass}. To activate
+% the resource management it should be followed by
+% \cs{DeclareDocumentMetaData}\marg{key-val}. The allowed keys are currently
+% described in \pdf{l3pdfinit}
+%
+% \section{Incompabilities}
+%
+% The package tries to take over the management of core PDF dictionaries. All packages
+% that bypass this package and access this dictionaries with primitives like
+% \cs{pdfcatalog}, \cs{pdfinfo}, \cs{pdfpageresources}, \cs{pdfpagesattr}
+% and \cs{pdfpageattr} or similar commands from other engines and backends are
+% basically incompatible: values can get lost or be wrong.
+%
+% The following describes known incompatible packages along with some suggestions
+% how this should or will be handled in future. The list is not exhaustive.
+%
+% \subsection{hyperref}
+% A generic driver that can
+% be used as replacement has been developed. It can be loaded with
+% \begin{verbatim}
+%  \usepackage[customdriver=hgeneric-experimental]{hyperref}
+% \end{verbatim}
+%
+% For bookmarks the bookmarks package should be loaded after hyperref.
+% The new driver supports already most of the functions of the original drivers.
+% Incomplete is the support for form fields.
+%
+% \subsection{pdfx}
+% \pkg{pdfx} is not compatible. Replacement code to setup standards is under
+% development. At first pdf/A will be handled, pdf/X then later.
+%
+% \subsection{hyperxmp}
+% With small adjustments hyperxmp can be used. But the coordination should be
+% improved.
+%
+% \subsection{tikz/pgf}
+% \pkg{pgf} writes to the page resources too and so is incompatible. The needed
+% changes are rather small and will be done in coordination with the maintainer.
+% Until this works, \pkg{pageresources} can be loaded with the option \texttt{patches}
+% which will add the needed patches.
+%
+% \subsection{transparent}
+% The package \pkg{transparent} is incompatible. A replacement has been written
+% (\pkg{new-transparent}) and will be merged into the package.
+%
+% \subsection{pdflscape}
+% The package \pkg{pdflscape} is incompatible. A replacement has been written
+% (\pkg{new-pdflscape}) and will be merged into the package.
+%
+% \subsection{colorspace}
+% The package is incompatible. It works more or less with the option \texttt{patches}.
+% Alternative code for spot colors is under development
+% in the \pkg{l3color} package.
+%
+% \subsection{embedfile}
+% Tools needed to be able to write a replacement
+% to replace this package have been developed in the l3pdffile package.
+%
+% \subsection{tagpdf}
+% The development code is compatible and will be uploaded in time.
+%
+%
+% \end{documentation}
+% \begin{implementation}
 % \section{messages}
 %    \begin{macrocode}
 %<*package>
@@ -98,17 +164,12 @@
 
 %</package>
 %    \end{macrocode}
-% \section{Preparation/helper Code}
-%^^A still needed:
-%^^A \pdf@strcmp??
-%^^A \pdf@escapestring?? \pdfescapestring
-%
-% This loads tools and the core code.
-% \begin{NOTE}{UF}
-% The loading order must be sorted ...
-% \end{NOTE}
+% \section{Loading the core files.}
+% This loads the core files. The backend should not be loaded
+% to allow to set it in the document.
 %    \begin{macrocode}
 %<*package>
+\RequirePackage{l3pdfinit} %
 \RequirePackage{l3pdfmeta} %
 \RequirePackage{l3pdfdict}
 \RequirePackage{l3pdftools}
@@ -116,6 +177,7 @@
 %</package>
 %    \end{macrocode}
 %
+% \section{The core dictionaries}
 % \subsection{The \enquote{Info} dictionary (pdfinfo)}
 % \begin{NOTE}{UF}
 % path: Info
@@ -937,5 +999,6 @@
 %
 % \section{Patches}
 % The code has been moved to pageresources-patches.dtx
+% \end{implementation}
 % \newpage
 % \PrintIndex
