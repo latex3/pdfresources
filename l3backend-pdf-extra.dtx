@@ -1206,7 +1206,7 @@
 %nearly identical but not completely ...
 \sys_if_engine_luatex:T
   {
-    \cs_new:Npn \@@_backend_xform_new:nnnn #1 #2 #3 #4
+    \cs_new_protected:Npn \@@_backend_xform_new:nnnn #1 #2 #3 #4
     % #1 name
     % #2 attributes
     % #3 resources
@@ -1271,7 +1271,7 @@
             { \tex_pdflastxform:D }
       }
 
-    \cs_new:Npn \@@_backend_xform_use:n #1
+    \cs_new_protected:Npn \@@_backend_xform_use:n #1 %protected as with xelatex
       {
         \tex_pdfrefxform:D \int_use:c
           {
@@ -1294,7 +1294,7 @@
    % as the object reference and the size is often wanted on the current page.
    % so we need to allocate a box - but probably they won't be thousands xform
    % in a document so it shouldn't matter.
-    \cs_new:Npn \@@_backend_xform_new:nnnn #1 #2 #3 #4
+    \cs_new_protected:Npn \@@_backend_xform_new:nnnn #1 #2 #3 #4
     % #1 name
     % #2 attributes
     % #3 resources
@@ -1375,7 +1375,7 @@
         @pdf.xform \int_use:c { c_@@_backend_xform_ \tl_to_str:n {#1} _int }
       }
 
-    \cs_new:Npn \@@_backend_xform_use:n #1
+    \cs_new_protected:Npn \@@_backend_xform_use:n #1
      {
        \hbox_set:Nn \l_@@_tmpa_box
          {
@@ -1392,8 +1392,8 @@
 %</dvipdfmx|xdvipdfmx>
 %<*dvisvgm>
 % unclear what it should do!!
-\cs_new:Npn \@@_backend_xform_new:nnnn #1 #2 #3 #4 {}
-\cs_new:Npn \@@_backend_xform_use:n #1 {}
+\cs_new_protected:Npn \@@_backend_xform_new:nnnn #1 #2 #3 #4 {}
+\cs_new_protected:Npn \@@_backend_xform_use:n #1 {}
 \cs_new:Npn \@@_backend_xform_ref:n {}
 %</dvisvgm>
 %<*drivers>
