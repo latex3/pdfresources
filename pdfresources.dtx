@@ -71,7 +71,7 @@
 % central PDF-directories to external packages.
 % This is problematic as it can lead easily to clashes if two packages try
 % to access the same resource in an incompatible way.  Also as
-% the primitives differ between the various binaries and backend with
+% the primitives differ between the various binaries and backends with
 % which \LaTeX{} is used all packages have to write and maintain \enquote{driver} files
 % for the various backends.
 %
@@ -95,6 +95,13 @@
 % \cs{DeclareDocumentMetaData}\marg{key-val}. The allowed keys are currently
 % described in \pdf{l3pdfinit}
 %
+% \section{Requirements}
+% pdfresources requires a LaTeX format from 2020/10/01 or later.
+% It currently depends on the external packages \pkg{zref-base} and \pkg{bitset}.
+% In some places, e.g. when writing strings to the pdf it assumes that
+% the file is utf8 encoded -- ascii will naturally work too, but 8bit encodings are
+% not supported
+%
 % \section{Incompabilities}
 %
 % The package tries to take over the management of core PDF dictionaries. All packages
@@ -112,8 +119,8 @@
 % \begin{verbatim}
 %  \usepackage[customdriver=hgeneric-experimental]{hyperref}
 % \end{verbatim}
-%
-% For bookmarks the bookmarks package should be loaded after hyperref.
+% The code for bookmarks has been removed from this driver, instead
+% the \pkg{bookmarks} package should be loaded after \pkg{hyperref}.
 % The new driver supports already most of the functions of the original drivers.
 % Incomplete is the support for form fields.
 %
@@ -122,7 +129,7 @@
 % development. At first pdf/A will be handled, pdf/X then later.
 %
 % \subsection{hyperxmp}
-% With small adjustments hyperxmp can be used. But the coordination should be
+% With small adjustments hyperxmp can be used. But the coordination must be
 % improved.
 %
 % \subsection{tikz/pgf}
@@ -179,6 +186,8 @@
 %
 % \section{The core dictionaries}
 % \subsection{The \enquote{Info} dictionary (pdfinfo)}
+% The content of the property list associated with this dictionary name is written to the
+% /Info object. This replaces \cs{pdfinfo}. 
 % \begin{NOTE}{UF}
 % path: Info
 % The info dictionary is filled by e.g. \cs{pdfinfo}. Multiple appearances of
@@ -205,7 +214,7 @@
 %
 % \subsection{The \enquote{Pages} dictionary (pdfpagesattr)}
 % The content of the property list associated with this dictionary name is written to the
-% /Pages object. This replaces \cs{pdfpagesattr}. This dictionary is global.
+% /Pages object. This replaces \cs{pdfpagesattr}.
 % \subsubsection{\enquote{Pages} / backend}
 % \begin{NOTE}{UF}
 %  path: Pages
@@ -225,6 +234,8 @@
 % The code has been moved to \pkg{l3pdfcoredict}
 %
 % \subsection{\enquote{Page} and \enquote{ThisPage} (pdfpageattr)}
+% The content of the property lists associated with this dictionary name is written to the
+% /Page objects. This replaces \cs{pdfpageattr}.
 % \subsubsection{\enquote{Page} and \enquote{ThisPage} /backend}
 % The code has been moved to \pgk{l3backend-pdf-extra}.
 % \subsubsection{\enquote{Page} and \enquote{ThisPage} / management}
