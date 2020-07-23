@@ -115,7 +115,6 @@
       {
         \keys_set_groups:nnn { pdf / setup} {init}{ #1 }
         \RequirePackage{l3pdf}   %should be loader after the backend is set.
-        \RequirePackage{lthooks} % should be removed later
         % %load backend driver
         \ExplSyntaxOn\makeatletter
         \file_input:n {l3\g__sys_backend_tl-pdf.def} %should be inside the normal backend
