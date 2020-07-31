@@ -757,7 +757,7 @@
     \bool_if:NTF  \g_@@_Core_active_bool
       {\cs_gset_eq:NN \@@_backend_bdc:nn \@@_backend_bdc_contobj:nn}
       {\cs_gset_eq:NN \@@_backend_bdc:nn \@@_backend_bdc_contstream:nn}
-      \@@_backend_bdc:nn {#1}{#1}
+      \@@_backend_bdc:nn {#1}{#2}
   }
 \cs_set_protected:Npn \@@_backend_emc:
   {
@@ -850,7 +850,7 @@
       \bool_if:NTF  \g_@@_Core_active_bool
         {\cs_gset_eq:NN \@@_backend_bdc:nn \@@_backend_bdc_contobj:nn}
         {\cs_gset_eq:NN \@@_backend_bdc:nn \@@_backend_bdc_contstream:nn}
-        \@@_backend_bdc:nn {#1}{#1}
+        \@@_backend_bdc:nn {#1}{#2}
     }
     \cs_set_protected:Npn \@@_backend_emc:
       {
@@ -953,7 +953,7 @@
       \bool_if:NTF  \g_@@_Core_active_bool
         {\cs_gset_eq:NN \@@_backend_bdc:nn \@@_backend_bdc_contobj:nn}
         {\cs_gset_eq:NN \@@_backend_bdc:nn \@@_backend_bdc_contstream:nn}
-        \@@_backend_bdc:nn {#1}{#1}
+        \@@_backend_bdc:nn {#1}{#2}
     }
   \cs_set_protected:Npn \@@_backend_emc:
     {
