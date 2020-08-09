@@ -482,6 +482,11 @@
   {
     The~dictionary~'#1'~is~already~defined.
   }
+\msg_new:nnn  { pdfcoredict } { inactive  }
+  {
+    The~pdfresources~managment~is~not~active\\
+    command~'#1'~ignored.
+  }
 %    \end{macrocode}
 % A predicate to test if the core code should be active
 %    \begin{macrocode}
@@ -498,12 +503,18 @@
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdfcoredict_gput:nnn #1 #2 #3
   {
-    \pdfdict_if_exist:nnTF { g }{ Core/#1 }
+    \@@_if_active:TF
       {
-        \@@_handler_gput:nnn { #1 }{ #2 }{ #3 }
+        \pdfdict_if_exist:nnTF { g }{ Core/#1 }
+          {
+            \@@_handler_gput:nnn { #1 }{ #2 }{ #3 }
+          }
+          {
+            \msg_error:nnn{pdfcoredict}{unknown-dict}{#1}
+          }
       }
       {
-        \msg_error:nnn{pdfcoredict}{unknown-dict}{#1}
+        \msg_warning:nnx {pdfcoredict}{inactive}{\tl_to_str:n {\pdfcoredict_gput:nnn}}
       }
   }
 
@@ -801,6 +812,18 @@
 %    \end{macrocode}
 % \subsubsection{\enquote{Page/Resources}: ExtGState, ColorSpace, Shading, Pattern}
 %    \begin{macrocode}
+\clist_const:Nn \c_@@_PageResources_clist
+  {
+    ExtGState,
+    ColorSpace,
+    Pattern,
+    Shading,
+  }
+
+\clist_map_inline:Nn \c_@@_PageResources_clist
+  {
+    \pdfdict_new:nn { g } {Core/Page/Resources/#1}
+  }
 %
 % setter:  #1 is the name of the resource
 \cs_new_protected:cpn { @@_handler/Page/Resources/ExtGState/?_gput:nn } #1 #2
