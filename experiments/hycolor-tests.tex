@@ -1,0 +1,136 @@
+% !Mode:: "TeX:DE:UTF-8:Main"
+\RequirePackage{pdfresources}
+\DeclareDocumentMetaData{uncompress}
+
+\documentclass{article}
+\usepackage{l3color,color}
+\usepackage[customdriver=hgeneric-experimental]{hyperref}
+
+\makeatletter
+\ExplSyntaxOn
+\cs_new:Npx \__color_split_colon:n #1
+  {
+    \exp_not:N \__color_split_colon:w  #1 \c_colon_str \c_colon_str
+    \exp_not:N \q_stop
+  }
+\use:x
+  {
+    \cs_new:Npn \exp_not:N \__color_split_colon:w ##1 \c_colon_str ##2 \c_colon_str
+    ##3 \exp_not:N \q_stop
+  }
+  {
+    \tl_if_blank:nTF {#2}
+      { #1 }
+      { #2 }
+  }
+  \ExplSyntaxOff
+\protected\def\definecolor#1#2#3{%
+  \@ifundefined{color@#2}%
+    {\c@lor@error{model `#2'}}%
+    {\@ifundefined{\string\color @#1}{}%
+      {\PackageInfo{color}{Redefining color #1}}%
+     \csname color@#2\expandafter\endcsname
+         \csname\string\color @#1\endcsname{#3}}%
+    \@expl@color@set@nnn{#1}{#2}{#3}%
+  }
+
+\protected\def\DefineNamedColor#1#2#3#4{%
+  \@ifundefined{define@color@#1}%
+    {\c@lor@error{model `#1'}}%
+    {\@ifundefined{color@#3}%
+      {\c@lor@error{model `#3'}}%
+      {\@ifundefined{col@#2}{}%
+        {\PackageInfo{color}{Redefining color #2 in named color model}}%
+      \csname color@#3\endcsname\@tempa{#4}%
+    \@expl@color@set@nnn{#2}{#3}{#4}% %changed, use cmyk values for now.
+      \csname define@color@#1\endcsname{#2}\@tempa
+      \c@lor@usename{#2}}}}
+\@onlypreamble\DefineNamedColor
+
+
+
+\usepackage[dvipsnames]{xcolor}
+
+\usepackage{etoolbox}
+
+\ExplSyntaxOn
+\cs_if_exist:NT \color_set:nnn
+   {
+     \cs_new_protected:Npn \@expl@color@set@nnn #1#2#3
+       { \exp_args:Nnx\color_set:nnn {#1}{\__color_split_colon:n { #2 }}{#3}}
+     \cs_gset_eq:NN \@expl@color@set@nn \color_set:nn
+   }
+\pretocmd{\XC@definec@lor}{\@expl@color@set@nnn{#2}{#4}{#5}}{}{\fail}
+\pretocmd{\XC@col@rlet}   {\@expl@color@set@nn{#2}{#4}}{}{\fail}
+
+\ExplSyntaxOff
+\input{dvipsnam.def}
+\definecolorstrue
+\input{svgnam.def}
+\makeatother
+\preparecolor{prepblub}{rgb/cmyk}{1,0.123,0/1,1,1,0.1345}
+\definecolors{prepblub}
+
+\definecolorseries{foo}{rgb}{last}{red}{blue}
+\resetcolorseries{foo}
+\begin{document}
+
+\color{foo} abc \color{foo!!+} abc
+
+%\end{document}
+\colorlet{myred}{red}
+\makeatletter
+
+\expandafter\show\csname\string\colorB@foo\endcsname 
+
+missing: cmy, hsb, Gray, wave
+works: (but check values): Hsb, HSB,
+works: gray,rgb, RGB,HTML,
+%\definecolor{htmlcol}{wave}{500} \color{htmlcol}XXXX
+%\end{document}
+
+\definecolor{blub}{rgb/cmyk}{1,0.123,0/1,1,1,0.1345}
+\providecolor{blub}{hsb:rgb/cmyk}{1,0.1773,0/1,1,1,0.1345}
+
+\colorlet{blab}{blub}
+
+\definecolorset{rgb}{x}{10}{red,1,0,0;green,0,1,0;blue,0,0,1}
+\ExplSyntaxOn
+\color_show:n{AliceBlue}
+\color_show:n {foo}
+\color_show:n {htmlcol}
+
+\color_show:n {prepblub}
+
+\color_show:n{blab}
+\color_show:n{xgreen10}
+\color_show:n {blub}
+\color_show:n {GreenYellow}
+
+%    URI   = url,
+%    GoTo  = link,
+%    GoToR = file,
+%    Named = menu,
+%    Launch= run
+\color_set:nnn { hyp@URIcolor } {rgb }{1,0,0}
+%\color_show:n  { hyp@linkcolor }
+\color_set:nn  { hyp@GoTocolor }   {green!50!blue }
+%\color_show:n  { hyp@GoTocolor }
+
+\color_set:nnn { specialcolor }{rgb/cmyk}{1,0.3,0.3/0.4,0.2,0.3,0,5}
+\color_set:nn  { hyp@Launchcolor }{specialcolor}
+%\color_show:n  { hyp@runcolor }
+
+\url{abc}~
+\pdfdict_show:n{annot/Link/URI}
+\color_export:nnN {hyp@URIcolor}{space-sep-rgb}\l_tmpa_tl
+\pdfdict_put:nnx
+              {annot/Link/URI}
+              { C }
+              { [\l_tmpa_tl] }
+\pdfdict_show:n{annot/Link/URI}
+
+\url{abc}
+\ExplSyntaxOff
+
+\end{document} 
