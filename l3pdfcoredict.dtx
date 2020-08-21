@@ -801,6 +801,18 @@
 %    \end{macrocode}
 % \subsubsection{\enquote{Page/Resources}: ExtGState, ColorSpace, Shading, Pattern}
 %    \begin{macrocode}
+\clist_const:Nn \c_@@_PageResources_clist
+  {
+    ExtGState,
+    ColorSpace,
+    Pattern,
+    Shading,
+  }
+
+\clist_map_inline:Nn \c_@@_PageResources_clist
+  {
+    \pdfdict_new:nn { g } {Core/Page/Resources/#1}
+  }
 %
 % setter:  #1 is the name of the resource
 \cs_new_protected:cpn { @@_handler/Page/Resources/ExtGState/?_gput:nn } #1 #2

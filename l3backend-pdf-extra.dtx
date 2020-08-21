@@ -503,6 +503,7 @@
 % and to push the values.
 %
 % The names are quite often needed
+% a similar list is now in l3pdfcoredict. Perhaps it should be merged.
 %<*drivers>
 \clist_const:Nn \c_@@_backend_PageResources_clist
   {
@@ -511,11 +512,6 @@
     Pattern,
     Shading,
   }
-
-\clist_map_inline:Nn \c_@@_backend_PageResources_clist
-      {
-        \pdfdict_new:nn { g } {Core/Page/Resources/#1}
-      }
 %</drivers>
 % pdftex and luatex
 %<*pdfmode>
