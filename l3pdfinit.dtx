@@ -108,22 +108,29 @@
                 should~be~used~only~before~\token_to_str:N\documentclass
               }
 
+
+\bool_new:N \g__pdf_Meta_used_bool
 \NewDocumentCommand\DeclareDocumentMetaData { m }
   {
     \cs_if_eq:NNTF \documentclass \@twoclasseserror
       { \msg_error:nn { pdf }{ setup-after-documentclass } }
       {
-        \keys_set_groups:nnn { pdf / setup} {init}{ #1 }
-        \RequirePackage{l3pdf}   %should be loader after the backend is set.
-        % %load backend driver
-        \ExplSyntaxOn\makeatletter
-        \file_input:n {l3\g__sys_backend_tl-pdf.def} %should be inside the normal backend
-        \ExplSyntaxOff\makeatother
-        \RequirePackage{l3pdfutils}
-        \bool_gset_true:N \g_@@_Core_active_bool
+        \bool_if:NF \g__pdf_Meta_used_bool
+          {
+            \keys_set_groups:nnn { pdf / setup} {init}{ #1 }
+            \RequirePackage{l3pdf}   %should be loader after the backend is set.
+            % %load backend driver
+            \ExplSyntaxOn\makeatletter
+            \file_input:n {l3\g__sys_backend_tl-pdf.def} %should be inside the normal backend
+            \ExplSyntaxOff\makeatother
+            \RequirePackage{l3pdfutils}
+            \bool_gset_true:N \g__pdf_Core_active_bool
+          }
+        \bool_gset_true:N \g__pdf_Meta_used_bool
         \keys_set_filter:nnn  { pdf / setup } { init } { #1 }
       }
   }
+
 
 \keys_define:nn { pdf / setup }
   {

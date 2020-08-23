@@ -334,7 +334,7 @@
       {
         \tex_directlua:D
           {
-            l3kernel.@@.backend_Page_gput
+            ltx.@@.backend_Page_gput
               (
                 \@@_backend_luastring:n { #1 },
                 \@@_backend_luastring:n { #2 }
@@ -348,7 +348,7 @@
     {
       \tex_directlua:D
         {
-          l3kernel.@@.backend_Page_gremove (\@@_backend_luastring:n { #1 })
+          ltx.@@.backend_Page_gremove (\@@_backend_luastring:n { #1 })
         }
     }
  % the command used in the document.
@@ -360,13 +360,13 @@
     {
       \tex_latelua:D
         {
-          l3kernel.@@.backend_ThisPage_gput
+          ltx.@@.backend_ThisPage_gput
             (
               tex.count["g_shipout_readonly_int"],
               \@@_backend_luastring:n { #1 },
               \@@_backend_luastring:n { #2 }
             )
-          l3kernel.@@.backend_ThisPage_gpush (tex.count["g_shipout_readonly_int"])
+          ltx.@@.backend_ThisPage_gpush (tex.count["g_shipout_readonly_int"])
         }
     }
   %the code to push the values, used in shipout
@@ -377,7 +377,7 @@
     {
       \tex_latelua:D
         {
-          l3kernel.@@.backend_ThisPage_gpush (tex.count["g_shipout_readonly_int"])
+          ltx.@@.backend_ThisPage_gpush (tex.count["g_shipout_readonly_int"])
         }
     }
   }
@@ -503,6 +503,7 @@
 % and to push the values.
 %
 % The names are quite often needed
+% a similar list is now in l3pdfcoredict. Perhaps it should be merged.
 %<*drivers>
 \clist_const:Nn \c_@@_backend_PageResources_clist
   {
@@ -522,7 +523,7 @@
       {
         \tex_directlua:D
           {
-            l3kernel.@@.object["Page/Resources/#1"]
+            ltx.@@.object["Page/Resources/#1"]
             =
             "\@@_backend_object_ref:n{Page/Resources/#1}"
           }
@@ -535,10 +536,10 @@
       {
         \pdfdict_gput:nnn {Core/Page/Resources/#1} { #2 }{ #3 }
         % luatex must also trigger the lua side
-        \tex_latelua:D{l3kernel.@@.Page.Resources.#1=true}
+        \tex_latelua:D{ltx.@@.Page.Resources.#1=true}
         \tex_latelua:D
           {
-            l3kernel.pdf.Page_Resources_gpush(tex.count["g_shipout_readonly_int"])
+            ltx.pdf.Page_Resources_gpush(tex.count["g_shipout_readonly_int"])
           }
       }
   }
@@ -794,7 +795,7 @@
           {
             \exp_args:Nx \tex_latelua:D
               {
-                l3kernel.pdf.Page_Resources_Properties_gput
+                ltx.pdf.Page_Resources_Properties_gput
                   (
                     tex.count["g_shipout_readonly_int"],
                     "l3pdf\int_use:N\g_@@_backend_name_int",
@@ -818,7 +819,7 @@
           {
             \exp_args:Nx \tex_latelua:D
               {
-                l3kernel.pdf.Page_Resources_Properties_gput
+                ltx.pdf.Page_Resources_Properties_gput
                   (
                     tex.count["g_shipout_readonly_int"],
                     "l3pdf\int_use:N\g_@@_backend_name_int",
@@ -1416,19 +1417,18 @@
 % \subsection{lua code for lualatex}
 %    \begin{macrocode}
 %<*lua>
-l3kernel= l3kernel or {}
-l3kernel.@@      = l3kernel.@@ or {}
-l3kernel.@@.Page = l3kernel.@@.Page or {}
-l3kernel.@@.Page.dflt = l3kernel.@@.Page.dflt or {}
-l3kernel= l3kernel or {}
-l3kernel.@@.Page.Resources = l3kernel.@@.Resources or {}
-l3kernel.@@.Page.Resources.Properties = l3kernel.@@.Page.Resources.Properties or {}
-l3kernel.@@.Page.Resources.List={"ExtGState","ColorSpace","Pattern","Shading"}
-l3kernel.@@.object = l3kernel.@@.object or {}
+ltx= ltx or {}
+ltx.@@      = ltx.@@ or {}
+ltx.@@.Page = ltx.@@.Page or {}
+ltx.@@.Page.dflt = ltx.@@.Page.dflt or {}
+ltx.@@.Page.Resources = ltx.@@.Resources or {}
+ltx.@@.Page.Resources.Properties = ltx.@@.Page.Resources.Properties or {}
+ltx.@@.Page.Resources.List={"ExtGState","ColorSpace","Pattern","Shading"}
+ltx.@@.object = ltx.@@.object or {}
 
-l3kernel.pdf= l3kernel.pdf or {} -- for "public" functions
+ltx.pdf= ltx.pdf or {} -- for "public" functions
 
-local @@ = l3kernel.@@
+local @@ = ltx.@@
 local pdf = pdf
 
 local function @@_backend_Page_gput (name,value)
@@ -1471,29 +1471,29 @@ local function @@_backend_ThisPage_gpush (page)
  return token
 end
 
-function l3kernel.@@.backend_ThisPage_gput (page,name,value) -- tex.count["g_shipout_readonly_int"]
+function ltx.@@.backend_ThisPage_gput (page,name,value) -- tex.count["g_shipout_readonly_int"]
  @@_backend_ThisPage_gput (page,name,value)
 end
 
-function l3kernel.@@.backend_ThisPage_gpush (page)
+function ltx.@@.backend_ThisPage_gpush (page)
   pdf.setpageattributes(@@_backend_ThisPage_gpush (page))
 end
 
-function l3kernel.@@.backend_Page_gput (name,value)
+function ltx.@@.backend_Page_gput (name,value)
   @@_backend_Page_gput (name,value)
 end
 
-function l3kernel.@@.backend_Page_gremove (name)
+function ltx.@@.backend_Page_gremove (name)
   @@_backend_Page_gremove (name)
 end
 
-function l3kernel.@@.backend_Page_gclear ()
+function ltx.@@.backend_Page_gclear ()
   @@_backend_Page_gclear ()
 end
 
 
-local Properties  = l3kernel.@@.Page.Resources.Properties
-local ResourceList= l3kernel.@@.Page.Resources.List
+local Properties  = ltx.@@.Page.Resources.Properties
+local ResourceList= ltx.@@.Page.Resources.List
 local function @@_backend_PageResources_gpush (page)
  local token=""
  if Properties[page] then
@@ -1509,27 +1509,27 @@ local function @@_backend_PageResources_gpush (page)
   token = "/Properties <<"..token..">>"
  end
   for i,name in ipairs(ResourceList) do
-   if l3kernel.@@.Page.Resources[name] then
-   token = token .. "/"..name.." "..l3kernel.pdf.object_ref("Page/Resources/"..name)
+   if ltx.@@.Page.Resources[name] then
+   token = token .. "/"..name.." "..ltx.pdf.object_ref("Page/Resources/"..name)
    end
   end
  return token
 end
 
 -- the function is public, as I probably need it in tagpdf too ...
-function l3kernel.pdf.Page_Resources_Properties_gput (page,name,value) -- tex.count["g_shipout_readonly_int"]
+function ltx.pdf.Page_Resources_Properties_gput (page,name,value) -- tex.count["g_shipout_readonly_int"]
  Properties[page] = Properties[page] or {}
  Properties[page][name]=value
  pdf.setpageresources(@@_backend_PageResources_gpush (page))
 end
 
-function l3kernel.pdf.Page_Resources_gpush(page)
+function ltx.pdf.Page_Resources_gpush(page)
  pdf.setpageresources(@@_backend_PageResources_gpush (page))
 end
 
-function l3kernel.pdf.object_ref (objname)
- if l3kernel.@@.object[objname] then
-  local ref= l3kernel.@@.object[objname]
+function ltx.pdf.object_ref (objname)
+ if ltx.@@.object[objname] then
+  local ref= ltx.@@.object[objname]
   return ref
  else
   return "false"
