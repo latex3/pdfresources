@@ -7,23 +7,6 @@
 \usepackage[customdriver=hgeneric-experimental]{hyperref}
 
 \makeatletter
-\ExplSyntaxOn
-\cs_new:Npx \__color_split_colon:n #1
-  {
-    \exp_not:N \__color_split_colon:w  #1 \c_colon_str \c_colon_str
-    \exp_not:N \q_stop
-  }
-\use:x
-  {
-    \cs_new:Npn \exp_not:N \__color_split_colon:w ##1 \c_colon_str ##2 \c_colon_str
-    ##3 \exp_not:N \q_stop
-  }
-  {
-    \tl_if_blank:nTF {#2}
-      { #1 }
-      { #2 }
-  }
-  \ExplSyntaxOff
 \protected\def\definecolor#1#2#3{%
   \@ifundefined{color@#2}%
     {\c@lor@error{model `#2'}}%
@@ -47,8 +30,6 @@
       \c@lor@usename{#2}}}}
 \@onlypreamble\DefineNamedColor
 
-
-
 \usepackage[dvipsnames]{xcolor}
 
 \usepackage{etoolbox}
@@ -56,8 +37,9 @@
 \ExplSyntaxOn
 \cs_if_exist:NT \color_set:nnn
    {
-     \cs_new_protected:Npn \@expl@color@set@nnn #1#2#3
-       { \exp_args:Nnx\color_set:nnn {#1}{\__color_split_colon:n { #2 }}{#3}}
+    % \cs_new_protected:Npn \@expl@color@set@nnn #1#2#3
+%       { \exp_args:Nnx\color_set:nnn {#1}{#2}{#3}}
+     \cs_gset_eq:NN \@expl@color@set@nnn \color_set:nnn  
      \cs_gset_eq:NN \@expl@color@set@nn \color_set:nn
    }
 \pretocmd{\XC@definec@lor}{\@expl@color@set@nnn{#2}{#4}{#5}}{}{\fail}
@@ -81,7 +63,7 @@
 \colorlet{myred}{red}
 \makeatletter
 
-\expandafter\show\csname\string\colorB@foo\endcsname 
+\expandafter\show\csname\string\colorB@foo\endcsname
 
 missing: cmy, hsb, Gray, wave
 works: (but check values): Hsb, HSB,
@@ -89,8 +71,8 @@ works: gray,rgb, RGB,HTML,
 %\definecolor{htmlcol}{wave}{500} \color{htmlcol}XXXX
 %\end{document}
 
-\definecolor{blub}{rgb/cmyk}{1,0.123,0/1,1,1,0.1345}
-\providecolor{blub}{hsb:rgb/cmyk}{1,0.1773,0/1,1,1,0.1345}
+%\definecolor{blub}{rgb/cmyk}{1,0.123,0/1,1,1,0.1345}
+\definecolor{blub}{hsb:rgb/cmyk}{1,0.1773,0/1,1,1,0.1345}
 
 \colorlet{blab}{blub}
 
