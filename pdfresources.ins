@@ -144,13 +144,21 @@ and all files in that bundle must be distributed together.
 
 \generate
   {
-    \file{l3pdfmode-pdf.def}
+    \file{l3luatex-pdf.def}
       {
-        \from{l3backend-pdf-extra.dtx}{drivers,pdfmode}
-        \from{pdfresources.dtx}{drivers,pdfmode}
+        \from{l3backend-pdf-extra.dtx}{drivers,luatex}
+        \from{pdfresources.dtx}{drivers,luatex}
       }
   }
 
+\generate
+  {
+    \file{l3pdftex-pdf.def}
+      {
+        \from{l3backend-pdf-extra.dtx}{drivers,pdftex}
+        \from{pdfresources.dtx}{drivers,pdftex}
+      }
+  }
 \generate
   {
     \file {l3xetex-pdf.def}

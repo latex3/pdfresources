@@ -103,25 +103,22 @@
 % \subsection{luacode}
 % Load the lua code.
 %    \begin{macrocode}
-%<*pdfmode>
-\sys_if_engine_luatex:T
-  {
+%<*luatex>
     \directlua { require("l3backend-pdf.lua") }
-  }
-%</pdfmode>
+%</luatex>
 %    \end{macrocode}
 % \subsection{Hooks}
 % \subsubsection{Add the \enquote{end run} hooks}
 % Here we add the end run hook to suitable
 % end hooks.
 %    \begin{macrocode}
-%<*pdfmode>
+%<*pdftex|luatex>
 \hook_gput_code:nnn {enddocument/afterlastpage}
   {pdf/endrun}
   {
     \hook_use:n {pdf/coredict/end_run}
   }
-%</pdfmode>
+%</pdftex|luatex>
 %<*dvipdfmx|xdvipdfmx>
 \hook_gput_code:nnn {shipout/lastpage}
   {pdf/endrun}
@@ -160,14 +157,13 @@
 % content, dvips and dvipdfmx are additive. luatex sets it in lua.
 % The higher level code has to take this into account.
 %    \begin{macrocode}
-%<*pdfmode>
-\sys_if_engine_pdftex:T
+%<*pdftex>
+\cs_new_protected:Npn \@@_backend_Pages_primitive:n #1
   {
-    \cs_new_protected:Npn \@@_backend_Pages_primitive:n #1
-      {
-        \tex_global:D \tex_pdfpagesattr:D { #1 }
-      }
+    \tex_global:D \tex_pdfpagesattr:D { #1 }
   }
+%</pdftex>
+%<*luatex>
 %luatex: does it in lua
 \sys_if_engine_luatex:T
   {
@@ -179,7 +175,7 @@
           }
       }
   }
-%</pdfmode>
+%</luatex>
 %<*dvips>
 \cs_new_protected:Npx \@@_backend_Pages_primitive:n #1
   {
@@ -245,143 +241,140 @@
 % \cs{g_@@_backend_thispage_shipout_tl}.
 %    \begin{macrocode}
 %  backend commands
-%<*pdfmode>
-\sys_if_engine_pdftex:T
+%<*pdftex>
+ %the primitive
+  \cs_new_protected:Npn \@@_backend_Page_primitive:n #1
+    {
+      \tex_global:D \tex_pdfpageattr:D { #1 }
+    }
+% the command to store default values.
+% Uses a prop with pdflatex + dvi,
+% sets a lua table with lualatex
+ \cs_new_protected:Npn \@@_backend_Page_gput:nn #1 #2 %key,value
+   {
+     \pdfdict_gput:nnn {Core/Page}{ #1 }{ #2 }
+   }
+% the command to remove a default value.
+% Uses a prop with pdflatex + dvi,
+% changes a lua table with lualatex
+\cs_new_protected:Npn \@@_backend_Page_gremove:n #1
   {
-    %the primitive
-    \cs_new_protected:Npn \@@_backend_Page_primitive:n #1
-      {
-        \tex_global:D \tex_pdfpageattr:D { #1 }
-      }
-  % the command to store default values.
-  % Uses a prop with pdflatex + dvi,
-  % sets a lua table with lualatex
-   \cs_new_protected:Npn \@@_backend_Page_gput:nn #1 #2 %key,value
-     {
-       \pdfdict_gput:nnn {Core/Page}{ #1 }{ #2 }
-     }
-  % the command to remove a default value.
-  % Uses a prop with pdflatex + dvi,
-  % changes a lua table with lualatex
-  \cs_new_protected:Npn \@@_backend_Page_gremove:n #1
-    {
-      \pdfdict_gremove:nn  {Core/Page}{ #1 }
-    }
- % the command used in the document.
- % direct call of the primitive special with dvips/dvipdfmx
- % \latelua: fill a page related table with lualatex, merge it with the page
- % table and push it directly
- % write to aux and store in prop with pdflatex
-  \cs_new_protected:Npn \@@_backend_ThisPage_gput:nn #1 #2
-    {
-      %we need to know the page the resource should be added too.
-      \int_gincr:N\g_@@_backend_resourceid_int
-      \zref@labelbylist {l3pdf\int_use:N\g_@@_backend_resourceid_int} {l3pdf}
-      \tl_set:Nx \l_@@_tmpa_tl
-        {
-          \zref@extractdefault
-            {l3pdf\int_use:N\g_@@_backend_resourceid_int}
-            {pdf@abspage}
-            {0}
-        }
-      \pdfdict_if_exist:nnF { g } {Core/backend_Page\l_@@_tmpa_tl}
-        {
-          \pdfdict_new:nn { g }   {Core/backend_Page\l_@@_tmpa_tl}
-        }
-      %\__pdfcoredict_handler_gput:nnn {backend_Page\l_@@_tmpa_tl}{ #1 }{ #2 }
-      %backend_Page has no handler.
-      \pdfdict_gput:nnn {Core/backend_Page\l_@@_tmpa_tl}{ #1 }{ #2 }
-    }
-  %the code to push the values, used in shipout
-  %merges the two props and then fills the register in pdflatex
-  %merges the two tables and then fills (in lua) in luatex
-  %issues the values stored in the global prop with dvi
-  \cs_new_protected:Npn \@@_backend_ThisPage_gpush:n #1
-    {
-      \prop_gset_eq:Nc \g_@@_tmpa_prop { \pdfdict_name:nn { g }  { Core/Page } }
-      \prop_if_exist:cT  { \pdfdict_name:nn { g }  { Core/backend_Page#1 } }
-        {
-          \prop_map_inline:cn { \pdfdict_name:nn { g }  { Core/backend_Page#1 } }
-            {
-              \prop_gput:Nnn \g_@@_tmpa_prop { ##1 }{ ##2 }
-            }
-        }
-      \exp_args:Nx \@@_backend_Page_primitive:n
-        {
-          \prop_map_function:NN \g_@@_tmpa_prop \@@_dict_item:ne
-        }
-    }
+    \pdfdict_gremove:nn  {Core/Page}{ #1 }
   }
-
-\sys_if_engine_luatex:T
-  {% do we need to use some escaping for the values?????
-    \cs_new:Npn \@@_backend_luastring:n #1
+% the command used in the document.
+% direct call of the primitive special with dvips/dvipdfmx
+% \latelua: fill a page related table with lualatex, merge it with the page
+% table and push it directly
+% write to aux and store in prop with pdflatex
+\cs_new_protected:Npn \@@_backend_ThisPage_gput:nn #1 #2
+  {
+    %we need to know the page the resource should be added too.
+    \int_gincr:N\g_@@_backend_resourceid_int
+    \zref@labelbylist {l3pdf\int_use:N\g_@@_backend_resourceid_int} {l3pdf}
+    \tl_set:Nx \l_@@_tmpa_tl
       {
-        "\tex_luaescapestring:D { \tex_unexpanded:D { #1 } }"
+        \zref@extractdefault
+          {l3pdf\int_use:N\g_@@_backend_resourceid_int}
+          {pdf@abspage}
+          {0}
       }
- %not used, only there for consistency
-    \cs_new_protected:Npn \@@_backend_Page_primitive:n #1
+    \pdfdict_if_exist:nnF { g } {Core/backend_Page\l_@@_tmpa_tl}
       {
-        \tex_latelua:D
+        \pdfdict_new:nn { g }   {Core/backend_Page\l_@@_tmpa_tl}
+      }
+    %\__pdfcoredict_handler_gput:nnn {backend_Page\l_@@_tmpa_tl}{ #1 }{ #2 }
+    %backend_Page has no handler.
+    \pdfdict_gput:nnn {Core/backend_Page\l_@@_tmpa_tl}{ #1 }{ #2 }
+  }
+%the code to push the values, used in shipout
+%merges the two props and then fills the register in pdflatex
+%merges the two tables and then fills (in lua) in luatex
+%issues the values stored in the global prop with dvi
+\cs_new_protected:Npn \@@_backend_ThisPage_gpush:n #1
+  {
+    \prop_gset_eq:Nc \g_@@_tmpa_prop { \pdfdict_name:nn { g }  { Core/Page } }
+    \prop_if_exist:cT  { \pdfdict_name:nn { g }  { Core/backend_Page#1 } }
+      {
+        \prop_map_inline:cn { \pdfdict_name:nn { g }  { Core/backend_Page#1 } }
           {
-            pdf.setpageattributes(\@@_backend_luastring:n { #1 })
+            \prop_gput:Nnn \g_@@_tmpa_prop { ##1 }{ ##2 }
           }
       }
+    \exp_args:Nx \@@_backend_Page_primitive:n
+      {
+        \prop_map_function:NN \g_@@_tmpa_prop \@@_dict_item:ne
+      }
+  }
+%</pdftex>
+%<*luatex>
+% do we need to use some escaping for the values?????
+\cs_new:Npn \@@_backend_luastring:n #1
+  {
+    "\tex_luaescapestring:D { \tex_unexpanded:D { #1 } }"
+  }
+ %not used, only there for consistency
+\cs_new_protected:Npn \@@_backend_Page_primitive:n #1
+  {
+    \tex_latelua:D
+      {
+        pdf.setpageattributes(\@@_backend_luastring:n { #1 })
+      }
+  }
   % the command to store default values.
   % Uses a prop with pdflatex + dvi,
   % sets a lua table with lualatex
-    \cs_new_protected:Npn \@@_backend_Page_gput:nn #1 #2
+\cs_new_protected:Npn \@@_backend_Page_gput:nn #1 #2
+  {
+    \tex_directlua:D
       {
-        \tex_directlua:D
-          {
-            ltx.@@.backend_Page_gput
-              (
-                \@@_backend_luastring:n { #1 },
-                \@@_backend_luastring:n { #2 }
-              )
-          }
+        ltx.@@.backend_Page_gput
+          (
+            \@@_backend_luastring:n { #1 },
+            \@@_backend_luastring:n { #2 }
+          )
       }
+  }
   % the command to remove a default value.
   % Uses a prop with pdflatex + dvi,
   % changes a lua table with lualatex
-  \cs_new_protected:Npn \@@_backend_Page_gremove:n #1
-    {
-      \tex_directlua:D
-        {
-          ltx.@@.backend_Page_gremove (\@@_backend_luastring:n { #1 })
-        }
-    }
+\cs_new_protected:Npn \@@_backend_Page_gremove:n #1
+  {
+    \tex_directlua:D
+      {
+        ltx.@@.backend_Page_gremove (\@@_backend_luastring:n { #1 })
+      }
+  }
  % the command used in the document.
  % direct call of the primitive special with dvips/dvipdfmx
  % \latelua: fill a page related table with lualatex, merge it with the page
  % table and push it directly
  % write to aux and store in prop with pdflatex
-  \cs_new_protected:Npn \@@_backend_ThisPage_gput:nn #1 #2
-    {
-      \tex_latelua:D
-        {
-          ltx.@@.backend_ThisPage_gput
-            (
-              tex.count["g_shipout_readonly_int"],
-              \@@_backend_luastring:n { #1 },
-              \@@_backend_luastring:n { #2 }
-            )
-          ltx.@@.backend_ThisPage_gpush (tex.count["g_shipout_readonly_int"])
-        }
-    }
+\cs_new_protected:Npn \@@_backend_ThisPage_gput:nn #1 #2
+  {
+    \tex_latelua:D
+      {
+        ltx.@@.backend_ThisPage_gput
+          (
+            tex.count["g_shipout_readonly_int"],
+            \@@_backend_luastring:n { #1 },
+            \@@_backend_luastring:n { #2 }
+          )
+        ltx.@@.backend_ThisPage_gpush (tex.count["g_shipout_readonly_int"])
+      }
+  }
   %the code to push the values, used in shipout
   %merges the two props and then fills the register in pdflatex
   %merges the two tables (the one is probably still empty) and then fills (in lua) in luatex
   %issues the values stored in the global prop with dvi
-  \cs_new_protected:Npn \@@_backend_ThisPage_gpush:n #1
-    {
-      \tex_latelua:D
-        {
-          ltx.@@.backend_ThisPage_gpush (tex.count["g_shipout_readonly_int"])
-        }
-    }
+\cs_new_protected:Npn \@@_backend_ThisPage_gpush:n #1
+  {
+    \tex_latelua:D
+      {
+        ltx.@@.backend_ThisPage_gpush (tex.count["g_shipout_readonly_int"])
+      }
   }
-%</pdfmode>
+
+%</luatex>
 %<*dvipdfmx|xdvipdfmx>
   %the primitive
 \cs_new_protected:Npn \@@_backend_Page_primitive:n #1
@@ -514,7 +507,7 @@
   }
 %</drivers>
 % pdftex and luatex
-%<*pdfmode>
+%<*pdftex|luatex>
  %create the backend objects:
 \clist_map_inline:Nn \c_@@_backend_PageResources_clist
   {
@@ -529,28 +522,27 @@
           }
       }
    }
- %values are only stored in a prop and will be output at end document.
-\sys_if_engine_luatex:T
+%</pdftex|luatex>
+%<*luatex>
+%values are only stored in a prop and will be output at end document.
+\cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
   {
-    \cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
+    \pdfdict_gput:nnn {Core/Page/Resources/#1} { #2 }{ #3 }
+    % luatex must also trigger the lua side
+    \tex_latelua:D{ltx.@@.Page.Resources.#1=true}
+    \tex_latelua:D
       {
-        \pdfdict_gput:nnn {Core/Page/Resources/#1} { #2 }{ #3 }
-        % luatex must also trigger the lua side
-        \tex_latelua:D{ltx.@@.Page.Resources.#1=true}
-        \tex_latelua:D
-          {
-            ltx.pdf.Page_Resources_gpush(tex.count["g_shipout_readonly_int"])
-          }
+        ltx.pdf.Page_Resources_gpush(tex.count["g_shipout_readonly_int"])
       }
   }
-\sys_if_engine_pdftex:T
-  { %pdftex
-    \cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
-      {
-        \pdfdict_gput:nnn {Core/Page/Resources/#1} { #2 }{ #3 }
-      }
-  }
-
+%</luatex>
+%<*pdftex>
+ \cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
+   {
+     \pdfdict_gput:nnn {Core/Page/Resources/#1} { #2 }{ #3 }
+   }
+%</pdftex>
+%<*pdftex|luatex>
 %code for end of document code
 \cs_new_protected:Npn \@@_backend_PageResources_obj_gpush:
   {
@@ -565,7 +557,7 @@
           }
      }
   }
-%</pdfmode>
+%</pdftex|luatex>
 % xdvipdfmx
 % \special{pdf:pageresources<<#1>>} doesn't work correctly with object names ...
 % https://tug.org/pipermail/dvipdfmx/2019-August/000021.html,
@@ -777,216 +769,212 @@
   }
 %</dvipdfmx|xdvipdfmx>
 % luatex + pdftex
-%<*pdfmode>
-\sys_if_engine_luatex:T
+%<*luatex>
+\cs_set_protected:Npn \@@_backend_bdc_obj:nn #1 #2 % #1 eg. Span, #2: object name
   {
-    \cs_set_protected:Npn \@@_backend_bdc_obj:nn #1 #2 % #1 eg. Span, #2: object name
+    \int_gincr:N \g_@@_backend_name_int
+    \exp_args:Nx\__kernel_backend_literal_page:n
+      { /#1 ~ /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC }
+    \bool_if:NTF \l_@@_backend_xform_bool
       {
-        \int_gincr:N \g_@@_backend_name_int
-        \exp_args:Nx\__kernel_backend_literal_page:n
-          { /#1 ~ /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC }
-        \bool_if:NTF \l_@@_backend_xform_bool
-          {
-            \exp_args:Nnx\pdfdict_gput:nnn
-              { Core/Xform/Resources/Properties }
-              { l3pdf\int_use:N\g_@@_backend_name_int }
-              { \@@_backend_object_ref:n { #2 } }
-          }
-          {
-            \exp_args:Nx \tex_latelua:D
-              {
-                ltx.pdf.Page_Resources_Properties_gput
-                  (
-                    tex.count["g_shipout_readonly_int"],
-                    "l3pdf\int_use:N\g_@@_backend_name_int",
-                    "\@@_backend_object_ref:n { #2 }"
-                  )
-              }
-          }
-    }
-    \cs_set_protected:Npn \@@_backend_bdc_obj:n #1% #1 eg. Span
-      {
-        \int_gincr:N \g_@@_backend_name_int
-        \exp_args:Nx\__kernel_backend_literal_page:n
-          { /#1 ~ /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC }
-        \bool_if:NTF \l_@@_backend_xform_bool
-          {
-            \exp_args:Nnx\pdfdict_gput:nnn %no handler needed
-              { Core/Xform/Resources/Properties }
-              { l3pdf\int_use:N\g_@@_backend_name_int }
-              { \@@_backend_object_last: }
-          }
-          {
-            \exp_args:Nx \tex_latelua:D
-              {
-                ltx.pdf.Page_Resources_Properties_gput
-                  (
-                    tex.count["g_shipout_readonly_int"],
-                    "l3pdf\int_use:N\g_@@_backend_name_int",
-                    "\@@_backend_object_last:"
-                  )
-              }
-          }
-    }
-   \cs_set_protected:Npn \@@_backend_bmc:n #1
-      {
-        \__kernel_backend_literal_page:n { /#1~BMC }
+        \exp_args:Nnx\pdfdict_gput:nnn
+          { Core/Xform/Resources/Properties }
+          { l3pdf\int_use:N\g_@@_backend_name_int }
+          { \@@_backend_object_ref:n { #2 } }
       }
-   \cs_set_protected:Npn \@@_backend_bdc_contobj:nn #1 #2
-     {
-       \pdf_object_now:nn { dict } { #2 }
-       \@@_backend_bdc_obj:n { #1 }
-     }
-   \cs_set_protected:Npn \@@_backend_bdc_contstream:nn #1 #2
-     {
-       \__kernel_backend_literal_page:n { /#1~<<#2>>~BDC }
-     }
-  \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2
-    {
-      \bool_if:NTF  \g_@@_Core_active_bool
-        {\cs_gset_eq:NN \@@_backend_bdc:nn \@@_backend_bdc_contobj:nn}
-        {\cs_gset_eq:NN \@@_backend_bdc:nn \@@_backend_bdc_contstream:nn}
-        \@@_backend_bdc:nn {#1}{#2}
-    }
-    \cs_set_protected:Npn \@@_backend_emc:
       {
-        \__kernel_backend_literal_page:n { EMC }
+        \exp_args:Nx \tex_latelua:D
+          {
+            ltx.pdf.Page_Resources_Properties_gput
+              (
+                tex.count["g_shipout_readonly_int"],
+                "l3pdf\int_use:N\g_@@_backend_name_int",
+                "\@@_backend_object_ref:n { #2 }"
+              )
+          }
       }
-
-    \cs_new_protected:Npn \@@_backend_PageResources_gpush:n #1 {}
+  }
+\cs_set_protected:Npn \@@_backend_bdc_obj:n #1% #1 eg. Span
+  {
+    \int_gincr:N \g_@@_backend_name_int
+    \exp_args:Nx\__kernel_backend_literal_page:n
+      { /#1 ~ /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC }
+    \bool_if:NTF \l_@@_backend_xform_bool
+      {
+        \exp_args:Nnx\pdfdict_gput:nnn %no handler needed
+          { Core/Xform/Resources/Properties }
+          { l3pdf\int_use:N\g_@@_backend_name_int }
+          { \@@_backend_object_last: }
+      }
+      {
+        \exp_args:Nx \tex_latelua:D
+          {
+            ltx.pdf.Page_Resources_Properties_gput
+              (
+                tex.count["g_shipout_readonly_int"],
+                "l3pdf\int_use:N\g_@@_backend_name_int",
+                "\@@_backend_object_last:"
+              )
+          }
+      }
+  }
+\cs_set_protected:Npn \@@_backend_bmc:n #1
+   {
+     \__kernel_backend_literal_page:n { /#1~BMC }
+   }
+\cs_set_protected:Npn \@@_backend_bdc_contobj:nn #1 #2
+  {
+    \pdf_object_now:nn { dict } { #2 }
+    \@@_backend_bdc_obj:n { #1 }
+  }
+\cs_set_protected:Npn \@@_backend_bdc_contstream:nn #1 #2
+  {
+    \__kernel_backend_literal_page:n { /#1~<<#2>>~BDC }
+  }
+\cs_set_protected:Npn \@@_backend_bdc:nn #1 #2
+  {
+    \bool_if:NTF  \g_@@_Core_active_bool
+      {\cs_gset_eq:NN \@@_backend_bdc:nn \@@_backend_bdc_contobj:nn}
+      {\cs_gset_eq:NN \@@_backend_bdc:nn \@@_backend_bdc_contstream:nn}
+      \@@_backend_bdc:nn {#1}{#2}
+  }
+\cs_set_protected:Npn \@@_backend_emc:
+  {
+    \__kernel_backend_literal_page:n { EMC }
   }
 
+\cs_new_protected:Npn \@@_backend_PageResources_gpush:n #1 {}
+%</luatex>
+%<*pdftex>
 % pdflatex is the most complicated as it has to go through the aux ...
 % the push command is extended to take other resources too
-\sys_if_engine_pdftex:T
+\cs_set_protected:Npn \@@_backend_bdc_obj:nn #1 #2 % #1 eg. Span, #2: object name
   {
-    \cs_set_protected:Npn \@@_backend_bdc_obj:nn #1 #2 % #1 eg. Span, #2: object name
+    \int_gincr:N \g_@@_backend_name_int
+    \exp_args:Nx\__kernel_backend_literal_page:n
+      { /#1 ~ /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC }
+    % code to set the property ....
+    \int_gincr:N\g_@@_backend_resourceid_int
+    \bool_if:NTF \l_@@_backend_xform_bool
       {
-        \int_gincr:N \g_@@_backend_name_int
-        \exp_args:Nx\__kernel_backend_literal_page:n
-          { /#1 ~ /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC }
-        % code to set the property ....
-        \int_gincr:N\g_@@_backend_resourceid_int
-        \bool_if:NTF \l_@@_backend_xform_bool
-          {
-            \exp_args:Nnxx\pdfdict_gput:nnn %no handler needed
-              { Core/Xform/Resources/Properties }
-              { l3pdf\int_use:N\g_@@_backend_resourceid_int }
-              { \@@_backend_object_ref:n { #2 } }
-          }
-          {
-            \zref@labelbylist
-              { l3pdf\int_use:N\g_@@_backend_resourceid_int }
-              { l3pdf }
-            \tl_set:Nx \l_@@_tmpa_tl
-              {
-                \zref@extractdefault
-                  { l3pdf\int_use:N\g_@@_backend_resourceid_int }
-                  {pdf@abspage}
-                  {0}
-              }
-            \pdfdict_if_exist:nnF { g } { Core/backend_Page\l_@@_tmpa_tl/Resources/Properties }
-              {
-                \pdfdict_new:nn { g }  { Core/backend_Page\l_@@_tmpa_tl/Resources/Properties }
-              }
-            \exp_args:Nnxx\pdfdict_gput:nnn
-              { Core/backend_Page\l_@@_tmpa_tl/Resources/Properties }
-              { l3pdf\int_use:N\g_@@_backend_resourceid_int }
-              { \@@_backend_object_ref:n{#2} }
-          }
+        \exp_args:Nnxx\pdfdict_gput:nnn %no handler needed
+          { Core/Xform/Resources/Properties }
+          { l3pdf\int_use:N\g_@@_backend_resourceid_int }
+          { \@@_backend_object_ref:n { #2 } }
       }
-    \cs_set_protected:Npn \@@_backend_bdc_obj:n #1% #1 eg. Span
       {
-        \int_gincr:N \g_@@_backend_name_int
-        \exp_args:Nx\__kernel_backend_literal_page:n
-          { /#1 ~ /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC }
-        % code to set the property ....
-        \int_gincr:N\g_@@_backend_resourceid_int
-        \bool_if:NTF \l_@@_backend_xform_bool
+        \zref@labelbylist
+          { l3pdf\int_use:N\g_@@_backend_resourceid_int }
+          { l3pdf }
+        \tl_set:Nx \l_@@_tmpa_tl
           {
-            \exp_args:Nnxx\pdfdict_gput:nnn
-              { Core/Xform/Resources/Properties }
+            \zref@extractdefault
               { l3pdf\int_use:N\g_@@_backend_resourceid_int }
-              { \@@_backend_object_last: }
+              {pdf@abspage}
+              {0}
           }
+        \pdfdict_if_exist:nnF { g } { Core/backend_Page\l_@@_tmpa_tl/Resources/Properties }
           {
-            \zref@labelbylist
-              { l3pdf\int_use:N\g_@@_backend_resourceid_int }
-              { l3pdf }
-            \tl_set:Nx \l_@@_tmpa_tl
-              {
-                \zref@extractdefault
-                  { l3pdf\int_use:N\g_@@_backend_resourceid_int }
-                  {pdf@abspage}
-                  {0}
-              }
-            \pdfdict_if_exist:nnF { g } { Core/backend_Page\l_@@_tmpa_tl/Resources/Properties }
-              {
-                \pdfdict_new:nn { g } { Core/backend_Page\l_@@_tmpa_tl/Resources/Properties }
-              }
-            \exp_args:Nnxx\pdfdict_gput:nnn
-              { Core/backend_Page\l_@@_tmpa_tl/Resources/Properties }
-              { l3pdf\int_use:N\g_@@_backend_resourceid_int }
-              { \@@_backend_object_last: }
-            %\pdfdict_show:n { backend_Page\l_@@_tmpa_tl/Resources/Properties }
+            \pdfdict_new:nn { g }  { Core/backend_Page\l_@@_tmpa_tl/Resources/Properties }
           }
+        \exp_args:Nnxx\pdfdict_gput:nnn
+          { Core/backend_Page\l_@@_tmpa_tl/Resources/Properties }
+          { l3pdf\int_use:N\g_@@_backend_resourceid_int }
+          { \@@_backend_object_ref:n{#2} }
       }
-  \cs_set_protected:Npn \@@_backend_bmc:n #1
-    {
-      \__kernel_backend_literal_page:n { /#1~BMC }
-    }
-  \cs_set_protected:Npn \@@_backend_bdc_contobj:nn #1 #2
-     {
-       \pdf_object_now:nn { dict } { #2 }
-       \@@_backend_bdc_obj:n { #1 }
-     }
-  \cs_set_protected:Npn \@@_backend_bdc_contstream:nn #1 #2
-     {
-       \__kernel_backend_literal_page:n { /#1~<<#2>>~BDC }
-     }
-  \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2
-    {
-      \bool_if:NTF  \g_@@_Core_active_bool
-        {\cs_gset_eq:NN \@@_backend_bdc:nn \@@_backend_bdc_contobj:nn}
-        {\cs_gset_eq:NN \@@_backend_bdc:nn \@@_backend_bdc_contstream:nn}
-        \@@_backend_bdc:nn {#1}{#2}
-    }
-  \cs_set_protected:Npn \@@_backend_emc:
-    {
-      \__kernel_backend_literal_page:n { EMC }
-    }
-
-  \cs_new:Npn \@@_backend_PageResources_gpush_aux:n #1 %#1 ExtGState etc
-    {
-      \prop_if_empty:cF
-        { \pdfdict_name:nn { g } {Core/Page/Resources/#1} }
-        {
-          \@@_dict_item:ne { #1 }{ \pdf_object_ref:n {Page/Resources/#1}}
-        }
-    }
-
-  \cs_new_protected:Npn \@@_backend_PageResources_gpush:n #1
-    {
-       \exp_args:NNx \tex_global:D \tex_pdfpageresources:D
-         {
-           \prop_if_exist:cT
-             { \pdfdict_name:nn { g }  { Core/backend_Page#1/Resources/Properties } }
-             {
-               /Properties~
-                 <<
-                   \prop_map_function:cN
-                     { \pdfdict_name:nn { g }  { Core/backend_Page#1/Resources/Properties } }
-                     \@@_dict_item:ne
-                 >>
-             }
-           %% add ExtGState etc
-           \clist_map_function:NN
-             \c_@@_backend_PageResources_clist
-             \@@_backend_PageResources_gpush_aux:n
-         }
-    }
   }
-%</pdfmode>
+\cs_set_protected:Npn \@@_backend_bdc_obj:n #1% #1 eg. Span
+  {
+    \int_gincr:N \g_@@_backend_name_int
+    \exp_args:Nx\__kernel_backend_literal_page:n
+      { /#1 ~ /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC }
+    % code to set the property ....
+    \int_gincr:N\g_@@_backend_resourceid_int
+    \bool_if:NTF \l_@@_backend_xform_bool
+      {
+        \exp_args:Nnxx\pdfdict_gput:nnn
+          { Core/Xform/Resources/Properties }
+          { l3pdf\int_use:N\g_@@_backend_resourceid_int }
+          { \@@_backend_object_last: }
+      }
+      {
+        \zref@labelbylist
+          { l3pdf\int_use:N\g_@@_backend_resourceid_int }
+          { l3pdf }
+        \tl_set:Nx \l_@@_tmpa_tl
+          {
+            \zref@extractdefault
+              { l3pdf\int_use:N\g_@@_backend_resourceid_int }
+              {pdf@abspage}
+              {0}
+          }
+        \pdfdict_if_exist:nnF { g } { Core/backend_Page\l_@@_tmpa_tl/Resources/Properties }
+          {
+            \pdfdict_new:nn { g } { Core/backend_Page\l_@@_tmpa_tl/Resources/Properties }
+          }
+        \exp_args:Nnxx\pdfdict_gput:nnn
+          { Core/backend_Page\l_@@_tmpa_tl/Resources/Properties }
+          { l3pdf\int_use:N\g_@@_backend_resourceid_int }
+          { \@@_backend_object_last: }
+        %\pdfdict_show:n { backend_Page\l_@@_tmpa_tl/Resources/Properties }
+      }
+  }
+\cs_set_protected:Npn \@@_backend_bmc:n #1
+  {
+    \__kernel_backend_literal_page:n { /#1~BMC }
+  }
+\cs_set_protected:Npn \@@_backend_bdc_contobj:nn #1 #2
+   {
+     \pdf_object_now:nn { dict } { #2 }
+     \@@_backend_bdc_obj:n { #1 }
+   }
+\cs_set_protected:Npn \@@_backend_bdc_contstream:nn #1 #2
+   {
+     \__kernel_backend_literal_page:n { /#1~<<#2>>~BDC }
+   }
+\cs_set_protected:Npn \@@_backend_bdc:nn #1 #2
+  {
+    \bool_if:NTF  \g_@@_Core_active_bool
+      {\cs_gset_eq:NN \@@_backend_bdc:nn \@@_backend_bdc_contobj:nn}
+      {\cs_gset_eq:NN \@@_backend_bdc:nn \@@_backend_bdc_contstream:nn}
+      \@@_backend_bdc:nn {#1}{#2}
+  }
+\cs_set_protected:Npn \@@_backend_emc:
+  {
+    \__kernel_backend_literal_page:n { EMC }
+  }
+
+\cs_new:Npn \@@_backend_PageResources_gpush_aux:n #1 %#1 ExtGState etc
+  {
+    \prop_if_empty:cF
+      { \pdfdict_name:nn { g } {Core/Page/Resources/#1} }
+      {
+        \@@_dict_item:ne { #1 }{ \pdf_object_ref:n {Page/Resources/#1}}
+      }
+  }
+
+\cs_new_protected:Npn \@@_backend_PageResources_gpush:n #1
+  {
+     \exp_args:NNx \tex_global:D \tex_pdfpageresources:D
+       {
+         \prop_if_exist:cT
+           { \pdfdict_name:nn { g }  { Core/backend_Page#1/Resources/Properties } }
+           {
+             /Properties~
+               <<
+                 \prop_map_function:cN
+                   { \pdfdict_name:nn { g }  { Core/backend_Page#1/Resources/Properties } }
+                   \@@_dict_item:ne
+               >>
+           }
+         %% add ExtGState etc
+         \clist_map_function:NN
+           \c_@@_backend_PageResources_clist
+           \@@_backend_PageResources_gpush_aux:n
+       }
+  }
+
+%</pdftex>
 %    \end{macrocode}
 % \end{macro}
 % \subsection{\enquote{Catalog} \& subdirectories (pdfcatalog) }
@@ -999,25 +987,20 @@
 % for every file and then creates the Name tree automatically.
 %    \begin{macrocode}
 % pdflatex
-%<*pdfmode>
-\sys_if_engine_pdftex:T
- {
-   \cs_new_protected:Npn \@@_backend_NamesEmbeddedFiles_gpush:n #1 %array content
-     {
-        \pdf_object_now:nn {dict} {/Names [#1] }
-        \pdfnames{/EmbeddedFiles~\pdf_object_last:}
-     }
- }
-
-\sys_if_engine_luatex:T
- {
-   \cs_new_protected:Npn \@@_backend_NamesEmbeddedFiles_gpush:n #1 %array content
-     {
-       \pdf_object_now:nn {dict} {/Names [#1] }
-       \pdfextension~names~{/EmbeddedFiles~\pdf_object_last: }
-     }
- }
-%</pdfmode>
+%<*pdftex>
+\cs_new_protected:Npn \@@_backend_NamesEmbeddedFiles_gpush:n #1 %array content
+  {
+     \pdf_object_now:nn {dict} {/Names [#1] }
+     \pdfnames{/EmbeddedFiles~\pdf_object_last:}
+  }
+%</pdftex>
+%<*luatex>
+\cs_new_protected:Npn \@@_backend_NamesEmbeddedFiles_gpush:n #1 %array content
+  {
+    \pdf_object_now:nn {dict} {/Names [#1] }
+    \pdfextension~names~{/EmbeddedFiles~\pdf_object_last: }
+  }
+%</luatex>
 %<*dvipdfmx|xdvipdfmx>
 \cs_new_protected:Npn \@@_backend_NamesEmbeddedFiles_gpush:n #1 %array content
   {
@@ -1078,7 +1061,7 @@
 % EmbeddedFiles name tree. We define a prop to store the relation between
 % object name and name in the name tree.
 %    \begin{macrocode}
-%<*pdfmode|dvipdfmx|xdvipdfmx>
+%<*pdftex|luatex|dvipdfmx|xdvipdfmx>
 \cs_new_protected:Npn  \@@_backend_NamesEmbeddedFiles_add:n #1
     %#1 object ref
     {
@@ -1090,7 +1073,7 @@
         { \@@_backend_EmbeddedFiles_name: \c_space_tl #1 }
     }
 
-%</pdfmode|dvipdfmx|xdvipdfmx>
+%</pdftex|luatex|dvipdfmx|xdvipdfmx>
 %<*dvips>
 \cs_new_protected:Npn  \@@_backend_NamesEmbeddedFiles_add:n #1
       {
@@ -1123,171 +1106,167 @@
 %  \end{arguments}
 %  \begin{macro}{ \@@_backend_xform_use:n, \@@_backend_xform_ref:n }
 %    \begin{macrocode}
-%<*pdfmode>
-\sys_if_engine_pdftex:T
+%<*pdftex>
+\cs_new_protected:Npn \@@_backend_xform_new:nnnn #1 #2 #3 #4
+% #1 name
+% #2 attributes
+% #3 resources
+% #4 content, not necessarily a box!
   {
-    \cs_new_protected:Npn \@@_backend_xform_new:nnnn #1 #2 #3 #4
-    % #1 name
-    % #2 attributes
-    % #3 resources
-    % #4 content, not necessarily a box!
+    \hbox_set:Nn \l_@@_tmpa_box
       {
-        \hbox_set:Nn \l_@@_tmpa_box
-          {
-            \bool_set_true:N \l_@@_backend_xform_bool
-            \prop_gclear:c {\pdfdict_name:nn { g } { Core/Xform/Resources/Properties }}
-            #4
-          }
-        %store the dimensions
-        \tl_const:cx
-          { c_@@_backend_xform_wd_ \tl_to_str:n {#1} _tl }
-          { \tex_the:D \box_wd:N \l_@@_tmpa_box }
-        \tl_const:cx
-          { c_@@_backend_xform_ht_ \tl_to_str:n {#1} _tl }
-          { \tex_the:D \box_ht:N \l_@@_tmpa_box }
-        \tl_const:cx
-          { c_@@_backend_xform_dp_ \tl_to_str:n {#1} _tl }
-          { \tex_the:D \box_dp:N \l_@@_tmpa_box }
-        %% do we need to test if #2 and #3 are empty??
-        \tex_immediate:D \tex_pdfxform:D
-          ~  attr      ~ { #2 }
-        %% which other resources should be default? Is an argument actually needed?
-          ~  resources ~
-          {
-            #3
-            \int_compare:nNnT
-              { \prop_count:c { \pdfdict_name:nn { g } { Core/Xform/Resources/Properties } } }
-              >
-              { 0 }
-              {
-                /Properties~
-                  <<
-                    \pdfdict_use:nn { g } { Core/Xform/Resources/Properties }
-                  >>
-              }
-
-            \prop_if_empty:cF
-              { \pdfdict_name:nn { g } { Core/Page/Resources/ExtGState } }
-              {
-                /ExtGState~ \pdf_object_ref:n { Page/Resources/ExtGState }
-              }
-            \prop_if_empty:cF
-              { \pdfdict_name:nn { g } { Core/Page/Resources/Pattern } }
-              {
-                /Pattern~ \pdf_object_ref:n { Page/Resources/Pattern }
-              }
-            \prop_if_empty:cF
-              { \pdfdict_name:nn { g } { Core/Page/Resources/Shading } }
-              {
-                /Shading~ \pdf_object_ref:n { Page/Resources/Shading }
-              }
-            \prop_if_empty:cF
-              { \pdfdict_name:nn { g } { Core/Page/Resources/ColorSpace } }
-              {
-                /ColorSpace~ \pdf_object_ref:n { Page/Resources/ColorSpace }
-              }
-          }
-          \l_@@_tmpa_box
-       \int_const:cn
-         { c_@@_backend_xform_ \tl_to_str:n {#1} _int }
-         { \tex_pdflastxform:D }
+        \bool_set_true:N \l_@@_backend_xform_bool
+        \prop_gclear:c {\pdfdict_name:nn { g } { Core/Xform/Resources/Properties }}
+        #4
       }
+    %store the dimensions
+    \tl_const:cx
+      { c_@@_backend_xform_wd_ \tl_to_str:n {#1} _tl }
+      { \tex_the:D \box_wd:N \l_@@_tmpa_box }
+    \tl_const:cx
+      { c_@@_backend_xform_ht_ \tl_to_str:n {#1} _tl }
+      { \tex_the:D \box_ht:N \l_@@_tmpa_box }
+    \tl_const:cx
+      { c_@@_backend_xform_dp_ \tl_to_str:n {#1} _tl }
+      { \tex_the:D \box_dp:N \l_@@_tmpa_box }
+    %% do we need to test if #2 and #3 are empty??
+    \tex_immediate:D \tex_pdfxform:D
+      ~  attr      ~ { #2 }
+    %% which other resources should be default? Is an argument actually needed?
+      ~  resources ~
+      {
+        #3
+        \int_compare:nNnT
+          { \prop_count:c { \pdfdict_name:nn { g } { Core/Xform/Resources/Properties } } }
+          >
+          { 0 }
+          {
+            /Properties~
+              <<
+                \pdfdict_use:nn { g } { Core/Xform/Resources/Properties }
+              >>
+          }
 
-  \cs_new_protected:Npn \@@_backend_xform_use:n #1
-    {
-      \tex_pdfrefxform:D
-        \int_use:c { c_@@_backend_xform_ \tl_to_str:n {#1} _int }
-        \scan_stop:
-    }
-
-  \cs_new:Npn \@@_backend_xform_ref:n #1
-    {
-      \int_use:c { c_@@_backend_xform_ \tl_to_str:n {#1} _int } ~ 0 ~ R
-    }
+        \prop_if_empty:cF
+          { \pdfdict_name:nn { g } { Core/Page/Resources/ExtGState } }
+          {
+            /ExtGState~ \pdf_object_ref:n { Page/Resources/ExtGState }
+          }
+        \prop_if_empty:cF
+          { \pdfdict_name:nn { g } { Core/Page/Resources/Pattern } }
+          {
+            /Pattern~ \pdf_object_ref:n { Page/Resources/Pattern }
+          }
+        \prop_if_empty:cF
+          { \pdfdict_name:nn { g } { Core/Page/Resources/Shading } }
+          {
+            /Shading~ \pdf_object_ref:n { Page/Resources/Shading }
+          }
+        \prop_if_empty:cF
+          { \pdfdict_name:nn { g } { Core/Page/Resources/ColorSpace } }
+          {
+            /ColorSpace~ \pdf_object_ref:n { Page/Resources/ColorSpace }
+          }
+      }
+      \l_@@_tmpa_box
+   \int_const:cn
+     { c_@@_backend_xform_ \tl_to_str:n {#1} _int }
+     { \tex_pdflastxform:D }
   }
 
+\cs_new_protected:Npn \@@_backend_xform_use:n #1
+  {
+    \tex_pdfrefxform:D
+      \int_use:c { c_@@_backend_xform_ \tl_to_str:n {#1} _int }
+      \scan_stop:
+  }
+
+\cs_new:Npn \@@_backend_xform_ref:n #1
+  {
+    \int_use:c { c_@@_backend_xform_ \tl_to_str:n {#1} _int } ~ 0 ~ R
+  }
+%</pdftex>
+%<*luatex>
 %luatex
 %nearly identical but not completely ...
-\sys_if_engine_luatex:T
+\cs_new_protected:Npn \@@_backend_xform_new:nnnn #1 #2 #3 #4
+% #1 name
+% #2 attributes
+% #3 resources
+% #4 content, not necessarily a box!
   {
-    \cs_new_protected:Npn \@@_backend_xform_new:nnnn #1 #2 #3 #4
-    % #1 name
-    % #2 attributes
-    % #3 resources
-    % #4 content, not necessarily a box!
+    \hbox_set:Nn \l_@@_tmpa_box
       {
-        \hbox_set:Nn \l_@@_tmpa_box
-          {
-            \bool_set_true:N \l_@@_backend_xform_bool
-            \prop_gclear:c { \pdfdict_name:nn { g } { Core/Xform/Resources/Properties } }
-            #4
-          }
-        \tl_const:cx
-          { c_@@_backend_xform_wd_ \tl_to_str:n {#1} _tl }
-          { \tex_the:D \box_wd:N \l_@@_tmpa_box }
-        \tl_const:cx
-          { c_@@_backend_xform_ht_ \tl_to_str:n {#1} _tl }
-          { \tex_the:D \box_ht:N \l_@@_tmpa_box }
-        \tl_const:cx
-          { c_@@_backend_xform_dp_ \tl_to_str:n {#1} _tl }
-          { \tex_the:D \box_dp:N \l_@@_tmpa_box }
-        %% do we need to test if #2 and #3 are empty??
-        \tex_immediate:D \tex_pdfxform:D
-          ~  attr      ~ { #2 }
-          %% which resources should be default? Is an argument actually needed?
-          ~  resources ~
-          {
-            #3
-            \int_compare:nNnT
-              {\prop_count:c { \pdfdict_name:nn { g } { Core/Xform/Resources/Properties } }}
-              >
-              { 0 }
-              {
-                /Properties~
-                  <<
-                    \pdfdict_use:nn { g } { Core/Xform/Resources/Properties }
-                  >>
-              }
-            \prop_if_empty:cF
-              { \pdfdict_name:nn { g } { Core/Page/Resources/ExtGState } }
-              {
-                /ExtGState~ \pdf_object_ref:n { Page/Resources/ExtGState }
-              }
-            \prop_if_empty:cF
-              { \pdfdict_name:nn { g } { Core/Page/Resources/Pattern } }
-              {
-                /Pattern~ \pdf_object_ref:n { Page/Resources/Pattern }
-              }
-            \prop_if_empty:cF
-              { \pdfdict_name:nn { g } { Core/Page/Resources/Shading } }
-              {
-                /Shading~ \pdf_object_ref:n { Page/Resources/Shading }
-              }
-            \prop_if_empty:cF
-              { \pdfdict_name:nn { g } { Core/Page/Resources/ColorSpace } }
-              {
-                /ColorSpace~ \pdf_object_ref:n { Page/Resources/ColorSpace }
-              }
-          }
-          \l_@@_tmpa_box
-          \int_const:cn
-            { c_@@_backend_xform_ \tl_to_str:n {#1} _int }
-            { \tex_pdflastxform:D }
+        \bool_set_true:N \l_@@_backend_xform_bool
+        \prop_gclear:c { \pdfdict_name:nn { g } { Core/Xform/Resources/Properties } }
+        #4
       }
-
-    \cs_new_protected:Npn \@@_backend_xform_use:n #1 %protected as with xelatex
+    \tl_const:cx
+      { c_@@_backend_xform_wd_ \tl_to_str:n {#1} _tl }
+      { \tex_the:D \box_wd:N \l_@@_tmpa_box }
+    \tl_const:cx
+      { c_@@_backend_xform_ht_ \tl_to_str:n {#1} _tl }
+      { \tex_the:D \box_ht:N \l_@@_tmpa_box }
+    \tl_const:cx
+      { c_@@_backend_xform_dp_ \tl_to_str:n {#1} _tl }
+      { \tex_the:D \box_dp:N \l_@@_tmpa_box }
+    %% do we need to test if #2 and #3 are empty??
+    \tex_immediate:D \tex_pdfxform:D
+      ~  attr      ~ { #2 }
+      %% which resources should be default? Is an argument actually needed?
+      ~  resources ~
       {
-        \tex_pdfrefxform:D \int_use:c
+        #3
+        \int_compare:nNnT
+          {\prop_count:c { \pdfdict_name:nn { g } { Core/Xform/Resources/Properties } }}
+          >
+          { 0 }
           {
-            c_@@_backend_xform_ \tl_to_str:n {#1} _int
+            /Properties~
+              <<
+                \pdfdict_use:nn { g } { Core/Xform/Resources/Properties }
+              >>
           }
-          \scan_stop:
+        \prop_if_empty:cF
+          { \pdfdict_name:nn { g } { Core/Page/Resources/ExtGState } }
+          {
+            /ExtGState~ \pdf_object_ref:n { Page/Resources/ExtGState }
+          }
+        \prop_if_empty:cF
+          { \pdfdict_name:nn { g } { Core/Page/Resources/Pattern } }
+          {
+            /Pattern~ \pdf_object_ref:n { Page/Resources/Pattern }
+          }
+        \prop_if_empty:cF
+          { \pdfdict_name:nn { g } { Core/Page/Resources/Shading } }
+          {
+            /Shading~ \pdf_object_ref:n { Page/Resources/Shading }
+          }
+        \prop_if_empty:cF
+          { \pdfdict_name:nn { g } { Core/Page/Resources/ColorSpace } }
+          {
+            /ColorSpace~ \pdf_object_ref:n { Page/Resources/ColorSpace }
+          }
       }
-
-    \cs_new:Npn \@@_backend_xform_ref:n #1
-      { \int_use:c { c_@@_backend_xform_ \tl_to_str:n {#1} _int } ~ 0 ~ R }
+      \l_@@_tmpa_box
+      \int_const:cn
+        { c_@@_backend_xform_ \tl_to_str:n {#1} _int }
+        { \tex_pdflastxform:D }
   }
-%</pdfmode>
+
+\cs_new_protected:Npn \@@_backend_xform_use:n #1 %protected as with xelatex
+  {
+    \tex_pdfrefxform:D \int_use:c
+      {
+        c_@@_backend_xform_ \tl_to_str:n {#1} _int
+      }
+      \scan_stop:
+  }
+
+\cs_new:Npn \@@_backend_xform_ref:n #1
+  { \int_use:c { c_@@_backend_xform_ \tl_to_str:n {#1} _int } ~ 0 ~ R }
+
+%</luatex>
 %<*dvipdfmx|xdvipdfmx>
 % xetex
    % it needs a bit testing if it really works to set the box to 0 before the special ...
