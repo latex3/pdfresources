@@ -1,0 +1,17 @@
+\RequirePackage{pdfresources}
+\DeclareDocumentMetaData{uncompress}
+\documentclass{article}
+\begin{document}
+\ExplSyntaxOn
+\pdfcoredict_gput:nnn{Page/Resources/ExtGState}{duckopacity}{<</CA~.5/ca~0.5>>}
+\pdfcoredict_gput:nnn{Page/Resources/ExtGState}{bearopacity}{<</CA~1/ca~1>>}
+\ExplSyntaxOff
+aaaaa
+\special{pdf:code /duckopacity gs}
+...some text goes here...
+\special{pdf:code /bearopacity gs}
+aaaaaa
+\special{pdf:bxgstate << /CA 0.1 /ca 0.1 >>}
+   Transparent\newpage text.
+\special{pdf:exgstate}%
+\end{document}
