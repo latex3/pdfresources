@@ -8,7 +8,7 @@
 % See the file doc/generic/pgf/licenses/LICENSE for more details.
 
 %%%%%%%%%%%%%%
-\typeout{!!!!!!!!!!!!! patched version of pgfutil-latex.def !!!!!!!!!!!}
+\typeout{!!!!!!!!!!!!! patched version of pgfutil-latex.def 20.09.2020 !!!!!!!!!!!}
 %%%%%%%%%%%%%%
 
 \catcode`\@=11\relax
@@ -219,6 +219,7 @@
 % Preview hack: preview.sty hacks into \shipout (which is ok), but
 % does not honour everyshi.sty (which is not ok). This causes everyshi
 % material to get lost.
+\@ifundefined{AddToHook}{%
 \AtBeginDocument{
     \@ifpackageloaded{preview}{%
         % Ok, package loaded. Swap definitions of everyshi.sty's shipout
@@ -229,7 +230,8 @@
             \let\pr@shipout\@EveryShipout@Shipout%
         \fi
         }{}%
-}
+}}{}
+
 
 % Guess the driver:
 
