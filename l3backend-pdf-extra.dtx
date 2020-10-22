@@ -992,14 +992,14 @@
 \cs_new_protected:Npn \@@_backend_NamesEmbeddedFiles_gpush:n #1 %array content
   {
      \pdf_object_now:nn {dict} {/Names [#1] }
-     \pdfnames{/EmbeddedFiles~\pdf_object_last:}
+     \tex_pdfnames:D {/EmbeddedFiles~\pdf_object_last:}
   }
 %</pdftex>
 %<*luatex>
 \cs_new_protected:Npn \@@_backend_NamesEmbeddedFiles_gpush:n #1 %array content
   {
     \pdf_object_now:nn {dict} {/Names [#1] }
-    \pdfextension~names~{/EmbeddedFiles~\pdf_object_last: }
+    \tex_pdfextension:D~names~{/EmbeddedFiles~\pdf_object_last: }
   }
 %</luatex>
 %<*dvipdfmx|xdvipdfmx>
