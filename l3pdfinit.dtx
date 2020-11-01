@@ -57,8 +57,10 @@
 %
 % \begin{description}
 %    \item[\texttt{expl3}] passes the value to expl3.
-%                This be used for example to setup the driver. The name and
+%                This be used for example to setup the backend. The name and
 %                implementation will probably change.
+%    \item[\texttt{backend}] passes the backend name to expl3. This will probably be extended, to
+%    pass the value also to packages.
 %    \item[\texttt{pdfversion}] e.g. \texttt{pdfversion=1.7}
 %    \item[\texttt{uncompress}] no value. Force an uncompressed pdf.
 %    \item[\texttt{lang}] to set the Lang entry in the Catalog. E.g. \texttt{lang=de-DE}.
@@ -134,6 +136,8 @@
 
 \keys_define:nn { pdf / setup }
   {
+    backend .code:n = { \PassOptionsToPackage { driver=#1 } {expl3} },
+    backend .groups:n = { init } ,
     expl3 .code:n = { \PassOptionsToPackage { #1 } {expl3} },
     expl3 .groups:n = { init } ,
   }
