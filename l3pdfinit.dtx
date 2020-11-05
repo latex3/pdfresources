@@ -49,8 +49,8 @@
 % \begin{documentation}
 %
 % \section{\pkg{l3pdfinit} documentation}
-% This small package defines \cs{DeclareDocumentMetaData} and the related keys.
-% \cs{DeclareDocumentMetaData} loads the core code and the backend. So it need
+% This small package defines \cs{DeclareDocumentMetadata} and the related keys.
+% \cs{DeclareDocumentMetadata} loads the core code and the backend. So it need
 % at least a key to set the backend.
 %
 % Currently the following keys are implemented
@@ -84,7 +84,7 @@
   {pdfresources initialisation command}
 %    \end{macrocode}
 % \section{Document metadata}
-% We plan a \cs{DeclareDocumentMetaData} so let's start with it.
+% We plan a \cs{DeclareDocumentMetadata} so let's start with it.
 % It should for the begin allow to set the version, to uncompress a pdf,
 % and set the language. We also add a key to activate the metadata stream and
 % to set a standard. The command triggers the use of the core resource management.
@@ -102,17 +102,17 @@
 \bool_new:N \g_@@_Core_active_bool
 %    \end{macrocode}
 % \end{variable}
-% \begin{function}[updated=2020-07-05]{\DeclareDocumentMetaData}
+% \begin{function}[updated=2020-07-05]{\DeclareDocumentMetadata}
 %    \begin{macrocode}
 \msg_new:nnn  { pdf } { setup-after-documentclass }
               {
-                \token_to_str:N \DeclareDocumentMetaData \c_space_tl
+                \token_to_str:N \DeclareDocumentMetadata \c_space_tl
                 should~be~used~only~before~\token_to_str:N\documentclass
               }
 
 
 \bool_new:N \g__pdf_Meta_used_bool
-\NewDocumentCommand\DeclareDocumentMetaData { m }
+\NewDocumentCommand\DeclareDocumentMetadata { m }
   {
     \cs_if_eq:NNTF \documentclass \@twoclasseserror
       { \msg_error:nn { pdf }{ setup-after-documentclass } }

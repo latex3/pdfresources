@@ -20,7 +20,7 @@
 \cs_generate_variant:Nn \pdf_xform_dp:n {e}
 \cs_generate_variant:Nn \pdf_xform_ref:n{e}
 
-\pdfdict_new:n {annot/Field}
+\pdfdict_new:nn {l} {annot/Field}
 
 \tl_new:N \g__uf_normal_off_default_tl
 \tl_new:N \g__uf_normal_yes_default_tl
@@ -163,7 +163,7 @@
           \pdfdict_put:nnn
             {annot/Field}{T}{(#2)}
           %write the field object and put in the field entry
-          \pdf_object_write:nx {pdf/annot/Field/#1/#2} { \pdfdict_use:n {annot/Field} }
+          \pdf_object_write:nx {pdf/annot/Field/#1/#2} { \pdfdict_use:nn {l} {annot/Field} }
           %\pdfdict_gput:nnx { Catalog / AcroForm } { Fields }{\pdf_object_ref:n {pdf/annot/Field/#1/#2} }
         \group_end:
       }

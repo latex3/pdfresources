@@ -1,6 +1,6 @@
 % !Mode:: "TeX:DE:UTF-8:Main"
 \RequirePackage{pdfresources}
-\DeclareDocumentMetaData{uncompress}
+\DeclareDocumentMetadata{uncompress}
 
 \documentclass{article}
 \usepackage{l3color,color}
@@ -39,7 +39,7 @@
    {
     % \cs_new_protected:Npn \@expl@color@set@nnn #1#2#3
 %       { \exp_args:Nnx\color_set:nnn {#1}{#2}{#3}}
-     \cs_gset_eq:NN \@expl@color@set@nnn \color_set:nnn  
+     \cs_gset_eq:NN \@expl@color@set@nnn \color_set:nnn
      \cs_gset_eq:NN \@expl@color@set@nn \color_set:nn
    }
 \pretocmd{\XC@definec@lor}{\@expl@color@set@nnn{#2}{#4}{#5}}{}{\fail}
