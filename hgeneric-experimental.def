@@ -67,7 +67,7 @@
   { hyp }
   { pdfversion-disabled }
   { This~hyperref~driver~ignores~the~pdfversion~key!\\
-    Set~the~pdfversion~in~\token_to_str:N \DeclareDocumentMetaData }
+    Set~the~pdfversion~in~\token_to_str:N \DeclareDocumentMetadata }
 
 \msg_new:nnn
   { hyp }
@@ -525,7 +525,7 @@
    \def\HyPat@ObjRef/{.+}
  }
 
-%we force the setting of pdfversion in \DeclareDocumentMetaData
+%we force the setting of pdfversion in \DeclareDocumentMetadata
 \cs_set_eq:NN \Hy@pdfminorversion \pdf_version_minor:
 \cs_set_eq:NN \Hy@pdfmajorversion \pdf_version_major:
 
@@ -878,7 +878,7 @@
 % This means that the following keys should better be set only in hypersetup and
 % not in the package options (they still could work, but ...)
 % baseurl       (default: empty)
-% pdflang       (default: empty, should be better set in DeclareDocumentMetaData)
+% pdflang       (default: empty, should be better set in DeclareDocumentMetadata)
 % pdfpagelayout (default:not set, TwoPageLeft,TwoPageRight are 1.5 but we don't test)
 % pdfpagemode   (default: UseNone or UseOutlines, bookmark should do the second)
 % pdfpagescrop  (default: empty/do nothing)
