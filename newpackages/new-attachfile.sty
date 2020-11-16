@@ -94,9 +94,9 @@
   }
 % variables
 % probably generic ....
-\pdfdict_new:n   {annot/FileAttachment}
+\pdfdict_new:nn {l}   {annot/FileAttachment}
 \pdfdict_put:nnn {annot/FileAttachment}{Subtype}{/FileAttachment}
-\pdfdict_new:n   {annot/FileAttachment/AP} % appearance
+\pdfdict_new:nn  {l} {annot/FileAttachment/AP} % appearance
 
 %
 \color_set:nnn {__atfi_annot_color}{rgb}{1,0.9255,0.7765}
@@ -519,7 +519,7 @@
     \group_begin:
     % keys #1
     %\tl_to_str for #2?? file_name??
-    \atfi@attachfile{#2}%
+    \atfi@attachfile{}{#2}%
     \group_end
   }
 
@@ -573,7 +573,7 @@
     \__draw_backend_miterlimit:n {4bp}
 
     \__draw_backend_color_fill_gray:n {1}
-    \__draw_backend_color_stroke_gray:n {0}
+    %\__draw_backend_color_stroke_gray:n {0}
     \__draw_backend_rectangle:nnnn {0.25bp} {1.6453bp} {20.145bp} {17.7715bp}
     \__draw_backend_fillstroke:
 

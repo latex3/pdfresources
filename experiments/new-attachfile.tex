@@ -1,5 +1,6 @@
 % !Mode:: "TeX:UTF-8:Main"
 \RequirePackage{pdfresources}
+\DeclareDocumentMetadata{}
 \documentclass{article}
 \usepackage{xcolor}
 \usepackage[customdriver=hgeneric-experimental]{hyperref}
@@ -16,17 +17,19 @@ abc
 %\attachfile[icon=Graph,mimetype=text/plain,color=red]{catalogue.tex} some text
 %
 
-\tl_set:Nn\l__atfi_annot_color_tl {red}
-
-\__atfi_annot_print_icon_Paperclip:
-\__atfi_annot_print_icon_Tag:
-\__atfi_annot_print_icon_Graph:
-\__atfi_annot_print_icon_PushPin:
+%\tl_set:Nn\l__atfi_annot_color_tl {red}
+%
+%\__atfi_annot_print_icon_Paperclip:
+%\__atfi_annot_print_icon_Tag:
+%\__atfi_annot_print_icon_Graph:
+%\__atfi_annot_print_icon_PushPin:
 
 %\atfi@acroGraph
 %\atfi@acroPushPin
 
 \ExplSyntaxOff
+
+\attachfile[icon=Graph,mimetype=text/plain,color=red]{catalogue.tex} some text  
 \end{document}
 \makeatletter
 \attachfilesetup{color=red,author=Müsterhaße,new-afrelationship=blub}
