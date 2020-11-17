@@ -64,20 +64,17 @@
 %<@@=pdf>
 %<*drivers>
 \IfFileExists{l3xref.sty}
+ { \@firstoftwo }{ \@secondoftwo }%
  {%
    \RequirePackage{l3xref}
    \cs_generate_variant:Nn \xref_label:nn {en}
    \cs_generate_variant:Nn \xref_value:nn {en}
    \cs_new_protected:Npn \@@_backend_abspage_label:n #1
      {
-          \xref_label:nn{#1}{abspage}
+        \xref_label:nn{#1}{abspage}
      }
    \cs_new:Npn \@@_backend_abspage_value:n #1
      {
-       \zref@extractdefault
-          {#1}
-          {pdf@abspage}
-          {0}
         \xref_value:nn{#1}{abspage}
      }
  }
