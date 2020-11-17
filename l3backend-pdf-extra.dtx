@@ -58,6 +58,9 @@
 %
 %    \begin{macrocode}
 %<@@=pdf>
+\RequirePackage{l3xref}
+\cs_generate_variant:Nn \xref_label:nn {en}
+\cs_generate_variant:Nn \xref_value:nn {en}
 %    \end{macrocode}
 %    \begin{macrocode}
 %<*dvipdfmx|xdvipdfmx>
@@ -82,9 +85,9 @@
 % new lthooks/ltshipout package.
 %    \begin{macrocode}
 %<*drivers>
-\zref@newlist  { l3pdf }
-\zref@newprop* { pdf@abspage } [0] { \int_use:N \g_shipout_readonly_int }
-\zref@addprop  { l3pdf } { pdf@abspage }
+%\zref@newlist  { l3pdf }
+%\zref@newprop* { pdf@abspage } [0] { \int_use:N \g_shipout_readonly_int }
+%\zref@addprop  { l3pdf } { pdf@abspage }
 %</drivers>
 %    \end{macrocode}
 %
@@ -270,13 +273,15 @@
   {
     %we need to know the page the resource should be added too.
     \int_gincr:N\g_@@_backend_resourceid_int
-    \zref@labelbylist {l3pdf\int_use:N\g_@@_backend_resourceid_int} {l3pdf}
+    %\zref@labelbylist {l3pdf\int_use:N\g_@@_backend_resourceid_int} {l3pdf}
+    \xref_label:en{l3pdf\int_use:N\g_@@_backend_resourceid_int}{abspage}
     \tl_set:Nx \l_@@_tmpa_tl
       {
-        \zref@extractdefault
-          {l3pdf\int_use:N\g_@@_backend_resourceid_int}
-          {pdf@abspage}
-          {0}
+        %\zref@extractdefault
+%          {l3pdf\int_use:N\g_@@_backend_resourceid_int}
+%          {pdf@abspage}
+%          {0}
+        \xref_value:en{l3pdf\int_use:N\g_@@_backend_resourceid_int}{abspage}
       }
     \pdfdict_if_exist:nnF { g } {Core/backend_Page\l_@@_tmpa_tl}
       {
@@ -864,15 +869,17 @@
           { \@@_backend_object_ref:n { #2 } }
       }
       {
-        \zref@labelbylist
-          { l3pdf\int_use:N\g_@@_backend_resourceid_int }
-          { l3pdf }
+        %\zref@labelbylist
+%          { l3pdf\int_use:N\g_@@_backend_resourceid_int }
+%          { l3pdf }
+        \xref_label:en{l3pdf\int_use:N\g_@@_backend_resourceid_int}{abspage}
         \tl_set:Nx \l_@@_tmpa_tl
           {
-            \zref@extractdefault
-              { l3pdf\int_use:N\g_@@_backend_resourceid_int }
-              {pdf@abspage}
-              {0}
+            %\zref@extractdefault
+%              { l3pdf\int_use:N\g_@@_backend_resourceid_int }
+%              {pdf@abspage}
+%              {0}
+            \xref_value:en{l3pdf\int_use:N\g_@@_backend_resourceid_int}{abspage}
           }
         \pdfdict_if_exist:nnF { g } { Core/backend_Page\l_@@_tmpa_tl/Resources/Properties }
           {
@@ -899,15 +906,17 @@
           { \@@_backend_object_last: }
       }
       {
-        \zref@labelbylist
-          { l3pdf\int_use:N\g_@@_backend_resourceid_int }
-          { l3pdf }
+        %\zref@labelbylist
+%          { l3pdf\int_use:N\g_@@_backend_resourceid_int }
+%          { l3pdf }
+       \xref_label:en{l3pdf\int_use:N\g_@@_backend_resourceid_int}{abspage}
         \tl_set:Nx \l_@@_tmpa_tl
           {
-            \zref@extractdefault
-              { l3pdf\int_use:N\g_@@_backend_resourceid_int }
-              {pdf@abspage}
-              {0}
+            %\zref@extractdefault
+%              { l3pdf\int_use:N\g_@@_backend_resourceid_int }
+%              {pdf@abspage}
+%              {0}
+            \xref_value:en{l3pdf\int_use:N\g_@@_backend_resourceid_int}{abspage}
           }
         \pdfdict_if_exist:nnF { g } { Core/backend_Page\l_@@_tmpa_tl/Resources/Properties }
           {
