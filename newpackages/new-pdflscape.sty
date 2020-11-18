@@ -1,0 +1,54 @@
+%%
+%% This is file `new-pdflscape.sty',
+%%
+%% Project: new-pdflscape
+%% Version: 2020/05/28 v0.1
+%%
+%% Copyright (C) 2020 The LaTeX3 Project
+%%
+%% This work may be distributed and/or modified under the
+%% conditions of the LaTeX Project Public License, either
+%% version 1.3c of this license or (at your option) any later
+%% version. This version of this license is in
+%%    https://www.latex-project.org/lppl/lppl-1-3c.txt
+%% and the latest version of this license is in
+%%    https://www.latex-project.org/lppl.txt
+%% and version 1.3 or later is part of all distributions of
+%% LaTeX version 2005/12/01 or later.
+%%
+%% This work has the LPPL maintenance status "maintained".
+%%
+%% The Current Maintainers of this work are
+%% The LaTeX3 Project
+%%
+%%
+%% This work consists of the main source file new-lscape.sty
+%%
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesExplPackage {new-pdflscape}{2020/05/28}{v0.1}
+ {Display of landscape pages in PDF - UF}
+\RequirePackage{pdfresources}
+\RequirePackage{lscape}
+% this always turns in the same direction as pdflscape did too.
+% left and right would need
+% \pdfdict_gput:nnn{ThisPage}{Rotate}{..}
+% on every page (e.g. in a shipout hook) and some option to control the wanted
+% orientation.
+\tl_new:N\g__pdflscape_saverotate_tl
+\hook_gput_code:nnn {env/begin/landscape}{pdflscape}
+  {
+    \pdfdict_get:nnN{Page}{Rotate}\l_tmpa_tl
+    \tl_gset_eq:NN\g__pdflscape_saverotate_tl\l_tmpa_tl
+    \clearpage
+    \pdfdict_gput:nnn{Page}{Rotate}{90}
+  }
+\hook_gput_code:nnn {env/after/landscape}{pdflscape}
+ {
+  \quark_if_no_value:NTF\g__pdflscape_saverotate_tl
+   {\pdfdict_gremove:nn{Page}{Rotate}}
+   {\pdfdict_gput:nnx{Page}{Rotate}{\g__pdflscape_saverotate_tl}}
+ }
+
+\endinput
+%%
+%% End of file `new-pdflscape.sty'.
