@@ -17,7 +17,7 @@ sourcefiles =  {"*.dtx","*.ins",
                 "newpackages/new-attachfile.sty",
                 "newpackages/atfi-generic.def",
                 "newpackages/new-hyperxmp.sty",                
-                "newpackages/pgfutil-latex.def"
+                "newpackages/new-pdflscape.sty"
                 }
 
 checkruns = 3
