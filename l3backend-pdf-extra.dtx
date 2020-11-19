@@ -71,7 +71,9 @@
    \cs_generate_variant:Nn \xref_value:nn {en}
    \cs_new_protected:Npn \@@_backend_abspage_label:n #1
      {
+        \@bsphack
         \xref_label:nn{#1}{abspage}
+        \@esphack
      }
    \cs_new:Npn \@@_backend_abspage_value:n #1
      {
