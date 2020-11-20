@@ -148,14 +148,14 @@
 \hook_gput_code:nnn {enddocument/afterlastpage}
   {pdf/endrun}
   {
-    \hook_use:n {pdf/coredict/end_run}
+    \hook_use:n {pdf/management/end_run}
   }
 %</pdftex|luatex>
 %<*dvipdfmx|xdvipdfmx>
 \hook_gput_code:nnn {shipout/lastpage}
   {pdf/endrun}
   {
-    \hook_use:n {pdf/coredict/end_run}
+    \hook_use:n {pdf/management/end_run}
   }
 \hook_gset_rule:nnnn {shipout/lastpage}{pdf}{before}{pdf/endrun}
 %</dvipdfmx|xdvipdfmx>
@@ -163,7 +163,7 @@
 \hook_gput_code:nnn {shipout/lastpage}
   {pdf/endrun}
   {
-    \hook_use:n {pdf/coredict/end_run}
+    \hook_use:n {pdf/management/end_run}
   }
 \hook_gset_rule:nnnn {shipout/lastpage}{pdf}{before}{pdf/endrun}
 %</dvips>
@@ -174,11 +174,11 @@
 %<*drivers>
 \hook_gput_code:nnn{shipout/background}{pdf}
   {
-    \hook_use:n {pdf/coredict/thispage_shipout}
+    \hook_use:n {pdf/management/thispage_shipout}
   }
 \hook_gput_code:nnn {shipout/lastpage} {pdf}
   {
-     \hook_use:n {pdf/coredict/lastpage_shipout}
+     \hook_use:n {pdf/management/lastpage_shipout}
   }
 %</drivers>
 %    \end{macrocode}
@@ -232,7 +232,7 @@
 %  path: Page
 %  !!!!!!!!!!!!!!!!!!!!!!
 %  This part of the code depends on zref/xref as it sets labels.
-%  It also depends on code in coredict as the code uses the Core-dictionaries
+%  It also depends on code in l3pdfmanagement as the code uses the Core-dictionaries
 %  !!!!!!!!!!!!!!!!!!!!!!
 %
 %  The engines differ a lot here: pdflatex and lualatex uses a register while with
@@ -318,7 +318,6 @@
       {
         \pdfdict_new:nn { g }   {Core/backend_Page\l_@@_tmpa_tl}
       }
-    %\__pdfcoredict_handler_gput:nnn {backend_Page\l_@@_tmpa_tl}{ #1 }{ #2 }
     %backend_Page has no handler.
     \pdfdict_gput:nnn {Core/backend_Page\l_@@_tmpa_tl}{ #1 }{ #2 }
   }
@@ -532,7 +531,7 @@
 % and to push the values.
 %
 % The names are quite often needed
-% a similar list is now in l3pdfcoredict. Perhaps it should be merged.
+% a similar list is now in l3pdfmanagement. Perhaps it should be merged.
 %<*drivers>
 \clist_const:Nn \c_@@_backend_PageResources_clist
   {
