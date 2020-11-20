@@ -1,6 +1,6 @@
 % \iffalse meta-comment
 %
-%% File: l3pdfcoredict.dtx
+%% File: l3pdfmanagement.dtx
 %
 % Copyright (C) 2018-2020 The LaTeX3 Project
 %
@@ -34,7 +34,7 @@
 % \fi
 %
 % \title{^^A
-%   The \pkg{l3pdfcoredict} package\\ Managing core pdf dictionaries ^^A
+%   The \pkg{l3pdfmanagement} package\\ Managing central PDF resources ^^A
 % }
 %
 % \author{^^A
@@ -51,14 +51,14 @@
 % \maketitle
 % \begin{documentation}
 %
-% \section{\pkg{l3pdfcoredict} documentation}
+% \section{\pkg{l3pdfmanagement} documentation}
 % When creating a pdf a number of objects, dictionaries and entries to
 % central \enquote{core} dictionaries must be created.
 %
 % The commands in this module offer interfaces to this core PDF dictionaries
 % They unify a number of primitives like the pdftex
-% registers \cs{pdfcatalog}, \cs{pdfpagesattr}, \cs{pdfinfo} and similar commands
-% of the other backends  in a backend independant way.
+% registers \cs{pdfcatalog}, \cs{pdfpagesattr}, \cs{pdfinfo}, \cs{pdfpageresources}
+% and similar commands of the other backends in a backend independant way.
 %
 % The supported backends are pdflatex, lualatex, (x)dvipdfmx (latex, xelatex)
 % and dvips with ps2pdf (not completely yet). dvips with distiller could work too
@@ -68,26 +68,32 @@
 % the compilation behavior is identical. The backends are too different to allow
 % this. Some backends expand arguments e.g. in a \cs{special} while other don't.
 % Some backends can insert a resource at the first compilation, while another uses
-% the aux-file and a label and so needs at least two.
+% the aux-file and a label and so needs at least two. Some backends create and
+% manage resources automatically which must be mananaged manually by other backends.
 %
-% The dictionaries handled by these module are inserted only
+% The dictionaries and resources handled by this module are inserted only
 % once in a PDF or only once per page. Examples are the Catalog dictionary,
-% the Info dictionary, the page resources. For these dictionaries management by the
+% the Info dictionary, the page resources. For these dictionaries and resources
+% management by the
 % \LaTeX{} kernel is necessary to avoid that packages overwrite settings from
 % other packages which would lead to clashes and incompatibilities.
-% It is therefor necessary that all packages which want to add content to this
-% dictionaries uses the interface provided by this module.
+% It is therefore necessary that all packages which want to add content to this
+% dictionaries and resources use the interface provided by this module.
 %
-% As these dictionaries are so central for the PDF format values to these
+% As these dictionaries and resources are so central for the PDF format values to these
 % dictionaries are always added globally. Through the interface values
-% can be added (and in many cases also removed), but the actually writing of the
-% dictionary objects to the PDF are then handled by
-% the kernel code at a suitable time.
+% can be added (and in many cases also removed) by users and packages,
+% but the actually writing of the
+% dictionary entries and resources to the PDF is handled by
+% the kernel code.
 %
-% The names of this core dictionaries follow the names in the PDF reference.
-% They all have names starting with an uppercase letter.
+% The interface uses as main name to address the resources \emph{Pathes}
+% which follow the names and structure described in the PDF reference. This
+% should make it easy to identify the names needed to insert a specific
+% PDF resources with the new interfaces.
+% All \emph{Pathes} have names starting with an uppercase letter.
 %
-% The following tabular summarize the core dictionaries and which pdftex primitive they
+% The following tabular summarize the \emph{Pathes} and which pdftex primitive they
 % replace:
 %
 % \begin{tabular}{ll}
@@ -105,23 +111,25 @@
 %  as this dictionary is not filled directly but
 %  managed through side effects when setting BDC-marks.
 %  \subsection{User Commands}
-%  The avoid problems with older documents the resource management of this
+%  To avoid problems with older documents the resource management of this
 %  module is not activated unconditionally. The values are pushed out to the
-%  dictionaries only if a boolean has been set to true. The state can be testet
+%  dictionaries only if a boolean has been set to true. The state can be tested
 %  with a conditional.
 %  \begin{function}[EXP,pTF,added=2020-07-04]
-%   {\pdfcoredict_if_active:}
+%   {\pdfmanagement_if_active:}
 %   This conditional tests if the resource management code is active.
 %
 %  \end{function}
 % \begin{function}[added = 2020-04-06]
-%   {\pdfcoredict_gput:nnn}
+%   {\pdfmanagement_add:nnn}
 %   \begin{syntax}
-%     \cs{pdfcoredict_gput:nnn} \Arg{core dictionary} \Arg{name} \Arg{value}\\
+%     \cs{pdfmanagement_add:nnn} \Arg{resource path} \Arg{name} \Arg{value}
 %   \end{syntax}
-% This function puts \Arg{name} \Arg{value}  globally in an internal
-% property lists.
-% \Arg{core dictionary} is a symbolic name for a concrete PDF dictionary to
+% This function puts \Arg{name} \Arg{value} globally in an internal
+% property lists and writes it later into the PDF dictionary\footnote{Currently all
+% resources are PDF dictionaries, so resource and dictionary mean the same.} described by
+% \Arg{resource path}.
+% \Arg{resource path} is a symbolic name for a concrete PDF dictionary to
 % which the content of these property lists will be written by the PDF
 % resource management code.
 % \Arg{name} should be a valid PDF Name without
@@ -147,23 +155,26 @@
 % \end{itemize}
 % \end{function}
 % \begin{function}[added = 2020-04-08]
-%   {\pdfcoredict_show:n }
+%   {\pdfmanagement_show:n }
 %   \begin{syntax}
-%     \cs{pdfcoredict_show:n}  \Arg{dictionary}
+%     \cs{pdfmanagement_show:n}  \Arg{resource path}
 %   \end{syntax}
-%   This shows the content of \Arg{dictionary} in the log and on the terminal.
-%   It doesn't show the special catalog dictionaries with arrays as values
-%   as these are filled only at the end of the document. It is not reliable for
+%   This shows the content of the dictionary targetted by
+%   \Arg{resource path} in the log and on the terminal if possible.
+%
+%   It can't show some subdictionaries of the catalog which have arrays as values
+%   as these are filled only at the end of the document. It is also not reliable for
 %   page resources as these are filled at shipout.
 %\end{function}
 % \begin{function}[added = 2020-04-07]
 %   {
-%     \pdfcoredict_gremove:nn,
+%     \pdfmanagement_remove:nn,
 %   }
 %   \begin{syntax}
-%     \cs{pdfcoredict_gremove:nn} \Arg{global dictionary} \Arg{name}
+%     \cs{pdfmanagement_remove:nn} \Arg{resource path} \Arg{name}
 %   \end{syntax}
-%   Removes  |/|\meta{name} and its associated \meta{value} from the \Arg{dictionary}
+%   Removes  |/|\meta{name} and its associated \meta{value} from the
+%   dictionary described with \Arg{resource path}
 %   The removal is global.
 %   If \meta{name} is not found no change occurs,
 %   \emph{i.e}~there is no need to test for the existence of a name before
@@ -171,52 +182,53 @@
 %   Values from the special Catalog entries with arrays as values can not be
 %   removed.
 % \end{function}
-% \subsection{The core dictionaries}
-% \subsubsection{The Info dictionary}
+% \subsection{Description of the resource pathes}
+% \subsubsection{Info: The Info dictionary}
 % \potentialclash If the primitive commands of the engines are used too there will
 % be double entries in the pdf (at least with the backend pdftex and luatex).
 % How pdf viewer handles this is unpredictable.
 %
 %  \begin{function}
 %   {
-%     pdfcoredict: Info
+%     pdfmanagement: Info
 %   }
 %   \begin{syntax}
-%     \cs{pdfcoredict_gput:nnn} \{Info\} \Arg{name} \Arg{value}
+%     \cs{pdfmanagement_add:nnn} \{Info\} \Arg{name} \Arg{value}
 %   \end{syntax}
 %   Adds |/|\meta{name} and the \meta{value} to the Info dictionary.
 %   \meta{name} should be a valid pdf name without the leading slash,
 %   \meta{value} should be a valid pdf value. Any escaping or (re)encoding must be
 %   done explicitly.
 %   If a \meta{name} is used twice, only the last \meta{value}
-%   set will be used. The info dictionary is written at the end of the compilation,
+%   set will be used. The Info dictionary is written at the end of the compilation,
 %   so values can be set at any time.
-%   The info dictionary expects utf16be in the strings, so a conversion like this is
+%   The Info dictionary expects utf16be in the strings, so a conversion like this is
 %   normally sensible:
 %   \begin{verbatim}
 %   \sys_if_engine_pdftex:TF
-%    {
-%     \str_set_convert:Nnnn \l_tmpa_str { Grüße }{ utf8 } {utf16/string}
-%    }
-%    {
-%     \str_set_convert:Nnnn \l_tmpa_str { Grüße }{  } {utf16/string}
-%    }
-%   \pdfcoredict_gput:nnx {Info} {Title}{(\l_tmpa_str)}
+%     {
+%       \str_set_convert:Nnnn \l_tmpa_str { Grüße }{ utf8 } {utf16/string}
+%     }
+%     {
+%       \str_set_convert:Nnnn \l_tmpa_str { Grüße }{  } {utf16/string}
+%     }
+%   \pdfmanagement_add:nnx {Info} {Title}{(\l_tmpa_str)}
 %   \end{verbatim}
 % \end{function}
 %
-% \subsubsection{The \enquote{Pages} dictionary}
+% \subsubsection{Pages: The \enquote{Pages} dictionary}
 % \potentialclash As the content of this dictionary is written at the end it will
 % in pdftex and luatex overwrite values added with the primitive commands (e.g.
 % \cs{pdfpagesattr}.
 % Package authors should use the management commands instead.
 
-% The content of the property list associated with this dictionary name
-% is written to the /Pages object. This replaces for example \cs{pdfpagesattr}.
+% By using this path with the pdfmanagement interface,
+% values can be added to the /Pages object.
+% This replaces for example \cs{pdfpagesattr}.
 %
-% \begin{function}{pdfcoredict: Pages}
+% \begin{function}{pdfmanagement: Pages}
 %   \begin{syntax}
-%     \cs{pdfcoredict_gput:nnn} \{Pages\} \Arg{name} \Arg{value}
+%     \cs{pdfmanagement_add:nnn} \{Pages\} \Arg{name} \Arg{value}
 %   \end{syntax}
 %
 %   Adds |/|\meta{name} \meta{value} to the |/Pages| dictionary.
@@ -233,11 +245,11 @@
 %
 % \subsubsection{\enquote{Page} and \enquote{ThisPage}}
 % \begin{function}[added = 2020-04-12]
-%   {pdfcoredict: Page}
+%   {pdfmanagement: Page}
 %   \begin{syntax}
-%     \cs{pdfcoredict_gput:nnn} \{Page\} \Arg{name} \Arg{value}
+%     \cs{pdfmanagement_add:nnn} \{Page\} \Arg{name} \Arg{value}
 %   \end{syntax}
-%   Values added to the dictionary \texttt{Page} are added to the page dictionary
+%   Values added with the path \texttt{Page} are added to the page dictionary
 %   of the current page and the following pages. The current page means the page
 %   on which the command is \emph{executed}. \meta{name} should be a valid pdf name
 %   without the leading slash. Typical names used here are e.g.
@@ -246,42 +258,44 @@
 %   Any escaping or (re)encoding must be done explicitly. Some backends expand the
 %   value but this should not be relied on.
 %   To avoid problems with the asynchronous page breaking
-%   the command should be used after \cs{newpage}, or in the header,
-%   and better not in a float.
+%   the command should be used after \cs{newpage} or in the header.
+%   It should not be used in a float, as it will then quite probably be executed
+%   on the wrong page.
 %   The value is assigned directly and is always stored globally.
 %   If a \meta{name} is used twice, only the last \meta{value}
-%   set will be used. Names set with \cs{pdfcoredict_gput:nnn}|{ThisPage}| will overwrite
-%   names set with \cs{pdfcoredict_gput:nnn}|{Page}| if there is a clash.
-%   Values can be removed again with \cs{pdfcoredict_gremove:nn}
+%   set will be used. Names set with \cs{pdfmanagement_add:nnn}|{ThisPage}| will overwrite
+%   names set with \cs{pdfmanagement_add:nnn}|{Page}| if there is a clash.
+%   Values can be removed again with \cs{pdfmanagement_remove:nn}.
+%   This replaces \cs{pdfpageattr}.
 % \end{function}
 % \begin{function}[added = 2020-04-12]
-%   { pdfcoredict: ThisPage}
+%   { pdfmanagement: ThisPage}
 %   \begin{syntax}
-%     \cs{pdfcoredict_gput:nnn} \{ThisPage\} \Arg{name} \Arg{value}
+%     \cs{pdfmanagement_add:nnn} \{ThisPage\} \Arg{name} \Arg{value}
 %   \end{syntax}
 %   Adds |/|\meta{name} \meta{value} at \emph{shipout} to the page dictionary of the
 %   current page. Current page means here the \emph{shipout} page.
 %   It is always stored globally.
 %   If \Arg{name} has already a value set in the \texttt{Page}
-%   dictionary it will be overwritte for this page.
+%   dictionary it will be overwritten for this page.
 %   \meta{name} should be a valid pdf name without the leading slash,
 %   \meta{value} should be a valid pdf value. Any escaping or (re)encoding must be
 %   done explicitly. If a \meta{name} is used twice, only the last \meta{value}
 %   set will be used.
 %   With the engine pdflatex (at least) a second compilation is needed.
 %   Values added to \texttt{ThisPage} can not be removed. It is not possible to
-%   show the content of this dictionary with \cs{pdfcoredict_show:n}.
+%   show the content of this dictionary with \cs{pdfmanagement_show:n}.
 % \end{function}
 % \subsubsection{\enquote{Page/Resources}: ExtGState, ColorSpace, Shading, Pattern}
 % \begin{function}[updated = 2020-04-10]
 %   {
-%    pdfcoredict: Page/Resources/ExtGState,
-%    pdfcoredict: Page/Resources/ColorSpace,
-%    pdfcoredict: Page/Resources/Shading,
-%    pdfcoredict: Page/Resources/Pattern,
+%    pdfmanagement: Page/Resources/ExtGState,
+%    pdfmanagement: Page/Resources/ColorSpace,
+%    pdfmanagement: Page/Resources/Shading,
+%    pdfmanagement: Page/Resources/Pattern,
 %   }
 %   \begin{syntax}
-%     \cs{pdfcoredict_gput:nnn} \{Page/Resources/\meta{resource}\} \Arg{name} \Arg{value}
+%     \cs{pdfmanagement_add:nnn} \{Page/Resources/\meta{resource}\} \Arg{name} \Arg{value}
 %   \end{syntax}
 %   Adds |/|\meta{name} \meta{value} to the page resource \meta{resource}.
 %   \meta{resource} can be |ExtGState|, |ColorSpace|, |Pattern| oder |Shading|.
@@ -292,15 +306,17 @@
 %   Any escaping or (re)encoding must be done explicitly. If a \meta{name} is
 %   used twice, only the last \meta{value} set will be used.
 %
-%   With the dvips backend the command does nothing: resources are managed by
+%   With the dvips backend the command does nothing: these resources are managed by
 %   ghostscript or the distiller if e.\,g. transparency is used.
 %
 %   The resources are added to all pages starting with the first where something has
 %   been added to a resources. That means that for example
 %   all ExtGState resources are combined in one
-%   dictionary object and every page with a ExtGState resource refer to this object.
+%   dictionary object and every page with a ExtGState resource refer to this object%
+%   \footnote{This is similar to how pgf handles this resources}.
 %
-%   \potentialclash The primitive commands to set the resources should not be used
+%   \potentialclash The primitive commands (e.g. \cs{pdfpageresources})
+%   to set the resources should not be used
 %   together with this code as the calls will overwrite each other and values
 %   will be lost. This means that currently there are clashes with the packages tikz,
 %   transparent and colorspace.
@@ -308,7 +324,7 @@
 % \subsubsection{\enquote{Catalog} \& subdirectories}
 % The catalog is a central dictionary in a PDF with a number of subdictionaries.
 % Entries to the top level of the catalog can be added with
-% |\pdfcoredict_gput:nnn {Catalog}|\Arg{Name}\Arg{Value}.
+% |\pdfmanagement_add:nnn {Catalog}|\Arg{Name}\Arg{Value}.
 % Entries to subdictionaries by using in the first
 % argument one of the pathes described later.
 % The entries in the catalog have varying requirements regarding the
@@ -318,7 +334,7 @@
 % can contain a number of values and can be filled from more than one source.
 % In some cases the values that needs to be added are not at the top-level
 % but in some subsubdictionary or are actually part of an array.
-% To handle this some pathes use internally special handlers.
+% To handle the pdf management uses a variety of internal, special handlers.
 %
 % \potentialclash In some cases entries are added implicitly.
 % For example entries to the name
@@ -337,20 +353,20 @@
 %
 %   The required PDF version is only mentioned if it is larger than 1.5.
 %
-%   Example: |\pdfcoredict_gput:nnn {Catalog}{PageMode}{/UseNone}|
+%   Example: |\pdfmanagement_add:nnn {Catalog}{PageMode}{/UseNone}|
 %
-%% !!!!!!!! Warning for unknown names is currently not working!
+%%   !!!!!!!! Warning for unknown names is currently not working!
 %   \medskip
 %   \noindent
 %   \begin{tabularx}{\linewidth}{ll>{\raggedright\arraybackslash}X}
-%    \bfseries Name           &  \bfseries Value  & \bfseries Remark \\\midrule
+%    \bfseries Name          &  \bfseries Value  & \bfseries Remark \\\midrule
 %    Collection              &  objref or dict     & the content should be
 %     build by external packages (see eg embedfile)                   \\
 %    DPartRoot               &  objref or dict     & PDF 2.0           \\
 %    Lang                    &  string             & e.g. \texttt{(de-DE)} \\
 %    Legal                   &  objref or dict                             \\
-%    Metadata                &  obj ref or stream                       \\
-%    NeedsRendering          &  boolean            &   PDF 1.7\\
+%    Metadata                &  objref or stream                       \\
+%    NeedsRendering          &  boolean            & PDF 1.7\\
 %    OpenAction              &  array (dest) or dict (action) \\
 %    PageLabels              &  objref or dict     &  number tree \\
 %    PageLayout              &  name               & one of /SinglePage, /OneColumn,
@@ -362,7 +378,7 @@
 %    Perms                   &  objref or dict     & permissions\\
 %    PieceInfo               &  objref or dict \\
 %    SpiderInfo              &  objref or dict \\
-%    StructTreeRoot          &  obj ref or dict \\
+%    StructTreeRoot          &  objref or dict \\
 %    Threads                 &  objref to an array\\
 %    URI                     &  objref or dict \\
 %    Version                 &  name           & eg. \texttt{/1.7} \\
@@ -372,18 +388,18 @@
 %   \par\medskip
 %
 %   \paragraph{Simple entries in subdictionaries of the catalog}
-%   The following dictionaries have been predeclared and allow to
+%   The following resource pathes have been predeclared and allow to
 %   add values to the respective subdictionaries of the catalog. The
 %   names of the dictionaries follow the naming and location of the dictionaries
 %   in the PDF reference.
 %   If \meta{Name} gets assigned two values the last one wins.
 %
-%   Example: |\pdfcoredict_gput:nnn {Catalog/MarkInfo}{Marked}{true}|
+%   Example: |\pdfmanagement_add:nnn {Catalog/MarkInfo}{Marked}{true}|
 %
 %   \medskip
 %   \noindent
 %   \begin{tabularx}{\linewidth}{llll>{\raggedright\arraybackslash}X}
-%    \bfseries Dictionary    & \bfseries Names & \bfseries Value  & \bfseries Remark
+%    \bfseries Path/dictionary    & \bfseries Names & \bfseries Value  & \bfseries Remark
 %    \\\midrule
 %    Catalog/AA              &WC, WS, DS, WP,DP& all dict    \\
 %    Catalog/AcroFrom        &  NeedAppearances&  boolean & In pdf 2.0
@@ -416,26 +432,26 @@
 %  \begin{verbatim}
 %  \pdf_object_new:nn   {pkg@intent}{dict}
 %  \pdf_object_write:nn {pkg@intent}{...}
-%  \pdfcoredict_gput:nnx  {Catalog} {OutputIntents}{\pdf_object_ref:n {pkg@intent}}
+%  \pdfmanagement_add:nnx  {Catalog} {OutputIntents}{\pdf_object_ref:n {pkg@intent}}
 %  \end{verbatim}
 %
 %  or
 %  \begin{verbatim}
 %  \pdf_object_now:nn   {dict} { ... }
-%  \pdfcoredict_gput:nnx  {Catalog} {OutputIntents}{\pdf_object_last:}
+%  \pdfmanagement_add:nnx  {Catalog} {OutputIntents}{\pdf_object_last:}
 %  \end{verbatim}
 %
 %
 %   \medskip
 %   \noindent
 %   \begin{tabularx}{\linewidth}{lll>{\raggedright\arraybackslash}X}
-%    \bfseries Dictionary &\bfseries Name        & \bfseries Value   & \bfseries Remark \\\midrule
+%    \bfseries Path/dictionary &\bfseries Name        & \bfseries Value   & \bfseries Remark \\\midrule
 %    Catalog/AcroForm     & Fields               & object reference\\
 %    Catalog/AcroForm     & CO                   & object reference\\
 %    Catalog              & AF                   & object reference\\
 %    Catalog/OCProperties & OCGs                 & object reference  &if there are OCProperties, OCGs and D are required.\\
 %    Catalog/OCProperties & Configs              & object reference \\
-%    Catalog/OCProperties & D                    & object reference & This actually a single value as
+%    Catalog/OCProperties & D                    & object reference & This is actually a single value as
 %                                         there can be only one default.
 %                                         If the value is set twice, the
 %                                         second wins, and the first is
@@ -449,40 +465,40 @@
 % \end{documentation}
 %
 % \begin{implementation}
-%  \section{\pkg{l3pdfcoredict} implementation}
+%  \section{\pkg{l3pdfmanagement} implementation}
 %    \begin{macrocode}
-%<@@=pdfcoredict>
+%<@@=pdfmanagement>
 %<*package>
 %
-\ProvidesExplPackage {l3pdfcoredict} {2020-04-08} {0.5}
-  {Managing global and local dictionaries}
+\ProvidesExplPackage {l3pdfmanagement} {2020-04-08} {0.5}
+  {Main PDF Management}
 %    \end{macrocode}
 % \subsection{Messages}
 %    \begin{macrocode}
-\msg_new:nnn  { pdfcoredict } { unknown-dict }
-              { The~dictionary~'#1'~is~not~declared. }
+\msg_new:nnn  { pdfmanagement } { unknown-dict }
+              { The~path/dictionary~'#1'~is~not~declared. }
 
-\msg_new:nnn  { pdfcoredict } { empty-value }
+\msg_new:nnn  { pdfmanagement } { empty-value }
               { The~value~for~#1~is~empty~and~will~be~ignored }
 
-\msg_new:nnn  { pdfcoredict } { no-removal }
-              { It~is~not~possible~to~remove~values~from~dictionary~'#1'.}
+\msg_new:nnn  { pdfmanagement } { no-removal }
+              { It~is~not~possible~to~remove~values~from~path/dictionary~'#1'.}
 
-\msg_new:nnn  { pdfcoredict } { no-show }
-              { It~is~not~possible~to~show~the~dictionary~'#1'.}
+\msg_new:nnn  { pdfmanagement } { no-show }
+              { It~is~not~possible~to~show~the~path/dictionary~'#1'.}
 
-\msg_new:nnn  { pdfcoredict } { show-dict }
+\msg_new:nnn  { pdfmanagement } { show-dict }
   {
-    The~core~dictionary~'#1'~
+    The~path/dictionary~'#1'~
     \tl_if_empty:nTF {#2}
       { is~empty \\>~ . }
       { contains~the~pairs~(without~outer~braces): #2 . }
   }
-\msg_new:nnn  { pdfcoredict } { dict-already-defined  }
+\msg_new:nnn  { pdfmanagement } { dict-already-defined  }
   {
-    The~dictionary~'#1'~is~already~defined.
+    The~path/dictionary~'#1'~is~already~defined.
   }
-\msg_new:nnn  { pdfcoredict } { inactive  }
+\msg_new:nnn  { pdfmanagement } { inactive  }
   {
     The~pdfresources~managment~is~not~active\\
     command~'#1'~ignored.
@@ -497,11 +513,11 @@
       { \prg_return_false: }
   }
 \prg_set_eq_conditional:NNn
-  \pdfcoredict_if_active: \@@_if_active: { p , T , F , TF }
+  \pdfmanagement_if_active: \@@_if_active: { p , T , F , TF }
 
 %    \end{macrocode}
 %    \begin{macrocode}
-\cs_new_protected:Npn \pdfcoredict_gput:nnn #1 #2 #3
+\cs_new_protected:Npn \pdfmanagement_add:nnn #1 #2 #3
   {
     \@@_if_active:TF
       {
@@ -510,15 +526,15 @@
             \@@_handler_gput:nnn { #1 }{ #2 }{ #3 }
           }
           {
-            \msg_error:nnn{pdfcoredict}{unknown-dict}{#1}
+            \msg_error:nnn{pdfmanagement}{unknown-dict}{#1}
           }
       }
       {
-        \msg_warning:nnx {pdfcoredict}{inactive}{\tl_to_str:n {\pdfcoredict_gput:nnn}}
+        \msg_warning:nnx {pdfmanagement}{inactive}{\tl_to_str:n {\pdfmanagement_add:nnn}}
       }
   }
 
-\cs_generate_variant:Nn \pdfcoredict_gput:nnn {nnx}
+\cs_generate_variant:Nn \pdfmanagement_add:nnn {nnx}
 %    \end{macrocode}
 % \subsection{Hooks -- shipout and end of run code}
 % Code is executed in three places: At shipout of every page,
@@ -530,19 +546,19 @@
 %
 % \begin{variable}
 %   {
-%    pdf/coredict/end_run,
-%    pdf/coredict/lastpage_shipout,
-%    pdf/coredict/thispage_shipout
+%    pdf/management/end_run,
+%    pdf/management/lastpage_shipout,
+%    pdf/management/thispage_shipout
 %   }
 % This hooks contain the code run in the three places.
 %    \begin{macrocode}
-\hook_new:n {pdf/coredict/end_run}
-\hook_new:n {pdf/coredict/lastpage_shipout}
-\hook_new:n {pdf/coredict/thispage_shipout}
+\hook_new:n {pdf/management/end_run}
+\hook_new:n {pdf/management/lastpage_shipout}
+\hook_new:n {pdf/management/thispage_shipout}
 %    \end{macrocode}
 % \end{variable}
 %    \begin{macrocode}
-\hook_gput_code:nnn {pdf/coredict/thispage_shipout} {pdf}
+\hook_gput_code:nnn {pdf/management/thispage_shipout} {pdf}
   {
      \bool_if:NT \g__pdf_Core_active_bool
        {
@@ -551,7 +567,7 @@
        }
   }
 
-\hook_gput_code:nnn {pdf/coredict/lastpage_shipout} {pdf}
+\hook_gput_code:nnn {pdf/management/lastpage_shipout} {pdf}
   {
     \bool_if:NT \g__pdf_Core_active_bool
        {
@@ -559,24 +575,21 @@
        }
   }
 
-\hook_gput_code:nnn {pdf/coredict/end_run} {pdf}
+\hook_gput_code:nnn {pdf/management/end_run} {pdf}
   {
     \bool_if:NT \g__pdf_Core_active_bool
        {
-         \__pdfcoredict_Pages_gpush:            %pagesattr
-         \__pdfcoredict_Info_gpush:             %pdfinfo
-         \__pdfcoredict_Catalog_gpush:
+         \__pdfmanagement_Pages_gpush:            %pagesattr
+         \__pdfmanagement_Info_gpush:             %pdfinfo
+         \__pdfmanagement_Catalog_gpush:
        }
   }
 %    \end{macrocode}
-% \subsection{Internal dictionary Code}
-%  Many code parts are quite similar: property lists for
-%  dictionaries are filled and output.
-%  So we define some generic commands to ensure systematic
-%  internal names. The names are based on paths separated by slashed.
-%  The first slash is not used in the names.
-%
+% \subsection{Naming convention}
+
 %  Currently the following names are used: ^^A!!!!! check, compare with g_@@_gnames_seq
+%  All have internally additionally a \texttt{Core} before the slash, to
+%  hide the real name a bit.
 %  \begin{verbatim}
 %  /Info                      %    (\pdfinfo)
 %  /Catalog                   %    (\pdfcatalog)
@@ -591,7 +604,7 @@
 %  /Pages                     %    (\pagesattr)
 %  /Page                      %    (\pageattr)
 %  /ThisPage                  %    (\pageattr)
-%  /backend_PageN/Resources/Properties %
+%  /backend_PageN/Resources/Properties % this is only internal.
 %  /Page/Resources/ExtGState
 %  /Page/Resources/ColorSpace
 %  /Page/Resources/Pattern
@@ -617,7 +630,7 @@
   {
     \tl_if_empty:nTF { #3 }
       {
-        \msg_none:nnn { pdfcoredict }{ empty-value }{ /#1/#2 }
+        \msg_none:nnn { pdfmanagement }{ empty-value }{ /#1/#2 }
       }
       {
         \pdfdict_if_exist:nnTF { g } { Core/#1 }
@@ -636,7 +649,7 @@
               }
           }
           {
-            \msg_error:nnn { pdfcoredict } { unknown-dict } { #1 }
+            \msg_error:nnn { pdfmanagement } { unknown-dict } { #1 }
           }
       }
   }
@@ -670,7 +683,7 @@
               }
           }
           {
-            \msg_error:nnn { pdfcoredict } { unknown-dict } { #1 }
+            \msg_error:nnn { pdfmanagement } { unknown-dict } { #1 }
           }
   }
 
@@ -682,7 +695,7 @@
               { \pdfdict_name:nn { g } { Core/#1 } }{ #2 }
           }
           {
-            \msg_error:nnn { pdfcoredict } { unknown-dict } { #1 }
+            \msg_error:nnn { pdfmanagement } { unknown-dict } { #1 }
           }
   }
 
@@ -696,13 +709,13 @@
         \prop_if_exist:cTF { \pdfdict_name:nn { g } { Core/#2 } }
           {
              #1
-               { pdfcoredict } { show-dict }
+               { pdfmanagement } { show-dict }
                { \tl_to_str:n {#2} }
                { \prop_map_function:cN {\pdfdict_name:nn { g } { Core/#2 }} \msg_show_item:nn }
                { } { }
           }
           {
-            #1 { pdfcoredict } { unknown-dict } {#2}{}{}{}
+            #1 { pdfmanagement } { unknown-dict } {#2}{}{}{}
           }
        }
   }
@@ -716,20 +729,32 @@
 %
 %
 %    \begin{macrocode}
-\cs_new_protected:Npn \pdfcoredict_show:n #1
+\cs_new_protected:Npn \pdfmanagement_show:n #1
   {
     \@@_show:Nn \msg_show:nnxxxx {#1}
   }
 %    \end{macrocode}
 %    \begin{macrocode}
-\cs_new_protected:Npn \pdfcoredict_gremove:nn #1 #2
+\cs_new_protected:Npn \pdfmanagement_remove:nn #1 #2
   {
     \pdfdict_if_exist:nnTF { g } { Core/#1 }
       {
         \@@_handler_gremove:nn { #1 }{ #2 }
       }
       {
-        \msg_error:nnn{pdfcoredict}{unknown-dict}{#1}
+        \msg_error:nnn{pdfmanagement}{unknown-dict}{#1}
+      }
+  }
+%    \end{macrocode}
+%    \begin{macrocode}
+\cs_new_protected:Npn \pdfmanagement_get:nnN #1 #2 #3
+  {
+    \pdfdict_if_exist:nnTF { g } { Core/#1 }
+      {
+        \@@_handler_get:nnN { #1 }{ #2 } #3
+      }
+      {
+        \msg_error:nnn{pdfmanagement}{unknown-dict}{#1}
       }
   }
 %    \end{macrocode}
@@ -778,7 +803,7 @@
 \pdfdict_new:nn { g } { Core/Page }
 \pdfdict_new:nn { g } { Core/ThisPage }
 
-%handler for pdfcoredict
+%handler for pdfmanagement
 \cs_new_protected:cpn { @@_handler/Page/?_gput:nn } #1 #2
   {
     \__pdf_backend_Page_gput:nn { #1 }{ #2 }
@@ -789,7 +814,7 @@
     \__pdf_backend_Page_gremove:n { #1 }
   }
 
-% handler for pdfcoredict
+% handler for pdfmanagement
 \cs_new_protected:cpn { @@_handler/ThisPage/?_gput:nn } #1 #2
   {
     \prop_gput:cnn  { \pdfdict_name:nn { g } { Core/ThisPage } }{ #1 } { #2 }
@@ -801,12 +826,12 @@
 
 \cs_new_protected:cpn { @@_handler/ThisPage/?_gremove:n } #1
   {
-    \msg_warning:nnn { pdfcoredict } { no-removal }{ThisPage}
+    \msg_warning:nnn { pdfmanagement } { no-removal }{ThisPage}
   }
 
 \cs_new_protected:cpn { @@_handler/ThisPage/?_show: }
   {
-    \msg_warning:nnn { pdfcoredict } { no-show }{ThisPage}
+    \msg_warning:nnn { pdfmanagement } { no-show }{ThisPage}
   }
 
 %    \end{macrocode}
