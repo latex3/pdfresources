@@ -735,14 +735,14 @@
 % is an absolute page number. \Arg{view} a string for the destination
 % without the leading slash. Examples are e.g. |XYZ left top zoom| or |Fit|.
 % The OpenAction uses (and could also be set directly with)
-% \cs{pdfcoredict_gput:nnn}|{Catalog}|.
+% \cs{pdfmanagement_add:nnn}|{Catalog}|.
 % \end{function}
 %
 %    \begin{macrocode}
 %<*package>
 %\cs_new_protected:Npn \pdf_docview:nn #1 #2
 %  {
-%    \pdfcoredict_gput:nnx {Catalog }{ OpenAction }{[\pdf_object_pageref:n {#1}~/#2]}
+%    \pdfmanagement_add:nnx {Catalog }{ OpenAction }{[\pdf_object_pageref:n {#1}~/#2]}
 %  }
 %</package>
 %    \end{macrocode}

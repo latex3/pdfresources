@@ -221,8 +221,8 @@
 % attachment panel requires special care:
 % This name tree is a global resource and uncoordinated access can lead to
 % clashes and files that are not visible or inaccessible.
-% The access here is managed by the \pkg{l3pdfcoredict} module:\\[\smallskipamount]%
-% |\pdfcoredict_gput:nnx{Catalog/Names}{EmbeddedFiles}{|\meta{objref}|}|
+% The access here is managed by the \pkg{l3pdfmanagement} module:\\[\smallskipamount]%
+% |\pdfmanagement_add:nnx{Catalog/Names}{EmbeddedFiles}{|\meta{objref}|}|
 %
 % \subsection{Commands and tools of these module}
 % \begin{function}{file, file/Params, file/streamParams,file/FileSpec}
@@ -355,7 +355,7 @@
 % %embeds testinput.txt and calls it grüße.txt
 % \pdffile_embed_file:nnn {testinput.txt}{grüße.txt}{file:example1}
 % %reference it in the panel
-% \pdfcoredict_gput:nnx
+% \pdfmanagement_add:nnx
 %  {Catalog/Names}
 %  {EmbeddedFiles}
 %   {\pdf_object_ref:n{file:example1}}
