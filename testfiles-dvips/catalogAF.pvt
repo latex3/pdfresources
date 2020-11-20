@@ -1,19 +1,19 @@
+\input{regression-test}
 \PassOptionsToPackage{enable-debug,check-declarations}{expl3}
 \RequirePackage[debug]{pdfresources}
-\ExplSyntaxOn
-%%% for reproducible tests:
-\pdfcoredict_gput:nnn {Info}{CreationDate}{(D:20200202111111+01'00')}
-\pdfcoredict_gput:nnn {Info}{ModDate}{(D:20200202111111+01'00')}
-\pdfcoredict_gput:nnn {Info}{Creator}{(l3build test)}
-%%%%%
-\ExplSyntaxOff
 \DeclareDocumentMetadata
  {
    pdfversion=2.0, %not so good with pdftex ...
    lang=de-DE,
    uncompress
  }
-\input{regression-test}
+\ExplSyntaxOn
+%%% for reproducible tests:
+\pdfcoredict_gput:nnn {Info}{CreationDate}{(D:20200202111111+01'00')}
+\pdfcoredict_gput:nnn {Info}{ModDate}{(D:20200202111111+01'00')}
+\pdfcoredict_gput:nnn {Info}{Creator}{(l3build test)}
+%%%%%
+\ExplSyntaxOff 
 \documentclass{article}
 \ExplSyntaxOn
 \pdf_object_new:nn   {filespec1}{dict}
