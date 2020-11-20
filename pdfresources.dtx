@@ -181,7 +181,7 @@
 \RequirePackage{l3pdfmeta} %
 \RequirePackage{l3pdfdict}
 \RequirePackage{l3pdftools}
-\RequirePackage{l3pdfcoredict}
+\RequirePackage{l3pdfmanagement}
 %</package>
 %    \end{macrocode}
 %
@@ -211,7 +211,7 @@
 % \cs{@@_backend_info_gput:nn} inserts one name/value pair.
 %
 % \subsubsection{\enquote{Info}/management}
-% moved to \pkg{l3pdfcoredict}
+% moved to \pkg{l3pdfmanagement}
 %
 % \subsection{The \enquote{Pages} dictionary (pdfpagesattr)}
 % The content of the property list associated with this dictionary name is written to the
@@ -232,7 +232,7 @@
 % but with dvips/dvipdfmx this would disable removing entries.
 % So we issue the push code only at the end of the document.
 % \end{NOTE}
-% The code has been moved to \pkg{l3pdfcoredict}
+% The code has been moved to \pkg{l3pdfmanagement}
 %
 % \subsection{\enquote{Page} and \enquote{ThisPage} (pdfpageattr)}
 % The content of the property lists associated with this dictionary name is written to the
@@ -246,7 +246,7 @@
 % See also https://tex.stackexchange.com/questions/479812/extension-of-rotating-package-to-set-pdf-rotation
 % (should work now)
 % \end{NOTE}
-% The code has been moved to \pkg{l3pdfcoredict}.
+% The code has been moved to \pkg{l3pdfmanagement}.
 %
 % \subsection{\enquote{Page/Resources}: ExtGState, ColorSpace, Shading, Pattern }
 % \begin{NOTE}{UF}
@@ -290,7 +290,7 @@
 % /Acroform/DR/ExtGState etc probably unneeded.
 % \end{NOTE}
 %
-%  The code has been moved to \pkg{l3pdfcoredict}.
+%  The code has been moved to \pkg{l3pdfmanagement}.
 %
 % \subsection{Local dictionaries}
 %
