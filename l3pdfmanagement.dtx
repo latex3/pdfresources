@@ -476,31 +476,31 @@
 % \subsection{Messages}
 %    \begin{macrocode}
 \msg_new:nnn  { pdfmanagement } { unknown-dict }
-              { The~path/dictionary~'#1'~is~not~declared. }
+              { The~PDF~management~resource~'#1'~is~unknown. }
 
 \msg_new:nnn  { pdfmanagement } { empty-value }
               { The~value~for~#1~is~empty~and~will~be~ignored }
 
 \msg_new:nnn  { pdfmanagement } { no-removal }
-              { It~is~not~possible~to~remove~values~from~path/dictionary~'#1'.}
+              { It~is~not~possible~to~remove~values~from~'#1'.}
 
 \msg_new:nnn  { pdfmanagement } { no-show }
-              { It~is~not~possible~to~show~the~path/dictionary~'#1'.}
+              { It~is~not~possible~to~show~the~content~of~'#1'.}
 
 \msg_new:nnn  { pdfmanagement } { show-dict }
   {
-    The~path/dictionary~'#1'~
+    The~PDF~resource~'#1'~
     \tl_if_empty:nTF {#2}
       { is~empty \\>~ . }
       { contains~the~pairs~(without~outer~braces): #2 . }
   }
 \msg_new:nnn  { pdfmanagement } { dict-already-defined  }
   {
-    The~path/dictionary~'#1'~is~already~defined.
+    The~path~'#1'~is~already~defined.
   }
 \msg_new:nnn  { pdfmanagement } { inactive  }
   {
-    The~pdfresources~managment~is~not~active\\
+    The~PDF~resources~managment~is~not~active\\
     command~'#1'~ignored.
   }
 %    \end{macrocode}
