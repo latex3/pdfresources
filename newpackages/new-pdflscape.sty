@@ -31,22 +31,22 @@
 \RequirePackage{lscape}
 % this always turns in the same direction as pdflscape did too.
 % left and right would need
-% \pdfcoredict_gput:nnn{ThisPage}{Rotate}{..}
+% \pdfmanagement_add:nnn{ThisPage}{Rotate}{..}
 % on every page (e.g. in a shipout hook) and some option to control the wanted
 % orientation.
 \tl_new:N\g__pdflscape_saverotate_tl
 \hook_gput_code:nnn {env/landscape/begin}{pdflscape}
   {
-    \pdfdict_get:nnnN {g} {Core/Page}{Rotate}\l_tmpa_tl
+    \pdfmanagement_get:nnN {Page}{Rotate}\l_tmpa_tl
     \tl_gset_eq:NN\g__pdflscape_saverotate_tl\l_tmpa_tl
     \clearpage
-    \pdfcoredict_gput:nnn{Page}{Rotate}{90}
+    \pdfmanagement_add:nnn{Page}{Rotate}{90}
   }
 \hook_gput_code:nnn {env/landscape/after}{pdflscape}
  {
   \quark_if_no_value:NTF\g__pdflscape_saverotate_tl
-   {\pdfcoredict_gremove:nn{Page}{Rotate}}
-   {\pdfcoredict_gput:nnx{Page}{Rotate}{\g__pdflscape_saverotate_tl}}
+   {\pdfmanagement_remove:nn{Page}{Rotate}}
+   {\pdfmanagement_add:nnx{Page}{Rotate}{\g__pdflscape_saverotate_tl}}
  }
 
 \endinput
