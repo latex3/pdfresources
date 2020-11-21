@@ -5,9 +5,9 @@
 \usepackage{l3pdffile}
 \ExplSyntaxOn
 %%% for reproducible tests:
-\pdfcoredict_gput:nnn {Info}{CreationDate}{(D:20200202111111+01'00')}
-\pdfcoredict_gput:nnn {Info}{ModDate}{(D:20200202111111+01'00')}
-\pdfcoredict_gput:nnn {Info}{Creator}{(l3build test)}
+\pdfmanagement_add:nnn {Info}{CreationDate}{(D:20200202111111+01'00')}
+\pdfmanagement_add:nnn {Info}{ModDate}{(D:20200202111111+01'00')}
+\pdfmanagement_add:nnn {Info}{Creator}{(l3build test)}
 %%%%%
 \ExplSyntaxOff
 
@@ -49,10 +49,10 @@ grüße
 
 
 
-\pdfcoredict_gput:nnx{Catalog/Names}{EmbeddedFiles}{\pdf_object_ref:n{example1}}
-\pdfcoredict_gput:nnx{Catalog/Names}{EmbeddedFiles}{\pdf_object_ref:n{example2}}
-\pdfcoredict_gput:nnx{Catalog/Names}{EmbeddedFiles}{\pdf_object_ref:n{example3}}
-\pdfcoredict_gput:nnx{Catalog/Names}{EmbeddedFiles}{\pdf_object_ref:n{example4}}
+\pdfmanagement_add:nnx{Catalog/Names}{EmbeddedFiles}{\pdf_object_ref:n{example1}}
+\pdfmanagement_add:nnx{Catalog/Names}{EmbeddedFiles}{\pdf_object_ref:n{example2}}
+\pdfmanagement_add:nnx{Catalog/Names}{EmbeddedFiles}{\pdf_object_ref:n{example3}}
+\pdfmanagement_add:nnx{Catalog/Names}{EmbeddedFiles}{\pdf_object_ref:n{example4}}
 
 %\prop_show:N \g__pdffile_file_embed_sources_prop
 %\seq_show:N \g__pdf_backend_EmbeddedFiles_seq
