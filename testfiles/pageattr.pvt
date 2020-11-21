@@ -7,24 +7,24 @@
 \START
 some text
 \ExplSyntaxOn
- \pdfcoredict_gput:nnn {Page} {Rotate}{90}
+ \pdfmanagement_add:nnn {Page} {Rotate}{90}
 %test local:
-{\pdfcoredict_gput:nnn {Page} {CropBox}{[0~0~300~350]}}
+{\pdfmanagement_add:nnn {Page} {CropBox}{[0~0~300~350]}}
 
 %test doublette
- \pdfcoredict_gput:nnn {Page} {Rotate}{90}
+ \pdfmanagement_add:nnn {Page} {Rotate}{90}
 
 %test command:
 \newcommand\attributecontent{(somesetting)}
-\pdfcoredict_gput:nnx {Page} {SSS}{\attributecontent}
+\pdfmanagement_add:nnx {Page} {SSS}{\attributecontent}
 
 \newpage
-\pdfcoredict_gremove:nn {Page}{Rotate}
-\pdfcoredict_gremove:nn {Page}{CropBox}
+\pdfmanagement_remove:nn {Page}{Rotate}
+\pdfmanagement_remove:nn {Page}{CropBox}
 some text more text
 \begin{figure}[p]
 \rule{1cm}{15cm}
-\pdfcoredict_gput:nnn {ThisPage}{Rotate}{-90}
+\pdfmanagement_add:nnn {ThisPage}{Rotate}{-90}
 \end{figure}
 \newpage
 abbb

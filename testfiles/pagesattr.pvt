@@ -7,16 +7,16 @@
 \START
 some text
 \ExplSyntaxOn
- \pdfcoredict_gput:nnn {Pages} {YYY}{(yyy)}
+ \pdfmanagement_add:nnn {Pages} {YYY}{(yyy)}
 %test local:
-{\pdfcoredict_gput:nnn {Pages} {ZZZ}{(zzz)}}
+{\pdfmanagement_add:nnn {Pages} {ZZZ}{(zzz)}}
 
 %test doublette
- \pdfcoredict_gput:nnn {Pages} {YYY}{(y22)}
+ \pdfmanagement_add:nnn {Pages} {YYY}{(y22)}
 
 %test command:
 \newcommand\attributecontent{(somesetting)}
-\pdfcoredict_gput:nnn {Pages} {SSS}{\attributecontent}
+\pdfmanagement_add:nnn {Pages} {SSS}{\attributecontent}
 %\tl_show:N\g__pdf_pagesattr_tl
 \ExplSyntaxOff
 \end{document} 

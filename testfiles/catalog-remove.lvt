@@ -7,25 +7,25 @@
 \begin{document}
 \START
 \ExplSyntaxOn
-\pdfcoredict_gput:nnn {Catalog }                   {Lang}        {(de-De)}
-\pdfcoredict_gput:nnn {Catalog }                   {PageLayout}  {/SinglePage}
-\pdfcoredict_gput:nnn {Catalog / MarkInfo}         {Marked}      {True}
-\pdfcoredict_gput:nnn {Catalog / ViewerPreferences}{HideToolbar} {true}
-\pdfcoredict_gput:nnn {Catalog / AcroForm/DR/Font} {Name}       {<</ABC/CDE>>}
-\pdfcoredict_gput:nnn {Catalog / AcroForm/DR/Font} {NameB}      {<</ABC/CDE>>}
-\pdfcoredict_show:n {Catalog}
-\pdfcoredict_show:n {Catalog/ViewerPreferences}
-\pdfcoredict_show:n {Catalog/MarkInfo}
-\pdfcoredict_show:n {Catalog/AcroForm/DR/Font}
-\pdfcoredict_gremove:nn {Catalog / ViewerPreferences } {HideToolbar}
-\pdfcoredict_gremove:nn {Catalog }                     {PageMode}
-\pdfcoredict_gremove:nn {Catalog }                     {PageLayout}
-\pdfcoredict_gremove:nn {Catalog / MarkInfo }          {Marked }
-\pdfcoredict_gremove:nn {Catalog / AcroForm/DR/Font}   {Name}
-\pdfcoredict_show:n {Catalog}
-\pdfcoredict_show:n {Catalog/ViewerPreferences}
-\pdfcoredict_show:n {Catalog/MarkInfo}
-\pdfcoredict_show:n {Catalog/AcroForm/DR/Font}
+\pdfmanagement_add:nnn {Catalog }                   {Lang}        {(de-De)}
+\pdfmanagement_add:nnn {Catalog }                   {PageLayout}  {/SinglePage}
+\pdfmanagement_add:nnn {Catalog / MarkInfo}         {Marked}      {True}
+\pdfmanagement_add:nnn {Catalog / ViewerPreferences}{HideToolbar} {true}
+\pdfmanagement_add:nnn {Catalog / AcroForm/DR/Font} {Name}       {<</ABC/CDE>>}
+\pdfmanagement_add:nnn {Catalog / AcroForm/DR/Font} {NameB}      {<</ABC/CDE>>}
+\pdfmanagement_show:n {Catalog}
+\pdfmanagement_show:n {Catalog/ViewerPreferences}
+\pdfmanagement_show:n {Catalog/MarkInfo}
+\pdfmanagement_show:n {Catalog/AcroForm/DR/Font}
+\pdfmanagement_remove:nn {Catalog / ViewerPreferences } {HideToolbar}
+\pdfmanagement_remove:nn {Catalog }                     {PageMode}
+\pdfmanagement_remove:nn {Catalog }                     {PageLayout}
+\pdfmanagement_remove:nn {Catalog / MarkInfo }          {Marked }
+\pdfmanagement_remove:nn {Catalog / AcroForm/DR/Font}   {Name}
+\pdfmanagement_show:n {Catalog}
+\pdfmanagement_show:n {Catalog/ViewerPreferences}
+\pdfmanagement_show:n {Catalog/MarkInfo}
+\pdfmanagement_show:n {Catalog/AcroForm/DR/Font}
 
 \ExplSyntaxOff
 blub

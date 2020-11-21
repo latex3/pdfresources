@@ -5,8 +5,8 @@
 \documentclass{article}
 \ExplSyntaxOn
 \pdf_text_convert:nnN {string-lit-print}{Grüße}\l_tmpa_str
-\pdfcoredict_gput:nnx {Info} {Title}{\l_tmpa_str}
-\pdfcoredict_gput:nnx {Info} {Author}{(Some~Author)}
+\pdfmanagement_add:nnx {Info} {Title}{\l_tmpa_str}
+\pdfmanagement_add:nnx {Info} {Author}{(Some~Author)}
 \ExplSyntaxOff
 \begin{document}
 \START
