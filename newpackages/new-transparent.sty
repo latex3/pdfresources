@@ -8,7 +8,9 @@
 %pdftex + luatex in pdf mode
 \sys_if_output_pdf:T
   {
-    \bool_lazy_and:nnF {\bool_if_exist_p:N \g__pdf_Core_active_bool } { \g__pdf_Core_active_bool }
+    \bool_lazy_and:nnF
+      {\cs_if_exist_p:N \pdfmanagement_add:nnn }
+      { \pdfmanagement_if_active_p: }
       {
         \PackageWarningNoLine{new-transparent}
          {
@@ -33,13 +35,13 @@
 \sys_if_output_pdf:T
   {
     %initialize opacity 1
-    \pdfcoredict_gput:nnn{Page/Resources/ExtGState}{TRP1}{<</ca~1/CA~1>>}
+    \pdfmanagement_add:nnn{Page/Resources/ExtGState}{TRP1}{<</ca~1/CA~1>>}
     %
     \cs_new_protected:Npn \__transparent_use:n #1
       {
         \tl_if_exist:cF { c__transparent_TRP#1_tl }
           {
-            \pdfcoredict_gput:nnn{Page/Resources/ExtGState}{TRP#1}{<</ca~#1/CA~#1>>}
+            \pdfmanagement_add:nnn{Page/Resources/ExtGState}{TRP#1}{<</ca~#1/CA~#1>>}
             \tl_const:cn { c__transparent_TRP#1_tl }{ /TRP#1~gs }
           }
       }
