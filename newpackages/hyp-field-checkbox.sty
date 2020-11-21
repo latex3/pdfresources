@@ -167,7 +167,7 @@
       \pdf_flag_set:nn {hyp/checkbox/Field}{NoExport}
       \pdfdict_put:nnx {hyp/checkbox/Field}{Ff}{\pdf_flag_use:n{hyp/checkbox/Field}}
       \pdf_object_write:nx {hyp/checkbox/Field/Btn/#1} { \pdfdict_use:n {hyp/checkbox/Field} }
-      \pdfcoredict_gput:nnx { Catalog / AcroForm } { Fields }{\pdf_object_ref:n {hyp/checkbox/Field/Btn/#1} }
+      \pdfmanagement_add:nnx { Catalog / AcroForm } { Fields }{\pdf_object_ref:n {hyp/checkbox/Field/Btn/#1} }
       \group_end:
      }
   }
