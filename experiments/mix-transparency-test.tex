@@ -3,8 +3,8 @@
 \documentclass{article}
 \begin{document}
 \ExplSyntaxOn
-\pdfcoredict_gput:nnn{Page/Resources/ExtGState}{duckopacity}{<</CA~.5/ca~0.5>>}
-\pdfcoredict_gput:nnn{Page/Resources/ExtGState}{bearopacity}{<</CA~1/ca~1>>}
+\pdfmanagement_add:nnn{Page/Resources/ExtGState}{duckopacity}{<</CA~.5/ca~0.5>>}
+\pdfmanagement_add:nnn{Page/Resources/ExtGState}{bearopacity}{<</CA~1/ca~1>>}
 \ExplSyntaxOff
 aaaaa
 \special{pdf:code /duckopacity gs}
