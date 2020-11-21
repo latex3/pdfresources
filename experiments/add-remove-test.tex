@@ -1,0 +1,83 @@
+% !Mode:: "TeX:DE:UTF-8:Main"
+\PassOptionsToPackage{enable-debug,check-declarations}{expl3}
+\RequirePackage{pdfresources}
+\DeclareDocumentMetadata{uncompress}
+%
+%\RequirePackage{l3pdf}
+%\ExplSyntaxOn
+%%\pdf_version_gset:n{2.0}
+%\pdf_uncompress:
+%
+%\ExplSyntaxOff
+
+\documentclass{article}
+\begin{document}
+%  Page/Resources/Shading                & \cs{pdfpageresources}  \\
+%  Page/Resources/Pattern                & \cs{pdfpageresources}  \\
+%  Page/Resources/ColorSpace             & \cs{pdfpageresources}  \\%
+
+\ExplSyntaxOn
+% Page/Resources/ExtGState
+% - removing doesn't work for xetex!
+% - dvips ignores ExtGstate? (transparency is different?)
+\pdfmanagement_add:nnn{Page/Resources/ExtGState}{bearopacity}{<</ca~0.7/CA~0.7>>}
+\pdfmanagement_add:nnn{Page/Resources/ExtGState}{duckopacity}{<</ca~0.4/CA~0.4>>}
+\pdfmanagement_show:n    {Page/Resources/ExtGState}
+\pdfmanagement_get:nnN   {Page/Resources/ExtGState}{bearopacity}\l_tmpa_tl
+\tl_show:N \l_tmpa_tl
+\pdfmanagement_remove:nn {Page/Resources/ExtGState}{bearopacity}
+\pdfmanagement_show:n    {Page/Resources/ExtGState}
+\ExplSyntaxOff
+abc
+\end{document}
+
+
+\ExplSyntaxOn
+% ThisPage
+% mostly warning, but get gets the value. Is this consequent?
+\pdfmanagement_add:nnn {ThisPage} {YYY}{(yyy)}
+\pdfmanagement_add:nnn {ThisPage} {Rotate}{-90}
+\pdfmanagement_show:n  {ThisPage}
+\pdfmanagement_get:nnN {ThisPage}{Rotate}\l_tmpa_tl
+\tl_show:N \l_tmpa_tl
+\pdfmanagement_remove:nn {ThisPage}{YYY}
+\pdfmanagement_show:n  {ThisPage}
+\ExplSyntaxOff
+abc
+
+
+\ExplSyntaxOn
+% Page
+\pdfmanagement_add:nnn {Page} {YYY}{(yyy)}
+\pdfmanagement_add:nnn {Page} {Rotate}{-90}
+\pdfmanagement_show:n  {Page}
+\pdfmanagement_get:nnN {Page}{Rotate}\l_tmpa_tl
+\tl_show:N \l_tmpa_tl
+\pdfmanagement_remove:nn {Page}{YYY}
+\pdfmanagement_show:n  {Page}
+\ExplSyntaxOff
+abc
+
+\ExplSyntaxOn
+% Pages
+\pdfmanagement_add:nnn {Pages} {YYY}{(yyy)}
+\pdfmanagement_add:nnn {Pages} {Rotate}{-90}
+\pdfmanagement_show:n  {Pages}
+\pdfmanagement_get:nnN {Pages}{Rotate}\l_tmpa_tl
+\tl_show:N \l_tmpa_tl
+\pdfmanagement_remove:nn {Pages}{YYY}
+\pdfmanagement_show:n  {Pages}
+\ExplSyntaxOff
+
+% Info
+\ExplSyntaxOn
+\pdfmanagement_add:nnn {Info}{Title}{(title)}
+\pdfmanagement_add:nnn {Info}{Author}{(author)}
+\pdfmanagement_show:n  {Info}
+\pdfmanagement_get:nnN {Info}{Title}\l_tmpa_tl
+\tl_show:N \l_tmpa_tl
+\pdfmanagement_remove:nn {Info}{Author}
+\pdfmanagement_show:n  {Info}
+\ExplSyntaxOff
+abc
+\end{document}
