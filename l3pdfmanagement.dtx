@@ -402,7 +402,7 @@
 %    \bfseries Path/dictionary    & \bfseries Names & \bfseries Value  & \bfseries Remark
 %    \\\midrule
 %    Catalog/AA              &WC, WS, DS, WP,DP& all dict    \\
-%    Catalog/AcroFrom        &  NeedAppearances&  boolean & In pdf 2.0
+%    Catalog/AcroForm        &  NeedAppearances&  boolean & In pdf 2.0
 %                                                           NeedAppearances
 %                                                           is deprecated,
 %                                                           it is then required
@@ -448,7 +448,7 @@
 %    \bfseries Path/dictionary &\bfseries Name        & \bfseries Value   & \bfseries Remark \\\midrule
 %    Catalog/AcroForm     & Fields               & object reference\\
 %    Catalog/AcroForm     & CO                   & object reference\\
-%    Catalog              & AF                   & object reference\\
+%    Catalog              & AF                   & object reference & PDF 2.0, associated files\\
 %    Catalog/OCProperties & OCGs                 & object reference  &if there are OCProperties, OCGs and D are required.\\
 %    Catalog/OCProperties & Configs              & object reference \\
 %    Catalog/OCProperties & D                    & object reference & This is actually a single value as
@@ -871,6 +871,9 @@
     \__pdf_backend_PageResources_gput:nnn {Pattern} { #1 }{ #2 }
   }
 %    \end{macrocode}
+% \subsubsection{\enquote{Catalog}}
+% The catalog has mixed entries: toplevel, subdictionaries, and entries
+% which must build arrays.
 % \begin{variable}[added=2019-08-24]
 %     {
 %      \c_@@_Catalog_toplevel_clist,
@@ -997,7 +1000,7 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \paragraph{Building catalog entries: AcroFrom}
+% \paragraph{Building catalog entries: AcroForm}
 % This is the most complicated case.
 % The entries is build from
 % /Catalog/AcroForm/Fields  (array),
