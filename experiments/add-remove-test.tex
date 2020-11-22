@@ -11,15 +11,90 @@
 %\ExplSyntaxOff
 
 \documentclass{article}
+\usepackage{tabularx,csquotes}
+\usepackage[customdriver=hgeneric-experimental]{hyperref} % to show acroform
+\hypersetup{pdfcenterwindow}
+\newcommand\meta[1]{\emph{<#1>}}
 \begin{document}
+\Form \TextField{abc}{xyz}
 \section{Catalog}
-\subsection{Top level entries}
-These can be added and removed easily. 
+\subsection{\enquote{additive} entries which build arrays}
+\ExplSyntaxOn
+%AF,
+%OCProperties/OCGs,
+%OCProperties/Configs,
+%OutputIntents,
+%Requirements,
+%AcroForm/Fields,
+%AcroForm/CO
+\pdf_object_new:nn   {filespec1}{dict}
+\pdf_object_write:nn {filespec1} {/Type /Filespec /UF (example1.pdf)}
+\pdf_object_new:nn   {filespec2}{dict}
+\pdf_object_write:nn {filespec2} {/Type /Filespec /UF (example2.pdf)}
 
-dvips adds a Metadata entry automatically, but
+\pdfmanagement_add:nnx { Catalog } {AF} {\pdf_object_ref:n {filespec1}}
+\pdfmanagement_add:nnx { Catalog } {AF} {\pdf_object_ref:n {filespec2}}
+
+\pdfmanagement_show:n {Catalog} %doesn't show AF etc
+
+\seq_show:c { g__pdfmanagement_/Catalog/AF_seq }
+\ExplSyntaxOff
+
+\end{document}
+\subsection{Simple entries in subdictionaries}
+   \begin{tabularx}{\linewidth}{llll>{\raggedright\arraybackslash}X}
+    \bfseries Path/dictionary    & \bfseries Names & \bfseries Value  & \bfseries Remark
+    \\\hline
+    Catalog/AA              &WC, WS, DS, WP,DP& all dict    \\
+    Catalog/AcroForm        &  NeedAppearances&  boolean & In pdf 2.0
+                                                           NeedAppearances
+                                                           is deprecated,
+                                                           it is then required
+                                                           that every widget has
+                                                           an appearance streams.\\
+                            &  SigFlags       & Integer\\
+                            &  DA             & String \\
+                            &  Q              & Integer\\
+                            &  XFA            & stream or array & pdf 1.5\\
+  Catalog/AcroForm/DR       & \meta{name}     &            & probably unneeded \\
+  Catalog/AcroForm/DR/Font  & \meta{name}     & dict       & \\
+  Catalog/MarkInfo          & Marked          & boolean      \\
+                            & UserProperties  & boolean      \\
+                            & Suspects        & boolean      \\
+  Catalog/ViewerPreferences & HideToolbar     & boolean      \\
+                            & Direction       & /R2L or /L2R \\
+                            & \ldots          &              & many more, see the reference \\
+ \end{tabularx}
+ 
+\ExplSyntaxOn
+\pdfmanagement_add:nnn   {Catalog/AA}{WC}{<</A/B>>}
+\pdfmanagement_show:n    {Catalog/AA}
+\pdfmanagement_remove:nn {Catalog/AA}{WC}
+\pdfmanagement_show:n    {Catalog/AA}
+\pdfmanagement_show:n    {Catalog/AcroForm}
+\pdfmanagement_show:n    {Catalog/AcroForm/DR}
+\pdfmanagement_add:nnn   {Catalog/AcroForm/DR/Font}{ZZZZ}{<</A/B>>}
+\pdfmanagement_show:n    {Catalog/AcroForm/DR/Font}
+\pdfmanagement_remove:nn {Catalog/AcroForm/DR/Font}{ZZZZ}
+\pdfmanagement_show:n    {Catalog/AcroForm/DR/Font}
+\pdfmanagement_show:n    {Catalog/ViewerPreferences}
+\pdfmanagement_add:nnn   {Catalog/AcroForm/DR}{Font}{blub} %ignored if Catalog/AcroForm/DR/Font is not empty! 
+\pdfmanagement_add:nnn   {Catalog/AcroForm/DR}{XFont}{blub}
+\pdfmanagement_show:n    {Catalog/AcroForm/DR}
+\pdfmanagement_show:n    {Catalog/AcroForm/DR/Font}
+\ExplSyntaxOff
+ 
+\end{document}
+\subsection{Top level entries}
+These can be added and removed easily.
+
+\begin{description}
+\item[Backend notes:] dvips adds a Metadata entry automatically, but
 if a manual value is added it will overwrite this and it also
-overwrites the stream, by using the null value it is also possible to
-suppress the xmp metadata altogether. The stream is encoded.  
+overwrites the stream, the new stream is encoded. By using the 
+null value it is also possible to suppress the xmp metadata altogether. 
+\end{description}
+
 \begin{tabular}{lll}
     Collection              &  objref or dict     & the content should be
      build by external packages (see eg embedfile)                   \\
@@ -45,7 +120,7 @@ suppress the xmp metadata altogether. The stream is encoded.
     Version                 &  name           & eg. \texttt{/1.7} \\
     --unknown--          &                 & an unknown name will be
                                                 inserted without a warning.\\
-\end{tabular}                                                
+\end{tabular}
 \ExplSyntaxOn
 \pdfmanagement_add:nnn   {Catalog}{Version}{/1.7}
 \pdfmanagement_add:nnn   {Catalog}{PageMode}{/UseOutlines}
