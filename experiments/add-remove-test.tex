@@ -12,6 +12,55 @@
 
 \documentclass{article}
 \begin{document}
+\section{Catalog}
+\subsection{Top level entries}
+These can be added and removed easily. 
+
+dvips adds a Metadata entry automatically, but
+if a manual value is added it will overwrite this and it also
+overwrites the stream, by using the null value it is also possible to
+suppress the xmp metadata altogether. The stream is encoded.  
+\begin{tabular}{lll}
+    Collection              &  objref or dict     & the content should be
+     build by external packages (see eg embedfile)                   \\
+    DPartRoot               &  objref or dict     & PDF 2.0           \\
+    Lang                    &  string             & e.g. \texttt{(de-DE)} \\
+    Legal                   &  objref or dict                             \\
+    Metadata                &  objref or stream                       \\
+    NeedsRendering          &  boolean            & PDF 1.7\\
+    OpenAction              &  array (dest) or dict (action) \\
+    PageLabels              &  objref or dict     &  number tree \\
+    PageLayout              &  name               & one of /SinglePage, /OneColumn,
+                                        /TwoColumnLeft, /TwoColumnRight,
+                                        /TwoPageLeft,
+                                        /TwoPageRight \\
+    PageMode                &  name               & one of /UseNone, /UseOutlines, /UseThumbs,
+                                    /UseOC, /UseAttachments (PDF 1.6)\\
+    Perms                   &  objref or dict     & permissions\\
+    PieceInfo               &  objref or dict \\
+    SpiderInfo              &  objref or dict \\
+    StructTreeRoot          &  objref or dict \\
+    Threads                 &  objref to an array\\
+    URI                     &  objref or dict \\
+    Version                 &  name           & eg. \texttt{/1.7} \\
+    --unknown--          &                 & an unknown name will be
+                                                inserted without a warning.\\
+\end{tabular}                                                
+\ExplSyntaxOn
+\pdfmanagement_add:nnn   {Catalog}{Version}{/1.7}
+\pdfmanagement_add:nnn   {Catalog}{PageMode}{/UseOutlines}
+\pdfmanagement_add:nnn   {Catalog}{Lang}{(de-De)}
+\pdfmanagement_add:nnn   {Catalog}{Blub}{(xxx)}
+
+\pdfmanagement_show:n    {Catalog}
+\pdfmanagement_get:nnN   {Catalog}{PageMode}\l_tmpa_tl
+\tl_show:N \l_tmpa_tl
+\pdfmanagement_remove:nn {Catalog}{Version}
+\pdfmanagement_show:n    {Catalog}
+\ExplSyntaxOff
+
+\end{document}
+
 %  Page/Resources/Shading                & \cs{pdfpageresources}  \\
 %  Page/Resources/Pattern                & \cs{pdfpageresources}  \\
 %  Page/Resources/ColorSpace             & \cs{pdfpageresources}  \\%
@@ -20,8 +69,8 @@
 % Page/Resources/ExtGState
 % - removing doesn't work for xetex!
 % - dvips ignores ExtGstate? (transparency is different?)
-\pdfmanagement_add:nnn{Page/Resources/ExtGState}{bearopacity}{<</ca~0.7/CA~0.7>>}
-\pdfmanagement_add:nnn{Page/Resources/ExtGState}{duckopacity}{<</ca~0.4/CA~0.4>>}
+\pdfmanagement_add:nnn   {Page/Resources/ExtGState}{bearopacity}{<</ca~0.7/CA~0.7>>}
+\pdfmanagement_add:nnn   {Page/Resources/ExtGState}{duckopacity}{<</ca~0.4/CA~0.4>>}
 \pdfmanagement_show:n    {Page/Resources/ExtGState}
 \pdfmanagement_get:nnN   {Page/Resources/ExtGState}{bearopacity}\l_tmpa_tl
 \tl_show:N \l_tmpa_tl
@@ -80,4 +129,4 @@ abc
 \pdfmanagement_show:n  {Info}
 \ExplSyntaxOff
 abc
-\end{document}
+\end{document} 
