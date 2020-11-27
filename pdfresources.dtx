@@ -36,7 +36,7 @@
 %    \begin{macrocode}
 %<@@=pdf>
 %<*package>
-\ProvidesExplPackage {pdfresources} {2020-07-13} {0.7}
+\ProvidesExplPackage {pdfresources} {2020-11-26} {0.8}
   {experimental pdf-resource management}
 %\RequirePackage{zref-base}
 \RequirePackage{bitset}
@@ -49,7 +49,7 @@
 %</package>
 %    \end{macrocode}
 %
-% \title{\pkg{pdfresources}}
+% \title{\pkg{pdfmanagement}}
 %
 % \author{^^A
 %  The \LaTeX3 Project\thanks
@@ -66,18 +66,38 @@
 % \begin{documentation}
 % \section{Introduction}
 % The \LaTeX{} format currently contains nearly no code specific to the now quite
-% central output format, PDF.
-% It delegates important tasks like supporting PDF standards,
+% central output format, PDF. It contains no interfaces to important PDF related
+% primitive commands.
+%
+% Important tasks like supporting PDF standards,
 % creating links, adding special colors, managing the content of
-% central PDF-directories to external packages.
-% This is problematic as it can lead easily to clashes if two packages try
-% to access the same resource in an incompatible way.  Also as
-% the primitives differ between the various binaries and backends with
-% which \LaTeX{} is used all packages have to write and maintain \enquote{driver} files
-% for the various backends.
+% central PDF-directories are delegated to external packages which have to recourse to
+% the primitive low-level commands in their code.
 %
+% This is problematic for two reasons:
+% \begin{itemize}
+%\item At first using primitives directly can lead to clashes and duplicate settings with
+% conflicting values---nothing prevent packages to add for example the \emph{Title} twice to
+% the Info dictionary, the \emph{Lang} entry twice to the Catalog, or to add two \emph{ExtGState}
+% resources to a page. The PDF normally doesn't break in such
+% cases---the format is quite robust---but it will ignore one of the duplicates and
+% the output can be wrong.
 %
-% The project here tries to resolve this situation by providing interfaces to
+% \item At second the primitives differ between the various binaries and backends with
+% which \LaTeX{} is used and so all packages have to write and maintain
+% \enquote{driver} files for the various backends.
+% \end{itemize}
+%
+% Until now the number of conflicts were small and could be resolved in an ad-hoc
+% fashion. But the future plans for \LaTeX{} regarding support for tagged PDF and
+% PDF standard mean that much more PDF specific code will have to be
+% written by the kernel directly and this can not be done without proper,
+% well-defined and well-behaving interfaces.
+%
+% Some first step for better support of PDF related commands have been already done
+% with the \pkg{l3pdf} package. 
+%
+% The \pkg{pdfmanagement} tries to resolve this situation by providing interfaces to
 % the various resources and objects in a backend independent way.
 %
 % The supported backends are pdflatex, lualatex, (x)dvipdfmx (latex, xelatex)
