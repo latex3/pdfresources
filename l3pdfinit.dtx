@@ -50,27 +50,27 @@
 %
 % \section{\pkg{l3pdfinit} documentation}
 % This small package defines \cs{DeclareDocumentMetadata} and the related keys.
-% \cs{DeclareDocumentMetadata} loads the core code and the backend. So it need
-% at least a key to set the backend.
+% \cs{DeclareDocumentMetadata} loads the management code and other core
+% code. This forces the loading of the backend files the backend.
+% So it needs at least a key to set the backend.
 %
 % Currently the following keys are implemented
 %
 % \begin{description}
-%    \item[\texttt{expl3}] passes the value to expl3.
-%                This be used for example to setup the backend. The name and
-%                implementation will probably change.
-%    \item[\texttt{backend}] passes the backend name to expl3. This will probably be extended, to
-%    pass the value also to packages.
+%    \item[\texttt{backend}] passes the backend name to expl3.
+%    This will probably be extended to  pass the value also to packages.
 %    \item[\texttt{pdfversion}] e.g. \texttt{pdfversion=1.7}
-%    \item[\texttt{uncompress}] no value. Force an uncompressed pdf.
+%    \item[\texttt{uncompress}] no value. Forces an uncompressed pdf.
 %    \item[\texttt{lang}] to set the Lang entry in the Catalog. E.g. \texttt{lang=de-DE}.
-%    \item[\texttt{standard}] Choice key to set the pdf standard. Currently A-1b, A-2b and A-3b are accepted as
-%              values, but the underlying code to ensure the requirements (as far as it
-%              can be ensured) is incomplete.
-%    \item[\texttt{xmpmeta}] Boolean. This includes a skeleton XMP-metadata in the pdf. This clashes
-%     with e.g. hyperxmp, and the code to extend the metadata isn't finished yet.
-%    \item[\texttt{pdfmanagement}] Boolean. This activates/deactivates the core management code.
-%         By default the value is true.
+%    \item[\texttt{standard}] Choice key to set the pdf standard.
+%      Currently A-1b, A-2b and A-3b are accepted as
+%      values, but the underlying code to ensure the requirements (as far as it
+%      can be ensured) is incomplete.
+%^^A     disabled for now.
+%^^A    \item[\texttt{xmpmeta}] Boolean. This includes a skeleton XMP-metadata in the pdf. This clashes
+%^^A     with e.g. hyperxmp, and the code to extend the metadata isn't finished yet.
+%    \item[\texttt{pdfmanagement}] Boolean. This activates/deactivates
+%      the core management code. By default the value is true.
 % \end{description}
 % \end{documentation}
 %
@@ -81,7 +81,7 @@
 %    \begin{macrocode}
 %<*package>
 \ProvidesExplPackage {l3pdfinit} {2020-11-27} {0.2}
-  {pdfresources initialisation command}
+  {New document  command}
 %    \end{macrocode}
 % \section{Document metadata}
 % We plan a \cs{DeclareDocumentMetadata} so let's start with it.

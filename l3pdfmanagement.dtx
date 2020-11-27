@@ -504,9 +504,16 @@
     command~'#1'~ignored.
   }
 %    \end{macrocode}
-% A predicate to test if the core code should be active
+% \begin{variable}{\g_@@_active_bool}
+% This boolean will control the activation of the management code.
+% It is used in the hooks, and in some backend files.
+% % \cs{DeclareDocumentMetadata} should set it to true
 %    \begin{macrocode}
 \bool_new:N \g_@@_active_bool
+%    \end{macrocode}
+% \end{variable}
+% A user predicate to test if the management code is active
+%    \begin{macrocode}
 \prg_new_conditional:Npnn \@@_if_active:  { p , T , F , TF }
   {
     \bool_if:NTF \g_@@_active_bool
