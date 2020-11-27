@@ -130,7 +130,7 @@
 \cs_set_eq:NN \@@_pgfori_pgfutil@setuppdfresources\pgfutil@setuppdfresources
 \def\pgfutil@setuppdfresources
   {
-    \bool_if:NTF \g_@@_Core_active_bool
+    \pdfmanagement_if_active:TF
       {
         \@@_pgf_sys_setuppdfresources_plain:
       }

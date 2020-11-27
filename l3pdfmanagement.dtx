@@ -506,9 +506,10 @@
 %    \end{macrocode}
 % A predicate to test if the core code should be active
 %    \begin{macrocode}
+\bool_new:N \g_@@_active_bool
 \prg_new_conditional:Npnn \@@_if_active:  { p , T , F , TF }
   {
-    \bool_if:NTF \g__pdf_Core_active_bool
+    \bool_if:NTF \g_@@_active_bool
       { \prg_return_true:  }
       { \prg_return_false: }
   }
@@ -560,7 +561,7 @@
 %    \begin{macrocode}
 \hook_gput_code:nnn {pdf/management/thispage_shipout} {pdf}
   {
-     \bool_if:NT \g__pdf_Core_active_bool
+     \bool_if:NT \g_@@_active_bool
        {
          \exp_args:NV \__pdf_backend_ThisPage_gpush:n      { \g_shipout_readonly_int }
          \exp_args:NV \__pdf_backend_PageResources_gpush:n { \g_shipout_readonly_int }
@@ -569,7 +570,7 @@
 
 \hook_gput_code:nnn {pdf/management/lastpage_shipout} {pdf}
   {
-    \bool_if:NT \g__pdf_Core_active_bool
+    \bool_if:NT \g_@@_active_bool
        {
          \__pdf_backend_PageResources_obj_gpush:          %ExtGState etc
        }
@@ -577,7 +578,7 @@
 
 \hook_gput_code:nnn {pdf/management/end_run} {pdf}
   {
-    \bool_if:NT \g__pdf_Core_active_bool
+    \bool_if:NT \g_@@_active_bool
        {
          \__pdfmanagement_Pages_gpush:            %pagesattr
          \__pdfmanagement_Info_gpush:             %pdfinfo
@@ -818,7 +819,7 @@
 \cs_new_protected:cpn { @@_handler/ThisPage/?_gput:nn } #1 #2
   {
     \prop_gput:cnn  { \pdfdict_name:nn { g } { Core/ThisPage } }{ #1 } { #2 }
-    \bool_if:NT \g__pdf_Core_active_bool
+    \bool_if:NT \g_@@_active_bool
       {
         \__pdf_backend_ThisPage_gput:nn { #1 }{ #2 }
       }

@@ -236,11 +236,13 @@
 % to allow to set it in the document.
 %    \begin{macrocode}
 %<*package>
-\RequirePackage{l3pdfinit} %
-\RequirePackage{l3pdfmeta} %
-\RequirePackage{l3pdfdict}
+\RequirePackage{l3pdfdict}       % needed by l3pdfmanagement
+\RequirePackage{l3pdfmanagement} % loads the core code with the boolean
+\RequirePackage{l3pdfinit}       % DeclareDocumentMetadata
+% optional?
+\RequirePackage{l3pdfmeta}       %
 \RequirePackage{l3pdftools}
-\RequirePackage{l3pdfmanagement}
+
 %</package>
 %    \end{macrocode}
 %

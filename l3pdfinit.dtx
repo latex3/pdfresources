@@ -69,7 +69,7 @@
 %              can be ensured) is incomplete.
 %    \item[\texttt{xmpmeta}] Boolean. This includes a skeleton XMP-metadata in the pdf. This clashes
 %     with e.g. hyperxmp, and the code to extend the metadata isn't finished yet.
-%    \item[\texttt{core}] Boolean. This activates/deactivates the core management code.
+%    \item[\texttt{pdfmanagement}] Boolean. This activates/deactivates the core management code.
 %         By default the value is true.
 % \end{description}
 % \end{documentation}
@@ -80,7 +80,7 @@
 %
 %    \begin{macrocode}
 %<*package>
-\ProvidesExplPackage {l3pdfinit} {2020-07-15} {0.1}
+\ProvidesExplPackage {l3pdfinit} {2020-11-27} {0.2}
   {pdfresources initialisation command}
 %    \end{macrocode}
 % \section{Document metadata}
@@ -99,7 +99,6 @@
 %    \begin{macrocode}
 %<@@=pdf>
 %<*package>
-\bool_new:N \g_@@_Core_active_bool
 %    \end{macrocode}
 % \end{variable}
 % \begin{function}[updated=2020-07-05]{\DeclareDocumentMetadata}
@@ -120,13 +119,13 @@
         \bool_if:NF \g__pdf_Meta_used_bool
           {
             \keys_set_groups:nnn { pdf / setup} {init}{ #1 }
-            \RequirePackage{l3pdf}   %should be loader after the backend is set.
+            \RequirePackage{l3pdf}   %should be loaded after the backend is set.
             % %load backend driver
             \ExplSyntaxOn\makeatletter
             \file_input:n {l3\g__sys_backend_tl-pdf.def} %should be inside the normal backend
             \ExplSyntaxOff\makeatother
             \RequirePackage{l3pdfutils}
-            \bool_gset_true:N \g__pdf_Core_active_bool
+            \bool_gset_true:N \g__pdfmanagement_active_bool
           }
         \bool_gset_true:N \g__pdf_Meta_used_bool
         \keys_set_filter:nnn  { pdf / setup } { init } { #1 }
@@ -166,7 +165,7 @@
       {
         \msg_warning:nnn{pdf}{unknown-standard}{#1}
       }
-    ,core .bool_gset:N = \g__pdf_Core_active_bool
+    ,pdfmanagement .bool_gset:N = \g__pdfmanagement_active_bool
   }
 %    \end{macrocode}
 % \end{function}
