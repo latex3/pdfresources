@@ -1,6 +1,6 @@
 % \iffalse meta-comment
 %
-%% File: l3pdfinit.dtx
+%% File: ltdocinit.dtx
 %
 % Copyright (C) 2018-2020 The LaTeX3 Project
 %
@@ -11,7 +11,7 @@
 %
 %    http://www.latex-project.org/lppl.txt
 %
-% This file is part of the "(experimental) pdfresources bundle" (The Work in LPPL)
+% This file is part of the "(experimental) pdfmanagement bundle" (The Work in LPPL)
 % and all files in that bundle must be distributed together.
 %
 % -----------------------------------------------------------------------
@@ -31,7 +31,7 @@
 % \fi
 %
 % \title{^^A
-%   The \pkg{l3pdfinit} package
+%   The \pkg{ltdocinit} package
 % }
 %
 % \author{^^A
@@ -48,11 +48,11 @@
 % \maketitle
 % \begin{documentation}
 %
-% \section{\pkg{l3pdfinit} documentation}
+% \section{\pkg{ltdocinit} documentation}
 % This small package defines \cs{DeclareDocumentMetadata} and the related keys.
-% \cs{DeclareDocumentMetadata} loads the management code and other core
-% code. This forces the loading of the backend files the backend.
-% So it needs at least a key to set the backend.
+% \cs{DeclareDocumentMetadata} loads the new PDF management code.
+% This forces the loading of the backend files the backend.
+% So it needs at least a key to set the backend is needed.
 %
 % Currently the following keys are implemented
 %
@@ -76,54 +76,58 @@
 %
 % \begin{implementation}
 %
-% \section{\pkg{l3pdfinit} implementation}
+% \section{\pkg{ltdocinit} implementation}
 %
 %    \begin{macrocode}
 %<*package>
-\ProvidesExplPackage {l3pdfinit} {2020-11-27} {0.2}
-  {New document  command}
+\ProvidesExplPackage {ltdocinit} {2020-11-27} {0.2}
+  {Set document metadata}
 %    \end{macrocode}
 % \section{Document metadata}
-% We plan a \cs{DeclareDocumentMetadata} so let's start with it.
-% It should for the begin allow to set the version, to uncompress a pdf,
-% and set the language. We also add a key to activate the metadata stream and
-% to set a standard. The command triggers the use of the core resource management.
-% \begin{NOTE}{UF}
-% how to setup a backend/driver key? Can it be copied from expl3?
-% \end{NOTE}
+% Currently there is no dedicated location to declare settings concerning
+% a document as a whole. Settings are placed somewhere in the preamble or
+% with the class options. For some settings this can be too late,
+% for example the pdf version can no longer be changed if a
+% package has already opened the PDF. \cs{DeclareDocumentMetadata} as a new command
+% should unify such settings in one place. It should always be the first command
+% in a document.
+% Beside loading the PDF management code \cs{DeclareDocumentMetadata}
+% currently allows to set the PDF version, to set the PDF \texttt{/Lang} and
+% to uncompress a pdf.
+% and set the language.
+% ^^A We also add a key to activate the metadata stream and to set a standard.
 %%
 %    \begin{macrocode}
-%<@@=pdf>
+%<@@=document>
 %<*package>
 %    \end{macrocode}
-% \begin{function}[updated=2020-07-05]{\DeclareDocumentMetadata}
+% \begin{function}[updated=2020-11-27]{\DeclareDocumentMetadata}
 %    \begin{macrocode}
-\msg_new:nnn  { pdf } { setup-after-documentclass }
+\msg_new:nnn  { document } { setup-after-documentclass }
               {
                 \token_to_str:N \DeclareDocumentMetadata \c_space_tl
                 should~be~used~only~before~\token_to_str:N\documentclass
               }
 
 
-\bool_new:N \g__pdf_Meta_used_bool
 \NewDocumentCommand\DeclareDocumentMetadata { m }
   {
     \cs_if_eq:NNTF \documentclass \@twoclasseserror
-      { \msg_error:nn { pdf }{ setup-after-documentclass } }
+      { \msg_error:nn { document }{ setup-after-documentclass } }
       {
-        \bool_if:NF \g__pdf_Meta_used_bool
-          {
-            \keys_set_groups:nnn { pdf / setup} {init}{ #1 }
-            \RequirePackage{l3pdf}   %should be loaded after the backend is set.
-            % %load backend driver
-            \ExplSyntaxOn\makeatletter
-            \file_input:n {l3\g__sys_backend_tl-pdf.def} %should be inside the normal backend
-            \ExplSyntaxOff\makeatother
-            \RequirePackage{l3pdfutils}
-            \bool_gset_true:N \g__pdfmanagement_active_bool
-          }
-        \bool_gset_true:N \g__pdf_Meta_used_bool
+        \keys_set_groups:nnn { pdf / setup} {init}{ #1 }
+        \RequirePackage{l3pdf}   %should be loaded after the backend is set.
+         % %load backend driver
+        \ExplSyntaxOn\makeatletter
+          \file_input:n {l3\g__sys_backend_tl-pdf.def} %should be inside the normal backend
+        \ExplSyntaxOff\makeatother
+        \RequirePackage{l3pdfutils}
+        \bool_gset_true:N \g__pdfmanagement_active_bool
         \keys_set_filter:nnn  { pdf / setup } { init } { #1 }
+        \RenewDocumentCommand\DeclareDocumentMetadata { m }
+          {
+            \keys_set_filter:nnn  { pdf / setup } { init } { ##1 }
+          }
       }
   }
 
@@ -132,8 +136,6 @@
   {
     backend .code:n = { \PassOptionsToPackage { driver=#1 } {expl3} },
     backend .groups:n = { init } ,
-    expl3 .code:n = { \PassOptionsToPackage { #1 } {expl3} },
-    expl3 .groups:n = { init } ,
   }
 
 \keys_define:nn { pdf / setup }
@@ -150,7 +152,7 @@
       {
         \pdfmanagement_add:nnn {Catalog} {Lang}{(#1)}
       }
-    ,xmpmeta .bool_gset:N = \g_pdfmeta_xmp_bool %see pdfmeta
+    ,xmpmeta .bool_gset:N = \g_pdfmeta_xmp_bool %see pdfmeta undocumentated for now!
     ,standard .choices:nn =
       {A-1b,A-2b,A-3b}
       {
