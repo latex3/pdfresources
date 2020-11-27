@@ -33,21 +33,6 @@
 %</driver>
 % \fi
 %
-%    \begin{macrocode}
-%<@@=pdf>
-%<*package>
-\ProvidesExplPackage {pdfresources} {2020-11-26} {0.8}
-  {experimental pdf-resource management}
-%\RequirePackage{zref-base}
-\RequirePackage{bitset}
-\DeclareOption { debug }
-  {
-    \msg_redirect_module:nnn { pdf } { none } { warning }
-  }
-\DeclareOption { patches }{\AtEndOfPackage{\RequirePackage{pdfresources-patches}}}
-\ProcessOptions\relax
-%</package>
-%    \end{macrocode}
 %
 % \title{\pkg{pdfmanagement}}
 %
@@ -66,8 +51,8 @@
 % \begin{documentation}
 % \section{Introduction}
 % The \LaTeX{} format currently contains nearly no code specific to the now quite
-% central output format, PDF. It contains no interfaces to important PDF related
-% primitive commands.
+% central output format, PDF. It also offers nearly no interfaces to important PDF related
+% primitive commands for package writers.
 %
 % Important tasks like supporting PDF standards,
 % creating links, adding special colors, managing the content of
@@ -76,37 +61,76 @@
 %
 % This is problematic for two reasons:
 % \begin{itemize}
-%\item At first using primitives directly can lead to clashes and duplicate settings with
-% conflicting values---nothing prevent packages to add for example the \emph{Title} twice to
-% the Info dictionary, the \emph{Lang} entry twice to the Catalog, or to add two \emph{ExtGState}
+%\item At first using primitives directly can lead to clashes and duplicate
+% settings with conflicting values---nothing prevent packages to add for example
+% the \texttt{/Title} twice to the Info dictionary, the \texttt{/Lang} entry
+% twice to the Catalog, or to add two \texttt{/ExtGState}
 % resources to a page. The PDF normally doesn't break in such
 % cases---the format is quite robust---but it will ignore one of the duplicates and
 % the output can be wrong.
 %
-% \item At second the primitives differ between the various binaries and backends with
+% \item At second the primitives differ between the various engines and backends with
 % which \LaTeX{} is used and so all packages have to write and maintain
 % \enquote{driver} files for the various backends.
 % \end{itemize}
 %
-% Until now the number of conflicts were small and could be resolved in an ad-hoc
-% fashion. But the future plans for \LaTeX{} regarding support for tagged PDF and
+% Despite the potential problems, until now the number of conflicts were
+% small and could be resolved in an ad-hoc fashion. But the future plans for
+% \LaTeX{} regarding support for tagged PDF and
 % PDF standard mean that much more PDF specific code will have to be
 % written by the kernel directly and this can not be done without proper,
 % well-defined and well-behaving interfaces.
 %
 % Some first step for better support of PDF related commands have been already done
-% with the \pkg{l3pdf} package. 
+% with the \pkg{l3pdf} package. It offers backend independent commands to create
+% PDF objects, to set the compress level and the PDF version.
 %
-% The \pkg{pdfmanagement} tries to resolve this situation by providing interfaces to
-% the various resources and objects in a backend independent way.
+% The \pkg{pdfmanagement} extends this to more PDF related areas and provide
+% interfaces to them in a backend independent way.
+%
+% \section{\enquote{Change Strategy}: The integration into \LaTeX}
+%
+% The central module of this package, \pkg{l3pdfmanagement}, defines an interface
+% for the (pdf\TeX) primitives \cs{pdfcatalog}, \cs{pdfinfo},
+% \cs{pdfpagesattr}, \cs{pdfpagesattr} and \cs{pdfpageresources} and
+% analog commands from the other engines and backends.
+%
+% The new interface is incompatible with a parallel use of the primitive commands
+% which it targets to replace and superseed.
+% This means that this module is not compatible with packages using the primitive
+% commands. This doesn't affect many packages, but the list contains
+% central and important package like \pkg{hyperref}, \pkg{tikz}, \pkg{pdfx} and more.
+%
+% So while the goal is to integrate the code into the \LaTeX{} format directly,
+% this can not be done directly to avoid conflicts with existing documents and packages.
+%
+% As an intermediary step this package has been created.
+% It has to be loaded manually \emph{and} the core pdf management has
+% to be activated explicitly. The loading and activation has to be done
+% \emph{before} the \cs{documentclass} command.
+%
+% \begin{verbatim}
+% \RequirePackage{pdfmanagement} %load the package
+% \DeclareDocumentMetadata %activates the l3management interface
+%  {
+%    %options
+%  }
+% \end{verbatim}
+%
+%
+%
+% \section{Modules of the package}
+%
+%
 %
 % The supported backends are pdflatex, lualatex, (x)dvipdfmx (latex, xelatex)
 % and dvips with ps2pdf (not completely yet). dvips with distiller could work too
 % but is untested.
 %
-% That the interfaces are backend independent doesn't mean that the results and even
-% the compilation behavior is identical. The backends are too different to allow
-% this. Some backends expand arguments e.g. in a \cs{special} while other don't.
+% That the interfaces and commands are backend independent doesn't mean
+% that the results and even the compilation behavior is identical.
+% The backends are too different to allow this.
+% Some backends expand arguments e.g. in a \cs{special} while other don't.
 % Some backends can insert a resource at the first compilation, while another uses
 % the aux-file and a label and so needs at least two.
 %
@@ -114,7 +138,7 @@
 % The package should be loaded before \cs{documentclass}. To activate
 % the resource management it should be followed by
 % \cs{DeclareDocumentMetadata}\marg{key-val}. The allowed keys are currently
-% described in \pdf{l3pdfinit}
+% described in \pkg{l3pdfinit}
 %
 % \section{Requirements}
 % pdfresources requires a LaTeX format from 2020/10/01 or later.
@@ -182,6 +206,21 @@
 %
 % \end{documentation}
 % \begin{implementation}
+%    \begin{macrocode}
+%<@@=pdf>
+%<*package>
+\ProvidesExplPackage {pdfresources} {2020-11-26} {0.8}
+  {experimental pdf-resource management}
+%\RequirePackage{zref-base}
+\RequirePackage{bitset}
+\DeclareOption { debug }
+  {
+    \msg_redirect_module:nnn { pdf } { none } { warning }
+  }
+\DeclareOption { patches }{\AtEndOfPackage{\RequirePackage{pdfresources-patches}}}
+\ProcessOptions\relax
+%</package>
+%    \end{macrocode}
 % \section{messages}
 %    \begin{macrocode}
 %<*package>
@@ -258,7 +297,7 @@
 % The content of the property lists associated with this dictionary name is written to the
 % /Page objects. This replaces \cs{pdfpageattr}.
 % \subsubsection{\enquote{Page} and \enquote{ThisPage} /backend}
-% The code has been moved to \pgk{l3backend-pdf-extra}.
+% The code has been moved to \pkg{l3backend-pdf-extra}.
 % \subsubsection{\enquote{Page} and \enquote{ThisPage} / management}
 % \begin{NOTE}{UF}
 % Open is the question if one need a command to set attribute on a page by page number.
