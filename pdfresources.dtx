@@ -117,12 +117,19 @@
 %  }
 % \end{verbatim}
 %
+% The pdf management can be deactivated either by commenting the
+% \cs{DeclareDocumentMetadata} or by using in the options \texttt{pdfmanagement=false}.
+% The options of \cs{DeclareDocumentMetadata} are described in the documentation of
+% \pkg{ltdocinit}.
+%
+% If the pdf management is active can be tested with the predicate \cs{pdfmanagement_if_active:TF},
+% see the documentation of \pkg{l3pdfmanagement}.
+%
+% We hope that this setup will allow packages writers and authors to test the pdfmanagement and adapt
+% packages and document safely.
 %
 %
-% \section{Modules of the package}
-%
-%
-%
+% \section{Backend support}
 % The supported backends are pdflatex, lualatex, (x)dvipdfmx (latex, xelatex)
 % and dvips with ps2pdf (not completely yet). dvips with distiller could work too
 % but is untested.
@@ -132,8 +139,12 @@
 % The backends are too different to allow this.
 % Some backends expand arguments e.g. in a \cs{special} while other don't.
 % Some backends can insert a resource at the first compilation, while another uses
-% the aux-file and a label and so needs at least two.
-%
+% the aux-file and a label and so needs at least two. Some backends manage some
+% of the resources through side-effects, some manage them automatically.
+% All this mean that package writers will still have to keep an eye on
+% backend requirements and run tests for all variants. Also backend specific code
+% will still be needed in some cases.
+% 
 % \section{Use}
 % The package should be loaded before \cs{documentclass}. To activate
 % the resource management it should be followed by
