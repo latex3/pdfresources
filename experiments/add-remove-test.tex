@@ -15,6 +15,7 @@
 \usepackage[customdriver=hgeneric-experimental]{hyperref} % to show acroform
 \hypersetup{pdfcenterwindow}
 \newcommand\meta[1]{\emph{<#1>}}
+\ShowHook{begindocument}
 \begin{document}
 \Form \TextField{abc}{xyz}
 \section{Catalog}
@@ -37,7 +38,7 @@
 
 \pdfmanagement_show:n {Catalog} %doesn't show AF etc
 
-\seq_show:c { g__pdfmanagement_/Catalog/AF_seq }
+%\seq_show:c { g__pdfmanagement_/Catalog/AF_seq }
 \ExplSyntaxOff
 
 \end{document}
@@ -65,7 +66,7 @@
                             & Direction       & /R2L or /L2R \\
                             & \ldots          &              & many more, see the reference \\
  \end{tabularx}
- 
+
 \ExplSyntaxOn
 \pdfmanagement_add:nnn   {Catalog/AA}{WC}{<</A/B>>}
 \pdfmanagement_show:n    {Catalog/AA}
@@ -78,12 +79,12 @@
 \pdfmanagement_remove:nn {Catalog/AcroForm/DR/Font}{ZZZZ}
 \pdfmanagement_show:n    {Catalog/AcroForm/DR/Font}
 \pdfmanagement_show:n    {Catalog/ViewerPreferences}
-\pdfmanagement_add:nnn   {Catalog/AcroForm/DR}{Font}{blub} %ignored if Catalog/AcroForm/DR/Font is not empty! 
+\pdfmanagement_add:nnn   {Catalog/AcroForm/DR}{Font}{blub} %ignored if Catalog/AcroForm/DR/Font is not empty!
 \pdfmanagement_add:nnn   {Catalog/AcroForm/DR}{XFont}{blub}
 \pdfmanagement_show:n    {Catalog/AcroForm/DR}
 \pdfmanagement_show:n    {Catalog/AcroForm/DR/Font}
 \ExplSyntaxOff
- 
+
 \end{document}
 \subsection{Top level entries}
 These can be added and removed easily.
@@ -91,8 +92,8 @@ These can be added and removed easily.
 \begin{description}
 \item[Backend notes:] dvips adds a Metadata entry automatically, but
 if a manual value is added it will overwrite this and it also
-overwrites the stream, the new stream is encoded. By using the 
-null value it is also possible to suppress the xmp metadata altogether. 
+overwrites the stream, the new stream is encoded. By using the
+null value it is also possible to suppress the xmp metadata altogether.
 \end{description}
 
 \begin{tabular}{lll}
