@@ -1292,6 +1292,43 @@
   }
 %    \end{macrocode}
 % \end{macro}
+% \begin{macro}{@@_handler/Catalog/?_show:}
+% A handler to show the catalog.
+%    \begin{macrocode}
+\cs_new_protected:cpn {@@_handler/Catalog/?_show:}
+  {
+    \iow_term:x
+      {
+        \iow_newline:
+        The~Catalog~contains~in~the~top~level~the~single~value~entries
+        \prop_map_function:cN {\pdfdict_name:nn { g } { Core/Catalog }} \msg_show_item:nn
+      }
+    \clist_map_inline:Nn \c_@@_Catalog_seq_clist
+     {
+       \seq_if_empty:cF {  g_@@_/Catalog/##1_seq }
+         {
+           \iow_term:x
+             {
+               The~'##1'~array~contains~the~entries
+               \seq_map_function:cN { g_@@_/Catalog/AF_seq } \msg_show_item:n
+             }
+         }
+      }
+    \clist_map_inline:Nn \c_@@_Catalog_sub_clist
+      {
+        \prop_if_empty:cF { \pdfdict_name:nn { g } { Core/Catalog/##1 } }
+          {
+            \iow_term:x
+              {
+                The~Catalog~subdirectory~'##1'~contains~the~single~value~entries
+                \prop_map_function:cN {\pdfdict_name:nn { g } { Core/Catalog/##1 }} \msg_show_item:nn
+              }
+          }
+      }
+    \tl_show:x {\tl_to_str:n{\pdfmanagement_show:n{Catalog}}}
+  }
+%    \end{macrocode}
+% \end{macro}
 % \subsection{ xform / Properties }
 %    \begin{macrocode}
 \pdfdict_new:nn { g } {Core/Xform/Resources/Properties}
