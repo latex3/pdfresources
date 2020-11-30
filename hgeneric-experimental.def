@@ -883,6 +883,24 @@
 % pdfpagemode   (default: UseNone or UseOutlines, bookmark should do the second)
 % pdfpagescrop  (default: empty/do nothing)
 
+% The following keys are set currently only with the original setup,
+% but we don't want warnings
+\keys_define:nn { hyp / setup }
+  {
+    ,unicode        .code:n = {}
+    ,pdfencoding .code:n = {}
+  }
+
+%pdfversion is disabled
+\keys_define:nn { hyp / setup }
+  {
+    ,pdfversion .code:n =
+      {
+         \msg_warning:nn { hyp }{ pdfversion-disabled }
+      }
+  }
+
+
 \keys_define:nn { hyp / setup }
  {
    ,baseurl       .code:n =
