@@ -88,7 +88,7 @@
 % The \pkg{pdfmanagement} extends this to more PDF related areas and provide
 % interfaces to them in a backend independent way.
 %
-% \section{\enquote{Change Strategy}: The integration into \LaTeX}
+% \section{\enquote{Change Strategy}: The integration into \LaTeX\label{sec:change}}
 %
 % The central module of this package, \pkg{l3pdfmanagement}, defines an interface
 % for the (pdf\TeX) primitives \cs{pdfcatalog}, \cs{pdfinfo},
@@ -122,11 +122,11 @@
 % The options of \cs{DeclareDocumentMetadata} are described in the documentation of
 % \pkg{ltdocinit}.
 %
-% If the pdf management is active can be tested with the predicate \cs{pdfmanagement_if_active:TF},
-% see the documentation of \pkg{l3pdfmanagement}.
+% If the pdf management is active can be tested with the predicate
+% \cs{pdfmanagement_if_active:TF}, see the documentation of \pkg{l3pdfmanagement}.
 %
-% We hope that this setup will allow packages writers and authors to test the pdfmanagement and adapt
-% packages and document safely.
+% We hope that this setup will allow packages writers and authors to test the
+% pdfmanagement and adapt packages and document safely.
 %
 %
 % \section{Backend support}
@@ -139,29 +139,31 @@
 % The backends are too different to allow this.
 % Some backends expand arguments e.g. in a \cs{special} while other don't.
 % Some backends can insert a resource at the first compilation, while another uses
-% the aux-file and a label and so needs at least two. Some backends manage some
-% of the resources through side-effects, some manage them automatically.
+% the aux-file and a label and so needs at least two compilation runs.
+% Some backends manage some of the resources through side-effects,
+% some manage them automatically.
 % All this mean that package writers will still have to keep an eye on
 % backend requirements and run tests for all variants. Also backend specific code
 % will still be needed in some cases.
-% 
+%
 % \section{Use}
 % The package should be loaded before \cs{documentclass}. To activate
 % the resource management it should be followed by
 % \cs{DeclareDocumentMetadata}\marg{key-val}. The allowed keys are currently
-% described in \pkg{l3pdfinit}
+% described in \pkg{ltdocinit}
 %
 % \section{Requirements}
-% pdfresources requires a LaTeX format from 2020/10/01 or later.
+% \pkg{pdfmanagement} requires a LaTeX format from 2020/10/01 or later.
 % It currently depends on the external packages \pkg{zref-base} and \pkg{bitset}.
 % In some places, e.g. when writing strings to the pdf it assumes that
 % the file is utf8 encoded -- ascii will naturally work too, but 8bit encodings are
-% not supported
+% not supported.
 %
 % \section{Incompabilities}
 %
-% The package tries to take over the management of core PDF dictionaries. All packages
-% that bypass this package and access this dictionaries with primitives like
+% As described in section~\ref{sec:change}, if activated
+% the package takes over the management of core PDF dictionaries. All packages
+% that bypass this package and access these dictionaries with primitives like
 % \cs{pdfcatalog}, \cs{pdfinfo}, \cs{pdfpageresources}, \cs{pdfpagesattr}
 % and \cs{pdfpageattr} or similar commands from other engines and backends are
 % basically incompatible: values can get lost or be wrong.
@@ -175,23 +177,37 @@
 % \begin{verbatim}
 %  \usepackage[customdriver=hgeneric-experimental]{hyperref}
 % \end{verbatim}
-% The code for bookmarks has been removed from this driver, instead
+%
+% The generic driver differs in some points from other \pkg{hyperref} drivers:
+% \begin{itemize}
+% \item The code for bookmarks has been removed from this driver, instead
 % the \pkg{bookmarks} package should be loaded after \pkg{hyperref}.
-% The new driver supports already most of the functions of the original drivers.
-% Incomplete is the support for form fields.
+% \item As the driver isn't yet fully integrated into hyperref. This means that
+% it doesn't react to a number of package options. Instead \cs{hypersetup} should
+% be used.
+% \item Incomplete is the support for form fields. Quite probably form fields will
+% be extracted in a dedicated package.
+% \end{itemize}
 %
 % \subsection{pdfx}
-% \pkg{pdfx} is not compatible. Replacement code to setup standards is under
-% development. At first pdf/A will be handled, pdf/X then later.
+% \pkg{pdfx} is not compatible. It uses the commands \cs{pdfpagesattr}, \cs{pdfpageattr},
+% \cs{pdfinfo} and \cs{pdfcatalog}. The needed changes are not many, but can
+% not be done by external patches.
+%
+% It is also one goal of the pdfmanagement project to
+% offer support for standards natively. The code is under development.
+% At first pdf/A will be handled, pdf/X then later.
 %
 % \subsection{hyperxmp}
-% With small adjustments hyperxmp can be used. But the coordination must be
-% improved.
+% \pkg{hyperxmp} uses \cs{pdfcatalog} to insert the \texttt{/MetaData} reference. This
+% makes it incompatible, but adjusting this is even possible with external
+% patches. \pkg{hyperxmp} also relies on some \pkg{hyperref} internals, so
+% changes in \pkg{hyperref} must be coordinated.
 %
 % \subsection{tikz/pgf}
 % \pkg{pgf} writes to the page resources too and so is incompatible. The needed
 % changes are rather small and will be done in coordination with the maintainer.
-% Until this works, \pkg{pageresources} can be loaded with the option \texttt{patches}
+% Until this works, \pkg{pagemanagement} can be loaded with the option \texttt{patches}
 % which will add the needed patches.
 %
 % \subsection{transparent}
