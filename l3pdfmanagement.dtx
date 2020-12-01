@@ -57,7 +57,8 @@
 %
 % The commands in this module offer interfaces to this core PDF dictionaries
 % They unify a number of primitives like the pdftex
-% registers \cs{pdfcatalog}, \cs{pdfpagesattr}, \cs{pdfinfo}, \cs{pdfpageresources}
+% registers and commands \cs{pdfcatalog}, \cs{pdfpageattr},
+% \cs{pdfpagesattr}, \cs{pdfinfo}, \cs{pdfpageresources}
 % and similar commands of the other backends in a backend independant way.
 %
 % The supported backends are pdflatex, lualatex, (x)dvipdfmx (latex, xelatex)
@@ -74,8 +75,8 @@
 % The dictionaries and resources handled by this module are inserted only
 % once in a PDF or only once per page. Examples are the Catalog dictionary,
 % the Info dictionary, the page resources. For these dictionaries and resources
-% management by the
-% \LaTeX{} kernel is necessary to avoid that packages overwrite settings from
+% management by the \LaTeX{} kernel is necessary to avoid
+% that packages overwrite settings from
 % other packages which would lead to clashes and incompatibilities.
 % It is therefore necessary that all packages which want to add content to this
 % dictionaries and resources use the interface provided by this module.
@@ -110,6 +111,7 @@
 %  There is no \texttt{Page/Resources/Properties} dictionary in the list
 %  as this dictionary is not filled directly but
 %  managed through side effects when setting BDC-marks.
+%
 %  \subsection{User Commands}
 %  To avoid problems with older documents the resource management of this
 %  module is not activated unconditionally. The values are pushed out to the
@@ -125,21 +127,16 @@
 %   \begin{syntax}
 %     \cs{pdfmanagement_add:nnn} \Arg{resource path} \Arg{name} \Arg{value}
 %   \end{syntax}
-% This function puts \Arg{name} \Arg{value} globally in an internal
-% property lists and writes it later into the PDF dictionary\footnote{Currently all
-% resources are PDF dictionaries, so resource and dictionary mean the same.} described by
-% \Arg{resource path}.
-% \Arg{resource path} is a symbolic name for a concrete PDF dictionary to
-% which the content of these property lists will be written by the PDF
-% resource management code.
+% This function puts \Arg{name} \Arg{value} in the PDF resource described by
+% the symbolic name \Arg{resource path}. Technically it stores it globally in an internal
+% property lists and writes it later into the right PDF dictionary\footnote{Currently all
+% resources are PDF dictionaries, so resource and dictionary mean the same.}
+% Which values for \Arg{resource path} exist is described in the following.
 % \Arg{name} should be a valid PDF Name without
 % the starting slash.
 % \Arg{value} should be a valid PDF value for this Name in the
 % target dictionary.
 %
-% The PDF resource management code predefines a large number of
-% symbolic names for important core dictionaries and will write the stored values
-% at the right time to the PDF. The predefined symbolic names are described below.
 %
 % The code works with all major engines but not necessarily
 % in the same way. Most importantly
@@ -162,9 +159,7 @@
 %   This shows the content of the dictionary targetted by
 %   \Arg{resource path} in the log and on the terminal if possible.
 %
-%   It can't show some subdictionaries of the catalog which have arrays as values
-%   as these are filled only at the end of the document. It is also not reliable for
-%   page resources as these are filled at shipout.
+%   It is not reliable for page resources as these are filled at shipout.
 %\end{function}
 % \begin{function}[added = 2020-04-07]
 %   {
@@ -179,8 +174,8 @@
 %   If \meta{name} is not found no change occurs,
 %   \emph{i.e}~there is no need to test for the existence of a name before
 %   trying to remove it.
-%   Values from the special Catalog entries with arrays as values can not be
-%   removed.
+%   Values from the special Catalog entries where the values are collected in arrays
+%   can't be removed (but should ever a use case appear it could be added).
 % \end{function}
 % \subsection{Description of the resource pathes}
 % \subsubsection{Info: The Info dictionary}
