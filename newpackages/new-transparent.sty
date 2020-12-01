@@ -150,3 +150,53 @@ xxxx
 \ExplSyntaxOff
 
 %% colorstack abstraction
+\documentclass[12pt]{article}
+\usepackage{kantlipsum,iftex}
+
+\begin{document}
+\ifxetex
+\special{pdfcolorstackinit 1 page direct (0 g)}
+\special{pdfcolorstackinit 2 direct (0 g)}
+\special{pdfcolorstack 2 push (0 1 0 rg)}
+\special{pdfcolorstack 1 push (1 0 0 rg)}
+1: red abc
+\special{pdfcolorstack 1 push (0 0 1 rg)}
+1: blue abc
+\special{pdfcolorstack 1 pop}
+1: red again
+\special{pdfcolorstack 2 current}
+2: green
+\special{pdfcolorstack 1 current}
+1: still red
+\special{pdfcolorstack 2 current}
+2: green
+\newpage
+
+should be red
+\else
+\edef\stackA {\pdfcolorstackinit page direct {0 g}}
+\edef\stackB {\pdfcolorstackinit direct {0 g}}
+
+\pdfcolorstack\stackB push {0 1 0 rg}
+\pdfcolorstack\stackA push {1 0 0 rg}
+1: red abc
+\pdfcolorstack\stackA push {0 0 1 rg}
+1: blue abc
+\pdfcolorstack\stackA pop
+1: red again
+\pdfcolorstack\stackB current
+2: green
+\pdfcolorstack\stackA current
+1: still red
+\pdfcolorstack\stackB current
+2: green
+\newpage
+
+should be red
+
+\pdfcolorstack\stackB pop
+aa
+
+
+\fi
+\end{document}
