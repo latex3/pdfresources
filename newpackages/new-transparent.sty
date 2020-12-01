@@ -106,3 +106,47 @@
 \endinput
 %%
 %% End of file `new-transparent.sty'.
+
+
+dvips could at least on one page along this lines
+\ExplSyntaxOn
+\let\backendpostscript\__kernel_backend_postscript:n
+\ExplSyntaxOff
+xxxx
+
+\backendpostscript
+ {
+   /STACK 50 array def % the stack data structure
+   /PTR 0 def % the stack pointer
+   /stackpush % any stackpush
+     { %def
+       STACK exch PTR exch put
+       /PTR PTR 1 add def
+     } bind def
+   /stackget % stackget any
+    { %def
+      /PTR PTR 1 sub def
+      STACK PTR get
+    } bind def
+ }
+\ExplSyntaxOn
+\__kernel_backend_postscript:n {.currentstrokeconstantalpha~stackpush}
+\__kernel_backend_postscript:n {.currentfillconstantalpha~stackpush}
+\__kernel_backend_postscript:n {0.1~.setstrokeconstantalpha}
+\__kernel_backend_postscript:n {0.1~.setfillconstantalpha}
+zzzz
+\__kernel_backend_postscript:n {.currentstrokeconstantalpha~stackpush}
+\__kernel_backend_postscript:n {.currentfillconstantalpha~stackpush}
+\__kernel_backend_postscript:n {0.4~.setstrokeconstantalpha}
+\__kernel_backend_postscript:n {0.4~.setfillconstantalpha}
+blub
+\__kernel_backend_postscript:n {stackget~.setstrokeconstantalpha}
+\__kernel_backend_postscript:n {stackget~.setfillconstantalpha}
+aaaa
+\__kernel_backend_postscript:n {stackget~.setstrokeconstantalpha}
+\__kernel_backend_postscript:n {stackget~.setfillconstantalpha}
+
+xxxx
+\ExplSyntaxOff
+
+%% colorstack abstraction
