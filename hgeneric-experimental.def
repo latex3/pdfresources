@@ -1448,16 +1448,28 @@
       {
         pdf#1  .code:n =
           {
-            \__hyp_text_convert_info:nN {##1}\l__hyp_tmpa_tl
-            \pdfmanagement_add:nnx {Info}{#2}{\l__hyp_tmpa_tl}
+            \tl_if_blank:nTF {##1}
+              {
+                \pdfmanagement_remove:nn {Info}{#2}
+              }
+              {
+                \__hyp_text_convert_info:nN {##1}\l__hyp_tmpa_tl
+                \pdfmanagement_add:nnx {Info}{#2}{\l__hyp_tmpa_tl}
+              }
           }
       }
     \keys_define:nn { hyp / info }
       {
         #2  .code:n =
           {
-            \__hyp_text_convert_info:nN {##1}\l__hyp_tmpa_tl
-            \pdfmanagement_add:nnx {Info}{#2}{\l__hyp_tmpa_tl}
+            \tl_if_blank:nTF {##1}
+              {
+                \pdfmanagement_remove:nn {Info}{#2}
+              }
+              {
+                \__hyp_text_convert_info:nN {##1}\l__hyp_tmpa_tl
+                \pdfmanagement_add:nnx {Info}{#2}{\l__hyp_tmpa_tl}
+              }
           }
         ,unknown .code:n =
          {
