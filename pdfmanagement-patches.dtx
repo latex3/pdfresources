@@ -1,6 +1,6 @@
 % \iffalse meta-comment
 %
-%% File: pdfresources-patches.dtx
+%% File: pdfmanagement-patches.dtx
 %
 % Copyright (C) 2018-2020 The LaTeX3 Project
 %
@@ -11,7 +11,7 @@
 %
 %    http://www.latex-project.org/lppl.txt
 %
-% This file is part of the "(experimental) pdfresources bundle" (The Work in LPPL)
+% This file is part of the "(experimental) pdfmanagement bundle" (The Work in LPPL)
 % and all files in that bundle must be distributed together.
 %
 % -----------------------------------------------------------------------
@@ -30,7 +30,7 @@
 %</driver>
 % \fi
 % \title{^^A
-%   The \pkg{pdfresources-patches} package  -- temporarly patches  ^^A
+%   The \pkg{pdfmanagement-patches} package  -- temporarly patches  ^^A
 % }
 %
 % \author{^^A
@@ -47,9 +47,9 @@
 % \maketitle
 % \begin{documentation}
 %
-% \section{\pkg{pdfresources-patches} documentation}
+% \section{\pkg{pdfmanagement-patches} documentation}
 % This code is temporary! It tries to patch commands of other packages which
-% fills pdfresources too, to remove clashes and test if everything works as expected.
+% fills pdfmanagement too, to remove clashes and test if everything works as expected.
 % This code should disappear when packages adapt to the central interfaces.
 %
 % \subsection{\pkg{pgf}}
@@ -71,13 +71,13 @@
 % these resources. That has to take place for every page: the exact route
 % therefore depends on the driver.
 %
-% For the pdfresources project we need to avoid that pgf interferes in ExtGState,
+% For the pdfmanagement project we need to avoid that pgf interferes in ExtGState,
 % ColorSpace and Pattern (Shadings are added to the xform resources and so probably
 % unproblematic for now).
 %    \begin{macrocode}
 %<@@=pdf>
 %<*package>
-\ProvidesExplPackage {pdfresources-patches} {2020-07-13} {0.7}
+\ProvidesExplPackage {pdfmanagement-patches} {2020-07-13} {0.7}
   {experimental pdf-resource management / patches}
 % patches for xetex/dvips doesn't make much sense for colorspace and
 % transparent. But pgf should be tested sometimes.
@@ -169,7 +169,7 @@
 %</package>
 %    \end{macrocode}
 % \subsection{\pkg{transparent}}
-% transparent, we assume that pdfresources is loaded first.
+% transparent, we assume that pdfmanagement is loaded first.
 % the code does nothing is with new-transparent ...
 %    \begin{macrocode}
 %<*package>

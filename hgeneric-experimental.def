@@ -2,7 +2,7 @@
 %% This is file `hgeneric-experimental.def',
 %% This is an adapted version of hluatex.def
 %% meant to test the use of the commands
-%% from pdfresources.sty
+%% from pdfmanagement.sty
 %%
 %% drivers are loaded in line 4745 in hyperref.sty in a \Hy@AtEndOfPackage command.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -856,7 +856,7 @@
 
 
 %this needs central management in the kernel and changes in hyperref.
-%with pdfresources most attributes can be set directly, there is not need
+%with pdfmanagement most attributes can be set directly, there is not need
 %to delay to the begin of the doc.
 %as a first step hypersetup is overwritten to set (some) keys with expl3.
 \cs_set_protected:Npn \hypersetup #1

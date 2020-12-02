@@ -1,6 +1,6 @@
 % \iffalse meta-comment
 %
-%% File: pdfresources.dtx
+%% File: pdfmanagement.dtx
 %
 % Copyright (C) 2019-2020 The LaTeX3 Project
 %
@@ -11,7 +11,7 @@
 %
 %    https://www.latex-project.org/lppl.txt
 %
-% This file is part of the "pdfresources bundle" (The Work in LPPL)
+% This file is part of the "pdfmanagement bundle" (The Work in LPPL)
 % and all files in that bundle must be distributed together.
 %
 % -----------------------------------------------------------------------
@@ -237,7 +237,7 @@
 %    \begin{macrocode}
 %<@@=pdf>
 %<*package>
-\ProvidesExplPackage {pdfresources} {2020-11-26} {0.8}
+\ProvidesExplPackage {pdfmanagement} {2020-11-26} {0.8}
   {experimental pdf-resource management}
 %\RequirePackage{zref-base}
 \RequirePackage{bitset}
@@ -245,7 +245,7 @@
   {
     \msg_redirect_module:nnn { pdf } { none } { warning }
   }
-\DeclareOption { patches }{\AtEndOfPackage{\RequirePackage{pdfresources-patches}}}
+\DeclareOption { patches }{\AtEndOfPackage{\RequirePackage{pdfmanagement-patches}}}
 \ProcessOptions\relax
 %</package>
 %    \end{macrocode}

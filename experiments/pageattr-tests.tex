@@ -1,7 +1,7 @@
 % !Mode:: "TeX:UTF-8:Main"
 
 \PassOptionsToPackage{enable-debug,check-declarations}{expl3}
-\RequirePackage[debug]{pdfresources}
+\RequirePackage[debug]{pdfmanagement}
 %\input{regression-test}
 \documentclass{article}
 \usepackage{lmodern}
@@ -11,7 +11,7 @@
 \ExplSyntaxOff
 \renewcommand\large{%
    \fontsize{1.5cm}{2cm}\selectfont}
-\renewcommand\floatpagefraction{0.2}   
+\renewcommand\floatpagefraction{0.2}
 \begin{document}\showoutput
 \makeatletter
 \ExplSyntaxOn
@@ -21,7 +21,7 @@
 \pdf_thispageattr_gput:nn{Rotate}{\ifodd\c@page -90\else 90 \fi}
 \large
 12345678 \par
-code~is~on~page~\thepage\par 
+code~is~on~page~\thepage\par
 \rule{1cm}{10cm}
 \end{figure}
 
@@ -29,15 +29,15 @@ code~is~on~page~\thepage\par
 \pdf_thispageattr_gput:nn{Rotate}{\ifodd\c@page -90\else 90 \fi}
 \large
 12345678 \par
-code~is~on~page~\thepage\par 
+code~is~on~page~\thepage\par
 \rule{1cm}{10cm}
 \end{figure}
 \newpage
 12345678 \par
-code~is~on~page~\thepage\par 
+code~is~on~page~\thepage\par
 \pdf_thispageattr_gput:nn{Rotate}{90}
 \ExplSyntaxOff
-\end{document} 
+\end{document}
 
 \begin{figure}[p]
 \rule{1cm}{15cm}

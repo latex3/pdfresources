@@ -2,7 +2,7 @@
 \documentclass{article}
 \usepackage{l3pdf,ifxetex,l3color}
 \usepackage%[patches] %doesn't work currently
-{pdfresources}
+{pdfmanagement}
 \usepackage{tikz}
 \ExplSyntaxOn
 \pdf_uncompress:
@@ -30,7 +30,7 @@
 
 \sys_if_engine_xetex:T
 {
- \cs_new:Npn \xxx_pdfresources: {/ExtGState~@pgfextgs} 
+ \cs_new:Npn \xxx_pdfresources: {/ExtGState~@pgfextgs}
 }
 \ExplSyntaxOff
 \begin{document}
@@ -56,15 +56,15 @@ C\pdf_xform_use:n{FormA}D \par
 E\pdf_xform_new:nnnn {FormB}{}{\xxx_pdfresources: /ABC /XYZ}
  {
  \csname pdf_bdc:nn\endcsname {Span}{objA}
-  \color{blue}Some Text    
- \csname pdf_emc:\endcsname 
+  \color{blue}Some Text
+ \csname pdf_emc:\endcsname
  \quad \tikz\fill[opacity=0.5,red](0,0)rectangle(1,1);
  \tikz\fill[opacity=1,red](0,0)rectangle(1,1);
  }F
- 
+
 \par
 
-G\pdf_xform_use:n{FormB}H 
+G\pdf_xform_use:n{FormB}H
 
 \par\bigskip
 Appeareance\makebox[\pdf_xform_wd:n{FormB}][l]{\__pdf_backend_annotation:nnnn
@@ -89,7 +89,7 @@ Appeareance\makebox[\pdf_xform_wd:n{FormB}][l]{\__pdf_backend_annotation:nnnn
 % xform: immediate or not?  -> immediate for now
 % argument: a box / content -> \pdf will use content and put in a hbox
 % with dvipdfmx, xform should be in a 0-box.
-% xform attr:  
+% xform attr:
 % pdflatex: attr keyword
 % xform resources
 % pdflatex: resources keyword
