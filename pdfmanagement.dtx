@@ -231,6 +231,9 @@
 % \subsection{tagpdf}
 % The development code is compatible and will be uploaded in time.
 %
+% \subsection{ocgx2, animate, media9}
+% These package all make use of low-level PDF command and will
+% have to be reviewed.
 %
 % \end{documentation}
 % \begin{implementation}
@@ -239,7 +242,16 @@
 %<*package>
 \ProvidesExplPackage {pdfmanagement} {2020-11-26} {0.8}
   {experimental pdf-resource management}
-%\RequirePackage{zref-base}
+\providecommand\IfFormatAtLeastTF{\@ifl@t@r\fmtversion}
+\IfFormatAtLeastTF{2020-10-01}{}{%
+ \PackageWarning{pdfmanagement}{This~package~needs~LaTeX~2020-10-01~or~newer.\MessageBreak Loading~is~aborted.}{}
+ \DeclareOption { debug }{}
+ \DeclareOption { patches }{}
+ \newcommand\DeclareDocumentMetadata[1]{}%
+ \ProcessOptions\relax
+ }
+\IfFormatAtLeastTF{2020-10-01}{}{\endinput}
+
 \RequirePackage{bitset}
 \DeclareOption { debug }
   {
