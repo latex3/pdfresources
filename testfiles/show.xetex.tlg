@@ -8,10 +8,7 @@ braces):
 l. ...\pdfdict_show:n{Core/Catalog}
 The global dictionary 'Core/Info' contains the pairs (without outer braces):
 >  {Creator}  => 
-{<FEFF004C006100540065005800200077006900740068002000680079007000650072007200650066>}
->  {Author}  =>  {<FEFF>}
->  {Title}  =>  {<FEFF>}
->  {Subject}  =>  {<FEFF>}.
+{<FEFF004C006100540065005800200077006900740068002000680079007000650072007200650066>}.
 <recently read> }
 l. ...\pdfdict_show:n{Core/Info}
 The local dictionary 'Core/Catalog' contains the pairs (without outer braces):
@@ -24,11 +21,12 @@ braces):
 >  {OpenAction}  =>  {[@page1 /Fit]}.
 <recently read> }
 l. ...\pdfdict_show:n{Core/Catalog}
-The core dictionary 'Catalog' contains the pairs (without outer braces):
+The Catalog contains in the top level the single value entries
 >  {PageMode}  =>  {/UseOutlines}
->  {OpenAction}  =>  {[@page1 /Fit]}.
+>  {OpenAction}  =>  {[@page1 /Fit]}
+> \pdfmanagement_show:n {Catalog}.
 <recently read> }
-l. ...\pdfcoredict_show:n{Catalog}
+l. ...\pdfmanagement_show:n{Catalog}
 The dictionary 'blub' is not a declared global or local dictionary.
 > .
 <recently read> }
@@ -96,9 +94,6 @@ Completed box being shipped out [1]
 .\hbox(0.0+0.0)x0.0
 ..\special{pdf:put @pages <<>>}
 ..\special{pdf:docinfo<</Creator <FEFF004C00610054006500580020007700690074006800\ETC.}
-..\special{pdf:docinfo<</Author <FEFF>>>}
-..\special{pdf:docinfo<</Title <FEFF>>>}
-..\special{pdf:docinfo<</Subject <FEFF>>>}
 ..\special{pdf:put @catalog<</PageMode /UseOutlines>>}
 ..\special{pdf:put @catalog<</OpenAction [@page1 /Fit]>>}
 .\kern 633.0
