@@ -38,13 +38,89 @@
 %%   \Hy@EXPsetbordercolor
 %%   \hypupdateattribute
 \ProvidesFile{hgeneric-experimental.def}
-  [2020/05/17 v0.6 %
+  [2020/12/03 v0.7 %
   Hyperref driver for luaTeX]
 
 \RequirePackage{xparse,etoolbox,l3color}
 \chardef\Hy@VersionChecked=1 %don't check the version!
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \ExplSyntaxOn
+%% zref/l3xref switch
+% one of both must have been loaded as pdfmanagement is a requirement
+% this is not perfect but should work only xref is there for good.
+
+\cs_if_exist:NTF \xref_value:nn
+  {
+    \cs_new_protected:Npn \__hyp_ref_label:nn #1 #2 %label/attributes
+      {
+        \@bsphack
+          \xref_label:nn{#1}{#2}
+        \@esphack
+      }
+    \cs_generate_variant:Nn \__hyp_ref_label:nn {en}
+    \cs_new_protected:Npn \__hyp_ref_check:nn #1 #2 %label/attribute
+      {
+        \tl_if_exist:cF { g__xref_label_ \tl_to_str:n {#1} _ \tl_to_str:n {#2} _tl }
+          {
+            \protect\G@refundefinedtrue
+            \@latex@warning
+              {
+                Reference~`\tl_to_str:n {#1}'~with~attribute~`\tl_to_str:n {#2}'~
+                on~page~\thepage~\space undefined
+              }
+          }
+      }
+    \cs_generate_variant:Nn \__hyp_ref_check:nn {en}
+    \prg_new_conditional:Npnn \__hyp_ref_if_exist:nn #1#2 { p , T , TF }  % #1 #2 %label/attribute
+      {
+        \tl_if_exist:cTF { g__xref_label_ \tl_to_str:n {#1} _ \tl_to_str:n {#2} _tl }
+          {
+            \prg_return_true:
+          }
+          {
+            \prg_return_false:
+          }
+      }
+    \prg_generate_conditional_variant:Nnn \__hyp_ref_if_exist:nn  {en} { p , T , TF }
+    \cs_new:Npn \__hyp_ref_value:nn #1 #2
+     {
+        \xref_value:nn{#1}{#2}
+     }
+    \cs_generate_variant:Nn \__hyp_ref_value:nn {en}
+  }
+  { %zref
+    \RequirePackage{zref-abspage} %move to backend ...
+    \cs_new_protected:Npn \__hyp_ref_label:nn #1 #2 %label/attributes
+      {
+        \zref@labelbyprops{\tl_to_str:n {#1}}{#2}
+      }
+    \cs_generate_variant:Nn \__hyp_ref_label:nn {en}
+    \cs_new_protected:Npn \__hyp_ref_check:nn #1 #2
+     {
+       \zref@refused {\exp_not:n{#1}}
+     }
+   \cs_generate_variant:Nn \__hyp_ref_check:nn {en}
+   \prg_new_conditional:Npnn \__hyp_ref_if_exist:nn #1#2 { p , T , TF }  % #1 #2 %label/attribute
+      {
+        \zref@ifrefundefined{\tl_to_str:n {#1}}
+         {\prg_return_false:}
+         {
+           \zref@ifrefcontainsprop{\tl_to_str:n {#1}}{\tl_to_str:n {#2}}
+            {
+              \prg_return_true:
+            }
+            {
+              \prg_return_false:
+            }
+         }
+      }
+   \prg_generate_conditional_variant:Nnn \__hyp_ref_if_exist:nn  {en} { p , T , TF }
+   \cs_new:Npn \__hyp_ref_value:nn #1 #2
+     {
+       \zref@extract{\tl_to_str:n {#1}}{\tl_to_str:n {#2}}
+     }
+   \cs_generate_variant:Nn \__hyp_ref_value:nn {en}
+ }
 %% messages, should later (with more drivers) go somewhere more generic ...
 \prop_gput:Nnn \g_msg_module_name_prop { hyp }{ hyperref }
 
@@ -1918,25 +1994,21 @@
   {
     \global\advance\HyAnn@Count by\ltx@one
     %\zref@labelbyprops{HyAnn@\the\HyAnn@Count}{abspage}%
-    \zref@labelbylist {HyAnn@\the\HyAnn@Count} {l3pdf}
-    \zref@refused{HyAnn@\the\HyAnn@Count}%
+    %\zref@labelbylist {HyAnn@\the\HyAnn@Count} {l3pdf}
+    %\zref@refused{HyAnn@\the\HyAnn@Count}%
+    \__hyp_ref_label:en {HyAnn@\the\HyAnn@Count}{abspage}
+    \__hyp_ref_check:en {HyAnn@\the\HyAnn@Count}{abspage}
   }%
 \def\Fld@pageobjref
   {
-    \zref@ifrefundefined{HyAnn@\the\HyAnn@Count}
-      {}
+    \__hyp_ref_if_exist:enT {HyAnn@\the\HyAnn@Count}{abspage}
       {
-        \zref@ifrefcontainsprop{HyAnn@\the\HyAnn@Count}{pdf@abspage}
+        /P~\pdf_object_pageref:n
           {
-            /P~\pdf_object_pageref:n
-                 {
-                   \zref@extractdefault{HyAnn@\the\HyAnn@Count}{pdf@abspage}{1} %
-                 }
+            \__hyp_ref_value:en{HyAnn@\the\HyAnn@Count}{abspage}
           }
-          {}
-       }
+      }
   }
-
 \ExplSyntaxOff
 \ExplSyntaxOn
 %% check if the attr should be set through

@@ -69,36 +69,30 @@
    \RequirePackage{l3xref}
    \cs_generate_variant:Nn \xref_label:nn {en}
    \cs_generate_variant:Nn \xref_value:nn {en}
-   \cs_new_protected:Npn \@@_backend_abspage_label:n #1
+   \cs_new_protected:Npn \@@_backend_ref_label:nn #1 #2
      {
         \@bsphack
         \xref_label:nn{#1}{abspage}
         \@esphack
      }
-   \cs_new:Npn \@@_backend_abspage_value:n #1
+   \cs_new:Npn \@@_backend_ref_value:nn #1 #2
      {
-        \xref_value:nn{#1}{abspage}
+        \xref_value:nn{#1}{#2}
      }
  }
  {
-   \RequirePackage{zref-base}
-   \zref@newlist  { l3pdf }
-   \zref@newprop* { pdf@abspage } [0] { \int_use:N \g_shipout_readonly_int }
-   \zref@addprop  { l3pdf } { pdf@abspage }
-    \cs_new_protected:Npn \@@_backend_abspage_label:n #1
+   \RequirePackage{zref-abspage}
+   \cs_new_protected:Npn \@@_backend_ref_label:nn #1 #2
      {
-         \zref@labelbylist {#1} {l3pdf}
+         \zref@labelbyprops {\tl_to_str:n {#1}} {#2}
      }
-    \cs_new:Npn \@@_backend_abspage_value:n #1
+    \cs_new:Npn \@@_backend_ref_value:nn #1 #2
      {
-        \zref@extractdefault
-          {#1}
-          {pdf@abspage}
-          {0}
+        \zref@extract {\tl_to_str:n {#1}}{\tl_to_str:n {#2}}
      }
  }
-\cs_generate_variant:Nn \@@_backend_abspage_label:n {e}
-\cs_generate_variant:Nn \@@_backend_abspage_value:n {e}
+\cs_generate_variant:Nn \@@_backend_ref_label:nn {en}
+\cs_generate_variant:Nn \@@_backend_ref_value:nn {en}
 %</drivers>
 %    \end{macrocode}
 %    \begin{macrocode}
@@ -304,7 +298,7 @@
     \int_gincr:N\g_@@_backend_resourceid_int
     %\zref@labelbylist {l3pdf\int_use:N\g_@@_backend_resourceid_int} {l3pdf}
     %\xref_label:en{l3pdf\int_use:N\g_@@_backend_resourceid_int}{abspage}
-     \@@_backend_abspage_label:e { l3pdf\int_use:N\g_@@_backend_resourceid_int }
+     \@@_backend_ref_label:en { l3pdf\int_use:N\g_@@_backend_resourceid_int }{abspage}
     \tl_set:Nx \l_@@_tmpa_tl
       {
         %\zref@extractdefault
@@ -312,7 +306,7 @@
 %          {pdf@abspage}
 %          {0}
 %        \xref_value:en{l3pdf\int_use:N\g_@@_backend_resourceid_int}{abspage}
-        \@@_backend_abspage_value:e {l3pdf\int_use:N\g_@@_backend_resourceid_int}
+        \@@_backend_ref_value:en {l3pdf\int_use:N\g_@@_backend_resourceid_int}{abspage}
       }
     \pdfdict_if_exist:nnF { g } {Core/backend_Page\l_@@_tmpa_tl}
       {
@@ -903,7 +897,7 @@
 %          { l3pdf\int_use:N\g_@@_backend_resourceid_int }
 %          { l3pdf }
 %        \xref_label:en{l3pdf\int_use:N\g_@@_backend_resourceid_int}{abspage}
-        \@@_backend_abspage_label:e{l3pdf\int_use:N\g_@@_backend_resourceid_int}
+        \@@_backend_ref_label:en{l3pdf\int_use:N\g_@@_backend_resourceid_int}{abspage}
         \tl_set:Nx \l_@@_tmpa_tl
           {
             %\zref@extractdefault
@@ -911,7 +905,7 @@
 %              {pdf@abspage}
 %              {0}
             %\xref_value:en{l3pdf\int_use:N\g_@@_backend_resourceid_int}{abspage}
-            \@@_backend_abspage_value:e{l3pdf\int_use:N\g_@@_backend_resourceid_int}
+            \@@_backend_ref_value:en{l3pdf\int_use:N\g_@@_backend_resourceid_int}{abspage}
           }
         \pdfdict_if_exist:nnF { g } { Core/backend_Page\l_@@_tmpa_tl/Resources/Properties }
           {
@@ -942,7 +936,7 @@
 %          { l3pdf\int_use:N\g_@@_backend_resourceid_int }
 %          { l3pdf }
        %\xref_label:en{l3pdf\int_use:N\g_@@_backend_resourceid_int}{abspage}
-        \@@_backend_abspage_label:e{l3pdf\int_use:N\g_@@_backend_resourceid_int}
+        \@@_backend_ref_label:en{l3pdf\int_use:N\g_@@_backend_resourceid_int}{abspage}
         \tl_set:Nx \l_@@_tmpa_tl
           {
             %\zref@extractdefault
@@ -950,7 +944,7 @@
 %              {pdf@abspage}
 %              {0}
          %   \xref_value:en{l3pdf\int_use:N\g_@@_backend_resourceid_int}{abspage}
-            \@@_backend_abspage_value:e{l3pdf\int_use:N\g_@@_backend_resourceid_int}
+            \@@_backend_ref_value:en{l3pdf\int_use:N\g_@@_backend_resourceid_int}{abspage}
           }
         \pdfdict_if_exist:nnF { g } { Core/backend_Page\l_@@_tmpa_tl/Resources/Properties }
           {
