@@ -60,7 +60,7 @@
 %    \begin{macrocode}
 %<*package>
 %<@@=pdf>
-\ProvidesExplPackage {l3pdfutils} {2020-07-15} {0.1}
+\ProvidesExplPackage {l3pdfutils} {2020-12-04} {0.2}
   {PDF-utils}
 %    \end{macrocode}
 % \subsection{Form XObject (pdfxform)}
@@ -174,6 +174,9 @@
 %
 %
 %\subsection{Annotations}
+%    \begin{macrocode}
+%<@@=pdfannot>
+%    \end{macrocode}
 % \begin{NOTE}{UF}
 % The code/naming tries to unify general annotations and the special type of
 % link under a common name.
@@ -189,13 +192,13 @@
 %
 % \subsubsection{ general Annotation/management }
 % \begin{variable}
-%  { \g__pdfannot_use_lastlink_bool }
+%  { \g_@@_use_lastlink_bool }
 % The pdf engines have two different primitive commands to refer to the last created
 % annotation: one for links, one for boxed annotation. We use a boolean to decide
 % which one should be used, so that only one user command is needed.
 %    \begin{macrocode}
 %<*package>
-\bool_new:N \g__pdfannot_use_lastlink_bool
+\bool_new:N \g_@@_use_lastlink_bool
 %</package>
 %    \end{macrocode}
 % \end{variable}
@@ -243,27 +246,27 @@
 %<*package>
 \cs_new_protected:Npn \pdfannot_box:nnnn #1 #2 #3 #4
   {
-    \@@_backend_annotation:nnnn {#1}{#2}{#3}{#4}
-    \bool_gset_false:N\g__pdfannot_use_lastlink_bool
+    \__pdf_backend_annotation:nnnn {#1}{#2}{#3}{#4}
+    \bool_gset_false:N\g_@@_use_lastlink_bool
   }
 
 \cs_new:Npn \pdfannot_box_last:
   {
-    \@@_backend_annotation_last:
+    \__pdf_backend_annotation_last:
   }
 
 \cs_new_protected:Npn \pdfannot_box:nnnnn #1 #2 #3 #4 #5
   {
     \exp_args:Nx
-    \@@_backend_annotation:nnnn {#2}{#3}{#4}
+    \__pdf_backend_annotation:nnnn {#2}{#3}{#4}
       {
-        \pdfdict_if_exist:nT { l_annot/#1 }
+        \pdfdict_if_exist:nT { l_@@/#1 }
           {
-            \pdfdict_use:n { l_annot/#1}
+            \pdfdict_use:n { l_@@/#1}
           }
         #5
       }
-    \bool_gset_false:N\g__pdfannot_use_lastlink_bool
+    \bool_gset_false:N\g_@@_use_lastlink_bool
   }
 %</package>
 %    \end{macrocode}
@@ -275,6 +278,7 @@
 % \end{NOTE}
 %    \begin{macrocode}
 %<*package>
+%<@@=pdf>
 \cs_new_protected:Npn \pdf_flag_new:nn #1 #2
   {
     \bitsetReset  { @@_#1_flag }
@@ -366,8 +370,9 @@
 % the subtype setting (the /Type is added by the backend).
 %    \begin{macrocode}
 %<*package>
-\pdfdict_new:n { l_annot/Widget}
-\pdfdict_put:nnn {l_annot/Widget}{Subtype}{/Widget}
+%<@@=pdfannot>
+\pdfdict_new:n { l_@@/Widget}
+\pdfdict_put:nnn {l_@@/Widget}{Subtype}{/Widget}
 %</package>
 %    \end{macrocode}
 % \subsection{Annotations, subtype Link}\label{sec:links}
@@ -419,13 +424,13 @@
 
 \seq_map_inline:Nn \c_pdfannot_link_types_seq
   {
-    \pdfdict_new:n { l_annot/Link/#1 }
-    \pdfdict_put:nnn { l_annot/Link/#1}{ F }{ \pdf_flag_use:n { annot/Link} }
+    \pdfdict_new:n { l_@@/Link/#1 }
+    \pdfdict_put:nnn { l_@@/Link/#1}{ F }{ \pdf_flag_use:n { annot/Link} }
     \hook_new_pair:nn
-      {pdf/annot/Link/#1/before}
-      {pdf/annot/Link/#1/after}
-    \seq_new:c  { l_@@_hook_annot/Link/#1_begin_seq }
-    \seq_new:c  { l_@@_hook_annot/Link/#1_end_seq }
+      {pdfannot/Link/#1/before}
+      {pdfannot/Link/#1/after}
+    \seq_new:c  { l_@@_hook/Link/#1_begin_seq }
+    \seq_new:c  { l_@@_hook/Link/#1_end_seq }
   }
 %</package>
 %    \end{macrocode}
@@ -466,25 +471,25 @@
 \cs_new_protected:Nn \pdfannot_link:nnn %#1 type (URI, GoTo etc),
                                         %#2 action spec, #3 link text
   {
-    \hook_use:n { pdf/annot/Link/#1/before}
+    \hook_use:n { pdfannot/Link/#1/before}
     \mode_leave_vertical:
     \exp_args:Nxx %xetex needs expansion
     \@@_backend_link_begin_user:nnw
       {
-         \pdfdict_if_exist:nT { l_annot/Link/#1 }
+         \pdfdict_if_exist:nT { l_@@/Link/#1 }
           {
-            \pdfdict_use:n { l_annot/Link/#1}
+            \pdfdict_use:n { l_@@/Link/#1}
           }
       }
       {
         /Subtype/Link
         #2
       }
-    \bool_gset_true:N \g__pdfannot_use_lastlink_bool
+    \bool_gset_true:N \g_@@_use_lastlink_bool
     #3
     \@@_backend_link_end:
-    \bool_gset_true:N \g__pdfannot_use_lastlink_bool
-    \hook_use:n { pdf/annot/Link/#1/after}
+    \bool_gset_true:N \g_@@_use_lastlink_bool
+    \hook_use:n { pdfannot/Link/#1/after}
   }
 %</package>
 %    \end{macrocode}
@@ -523,24 +528,24 @@
 %<*package>
 \cs_new_protected:Npn \pdfannot_link_begin:nnw #1 #2 %#1 type, #2 action spec
   {
-    \hook_use:n { pdf/annot/Link/#1/before}
+    \hook_use:n { pdfannot/Link/#1/before}
     \exp_args:Nxx %xetex needs expansion
-      \@@_backend_link_begin_user:nnw
+      \__pdf_backend_link_begin_user:nnw
         {
-           \pdfdict_if_exist:nT { l_annot/Link/#1 }
+           \pdfdict_if_exist:nT { l_@@/Link/#1 }
             {
-              \pdfdict_use:n { l_annot/Link/#1}
+              \pdfdict_use:n { l_@@/Link/#1}
             }
         }
         { #2 }
-      \bool_gset_true:N \g__pdfannot_use_lastlink_bool
+      \bool_gset_true:N \g_@@_use_lastlink_bool
   }
 
 \cs_new_protected:Nn \pdfannot_link_end:n %#1 type, e.g. url
   {
-    \@@_backend_link_end:
-    \bool_gset_true:N \g__pdfannot_use_lastlink_bool
-    \hook_use:n { pdf/annot/Link/#1/after}
+    \__pdf_backend_link_end:
+    \bool_gset_true:N \g_@@_use_lastlink_bool
+    \hook_use:n { pdfannot/Link/#1/after}
   }
 %</package>
 %    \end{macrocode}
@@ -556,22 +561,22 @@
 %<*package>
 \cs_new_protected:Npn \pdfannot_link_goto_begin:nw #1 %#1 destination
   {
-    \hook_use:n { pdf/annot/Link/GoTo/before}
+    \hook_use:n { pdfannot/Link/GoTo/before}
     \exp_args:Nxx %xetex needs expansion
-    \@@_backend_link_begin_goto:nnw
+    \__pdf_backend_link_begin_goto:nnw
       {
-        \pdfdict_use:n { l_annot/Link/GoTo}
+        \pdfdict_use:n { l_@@/Link/GoTo}
 
       }
       { #1 }
-     \bool_gset_true:N \g__pdfannot_use_lastlink_bool
+     \bool_gset_true:N \g_@@_use_lastlink_bool
   }
 
 \cs_new_protected:Nn \pdfannot_link_goto_end:
   {
-    \@@_backend_link_end:
-    \bool_gset_true:N \g__pdfannot_use_lastlink_bool
-     \hook_use:n { pdf/annot/Link/GoTo/after}
+    \__pdf_backend_link_end:
+    \bool_gset_true:N \g_@@_use_lastlink_bool
+     \hook_use:n { pdfannot/Link/GoTo/after}
   }
 %</package>
 %    \end{macrocode}
@@ -582,7 +587,7 @@
 % \end{function}
 %    \begin{macrocode}
 %<*package>
-\cs_new:Nn \pdfannot_link_last: { \@@_backend_link_last: }
+\cs_new:Nn \pdfannot_link_last: { \__pdf_backend_link_last: }
 %</package>
 %    \end{macrocode}
 % \begin{function}[added = 2020-06-29]{  \pdfannot_last: }
@@ -594,12 +599,12 @@
 %<*package>
 \cs_new:Npn \pdfannot_last:
   {
-    \bool_if:NTF \g__pdfannot_use_lastlink_bool
+    \bool_if:NTF \g_@@_use_lastlink_bool
       {
-        \@@_backend_link_last:
+        \__pdf_backend_link_last:
       }
       {
-        \@@_backend_annotation_last:
+        \__pdf_backend_annotation_last:
       }
   }
 %</package>
@@ -615,13 +620,57 @@
 %<*package>
 \cs_new_protected:Npn \pdfannot_link_margin:n #1
   {
-    \@@_backend_link_margin:n { #1 }
+    \__pdf_backend_link_margin:n { #1 }
   }
 
 %</package>
 %    \end{macrocode}
 %
+% \begin{function}[added = 2020-12-04]{ \pdfannot_dict_put:nnn }
+%  \begin{syntax}
+%    \cs{\pdfannot_dict_put:nnn} \Arg{dictionary name} \Arg{key} \Arg{value}
+%  \end{syntax}
+%   This adds (locally) a key-value to the internal annot dictionary
+% \end{function}
+%    \begin{macrocode}
+%<*package>
+\cs_new_protected:Npn \pdfannot_dict_put:nnn #1 #2 #3
+  {
+    \pdfdict_put:nnn { l_@@/#1 } { #2 }{ #3 }
+  }
 
+%</package>
+%    \end{macrocode}
+% \begin{function}[added = 2020-12-04]{ \pdfannot_dict_remove:nn }
+%  \begin{syntax}
+%    \cs{\pdfannot_dict_remove:nn} \Arg{dictionary name} \Arg{key}
+%  \end{syntax}
+%   This removes a key-value from the internal annot dictionary
+% \end{function}
+%    \begin{macrocode}
+%<*package>
+\cs_new_protected:Npn \pdfannot_dict_remove:nn #1 #2
+  {
+    \pdfdict_remove:nn { l_@@/#1 } { #2 }
+  }
+
+%</package>
+%    \end{macrocode}
+% \begin{function}[added = 2020-12-04]{ \pdfannot_dict_show:n }
+%  \begin{syntax}
+%    \cs{\pdfannot_dict_show:n} \Arg{dictionary name}
+%  \end{syntax}
+%   This shows the content of the internal annot dictionary
+% \end{function}
+%    \begin{macrocode}
+%<*package>
+\cs_new_protected:Npn \pdfannot_dict_show:n #1
+  {
+    \pdfdict_show:n { l_@@/#1 }
+  }
+
+%</package>
+%    \end{macrocode}
 % \subsection{Destinations}
 % \begin{NOTE}{UF}
 % I'm unsure about the backend code of the rectangle (FitR) variant. Should it
@@ -671,6 +720,7 @@
 % \end{function}
 %    \begin{macrocode}
 %<*package>
+%<@@=pdf>
 % perhaps some manipulation of the argument will be needed to map the current
 % hyperref syntax
 % unclear currently if is this is useful for anything.
