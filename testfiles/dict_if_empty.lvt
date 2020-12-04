@@ -8,9 +8,9 @@
 
 \ExplSyntaxOn
 \pdfdict_if_empty:nTF { l_test}{empty}{not empty}\par
-\pdfdict_new:nn {l_test}
+\pdfdict_new:n {l_test}
 \pdfdict_if_empty:nTF { l_test}{empty}{not empty}\par
-\pdfdict_put:nnn {test}{key}{value}
+\pdfdict_put:nnn {l_test}{key}{value}
 \pdfdict_if_empty:nTF { l_test}{empty}{not empty}\par
 
 \pdfdict_if_empty:nTF { g_Core/Page}{empty}{not empty}\par
