@@ -123,6 +123,18 @@
 % could end as strings in the PDF. So one should neither rely on
 % \Arg{value} to be expanded nor not expanded by the backend commands.
 % \end{function}
+% \begin{function}[EXP,added = 2020-12-04]
+%   { \pdfdict_item:nn, pdfdict_item:ne  }
+%   \begin{syntax}
+%     \cs{pdfdict_item:nn} \Arg{key} \Arg{value}
+%   \end{syntax}
+% A simple command to output key-value as |/key value|. This is
+% needed to output dictionaries in mapping commands. The command doesn't
+% do any escaping, it expects that the name has been escaped when the value
+% has been stored into the dictionary.
+% If the value is blank nothing is output.
+% The command is expandable if the content is it.
+% \end{function}%
 % \begin{function}[EXP,updated = 2020-12-03]
 %   { \pdfdict_use:n  }
 %   \begin{syntax}
@@ -568,14 +580,17 @@
 %</package>
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\@@_item:nn, \@@_item:ne,\@@_item:nx,}
+% \begin{macro}{\@@_item:nn, \@@_item:ne}
+% \begin{macro}{\pdfdict_item:nn, \pdfdict_item:ne}
 %   \begin{macrocode}
 %<*package>
 \cs_new:Npn \@@_item:nn #1 #2 %#1 name, #2 value
   {
     \tl_if_blank:nF {#2} { /#1~#2~ }
   }
-\cs_generate_variant:Nn \@@_item:nn {ne,nx}
+\cs_generate_variant:Nn \@@_item:nn {ne}
+\cs_set_eq:Nn \pdfdict_item:nn \@@_item:nn
+\cs_generate_variant:Nn \pdfdict_item:nn {ne}
 %</package>
 %    \end{macrocode}
 % \end{macro}
