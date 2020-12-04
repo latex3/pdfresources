@@ -56,13 +56,17 @@
 % tools to handle such dictionaries. The module setups a namespace for the
 % dictionary names and offers some commands to output dictionaries.
 %
-% The dictionaries are implemented with property lists. The keys are always
-% converted with \cs{str_convert_pdfname} to get a correct PDF name, and empty
-% values will be ignored.
+% The dictionaries are implemented with property lists and in many respects
+% they work like them with a few PDF specific changes:
+% \begin{itemize}
+% \item The keys are always converted with \cs{str_convert_pdfname}
+% to get a correct PDF name,
+% \item key with empty values can not be added, but will be ignored
+% \item There is a dedicated function to output the property as space
+% separated list with keys with slash: \texttt{/key1 value1 /key2 value2}.
 %
-% Local and global dictionaries can be created and for a number of commands both
-% a local and a global version exists.
-
+% Local and global dictionaries can be created.
+%
 % \subsection{User Commands}
 % \begin{function}[updated = 2020-12-03]
 %   {\pdfdict_new:n}
@@ -70,26 +74,25 @@
 %     \cs{pdfdict_new:n} \Arg{dictionary name}\\
 %   \end{syntax}
 % This function create a new local or global dictionary. Which one depends on
-% \Arg{dictionary name}: If it begins with the standard |g_| the dictionary is global.
-% With |l_| the dictionary is local. Other begins will give an error.
+% \Arg{dictionary name}: If it begins with the standard |g| the dictionary is global.
+% With |l| the dictionary is local. Other begins will give an error. It is recommended
+% to begin the name in the standard expl3 naming scheme with a module name, so |g_module_XXXX|
+% or |g__module_XXXX|.
 %
-% The commands are only small wrappers around \cs{prop_new:c}, but use a special name space.
-% It is possible to create a local and a global with the same name, but it is
-% recommended to use lowercase for global and uppercase for global dictionaries.
 % \end{function}
-% \begin{function}[added = 2020-06-16]
+% \begin{function}[added = 2020-06-16,updated = 2020-12-03]
 %   {\pdfdict_set_eq:nn,\pdfdict_gset_eq:nn}
 %   \begin{syntax}
-%     \cs{pdfdict_set_eq:nn}  \Arg{local dictionary name_1} \Arg{local dictionary name_2}\\
-%     \cs{pdfdict_gset_eq:nn} \Arg{global dictionary name_1}\Arg{global dictionary name_2}
+%     \cs{pdfdict_set_eq:nn}  \Arg{local dictionary name_1} \Arg{dictionary name_2}\\
+%     \cs{pdfdict_gset_eq:nn} \Arg{global dictionary name_1}\Arg{dictionary name_2}
 %   \end{syntax}
-% This functions copy \Arg{local/global dictionary name_2} into
+% This functions copy \Arg{dictionary name_2} into
 % \Arg{local/global dictionary name_1} locally or globally. If the
 % dictionary \Arg{local/global dictionary name_1} doesn't exist yet, it will be created.
-% If \Arg{local/global dictionary name_2} doesn't exist yet, an error will be raised.
+% If \Arg{dictionary name_2} doesn't exist yet, an error will be raised.
 %
 % \end{function}
-% \begin{function}[EXP,updated = 2020-07-06]
+% \begin{function}[EXP,updated = 2020-12-03]
 %   {\pdfdict_name:n}
 %   \begin{syntax}
 %     \cs{pdfdict_name:n} \Arg{dictionary name}\\
@@ -120,34 +123,34 @@
 % could end as strings in the PDF. So one should neither rely on
 % \Arg{value} to be expanded nor not expanded by the backend commands.
 % \end{function}
-% \begin{function}[EXP,added = 2020-04-21]
-%   {\pdfdict_use:n  }
+% \begin{function}[EXP,updated = 2020-12-03]
+%   { \pdfdict_use:n  }
 %   \begin{syntax}
-%     \cs{pdfdict_use:n} \Arg{local dictionary}\\
+%     \cs{pdfdict_use:n} \Arg{dictionary}
 %   \end{syntax}
 %   This outputs the property list of the dictionary as a list of
 %   \texttt{/key value} pairs.
 %   This can be used e.g. when writing a dictionary object with
 %   \cs{pdf_object_write:nx}
 % \end{function}
-% \begin{function}[added = 2020-04-08]
+% \begin{function}[updated = 2020-12-03]
 %   {\pdfdict_show:n }
 %   \begin{syntax}
 %     \cs{pdfdict_show:n}  \Arg{dictionary}
 %   \end{syntax}
 %   This shows the content of \Arg{dictionary} in the log and on the terminal.
 %\end{function}
-%\begin{function}[EXP, pTF,updated = 2020-07-06]
+%\begin{function}[EXP, pTF,updated = 2020-12-03]
 %   { \pdfdict_if_exist:n  }
 %   \begin{syntax}
 %     \cs{pdfdict_if_exist:n} \Arg{dictionary}\\
 %   \end{syntax}
 %   This tests if the dictionary exists.
 % \end{function}
-% \begin{function}[EXP, pTF,updated = 2020-07-06]
+% \begin{function}[EXP, pTF,updated = 2020-12-03]
 %   { \pdfdict_if_empty:n }
 %   \begin{syntax}
-%     \cs{pdfdict_if_empty:n} \Arg{dictionary}\\
+%     \cs{pdfdict_if_empty:n} \Arg{dictionary}
 %   \end{syntax}
 %   This tests if the dictionary is empty. The result is false if the
 %   dictionary doesn't exist.
@@ -155,7 +158,7 @@
 % \begin{function}[added = 2020-07-06]
 %   {\pdfdict_get:nnN }
 %   \begin{syntax}
-%     \cs{pdfdict_get:nnN} \Arg{dictionary}  \Arg{name} \meta{tl var}\\
+%     \cs{pdfdict_get:nnN} \Arg{dictionary}  \Arg{name} \meta{tl var}
 %   \end{syntax}
 %   Recovers the \meta{value} stored by \cs{pdfdict_put:nnn} or
 %   \cs{pdfdict_gput:nnn}
@@ -166,7 +169,7 @@
 %   with \cs{str_convert_pdfname}.  The \meta{token list
 %   variable} is set within the current \TeX{} group.
 % \end{function}
-% \begin{function}[added = 2020-04-07]
+% \begin{function}[updated = 2020-12-03]
 %   {
 %     \pdfdict_remove:nn, \pdfdict_gremove:nn
 %   }
@@ -281,7 +284,8 @@
 %   }
 %
 %   This are the commands to create new dictionaries and to access their internal
-%   name.
+%   name. All internal names start with |g__pdfdict_/| or |l__pdfdict_/|.
+%
 %    \begin{macrocode}
 %<*package>
 \cs_new:Npn \@@_name:n #1  % #1 dictionary name
@@ -564,7 +568,17 @@
 %</package>
 %    \end{macrocode}
 % \end{macro}
-%
+% \begin{macro}{\@@_item:nn, \@@_item:ne,\@@_item:nx,}
+%   \begin{macrocode}
+%<*package>
+\cs_new:Npn \@@_item:nn #1 #2 %#1 name, #2 value
+  {
+    \tl_if_blank:nF {#2} { /#1~#2~ }
+  }
+\cs_generate_variant:Nn \@@_item:nn {ne,nx}
+%</package>
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}
 %   {
 %     \@@_use:n
@@ -578,11 +592,10 @@
 %<*package>
 \cs_new:Npn \@@_use:n #1  %#1 dict
   {
-    \prop_map_function:cN { \@@_name:n { #1 } } \__pdf_dict_item:ne
+    \prop_map_function:cN { \@@_name:n { #1 } } \@@_item:ne
   }
 
 \cs_set_eq:NN \pdfdict_use:n \@@_use:n
-
 %</package>
 %    \end{macrocode}
 % \end{macro}
