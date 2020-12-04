@@ -311,22 +311,22 @@
     \bool_if:NT \l__hyp_pdfa_bool
       {
         \pdfdict_put:nnn
-          {annot/Link/URI}
+          {l_annot/Link/URI}
           { F }
           { 4 }
 
         \pdfdict_put:nnn
-          {annot/Link/GoTo}
+          {l_annot/Link/GoTo}
           { F }
           { 4 }
 
         \pdfdict_put:nnn
-          {annot/Link/GoToR}
+          {l_annot/Link/GoToR}
           { F }
           { 4 }
 
         \pdfdict_put:nnn
-          {annot/Link/Named}
+          {l_annot/Link/Named}
           { F }
           { 4 }
       }
@@ -384,21 +384,21 @@
       {
         \tl_if_empty:NTF \@pdfborder
           {
-            \pdfdict_remove:nn {annot/Link/##1}{Border}
+            \pdfdict_remove:nn {l_annot/Link/##1}{Border}
           }
           {
             \pdfdict_put:nnx
-              {annot/Link/##1}
+              {l_annot/Link/##1}
               { Border }
               { [\@pdfborder] }
           }
         \tl_if_empty:NTF \@pdfborderstyle
           {
-            \pdfdict_remove:nn {annot/Link/##1} { BS }
+            \pdfdict_remove:nn {l_annot/Link/##1} { BS }
           }
           {
            \pdfdict_put:nnx
-              {annot/Link/##1}
+              {l_annot/Link/##1}
               { BS }
               { <<\@pdfborderstyle>> }
           }
@@ -412,11 +412,11 @@
       {
         \tl_if_empty:NTF \@pdfhighlight
           {
-            \pdfdict_remove:nn {annot/Link/##1}{ H }
+            \pdfdict_remove:nn {l_annot/Link/##1}{ H }
           }
           {
              \pdfdict_put:nnx
-              {annot/Link/##1}
+              {l_annot/Link/##1}
               { H }
               { \@pdfhighlight }
          }
@@ -431,12 +431,12 @@
         \tl_if_exist:cTF { @\prop_item:Nn\c__hyp_map_linktypes_prop{##1}bordercolor }
           {
             \pdfdict_put:nnx
-              {annot/Link/##1}
+              {l_annot/Link/##1}
               { C }
               { [\tl_use:c {@\prop_item:Nn\c__hyp_map_linktypes_prop{##1}bordercolor}] }
           }
           {
-            \pdfdict_remove:nn {annot/Link/##1} { C }
+            \pdfdict_remove:nn {l_annot/Link/##1} { C }
           }
      }
   }
@@ -1676,7 +1676,7 @@
            \keys_set:nn { hyp / trans }{style=R,#1}
            \pdf_object_now:nx { dict }
              {
-               \pdfdict_use:nn { l } {page/Trans}
+               \pdfdict_use:n {l_page/Trans}
              }
            \pdfmanagement_add:nnx {Page}{Trans}{\pdf_object_last:}
            \group_end:
@@ -1687,7 +1687,7 @@
   {
     ,style .choices:nn =
       {Split,Blinds,Box,Wipe,Dissolve,Glitter,R,Fly,Push,Cover,Uncover,Fade}
-      { \pdfdict_put:nnn {page/Trans}{ S }{/#1} }
+      { \pdfdict_put:nnn {l_page/Trans}{ S }{/#1} }
     ,style / unknown .code:n =
       {
         \msg_warning:nnxxx { hyp } { unknown-choice }
@@ -1697,16 +1697,16 @@
       }
     ,duration .code:n  =
       {
-        \pdfdict_put:nnn {page/Trans}{ D }{#1}
+        \pdfdict_put:nnn {l_page/Trans}{ D }{#1}
       }
     ,direction .choices:nn =
       {H,V}
-      { \pdfdict_put:nnn {page/Trans}{ S }{/#1} }
+      { \pdfdict_put:nnn {l_page/Trans}{ S }{/#1} }
     ,direction .choices:nn =
       {0,90,180,270,315}
-      { \pdfdict_put:nnn {page/Trans}{ DI }{ #1 } }
+      { \pdfdict_put:nnn {l_page/Trans}{ DI }{ #1 } }
     ,direction / None .code:n =
-      { \pdfdict_put:nnn {page/Trans}{ DI }{ /None } }
+      { \pdfdict_put:nnn {l_page/Trans}{ DI }{ /None } }
     ,direction / unknown .code:n =
       {
         \msg_warning:nnxxx { hyp } { unknown-choice }
@@ -1725,7 +1725,7 @@
       }
     ,motion .choices:nn =
      {I,O}
-     { \pdfdict_put:nnn {page/Trans}{ M }{/#1} }
+     { \pdfdict_put:nnn {l_page/Trans}{ M }{/#1} }
     ,motion / unknown .code:n =
       {
         \msg_warning:nnxxx { hyp } { unknown-choice }
@@ -1734,9 +1734,9 @@
            { \exp_not:n {#1} }
       }
      ,scale .code:n =
-       { \pdfdict_put:nnn { page/Trans }{ SS }{ #1 } }
+       { \pdfdict_put:nnn { l_page/Trans }{ SS }{ #1 } }
      ,opaque .choices:nn = {true,false}
-       { \pdfdict_put:nnn { page/Trans }{ B } { #1} }
+       { \pdfdict_put:nnn { l_page/Trans }{ B } { #1} }
      ,opaque / unknown .code:n =
        {
           \msg_warning:nnxxx { hyp } { unknown-choice }
@@ -1884,7 +1884,7 @@
         \prop_map_inline:Nn \g__hyp_AcroForm_Fields_prop
           {
             \pdfmanagement_add:nnx { Catalog / AcroForm } { Fields }{##1}
-            %\pdfdict_show:n { Catalog / AcroForm }
+            %\pdfmanagement_show:n { Catalog / AcroForm }
             %\seq_show:c { g__pdf_/Catalog/AcroForm/Fields_seq} %!!!!!
           }
         \prop_if_empty:NF \g__hyp_AcroForm_CoFields_prop

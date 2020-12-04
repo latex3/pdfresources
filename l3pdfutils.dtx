@@ -257,9 +257,9 @@
     \exp_args:Nx
     \@@_backend_annotation:nnnn {#2}{#3}{#4}
       {
-        \pdfdict_if_exist:nnT { l } { annot/#1 }
+        \pdfdict_if_exist:nT { l_annot/#1 }
           {
-            \pdfdict_use:nn { l } {annot/#1}
+            \pdfdict_use:n { l_annot/#1}
           }
         #5
       }
@@ -366,8 +366,8 @@
 % the subtype setting (the /Type is added by the backend).
 %    \begin{macrocode}
 %<*package>
-\pdfdict_new:nn { l }   {annot/Widget}
-\pdfdict_put:nnn {annot/Widget}{Subtype}{/Widget}
+\pdfdict_new:n { l_annot/Widget}
+\pdfdict_put:nnn {l_annot/Widget}{Subtype}{/Widget}
 %</package>
 %    \end{macrocode}
 % \subsection{Annotations, subtype Link}\label{sec:links}
@@ -419,8 +419,8 @@
 
 \seq_map_inline:Nn \c_pdfannot_link_types_seq
   {
-    \pdfdict_new:nn { l }   { annot/Link/#1 }
-    \pdfdict_put:nnn { annot/Link/#1}{ F }{ \pdf_flag_use:n { annot/Link} }
+    \pdfdict_new:n { l_annot/Link/#1 }
+    \pdfdict_put:nnn { l_annot/Link/#1}{ F }{ \pdf_flag_use:n { annot/Link} }
     \hook_new_pair:nn
       {pdf/annot/Link/#1/before}
       {pdf/annot/Link/#1/after}
@@ -471,9 +471,9 @@
     \exp_args:Nxx %xetex needs expansion
     \@@_backend_link_begin_user:nnw
       {
-         \pdfdict_if_exist:nnT { l } { annot/Link/#1 }
+         \pdfdict_if_exist:nT { l_annot/Link/#1 }
           {
-            \pdfdict_use:nn { l } {annot/Link/#1}
+            \pdfdict_use:n { l_annot/Link/#1}
           }
       }
       {
@@ -527,9 +527,9 @@
     \exp_args:Nxx %xetex needs expansion
       \@@_backend_link_begin_user:nnw
         {
-           \pdfdict_if_exist:nnT { l } { annot/Link/#1 }
+           \pdfdict_if_exist:nT { l_annot/Link/#1 }
             {
-              \pdfdict_use:nn { l } {annot/Link/#1}
+              \pdfdict_use:n { l_annot/Link/#1}
             }
         }
         { #2 }
@@ -560,7 +560,7 @@
     \exp_args:Nxx %xetex needs expansion
     \@@_backend_link_begin_goto:nnw
       {
-        \pdfdict_use:nn { l } {annot/Link/GoTo}
+        \pdfdict_use:n { l_annot/Link/GoTo}
 
       }
       { #1 }

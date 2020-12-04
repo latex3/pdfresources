@@ -346,12 +346,12 @@
 % \begin{verbatim}
 % \group_begin:
 % %set the relationship:
-% \pdfdict_put:nnn  {file/FileSpec} {AFRelationship}{/Source}
+% \pdfdict_put:nnn  {l_file/FileSpec} {AFRelationship}{/Source}
 % %set the description key. The text must first be converted:
 % \pdf_text_convert:nnN {string-lit-print}
 %    {this~is~an~odd~description~with~öäü}
 %    \l_tmpa_str
-% \pdfdict_put:nnx  {file/FileSpec} {Desc}{\l_tmpa_str}
+% \pdfdict_put:nnx  {l_file/FileSpec} {Desc}{\l_tmpa_str}
 % %embeds testinput.txt and calls it grüße.txt
 % \pdffile_embed_file:nnn {testinput.txt}{grüße.txt}{file:example1}
 % %reference it in the panel
@@ -461,20 +461,20 @@
 %    \end{macrocode}
 % Here we define and setup the local dictionaries.
 %    \begin{macrocode}
-\pdfdict_new:nn { l }   { file }
-\pdfdict_put:nnn { file }{Type}{/EmbeddedFile}
-\pdfdict_new:nn { l }   { file/Params }
-\pdfdict_put:nnn { file/Params }
+\pdfdict_new:n { l_file }
+\pdfdict_put:nnn { l_file }{Type}{/EmbeddedFile}
+\pdfdict_new:n { l_file/Params }
+\pdfdict_put:nnn { l_file/Params }
   {ModDate}  { (\file_timestamp:n { \l_pdffile_source_name_str }) }
-\pdfdict_put:nnn { file/Params }
+\pdfdict_put:nnn { l_file/Params }
   {Size}     { \file_size:n { \l_pdffile_source_name_str } }
-\pdfdict_put:nnn { file/Params }
+\pdfdict_put:nnn { l_file/Params }
   {CheckSum} { (\file_mdfive_hash:n { \l_pdffile_source_name_str }) }
-\pdfdict_new:nn { l }   { file/streamParams }
-\pdfdict_new:nn { l }   { file/FileSpec }
-\pdfdict_put:nnn { file/FileSpec }
+\pdfdict_new:n { l_file/streamParams }
+\pdfdict_new:n { l_file/FileSpec }
+\pdfdict_put:nnn { l_file/FileSpec }
   {Type} { /FileSpec }
-\pdfdict_put:nnn { file/FileSpec }
+\pdfdict_put:nnn { l_file/FileSpec }
   {AFRelationship} { /Unspecified }
 
 %    \end{macrocode}
@@ -517,7 +517,7 @@
           \l_@@_tmpb_str %unused
           \l_@@_ext_str
         %check if Subtype has been set
-        \pdfdict_get:nnnN { l } {file}{Subtype}\l_@@_tmpa_tl
+        \pdfdict_get:nnN { l_file}{Subtype}\l_@@_tmpa_tl
         %if not look up in the prop:
         \quark_if_no_value:NT \l_@@_tmpa_tl
           {
@@ -546,12 +546,12 @@
       {
         {
           #2
-          \pdfdict_use:nn { l } {file}
-          \pdfdict_if_empty:nnF { l } {file/Params}
+          \pdfdict_use:n { l_file}
+          \pdfdict_if_empty:nF { l_file/Params}
             {
               /Params
                 <<
-                  \pdfdict_use:nn { l } {file/Params}
+                  \pdfdict_use:n { l_file/Params}
                 >>
             }
         }
@@ -571,12 +571,12 @@
       {
         {
           #2
-          \pdfdict_use:nn { l } {file}
-          \pdfdict_if_empty:nnF { l } {file/streamParams}
+          \pdfdict_use:n { l_file}
+          \pdfdict_if_empty:nF { l_file/streamParams}
             {
               /Params
                 <<
-                  \pdfdict_use:nn { l } {file/streamParams}
+                  \pdfdict_use:n { l_file/streamParams}
                 >>
             }
         }
@@ -600,11 +600,11 @@
         \pdf_object_new:nn   { #1 } {dict}
         \group_begin:
           \@@_filename_convert_to_print:nN  { #2 } \l_@@_tmpa_str
-          \pdfdict_put:nnx {file/FileSpec}{F} { \l_@@_tmpa_str }
-          \pdfdict_put:nnx {file/FileSpec}{UF}{ \l_@@_tmpa_str }
+          \pdfdict_put:nnx {l_file/FileSpec}{F} { \l_@@_tmpa_str }
+          \pdfdict_put:nnx {l_file/FileSpec}{UF}{ \l_@@_tmpa_str }
           \pdf_object_write:nx { #1 }
             {
-              \pdfdict_use:nn { l } {file/FileSpec}
+              \pdfdict_use:n { l_file/FileSpec}
               \tl_if_empty:nF { #3 }
                 {
                   /EF <</F~#3 /UF~#3>>

@@ -9,14 +9,14 @@
 \showoutput
 abbb
 \ExplSyntaxOn
-\pdfdict_show:n{Core/Catalog}
-\pdfdict_show:n{Core/Info}
-\pdfdict_new:nn { l } {Core/Catalog}
-\pdfdict_put:nnn{Core/Catalog}{abc }{blub}
-\pdfdict_show:n{Core/Catalog}
+\pdfdict_show:n{g_Core/Catalog}
+\pdfdict_show:n{g_Core/Info}
+\pdfdict_new:n { l_Core/Catalog}
+\pdfdict_put:nnn{l_Core/Catalog}{abc }{blub}
+\pdfdict_show:n{l_Core/Catalog}
 \pdfmanagement_show:n{Catalog}
 \pdfdict_show:n{blub}
-\pdfdict_if_exist:nnTF { l } {blub}{true}{false}
-\pdfdict_if_exist:nnTF { g }{Core/Info}{true}{false}
+\pdfdict_if_exist:nTF { l_blub}{true}{false}
+\pdfdict_if_exist:nTF { g_Core/Info}{true}{false}
 \ExplSyntaxOff
 \end{document}

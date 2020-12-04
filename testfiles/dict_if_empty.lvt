@@ -7,15 +7,15 @@
 \showoutput
 
 \ExplSyntaxOn
-\pdfdict_if_empty:nnTF { l }{test}{empty}{not empty}\par
-\pdfdict_new:nn {l} {test}
-\pdfdict_if_empty:nnTF { l }{test}{empty}{not empty}\par
+\pdfdict_if_empty:nTF { l_test}{empty}{not empty}\par
+\pdfdict_new:nn {l_test}
+\pdfdict_if_empty:nTF { l_test}{empty}{not empty}\par
 \pdfdict_put:nnn {test}{key}{value}
-\pdfdict_if_empty:nnTF { l }{test}{empty}{not empty}\par
+\pdfdict_if_empty:nTF { l_test}{empty}{not empty}\par
 
-\pdfdict_if_empty:nnTF { g }{Core/Page}{empty}{not empty}\par
+\pdfdict_if_empty:nTF { g_Core/Page}{empty}{not empty}\par
 \pdfmanagement_add:nnn {Page}{Rotate}{90}
-\pdfdict_if_empty:nnTF { g } {Core/Page}{empty}{not empty}\par
+\pdfdict_if_empty:nTF { g_Core/Page}{empty}{not empty}\par
 \ExplSyntaxOff
 
 \end{document}
