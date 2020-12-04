@@ -212,6 +212,7 @@
 % \begin{NOTE}{UF}
 % Check which (local) dictionaries should be predefined.
 % Check also if the reset idea makes sense. (Removed for now)
+% Move page/Trans to hyperref driver. Belongs imho there
 % \end{NOTE}
 %
 % \medskip
@@ -223,9 +224,6 @@
 %  l_annot/Link/GotoR  &F (Flag)& used in GoToR links (file  references) \tabularnewline
 %  l_annot/Link/Named  &F (Flag)& used in Named actions (menu calls) \tabularnewline
 %  l_annot/Link/Launch &F (Flag)& used in Launch links (application calls) \tabularnewline
-%  l_page/Trans& /Type /Trans & for transitions dictionaries. Other keys:
-%                   /S (name), /D integer, /Dm (name),
-%                   /M (name), /SS number /B boolean.
 %  \end{tabular}
 
 % \end{documentation}
@@ -616,17 +614,6 @@
 % \end{macro}
 %
 % \subsection{Predeclared dictionaries}
-% \begin{variable}{page/Trans}
-%     \begin{macrocode}
-%<*package>
-\pdfdict_new:n   {l_page/Trans}
-\pdfdict_put:nnn {l_page/Trans}{Type}{/Trans}
-% keys: /S (name), /D integer, /Dm (name), /M (name), /SS number /B boolean.
-% decribes transition *to* the page.
-%</package>
-%    \end{macrocode}
-% \end{variable}
-
 % \end{implementation}
 %
 % \PrintIndex

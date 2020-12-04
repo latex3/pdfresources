@@ -304,6 +304,9 @@
      \ *\Z
   }
 
+% module dictionary for trans:
+\pdfdict_new:n {l__hyp_page/Trans}
+
 % this need sorting out later. pdf standards should be handled outside the driver.
 % pdfa forces the flag /F 4 in some places.
 \AtBeginDocument
@@ -1676,7 +1679,7 @@
            \keys_set:nn { hyp / trans }{style=R,#1}
            \pdf_object_now:nx { dict }
              {
-               \pdfdict_use:n {l_page/Trans}
+               \pdfdict_use:n {l__hyp_page/Trans}
              }
            \pdfmanagement_add:nnx {Page}{Trans}{\pdf_object_last:}
            \group_end:
@@ -1687,7 +1690,7 @@
   {
     ,style .choices:nn =
       {Split,Blinds,Box,Wipe,Dissolve,Glitter,R,Fly,Push,Cover,Uncover,Fade}
-      { \pdfdict_put:nnn {l_page/Trans}{ S }{/#1} }
+      { \pdfdict_put:nnn {l__hyp_page/Trans}{ S }{/#1} }
     ,style / unknown .code:n =
       {
         \msg_warning:nnxxx { hyp } { unknown-choice }
@@ -1697,16 +1700,16 @@
       }
     ,duration .code:n  =
       {
-        \pdfdict_put:nnn {l_page/Trans}{ D }{#1}
+        \pdfdict_put:nnn {l__hyp_page/Trans}{ D }{#1}
       }
     ,direction .choices:nn =
       {H,V}
-      { \pdfdict_put:nnn {l_page/Trans}{ S }{/#1} }
+      { \pdfdict_put:nnn {l__hyp_page/Trans}{ S }{/#1} }
     ,direction .choices:nn =
       {0,90,180,270,315}
-      { \pdfdict_put:nnn {l_page/Trans}{ DI }{ #1 } }
+      { \pdfdict_put:nnn {l__hyp_page/Trans}{ DI }{ #1 } }
     ,direction / None .code:n =
-      { \pdfdict_put:nnn {l_page/Trans}{ DI }{ /None } }
+      { \pdfdict_put:nnn {l__hyp_page/Trans}{ DI }{ /None } }
     ,direction / unknown .code:n =
       {
         \msg_warning:nnxxx { hyp } { unknown-choice }
@@ -1725,7 +1728,7 @@
       }
     ,motion .choices:nn =
      {I,O}
-     { \pdfdict_put:nnn {l_page/Trans}{ M }{/#1} }
+     { \pdfdict_put:nnn {l__hyp_page/Trans}{ M }{/#1} }
     ,motion / unknown .code:n =
       {
         \msg_warning:nnxxx { hyp } { unknown-choice }
@@ -1734,9 +1737,9 @@
            { \exp_not:n {#1} }
       }
      ,scale .code:n =
-       { \pdfdict_put:nnn { l_page/Trans }{ SS }{ #1 } }
+       { \pdfdict_put:nnn { l__hyp_page/Trans }{ SS }{ #1 } }
      ,opaque .choices:nn = {true,false}
-       { \pdfdict_put:nnn { l_page/Trans }{ B } { #1} }
+       { \pdfdict_put:nnn { l__hyp_page/Trans }{ B } { #1} }
      ,opaque / unknown .code:n =
        {
           \msg_warning:nnxxx { hyp } { unknown-choice }
