@@ -49,13 +49,21 @@
 % \begin{documentation}
 %
 % \section{\pkg{l3pdfannot} documentation}
-% This module contains a number of commands to create pdf annotations.
-% The command are \emph{not} simple wrappers around the primitive commands.
+% This module contains a number of commands to create PDF annotations.
+% The command are \emph{not} only simple wrappers around primitive commands.
 % To allow external packages to configure links and other annotations,
 % the annotations have hooks and use shared attribute dictionaries.
 % The hooks and dictionaries are selected depending on the \Arg{type}
-% of the annotation.
+% of the annotation. Currently the module only supports some general commands
+% and link annotations. Commands for other annotations like widgets will be added
+% later.
+%
 % \subsection{General annotation commands}
+% \begin{NOTE}{UF}
+%  There was a \cs{pdfannot:nnnn} for general text, but no definition.
+%  Perhaps an overlook or copy\&paste error.
+% \end{NOTE}
+%
 % \begin{function}[added = 2019-09-05, updated = 2020-04-14]
 %   { \pdfannot_box:nnnn }
 %   \begin{syntax}
@@ -69,10 +77,10 @@
 %   \begin{syntax}
 %     \cs{pdfannot_box:nnnnn} \Arg{type} \Arg{width} \Arg{height} \Arg{depth} \Arg{annot spec}
 %   \end{syntax}
-%   This creates an \texttt{/Type/Annot} object.
+%   This creates an \texttt{/Type/Annot} object with the given dimensions.
 %   If \Arg{type} is a known type the attribute dictionary of the type is
-%   inserted as attributes. Hooks are not used.
-%   \Arg{type} could e.g. be |link/URI|. %
+%   inserted additionally to the manually given \Arg{annot spec}.
+%   Hooks are not used. \Arg{type} could e.g. be |link/URI|. %
 % \end{function}
 % \begin{function}[added = 2019-09-05]
 %   { \pdfannot_box_last: }
@@ -82,10 +90,16 @@
 %   This retrieves the object reference of the last box annotation created.
 % \end{function}
 % \subsection{Link annotations}
-% Many documents contains links, both internal and external.
-% It must be possible to configure them: Packages like hyperref, ocgx2 and tagpdf
-% all wants to add code to link annotation.
-% So commands to start and end a link are needed which allows
+% Link annotations are special cases of annotations: their dictionary contains
+% |/Subtype/Link|.
+% Link annotations are quite important as most documents contains links,
+% both internal and external. Link annotations are objects that need some
+% \enquote{management} as more than one
+% package wants to configure their look and behaviour.
+% For example \pkg{hyperref}, \pkg{ocgx2} and the code for tagged PDF (currently
+% in \pkg{tagpdf}) all wants to add keys and values to the dictionaries of
+% link annotation and code around links.
+% So commands to create link annotations are needed which allows
 % packages to add their code through hooks. There are three standard
 % places in a link where hooks are needed:
 % At the begin (for example for a structure command or color),
@@ -93,8 +107,8 @@
 % at the end of the link (to close a structure or the color group).
 %
 % For the values of \emph{attr spec} an internal
-% dictionary created with the l3pdfdict commands is used. Values can be added
-% and remove by the commands described below.
+% dictionary created with the l3pdfdict commands is used.
+% Values can be added and remove by the commands described below.
 %
 % For the begin and end hooks of the LaTeX hook management are predefined and used.
 %
@@ -126,9 +140,39 @@
 %     { link text }
 %    \end{verbatim}
 %
-%  The known types are URI , GoToR , Launch , GoTo, Named.
+%  The known types are \texttt{URI}, \texttt{GoToR}, \texttt{Launch}, \texttt{GoTo}, \texttt{Named}.
 % \end{function}
-%
+% \begin{function}[added = 2020-03-12]{ \pdfannot_link_begin:nnw, \pdfannot_link_end:n }
+%   \begin{syntax}
+%     \cs{pdfannot_link_begin:nnw} \Arg{type} \Arg{user action spec} \meta{content}
+%     \cs{pdfannot_link_end:n} \Arg{type}
+%   \end{syntax}
+%  This creates a link around the \meta{content} with the specified
+%  \meta{user action spec} (e.g. an /A dictionary with an URI) or
+%  \meta{destination} (a name as defined with the
+%  first argument of \cs{pdf_destination:nn}).
+%  \texttt{/Subtype/Link} is added automatically.
+%  In contrast to \cs{pdfannot_link:nnn} this function
+%  does not absorb the argument when finding the \meta{content}, and so can
+%  be used in circumstances where the \meta{content} may not be a simple
+%  argument.
+%  If \texttt{link/}\Arg{type} is a known local dictionary
+%  attributes stored in dictionary of type \texttt{link/}\Arg{type} are inserted as
+%  \emph{attr spec} and the code in the begin and end hook is executed
+%  before and after the link. As example
+%  \begin{verbatim}
+%    \pdfannot_link_begin:nnw { URI }
+%     {
+%       /A<<
+%         /Type/Action
+%         /S/URI
+%         /URI(https://www.latex-project.org)
+%       >>
+%     }
+%     link text
+%    \pdfannot_link_end:n { URI }
+%    \end{verbatim}
+% \end{function}
 % \end{documentation}
 %
 % \begin{implementation}
@@ -197,29 +241,15 @@
 %    \end{macrocode}
 % \subsection{Annotations, subtype Widget}\label{pdf:annot:widget}
 % Currently no code is provided here.
-% The local dictionary \texttt{l_@@/Widget} is a sceleton
+% The local dictionary \texttt{l_@@/Widget} is a skeleton
 % dictionary for this subtype. It currently contains as only entry
 % the subtype setting (the /Type is added by the backend).
 %    \begin{macrocode}
-% \pdfdict_new:n { l_@@/Widget }
-% \pdfdict_put:nnn { l_@@/Widget }{ Subtype }{ /Widget }
+ \pdfdict_new:n { l_@@/Widget }
+ \pdfdict_put:nnn { l_@@/Widget }{ Subtype }{ /Widget }
 %    \end{macrocode}
 %
 % \subsection{Annotations, subtype Link}\label{sec:links}
-% Packages like hyperref, ocgx2 and tagpdf all wants to add code
-% to link annotation. So we need commands to start and end a link which allows
-% packages to add their code through hooks. There are three places in a link where
-% hooks are needed: At the begin (for example for a structure command or color),
-% in the \emph{attr spec} of the link (for example for the border), and
-% at the end of the link (to close a structure or the color group).
-%
-% The values for \emph{attr spec} are stored in an internal
-% dictionary created with the l3pdfdict commands. Explicit
-% accessor functions are provided.
-%
-% Code for the begin and end hooks are stored in sequences. This allows some
-% ordering.
-%
 % The code assumes that there will be different link types
 % (currently URI, GoToR, Launch, GoTo, Named, hyperref uses the names
 % url,file,run,link,menu) and that links of the same type share
@@ -283,40 +313,10 @@
     #3
     \__pdf_backend_link_end:
     \bool_gset_true:N \g_@@_use_lastlink_bool
-    \hook_use:n { pdfannot/Link/#1/after}
+    \hook_use:n { pdfannot/link/#1/after}
   }
 %    \end{macrocode}
-% \begin{function}[added = 2020-03-12]{ \pdfannot_link_begin:nnw, \pdfannot_link_end:n }
-%   \begin{syntax}
-%     \cs{pdfannot_link_begin:nnw} \Arg{type} \Arg{user action spec} \meta{content}
-%     \cs{pdfannot_link_end:n} \Arg{type}
-%   \end{syntax}
-%  This creates a link around the \meta{content} with the specified
-%  \meta{user action spec} (e.g. an /A dictionary with an URI) or
-%  \meta{destination} (a name as defined with the
-%  first argument of \cs{pdf_destination:nn}).
-%  \texttt{/Subtype/Link} is added automatically.
-%  In contrast to \cs{pdfannot_link:nnn} this function
-%  does not absorb the argument when finding the \meta{content}, and so can
-%  be used in circumstances where the \meta{content} may not be a simple
-%  argument.
-%  If \texttt{l_@@/Link/}\Arg{type} is a known local dictionary
-%  attributes stored in dictionary of type \Arg{type} are inserted as
-%  \emph{attr spec} and the code in the begin and end hook is executed
-%  before and after the link. As example
-%  \begin{verbatim}
-%    \pdfannot_link_begin:nnw { URI }
-%     {
-%       /A<<
-%         /Type/Action
-%         /S/URI
-%         /URI(https://www.latex-project.org)
-%       >>
-%     }
-%     link text
-%    \pdfannot_link_end:n { URI }
-%    \end{verbatim}
-% \end{function}
+
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdfannot_link_begin:nnw #1 #2 %#1 type, #2 action spec
   {
