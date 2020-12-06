@@ -50,10 +50,10 @@
 %
 % \section{\pkg{l3pdfannot} documentation}
 % This module contains a number of commands to create PDF annotations.
-% The command are \emph{not} only simple wrappers around primitive commands.
+% The commands are \emph{not} only simple wrappers around primitive commands.
 % To allow external packages to configure links and other annotations,
-% the annotations have hooks and use shared attribute dictionaries.
-% The hooks and dictionaries are selected depending on the \Arg{type}
+% some of the commands have hooks and use shared attribute dictionaries.
+% For these commands the hooks and dictionaries are selected depending on the \Arg{type}
 % of the annotation. Currently the module only supports some general commands
 % and link annotations. Commands for other annotations like widgets will be added
 % later.
@@ -78,9 +78,12 @@
 %     \cs{pdfannot_box:nnnnn} \Arg{type} \Arg{width} \Arg{height} \Arg{depth} \Arg{annot spec}
 %   \end{syntax}
 %   This creates an \texttt{/Type/Annot} object with the given dimensions.
-%   If \Arg{type} is a known type the attribute dictionary of the type is
-%   inserted additionally to the manually given \Arg{annot spec}.
-%   Hooks are not used. \Arg{type} could e.g. be |link/URI|. %
+%   \Arg{type} should be currently one of |link/URI|, |link/GoToR|,
+%  |link/Launch|, |link/GoTo| or |link/Named| or
+%  |widget|, it will then insert the attribute dictionary of this type
+%   additionally to the manually given \Arg{annot spec}.
+%   The attribute dictionaries can be filled with commands described below.
+%   Hooks are not used.
 % \end{function}
 % \begin{function}[added = 2019-09-05]
 %   { \pdfannot_box_last: }
@@ -92,11 +95,12 @@
 % \subsection{Link annotations}
 % Link annotations are special cases of annotations. In the PDF they are identified
 % by an |/Subtype/Link| entry in the dictionary.
-% Link annotations are quite important as most documents contains links,
+% Link annotations are quite important as many documents contain links,
 % both internal and external. They need a set of special commands for two reasons:
 %
-% At first links are not only needed for boxed material. Links can contain line
-% and page breaks (this is normally implemented by creating a set of annotations).
+% At first the content of links are not not only boxes. Links can contain line
+% and page breaks (this is normally implemented by the primitive command by
+% creating a set of annotations).
 %
 % At second link annotations are objects that need some
 % \enquote{management} as more than one
@@ -205,7 +209,7 @@
 % \end{function}
 % \begin{function}[added = 2020-12-04]{ \pdfannot_dict_put:nnn }
 %  \begin{syntax}
-%    \cs{\pdfannot_dict_put:nnn} \Arg{dictionary name} \Arg{key} \Arg{value}
+%    \cs{pdfannot_dict_put:nnn} \Arg{dictionary name} \Arg{key} \Arg{value}
 %  \end{syntax}
 %   This adds (locally) a key-value to the internal annot dictionaries used
 %   by the link commands above.
@@ -215,20 +219,20 @@
 % \end{function}
 % \begin{function}[added = 2020-12-04]{ \pdfannot_dict_remove:nn }
 %  \begin{syntax}
-%    \cs{\pdfannot_dict_remove:nn} \Arg{dictionary name} \Arg{key}
+%    \cs{pdfannot_dict_remove:nn} \Arg{dictionary name} \Arg{key}
 %  \end{syntax}
 %   This removes a key-value from the internal annot dictionary
 %   \Arg{dictionary name} should be currently one of \texttt{link/URI},
-%   \texttt{link/URI},\texttt{link/GoToR}, \texttt{link/Launch},
+%   \texttt{link/URI}, \texttt{link/GoToR}, \texttt{link/Launch},
 %   \texttt{link/GoTo}, \texttt{link/Named}.
 % \end{function}
 % \begin{function}[added = 2020-12-04]{ \pdfannot_dict_show:n }
 %  \begin{syntax}
-%    \cs{\pdfannot_dict_show:n} \Arg{dictionary name}
+%    \cs{pdfannot_dict_show:n} \Arg{dictionary name}
 %  \end{syntax}
 %   This shows the content of the internal annot dictionary.
 %  \Arg{dictionary name} should be currently one of \texttt{link/URI},
-%   \texttt{link/URI},\texttt{link/GoToR}, \texttt{link/Launch},
+%   \texttt{link/URI}, \texttt{link/GoToR}, \texttt{link/Launch},
 %   \texttt{link/GoTo}, \texttt{link/Named}.
 % \end{function}
 % \end{documentation}

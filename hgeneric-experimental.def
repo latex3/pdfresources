@@ -313,23 +313,23 @@
   {
     \bool_if:NT \l__hyp_pdfa_bool
       {
-        \pdfdict_put:nnn
-          {l_annot/Link/URI}
+        \pdfannot_dict_put:nnn
+          {link/URI}
           { F }
           { 4 }
 
-        \pdfdict_put:nnn
-          {l_annot/Link/GoTo}
+        \pdfannot_dict_put:nnn
+          {link/GoTo}
           { F }
           { 4 }
 
-        \pdfdict_put:nnn
-          {l_annot/Link/GoToR}
+        \pdfannot_dict_put:nnn
+          {link/GoToR}
           { F }
           { 4 }
 
-        \pdfdict_put:nnn
-          {l_annot/Link/Named}
+        \pdfannot_dict_put:nnn
+          {link/Named}
           { F }
           { 4 }
       }
@@ -387,21 +387,23 @@
       {
         \tl_if_empty:NTF \@pdfborder
           {
-            \pdfdict_remove:nn {l_annot/Link/##1}{Border}
+            \pdfannot_dict_remove:nn {link/##1}{Border}
           }
           {
-            \pdfdict_put:nnx
-              {l_annot/Link/##1}
+            \exp_args:Nnnx
+             \pdfannot_dict_put:nnn
+              {link/##1}
               { Border }
               { [\@pdfborder] }
           }
         \tl_if_empty:NTF \@pdfborderstyle
           {
-            \pdfdict_remove:nn {l_annot/Link/##1} { BS }
+            \pdfannot_dict_remove:nn {link/##1} { BS }
           }
           {
-           \pdfdict_put:nnx
-              {l_annot/Link/##1}
+            \exp_args:Nnnx
+             \pdfannot_dict_put:nnn
+              {link/##1}
               { BS }
               { <<\@pdfborderstyle>> }
           }
@@ -415,11 +417,12 @@
       {
         \tl_if_empty:NTF \@pdfhighlight
           {
-            \pdfdict_remove:nn {l_annot/Link/##1}{ H }
+            \pdfannot_dict_remove:nn {link/##1}{ H }
           }
           {
-             \pdfdict_put:nnx
-              {l_annot/Link/##1}
+            \exp_args:Nnnx
+             \pdfannot_dict_put:nnn
+              {link/##1}
               { H }
               { \@pdfhighlight }
          }
@@ -433,13 +436,14 @@
       {
         \tl_if_exist:cTF { @\prop_item:Nn\c__hyp_map_linktypes_prop{##1}bordercolor }
           {
-            \pdfdict_put:nnx
-              {l_annot/Link/##1}
+           \exp_args:Nnnx
+             \pdfannot_dict_put:nnn
+              {link/##1}
               { C }
               { [\tl_use:c {@\prop_item:Nn\c__hyp_map_linktypes_prop{##1}bordercolor}] }
           }
           {
-            \pdfdict_remove:nn {l_annot/Link/##1} { C }
+            \pdfannot_dict_remove:nn {link/##1} { C }
           }
      }
   }

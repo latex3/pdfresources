@@ -16,31 +16,31 @@
 %add hooks:
 \ExplSyntaxOn\makeatletter
 \hook_gput_code:nnn
- {pdf/annot/Link/URI/before}
+ {pdfannot/link/URI/before}
  { pdf }
  {
   begin~url
  }
 
- \pdfdict_put:nnn
-   {l_annot/Link/URI}
+\pdfannot_dict_put:nnn
+   {link/URI}
    { StructParent }
    { 123 }
 
 \hook_gput_code:nnn
- {pdf/annot/Link/URI/after}
+ {pdfannot/link/URI/after}
  { pdf }
  {
   end~url
  }
 
-\pdfdict_put:nnn
-   {l_annot/Link/URI}
+\pdfannot_dict_put:nnn
+   {link/URI}
    { Contents }
    { (url) }
 
- \pdfdict_put:nnn
-   {l_annot/Link/GoTo}
+\pdfannot_dict_put:nnn
+   {link/GoTo}
    { Contents }
    { (ref) }
 
