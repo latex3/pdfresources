@@ -90,42 +90,46 @@
 %   This retrieves the object reference of the last box annotation created.
 % \end{function}
 % \subsection{Link annotations}
-% Link annotations are special cases of annotations: their dictionary contains
-% |/Subtype/Link|.
+% Link annotations are special cases of annotations. In the PDF they are identified
+% by an |/Subtype/Link| entry in the dictionary.
 % Link annotations are quite important as most documents contains links,
-% both internal and external. Link annotations are objects that need some
+% both internal and external. They need a set of special commands for two reasons:
+%
+% At first links are not only needed for boxed material. Links can contain line
+% and page breaks (this is normally implemented by creating a set of annotations).
+%
+% At second link annotations are objects that need some
 % \enquote{management} as more than one
 % package wants to configure their look and behaviour.
 % For example \pkg{hyperref}, \pkg{ocgx2} and the code for tagged PDF (currently
-% in \pkg{tagpdf}) all wants to add keys and values to the dictionaries of
+% in \pkg{tagpdf}) all want to add keys and values to the dictionaries of
 % link annotation and code around links.
-% So commands to create link annotations are needed which allows
-% packages to add their code through hooks. There are three standard
-% places in a link where hooks are needed:
+% So commands to create link annotations should offer suitable hooks.
+% There are three standard places in a link where such hooks are needed:
 % At the begin (for example for a structure command or color),
-% in the \emph{attr spec} of the link (for example for the border), and
+% in the \emph{attr spec} dictionary of the link (for example for the border), and
 % at the end of the link (to close a structure or the color group).
-%
-% For the values of \emph{attr spec} an internal
-% dictionary created with the l3pdfdict commands is used.
-% Values can be added and remove by the commands described below.
-%
 % For the begin and end hooks of the LaTeX hook management are predefined and used.
+% To add and remove values from the \emph{attr spec} dictionary special
+% commands described below are provided.
 %
-% \begin{function}[added = 2020-03-12, updated = 2020-04-14]{ \pdfannot_link:nnn }
+% \begin{function}[added = 2020-03-12, updated = 2020-12-06]{ \pdfannot_link:nnn }
 %   \begin{syntax}
 %     \cs{pdfannot_link:nnn} \Arg{type} \Arg{user action spec} \Arg{link text}
 %   \end{syntax}
 %  This creates a link around the \Arg{link text} with the specified
 %  \Arg{user action spec}\footnote{The wording follows the pdftex documentation}.
 %  \texttt{/Subtype/Link} is added automatically.
-%  If \texttt{link/}\Arg{type} is a known local dictionary
-%  attributes stored in dictionary of \texttt{link/}\Arg{type} are inserted as
+%  \Arg{type} should be one of \texttt{URI}, \texttt{GoToR},
+%  \texttt{Launch}, \texttt{GoTo} or \texttt{Named}.
+%  The attributes stored in the local dictionary
+%  \texttt{link/}\Arg{type} are inserted as
 %  \emph{attr spec} and the code in the begin and end hook
 %  \texttt{pdfannot/link/\Arg{type}/before}
 %  and \texttt{pdfannot/link/\Arg{type}/after}
-%  is executed  before and after the link. \Arg{type} should
-%  normally be identical to the value of the |/S| key in the action dictionary.
+%  is executed  before and after the link.
+%  \Arg{type} should normally be identical to the value of the |/S| key
+%  in the action dictionary.
 %  As example
 %  \begin{verbatim}
 %    \pdfannot_link:nnn { URI }
@@ -140,9 +144,9 @@
 %     { link text }
 %    \end{verbatim}
 %
-%  The known types are \texttt{URI}, \texttt{GoToR}, \texttt{Launch}, \texttt{GoTo}, \texttt{Named}.
+%
 % \end{function}
-% \begin{function}[added = 2020-03-12]{ \pdfannot_link_begin:nnw, \pdfannot_link_end:n }
+% \begin{function}[updated = 2020-12-06]{ \pdfannot_link_begin:nnw, \pdfannot_link_end:n }
 %   \begin{syntax}
 %     \cs{pdfannot_link_begin:nnw} \Arg{type} \Arg{user action spec} \meta{content}
 %     \cs{pdfannot_link_end:n} \Arg{type}
@@ -155,11 +159,8 @@
 %  In contrast to \cs{pdfannot_link:nnn} this function
 %  does not absorb the argument when finding the \meta{content}, and so can
 %  be used in circumstances where the \meta{content} may not be a simple
-%  argument.
-%  If \texttt{link/}\Arg{type} is a known local dictionary
-%  attributes stored in dictionary of type \texttt{link/}\Arg{type} are inserted as
-%  \emph{attr spec} and the code in the begin and end hook is executed
-%  before and after the link. As example
+%  argument. But beside this, it works similar and use the same hooks.
+%  As example
 %  \begin{verbatim}
 %    \pdfannot_link_begin:nnw { URI }
 %     {
@@ -172,6 +173,63 @@
 %     link text
 %    \pdfannot_link_end:n { URI }
 %    \end{verbatim}
+% \end{function}
+% \begin{function}[updated = 2020-12-06]{ \pdfannot_link_goto_begin:nw, \pdfannot_link_goto_end: }
+%   \begin{syntax}
+%     \cs{pdfannot_link_goto_begin:nw} \Arg{destination} \meta{content}
+%     \cs{pdfannot_link_goto_end:}
+%   \end{syntax}
+% This is a special, shorter version for links to internal destinations. It always
+% uses the hooks and dictionary of the |GoTo| link type. \Arg{destination} is a
+% destination name.
+% \end{function}
+% \begin{function}[added = 2020-03-12]{  \pdfannot_link_last: }
+%   This retrieves the object reference a link created previously with the commands
+%   above. This doesn't work currently with xelatex but a feature request has
+%   been made. see https://tug.org/pipermail/dvipdfmx/2020-December/000134.html
+% \end{function}
+% \begin{function}[added = 2020-06-29]{  \pdfannot_last: }
+%   This retrieves the object reference a previously annotation
+%   created either with a link or a general box command. When the last was a link
+%   it won't work with xelatex.
+%   see https://tug.org/pipermail/dvipdfmx/2020-December/000134.html
+% \end{function}
+% \begin{NOTE}{UF}
+% only annot link or also annot?
+% \end{NOTE}
+% \begin{function}[added = 2020-03-12]{  \pdfannot_link_margin:n }
+%  \begin{syntax}
+%    \cs{pdfannot_link_margin:n} \Arg{dimen}
+%  \end{syntax}
+%   This sets the dimension of the link margin.
+% \end{function}
+% \begin{function}[added = 2020-12-04]{ \pdfannot_dict_put:nnn }
+%  \begin{syntax}
+%    \cs{\pdfannot_dict_put:nnn} \Arg{dictionary name} \Arg{key} \Arg{value}
+%  \end{syntax}
+%   This adds (locally) a key-value to the internal annot dictionaries used
+%   by the link commands above.
+%   \Arg{dictionary name} should be currently one of \texttt{link/URI},
+%   \texttt{link/URI},\texttt{link/GoToR}, \texttt{link/Launch},
+%   \texttt{link/GoTo}, \texttt{link/Named}.
+% \end{function}
+% \begin{function}[added = 2020-12-04]{ \pdfannot_dict_remove:nn }
+%  \begin{syntax}
+%    \cs{\pdfannot_dict_remove:nn} \Arg{dictionary name} \Arg{key}
+%  \end{syntax}
+%   This removes a key-value from the internal annot dictionary
+%   \Arg{dictionary name} should be currently one of \texttt{link/URI},
+%   \texttt{link/URI},\texttt{link/GoToR}, \texttt{link/Launch},
+%   \texttt{link/GoTo}, \texttt{link/Named}.
+% \end{function}
+% \begin{function}[added = 2020-12-04]{ \pdfannot_dict_show:n }
+%  \begin{syntax}
+%    \cs{\pdfannot_dict_show:n} \Arg{dictionary name}
+%  \end{syntax}
+%   This shows the content of the internal annot dictionary.
+%  \Arg{dictionary name} should be currently one of \texttt{link/URI},
+%   \texttt{link/URI},\texttt{link/GoToR}, \texttt{link/Launch},
+%   \texttt{link/GoTo}, \texttt{link/Named}.
 % \end{function}
 % \end{documentation}
 %
@@ -245,8 +303,8 @@
 % dictionary for this subtype. It currently contains as only entry
 % the subtype setting (the /Type is added by the backend).
 %    \begin{macrocode}
- \pdfdict_new:n { l_@@/Widget }
- \pdfdict_put:nnn { l_@@/Widget }{ Subtype }{ /Widget }
+ \pdfdict_new:n { l_@@/widget }
+ \pdfdict_put:nnn { l_@@/widget }{ Subtype }{ /Widget }
 %    \end{macrocode}
 %
 % \subsection{Annotations, subtype Link}\label{sec:links}
@@ -260,7 +318,7 @@
 % \begin{NOTE}{UF}
 % Perhaps a |cite| type will be useful at some time. -- Thinking more about it,
 % a |cite| type is not sensible. hyperref supports it, but it doesn't fit in.
-% Commands like cite, gls, acro, footnote and so one should locally change
+% Commands like cite, gls, acro, footnote and so on should locally change
 % linkcolor and linkbordercolor.
 % Probably we will need some commands to add an attribute to all link types
 % at once.
@@ -307,7 +365,7 @@
       }
       {
         /Subtype/Link
-        #2
+        #2 %exp_not?
       }
     \bool_gset_true:N \g_@@_use_lastlink_bool
     #3
@@ -320,13 +378,13 @@
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdfannot_link_begin:nnw #1 #2 %#1 type, #2 action spec
   {
-    \hook_use:n { pdfannot/Link/#1/before}
+    \hook_use:n { pdfannot/link/#1/before}
     \exp_args:Nxx %xetex needs expansion
       \__pdf_backend_link_begin_user:nnw
         {
-           \pdfdict_if_exist:nT { l_@@/Link/#1 }
+           \pdfdict_if_exist:nT { l_@@/link/#1 }
             {
-              \pdfdict_use:n { l_@@/Link/#1}
+              \pdfdict_use:n { l_@@/link/#1}
             }
         }
         { #2 }
@@ -337,25 +395,17 @@
   {
     \__pdf_backend_link_end:
     \bool_gset_true:N \g_@@_use_lastlink_bool
-    \hook_use:n { pdfannot/Link/#1/after}
+    \hook_use:n { pdfannot/link/#1/after}
   }
 %    \end{macrocode}
-% \begin{function}[updated = 2020-03-30]{ \pdfannot_link_goto_begin:nw, \pdfannot_link_goto_end: }
-%   \begin{syntax}
-%     \cs{pdfannot_link_goto_begin:nw} \Arg{destination} \meta{content}
-%     \cs{pdfannot_link_goto_end:}
-%   \end{syntax}
-% This is a special, shorter version for links to internal destinations. It always
-% uses the hooks and dictionary of the |GoTo| link type.
-% \end{function}
 %     \begin{macrocode}
 \cs_new_protected:Npn \pdfannot_link_goto_begin:nw #1 %#1 destination
   {
-    \hook_use:n { pdfannot/Link/GoTo/before}
+    \hook_use:n { pdfannot/link/GoTo/before}
     \exp_args:Nxx %xetex needs expansion
     \__pdf_backend_link_begin_goto:nnw
       {
-        \pdfdict_use:n { l_@@/Link/GoTo}
+        \pdfdict_use:n { l_@@/link/GoTo}
       }
       { #1 }
      \bool_gset_true:N \g_@@_use_lastlink_bool
@@ -365,22 +415,12 @@
   {
     \__pdf_backend_link_end:
     \bool_gset_true:N \g_@@_use_lastlink_bool
-     \hook_use:n { pdfannot/Link/GoTo/after}
+     \hook_use:n { pdfannot/link/GoTo/after}
   }
 %    \end{macrocode}
-% \begin{function}[added = 2020-03-12]{  \pdfannot_link_last: }
-%   This retrieves the object reference a previously link created with the commands
-%   above. This doesn't work currently with xelatex but a feature request has
-%   been made.
-% \end{function}
 %    \begin{macrocode}
 \cs_new:Nn \pdfannot_link_last: { \__pdf_backend_link_last: }
 %    \end{macrocode}
-% \begin{function}[added = 2020-06-29]{  \pdfannot_last: }
-%   This retrieves the object reference a previously annotation
-%   created either with a link or a box command. When the last was a link
-%   it won't work with xelatex.
-% \end{function}
 %    \begin{macrocode}
 \cs_new:Npn \pdfannot_last:
   {
@@ -393,13 +433,7 @@
       }
   }
 %    \end{macrocode}
-% %!!!! only annot link or also annot??
-% \begin{function}[added = 2020-03-12]{  \pdfannot_link_margin:n }
-%  \begin{syntax}
-%    \cs{pdfannot_link_margin:n} \Arg{dimen}
-%  \end{syntax}
-%   This sets the dimension of the link margin.
-% \end{function}
+%
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdfannot_link_margin:n #1
   {
@@ -407,45 +441,18 @@
   }
 %    \end{macrocode}
 %
-% \begin{function}[added = 2020-12-04]{ \pdfannot_dict_put:nnn }
-%  \begin{syntax}
-%    \cs{\pdfannot_dict_put:nnn} \Arg{dictionary name} \Arg{key} \Arg{value}
-%  \end{syntax}
-%   This adds (locally) a key-value to the internal annot dictionaries.
-%   \Arg{dictionary name} should be currently one of \texttt{link/URI},
-%   \texttt{link/URI},\texttt{link/GoToR}, \texttt{link/Launch},
-%   \texttt{link/GoTo}, \texttt{link/Named}.
-% \end{function}
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdfannot_dict_put:nnn #1 #2 #3
   {
     \pdfdict_put:nnn { l_@@/#1 } { #2 }{ #3 }
   }
 %    \end{macrocode}
-% \begin{function}[added = 2020-12-04]{ \pdfannot_dict_remove:nn }
-%  \begin{syntax}
-%    \cs{\pdfannot_dict_remove:nn} \Arg{dictionary name} \Arg{key}
-%  \end{syntax}
-%   This removes a key-value from the internal annot dictionary
-%   \Arg{dictionary name} should be currently one of \texttt{link/URI},
-%   \texttt{link/URI},\texttt{link/GoToR}, \texttt{link/Launch},
-%   \texttt{link/GoTo}, \texttt{link/Named}.
-% \end{function}
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdfannot_dict_remove:nn #1 #2
   {
     \pdfdict_remove:nn { l_@@/#1 } { #2 }
   }
 %    \end{macrocode}
-% \begin{function}[added = 2020-12-04]{ \pdfannot_dict_show:n }
-%  \begin{syntax}
-%    \cs{\pdfannot_dict_show:n} \Arg{dictionary name}
-%  \end{syntax}
-%   This shows the content of the internal annot dictionary.
-%  \Arg{dictionary name} should be currently one of \texttt{link/URI},
-%   \texttt{link/URI},\texttt{link/GoToR}, \texttt{link/Launch},
-%   \texttt{link/GoTo}, \texttt{link/Named}.
-% \end{function}
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdfannot_dict_show:n #1
   {
