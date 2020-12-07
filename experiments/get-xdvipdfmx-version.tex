@@ -1,0 +1,58 @@
+\documentclass{article}
+\usepackage{l3pdf}
+\ExplSyntaxOn
+\pdf_uncompress:
+
+\str_new:N  \g_sys_dvipdfmx_version_str  %Name?
+\str_gset:Nn\g_sys_dvipdfmx_version_str {0} %or whatever
+
+\int_new:N \g__pdf_backend_link_int
+
+\cs_set_protected:Npn \__pdf_backend_link_begin:n #1
+  {
+    \int_gincr:N \g__pdf_backend_object_int
+    \int_gset_eq:NN \g__pdf_backend_link_int \g__pdf_backend_object_int
+    \__pdf_backend:x
+      {
+         bann ~
+          \int_compare:nNnF { \g_sys_dvipdfmx_version_str } < {20201111}
+           {
+             @pdf.obj \int_use:N \g__pdf_backend_object_int \c_space_tl
+           }
+         <<
+           /Type /Annot
+           #1
+         >>
+      }
+  }
+
+\cs_set:Npn \__pdf_backend_link_last:
+ {
+   \int_compare:nNnF { \g_sys_dvipdfmx_version_str } < {20201111}
+    {@pdf.obj \int_use:N \g__pdf_backend_link_int} }
+
+%recover real version:
+\cs_new:Npn \__sys_extractbb_version:w #1n#2C#3\q_stop
+  {
+    \str_gset:Nn\g_sys_dvipdfmx_version_str{#2}
+  }
+\sys_get_shell:nnN{extractbb~--version}{}\l_tmpa_str
+\exp_last_unbraced:No \__sys_extractbb_version:w \l_tmpa_str\q_stop
+
+\ExplSyntaxOff
+\begin{document}
+\ExplSyntaxOn
+\__pdf_backend_link_begin_user:nnw {}
+      {
+        /Subtype/Link
+        /A<<
+         /Type/Action
+         /S/URI
+         /URI(https://www.latex-project.org)
+       >>
+      }
+some~text
+\__pdf_backend_link_end:
+\special{pdf:~put~\__pdf_backend_link_last:\c_space_tl << /F~16 >>}
+\ExplSyntaxOff
+\end{document}
