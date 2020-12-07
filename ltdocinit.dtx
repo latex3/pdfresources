@@ -122,6 +122,7 @@
           \file_input:n {l3\g__sys_backend_tl-pdf.def} %should be inside the normal backend
         \ExplSyntaxOff\makeatother
         \RequirePackage{l3pdfutils}
+        \RequirePackage{l3pdfannot}
         \bool_gset_true:N \g__pdfmanagement_active_bool
         \keys_set_filter:nnn  { pdf / setup } { init } { #1 }
         \RenewDocumentCommand\DeclareDocumentMetadata { m }
