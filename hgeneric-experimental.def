@@ -1157,7 +1157,7 @@
      {
        \pdf_version_compare:NnTF > {1.6}
          {
-           \tl_empty:nTF
+           \tl_if_empty:nTF {#1}
              {
                \pdfmanagement_remove:nn {Catalog / ViewerPreferences } { NumCopies }
              }
