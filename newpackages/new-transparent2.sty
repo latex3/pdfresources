@@ -1,0 +1,190 @@
+%%
+%% This is file `new-transparent2.sty',
+%% base on transparent sty from Heiko Oberdiek
+%%
+\NeedsTeXFormat{LaTeX2e}[2020/10/01]
+\ProvidesExplPackage{new-transparent2}%
+  {2020-12-10}{v0.1}{Transparency with color stacks (based on transparent from Heiko Oberdiek)}%
+%not really needed for dvips, but lets keep it for now ...
+\bool_lazy_and:nnF
+      {\cs_if_exist_p:N \pdfmanagement_add:nnn }
+      { \pdfmanagement_if_active_p: }
+      {
+        \PackageWarningNoLine{new-transparent}
+         {
+           Loading~aborted,~because~pdf~resource~management~code~not~found~%
+           or~not~active
+         }
+        \endinput
+      }
+% Open question: do we need also fill and stroke opacity?
+% And if yes, should it also use a stack?
+
+\fp_new:N\l__color_backend_opacity_fp
+\cs_if_free:NTF \__kernel_color_stack_init:Nnn
+  { %dvips
+    % only minimal support (doesn't work over page breaks, and no stack, simply
+    % resets to 1 after the group
+    \cs_new_protected:Npn \__color_backend_opacity_set:n #1
+      {
+        \fp_set:Nn\l__color_backend_opacity_fp { min(max(0,#1),1)}
+        \__kernel_backend_postscript:x {\fp_use:N\l__color_backend_opacity_fp\c_space_tl~.setstrokeconstantalpha}
+        \__kernel_backend_postscript:x {\fp_use:N\l__color_backend_opacity_fp\c_space_tl~.setfillconstantalpha}
+        \group_insert_after:N \__color_backend_opacity_reset:
+      }
+    \cs_new_protected:Npn \__color_backend_opacity_reset:
+      {
+        \__kernel_backend_postscript:n {1~.setstrokeconstantalpha}
+        \__kernel_backend_postscript:n {1~.setfillconstantalpha}
+      }
+  }
+  { %others
+    \__kernel_color_stack_init:Nnn \g_tmpa_int {page~direct}{/l3opa1~gs}
+    % hm, actually only needed if used ...
+    \pdfmanagement_add:nnn{Page/Resources/ExtGState}{l3opa1}{<</ca~1/CA~1>>}
+    \int_const:Nn \c__color_backend_opacity_stack_int { \int_use:N \g_tmpa_int }
+    \cs_new_protected:Npn \__color_backend_opacity_set:n #1
+      {
+        %decide later, if we should test that the opacity has already been set ...
+        \fp_set:Nn\l__color_backend_opacity_fp { min(max(0,#1),1)}
+        \exp_args:Nxx
+        \pdfmanagement_add:nnn
+          {Page/Resources/ExtGState}
+          {l3opa\fp_use:N \l__color_backend_opacity_fp}
+          {
+            <<
+              /ca~\fp_use:N \l__color_backend_opacity_fp
+              /CA~\fp_use:N \l__color_backend_opacity_fp
+            >>
+          }
+        \exp_args:Nee \__kernel_color_stack_push:nn
+         {
+           \int_use:N \c__color_backend_opacity_stack_int
+         }
+         {
+           /l3opa\fp_use:N\l__color_backend_opacity_fp~\c_space_tl~gs
+         }
+       \group_insert_after:N \__color_backend_opacity_reset:
+      }
+    \cs_new_protected:Npn \__color_backend_opacity_reset:
+      {
+        \exp_args:Ne
+        \__kernel_color_stack_pop:n
+          {
+            \int_use:N \c__color_backend_opacity_stack_int
+          }
+       }
+    }
+
+\NewDocumentCommand{\transparent} { m }
+  {
+    \__color_backend_opacity_set:n { #1 }
+  }
+
+\NewDocumentCommand{\texttransparent}{m m}
+  {
+   \mode_leave_vertical:
+   \group_begin:
+     \transparent{#1}
+     #2
+   \group_end:
+  }
+
+
+\endinput
+%%
+%% End of file `new-transparent.sty'.
+
+
+dvips could at least on one page along this lines
+\ExplSyntaxOn
+\let\backendpostscript\__kernel_backend_postscript:n
+\ExplSyntaxOff
+xxxx
+
+\backendpostscript
+ {
+   /STACK 50 array def % the stack data structure
+   /PTR 0 def % the stack pointer
+   /stackpush % any stackpush
+     { %def
+       STACK exch PTR exch put
+       /PTR PTR 1 add def
+     } bind def
+   /stackget % stackget any
+    { %def
+      /PTR PTR 1 sub def
+      STACK PTR get
+    } bind def
+ }
+\ExplSyntaxOn
+\__kernel_backend_postscript:n {.currentstrokeconstantalpha~stackpush}
+\__kernel_backend_postscript:n {.currentfillconstantalpha~stackpush}
+\__kernel_backend_postscript:n {0.1~.setstrokeconstantalpha}
+\__kernel_backend_postscript:n {0.1~.setfillconstantalpha}
+zzzz
+\__kernel_backend_postscript:n {.currentstrokeconstantalpha~stackpush}
+\__kernel_backend_postscript:n {.currentfillconstantalpha~stackpush}
+\__kernel_backend_postscript:n {0.4~.setstrokeconstantalpha}
+\__kernel_backend_postscript:n {0.4~.setfillconstantalpha}
+blub
+\__kernel_backend_postscript:n {stackget~.setstrokeconstantalpha}
+\__kernel_backend_postscript:n {stackget~.setfillconstantalpha}
+aaaa
+\__kernel_backend_postscript:n {stackget~.setstrokeconstantalpha}
+\__kernel_backend_postscript:n {stackget~.setfillconstantalpha}
+
+xxxx
+\ExplSyntaxOff
+
+%% colorstack abstraction
+\documentclass[12pt]{article}
+\usepackage{kantlipsum,iftex}
+
+\begin{document}
+\ifxetex
+\special{pdfcolorstackinit 1 page direct (0 g)}
+\special{pdfcolorstackinit 2 direct (0 g)}
+\special{pdfcolorstack 2 push (0 1 0 rg)}
+\special{pdfcolorstack 1 push (1 0 0 rg)}
+1: red abc
+\special{pdfcolorstack 1 push (0 0 1 rg)}
+1: blue abc
+\special{pdfcolorstack 1 pop}
+1: red again
+\special{pdfcolorstack 2 current}
+2: green
+\special{pdfcolorstack 1 current}
+1: still red
+\special{pdfcolorstack 2 current}
+2: green
+\newpage
+
+should be red
+\else
+\edef\stackA {\pdfcolorstackinit page direct {0 g}}
+\edef\stackB {\pdfcolorstackinit direct {0 g}}
+
+\pdfcolorstack\stackB push {0 1 0 rg}
+\pdfcolorstack\stackA push {1 0 0 rg}
+1: red abc
+\pdfcolorstack\stackA push {0 0 1 rg}
+1: blue abc
+\pdfcolorstack\stackA pop
+1: red again
+\pdfcolorstack\stackB current
+2: green
+\pdfcolorstack\stackA current
+1: still red
+\pdfcolorstack\stackB current
+2: green
+\newpage
+
+should be red
+
+\pdfcolorstack\stackB pop
+aa
+
+
+\fi
+\end{document}
