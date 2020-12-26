@@ -38,93 +38,14 @@
 %%   \Hy@EXPsetbordercolor
 %%   \hypupdateattribute
 \ProvidesFile{hgeneric-experimental.def}
-  [2020/12/03 v0.7 %
+  [2020/12/26 v0.71 %
   Hyperref driver for luaTeX]
 
 \RequirePackage{xparse,etoolbox,l3color}
 \chardef\Hy@VersionChecked=1 %don't check the version!
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \ExplSyntaxOn
-%% zref/l3xref switch
-% one of both must have been loaded as pdfmanagement is a requirement
-% this is not perfect but should work only xref is there for good.
-
-\cs_if_exist:NTF \xref_value:nn
-  {
-    \cs_new_protected:Npn \__hyp_ref_label:nn #1 #2 %label/attributes
-      {
-        \@bsphack
-          \xref_label:nn{#1}{#2}
-        \@esphack
-      }
-    \cs_generate_variant:Nn \__hyp_ref_label:nn {en}
-    \cs_new_protected:Npn \__hyp_ref_check:nn #1 #2 %label/attribute
-      {
-        \tl_if_exist:cF { g__xref_label_ \tl_to_str:n {#1} _ \tl_to_str:n {#2} _tl }
-          {
-            \protect\G@refundefinedtrue
-            \@latex@warning
-              {
-                Reference~`\tl_to_str:n {#1}'~with~attribute~`\tl_to_str:n {#2}'~
-                on~page~\thepage~\space undefined
-              }
-          }
-      }
-    \cs_generate_variant:Nn \__hyp_ref_check:nn {en}
-    \prg_new_conditional:Npnn \__hyp_ref_if_exist:nn #1#2 { p , T , TF }  % #1 #2 %label/attribute
-      {
-        \tl_if_exist:cTF { g__xref_label_ \tl_to_str:n {#1} _ \tl_to_str:n {#2} _tl }
-          {
-            \prg_return_true:
-          }
-          {
-            \prg_return_false:
-          }
-      }
-    \prg_generate_conditional_variant:Nnn \__hyp_ref_if_exist:nn  {en} { p , T , TF }
-    \cs_new:Npn \__hyp_ref_value:nn #1 #2
-     {
-        \xref_value:nn{#1}{#2}
-     }
-    \cs_generate_variant:Nn \__hyp_ref_value:nn {en}
-  }
-  { %zref
-    \RequirePackage{zref-abspage} %move to backend ...
-    \cs_new_protected:Npn \__hyp_ref_label:nn #1 #2 %label/attributes
-      {
-        \zref@labelbyprops{\tl_to_str:n {#1}}{#2}
-      }
-    \cs_generate_variant:Nn \__hyp_ref_label:nn {en}
-    \cs_new_protected:Npn \__hyp_ref_check:nn #1 #2
-     {
-       \zref@refused {\exp_not:n{#1}}
-     }
-   \cs_generate_variant:Nn \__hyp_ref_check:nn {en}
-   \prg_new_conditional:Npnn \__hyp_ref_if_exist:nn #1#2 { p , T , TF }  % #1 #2 %label/attribute
-      {
-        \zref@ifrefundefined{\tl_to_str:n {#1}}
-         {\prg_return_false:}
-         {
-           \zref@ifrefcontainsprop{\tl_to_str:n {#1}}{\tl_to_str:n {#2}}
-            {
-              \prg_return_true:
-            }
-            {
-              \prg_return_false:
-            }
-         }
-      }
-   \prg_generate_conditional_variant:Nnn \__hyp_ref_if_exist:nn  {en} { p , T , TF }
-   \cs_new:Npn \__hyp_ref_value:nn #1 #2
-     {
-       \zref@extract{\tl_to_str:n {#1}}{\tl_to_str:n {#2}}
-     }
-   \cs_generate_variant:Nn \__hyp_ref_value:nn {en}
- }
-%% messages, should later (with more drivers) go somewhere more generic ...
-\prop_gput:Nnn \g_msg_module_name_prop { hyp }{ hyperref }
-
-\cs_new:Npn \__hyp_clist_display:n #1 {*~#1\\}
+% Test is resource management is active ...
 \msg_new:nnn
   { hyp }
   { missing-resource-management }
@@ -133,6 +54,49 @@
 \bool_lazy_and:nnF
   { \cs_if_exist_p:N \pdfmanagement_if_active_p: }{ \pdfmanagement_if_active_p: }
   { \msg_error:nn { hyp}{ missing-resource-management}}
+
+% l3ref-tmp must have been loaded as pdfmanagement is a requirement
+\cs_new_protected:Npn \__hyp_ref_label:nn #1 #2 %label/attributes
+  {
+    \@bsphack
+      \ref_label:nn{#1}{#2}
+    \@esphack
+  }
+\cs_generate_variant:Nn \__hyp_ref_label:nn {en}
+\cs_new_protected:Npn \__hyp_ref_check:nn #1 #2 %label/attribute
+  {
+    \tl_if_exist:cF { g__ref_label_ \tl_to_str:n {#1} _ \tl_to_str:n {#2} _tl }
+      {
+        \protect\G@refundefinedtrue
+        \@latex@warning
+          {
+            Reference~`\tl_to_str:n {#1}'~with~attribute~`\tl_to_str:n {#2}'~
+            on~page~\thepage~\space undefined
+          }
+      }
+  }
+\cs_generate_variant:Nn \__hyp_ref_check:nn {en}
+\prg_new_conditional:Npnn \__hyp_ref_if_exist:nn #1#2 { p , T , TF }  % #1 #2 %label/attribute
+  {
+    \tl_if_exist:cTF { g__ref_label_ \tl_to_str:n {#1} _ \tl_to_str:n {#2} _tl }
+      {
+        \prg_return_true:
+      }
+      {
+        \prg_return_false:
+      }
+  }
+\prg_generate_conditional_variant:Nnn \__hyp_ref_if_exist:nn  {en} { p , T , TF }
+\cs_new:Npn \__hyp_ref_value:nn #1 #2
+ {
+    \ref_value:nn{#1}{#2}
+ }
+\cs_generate_variant:Nn \__hyp_ref_value:nn {en}
+
+%% messages, should later (with more drivers) go somewhere more generic ...
+\prop_gput:Nnn \g_msg_module_name_prop { hyp }{ hyperref }
+
+\cs_new:Npn \__hyp_clist_display:n #1 {*~#1\\}
 
 \msg_new:nnn
   { hyp }
