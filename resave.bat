@@ -5,7 +5,7 @@ rem l3build save -cconfig-luatex -e\2 \1
 
 REM CHECK  l3build save -cconfig-dvips embedfile
 
-REM needs new expl3  - ./build/test/annot-last.xetex.fc
+l3build save -exetex annot-last
 REM check!  - ./build/test/ismap.xetex.pdf.fc
 REM check!  - ./build/test/linkbordercolor.xetex.pdf.fc
 REM check!  - ./build/test/linkhook.xetex.pdf.fc
