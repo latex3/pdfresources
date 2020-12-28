@@ -5,7 +5,6 @@ rem l3build save -cconfig-luatex -e\2 \1
 
 REM CHECK  l3build save -cconfig-dvips embedfile
 
-REM check!  - ./build/test/linkhook.xetex.pdf.fc
 REM check!  - ./build/test/ocgcolorlinks.xetex.pdf.fc
 REM check!  - ./build/test/pdffilelink.xetex.pdf.fc
 REM check!    - ./build/test/show.luatex.fc
