@@ -5,6 +5,4 @@ rem l3build save -cconfig-luatex -e\2 \1
 
 REM CHECK  l3build save -cconfig-dvips embedfile
 
-REM check!    - ./build/test/show.luatex.fc
-REM check!  - ./build/test/show.pdftex.fc
 REM leave (id)  - ./build/test/viewerpreferences.xetex.pdf.fc
