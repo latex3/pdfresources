@@ -235,6 +235,19 @@
 %   \texttt{link/URI}, \texttt{link/GoToR}, \texttt{link/Launch},
 %   \texttt{link/GoTo}, \texttt{link/Named}.
 % \end{function}
+%
+% \begin{variable}[added = 2020-12-28]{\l_pdfannot_F_bitset}
+%  This is a bitset variable, with the named index names suitable for the
+%  /F flag in an annotation.
+%  It can be used for example like this:
+%  \begin{verbatim}
+%  \pdfannot_dict_put:nnn {link/URI}{F}{ \bitset_to_arabic:N \l_pdfannot_F_bitset }
+%  \bitset_set_true_key:Nn \l_pdfannot_F_bitset {Print}
+%  \end{verbatim}
+%  The known keys for the bitset are |Invisible|, |Hidden|,
+%  |Print|, |NoZoom|, |NoRotate|, |NoView|, |ReadOnly|, |Locked|,  |ToggleNoView|,
+%  |LockedContents| which correspond to the names used in the PDF references.
+% \end{variable}
 % \end{documentation}
 %
 % \begin{implementation}
@@ -246,7 +259,26 @@
 %<@@=pdfannot>
 \ProvidesExplPackage {l3pdfannot} {2020-12-04} {0.1}
   {PDF-annotations}
-\RequirePackage{l3pdfutils} %because of the flags ...
+\RequirePackage{l3pdfdict}
+%    \end{macrocode}
+% Annotations have a /F flag, we provide a public
+% bitset for it.
+%    \begin{macrocode}
+\RequirePackage{l3bitset}
+\bitset_new:N \l_pdfannot_F_bitset
+\bitset_addto_named_index:Nn \l_pdfannot_F_bitset
+  {
+    Invisible      = 1,
+    Hidden         = 2,
+    Print          = 3,
+    NoZoom         = 4,
+    NoRotate       = 5,
+    NoView         = 6,
+    ReadOnly       = 7,
+    Locked         = 8,
+    ToggleNoView   = 9,
+    LockedContents = 10
+  }
 %    \end{macrocode}
 % \begin{NOTE}{UF}
 % The code/naming tries to unify general annotations and the special type of
@@ -343,7 +375,6 @@
 \seq_map_inline:Nn \c_pdfannot_link_types_seq
   {
     \pdfdict_new:n { l_@@/link/#1 }
-    \pdfdict_put:nnn { l_@@/link/#1}{ F }{ \pdf_flag_use:n { annot/Link} }
     \hook_new_pair:nn
       {pdfannot/link/#1/before}
       {pdfannot/link/#1/after}

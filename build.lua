@@ -9,9 +9,10 @@ module  = "pdfresources"
 
 installfiles = {"*.sty","*.cls","*.def","*.lua"}
 sourcefiles =  {"*.dtx","*.ins",
+                "l3ref-tmp.sty",
                 "hgeneric-experimental.def",
-                "tmpl3shipout.sty",
                 "newpackages/new-transparent.sty",
+                "newpackages/new-transparent2.sty",
                 "newpackages/new-bookmark.sty",
                 "newpackages/bkm-generic.def",
                 "newpackages/new-attachfile.sty",

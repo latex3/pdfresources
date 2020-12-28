@@ -7,6 +7,48 @@
 %\def\DefaultHeightofCheckBox{\normalbaselineskip}
 %\def\DefaultWidthofCheckBox{\normalbaselineskip}
 
+%\pdf_flag_new:nn {annot/Field} %name is wrong ... form?? it is not really an annot,
+%  {
+%    ReadOnly          = 0,
+%    Required          = 1,
+%    NoExport          = 2,
+%    Multiline         = 12,%Tx
+%    Password          = 13,
+%    NoToggleToOff     = 14,%Btn, radio button
+%    Radio             = 15,%Btn: Radio:    15=1, 16=0
+%    Pushbutton        = 16,%Btn: Checkbox: 15=0, 16=0
+%                           %Btn: Pushbutton: 16=1
+%    Combo             = 17,%Ch: Combo=1 List=0
+%    Edit              = 18,%Ch, Combo=1 -> + edit field
+%    Sort              = 19,%Ch, not relevant for view...
+%    FileSelect        = 20,%Tx
+%    MultiSelect       = 21,%Ch
+%    DoNotSpellCheck   = 22,%Tx, Ch (if Combo + Edit set)
+%    DoNotScroll       = 23,%Tx
+%    Comb              = 24,%Tx, requires MaxLen in dict
+%    RadiosInUnison    = 25,%Btn Radio
+%    RichText          = 25,%Tx
+%    CommitOnSelChange = 26
+%  }
+%
+%\pdf_flag_new:nn {annot/Field/submit} %name is wrong ...
+%  {
+%    Include/Exclude       = 0,
+%    IncludeNoValueFields  = 1,
+%    ExportFormat          = 2,
+%    GetMethod             = 3, % if ExportFormat=0 -> =0 to
+%    SubmitCoordinates     = 4, % if ExportFormat=0 -> =0 to
+%    XFDF                  = 5,
+%    IncludeAppendSaves    = 6,
+%    IncludeAnnotations    = 7,
+%    SubmitPDF             = 8,
+%    CanonicalFormat       = 9,
+%    ExclNonUserAnnots     = 10,
+%    ExclFKey              = 11,
+%    EmbedForm             = 12
+%  }
+%
+
 \cs_generate_variant:Nn \pdf_xform_wd:n {e}
 \cs_generate_variant:Nn \pdf_xform_ht:n {e}
 \cs_generate_variant:Nn \pdf_xform_dp:n {e}

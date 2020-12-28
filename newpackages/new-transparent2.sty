@@ -1,14 +1,12 @@
 %%
-%% This is file `new-transparent.sty',
+%% This is file `new-transparent2.sty',
 %% base on transparent sty from Heiko Oberdiek
 %%
 \NeedsTeXFormat{LaTeX2e}[2020/10/01]
-\ProvidesExplPackage{new-transparent}%
-  {2020-09-06}{v1.42}{Transparency with color stacks (based on transparent from Heiko Oberdiek)}%
-%pdftex + luatex in pdf mode
-\sys_if_output_pdf:T
-  {
-    \bool_lazy_and:nnF
+\ProvidesExplPackage{new-transparent2}%
+  {2020-12-10}{v0.1}{Transparency with color stacks (based on transparent from Heiko Oberdiek)}%
+%not really needed for dvips, but lets keep it for now ...
+\bool_lazy_and:nnF
       {\cs_if_exist_p:N \pdfmanagement_add:nnn }
       { \pdfmanagement_if_active_p: }
       {
@@ -19,87 +17,77 @@
          }
         \endinput
       }
-   }
-\sys_if_engine_pdftex:T
-  {
-    \let\TRP@pdfcolorstackinit\tex_pdfcolorstackinit:D
-    \let\TRP@pdfcolorstack\tex_pdfcolorstack:D
-  }
+% Open question: do we need also fill and stroke opacity?
+% And if yes, should it also use a stack?
 
-\sys_if_engine_luatex:T
-  {
-    \def\TRP@pdfcolorstackinit           {\pdffeedback~colorstackinit}
-    \protected\def\TRP@pdfcolorstack     {\pdfextension~colorstack}
-  }
-
-\sys_if_output_pdf:T
-  {
-    %initialize opacity 1
-    \pdfmanagement_add:nnn{Page/Resources/ExtGState}{TRP1}{<</ca~1/CA~1>>}
-    %
-    \cs_new_protected:Npn \__transparent_use:n #1
+\fp_new:N\l__color_backend_opacity_fp
+\cs_if_free:NTF \__kernel_color_stack_init:Nnn
+  { %dvips
+    % only minimal support (doesn't work over page breaks, and no stack, simply
+    % resets to 1 after the group
+    \cs_new_protected:Npn \__color_backend_opacity_set:n #1
       {
-        \tl_if_exist:cF { c__transparent_TRP#1_tl }
+        \fp_set:Nn\l__color_backend_opacity_fp { min(max(0,#1),1)}
+        \__kernel_backend_postscript:x {\fp_use:N\l__color_backend_opacity_fp\c_space_tl~.setstrokeconstantalpha}
+        \__kernel_backend_postscript:x {\fp_use:N\l__color_backend_opacity_fp\c_space_tl~.setfillconstantalpha}
+        \group_insert_after:N \__color_backend_opacity_reset:
+      }
+    \cs_new_protected:Npn \__color_backend_opacity_reset:
+      {
+        \__kernel_backend_postscript:n {1~.setstrokeconstantalpha}
+        \__kernel_backend_postscript:n {1~.setfillconstantalpha}
+      }
+  }
+  { %others
+    \__kernel_color_stack_init:Nnn \g_tmpa_int {page~direct}{/l3opa1~gs}
+    % hm, actually only needed if used ...
+    \pdfmanagement_add:nnn{Page/Resources/ExtGState}{l3opa1}{<</ca~1/CA~1>>}
+    \int_const:Nn \c__color_backend_opacity_stack_int { \int_use:N \g_tmpa_int }
+    \cs_new_protected:Npn \__color_backend_opacity_set:n #1
+      {
+        %decide later, if we should test that the opacity has already been set ...
+        \fp_set:Nn\l__color_backend_opacity_fp { min(max(0,#1),1)}
+        \exp_args:Nxx
+        \pdfmanagement_add:nnn
+          {Page/Resources/ExtGState}
+          {l3opa\fp_use:N \l__color_backend_opacity_fp}
           {
-            \pdfmanagement_add:nnn{Page/Resources/ExtGState}{TRP#1}{<</ca~#1/CA~#1>>}
-            \tl_const:cn { c__transparent_TRP#1_tl }{ /TRP#1~gs }
+            <<
+              /ca~\fp_use:N \l__color_backend_opacity_fp
+              /CA~\fp_use:N \l__color_backend_opacity_fp
+            >>
           }
+        \exp_args:Nee \__kernel_color_stack_push:nn
+         {
+           \int_use:N \c__color_backend_opacity_stack_int
+         }
+         {
+           /l3opa\fp_use:N\l__color_backend_opacity_fp~\c_space_tl~gs
+         }
+       \group_insert_after:N \__color_backend_opacity_reset:
       }
-    \xdef\TRP@colorstack{%
-         \TRP@pdfcolorstackinit~page~direct{/TRP1~gs}}
-    \NewDocumentCommand{\transparent} { m }
+    \cs_new_protected:Npn \__color_backend_opacity_reset:
       {
-        \exp_args:Nx\__transparent_use:n { \fp_eval:n{ min(max(0,#1),1)}}
-        \tl_set:Nx  \transparent@current { \fp_eval:n{ min(max(0,#1),1)}}
-        \transparent@set
-      }
-
-    \def\transparent@current{/TRP1~gs}
-    \def\transparent@set
-      {
-        \TRP@pdfcolorstack\TRP@colorstack~push~
+        \exp_args:Ne
+        \__kernel_color_stack_pop:n
           {
-            \tl_use:c { c__transparent_TRP\transparent@current _tl }
+            \int_use:N \c__color_backend_opacity_stack_int
           }
-            \aftergroup\transparent@reset
-      }
+       }
+    }
 
-    \def\transparent@reset{\TRP@pdfcolorstack\TRP@colorstack~pop\relax}
-
+\NewDocumentCommand{\transparent} { m }
+  {
+    \__color_backend_opacity_set:n { #1 }
   }
-
-%xetex, dvipdfmx
-\str_case_e:nnT {\g__sys_backend_tl}
- {
-   {xetex}{}
-   {dvipdfmx}{}
- }
- {
-   \PackageInfo{new-transparent}{xetex~and~dvipdfmx~need~dvipdfmx~newer~than~20200901}{}
-   \NewDocumentCommand{\transparent} { m }
-      {
-       \transparent@set{#1}
-      }
-   \def\transparent@set #1
-      {
-        \special{pdf:bxgstate~<</CA~#1/ca~#1>>}
-        \aftergroup\transparent@reset
-      }
-
-    \def\transparent@reset{\special{pdf:exgstate}}
- }
-
-%warning for dvips currently missing
-% but it should at least not error
-\ProvideDocumentCommand\transparent { m }{}
 
 \NewDocumentCommand{\texttransparent}{m m}
   {
-   \protect\leavevmode
-   \begingroup
+   \mode_leave_vertical:
+   \group_begin:
      \transparent{#1}
      #2
-   \endgroup
+   \group_end:
   }
 
 
