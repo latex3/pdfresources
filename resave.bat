@@ -3,6 +3,4 @@ rem l3build save -e\2 \1
 rem l3build save -cconfig-dvips \1
 rem l3build save -cconfig-luatex -e\2 \1
 
-REM CHECK  l3build save -cconfig-dvips embedfile
-
 REM leave (id)  - ./build/test/viewerpreferences.xetex.pdf.fc
