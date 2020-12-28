@@ -7,5 +7,4 @@ REM CHECK  l3build save -cconfig-dvips embedfile
 
 REM check!    - ./build/test/show.luatex.fc
 REM check!  - ./build/test/show.pdftex.fc
-REM check!    - ./build/test/show.xetex.fc
 REM leave (id)  - ./build/test/viewerpreferences.xetex.pdf.fc
