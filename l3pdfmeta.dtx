@@ -197,10 +197,10 @@
     ,Catalog/OCProperties    = false
     ,named_actions    = {NextPage, PrevPage, FirstPage, LastPage}
     ,annot_flags      = {
-                          \bitset_set_key:Nn   \l_pdfannot_F_bitset {Print}
-                          \bitset_clear_key:Nn \l_pdfannot_F_bitset {Hidden}
-                          \bitset_clear_key:Nn \l_pdfannot_F_bitset {Invisible}
-                          \bitset_clear_key:Nn \l_pdfannot_F_bitset {NoView}
+                          \bitset_set_true:Nn   \l_pdfannot_F_bitset {Print}
+                          \bitset_set_false:Nn \l_pdfannot_F_bitset {Hidden}
+                          \bitset_set_false:Nn \l_pdfannot_F_bitset {Invisible}
+                          \bitset_set_false:Nn \l_pdfannot_F_bitset {NoView}
                         }
     % to be continued https://docs.verapdf.org/validation/pdfa-part1/
   }
