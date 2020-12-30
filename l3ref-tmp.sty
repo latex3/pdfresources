@@ -1,26 +1,26 @@
 %%
-%% This is file `l3ref-tmp.sty',
+%% This is file `l3ref.sty',
 %% generated with the docstrip utility.
 %%
 %% The original source files were:
 %%
 %% l3ref.dtx  (with options: `package')
-%%
+%% 
 %% Copyright (C) 2020 The LaTeX3 Project
-%%
+%% 
 %% It may be distributed and/or modified under the conditions of
 %% the LaTeX Project Public License (LPPL), either version 1.3c of
 %% this license or (at your option) any later version.  The latest
 %% version of this license is in the file:
-%%
+%% 
 %%    http://www.latex-project.org/lppl.txt
-%%
+%% 
 %% This file is part of the "l3ref bundle" (The Work in LPPL)
 %% and all files in that bundle must be distributed together.
-%%
+%% 
 %% File: l3ref.dtx
-\ProvidesExplPackage{l3ref-tmp}{2020-12-26}{}
-  {L3 Experimental cross-referencing -- temporary version!}
+\ProvidesExplPackage{l3ref}{2020-10-09}{}
+  {L3 Experimental cross-referencing}
 \cs_new_protected:Npn \ref_attribute_gset:nnnn #1#2#3#4
   {
     \exp_args:Nx \__ref_attribute_gset:nnnn { \tl_to_str:n {#1} }
@@ -88,6 +88,16 @@
           { \exp_not:n { \textbf { ?? } } }
       }
   }
+\prg_new_conditional:Npnn \ref_if_exist:nn #1#2 { p , T , F,  TF }  % #1 label #2 attribute
+  {
+    \tl_if_exist:cTF { g__ref_label_ \tl_to_str:n {#1} _ \tl_to_str:n {#2} _tl }
+      {
+        \prg_return_true:
+      }
+      {
+        \prg_return_false:
+      }
+  }
 \cs_new_protected:Npn \newlabeldata #1#2
   {
     \__ref_data:nnn {#1} #2 { \q_recursion_tail } { ? } \q_recursion_stop
@@ -116,6 +126,6 @@
     LaTeX~has~been~asked~to~set~the~attribute~'#1',~but~the~keyword~
     '#3'~is~not~one~of~the~two~known~values:~'now'~or~'shipout'.
   }
-%%
+%% 
 %%
 %% End of file `l3ref.sty'.
