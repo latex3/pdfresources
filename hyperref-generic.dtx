@@ -123,13 +123,6 @@
      before~\tl_to_str:n{\documentclass}
   }
 %    \end{macrocode}
-% A message for missing bookmark package
-%    \begin{macrocode}
-\msg_new:nnn
-  { hyp }
-  { missing-bookmark-package }
-  { The~bookmark~package~is~required~for~this~hyperref~driver! }
-%    \end{macrocode}
 % The pdfversion should be set in \cs{DeclareDocumentMetadata}
 %    \begin{macrocode}
 \msg_new:nnnn
@@ -309,8 +302,8 @@
 \Hy@setbreaklinks{true}        %also for dvips??
 
 % checked dvips, luatex, xetex, dvipdfm: values are identical:
-\providecommand*\@pdfborder{0~0~1}
-\providecommand*\@pdfborderstyle{}
+%\providecommand*\@pdfborder{0~0~1}
+%\providecommand*\@pdfborderstyle{}
 \providecommand*\@pdfview{XYZ}
 
 % unicode ...
