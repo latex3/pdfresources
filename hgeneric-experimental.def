@@ -41,7 +41,7 @@
   [2020/12/26 v0.71 %
   Hyperref driver for luaTeX]
 
-\RequirePackage{xparse,etoolbox,l3color}
+\RequirePackage{etoolbox,l3color}
 \chardef\Hy@VersionChecked=1 %don't check the version!
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \ExplSyntaxOn
@@ -185,19 +185,9 @@
   }
 
 
-
-%% I require the bookmark package to get rid of some of the bookmarks code.
-% but the testing code doesn't work.
-% !!!!!!!!!!!!!!!!!!!!! to do !!!!!!!!!!!!!!!!!!!!!
-%\Hy@AtEndOfPackage{% so that we are later than KOMA ...
-%\AtBeginDocument
-% {
-%  \ltx@ifpackageloaded{bookmark}
-%   {}
-%   {\msg_error:nn {hyp}{missing-bookmark-package}}
-% }}
-% booleans for the (some) option keys. As hyperref disables them it is okay to set them here,
-% hypersetup  can't interfere
+%% I require the bookmark package to get rid of some of the bookmarks code
+%% but load it explicitly for now, so let's have warning at least.
+\AddToHook{begindocument/end}{\ltx@ifpackageloaded{bookmark}{}{\msg_warning:nn {hyp}{missing-bookmark-package}}}
 
 %%%%%%%%%%%%%%%%
 % defaults, will perhaps need some sorting and be checked if they are sensible for all backends
