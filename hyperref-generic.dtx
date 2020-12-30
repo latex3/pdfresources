@@ -252,7 +252,7 @@
 %    \end{macrocode}
 % Outlines/bookmarks require the bookmark package.
 %    \begin{macrocode}
-\AddToHook{begindocument/before}{\RequirePackage{bookmark}}
+%\AddToHook{begindocument/before}{\RequirePackage{bookmark}}
 %    \end{macrocode}
 %
 % \section{Reference and label commands}
@@ -272,19 +272,9 @@
 \cs_generate_variant:Nn \@@_ref_label:nn {en}
 %    \end{macrocode}
 % This provides a condition which tests if a label/attribute combination is known
-% TODO: The test uses an internal tl from l3ref. This should be replaced.
 %   \begin{macrocode}
-\prg_new_conditional:Npnn \@@_ref_if_exist:nn #1#2 { p , T , F,  TF }  % #1 #2 %label/attribute
-  {
-    \tl_if_exist:cTF { g__ref_label_ \tl_to_str:n {#1} _ \tl_to_str:n {#2} _tl }
-      {
-        \prg_return_true:
-      }
-      {
-        \prg_return_false:
-      }
-  }
-\prg_generate_conditional_variant:Nnn \@@_ref_if_exist:nn  {en} { p , T , F, TF }
+\prg_new_eq_conditional:NNn \@@_ref_if_exist:nn \ref_if_exist:nn { p , T , F,  TF }
+\prg_generate_conditional_variant:Nnn \@@_ref_if_exist:nn  {en}  { p , T , F, TF }
 %    \end{macrocode}
 % This checks if the label/attribute is known and issues a warning if not.
 % It then also triggers the standard rerun message.
