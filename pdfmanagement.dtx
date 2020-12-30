@@ -70,8 +70,10 @@
 % the output can be wrong.
 %
 % \item At second the primitives differ between the various engines and backends with
-% which \LaTeX{} is used and so all packages have to write and maintain
-% \enquote{driver} files for the various backends.
+% which \LaTeX{} is used. To support the engines and backend
+% packages have to write and maintain
+% \enquote{driver} files which they did to a varying degree. This makes it
+% difficult for users to assess if a package will work with their work-flow.
 % \end{itemize}
 %
 % Despite the potential problems, until now the number of conflicts were
@@ -85,8 +87,17 @@
 % with the \pkg{l3pdf} package. It offers backend independent commands to create
 % PDF objects, to set the compress level and the PDF version.
 %
-% The \pkg{pdfmanagement} extends this to more PDF related areas and provide
+% The package \pkg{pdfmanagement} extends this to more PDF related areas and provide
 % interfaces to them in a backend independent way.
+%
+% The package has two main objectives connected with the problems identified above:
+% \begin{itemize}
+% \item For commands with \enquote{clash potential} it implements commands to
+% replace the primitives which resolve potential conflicts.
+%
+% \item It implements for a variety of PDF related tasks commands
+% which support a well-defined set of backends.
+% \end{itemize}
 %
 % \section{\enquote{Change Strategy}: The integration into \LaTeX\label{sec:change}}
 %
@@ -95,11 +106,12 @@
 % \cs{pdfpagesattr}, \cs{pdfpagesattr} and \cs{pdfpageresources} and
 % analog commands from the other engines and backends.
 %
-% The new interface is incompatible with a parallel use of the primitive commands
+% All these commands have a \enquote{clash potential}, this means that the new
+% interface is incompatible with a parallel use of the primitive commands
 % which it targets to replace and superseed.
-% This means that this module is not compatible with packages using the primitive
-% commands. This doesn't affect many packages, but the list contains
-% central and important package like \pkg{hyperref}, \pkg{tikz}, \pkg{pdfx} and more.
+% This doesn't affect many packages, but the list of package using such primitives
+% contains central and important package like \pkg{hyperref}, \pkg{tikz},
+% \pkg{pdfx} and more.
 %
 % So while the goal is to integrate the code into the \LaTeX{} format directly,
 % this can not be done directly to avoid conflicts with existing documents and packages.
@@ -122,8 +134,8 @@
 % The options of \cs{DeclareDocumentMetadata} are described in the documentation of
 % \pkg{ltdocinit}.
 %
-% If the pdf management is active can be tested with the predicate
-% \cs{pdfmanagement_if_active:TF}, see the documentation of \pkg{l3pdfmanagement}.
+% To test if the pdf management is active the predicate
+% \cs{pdfmanagement_if_active:TF} can be used, see the documentation of \pkg{l3pdfmanagement}.
 %
 % We hope that this setup will allow packages writers and authors to test the
 % pdfmanagement and adapt packages and document safely.
@@ -154,7 +166,7 @@
 %
 % \section{Requirements}
 % \pkg{pdfmanagement} requires a LaTeX format from 2020/10/01 or later.
-% It currently depends on the external packages \pkg{zref-base} and \pkg{bitset}.
+% It currently depends on the experimental packages \pkg{l3ref-tmp} and \pkg{l3bitset}.
 % In some places, e.g. when writing strings to the pdf it assumes that
 % the file is utf8 encoded -- ascii will naturally work too, but 8bit encodings are
 % not supported.
@@ -182,7 +194,7 @@
 % \begin{itemize}
 % \item The code for bookmarks has been removed from this driver, instead
 % the \pkg{bookmarks} package should be loaded after \pkg{hyperref}.
-% \item As the driver isn't yet fully integrated into hyperref. This means that
+% \item The driver isn't yet fully integrated into hyperref. This means that
 % it doesn't react to a number of package options. Instead \cs{hypersetup} should
 % be used.
 % \item Incomplete is the support for form fields. Quite probably form fields will
@@ -225,7 +237,7 @@
 %
 % \subsection{embedfile}
 % Tools needed to be able to write a replacement
-% to replace this package have been developed in the l3pdffile package.
+% to replace this package have been developed in the \pkg{l3pdffile} package.
 %
 %
 % \subsection{tagpdf}
@@ -240,7 +252,7 @@
 % adapted, including the currently untested route dvips + distiller.
 %
 % \subsection{fancytooltips}
-% This package uses \cs{pdfpageattr} and \pkg{acrotex} and so must be reviewed. 
+% This package uses \cs{pdfpageattr} and \pkg{acrotex} and so must be reviewed.
 % \end{documentation}
 % \begin{implementation}
 %    \begin{macrocode}
@@ -258,7 +270,6 @@
  }
 \IfFormatAtLeastTF{2020-10-01}{}{\endinput}
 
-\RequirePackage{bitset}
 \DeclareOption { debug }
   {
     \msg_redirect_module:nnn { pdf } { none } { warning }

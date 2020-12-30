@@ -242,7 +242,7 @@
 %  It can be used for example like this:
 %  \begin{verbatim}
 %  \pdfannot_dict_put:nnn {link/URI}{F}{ \bitset_to_arabic:N \l_pdfannot_F_bitset }
-%  \bitset_set_true_key:Nn \l_pdfannot_F_bitset {Print}
+%  \bitset_set_true:Nn \l_pdfannot_F_bitset {Print}
 %  \end{verbatim}
 %  The known keys for the bitset are |Invisible|, |Hidden|,
 %  |Print|, |NoZoom|, |NoRotate|, |NoView|, |ReadOnly|, |Locked|,  |ToggleNoView|,
@@ -265,8 +265,7 @@
 % bitset for it.
 %    \begin{macrocode}
 \RequirePackage{l3bitset}
-\bitset_new:N \l_pdfannot_F_bitset
-\bitset_addto_named_index:Nn \l_pdfannot_F_bitset
+\bitset_new:Nn \l_pdfannot_F_bitset
   {
     Invisible      = 1,
     Hidden         = 2,
