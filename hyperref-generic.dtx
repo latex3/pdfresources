@@ -1,5 +1,53 @@
-%%
-%% This is file `hgeneric-experimental.def',
+% \iffalse meta-comment
+%
+%% File: hyperref-generic.dtx
+%
+% Copyright (C) 2020 The LaTeX3 Project
+%
+% It may be distributed and/or modified under the conditions of the
+% LaTeX Project Public License (LPPL), either version 1.3c of this
+% license or (at your option) any later version.  The latest version
+% of this license is in the file
+%
+%    http://www.latex-project.org/lppl.txt
+%
+% This file is part of the "pdfresources bundle" (The Work in LPPL)
+% and all files in that bundle must be distributed together.
+%
+% The released version of this bundle is available from CTAN.
+%
+% -----------------------------------------------------------------------
+%
+% The development version of the bundle can be found at
+%
+%    https://github.com/latex3/pdfresources
+%
+% for those people who are interested.
+%
+%<*driver>
+\documentclass[full]{l3doc}
+\begin{document}
+  \DocInput{\jobname.dtx}
+\end{document}
+%</driver>
+% \fi
+% \title{^^A
+%   The \pkg{hyperref-generic} package  \\ A generic driver for hyperref ^^A
+% }
+%
+% \author{^^A
+%  The \LaTeX3 Project\thanks
+%    {^^A
+%      E-mail:
+%        \href{mailto:latex-team@latex-project.org}
+%          {latex-team@latex-project.org}^^A
+%    }^^A
+% }
+%
+% \date{Released XXXX-XX-XX}
+%
+% \maketitle
+
 %% This is an adapted version of hluatex.def
 %% meant to test the use of the commands
 %% from pdfmanagement.sty
@@ -37,78 +85,70 @@
 %%   \Hy@EXPsetpdfhighlight
 %%   \Hy@EXPsetbordercolor
 %%   \hypupdateattribute
+%
+%    \begin{macrocode}
+%<*package>
+%<@@=hyp>
+%    \end{macrocode}
+%    \begin{macrocode}
 \ProvidesFile{hgeneric-experimental.def}
   [2020/12/26 v0.71 %
   Hyperref driver for luaTeX]
 
-\RequirePackage{etoolbox,l3color}
+\RequirePackage{etoolbox} %why?
+\RequirePackage{l3color}
+%    \end{macrocode}
+%
+%  hyperref checks driver version, we need to suppress this during the development
+%    \begin{macrocode}
 \chardef\Hy@VersionChecked=1 %don't check the version!
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \ExplSyntaxOn
-% Test is resource management is active ...
-\msg_new:nnn
+%    \end{macrocode}
+%
+% \section{messages}
+%  Redirect the message name:
+%    \begin{macrocode}
+\prop_gput:Nnn \g_msg_module_name_prop { hyp }{ hyperref }
+%    \end{macrocode}
+% At first a message for the testing of the resource management
+%    \begin{macrocode}
+\msg_new:nnnn
   { hyp }
   { missing-resource-management }
-  { The~resource~management~is~required~for~this~hyperref~driver! }
-
-\bool_lazy_and:nnF
-  { \cs_if_exist_p:N \pdfmanagement_if_active_p: }{ \pdfmanagement_if_active_p: }
-  { \msg_error:nn { hyp}{ missing-resource-management}}
-
-% l3ref-tmp must have been loaded as pdfmanagement is a requirement
-\cs_new_protected:Npn \__hyp_ref_label:nn #1 #2 %label/attributes
+  { The~PDF~resource~management~is~required~for~this~hyperref~driver! }
   {
-    \@bsphack
-      \ref_label:nn{#1}{#2}
-    \@esphack
+     Activate~it~with \\
+     \tl_to_str:n{\RequirePackage{pdfmanagement}}\\
+     \tl_to_str:n{\DeclareDocumentMetadata{<options>}}\\
+     before~\tl_to_str:n{\documentclass}
   }
-\cs_generate_variant:Nn \__hyp_ref_label:nn {en}
-\cs_new_protected:Npn \__hyp_ref_check:nn #1 #2 %label/attribute
-  {
-    \tl_if_exist:cF { g__ref_label_ \tl_to_str:n {#1} _ \tl_to_str:n {#2} _tl }
-      {
-        \protect\G@refundefinedtrue
-        \@latex@warning
-          {
-            Reference~`\tl_to_str:n {#1}'~with~attribute~`\tl_to_str:n {#2}'~
-            on~page~\thepage~\space undefined
-          }
-      }
-  }
-\cs_generate_variant:Nn \__hyp_ref_check:nn {en}
-\prg_new_conditional:Npnn \__hyp_ref_if_exist:nn #1#2 { p , T , TF }  % #1 #2 %label/attribute
-  {
-    \tl_if_exist:cTF { g__ref_label_ \tl_to_str:n {#1} _ \tl_to_str:n {#2} _tl }
-      {
-        \prg_return_true:
-      }
-      {
-        \prg_return_false:
-      }
-  }
-\prg_generate_conditional_variant:Nnn \__hyp_ref_if_exist:nn  {en} { p , T , TF }
-\cs_new:Npn \__hyp_ref_value:nn #1 #2
- {
-    \ref_value:nn{#1}{#2}
- }
-\cs_generate_variant:Nn \__hyp_ref_value:nn {en}
-
-%% messages, should later (with more drivers) go somewhere more generic ...
-\prop_gput:Nnn \g_msg_module_name_prop { hyp }{ hyperref }
-
-\cs_new:Npn \__hyp_clist_display:n #1 {*~#1\\}
-
+%    \end{macrocode}
+% A message for missing bookmark package
+%    \begin{macrocode}
 \msg_new:nnn
   { hyp }
   { missing-bookmark-package }
   { The~bookmark~package~is~required~for~this~hyperref~driver! }
-
-\msg_new:nnn
+%    \end{macrocode}
+% The pdfversion should be set in \cs{DeclareDocumentMetadata}
+%    \begin{macrocode}
+\msg_new:nnnn
   { hyp }
   { pdfversion-disabled }
-  { This~hyperref~driver~ignores~the~pdfversion~key!\\
-    Set~the~pdfversion~in~\token_to_str:N \DeclareDocumentMetadata }
-
+  {
+    This~hyperref~driver~ignores~the~pdfversion~key!\\
+    Set~the~pdfversion~in~\token_to_str:N \DeclareDocumentMetadata
+  }
+  {
+    For example:\\
+    \tl_to_str:n
+     {
+      \DeclareDocumentMetadata { pdfversion=1.7 }
+     }
+  }
+%    \end{macrocode}
+% pdf/A messages for fields, this will probably be moved to an external package
+%    \begin{macrocode}
 \msg_new:nnn
   { hyp }
   { pdfa-no-push-button }
@@ -118,7 +158,9 @@
   { hyp }
   { pdfa-no-reset-button }
   { PDF/A:~Reset~action~is~prohibited }
-
+%    \end{macrocode}
+% A message if the destination name is empty.
+%    \begin{macrocode}
 \msg_new:nnn
   { hyp }
   { empty-destination-name }
@@ -126,6 +168,9 @@
     Empty~destination~name,\\
             using~`#1'
   }
+%    \end{macrocode}
+% Some options or values should not be used in older pdf versions
+%    \begin{macrocode}
 \msg_new:nnn
   { hyp }
   { ignore-deprecated-or-unknown-option-in-pdf-version }
@@ -147,19 +192,28 @@
     Value~`#1'~is~unknown~or~deprecated~in\\
     pdf~version~#2. Value~`#3'~is used instead.
   }
+%    \end{macrocode}
+% During development not all standard hyperref keys are known, this issues a warning
+% for now:
+%    \begin{macrocode}
 \msg_new:nnn
   { hyp }
   { unknown-key }
   {
     unknown~key~#2~of~module~’#1’~set~to~’#3’.
   }
+%    \end{macrocode}
+% There are a lot choice keys. This defines messages which shows the valid
+% choices if a faulty one has been used:
+%    \begin{macrocode}
+\cs_new:Npn \@@_clist_display:n #1 {*~#1\\}
 \msg_new:nnn
   { hyp }
   { unknown-choice }
   {
     Value~'#3'~is~invalid~for~key~'#1'.\\
     The~key~accepts~only~the~choices\\
-    \clist_map_function:nN { #2 }\__hyp_clist_display:n
+    \clist_map_function:nN { #2 }\@@_clist_display:n
   }
 
 \msg_new:nnn
@@ -168,7 +222,7 @@
   {
     Value~'#3'~is~invalid~for~key~'#1'.\\
     The~key~accepts~only~the~choices\\
-    \clist_map_function:nN { #2 }\__hyp_clist_display:n
+    \clist_map_function:nN { #2 }\@@_clist_display:n
     An~empty~value~removes~the~setting.
   }
 
@@ -183,12 +237,81 @@
     *~and~an~empty~value~which~removes~the~setting.\\
     No~value~is~equivalent~to~using~`true`.
   }
-
-
-%% I require the bookmark package to get rid of some of the bookmarks code
-%% but load it explicitly for now, so let's have warning at least.
-\AddToHook{begindocument/end}{\ltx@ifpackageloaded{bookmark}{}{\msg_warning:nn {hyp}{missing-bookmark-package}}}
-
+%    \end{macrocode}
+% \section{Checks}
+% The driver can not work properly if the pdfmanagement is not active,
+% as keys need to write to the catalog and to info. But annotations
+% and outlines should work.
+% So should this be a fatal error?
+% Should there be a difference between missing and inactive management?
+% TODO
+%    \begin{macrocode}
+\bool_lazy_and:nnF
+  { \cs_if_exist_p:N \pdfmanagement_if_active_p: }{ \pdfmanagement_if_active_p: }
+  { \msg_error:nn { hyp}{ missing-resource-management } }
+%    \end{macrocode}
+% Outlines/bookmarks require the bookmark package.
+%    \begin{macrocode}
+\AddToHook{begindocument/before}{\RequirePackage{bookmark}}
+%    \end{macrocode}
+%
+% \section{Reference and label commands}
+% The code uses the l3ref-tmp package which
+% must have been loaded as pdfmanagement is a requirement.
+% The commands use after the module prefix always |_ref|.
+%
+% At first a label command which add the space commands from LaTeX:
+%    \begin{macrocode}
+%
+\cs_new_protected:Npn \@@_ref_label:nn #1 #2 %label/attributes
+  {
+    \@bsphack
+      \ref_label:nn{#1}{#2}
+    \@esphack
+  }
+\cs_generate_variant:Nn \@@_ref_label:nn {en}
+%    \end{macrocode}
+% This provides a condition which tests if a label/attribute combination is known
+% TODO: The test uses an internal tl from l3ref. This should be replaced.
+%   \begin{macrocode}
+\prg_new_conditional:Npnn \@@_ref_if_exist:nn #1#2 { p , T , F,  TF }  % #1 #2 %label/attribute
+  {
+    \tl_if_exist:cTF { g__ref_label_ \tl_to_str:n {#1} _ \tl_to_str:n {#2} _tl }
+      {
+        \prg_return_true:
+      }
+      {
+        \prg_return_false:
+      }
+  }
+\prg_generate_conditional_variant:Nnn \@@_ref_if_exist:nn  {en} { p , T , F, TF }
+%    \end{macrocode}
+% This checks if the label/attribute is known and issues a warning if not.
+% It then also triggers the standard rerun message.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_ref_check:nn #1 #2 %label/attribute
+  {
+    \@@_ref_if_exist:nnF {#1}{#2}
+      {
+        \protect\G@refundefinedtrue
+        \@latex@warning
+          {
+            Reference~`\tl_to_str:n {#1}'~with~attribute~`\tl_to_str:n {#2}'~
+            on~page~\thepage~\space undefined
+          }
+      }
+  }
+\cs_generate_variant:Nn \@@_ref_check:nn {en}
+%    \end{macrocode}
+% This retrieves a value, it is a simple wrapper around the \cs{ref_value:nn}
+%    \begin{macrocode}
+\cs_new:Npn \@@_ref_value:nn #1 #2
+  {
+    \ref_value:nn{#1}{#2}
+  }
+\cs_generate_variant:Nn \@@_ref_value:nn {en}
+%    \end{macrocode}
+%    \begin{macrocode}
 %%%%%%%%%%%%%%%%
 % defaults, will perhaps need some sorting and be checked if they are sensible for all backends
 %%%%%%%%%%%%%%%
@@ -2893,4 +3016,5 @@
 
 %%
 %% End of file `hgeneric-experimental.def'.
-\endinput
+%</package>
+%    \end{macrocode}

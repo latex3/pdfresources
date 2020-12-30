@@ -2,7 +2,7 @@
 
 File: pdfmanagement.ins
 
-Copyright (C) 2019 The LaTeX Project
+Copyright (C) 2019-2020 The LaTeX Project
 
 It may be distributed and/or modified under the conditions of the
 LaTeX Project Public License (LPPL), either version 1.3c of this
@@ -34,7 +34,7 @@ for those people who are interested.
 \let\MetaPrefix\relax
 \preamble
 
-Copyright (C) 2019 The LaTeX3 Project
+Copyright (C) 2019-2020 The LaTeX3 Project
 
 It may be distributed and/or modified under the conditions of
 the LaTeX Project Public License (LPPL), either version 1.3c of
@@ -184,6 +184,15 @@ and all files in that bundle must be distributed together.
         \from{pdfmanagement.dtx}{drivers,dvisvgm}
       }
   }
+
+\generate
+  {
+    \file {hgeneric-experimental.def}
+      {
+       \from{hyperref-generic.dtx}{package}
+      }
+  }
+
 
 \def\MetaPrefix{-- }
 \def\defaultpostamble{%
