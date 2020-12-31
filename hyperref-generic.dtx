@@ -47,7 +47,57 @@
 % \date{Released XXXX-XX-XX}
 %
 % \maketitle
-
+% This package generates a generic driver for \pkg{hyperref} meant to be used
+% with the new LaTeX PDF management code. Currently---until \pkg{hyperref} has been
+% adapted to use this driver it has to be loaded with
+% \begin{verbatim}
+% \usepackage[customdriver=hgeneric-experimental]{hyperref}
+% \end{verbatim}
+% Both the name of the driver and the loading method will change.
+%
+% The generic driver can be used with pdflatex, lualatex, xelatex, latex with
+% dvipdfmx, latex with dvips+ps2pdf. latex with dvips+distiller could work too
+% but is untested.
+%
+% The driver requires the new PDF management code, so document wanting to use it should
+% start like this
+% \begin{verbatim}
+% \RequirePackage{pdfmanagement} %loads the code
+% \DeclareDocumentMetadata % activates it
+%   {
+%    % options
+%    % e.g. pdf version, backend:
+%    % pdfversion=1.7,
+%    % backend = dvipdfmx
+%   }
+%  \end{verbatim}
+%
+%  \section{Differences}
+%  The new driver tries to be compatible with the current \pkg{hyperref} drivers
+%  but there are nevertheless difference. Some of them due to the still experimental
+%  status of the driver, other are design decision: one part of the project is
+%  to clean up and modernize the code.
+%
+%  \subsection{Bookmark code}
+%  The driver doesn't contain code to handle bookmarks/outlines. Instead it forces
+%  the loading the \pkg{bookmark} package. Currently this is done at the end of the preamble
+%  so if commands from \pkg{bookmark} are needed in the preamble the document
+%  still has to load it manually but this is subject to change.
+%
+%  \subsection{Package options from hyperref}
+%  Not all package options are handled by the driver as this would require adaption
+%  of \pkg{hyperref}. Options should be set with \cs{hypersetup} after
+%  the package has been loaded.
+%
+%  \subsection{Destinations}
+%  Destinations (sometimes call anchors in the \pkg{hyperref} documentation)
+%  are the places a link jumped too. Unlike the name may suggest they don't described
+%  an exact location in the PDF. Instead a destination contains a reference to
+%  a page along with an instruction how to display this page.
+%  The normally used \enquote{XYZ \textit{top left zoom}} for example instructs
+%  the viewer to show the page with the given \textit{zoom} and
+%  the top left corner at the \textit{top left} coordinates---which then gives
+%  the impression that there is an anchor at this position. 
 %% This is an adapted version of hluatex.def
 %% meant to test the use of the commands
 %% from pdfmanagement.sty
