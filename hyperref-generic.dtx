@@ -97,7 +97,79 @@
 %  The normally used \enquote{XYZ \textit{top left zoom}} for example instructs
 %  the viewer to show the page with the given \textit{zoom} and
 %  the top left corner at the \textit{top left} coordinates---which then gives
-%  the impression that there is an anchor at this position. 
+%  the impression that there is an anchor at this position.
+%
+%  From these instructions two |Fit| and |FitB| are absolute. All
+%  others take one (|FitH|, |FitV|, |FitBH|, |FitBV|)
+%  or more (|XYZ|, |FitR|) arguments. These arguments are normally
+%  coordinates, |XYZ| takes also a zoom factor. The coordinates are
+%  absolute coordinates in bp relative to the lower left corner
+%  of the PDF.
+%
+%  With pdftex almost all instructions
+%  don't take an argument: The needed coordinate is instead calculated from the location
+%  the \cs{pdfdest} command is issued. So to get a specific coordinate one has to
+%  move the command to the right place. E.g.
+%  \begin{verbatim}
+%  \AddToHookNext{shipout/background}
+%     {\put(0,-\pdfpageheight+100bp){\pdfdest name{destA} FitH\relax}}
+%  \end{verbatim}
+%
+%  Exceptions are the |XYZ| instruction, where pdftex accepts a keyword
+%  |zoom| followed by a zoom factor, and the |FitR| instruction
+%  which understands the keywords |width|, |height| and |depth|
+%  followed by a dimension, which is then used to calculate a rectangle relative to the
+%  current location. If no keywords are given the dimensions are taken from the surrounding
+%  box---which can also lead to zero sized areas.
+%
+%  The manual of \pkg{hyperref} gives a bit the impression as if this
+%  coordinates can be set manually by the user but as described above this is
+%  mostly wrong: It is only possible with a dvi-backend like dvips which make use of
+%  pdfmark.def. As dvips was the first driver of \pkg{hyperref} the option was at first
+%  developed for it and then adapted to pdftex. But this had the effect that the handling
+%  of the options is quite inconsequent across the backend and engines:
+%  For example with |pdfview=FitH 100| pdftex ignores the
+%  number and calculates on its own, while dvips sets the coordinate to the absolute
+%  100. The zoom factor of XYZ is not supported by the pdftex driver at all, and
+%  |FitR| only partially.
+%
+%  The generic driver consolidate this.
+%  It also takes into account the |pdfview| and |pdfstartview| and |pdfremotestartview|
+%  have different requirements: While for the first relative coordinates are fine,
+%  for the two others absolute coordinates are more sensible.
+%
+%  So with this driver the options
+%  |pdfview|, |pdfstartview| and |pdfremotestartview| take
+%  the following options:
+%  \begin{itemize}
+%  \item |Fit|, |FitB|, |FitH|, |FitV|,
+%   |FitBH|, |FitBV| which can be followed by number (separated by a space).
+%   The number can be calculated from a \meta{dimension expression} with
+%   \cs{\hypercalcbp}. The driver redefines this command to use
+%   \cs{dim_to_decimal_in_bp:n}
+%   \begin{itemize}
+%   \item |pdfview| will ignore any following arguments and work
+%   as described above for pdftex for all supported engines and backends.
+%   \item |pdfstartview| and |pdfremotestartview| will pass the optional number
+%   as absolute coordinate.
+%
+%  \item |XYZ|. This \emph{can} be followed (separated by spaces) by a
+%  number which is then taken as the zoom value. Other
+%  arguments are ignored. This behaviour is incompatible with previous
+%  handling with the dvips driver.
+%  \item |FitR|. This case is the most challenging.
+%  If no argument (separated by spaces) follows it will use with pdftex and luatex
+%  the automatic calculation of the coordinates from the encompassing box. With
+%  dvips and dvipdfmx it will fall back to |Fit|.
+%  If arguments (separated by spaces) follow they should be up to
+%  three dimensions representing width,
+%  height and depth of the area that the destination should encompass relative to
+%  the place it is created.
+%
+%  \end{itemize}
+%
+%
+%
 %% This is an adapted version of hluatex.def
 %% meant to test the use of the commands
 %% from pdfmanagement.sty
@@ -149,10 +221,15 @@
 \RequirePackage{l3color}
 %    \end{macrocode}
 %
+% \section{Overwriting commands from hyperref}
 %  hyperref checks driver version, we need to suppress this during the development
 %    \begin{macrocode}
 \chardef\Hy@VersionChecked=1 %don't check the version!
 \ExplSyntaxOn
+%    \end{macrocode}
+% We define a better (expandable) version of \cs{hypercalcbp}
+%    \begin{macrocode}
+\cs_set_eq:NN \hypercalcbp \dim_to_decimal_in_bp:n
 %    \end{macrocode}
 %
 % \section{messages}
@@ -399,6 +476,7 @@
   }
 
 %regex for destinations
+% must be redone after the decision to change syntax ...
 \regex_const:Nn \c__hyp_dest_view_regex
   {
     \A\ *
@@ -845,12 +923,12 @@
 
 % internal definitions for anchors (destinations) and links to destinations.
 
-\Hy@WrapperDef \__hyp_destination:n #1 % #1 is a destination name.
+\Hy@WrapperDef \@@_destination:n #1 % #1 is a destination name.
   {
     \mode_if_horizontal:T { \@savsf\spacefactor }
     \Hy@SaveLastskip      %defined in hyperref
     \Hy@VerboseAnchor{#1} %defined in hyperref, for debugging
-    \__hyp_pstringdef:Nx  \l__hyp_tmpa_tl { \HyperDestNameFilter{#1} } %
+    \@@_pstringdef:Nx  \l__hyp_tmpa_tl { \HyperDestNameFilter{#1} } %
     \exp_args:NV \pdf_destination:nf { \l__hyp_tmpa_tl } { \@pdfview } %
     \Hy@RestoreLastskip   %defined in hyperref
     \mode_if_horizontal:T { \spacefactor\@savsf }
@@ -1758,10 +1836,10 @@
 % to set it on the right page, e.g. only after a |\newpage|.
 % The generic driver uses a different syntax than the other hyperref drivers:
 % various transition options can be set by a keyval syntax in the value of
-% \texttt{pdfpagetransition}. A typical setting looks e.g. like this\\
+% |pdfpagetransition|. A typical setting looks e.g. like this\\
 % |\hypersetup{pdfpagetransition={style=Fly,duration=2,direction=90,opaque=false}}|
 %
-% The keys allowed in the argument of \texttt{pdfpagetransition} are
+% The keys allowed in the argument of |pdfpagetransition| are
 % \begin{tabular}{l>{\raggedright}p{6cm}}
 % style    &  one of Split, Blinds, Box, Wipe, Dissolve, Glitter, R, Fly, Push, Cover, Uncover, Fade\\
 % duration &  a number, describes the duration of the transition\\

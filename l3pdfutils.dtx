@@ -207,9 +207,12 @@
 %   \begin{syntax}
 %     \cs{pdf_destination:nn} \Arg{name} \Arg{type or integer}
 %   \end{syntax}
-%   This creates a destination. \Arg{type or Integer} can be one of |Fit|, |FitH|,
-%   |FitV|, |FitB|, |FitBH|, |FitBV|, |XYZ| and the lower case variants,
+%   This creates a destination. \Arg{type or Integer} can be one of |fit|, |fith|,
+%   |fitv|, |fitb|, |fitbh|, |fitbv|, |fitr|, |xyz|
 %   or an integer representing a  scale factor in percent.
+%   The backend code defines |fitr| so that it will with pdflatex and
+%   lualatex use the coordinates of the surrounding box,
+%   with dvips and dvipdfmx it falls back to |fit|.
 % \end{function}
 % \begin{function}[added = 2020-03-10]
 %   {\pdf_destination_box:nn}
@@ -225,37 +228,29 @@
 % perhaps some manipulation of the argument will be needed to map the current
 % hyperref syntax
 % unclear currently if is this is useful for anything.
-\prop_new:N   \l_@@_views_map_prop
-\prop_put:Nnn \l_@@_views_map_prop {XYZ} { xyz }
-\prop_put:Nnn \l_@@_views_map_prop {xyz} { xyz }
-\prop_put:Nnn \l_@@_views_map_prop {Fit} { fit }
-\prop_put:Nnn \l_@@_views_map_prop {fit} { fit }
-\prop_put:Nnn \l_@@_views_map_prop {FitB} { fitb }
-\prop_put:Nnn \l_@@_views_map_prop {fitb} { fitb }
-\prop_put:Nnn \l_@@_views_map_prop {FitBH} { fitbh }
-\prop_put:Nnn \l_@@_views_map_prop {fitbh} { fitbh }
-\prop_put:Nnn \l_@@_views_map_prop {FitBv} { fitbv }
-\prop_put:Nnn \l_@@_views_map_prop {fitbv} { fitbv }
-\prop_put:Nnn \l_@@_views_map_prop {FitH} { fith }
-\prop_put:Nnn \l_@@_views_map_prop {fith} { fith }
-\prop_put:Nnn \l_@@_views_map_prop {FitV} { fitv }
-\prop_put:Nnn \l_@@_views_map_prop {fitv} { fitv }
+%\prop_new:N   \l_@@_views_map_prop
+%\prop_put:Nnn \l_@@_views_map_prop {XYZ} { xyz }
+%\prop_put:Nnn \l_@@_views_map_prop {xyz} { xyz }
+%\prop_put:Nnn \l_@@_views_map_prop {Fit} { fit }
+%\prop_put:Nnn \l_@@_views_map_prop {fit} { fit }
+%\prop_put:Nnn \l_@@_views_map_prop {FitB} { fitb }
+%\prop_put:Nnn \l_@@_views_map_prop {fitb} { fitb }
+%\prop_put:Nnn \l_@@_views_map_prop {FitBH} { fitbh }
+%\prop_put:Nnn \l_@@_views_map_prop {fitbh} { fitbh }
+%\prop_put:Nnn \l_@@_views_map_prop {FitBv} { fitbv }
+%\prop_put:Nnn \l_@@_views_map_prop {fitbv} { fitbv }
+%\prop_put:Nnn \l_@@_views_map_prop {FitH} { fith }
+%\prop_put:Nnn \l_@@_views_map_prop {fith} { fith }
+%\prop_put:Nnn \l_@@_views_map_prop {FitV} { fitv }
+%\prop_put:Nnn \l_@@_views_map_prop {fitv} { fitv }
+%\prop_put:Nnn \l_@@_views_map_prop {FitR} { fitr }
+%\prop_put:Nnn \l_@@_views_map_prop {fitr} { fitr }
 
 \cs_new_protected:Npn \pdf_destination:nn #1 #2
- {
-  \prop_if_in:NnTF \l_@@_views_map_prop { #2 }
-   {
-    \exp_args:Nox %xetex?
-    \@@_backend_destination:nn { #1 } { \prop_item:Nn \l_@@_views_map_prop {#2} }
-   }
-   {
-    \exp_args:No %xetex?
-    \@@_backend_destination:nn { #1 } { #2 }
-    % should we assume that it is a zoom value then??
-    % should we test that it is really a number?
-    % or should there be a third argument for this case and for other coordinates?
-   }
- }
+  {
+    \@@_backend_destination:nn {#1}{#2}
+  }
+
 \cs_generate_variant:Nn\pdf_destination:nn {no,nf}
 
 \cs_new_protected:Npn \pdf_destination_box:nn #1 #2 %#1 name, #2 box content
