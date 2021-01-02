@@ -153,22 +153,24 @@
 %   the expected coordinates as described above for pdftex with all
 %   supported engines and backends.
 %   \item |pdfstartview| and |pdfremotestartview| will pass the optional
-%   number or keyword after expansion as absolute coordinate.
+%   number or keyword after expansion as absolute coordinate. If needed they will
+%   extend them with |null|
 %   \end{itemize}
 %
 %  \item |XYZ|. This can be followed (separated by spaces) by up to three
 %  positive integers or the keyword |null| which are then taken as \textit{top left zoom}
-%  in this order. \textit{zoom} is a value in percent!
+%  in this order. \textit{zoom} is a factor, so e.g. 0.5 will give a scaling of 50\%.
 %   \begin{itemize}
 %   \item |pdfview| will the last value as \textit{zoom}, ignore all other values
 %   and calculate  the expected coordinates as described above for pdftex with all
-%   supported engines and backends (this means it is possible to use |XYZ 200| to
+%   supported engines and backends (this means it is possible to use |XYZ 2| to
 %   set a zoom of 200\%, it is not necessary to fill in dummy values.)
 %   \item |pdfstartview| and |pdfremotestartview| will pass the optional
 %   numbers or keyword after expansion as absolute coordinates and zoom.
+%   If needed they will extend them with |null|.
 %   \end{itemize}
 %   This new behaviour is in part incompatible with previous handling with the dvips driver.
-%   That \textit{zoom} is a percent now, this is a change too.
+%
 %
 %  \item |FitR|. This case is the most challenging.
 %  If no argument (separated by spaces) follows then
@@ -312,6 +314,16 @@
             using~`#1'
   }
 %    \end{macrocode}
+% A message if the destination check fails
+%    \begin{macrocode}
+\msg_new:nnn
+  { hyp }
+  { invalid-destination-value }
+  {
+    Invalid~value~`#1'~of~`#2'  \\
+    is~replaced~by~`Fit'~\msg_line_context:.
+  }
+%    \end{macrocode}
 % Some options or values should not be used in older pdf versions
 %    \begin{macrocode}
 \msg_new:nnn
@@ -451,7 +463,7 @@
 \providecommand*{\XR@ext}{pdf} %ok as default for all drivers we want to support, should probably go into hyperref
 \Hy@setbreaklinks{true}        %also for dvips??
 
-\providecommand*\@pdfview{XYZ}
+%\providecommand*\@pdfview{XYZ}
 
 % unicode ...
 \HyPsd@LoadUnicode
@@ -470,6 +482,7 @@
 % tmp
 \box_new:N \l_@@_tmpa_box
 \tl_new:N  \l_@@_tmpa_tl
+\seq_new:N \l_@@_tmpa_seq
 \tl_new:N  \l_@@_destname_tmpa_tl %needed?
 \tl_new:N  \l_@@_uri_tmpa_tl
 \tl_new:N  \l_@@_filename_tmpa_tl
@@ -480,8 +493,9 @@
 \tl_const:Nn \c__hyp_destname_undefined_tl {UNDEFINED}
 
 %variables
-\tl_new:N  \g__hyp_pdfstartpage_tl
-\tl_new:N  \g__hyp_pdfstartview_tl
+\tl_new:N  \g_@@_pdfstartpage_tl
+\tl_new:N  \g_@@_pdfstartview_tl
+\tl_new:N  \l_@@_pdfremotestartview_tl
 
 % booleans
 \bool_new:N \l_@@_tmpa_bool
@@ -501,7 +515,7 @@
   }
 
 %regex for destinations
-% must be redone after the decision to change syntax ...
+% unclear if needed must be redone after the decision to change syntax ...
 \regex_const:Nn \c__hyp_dest_view_regex
   {
     \A\ *
@@ -515,6 +529,21 @@
       (?:FitR (?:\ +\d+|\d*\.\d+){4})
      )
      \ *\Z
+  }
+
+% for pdfstartview and pdfremotestartviewcheck:
+\regex_const:Nn \c_@@_dest_startview_regex
+  {
+    \A\ *
+     (?:
+      (?:XYZ (?:\ +(?:(?:\d+|\d*\.\d+)|null)){3}\ )
+      |
+      (?:Fit\b|FitB\b)
+      |
+      (?:(?:FitH|FitV|FitBH|FitBV)(?:\ +(?:\d+|\d*\.\d+)|\ +null){1})
+      |
+      (?:FitR (?:\ +\d+|\d*\.\d+){4})
+     )
   }
 
 % module dictionary for trans:
@@ -954,7 +983,26 @@
     \Hy@SaveLastskip      %defined in hyperref
     \Hy@VerboseAnchor{#1} %defined in hyperref, for debugging
     \@@_pstringdef:Nx  \l_@@_tmpa_tl { \HyperDestNameFilter{#1} } %
-    \exp_args:NV \pdf_destination:nf { \l_@@_tmpa_tl } { \@pdfview } %
+    \bool_if:NTF \l_@@_dest_box_bool
+      {
+        \vbox_to_zero:n
+          {
+           \smash
+             {
+               \hbox_to_zero:n
+                 {
+                   \exp_args:NV
+                     \pdf_destination_box:nn
+                       { \l_@@_tmpa_tl }
+                       { \box_use:N \l_@@_dest_box }
+                    \hss
+                 }
+             }
+          }
+      }
+      {
+        \exp_args:NV \pdf_destination:nf { \l_@@_tmpa_tl } { \l_@@_dest_pdfview_tl } %
+      }
     \Hy@RestoreLastskip   %defined in hyperref
     \mode_if_horizontal:T { \spacefactor\@savsf }
   }
@@ -1088,7 +1136,7 @@
           /S/GoToR
           \Hy@SetNewWindow
           \ifx\\#3\\
-            /D[\Hy@href@page\@pdfremotestartview]
+            /D[\Hy@href@page\l_@@_pdfremotestartview_tl]
           \else
             /D( \l_@@_destname_tmpa_tl )
           \fi
@@ -1576,35 +1624,57 @@
          { None, AppDefault }
          { \exp_not:n {#1} }
      }
+   ,pdfremotestartview .code:n =
+     {
+       \tl_set:Nx \l_@@_tmpa_tl {#1~null~null~null~}
+       \exp_args:NNV
+       \regex_extract_once:NnNTF \c_@@_dest_startview_regex \l_@@_tmpa_tl  \l_@@_tmpa_seq
+         {
+           \tl_set_Nx \l_@@_pdfremotestartview_tl {\seq_item:Nn \l_@@_tmpa_seq {1}}
+         }
+         {
+           \msg_warning:nnnn {hyp}{invalid-destination-value}{#1}{pdfremotestartview}
+           \tl_set:Nn \l_@@_pdfremotestartview_tl {Fit}
+         }
+     }
    % pdfstartpage is special as it shares code with pdfstartview
    ,pdfstartpage .code:n =
      {
-       \tl_gset:Nx \g__hyp_pdfstartpage_tl { #1 }
+       \tl_gset:Nx \g_@@_pdfstartpage_tl { #1 }
        \bool_if:nTF
-         { \tl_if_empty_p:N \g__hyp_pdfstartpage_tl || \tl_if_empty_p:N \g__hyp_pdfstartview_tl }
+         { \tl_if_empty_p:N \g_@@_pdfstartpage_tl || \tl_if_empty_p:N \g_@@_pdfstartview_tl }
          {
            \pdfmanagement_remove:nn {Catalog} { OpenAction }
          }
          {
            \pdfmanagement_add:nnx {Catalog} { OpenAction }
              {
-               [\pdf_object_pageref:n {\g__hyp_pdfstartpage_tl}~/\g__hyp_pdfstartview_tl]
+               [\pdf_object_pageref:n {\g_@@_pdfstartpage_tl}~/\g_@@_pdfstartview_tl]
              }
          }
      }
    ,pdfstartpage .initial:n =1
    ,pdfstartview .code:n =
      {
-       \tl_gset:Nx \g__hyp_pdfstartview_tl { #1 }
+       \tl_set:Nx \l_@@_tmpa_tl {#1~null~null~null~}
+       \exp_args:NNV
+       \regex_extract_once:NnNTF \c_@@_dest_startview_regex \l_@@_tmpa_tl  \l_@@_tmpa_seq
+         {
+           \tl_gset:Nx \g_@@_pdfstartview_tl {\seq_item:Nn \l_@@_tmpa_seq {1}}
+         }
+         {
+           \msg_warning:nnnn {hyp}{invalid-destination-value}{#1}{pdfstartview}
+           \tl_gset:Nn \g_@@_pdfstartview_tl {Fit}
+         }
        \bool_if:nTF
-         { \tl_if_empty_p:N \g__hyp_pdfstartpage_tl || \tl_if_empty_p:N \g__hyp_pdfstartview_tl }
+         { \tl_if_empty_p:N \g_@@_pdfstartpage_tl || \tl_if_empty_p:N \g_@@_pdfstartview_tl }
          {
            \pdfmanagement_remove:nn {Catalog} { OpenAction }
          }
          {
            \pdfmanagement_add:nnx {Catalog} { OpenAction }
              {
-               [\pdf_object_pageref:n {\g__hyp_pdfstartpage_tl}~/\g__hyp_pdfstartview_tl]
+               [\pdf_object_pageref:n {\g_@@_pdfstartpage_tl}~/\g_@@_pdfstartview_tl]
              }
          }
      }
@@ -1708,14 +1778,15 @@
    ,pdfwindowui    .default:n = true
  }
 
-% Destination keys. A bit more complicates so extra.
+% Destination keys. A bit more complicated so extra.
 \bool_new:N \l_@@_dest_box_bool
 \box_new:N  \l_@@_dest_box
 \tl_new:N   \l_@@_dest_pdfview_tl
 \keys_define:nn { hyp / setup }
   {
-    pdfview .code:n =
+    ,pdfview .code:n =
       {
+        \bool_set_false:N \l_@@_dest_box_bool
         \seq_set_split:Nnn \l_@@_tmpa_seq {~}{#1}
         \str_case_e:nn { \str_lowercase:f{ \seq_item:Nn \l_@@_tmpa_seq {1} } }
            {
@@ -1723,10 +1794,16 @@
                {
                  \int_compare:nNnTF {\seq_count:N \l_@@_tmpa_seq } > { 1 }
                    {
-                     \seq_get_right:NN \l_@@_tmpa_seq \l_@@_dest_pdfview_tl
-                     \tl_if_eq:NnT \l_@@_dest_pdfview_tl {null}
+                     \seq_get_right:NN \l_@@_tmpa_seq \l_@@_tmpa_tl
+                     \tl_if_eq:NnTF \l_@@_tmpa_tl {null}
                        {
                          \tl_set:Nn \l_@@_dest_pdfview_tl {xyz}
+                       }
+                       {
+                         \tl_set:Nx \l_@@_dest_pdfview_tl
+                            {
+                               \fp_eval:n { \l_@@_tmpa_tl * 100 }
+                            }
                        }
                    }
                    {
@@ -1776,6 +1853,7 @@
                }
            }
       }
+    ,pdfview .initial:n  = {xyz}
   }
 % styles and colors.
 % this needs some sorting.
@@ -2081,7 +2159,7 @@
 
 \prop_new:N   \g__hyp_AcroForm_CoFields_prop
 \prop_new:N   \g__hyp_AcroForm_Fields_prop
-\seq_new:N    \l_@@_tmpa_seq
+
 \let\HyField@afields\ltx@empty
 \let\HyField@cofields\ltx@empty
 %% UF test for old pdftex removed
