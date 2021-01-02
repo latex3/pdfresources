@@ -143,29 +143,52 @@
 %  the following options:
 %  \begin{itemize}
 %  \item |Fit|, |FitB|, |FitH|, |FitV|,
-%   |FitBH|, |FitBV| which can be followed by number (separated by a space).
-%   The number can be calculated from a \meta{dimension expression} with
+%   |FitBH|, |FitBV| which can be followed by a positive integer (separated by a space) or the
+%   keyword |null|.
+%   The number can be gives as a \meta{dimension expression} surrounded with
 %   \cs{\hypercalcbp}. The driver redefines this command to use
-%   \cs{dim_to_decimal_in_bp:n}
+%   \cs{dim_to_decimal_in_bp:n}.
 %   \begin{itemize}
-%   \item |pdfview| will ignore any following arguments and work
-%   as described above for pdftex for all supported engines and backends.
-%   \item |pdfstartview| and |pdfremotestartview| will pass the optional number
-%   as absolute coordinate.
+%   \item |pdfview| will ignore the integer and any other arguments and calculate
+%   the expected coordinates as described above for pdftex with all
+%   supported engines and backends.
+%   \item |pdfstartview| and |pdfremotestartview| will pass the optional
+%   number or keyword after expansion as absolute coordinate.
+%   \end{itemize}
 %
-%  \item |XYZ|. This \emph{can} be followed (separated by spaces) by a
-%  number which is then taken as the zoom value. Other
-%  arguments are ignored. This behaviour is incompatible with previous
-%  handling with the dvips driver.
+%  \item |XYZ|. This can be followed (separated by spaces) by up to three
+%  positive integers or the keyword |null| which are then taken as \textit{top left zoom}
+%  in this order. \textit{zoom} is a value in percent!
+%   \begin{itemize}
+%   \item |pdfview| will the last value as \textit{zoom}, ignore all other values
+%   and calculate  the expected coordinates as described above for pdftex with all
+%   supported engines and backends (this means it is possible to use |XYZ 200| to
+%   set a zoom of 200\%, it is not necessary to fill in dummy values.)
+%   \item |pdfstartview| and |pdfremotestartview| will pass the optional
+%   numbers or keyword after expansion as absolute coordinates and zoom.
+%   \end{itemize}
+%   This new behaviour is in part incompatible with previous handling with the dvips driver.
+%   That \textit{zoom} is a percent now, this is a change too.
+%
 %  \item |FitR|. This case is the most challenging.
-%  If no argument (separated by spaces) follows it will use with pdftex and luatex
+%  If no argument (separated by spaces) follows then
+%  |pdfview| will use with pdftex and luatex
 %  the automatic calculation of the coordinates from the encompassing box. With
-%  dvips and dvipdfmx it will fall back to |Fit|.
-%  If arguments (separated by spaces) follow they should be up to
-%  three dimensions representing width,
-%  height and depth of the area that the destination should encompass relative to
-%  the place it is created.
+%  dvips and dvipdfmx  it will fall back to |Fit|.
+%  |pdfstartview| and |pdfremotestartview| will fallback to |Fit| too.
 %
+%  If arguments (separated by spaces) follow they should be up to
+%  four numbers  representing \texttt{left bottom right top}.
+%  \begin{itemize}\item
+%  |pdfview| will use the values to calculate coordinates relative to the current
+%  location. So |0 -100 200 400| will give a \enquote{box} of width 200bp,
+%  height 400bp and depth 100dp that the destination should encompass.
+%  Missing numbers will be set to 0. But one should be aware that is it is quite
+%  unpredicable how viewers which support |FitR| handles zero sizes.
+%
+%  \item |pdfstartview| and |pdfremotestartview| will pass
+%  the values as absolute coordinates.
+%  \end{itemize}
 %  \end{itemize}
 %
 %
@@ -188,20 +211,20 @@
 %%                           currently simply \text_purify:n
 %% \__hyp_info_generate_addons: what did this do??
 %% list of new variables
-%% \l__hyp_pdfa_bool : for pdfa option (unclear if it will stay)
+%% \l_@@_pdfa_bool : for pdfa option (unclear if it will stay)
 %% \c__hyp_destname_undefined_tl
 %% \g__hyp_AcroForm_CoFields_prop
 %% \g__hyp_AcroForm_Fields_prop
-%% \l__hyp_tmpa_seq
-%% \l__hyp_tmpa_box
-%% \l__hyp_tmpa_tl
-%% \l__hyp_destname_tmpa_tl
-%% \l__hyp_uri_tmpa_tl
-%% \l__hyp_filename_tmpa_tl
-%% \l__hyp_para_tmpa_tl
-%% \l__hyp_CheckmarkYes_tl
-%% \l__hyp_CheckmarkOff_tl
-%% \l__hyp_RadioYes_tl
+%% \l_@@_tmpa_seq
+%% \l_@@_tmpa_box
+%% \l_@@_tmpa_tl
+%% \l_@@_destname_tmpa_tl
+%% \l_@@_uri_tmpa_tl
+%% \l_@@_filename_tmpa_tl
+%% \l_@@_para_tmpa_tl
+%% \l_@@_CheckmarkYes_tl
+%% \l_@@_CheckmarkOff_tl
+%% \l_@@_RadioYes_tl
 %% list of commands which probably will have to change
 %%   \Hy@EXPsetpdfborder
 %%   \Hy@EXPsetpdfhighlight
@@ -428,9 +451,6 @@
 \providecommand*{\XR@ext}{pdf} %ok as default for all drivers we want to support, should probably go into hyperref
 \Hy@setbreaklinks{true}        %also for dvips??
 
-% checked dvips, luatex, xetex, dvipdfm: values are identical:
-%\providecommand*\@pdfborder{0~0~1}
-%\providecommand*\@pdfborderstyle{}
 \providecommand*\@pdfview{XYZ}
 
 % unicode ...
@@ -441,15 +461,20 @@
 \pdfannot_link_margin:n { 1pt }
 
 %%%%%%%%%%
-
+% hyperref, must be renamed later
+% checked dvips, luatex, xetex, dvipdfm: values are identical:
+%\providecommand*\@pdfborder{0~0~1}
+%\providecommand*\@pdfborderstyle{}
+\tl_new:N\@pdfborder
+\tl_new:N\@pdfborderstyle
 % tmp
-\box_new:N \l__hyp_tmpa_box
-\tl_new:N  \l__hyp_tmpa_tl
-\tl_new:N  \l__hyp_destname_tmpa_tl %needed?
-\tl_new:N  \l__hyp_uri_tmpa_tl
-\tl_new:N  \l__hyp_filename_tmpa_tl
-\tl_new:N  \l__hyp_para_tmpa_tl
-\int_new:N \l__hyp_tmpa_int
+\box_new:N \l_@@_tmpa_box
+\tl_new:N  \l_@@_tmpa_tl
+\tl_new:N  \l_@@_destname_tmpa_tl %needed?
+\tl_new:N  \l_@@_uri_tmpa_tl
+\tl_new:N  \l_@@_filename_tmpa_tl
+\tl_new:N  \l_@@_para_tmpa_tl
+\int_new:N \l_@@_tmpa_int
 
 % const
 \tl_const:Nn \c__hyp_destname_undefined_tl {UNDEFINED}
@@ -459,11 +484,11 @@
 \tl_new:N  \g__hyp_pdfstartview_tl
 
 % booleans
-\bool_new:N \l__hyp_tmpa_bool
+\bool_new:N \l_@@_tmpa_bool
 %%% pdfa key:
-\bool_new:N \l__hyp_pdfa_bool
+\bool_new:N \l_@@_pdfa_bool
 \ifHy@pdfa
-  \bool_set_true:N \l__hyp_pdfa_bool
+  \bool_set_true:N \l_@@_pdfa_bool
 \fi
 
 \prop_const_from_keyval:Nn \c__hyp_map_linktypes_prop
@@ -493,13 +518,13 @@
   }
 
 % module dictionary for trans:
-\pdfdict_new:n   {l__hyp_page/Trans}
-\pdfdict_put:nnn {l__hyp_page/Trans}{Type}{/Trans}
+\pdfdict_new:n   {l_@@_page/Trans}
+\pdfdict_put:nnn {l_@@_page/Trans}{Type}{/Trans}
 % this need sorting out later. pdf standards should be handled outside the driver.
 % pdfa forces the flag /F 4 in some places.
 \AtBeginDocument
   {
-    \bool_if:NT \l__hyp_pdfa_bool
+    \bool_if:NT \l_@@_pdfa_bool
       {
         \pdfannot_dict_put:nnn
           {link/URI}
@@ -550,8 +575,8 @@
 % #1=input, #2= handler shortcut #3 output command
 \cs_new_protected:Npn \__hyp_text_purify_to_string:nnN #1 #2 #3
  {
-   \__hyp_text_purify:nN {#1}\l__hyp_tmpa_tl
-   \__hyp_text_to_string:NnN \l__hyp_tmpa_tl { #2 } #3
+   \__hyp_text_purify:nN {#1}\l_@@_tmpa_tl
+   \__hyp_text_to_string:NnN \l_@@_tmpa_tl { #2 } #3
  }
 
 
@@ -821,17 +846,17 @@
     \pdf@ifdraftmode
       {}
       {
-        \pdf_object_new:nn   { l__hyp_ocg_view_dict_obj }   { dict }
-        \pdf_object_new:nn   { l__hyp_ocg_print_dict_obj }  { dict }
-        \pdf_object_new:nn   { l__hyp_ocg_config_dict_obj } { dict }
-        \pdf_object_new:nn   { l__hyp_ocg_ref_array_obj }   { array }
-        \pdf_object_write:nx { l__hyp_ocg_ref_array_obj }
+        \pdf_object_new:nn   { l_@@_ocg_view_dict_obj }   { dict }
+        \pdf_object_new:nn   { l_@@_ocg_print_dict_obj }  { dict }
+        \pdf_object_new:nn   { l_@@_ocg_config_dict_obj } { dict }
+        \pdf_object_new:nn   { l_@@_ocg_ref_array_obj }   { array }
+        \pdf_object_write:nx { l_@@_ocg_ref_array_obj }
           {
-            \pdf_object_ref:n { l__hyp_ocg_view_dict_obj }
+            \pdf_object_ref:n { l_@@_ocg_view_dict_obj }
             \c_space_tl
-            \pdf_object_ref:n { l__hyp_ocg_print_dict_obj }
+            \pdf_object_ref:n { l_@@_ocg_print_dict_obj }
           }
-        \pdf_object_write:nn { l__hyp_ocg_view_dict_obj }
+        \pdf_object_write:nn { l_@@_ocg_view_dict_obj }
           {
             /Type/OCG
             /Name(View)
@@ -841,7 +866,7 @@
               /View  <</ViewState/ON  >>~
              >>
           }
-        \pdf_object_write:nn { l__hyp_ocg_print_dict_obj }
+        \pdf_object_write:nn { l_@@_ocg_print_dict_obj }
           {
             /Type/OCG
             /Name(Print)
@@ -851,30 +876,30 @@
               /View  <</ViewState/OFF>>~
              >>
           }
-       \pdfmanagement_add:nnx { Catalog / OCProperties }{OCGs }{ \pdf_object_ref:n {l__hyp_ocg_view_dict_obj} }
-       \pdfmanagement_add:nnx { Catalog / OCProperties }{OCGs }{ \pdf_object_ref:n {l__hyp_ocg_print_dict_obj} }
-       \pdf_object_write:nx { l__hyp_ocg_config_dict_obj }
+       \pdfmanagement_add:nnx { Catalog / OCProperties }{OCGs }{ \pdf_object_ref:n {l_@@_ocg_view_dict_obj} }
+       \pdfmanagement_add:nnx { Catalog / OCProperties }{OCGs }{ \pdf_object_ref:n {l_@@_ocg_print_dict_obj} }
+       \pdf_object_write:nx { l_@@_ocg_config_dict_obj }
          {
-           /OFF[\pdf_object_ref:n { l__hyp_ocg_print_dict_obj }]
+           /OFF[\pdf_object_ref:n { l_@@_ocg_print_dict_obj }]
            /AS[
              <<
               /Event/View
-              /OCGs\c_space_tl \pdf_object_ref:n { l__hyp_ocg_ref_array_obj }
+              /OCGs\c_space_tl \pdf_object_ref:n { l_@@_ocg_ref_array_obj }
               /Category[/View]
              >>
              <<
               /Event/Print
-              /OCGs\c_space_tl \pdf_object_ref:n { l__hyp_ocg_ref_array_obj }
+              /OCGs\c_space_tl \pdf_object_ref:n { l_@@_ocg_ref_array_obj }
               /Category[/Print]
              >>
              <<
               /Event/Export
-              /OCGs\c_space_tl \pdf_object_ref:n { l__hyp_ocg_ref_array_obj }
+              /OCGs\c_space_tl \pdf_object_ref:n { l_@@_ocg_ref_array_obj }
               /Category[/Print]
              >>
               ]
          }
-       \pdfmanagement_add:nnx { Catalog / OCProperties }{ D }{ \pdf_object_ref:n { l__hyp_ocg_config_dict_obj} }
+       \pdfmanagement_add:nnx { Catalog / OCProperties }{ D }{ \pdf_object_ref:n { l_@@_ocg_config_dict_obj} }
     }
     \Hy@AtBeginDocument
       {
@@ -884,7 +909,7 @@
             \legacy_if:nTF {Hy@ocgcolorlinks}
               {
                 \def\Hy@ocgcolor{#1}
-                \hbox_set:Nw \l__hyp_tmpa_box
+                \hbox_set:Nw \l_@@_tmpa_box
               }
               {
                 \HyColor@UseColor#1
@@ -897,13 +922,13 @@
                \hbox_set_end:
                \mbox
                  {
-                   \pdf_bdc_obj:nn {OC}{l__hyp_ocg_print_dict_obj}
-                   \hbox_overlap_right:n { \box_use:N \l__hyp_tmpa_box }
+                   \pdf_bdc_obj:nn {OC}{l_@@_ocg_print_dict_obj}
+                   \hbox_overlap_right:n { \box_use:N \l_@@_tmpa_box }
                    \pdf_emc:
-                   \pdf_bdc_obj:nn {OC}{l__hyp_ocg_view_dict_obj}
+                   \pdf_bdc_obj:nn {OC}{l_@@_ocg_view_dict_obj}
                    \group_begin:
                    \expandafter\HyColor@UseColor\Hy@ocgcolor
-                   \box_use_drop:N \l__hyp_tmpa_box
+                   \box_use_drop:N \l_@@_tmpa_box
                    \group_end:
                    \pdf_emc:
                 }
@@ -928,8 +953,8 @@
     \mode_if_horizontal:T { \@savsf\spacefactor }
     \Hy@SaveLastskip      %defined in hyperref
     \Hy@VerboseAnchor{#1} %defined in hyperref, for debugging
-    \@@_pstringdef:Nx  \l__hyp_tmpa_tl { \HyperDestNameFilter{#1} } %
-    \exp_args:NV \pdf_destination:nf { \l__hyp_tmpa_tl } { \@pdfview } %
+    \@@_pstringdef:Nx  \l_@@_tmpa_tl { \HyperDestNameFilter{#1} } %
+    \exp_args:NV \pdf_destination:nf { \l_@@_tmpa_tl } { \@pdfview } %
     \Hy@RestoreLastskip   %defined in hyperref
     \mode_if_horizontal:T { \spacefactor\@savsf }
   }
@@ -937,23 +962,23 @@
 \cs_new_protected:Npn \__hyp_link_dest_begin:nw #1
   {
     \mode_leave_vertical:
-    \protected@edef \l__hyp_destname_tmpa_tl { #1 }
-    \tl_if_empty:NTF \l__hyp_destname_tmpa_tl
+    \protected@edef \l_@@_destname_tmpa_tl { #1 }
+    \tl_if_empty:NTF \l_@@_destname_tmpa_tl
       {
         \msg_warning:nnx
           { hyp }
           { empty-destination-name }
           { \c__hyp_destname_undefined_tl }
-        \tl_set_eq:NN \l__hyp_destname_tmpa_tl \c__hyp_destname_undefined_tl
+        \tl_set_eq:NN \l_@@_destname_tmpa_tl \c__hyp_destname_undefined_tl
       }
       { %I hope this is right ...
-        \__hyp_pstringdef:Nx \l__hyp_destname_tmpa_tl
+        \__hyp_pstringdef:Nx \l_@@_destname_tmpa_tl
           {
-            \exp_args:No \HyperDestNameFilter { \l__hyp_destname_tmpa_tl }
+            \exp_args:No \HyperDestNameFilter { \l_@@_destname_tmpa_tl }
           }
       }
     \exp_args:No
-      \pdfannot_link_goto_begin:nw  { \l__hyp_destname_tmpa_tl }
+      \pdfannot_link_goto_begin:nw  { \l_@@_destname_tmpa_tl }
         \Hy@colorlink\@linkcolor
   }
 
@@ -1011,7 +1036,7 @@
 \cs_new_protected:Npn \hyper@linkurl #1 #2  %#1:link text #2: URI,
   {
     \group_begin:
-    \__hyp_pstringdef:Nx \l__hyp_uri_tmpa_tl { #2 }
+    \__hyp_pstringdef:Nx \l_@@_uri_tmpa_tl { #2 }
     %hyper@chars, unneeded as used only once
     \cs_set_eq:NN \# \c_hash_str
     \cs_set_eq:NN \% \c_percent_str
@@ -1026,7 +1051,7 @@
             % the action dictionary has no hook!
             /Type/Action~
             /S/URI~
-            /URI(\l__hyp_uri_tmpa_tl)~
+            /URI(\l_@@_uri_tmpa_tl)~
             \ifHy@href@ismap
               /IsMap~true%
             \fi
@@ -1049,23 +1074,23 @@
 \cs_new_protected:Npn \hyper@linkfile #1 #2 #3 % anchor text, filename, destname
   {
     \group_begin:
-    \tl_set:Nn \l__hyp_filename_tmpa_tl { #2 }
-    \Hy@CleanupFile \l__hyp_filename_tmpa_tl
-    \__hyp_pstringdef:No \l__hyp_filename_tmpa_tl { \l__hyp_filename_tmpa_tl }
-    \__hyp_pstringdef:Nn \l__hyp_destname_tmpa_tl { #3 }
+    \tl_set:Nn \l_@@_filename_tmpa_tl { #2 }
+    \Hy@CleanupFile \l_@@_filename_tmpa_tl
+    \__hyp_pstringdef:No \l_@@_filename_tmpa_tl { \l_@@_filename_tmpa_tl }
+    \__hyp_pstringdef:Nn \l_@@_destname_tmpa_tl { #3 }
     \Hy@MakeRemoteAction
     \mode_leave_vertical:
     \pdfannot_link:nnn %expansion??
       { GoToR }
       {
         /A<<
-          /F( \l__hyp_filename_tmpa_tl )
+          /F( \l_@@_filename_tmpa_tl )
           /S/GoToR
           \Hy@SetNewWindow
           \ifx\\#3\\
             /D[\Hy@href@page\@pdfremotestartview]
           \else
-            /D( \l__hyp_destname_tmpa_tl )
+            /D( \l_@@_destname_tmpa_tl )
           \fi
           \Hy@href@nextactionraw
         >>
@@ -1092,8 +1117,8 @@
 \cs_new_protected:Npn \hyper@linklaunch #1 #2 #3 % filename, anchor text, Parameters
  {
   \group_begin:
-    \__hyp_pstringdef:Nn \l__hyp_filename_tmpa_tl { #1 }
-    \__hyp_pstringdef:Nn \l__hyp_para_tmpa_tl     { #3 }
+    \__hyp_pstringdef:Nn \l_@@_filename_tmpa_tl { #1 }
+    \__hyp_pstringdef:Nn \l_@@_para_tmpa_tl     { #3 }
     %\Hy@pstringdef\Hy@pstringF{#1}%
     %\Hy@pstringdef\Hy@pstringP{#3}%
     \mode_leave_vertical:
@@ -1101,17 +1126,17 @@
      { Launch }
      {
        /A<<
-          /F( \l__hyp_filename_tmpa_tl )
+          /F( \l_@@_filename_tmpa_tl )
           /S/Launch
           \Hy@SetNewWindow
           \bool_if:nF
             {
-              \tl_if_empty_p:N \l__hyp_para_tmpa_tl
+              \tl_if_empty_p:N \l_@@_para_tmpa_tl
               ||
               \pdf_version_compare_p:Nn > {1.9}
             }
             {
-              /Win<</P(\l__hyp_para_tmpa_tl)/F(\l__hyp_filename_tmpa_tl)>>
+              /Win<</P(\l_@@_para_tmpa_tl)/F(\l_@@_filename_tmpa_tl)>>
             }
           \Hy@href@nextactionraw
          >>
@@ -1176,13 +1201,13 @@
  {
    ,baseurl       .code:n =
      {
-       \__hyp_pstringdef:No \l__hyp_tmpa_tl {#1}%
-        \tl_if_empty:NTF \l__hyp_tmpa_tl
+       \__hyp_pstringdef:No \l_@@_tmpa_tl {#1}%
+        \tl_if_empty:NTF \l_@@_tmpa_tl
           {
              \pdfmanagement_remove:nn {Catalog} { URI }
           }
           {
-             \pdfmanagement_add:nnx {Catalog} { URI }{ <</Base ( \l__hyp_tmpa_tl )>> }
+             \pdfmanagement_add:nnx {Catalog} { URI }{ <</Base ( \l_@@_tmpa_tl )>> }
           }
      }
    ,pdfcenterwindow    .choice:
@@ -1605,6 +1630,7 @@
          { pdftoolbar }
          { \exp_not:n {#1} }
      }
+   % pdfview see below.
    ,pdfviewarea    .choices:nn =
      { MediaBox, CropBox, BleedBox, TrimBox, ArtBox }
      {
@@ -1682,6 +1708,75 @@
    ,pdfwindowui    .default:n = true
  }
 
+% Destination keys. A bit more complicates so extra.
+\bool_new:N \l_@@_dest_box_bool
+\box_new:N  \l_@@_dest_box
+\tl_new:N   \l_@@_dest_pdfview_tl
+\keys_define:nn { hyp / setup }
+  {
+    pdfview .code:n =
+      {
+        \seq_set_split:Nnn \l_@@_tmpa_seq {~}{#1}
+        \str_case_e:nn { \str_lowercase:f{ \seq_item:Nn \l_@@_tmpa_seq {1} } }
+           {
+             { xyz }
+               {
+                 \int_compare:nNnTF {\seq_count:N \l_@@_tmpa_seq } > { 1 }
+                   {
+                     \seq_get_right:NN \l_@@_tmpa_seq \l_@@_dest_pdfview_tl
+                     \tl_if_eq:NnT \l_@@_dest_pdfview_tl {null}
+                       {
+                         \tl_set:Nn \l_@@_dest_pdfview_tl {xyz}
+                       }
+                   }
+                   {
+                     \tl_set:Nn \l_@@_dest_pdfview_tl {xyz}
+                   }
+               }
+             { fit }   { \tl_set:Nn \l_@@_dest_pdfview_tl {fit}  }
+             { fitb }  { \tl_set:Nn \l_@@_dest_pdfview_tl {fitb} }
+             { fitbh } { \tl_set:Nn \l_@@_dest_pdfview_tl {fitbh}}
+             { fitbv } { \tl_set:Nn \l_@@_dest_pdfview_tl {fitbv}}
+             { fith }  { \tl_set:Nn \l_@@_dest_pdfview_tl {fith} }
+             { fitv }  { \tl_set:Nn \l_@@_dest_pdfview_tl {fitv} }
+             { fitr }
+               {
+                 \int_compare:nNnTF {\seq_count:N \l_@@_tmpa_seq } = {1}
+                   {
+                     \tl_set:Nn \l_@@_dest_pdfview_tl {fitr}
+                   }
+                   {
+                      %ensure 4 values ...
+                     \tl_set:Nn \l_@@_dest_pdfview_tl {fitr}
+                     \seq_put_right:Nn \l_@@_tmpa_seq  {0}
+                     \seq_put_right:Nn \l_@@_tmpa_seq  {0}
+                     \seq_put_right:Nn \l_@@_tmpa_seq  {0}
+                     \bool_set_true:N \l_@@_dest_box_bool
+                     \hbox_set_to_wd:Nnn \l_@@_dest_box
+                       {
+                         \int_abs:n
+                          {
+                            \seq_item:Nn\l_@@_tmpa_seq{4}
+                            -
+                            (\seq_item:Nn\l_@@_tmpa_seq{2})
+                          }bp
+                       }{}
+                     \box_set_dp:Nn \l_@@_dest_box
+                       {
+                         \int_eval:n
+                           {
+                             0 - (\seq_item:Nn\l_@@_tmpa_seq{3})
+                           }bp
+                       }
+                     \box_set_ht:Nn \l_@@_dest_box
+                       {
+                         \seq_item:Nn\l_@@_tmpa_seq{5}bp
+                       }
+                   }
+               }
+           }
+      }
+  }
 % styles and colors.
 % this needs some sorting.
 % should colorlinks reset the border?
@@ -1724,8 +1819,8 @@
                 \pdfmanagement_remove:nn {Info}{#2}
               }
               {
-                \__hyp_text_convert_info:nN {##1}\l__hyp_tmpa_tl
-                \pdfmanagement_add:nnx {Info}{#2}{\l__hyp_tmpa_tl}
+                \__hyp_text_convert_info:nN {##1}\l_@@_tmpa_tl
+                \pdfmanagement_add:nnx {Info}{#2}{\l_@@_tmpa_tl}
               }
           }
       }
@@ -1738,15 +1833,15 @@
                 \pdfmanagement_remove:nn {Info}{#2}
               }
               {
-                \__hyp_text_convert_info:nN {##1}\l__hyp_tmpa_tl
-                \pdfmanagement_add:nnx {Info}{#2}{\l__hyp_tmpa_tl}
+                \__hyp_text_convert_info:nN {##1}\l_@@_tmpa_tl
+                \pdfmanagement_add:nnx {Info}{#2}{\l_@@_tmpa_tl}
               }
           }
         ,unknown .code:n =
          {
-            \__hyp_text_convert_info:nN {##1}\l__hyp_tmpa_tl
+            \__hyp_text_convert_info:nN {##1}\l_@@_tmpa_tl
             \exp_args:Nnx
-              \pdfmanagement_add:nnx {Info}{\pdf_text_convert:nV {name }\l_keys_key_str}{\l__hyp_tmpa_tl}
+              \pdfmanagement_add:nnx {Info}{\pdf_text_convert:nV {name }\l_keys_key_str}{\l_@@_tmpa_tl}
          }
       }
   }
@@ -1871,7 +1966,7 @@
            \keys_set:nn { hyp / trans }{style=R,#1}
            \pdf_object_now:nx { dict }
              {
-               \pdfdict_use:n {l__hyp_page/Trans}
+               \pdfdict_use:n {l_@@_page/Trans}
              }
            \pdfmanagement_add:nnx {Page}{Trans}{\pdf_object_last:}
            \group_end:
@@ -1882,7 +1977,7 @@
   {
     ,style .choices:nn =
       {Split,Blinds,Box,Wipe,Dissolve,Glitter,R,Fly,Push,Cover,Uncover,Fade}
-      { \pdfdict_put:nnn {l__hyp_page/Trans}{ S }{/#1} }
+      { \pdfdict_put:nnn {l_@@_page/Trans}{ S }{/#1} }
     ,style / unknown .code:n =
       {
         \msg_warning:nnxxx { hyp } { unknown-choice }
@@ -1892,16 +1987,16 @@
       }
     ,duration .code:n  =
       {
-        \pdfdict_put:nnn {l__hyp_page/Trans}{ D }{#1}
+        \pdfdict_put:nnn {l_@@_page/Trans}{ D }{#1}
       }
     ,direction .choices:nn =
       {H,V}
-      { \pdfdict_put:nnn {l__hyp_page/Trans}{ S }{/#1} }
+      { \pdfdict_put:nnn {l_@@_page/Trans}{ S }{/#1} }
     ,direction .choices:nn =
       {0,90,180,270,315}
-      { \pdfdict_put:nnn {l__hyp_page/Trans}{ DI }{ #1 } }
+      { \pdfdict_put:nnn {l_@@_page/Trans}{ DI }{ #1 } }
     ,direction / None .code:n =
-      { \pdfdict_put:nnn {l__hyp_page/Trans}{ DI }{ /None } }
+      { \pdfdict_put:nnn {l_@@_page/Trans}{ DI }{ /None } }
     ,direction / unknown .code:n =
       {
         \msg_warning:nnxxx { hyp } { unknown-choice }
@@ -1920,7 +2015,7 @@
       }
     ,motion .choices:nn =
      {I,O}
-     { \pdfdict_put:nnn {l__hyp_page/Trans}{ M }{/#1} }
+     { \pdfdict_put:nnn {l_@@_page/Trans}{ M }{/#1} }
     ,motion / unknown .code:n =
       {
         \msg_warning:nnxxx { hyp } { unknown-choice }
@@ -1929,9 +2024,9 @@
            { \exp_not:n {#1} }
       }
      ,scale .code:n =
-       { \pdfdict_put:nnn { l__hyp_page/Trans }{ SS }{ #1 } }
+       { \pdfdict_put:nnn { l_@@_page/Trans }{ SS }{ #1 } }
      ,opaque .choices:nn = {true,false}
-       { \pdfdict_put:nnn { l__hyp_page/Trans }{ B } { #1} }
+       { \pdfdict_put:nnn { l_@@_page/Trans }{ B } { #1} }
      ,opaque / unknown .code:n =
        {
           \msg_warning:nnxxx { hyp } { unknown-choice }
@@ -1986,7 +2081,7 @@
 
 \prop_new:N   \g__hyp_AcroForm_CoFields_prop
 \prop_new:N   \g__hyp_AcroForm_Fields_prop
-\seq_new:N    \l__hyp_tmpa_seq
+\seq_new:N    \l_@@_tmpa_seq
 \let\HyField@afields\ltx@empty
 \let\HyField@cofields\ltx@empty
 %% UF test for old pdftex removed
@@ -2064,10 +2159,10 @@
 
 \ExplSyntaxOff
 \ExplSyntaxOn
-\tl_new:N  \l__hyp_CheckmarkYes_tl
-\tl_set:Nn \l__hyp_CheckmarkYes_tl {  __hyp_xform_CheckMarkYes }
-\tl_new:N  \l__hyp_CheckmarkOff_tl
-\tl_set:Nn \l__hyp_CheckmarkOff_tl {  __hyp_xform_CheckMarkOff }
+\tl_new:N  \l_@@_CheckmarkYes_tl
+\tl_set:Nn \l_@@_CheckmarkYes_tl {  __hyp_xform_CheckMarkYes }
+\tl_new:N  \l_@@_CheckmarkOff_tl
+\tl_set:Nn \l_@@_CheckmarkOff_tl {  __hyp_xform_CheckMarkOff }
 
 \def\@Form[#1]
   {
@@ -2086,16 +2181,16 @@
           {
             \prop_map_inline:Nn \g__hyp_AcroForm_CoFields_prop
               {
-                \seq_put_right:Nn \l__hyp_tmpa_seq {##1}
+                \seq_put_right:Nn \l_@@_tmpa_seq {##1}
               }
-            \seq_sort:Nn \l__hyp_tmpa_seq
+            \seq_sort:Nn \l_@@_tmpa_seq
               {
                 \int_compare:nNnTF { \pdf@strcmp{##1}{##2} } > { 0 }
                 %\int_compare:nNnTF { \__str_if_eq:nn {#1}{#2} } > { 0 }
                   { \sort_return_swapped: }
                   { \sort_return_same: }
               }
-            \seq_map_inline:Nn \l__hyp_tmpa_seq
+            \seq_map_inline:Nn \l_@@_tmpa_seq
              {
                 \pdfmanagement_add:nnx { Catalog / AcroForm }
                   { CO }
@@ -2105,9 +2200,9 @@
              }
           }
        \pdfmanagement_add:nnx {Catalog / AcroForm/DR/Font }
-         {ZaDb} {\pdf_object_ref:n {l__hyp_font_zapfdingbats_obj} }
+         {ZaDb} {\pdf_object_ref:n {l_@@_font_zapfdingbats_obj} }
        \pdfmanagement_add:nnx {Catalog / AcroForm/DR/Font }
-         {Helv} {\pdf_object_ref:n {l__hyp_font_helvetica_obj} }
+         {Helv} {\pdf_object_ref:n {l_@@_font_helvetica_obj} }
        \pdfmanagement_add:nnx {Catalog /AcroForm}
          {DA}{(/Helv~10~Tf~0~g)}
        \legacy_if:nF { Hy@pdfa } %?????? Standards?
@@ -2315,8 +2410,8 @@
     }%
   \endgroup
 }
-\tl_new:N  \l__hyp_RadioYes_tl
-\tl_set:Nn \l__hyp_RadioYes_tl { __hyp_xform_Ding }
+\tl_new:N  \l_@@_RadioYes_tl
+\tl_set:Nn \l_@@_RadioYes_tl { __hyp_xform_Ding }
 \def\@@Radio#1{%
   \Fld@listcount=0~%
   %\show\Fld@default
@@ -2377,7 +2472,7 @@
       \DefaultOptionsofPushButton,#1
      }
     \PDFForm@Name
-    \bool_if:NTF \l__hyp_pdfa_bool
+    \bool_if:NTF \l_@@_pdfa_bool
      {
       \msg_error:nn { hyp }{ pdfa-no-push-button }
        \LayoutPushButtonField
@@ -2456,7 +2551,7 @@
          \DefaultOptionsofReset,#1
        }
      \mode_leave_vertical:
-     \bool_if:NTF \l__hyp_pdfa_bool
+     \bool_if:NTF \l_@@_pdfa_bool
        {
          \msg_error:nn { hyp }{ pdfa-no-reset-button }
          \MakeButtonField{#2}
@@ -2516,10 +2611,10 @@
 \ExplSyntaxOn
 \def\Hy@FormObjects
   {
-    \pdf_object_new:nn   {l__hyp_encoding_pdfdoc_obj }   { dict }
-    \pdf_object_new:nn   {l__hyp_font_zapfdingbats_obj } { dict }
-    \pdf_object_new:nn   {l__hyp_font_helvetica_obj }    { dict }
-    \pdf_object_write:nx {l__hyp_encoding_pdfdoc_obj }
+    \pdf_object_new:nn   {l_@@_encoding_pdfdoc_obj }   { dict }
+    \pdf_object_new:nn   {l_@@_font_zapfdingbats_obj } { dict }
+    \pdf_object_new:nn   {l_@@_font_helvetica_obj }    { dict }
+    \pdf_object_write:nx {l_@@_encoding_pdfdoc_obj }
       {
         /Type/Encoding
         /Differences[
@@ -2561,20 +2656,20 @@
           /uacute/ucircumflex/udieresis/yacute/thorn/ydieresis
          ]
       }
-    \pdf_object_write:nn {l__hyp_font_zapfdingbats_obj }
+    \pdf_object_write:nn {l_@@_font_zapfdingbats_obj }
       {
         /Type/Font
         /Subtype/Type1
         /Name/ZaDb
         /BaseFont/ZapfDingbats
       }
-    \pdf_object_write:nx {l__hyp_font_helvetica_obj }
+    \pdf_object_write:nx {l_@@_font_helvetica_obj }
       {
         /Type/Font
         /Subtype/Type1
         /Name/Helv
         /BaseFont/Helvetica
-        /Encoding~\pdf_object_ref:n { l__hyp_encoding_pdfdoc_obj }
+        /Encoding~\pdf_object_ref:n { l_@@_encoding_pdfdoc_obj }
       }
   \global\let\Hy@FormObjects\relax
   }
@@ -2720,8 +2815,8 @@
      <<
       /N
         <<
-          /Yes~\pdf_xform_ref:o{\l__hyp_CheckmarkYes_tl}
-          /Off~\pdf_xform_ref:o{\l__hyp_CheckmarkOff_tl}
+          /Yes~\pdf_xform_ref:o{\l_@@_CheckmarkYes_tl}
+          /Off~\pdf_xform_ref:o{\l_@@_CheckmarkOff_tl}
         >>
     >>
   /MK<<
