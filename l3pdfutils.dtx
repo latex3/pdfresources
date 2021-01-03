@@ -225,38 +225,19 @@
 %    \begin{macrocode}
 %<*package>
 %<@@=pdf>
-% perhaps some manipulation of the argument will be needed to map the current
-% hyperref syntax
-% unclear currently if is this is useful for anything.
-%\prop_new:N   \l_@@_views_map_prop
-%\prop_put:Nnn \l_@@_views_map_prop {XYZ} { xyz }
-%\prop_put:Nnn \l_@@_views_map_prop {xyz} { xyz }
-%\prop_put:Nnn \l_@@_views_map_prop {Fit} { fit }
-%\prop_put:Nnn \l_@@_views_map_prop {fit} { fit }
-%\prop_put:Nnn \l_@@_views_map_prop {FitB} { fitb }
-%\prop_put:Nnn \l_@@_views_map_prop {fitb} { fitb }
-%\prop_put:Nnn \l_@@_views_map_prop {FitBH} { fitbh }
-%\prop_put:Nnn \l_@@_views_map_prop {fitbh} { fitbh }
-%\prop_put:Nnn \l_@@_views_map_prop {FitBv} { fitbv }
-%\prop_put:Nnn \l_@@_views_map_prop {fitbv} { fitbv }
-%\prop_put:Nnn \l_@@_views_map_prop {FitH} { fith }
-%\prop_put:Nnn \l_@@_views_map_prop {fith} { fith }
-%\prop_put:Nnn \l_@@_views_map_prop {FitV} { fitv }
-%\prop_put:Nnn \l_@@_views_map_prop {fitv} { fitv }
-%\prop_put:Nnn \l_@@_views_map_prop {FitR} { fitr }
-%\prop_put:Nnn \l_@@_views_map_prop {fitr} { fitr }
-
-\cs_new_protected:Npn \pdf_destination:nn #1 #2
+\cs_if_free:NT \pdf_destination:nn
   {
-    \@@_backend_destination:nn {#1}{#2}
+    \cs_new_protected:Npn \pdf_destination:nn #1 #2
+      {
+        \@@_backend_destination:nn {#1}{#2}
+      }
+
+    \cs_new_protected:Npn \pdf_destination_box:nn #1 #2 %#1 name, #2 box content
+      {
+        \@@_backend_destination_box:nn { #1 }{ #2 } %new name!!
+      }
   }
-
 \cs_generate_variant:Nn\pdf_destination:nn {no,nf}
-
-\cs_new_protected:Npn \pdf_destination_box:nn #1 #2 %#1 name, #2 box content
- {
-   \@@_backend_destination_box:nn { #1 }{ #2 } %new name!!
- }
 
 %</package>
 %    \end{macrocode}
