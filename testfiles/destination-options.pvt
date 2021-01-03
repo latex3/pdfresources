@@ -1,0 +1,45 @@
+\PassOptionsToPackage{enable-debug,check-declarations}{expl3}
+\input{regression-test}
+\RequirePackage{pdfmanagement}
+\DeclareDocumentMetadata{uncompress}
+\documentclass{article}
+\usepackage[customdriver=hgeneric-experimental,
+]{hyperref}
+\hypersetup{pdfremotestartview={Fit},pdfstartview={FitR 0 0 \hypercalcbp{0.5\paperheight} \hypercalcbp{0.5\paperwidth}}}
+\begin{document}%
+\section{ABC}
+
+\hypersetup{pdfview=fit}
+\refstepcounter{section}\label{Fit}Fit
+
+\hypersetup{pdfview=fith}
+\refstepcounter{section}\label{Fith}Fith
+
+\hypersetup{pdfview=fitv}
+\refstepcounter{section}\label{Fitv}Fitv
+
+\hypersetup{pdfview=fitbh}
+\refstepcounter{section}\label{Fitbh}Fitbh
+
+\hypersetup{pdfview=fitbv}
+\refstepcounter{section}\label{Fitbv}Fitbv
+
+\hypersetup{pdfview=xyz}
+\refstepcounter{section}\label{XYZ}XYZ
+
+\hypersetup{pdfview=xyz 2.5}
+\refstepcounter{section}\label{XYZ2.5}XYZ 2.5
+
+\hypersetup{pdfview=xyz 100 100 null}
+\refstepcounter{section}\label{XYZnull}XYZ null
+
+\hypersetup{pdfview={fitr 0 \hypercalcbp{-0.1\paperheight} 200 \hypercalcbp{0.2\paperheight}}}
+\refstepcounter{section}\label{fitr}\rule{195bp}{0.2\paperheight}fitr
+
+\hypersetup{pdfview=fitxx}
+\refstepcounter{section}\label{Fitxx}Fitxx
+\newpage
+\ref{Fit}Fit, \ref{Fith}Fith, \ref{Fitv}Fitv, \ref{Fitbh}Fitbh,
+\ref{Fitbv}Fitbv, \ref{XYZ}XYZ, \ref{XYZ2.5}XYZ2.5,
+\ref{XYZnull}XYZnull, \ref{fitr}fitr,
+\end{document}
