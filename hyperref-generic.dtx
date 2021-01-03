@@ -89,6 +89,14 @@
 %  of \pkg{hyperref}. Options should be set with \cs{hypersetup} after
 %  the package has been loaded.
 %
+%  \subsection{Dropped options}
+%  A number of options are ignored by this driver
+%  \begin{description}
+%  \item[pdfversion] The pdfversion should be set in \cs{DeclareDocumentMetadata}
+%  \item[breaklinks] The option does nothing sensible anyway (apart from triggering
+%  a warning). Currently with latex+dvips links can not be broken. But there is work
+%  in progress to change this.
+%  \end{description}
 %  \subsection{Destinations}
 %  Destinations (sometimes call anchors in the \pkg{hyperref} documentation)
 %  are the places a link jumped too. Unlike the name may suggest they don't described
@@ -124,16 +132,19 @@
 %
 %  The manual of \pkg{hyperref} gives a bit the impression as if this
 %  coordinates can be set manually by the user but as described above this is
-%  mostly wrong: It is only possible with a dvi-backend like dvips which make use of
-%  pdfmark.def. As dvips was the first driver of \pkg{hyperref} the option was at first
+%  mostly wrong: It is for normal destination only possible with a dvi-backend like
+%  dvips which make use of pdfmark.def. pdftex and luatex can use manual coordinates
+%  only for |pdfstartview| and |pdfremotestartview|
+%  As dvips was the first driver of \pkg{hyperref} the option |pdfview| was at first
 %  developed for it and then adapted to pdftex. But this had the effect that the handling
-%  of the options is quite inconsequent across the backend and engines:
+%  of the option |pdfview| is inconsequent across the backend and engines:
 %  For example with |pdfview=FitH 100| pdftex ignores the
 %  number and calculates on its own, while dvips sets the coordinate to the absolute
 %  100. The zoom factor of XYZ is not supported by the pdftex driver at all, and
 %  |FitR| only partially.
 %
-%  The generic driver consolidate this.
+%  The generic driver consolidate this but tries to stay compatible with the other
+%  drivers as far as possible.
 %  It also takes into account the |pdfview| and |pdfstartview| and |pdfremotestartview|
 %  have different requirements: While for the first relative coordinates are fine,
 %  for the two others absolute coordinates are more sensible.
@@ -146,7 +157,7 @@
 %   |FitBH|, |FitBV| which can be followed by a positive integer (separated by a space) or the
 %   keyword |null|.
 %   The number can be gives as a \meta{dimension expression} surrounded with
-%   \cs{\hypercalcbp}. The driver redefines this command to use
+%   \cs{hypercalcbp}. The driver redefines this command to use
 %   \cs{dim_to_decimal_in_bp:n}.
 %   \begin{itemize}
 %   \item |pdfview| will ignore the integer and any other arguments and calculate
@@ -158,10 +169,10 @@
 %   \end{itemize}
 %
 %  \item |XYZ|. This can be followed (separated by spaces) by up to three
-%  positive integers or the keyword |null| which are then taken as \textit{top left zoom}
+%  positive integers or keywords |null| which are then taken as \textit{top left zoom}
 %  in this order. \textit{zoom} is a factor, so e.g. 0.5 will give a scaling of 50\%.
 %   \begin{itemize}
-%   \item |pdfview| will the last value as \textit{zoom}, ignore all other values
+%   \item |pdfview| will use the last value as \textit{zoom}, ignore all other values
 %   and calculate  the expected coordinates as described above for pdftex with all
 %   supported engines and backends (this means it is possible to use |XYZ 2| to
 %   set a zoom of 200\%, it is not necessary to fill in dummy values.)
@@ -172,14 +183,14 @@
 %   This new behaviour is in part incompatible with previous handling with the dvips driver.
 %
 %
-%  \item |FitR|. This case is the most challenging.
+%  \item |FitR|.
 %  If no argument (separated by spaces) follows then
 %  |pdfview| will use with pdftex and luatex
 %  the automatic calculation of the coordinates from the encompassing box. With
-%  dvips and dvipdfmx  it will fall back to |Fit|.
+%  dvips and (x)dvipdfmx  it will fall back to |Fit|.
 %  |pdfstartview| and |pdfremotestartview| will fallback to |Fit| too.
 %
-%  If arguments (separated by spaces) follow they should be up to
+%  If arguments (separated by spaces) follow they should be
 %  four numbers  representing \texttt{left bottom right top}.
 %  \begin{itemize}\item
 %  |pdfview| will use the values to calculate coordinates relative to the current
@@ -214,7 +225,7 @@
 %% \__hyp_info_generate_addons: what did this do??
 %% list of new variables
 %% \l_@@_pdfa_bool : for pdfa option (unclear if it will stay)
-%% \c__hyp_destname_undefined_tl
+%% \c_@@_dest_undefined_tl
 %% \g__hyp_AcroForm_CoFields_prop
 %% \g__hyp_AcroForm_Fields_prop
 %% \l_@@_tmpa_seq
@@ -249,7 +260,7 @@
 \RequirePackage{l3color}
 %    \end{macrocode}
 %
-% \section{Overwriting commands from hyperref}
+% \section{Overwriting/providing commands from hyperref}
 %  hyperref checks driver version, we need to suppress this during the development
 %    \begin{macrocode}
 \chardef\Hy@VersionChecked=1 %don't check the version!
@@ -259,7 +270,15 @@
 %    \begin{macrocode}
 \cs_set_eq:NN \hypercalcbp \dim_to_decimal_in_bp:n
 %    \end{macrocode}
-%
+% This is used as default file extension, should probably go into hyperref.
+%    \begin{macrocode}
+\providecommand*{\XR@ext}{pdf} %
+%    \end{macrocode}
+% This command must be provided for now, but they are unused by the driver:
+%    \begin{macrocode}
+\tl_new:N\@pdfborder
+\tl_new:N\@pdfborderstyle
+%    \end{macrocode}
 % \section{messages}
 %  Redirect the message name:
 %    \begin{macrocode}
@@ -463,10 +482,6 @@
 %%%%%%%%%%%%%%%%
 % defaults, will perhaps need some sorting and be checked if they are sensible for all backends
 %%%%%%%%%%%%%%%
-\providecommand*{\XR@ext}{pdf} %ok as default for all drivers we want to support, should probably go into hyperref
-\Hy@setbreaklinks{true}        %also for dvips??
-
-%\providecommand*\@pdfview{XYZ}
 
 % unicode ...
 \HyPsd@LoadUnicode
@@ -480,8 +495,7 @@
 % checked dvips, luatex, xetex, dvipdfm: values are identical:
 %\providecommand*\@pdfborder{0~0~1}
 %\providecommand*\@pdfborderstyle{}
-\tl_new:N\@pdfborder
-\tl_new:N\@pdfborderstyle
+
 % tmp
 \box_new:N \l_@@_tmpa_box
 \tl_new:N  \l_@@_tmpa_tl
@@ -493,7 +507,7 @@
 \int_new:N \l_@@_tmpa_int
 
 % const
-\tl_const:Nn \c__hyp_destname_undefined_tl {UNDEFINED}
+\tl_const:Nn \c_@@_dest_undefined_tl {UNDEFINED}
 
 %variables
 \tl_new:N  \g_@@_dest_pdfstartpage_tl
@@ -1024,8 +1038,8 @@
         \msg_warning:nnx
           { hyp }
           { empty-destination-name }
-          { \c__hyp_destname_undefined_tl }
-        \tl_set_eq:NN \l_@@_dest_name_tmpa_tl \c__hyp_destname_undefined_tl
+          { \c_@@_dest_undefined_tl }
+        \tl_set_eq:NN \l_@@_dest_name_tmpa_tl \c_@@_dest_undefined_tl
       }
       { %I hope this is right ...
         \__hyp_pstringdef:Nx \l_@@_dest_name_tmpa_tl
