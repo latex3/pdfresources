@@ -96,6 +96,9 @@
 %  \item[breaklinks] The option does nothing sensible anyway (apart from triggering
 %  a warning). Currently with latex+dvips links can not be broken. But there is work
 %  in progress to change this.
+%  \item[unicode] This is always true.
+%  \item[pdfa] The |pdfa| is used in hyperref to check a small number of requirements
+%  for the PDF standard PDF/A. 
 %  \end{description}
 %  \subsection{Destinations}
 %  Destinations (sometimes call anchors in the \pkg{hyperref} documentation)
@@ -266,19 +269,32 @@
 \chardef\Hy@VersionChecked=1 %don't check the version!
 \ExplSyntaxOn
 %    \end{macrocode}
+%
 % We define a better (expandable) version of \cs{hypercalcbp}
 %    \begin{macrocode}
 \cs_set_eq:NN \hypercalcbp \dim_to_decimal_in_bp:n
 %    \end{macrocode}
+%
 % This is used as default file extension, should probably go into hyperref.
 %    \begin{macrocode}
 \providecommand*{\XR@ext}{pdf} %
 %    \end{macrocode}
+%
 % This command must be provided for now, but they are unused by the driver:
 %    \begin{macrocode}
 \tl_new:N\@pdfborder
 \tl_new:N\@pdfborderstyle
 %    \end{macrocode}
+%
+% We force unicode as option. As bookmarks are still using \cs{pdfstringdef}
+% we also need to load puenc.def.
+%    \begin{macrocode}
+\HyPsd@LoadUnicode
+\Hy@unicodetrue
+\let\HyPsd@pdfencoding\HyPsd@pdfencoding@unicode
+\Hy@DisableOption{unicode}
+%    \end{macrocode}
+%
 % \section{messages}
 %  Redirect the message name:
 %    \begin{macrocode}
@@ -483,10 +499,7 @@
 % defaults, will perhaps need some sorting and be checked if they are sensible for all backends
 %%%%%%%%%%%%%%%
 
-% unicode ...
-\HyPsd@LoadUnicode
-\Hy@unicodetrue
-\let\HyPsd@pdfencoding\HyPsd@pdfencoding@unicode
+
 
 \pdfannot_link_margin:n { 1pt }
 
