@@ -97,8 +97,24 @@
 %  a warning). Currently with latex+dvips links can not be broken. But there is work
 %  in progress to change this.
 %  \item[unicode] This is always true.
-%  \item[pdfa] The |pdfa| is used in hyperref to check a small number of requirements
-%  for the PDF standard PDF/A. 
+%  \item[pdfa] If this option is set to true \pkg{hyperref} checks and sets
+%  a small number of requirements for the PDF standard PDF/A.
+%  The key is ignored with this driver. Instead the wanted standard should be declared
+%  in \cs{DeclareDocumentMetadata}:
+%  \begin{verbatim}
+%  \DeclareDocumentMetadata{standard=A-2b}
+%  \end{verbatim}
+%  Currently |A-1b|, |A-2b|, |A-3b| can be set.
+%  The support for various requirements is still incomplete, but the parts that
+%  \pkg{hyperref} already checked are implemented:
+%  \begin{itemize}
+%  \item The |/F| key is added to links and Print is activated, Hidden, Invisible,
+%   NoView are deactivated.
+%  \item |/NeedAppearances| is suppressed
+%  \item  Pushbuttons, which use the action |/S/JavaScript| are suppressed
+%  \item  Resetbuttons, which use the action |/S/ResetForm| are suppressed Resetbutton
+%  \item  In widget annotations, the /AA dictionary is suppressed.
+%  \end{itemize}
 %  \end{description}
 %  \subsection{Destinations}
 %  Destinations (sometimes call anchors in the \pkg{hyperref} documentation)
@@ -227,7 +243,6 @@
 %%                           currently simply \text_purify:n
 %% \__hyp_info_generate_addons: what did this do??
 %% list of new variables
-%% \l_@@_pdfa_bool : for pdfa option (unclear if it will stay)
 %% \c_@@_dest_undefined_tl
 %% \g__hyp_AcroForm_CoFields_prop
 %% \g__hyp_AcroForm_Fields_prop
@@ -534,11 +549,6 @@
 % booleans
 \bool_new:N \l_@@_tmpa_bool
 \bool_new:N \l_@@_dest_box_bool
-%%% pdfa key:
-\bool_new:N \l_@@_pdfa_bool
-\ifHy@pdfa
-  \bool_set_true:N \l_@@_pdfa_bool
-\fi
 
 \prop_const_from_keyval:Nn \c__hyp_map_linktypes_prop
   {
@@ -584,33 +594,6 @@
 % module dictionary for trans:
 \pdfdict_new:n   {l_@@_page/Trans}
 \pdfdict_put:nnn {l_@@_page/Trans}{Type}{/Trans}
-% this need sorting out later. pdf standards should be handled outside the driver.
-% pdfa forces the flag /F 4 in some places.
-\AtBeginDocument
-  {
-    \bool_if:NT \l_@@_pdfa_bool
-      {
-        \pdfannot_dict_put:nnn
-          {link/URI}
-          { F }
-          { 4 }
-
-        \pdfannot_dict_put:nnn
-          {link/GoTo}
-          { F }
-          { 4 }
-
-        \pdfannot_dict_put:nnn
-          {link/GoToR}
-          { F }
-          { 4 }
-
-        \pdfannot_dict_put:nnn
-          {link/Named}
-          { F }
-          { 4 }
-      }
-  }
 
 %% conversion macro, replacement for \pdfstringdef
 % first the purify step
@@ -1672,6 +1655,7 @@
            \tl_set:Nn \l_@@_dest_pdfremotestartview_tl {Fit}
          }
      }
+   ,pdfremotestartview .initial:n = {Fit}
    % pdfstartpage is special as it shares code with pdfstartview
    ,pdfstartpage .code:n =
      {
@@ -2326,13 +2310,16 @@
          {Helv} {\pdf_object_ref:n {l_@@_font_helvetica_obj} }
        \pdfmanagement_add:nnx {Catalog /AcroForm}
          {DA}{(/Helv~10~Tf~0~g)}
-       \legacy_if:nF { Hy@pdfa } %?????? Standards?
-         {
-           \legacy_if:nT { HyField@NeedAppearances }
-             {
-               \pdfmanagement_add:nnx {Catalog / AcroForm }{NeedAppearances}{true}
-             }
-         }
+       \exp_args:Ne
+         \tl_if_eq:nnF
+           {\prop_item:Nn \g_pdfmeta_standard_prop {form_NeedAppearances}}
+           {false}
+           {
+             \legacy_if:nT { HyField@NeedAppearances }
+               {
+                 \pdfmanagement_add:nnx {Catalog / AcroForm }{NeedAppearances}{true}
+               }
+           }
        }
      \MakeFieldObject
        {
@@ -2593,7 +2580,7 @@
       \DefaultOptionsofPushButton,#1
      }
     \PDFForm@Name
-    \bool_if:NTF \l_@@_pdfa_bool
+    \exp_args:Ne\tl_if_in:nnTF {\prop_item:Nn \g_pdfmeta_standard_prop {annot_no_actions}}{JavaScript}
      {
       \msg_error:nn { hyp }{ pdfa-no-push-button }
        \LayoutPushButtonField
@@ -2672,7 +2659,7 @@
          \DefaultOptionsofReset,#1
        }
      \mode_leave_vertical:
-     \bool_if:NTF \l_@@_pdfa_bool
+      \exp_args:Ne\tl_if_in:nnTF {\prop_item:Nn \g_pdfmeta_standard_prop {annot_no_actions}}{ResetForm}
        {
          \msg_error:nn { hyp }{ pdfa-no-reset-button }
          \MakeButtonField{#2}
@@ -2859,7 +2846,7 @@
   \endgroup
   \let#1\Hy@gtemp
 }
-\def\Fld@@additionalactions{%
+\def\Fld@X@additionalactions{%
   \ifx\Fld@keystroke@code\@empty
   \else
     /K<</S/JavaScript/JS(\Hy@escapestring{\Fld@keystroke@code})>>%
@@ -2901,15 +2888,19 @@
     /X<</S/JavaScript/JS(\Hy@escapestring{\Fld@onexit@code})>>%
   \fi
 }
-\def\Fld@additionalactions{%
-  \if-\Fld@@additionalactions-%
-  \else
-    \ifHy@pdfa
-    \else
-      /AA<<\Fld@@additionalactions>>%
-    \fi
-  \fi
-}
+\ExplSyntaxOn
+\def\Fld@additionalactions
+ {%
+  \tl_if_empty:NF\Fld@X@additionalactions
+    {
+      \exp_args:Ne
+        \tl_if_eq:nnF
+          {\prop_item:Nn \g_pdfmeta_standard_prop {annot_widget_AA}}
+          {false}
+          {/AA<<\Fld@X@additionalactions>>}
+    }
+ }
+\ExplSyntaxOff
 \def\Fld@annotnames{%
   /T(\Fld@name)%
   \ifx\Fld@altname\relax
@@ -2975,7 +2966,7 @@
 }
 \ExplSyntaxOff
 \ExplSyntaxOn
-\legacy_if:nF { Hy@pdfa }
+\exp_args:Ne\tl_if_in:nnF {\prop_item:Nn \g_pdfmeta_standard_prop {annot_no_actions}}{JavaScript}
   {
    \def\PDFForm@Push
      {
@@ -3169,38 +3160,40 @@
   >>%
   \Fld@additionalactions
 }
-\ifHy@pdfa
-\else
-  \def\PDFForm@Reset{%
-    /Subtype/Widget%
-    \Fld@annotflags
-    \Fld@pageobjref
-    \Fld@annotnames
-    /FT/Btn%
-    \Fld@flags
-    /H/P%
-    /DA(/Helv \strip@pt\Fld@charsize\space Tf 0 0 1 rg)%
-    \ifcase0\ifnum\Fld@rotation=\z@   \else 1\fi
-            \ifx\Fld@bordercolor\relax\else 1\fi
-            \space
-    \else
-      /MK<<%
-        \ifnum\Fld@rotation=\z@
-        \else
-          /R \Fld@rotation
-        \fi
-        \ifx\Fld@bordercolor\relax
-        \else
-          /BC[\Fld@bordercolor]%
-        \fi
-      >>%
-    \fi
-    /BS<</W \Fld@borderwidth/S/\Fld@borderstyle>>%
-    /A<</S/ResetForm>>%
-    \Fld@additionalactions
-  }%
-\fi
-
+\ExplSyntaxOn
+\exp_args:Ne
+  \tl_if_in:nnF {\prop_item:Nn \g_pdfmeta_standard_prop {annot_no_actions}}{ResetForm}
+    {
+       \def\PDFForm@Reset{%
+         /Subtype/Widget%
+         \Fld@annotflags
+         \Fld@pageobjref
+         \Fld@annotnames
+         /FT/Btn%
+         \Fld@flags
+         /H/P%
+         /DA(/Helv~\strip@pt\Fld@charsize\space Tf~0~0~1~rg)%
+         \ifcase0\ifnum\Fld@rotation=\z@   \else 1\fi
+                 \ifx\Fld@bordercolor\relax\else 1\fi
+                 \space
+         \else
+           /MK<<%
+             \ifnum\Fld@rotation=\z@
+             \else
+               /R~\Fld@rotation
+             \fi
+             \ifx\Fld@bordercolor\relax
+             \else
+               /BC[\Fld@bordercolor]%
+             \fi
+           >>%
+         \fi
+         /BS<</W \Fld@borderwidth/S/\Fld@borderstyle>>%
+         /A<</S/ResetForm>>%
+         \Fld@additionalactions
+       }%
+   }
+\ExplSyntaxOff
 % UF: removed Hy@writebookmark
 %     \Hy@currentbookmarklevel{0}
 %     \Hy@numberline
