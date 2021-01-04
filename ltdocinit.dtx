@@ -139,6 +139,7 @@
     backend .groups:n = { init } ,
   }
 
+%perhaps it should be a seq?
 \keys_define:nn { pdf / setup }
   {
     ,pdfversion .code:n =
@@ -157,7 +158,11 @@
     ,standard .choices:nn =
       {A-1b,A-2b,A-3b}
       {
-        \prop_gset_eq:Nc \g_pdfmeta_standard_prop { g_@@_meta_standard_pdf/#1_prop }
+        \prop_if_exist:cT { g_pdfmeta_standard_pdf/#1_prop }
+          {
+            \prop_gset_eq:Nc \g_pdfmeta_standard_prop { g_pdfmeta_standard_pdf/#1 _prop }
+          }
+
       }
     ,standard / unknown .code:n =
       {
