@@ -256,7 +256,6 @@
 %% \l_@@_CheckmarkYes_tl
 %% \l_@@_CheckmarkOff_tl
 %% \l_@@_RadioYes_tl
-%% \l_@@_dest_box_bool
 %%\\l_@@_dest_box
 %% \l_@@_dest_pdfview_tl
 %% list of commands which probably will have to change
@@ -509,48 +508,51 @@
   }
 \cs_generate_variant:Nn \@@_ref_value:nn {en}
 %    \end{macrocode}
+%
+% \section{Variables}
+% \subsection{Private temporary variables}
+% At first a few generic tmp variables
+% \begin{variable}
+%  {\l_@@_tmpa_tl, \l_@@_tmpa_seq,\l_@@_tmpa_int.´,\l_@@_tmpa_box}
 %    \begin{macrocode}
-%%%%%%%%%%%%%%%%
-% defaults, will perhaps need some sorting and be checked if they are sensible for all backends
-%%%%%%%%%%%%%%%
-
-
-
-\pdfannot_link_margin:n { 1pt }
-
-%%%%%%%%%%
-% hyperref, must be renamed later
-% checked dvips, luatex, xetex, dvipdfm: values are identical:
-%\providecommand*\@pdfborder{0~0~1}
-%\providecommand*\@pdfborderstyle{}
-
-% tmp
 \box_new:N \l_@@_tmpa_box
 \tl_new:N  \l_@@_tmpa_tl
 \seq_new:N \l_@@_tmpa_seq
-\tl_new:N  \l_@@_dest_name_tmpa_tl %needed?
+\int_new:N \l_@@_tmpa_int
+%    \end{macrocode}
+% \end{variable}
+%
+% A number of more specific tmp variables. These will perhaps disappear or change.
+% \begin{variable}
+%  {
+%   \l_@@_dest_name_tmpa_tl,
+%   \l_@@_uri_tmpa_tl,
+%   \l_@@_filename_tmpa_tl,
+%   \l_@@_para_tmpa_tl
+%  }
+% TODO: document and check use!
+%    \begin{macrocode}
+\tl_new:N  \l_@@_dest_name_tmpa_tl
 \tl_new:N  \l_@@_uri_tmpa_tl
 \tl_new:N  \l_@@_filename_tmpa_tl
 \tl_new:N  \l_@@_para_tmpa_tl
-\int_new:N \l_@@_tmpa_int
-
-% const
+%    \end{macrocode}
+% \end{variable}
+%
+% \subsection{Constants}
+% \begin{variable}
+%   { \c_@@_dest_undefined_tl }
+%  This variable is used if a destination name is empty.
+%    \begin{macrocode}
 \tl_const:Nn \c_@@_dest_undefined_tl {UNDEFINED}
-
-%variables
-\tl_new:N  \g_@@_dest_pdfstartpage_tl
-\tl_new:N  \g_@@_dest_pdfstartview_tl
-\tl_new:N  \l_@@_dest_pdfremotestartview_tl
-\tl_new:N   \l_@@_dest_pdfview_tl
-
-%boxes
-\box_new:N  \l_@@_dest_box
-
-% booleans
-\bool_new:N \l_@@_tmpa_bool
-\bool_new:N \l_@@_dest_box_bool
-
-\prop_const_from_keyval:Nn \c__hyp_map_linktypes_prop
+%    \end{macrocode}
+% \end{variable}
+% \begin{variable}
+%   { \c_@@_map_linktypes_prop }
+%  This constants holds the link types managed by hyperref
+%  along with a mapping from annot names to hyperref names.
+%    \begin{macrocode}
+\prop_const_from_keyval:Nn \c_@@_map_linktypes_prop
   {
     URI   = url,
     GoTo  = link,
@@ -558,25 +560,47 @@
     Named = menu,
     Launch= run
   }
+%    \end{macrocode}
+% \end{variable}
+% \subsection{Variables}
+% \begin{variable}
+%   {
+%     \g_@@_dest_pdfstartpage_tl ,
+%     \g_@@_dest_pdfstartview_tl ,
+%     \l_@@_dest_pdfremotestartview_tl ,
+%   }
+%   The first holds the (absolute) start page number,
+%   the other the startview instruction for the current and remote files.
+%   The instruction is in \enquote{PDF format} but without the leading slash!
+%    \begin{macrocode}
+\tl_new:N  \g_@@_dest_pdfstartpage_tl
+\tl_new:N  \g_@@_dest_pdfstartview_tl
+\tl_new:N  \l_@@_dest_pdfremotestartview_tl
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{variable}{\l_@@_dest_pdfview_tl}
+% This hold the destination instructions in a format suitable for
+% \cs{pdf_destination:nn}. The special value |fitrbox| indicates a boxed destination.
+%    \begin{macrocode}
+\tl_new:N  \l_@@_dest_pdfview_tl
+%    \end{macrocode}
+% \end{variable}
+%
+% \subsection{Boxes}
+% \begin{variable}{\l_@@_dest_box}
+% This holds an (empty) box which is used to get the width for FitR destinations.
+%    \begin{macrocode}
+\box_new:N  \l_@@_dest_box
+%    \end{macrocode}
+% \end{variable}
 
-%regex for destinations
-% unclear if needed must be redone after the decision to change syntax ...
-\regex_const:Nn \c__hyp_dest_view_regex
-  {
-    \A\ *
-     (?:
-      (?:XYZ (?:\ +(?:(?:\d+|\d*\.\d+)|null)){0,3})
-      |
-      (?:Fit|FitB)
-      |
-      (?:(?:FitH|FitV|FitBH|FitBV)(?:\ +(?:\d+|\d*\.\d+)|null)??)
-      |
-      (?:FitR (?:\ +\d+|\d*\.\d+){4})
-     )
-     \ *\Z
-  }
-
-% for pdfstartview and pdfremotestartviewcheck:
+% \subsection{Regex}
+% \begin{variable}{\c_@@_dest_startview_regex}
+% This regex is used to extract the right arguments
+% pdfstartview and pdfremotestartview. Their values is filled up with |null|
+% and then the start extracted.
+%    \begin{macrocode}
 \regex_const:Nn \c_@@_dest_startview_regex
   {
     \A\ *
@@ -590,10 +614,28 @@
       (?:FitR (?:\ +\d+|\ +\d*\.\d+){4}\ )
      )
   }
-
-% module dictionary for trans:
+%    \end{macrocode}
+% \end{variable}
+%
+% \subsection{PDF dictionaries}
+% \begin{variable}{l_@@_page/Trans}
+% This dictionary is used for page transitions.
+%    \begin{macrocode}
 \pdfdict_new:n   {l_@@_page/Trans}
 \pdfdict_put:nnn {l_@@_page/Trans}{Type}{/Trans}
+%    \end{macrocode}
+% \end{variable}
+
+
+%%%%%%%%%%%%%%%%
+% defaults, will perhaps need some sorting and be checked if they are sensible for all backends
+%%%%%%%%%%%%%%%
+
+
+
+
+\pdfannot_link_margin:n { 1pt }
+
 
 %% conversion macro, replacement for \pdfstringdef
 % first the purify step
@@ -1001,7 +1043,7 @@
     \Hy@SaveLastskip      %defined in hyperref
     \Hy@VerboseAnchor{#1} %defined in hyperref, for debugging
     \@@_pstringdef:Nx  \l_@@_tmpa_tl { \HyperDestNameFilter{#1} } %
-    \bool_if:NTF \l_@@_dest_box_bool
+    \tl_if_eq:NnTF  \l_@@_dest_pdfview_tl {fitrbox}
       {
         \vbox_to_zero:n
           {
@@ -1802,7 +1844,6 @@
   {
     ,pdfview .code:n =
       {
-        \bool_set_false:N \l_@@_dest_box_bool
         \seq_set_split:Nnn \l_@@_tmpa_seq {~}{#1}
         \str_case_e:nnF { \str_lowercase:f{ \seq_item:Nn \l_@@_tmpa_seq {1} } }
            {
@@ -1840,11 +1881,10 @@
                    }
                    {
                       %ensure 4 values ...
-                     \tl_set:Nn \l_@@_dest_pdfview_tl {fitr}
+                     \tl_set:Nn \l_@@_dest_pdfview_tl {fitrbox}
                      \seq_put_right:Nn \l_@@_tmpa_seq  {0}
                      \seq_put_right:Nn \l_@@_tmpa_seq  {0}
                      \seq_put_right:Nn \l_@@_tmpa_seq  {0}
-                     \bool_set_true:N \l_@@_dest_box_bool
                      \hbox_set_to_wd:Nnn \l_@@_dest_box
                        {
                          \fp_eval:n
