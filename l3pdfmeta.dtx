@@ -194,7 +194,6 @@
     ,max_dict_size    = 4095
     ,max_obj_num      = 8388607
     ,max_nest_qQ      = 28
-    ,Catalog/OCProperties    = false
     ,named_actions    = {NextPage, PrevPage, FirstPage, LastPage}
     ,annot_flags      = {
                           \bitset_set_true:Nn  \l_pdfannot_F_bitset {Print}
@@ -207,9 +206,31 @@
                           \pdfannot_dict_put:nnn {link/Launch}{F}{ \bitset_to_arabic:N \l_pdfannot_F_bitset }
                           \pdfannot_dict_put:nnn {link/Named}{F}{ \bitset_to_arabic:N \l_pdfannot_F_bitset }
                         }
-    ,annot_no_actions   =  {Launch, Sound, Movie, ResetForm, ImportData, JavaScript, Hide}
-    ,annot_widget_AA =  false %no /AA dictionary in widget dict. Subtype != "Widget" || AA_size == 0
-    ,form_NeedAppearances = false
+    %booleans. Only the existence of the key matter.
+    %If the entry is added it means true (so in most cases "don't use ...")
+    %
+    %===============
+    % Rule 6.1.13-1 CosDocument, isOptionalContentPresent == false
+      ,Catalog_no_OCProperties =
+    %===============
+    % Rule 6.6.1-1: PDAction, S == "GoTo" || S == "GoToR" || S == "Thread" || S == "URI" || S == "Named" || S == "SubmitForm"
+    % means: no /S/Launch, /S/Sound, /S/Movie, /S/ResetForm, /S/ImportData, /S/JavaScript, /S/Hide
+      ,annot_action_no_A        =
+    %===============
+    % Rule 6.6.2-1: PDAnnot, Subtype != "Widget" || AA_size == 0
+    % means: no AA dictionary
+      ,annot_widget_no_AA      =
+    %===============
+    % Rule 6.9-2: PDAnnot, Subtype != "Widget" || (A_size == 0 && AA_size == 0)
+    % (looks like a tightening of the previous rule)
+      ,annot_widget_no_A_AA    =
+    %===============
+    % Rule 6.9-1 PDAcroForm, NeedAppearances == null || NeedAppearances == false
+    ,form_no_NeedAppearances =
+    %===============
+    %Rule 6.9-3 PDFormField, AA_size == 0
+    ,form_no_AA              =
+    %===============
     % to be continued https://docs.verapdf.org/validation/pdfa-part1/
     % - Outputintent/colorprofiles requirements
     % - no Alternates key in image dictionaries

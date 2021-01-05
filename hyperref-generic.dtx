@@ -97,7 +97,7 @@
 %  a warning). Currently with latex+dvips links can not be broken. But there is work
 %  in progress to change this.
 %  \item[unicode] This is always true.
-%  \item[pdfa] If this option is set to true \pkg{hyperref} checks and sets
+%  \item[pdfa] If this option is set to true \pkg{hyperref} normally checks and sets
 %  a small number of requirements for the PDF standard PDF/A.
 %  The key is ignored with this driver. Instead the wanted standard should be declared
 %  in \cs{DeclareDocumentMetadata}:
@@ -1154,7 +1154,7 @@
           /S/GoToR
           \Hy@SetNewWindow
           \ifx\\#3\\
-            /D[\Hy@href@page\l_@@_dest_pdfremotestartview_tl]
+            /D[\Hy@href@page/\l_@@_dest_pdfremotestartview_tl]
           \else
             /D( \l_@@_dest_name_tmpa_tl )
           \fi
@@ -2310,16 +2310,16 @@
          {Helv} {\pdf_object_ref:n {l_@@_font_helvetica_obj} }
        \pdfmanagement_add:nnx {Catalog /AcroForm}
          {DA}{(/Helv~10~Tf~0~g)}
-       \exp_args:Ne
-         \tl_if_eq:nnF
-           {\prop_item:Nn \g_pdfmeta_standard_prop {form_NeedAppearances}}
-           {false}
-           {
-             \legacy_if:nT { HyField@NeedAppearances }
-               {
-                 \pdfmanagement_add:nnx {Catalog / AcroForm }{NeedAppearances}{true}
-               }
-           }
+       \prop_if_in:NnTF\g_pdfmeta_standard_prop {form_no_NeedAppearance}
+         {
+           \pdfmanagement_remove:nn {Catalog / AcroForm }{NeedAppearances}
+         }
+         {
+           \legacy_if:nT { HyField@NeedAppearances }
+             {
+               \pdfmanagement_add:nnn {Catalog / AcroForm }{NeedAppearances}{true}
+             }
+         }
        }
      \MakeFieldObject
        {
@@ -2580,36 +2580,36 @@
       \DefaultOptionsofPushButton,#1
      }
     \PDFForm@Name
-    \exp_args:Ne\tl_if_in:nnTF {\prop_item:Nn \g_pdfmeta_standard_prop {annot_no_actions}}{JavaScript}
-     {
-      \msg_error:nn { hyp }{ pdfa-no-push-button }
-       \LayoutPushButtonField
-        {
-         \mode_leave_vertical:
-         \MakeButtonField{#2}
-        }
-     }
-     {
-      \HyField@FlagsPushButton
-      \legacy_if:nT {Fld@hidden}
-        {
-          \def\Fld@width{1sp}
-        }
-      \LayoutPushButtonField
-       {
-        \mode_leave_vertical:
-        \HyAnn@AbsPageLabel
-        \Hy@escapeform\PDFForm@Push
-        \hbox_set:Nn \l_tmpa_box { \MakeButtonField {#2}}
-        \pdfannot_box:nnnn
-          {\box_wd:N\l_tmpa_box}
-          {\box_ht:N\l_tmpa_box}
-          {\box_dp:N\l_tmpa_box} %is this correct?
-          {\PDFForm@Push}
-         {\box_use:N\l_tmpa_box}
-        \HyField@AddToFields
-       }
+    \prop_if_in:NnTF \g_pdfmeta_standard_prop {annot_action_no_A}
+      {
+        \msg_error:nn { hyp }{ pdfa-no-push-button }
+        \LayoutPushButtonField
+          {
+            \mode_leave_vertical:
+            \MakeButtonField{#2}
+          }
       }
+      {
+        \HyField@FlagsPushButton
+        \legacy_if:nT {Fld@hidden}
+          {
+            \def\Fld@width{1sp}
+          }
+        \LayoutPushButtonField
+          {
+            \mode_leave_vertical:
+            \HyAnn@AbsPageLabel
+            \Hy@escapeform\PDFForm@Push
+            \hbox_set:Nn \l_tmpa_box { \MakeButtonField {#2}}
+            \pdfannot_box:nnnn
+              {\box_wd:N\l_tmpa_box}
+              {\box_ht:N\l_tmpa_box}
+              {\box_dp:N\l_tmpa_box} %is this correct?
+              {\PDFForm@Push}
+             {\box_use:N\l_tmpa_box}
+            \HyField@AddToFields
+          }
+     }
   \group_end:
 }
 
@@ -2659,7 +2659,7 @@
          \DefaultOptionsofReset,#1
        }
      \mode_leave_vertical:
-      \exp_args:Ne\tl_if_in:nnTF {\prop_item:Nn \g_pdfmeta_standard_prop {annot_no_actions}}{ResetForm}
+     \prop_if_in:NnTF \g_pdfmeta_standard_prop {annot_action_no_A}
        {
          \msg_error:nn { hyp }{ pdfa-no-reset-button }
          \MakeButtonField{#2}
@@ -2891,13 +2891,10 @@
 \ExplSyntaxOn
 \def\Fld@additionalactions
  {%
-  \tl_if_empty:NF\Fld@X@additionalactions
+  \exp_args:Ne\str_if_eq:nnF {\Fld@X@additionalactions}{}
     {
-      \exp_args:Ne
-        \tl_if_eq:nnF
-          {\prop_item:Nn \g_pdfmeta_standard_prop {annot_widget_AA}}
-          {false}
-          {/AA<<\Fld@X@additionalactions>>}
+      \prop_if_in:NnF \g_pdfmeta_standard_prop {annot_widget_no_AA}
+        {/AA<<\Fld@X@additionalactions>>}
     }
  }
 \ExplSyntaxOff
@@ -2966,7 +2963,7 @@
 }
 \ExplSyntaxOff
 \ExplSyntaxOn
-\exp_args:Ne\tl_if_in:nnF {\prop_item:Nn \g_pdfmeta_standard_prop {annot_no_actions}}{JavaScript}
+\prop_if_in:NnF \g_pdfmeta_standard_prop {annot_action_no_A}
   {
    \def\PDFForm@Push
      {
@@ -3161,8 +3158,7 @@
   \Fld@additionalactions
 }
 \ExplSyntaxOn
-\exp_args:Ne
-  \tl_if_in:nnF {\prop_item:Nn \g_pdfmeta_standard_prop {annot_no_actions}}{ResetForm}
+\prop_if_in:NnF \g_pdfmeta_standard_prop {annot_action_no_A}
     {
        \def\PDFForm@Reset{%
          /Subtype/Widget%
