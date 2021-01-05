@@ -84,6 +84,21 @@
 %  so if commands from \pkg{bookmark} are needed in the preamble the document
 %  still has to load it manually but this is subject to change.
 %
+%  \subsection{PDF strings}
+%
+%  \pkg{hyperref} use a command called \cs{pdfstringdef} to convert text input into
+%  something that both makes sense and is valid in a PDF string, e.g. the bookmarks
+%  or the info dictionary or in form field values.
+%
+%  As the handling of the outlines are delegated to the \pkg{bookmark} package, they
+%  will for now still use \cs{pdfstringdef}, but all other strings produced by
+%  this driver will use a new method based on \cs{text_purify:n} and
+%  \cs{str_set_convert:Nnnn}. This method requires that files are utf8-encoded
+%  (at least if non-ascii chars are used in for PDF strings). For normal text
+%  it shouldn't matter, but a variety of commands and math are handled differently.
+%  Like with \cs{pdfstringdef} they are a number of ways to adjust the outcome of
+% \cs{text_purify:n}. These are described in the expl3 documentation interface3.pdf.
+%
 %  \subsection{Package options from hyperref}
 %  Not all package options are handled by the driver as this would require adaption
 %  of \pkg{hyperref}. Options should be set with \cs{hypersetup} after
@@ -627,7 +642,7 @@
 % \end{variable}
 
 % \section{PDF string conversion}
-% 
+%
 
 
 
