@@ -252,26 +252,53 @@
 %% \__hyp_link_dest_end:
 %% \__hyp_destination:n     :  sets an anchor, replaces \new@pdflink
 %% \__hyp_PageLabels_gpush: : puts pagelabels in the catalog, used on every storing
-%% \__hyp_pstringdef:Nn     : replaces Hy@pstringdef, converts n to pdfstring and stores in N
-%%                            naming??
-%% \__hyp_text_purify:Nn   : replaces the first step of \pdfstringdef/\Hy@pdfstringdef
-%%                           currently simply \text_purify:n
+%% PDF String (text)
+%% *\@@_text_pdfstring:nnN  : replaces Hy@pstringdef, converts #1 to pdfstring in encoding #2
+%%                           and stores in N
+%% Build with:
+%% *\@@_text_purify:nN
+%% *\@@_text_cleanup:N
+%% *\@@_text_convert:nN
+%%
+%% Destinations (dest)
+%% \l_@@_dest_box
+%%
+%% References (ref)
+%% *\@@_ref_label:nn
+%% *\@@_ref_if_exist:nn
+%% *\@@_ref_check:nn
+%% % helps to display key list messages
+%% \@@_clist_display:n
+%%
 %% \__hyp_info_generate_addons: what did this do??
-%% list of new variables
-%% \c_@@_dest_undefined_tl
+%%
 %% \g__hyp_AcroForm_CoFields_prop
 %% \g__hyp_AcroForm_Fields_prop
+%%
+%%  \g_@@_dest_pdfstartpage_tl ,
+%%  \g_@@_dest_pdfstartview_tl ,
+%%  \l_@@_dest_pdfremotestartview_tl ,
+
+%% Constants
+%% *\c_@@_map_linktypes_prop
+%% *\c_@@_dest_undefined_tl
+%% Temp variables
 %% \l_@@_tmpa_seq
 %% \l_@@_tmpa_box
 %% \l_@@_tmpa_tl
+%% \l_@@_tmpa_str
+%% \l_@@_tmpa_int
+%%
 %% \l_@@_dest_name_tmpa_tl
 %% \l_@@_uri_tmpa_tl
 %% \l_@@_filename_tmpa_tl
 %% \l_@@_para_tmpa_tl
+%% \l_@@_text_tmpa_str
+%% \g_@@_text_tmpa_str
 %% \l_@@_CheckmarkYes_tl
 %% \l_@@_CheckmarkOff_tl
 %% \l_@@_RadioYes_tl
-%%\\l_@@_dest_box
+
 %% \l_@@_dest_pdfview_tl
 %% list of commands which probably will have to change
 %%   \Hy@EXPsetpdfborder
@@ -528,12 +555,19 @@
 % \subsection{Private temporary variables}
 % At first a few generic tmp variables
 % \begin{variable}
-%  {\l_@@_tmpa_tl, \l_@@_tmpa_seq,\l_@@_tmpa_int.´,\l_@@_tmpa_box}
+%  {
+%    \l_@@_tmpa_tl,
+%    \l_@@_tmpa_seq,
+%    \l_@@_tmpa_int,
+%    \l_@@_tmpa_box,
+%    \l_@@_tmpa_str,
+%  }
 %    \begin{macrocode}
 \box_new:N \l_@@_tmpa_box
 \tl_new:N  \l_@@_tmpa_tl
 \seq_new:N \l_@@_tmpa_seq
 \int_new:N \l_@@_tmpa_int
+\str_new:N \l_@@_tmpa_str
 %    \end{macrocode}
 % \end{variable}
 %
@@ -544,6 +578,8 @@
 %   \l_@@_uri_tmpa_tl,
 %   \l_@@_filename_tmpa_tl,
 %   \l_@@_para_tmpa_tl
+%   \l_@@_text_tmpa_str
+%   \g_@@_text_tmpa_str
 %  }
 % TODO: document and check use!
 %    \begin{macrocode}
@@ -551,6 +587,8 @@
 \tl_new:N  \l_@@_uri_tmpa_tl
 \tl_new:N  \l_@@_filename_tmpa_tl
 \tl_new:N  \l_@@_para_tmpa_tl
+\str_new:N \l_@@_text_tmpa_str
+\str_new:N \g_@@_text_tmpa_str
 %    \end{macrocode}
 % \end{variable}
 %
@@ -643,47 +681,75 @@
 
 % \section{PDF string conversion}
 %
-
-
-
-%% conversion macro, replacement for \pdfstringdef
-% first the purify step
-% a hook, but there will need for a wrapper interface ...
-
-\hook_new:n {hyp/text/purify}
-
-\cs_new_protected:Npn \__hyp_text_purify:nN #1 #2
+% This defines a command which is used to replace
+% \cs{pdfstringdef}. This is probably temporary and will be adjusted or
+% replaced if some more generic PDF string command/module exists.
+% All commands here use the \enquote{submodule} name \texttt{text}.
+% At first a hook for user additions:
+%    \begin{macrocode}
+\hook_new:n {hyp/text/pdfstring}
+%    \end{macrocode}
+% The first step to convert input in a PDF string is to purify it, that means
+% to remove/expand commands. As the whole process is not expandable anyway we
+% can use a protected command. The \enquote{output} is a string:
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_text_purify:nN #1 #2 %#1 input, #2  str command
   {
-     \hook_use:n {hyp/text/purify}
-     \tl_set:Nx #2 {\text_purify:n { #1 } }
+     \str_set:Nx #2 {\text_purify:n { #1 } }
   }
+%    \end{macrocode}
+% The second step is to cleanup the output of the first step. This is a dummy
+% currently. The argument should be a string variable.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_text_cleanup:N #1
+ {
 
-% this takes the output of \__hyp_text_purify and applies a converter
-% #1 = text, #2 = converter #3 output
-% #2 should be string-hex-print for \pdf_text_convert:nnN {string-hex-print}
-%              string-hex for \pdf_text_convert:nnN {string-hex}
-%           or string-lit_print for \pdf_text_convert:nnN {string-lit-print}
-%           or lit for \pdf_text_convert:nnN {string-lit}
-\cs_new_protected:Npn \__hyp_text_to_string:NnN #1 #2 #3
+ }
+%    \end{macrocode}
+% The last step converts the string to a PDF encoding. As we have at least two
+% targets (hex and literal) there is an argument. The conversion assumes
+% utf8 input, it is based on cs{pdf_text_convert:nnN} in l3pdftools.
+%
+% \#2 is str variable,
+% \#1 should be
+% \begin{tabular}{ll}
+%  string-hex-print    & \texttt{<HEX>}\\
+%  string-hex          & \texttt{HEX}\\
+%  string-lit_print    & \texttt{(lit)}\\
+%  string-lit          & \texttt{lit}
+%  \end{tabular}
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_text_convert:nN #1 #2
   {
-     \pdf_text_convert:nVN {#2 } #1 #3
+     \pdf_text_convert:nVN { #1 } #2 #2
   }
-
-%% combining both:
-% #1=input, #2= handler shortcut #3 output command
-\cs_new_protected:Npn \__hyp_text_purify_to_string:nnN #1 #2 #3
- {
-   \__hyp_text_purify:nN {#1}\l_@@_tmpa_tl
-   \__hyp_text_to_string:NnN \l_@@_tmpa_tl { #2 } #3
+%    \end{macrocode}
+% This command combines everything.
+% |#1|=input, |#2|= handler shortcut |#3|= output str variable
+% The commands uses a group to locally set \cs{Hy@pdfstringtrue}
+% so that \cs{texorpdfstring} works and other local settings can be done.
+%
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_text_pdfstring:nnN #1 #2 #3
+  {
+    \group_begin:
+    \Hy@pdfstringtrue
+    \hook_use:n {hyp/text/pdfstring}
+    \@@_text_purify:nN  { #1 } \l_@@_text_tmpa_str
+    \@@_text_cleanup:N         \l_@@_text_tmpa_str
+    \@@_text_convert:nN { #2 } \l_@@_text_tmpa_str
+    \str_gset_eq:NN \g_@@_text_tmpa_str\l_@@_text_tmpa_str
+    \group_end:
+    \str_set_eq:NN #3 \g_@@_text_tmpa_str
  }
-
-
-%info keys use hex_print for now:
-\cs_new_protected:Npn \__hyp_text_convert_info:nN #1 #2
- {
-   \__hyp_text_purify_to_string:nnN { #1 }{ string-hex-print } #2
- }
-
+%    \end{macrocode}
+% This is a special version for info keys:
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_text_pdfstring_info:nN #1 #2
+  {
+    \@@_text_pdfstring:nnN  { #1 }{ string-hex-print } #2
+  }
+%    \end{macrocode}
 
 
 % variants of hyperref commands to get attributes in the prop
@@ -1974,8 +2040,8 @@
                 \pdfmanagement_remove:nn {Info}{#2}
               }
               {
-                \__hyp_text_convert_info:nN {##1}\l_@@_tmpa_tl
-                \pdfmanagement_add:nnx {Info}{#2}{\l_@@_tmpa_tl}
+                \@@_text_pdfstring_info:nN {##1}\l_@@_tmpa_str
+                \pdfmanagement_add:nnx {Info}{#2}{\l_@@_tmpa_str}
               }
           }
       }
@@ -1988,15 +2054,15 @@
                 \pdfmanagement_remove:nn {Info}{#2}
               }
               {
-                \__hyp_text_convert_info:nN {##1}\l_@@_tmpa_tl
-                \pdfmanagement_add:nnx {Info}{#2}{\l_@@_tmpa_tl}
+                \@@_text_pdfstring_info:nN {##1}\l_@@_tmpa_str
+                \pdfmanagement_add:nnx {Info}{#2}{\l_@@_tmpa_str}
               }
           }
         ,unknown .code:n =
          {
-            \__hyp_text_convert_info:nN {##1}\l_@@_tmpa_tl
+            \@@_text_pdfstring_info:nN {##1}\l_@@_tmpa_str
             \exp_args:Nnx
-              \pdfmanagement_add:nnx {Info}{\pdf_text_convert:nV {name }\l_keys_key_str}{\l_@@_tmpa_tl}
+              \pdfmanagement_add:nnx {Info}{\pdf_text_convert:nV {name }\l_keys_key_str}{\l_@@_tmpa_str}
          }
       }
   }
