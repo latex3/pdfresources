@@ -74,35 +74,47 @@
 %
 %  \section{Differences}
 %  The new driver tries to be compatible with the current \pkg{hyperref} drivers
-%  but there are nevertheless difference. Some of them due to the still experimental
-%  status of the driver, other are design decision: one part of the project is
+%  but there are nevertheless differences. Some of them due to the still experimental
+%  status of the driver, others are design decision: one part of the project is
 %  to clean up and modernize the code.
 %
 %  \subsection{Bookmark code}
 %  The driver doesn't contain code to handle bookmarks/outlines. Instead it forces
-%  the loading the \pkg{bookmark} package. Currently this is done at the end of the preamble
+%  the loading of the \pkg{bookmark} package. Currently this is done at the end of the preamble
 %  so if commands from \pkg{bookmark} are needed in the preamble the document
 %  still has to load it manually but this is subject to change.
 %
 %  \subsection{PDF strings}
 %
 %  \pkg{hyperref} use a command called \cs{pdfstringdef} to convert text input into
-%  something that both makes sense and is valid in a PDF string, e.g. the bookmarks
-%  or the info dictionary or in form field values.
+%  something that both makes sense and is valid in a PDF string, e.g. in the bookmarks
+%  or in the info dictionary or as form field values.
 %
 %  As the handling of the outlines are delegated to the \pkg{bookmark} package, they
 %  will for now still use \cs{pdfstringdef}, but all other strings produced by
 %  this driver will use a new method based on \cs{text_purify:n} and
-%  \cs{str_set_convert:Nnnn}. This method requires that files are utf8-encoded
+%  \cs{str_set_convert:Nnnn}.
 %  (at least if non-ascii chars are used in for PDF strings). For normal text
 %  it shouldn't matter, but a variety of commands and math are handled differently.
 %  Like with \cs{pdfstringdef} they are a number of ways to adjust the outcome of
 % \cs{text_purify:n}. These are described in the expl3 documentation interface3.pdf.
 %
+%  \emph{This new method requires that files are utf8-encoded}
 %  \subsection{Package options from hyperref}
-%  Not all package options are handled by the driver as this would require adaption
-%  of \pkg{hyperref}. Options should be set with \cs{hypersetup} after
-%  the package has been loaded.
+%  Only a few package options are recognized by the new driver currently
+%  as \pkg{hyperref} hasn't been adapted yet.
+%
+%  Such options should be set with \cs{hypersetup} after
+%  the package has been loaded. This can also be the case for options which normally
+%  don't work in \cs{hypersetup}.
+%
+%  Options that still must be set as package options are
+%  |pdfpagelabels| (a boolean)
+%
+%  \subsection{Draftmode}
+%  pdftex and other engines knows a
+%  draftmode and hyperref honors this in some places. The new
+%  driver ignores this, for example |pagelabels| are always created.
 %
 %  \subsection{Dropped options}
 %  A number of options are ignored by this driver
@@ -239,73 +251,73 @@
 %  \end{itemize}
 %
 %
-%
-%% This is an adapted version of hluatex.def
-%% meant to test the use of the commands
-%% from pdfmanagement.sty
-%%
-%% drivers are loaded in line 4745 in hyperref.sty in a \Hy@AtEndOfPackage command.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% list of new internal commands
-%% \__hyp_link_dest_begin:nw : start command for links to internal destination
-%%                             replaces \find@pdflink
-%% \__hyp_link_dest_end:
-%% \__hyp_destination:n     :  sets an anchor, replaces \new@pdflink
-%% \__hyp_PageLabels_gpush: : puts pagelabels in the catalog, used on every storing
-%% PDF String (text)
-%% *\@@_text_pdfstring:nnN  : replaces Hy@pstringdef, converts #1 to pdfstring in encoding #2
-%%                           and stores in N
-%% Build with:
-%% *\@@_text_purify:nN
-%% *\@@_text_cleanup:N
-%% *\@@_text_convert:nN
-%%
-%% Destinations (dest)
-%% \l_@@_dest_box
-%%
-%% References (ref)
-%% *\@@_ref_label:nn
-%% *\@@_ref_if_exist:nn
-%% *\@@_ref_check:nn
-%% % helps to display key list messages
-%% \@@_clist_display:n
-%%
-%% \__hyp_info_generate_addons: what did this do??
-%%
-%% \g__hyp_AcroForm_CoFields_prop
-%% \g__hyp_AcroForm_Fields_prop
-%%
-%%  \g_@@_dest_pdfstartpage_tl ,
-%%  \g_@@_dest_pdfstartview_tl ,
-%%  \l_@@_dest_pdfremotestartview_tl ,
 
-%% Constants
-%% *\c_@@_map_linktypes_prop
-%% *\c_@@_dest_undefined_tl
-%% Temp variables
-%% \l_@@_tmpa_seq
-%% \l_@@_tmpa_box
-%% \l_@@_tmpa_tl
-%% \l_@@_tmpa_str
-%% \l_@@_tmpa_int
-%%
-%% \l_@@_dest_name_tmpa_tl
-%% \l_@@_uri_tmpa_tl
-%% \l_@@_filename_tmpa_tl
-%% \l_@@_para_tmpa_tl
-%% \l_@@_text_tmpa_str
-%% \g_@@_text_tmpa_str
-%% \l_@@_CheckmarkYes_tl
-%% \l_@@_CheckmarkOff_tl
-%% \l_@@_RadioYes_tl
+%^^A %% This is an adapted version of hluatex.def
+%^^A %% meant to test the use of the commands
+%^^A %% from pdfmanagement.sty
+%^^A %%
+%^^A %% drivers are loaded in line 4745 in hyperref.sty in a \Hy@AtEndOfPackage command.
+%^^A %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%^^A %% list of new internal commands
+%^^A %% __hyp_link_dest_begin:nw : start command for links to internal destination
+%^^A %%                             replaces \find@pdflink
+%^^A %% __hyp_link_dest_end:
+%^^A %% __hyp_destination:n     :  sets an anchor, replaces \new@pdflink
+%^^A %% \__hyp_PageLabels_gpush: : puts pagelabels in the catalog, used on every storing
+%^^A %% PDF String (text)
+%^^A %% *\@@_text_pdfstring:nnN  : replaces Hy@pstringdef, converts #1 to pdfstring in encoding #2
+%^^A %%                           and stores in N
+%^^A %% Build with:
+%^^A %% *\@@_text_purify:nN
+%^^A %% *\@@_text_cleanup:N
+%^^A %% *\@@_text_convert:nN
+%^^A %%
+%^^A %% Destinations (dest)
+%^^A %% \l_@@_dest_box
+%^^A %%
+%^^A %% References (ref)
+%^^A %% *\@@_ref_label:nn
+%^^A %% *\@@_ref_if_exist:nn
+%^^A %% *\@@_ref_check:nn
+%^^A %% % helps to display key list messages
+%^^A %% \@@_clist_display:n
+%^^A %%
+%^^A %% \__hyp_info_generate_addons: what did this do??
+%^^A %%
+%^^A %% \g__hyp_AcroForm_CoFields_prop
+%^^A %% \g__hyp_AcroForm_Fields_prop
+%^^A %%
+%^^A %%  \g_@@_dest_pdfstartpage_tl ,
+%^^A %%  \g_@@_dest_pdfstartview_tl ,
+%^^A %%  \l_@@_dest_pdfremotestartview_tl ,
+%^^A
+%^^A %% Constants
+%^^A %% *\c_@@_map_linktypes_prop
+%^^A %% *\c_@@_dest_undefined_tl
+%^^A %% Temp variables
+%^^A %% \l_@@_tmpa_seq
+%^^A %% \l_@@_tmpa_box
+%^^A %% \l_@@_tmpa_tl
+%^^A %% \l_@@_tmpa_str
+%^^A %% \l_@@_tmpa_int
+%^^A %%
+%^^A %% \l_@@_dest_name_tmpa_tl
+%^^A %% \l_@@_uri_tmpa_tl
+%^^A %% \l_@@_filename_tmpa_tl
+%^^A %% \l_@@_para_tmpa_tl
+%^^A %% \l_@@_text_tmpa_str
+%^^A %% \g_@@_text_tmpa_str
+%^^A %% \l_@@_CheckmarkYes_tl
+%^^A %% \l_@@_CheckmarkOff_tl
+%^^A %% \l_@@_RadioYes_tl
+%^^A
+%^^A %% \l_@@_dest_pdfview_tl
+%^^A %% list of commands which probably will have to change
+%^^A %%   \Hy@EXPsetpdfborder
+%^^A %%   \Hy@EXPsetpdfhighlight
+%^^A %%   \Hy@EXPsetbordercolor
+%^^A % %   \hypupdateattribute
 
-%% \l_@@_dest_pdfview_tl
-%% list of commands which probably will have to change
-%%   \Hy@EXPsetpdfborder
-%%   \Hy@EXPsetpdfhighlight
-%%   \Hy@EXPsetbordercolor
-%%   \hypupdateattribute
-%
 %    \begin{macrocode}
 %<*package>
 %<@@=hyp>
@@ -751,12 +763,70 @@
   }
 %    \end{macrocode}
 
+% \section{Pagelabels}
+% Page labels are representations of the page numbers in the PDF viewer. If the hyperref
+% options |pdfpagelabels| is true (the default) roman numbers are e.g. shown as
+% \enquote{ii (2/58)}. To do this the page ranges must be collected, if possible a prefix
+% and the numbering of the counter must be identified and then written
+% to the catalog.
+%
+% The current implemention in hyperref/hyperref drivers:
+% \begin{description}
+% \item[xetex:] hxetex.def, line 80-110\\
+%        |\HyPL@StorePageLabel| writes to the aux-file
+%        at begin document (after reading the aux)
+%        |\HyPL@SetPageLabels| is called (defined in hyperref.sty after the driver
+%        loading)
+%        which calls |\Hy@PutCatalog{/PageLabels<</Nums[\HyPL@Labels]>>}|
+% \item[dvips:]  identical to xetex, line 60 to 90 in pdfmark.def
+% \item[dvipdfm:] identical to xetex
+% \item[pdftex:] |\HyPL@StorePageLabel| stores in |\HyPL@Labels| in the first compilation
+% In |\AtVeryEndDocument|  |\HyPL@SetPageLabels| is called.
+% \item[luatex] identical to pdftex
+% \end{description}
+%
+% The code in \pkg{hyperref} inspects |\thepage| and tries to figure out
+% the numbering system and the prefix. E.g. A-\arabic{page} is correctly split.
+% If the counter can not be identified \pkg{hyperref} generates only /P entries with the
+% whole content.
+%
+% The new implementation makes use of the pdf management: The relevant entry in the
+% catalog is continuously updated and pushed out at the end of the document.
+% This works (hopefully \ldots) with all drivers.
+%
+% We do not try to avoid the \enquote{useless} pagelabel entry
+% |/PageLabels <</Nums[0<</S/D>>]>>|
+% (but it would be possible), we also don't test for empty |\thepage|,
+% \pkg{hyperref} seems to handle this fine and the pdf is valid.
+%
+% The code has to refer to some \pkg{hyperref} commands as we can't yet
+% change code there. The switch for draftmode has been removed.
+%
+%    \begin{macrocode}
+\cs_new_protected:Npn\@@_PageLabels_gpush:
+  {
+    \pdfmanagement_add:nnx {Catalog} {PageLabels}{<</Nums[\HyPL@Labels]>>}
+  }
+
+\def\Hy@PutCatalog #1 { \__hyp_PageLabels_gpush: }
+
+
+\legacy_if:nT { Hy@pdfpagelabels }
+  {
+    \cs_set_protected:Npn \HyPL@StorePageLabel #1
+      {
+        \tl_gput_right:Nx \HyPL@Labels { \the\Hy@abspage<<#1>> }
+        \__hyp_PageLabels_gpush:
+      }
+  }
+
 
 % variants of hyperref commands to get attributes in the prop
 % these are (temporary) commands to fill various attributes (color, border style) in
 % the hooks for links from the hyperref keys.
 
 % pdfborder, pdfborderstyle
+%    \begin{macrocode}
 \pdfannot_link_margin:n { 1pt }
 
 \cs_new_protected:Npn \Hy@EXPsetpdfborder
@@ -839,98 +909,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-% page labels.
-%% current implemention in hyperref/hyperref drivers
-% xetex: hxetex line 80-110
-%        \HyPL@StorePageLabel writes to the aux-file
-%        at begin document (after reading the aux)
-%        \HyPL@SetPageLabels is called (defined in hyperref.sty after the driver
-%        loading)
-%        which calls \Hy@PutCatalog{/PageLabels<</Nums[\HyPL@Labels]>>}%
-% dvips  identical to xetex, line 60 to 90 in pdfmark.def
-% dvipdfm identical to xetex
-% pdftex \HyPL@StorePageLabel stores in \HyPL@Labels in the first compilation
-%        \AtVeryEndDocument \HyPL@SetPageLabels is called.
-% luatex identical to pdftex
-% The code in hyperref inspects \thepage and tries to figure out
-% the numbering system and the prefix. E.g. A-\arabic{page} is correctly split.
-% If the counter can not be identified hyperref generates only /P entries with the
-% whole content.
-%% new implementation
-% pdftex/luatex
-% \AtVeryEndDocument is too late for pdflatex/lualatex the catalog is already pushed
-% out. So we update the catalog entry when storing the page label.
-% we do not try to avoid the "useless" pagelabel entry /PageLabels <</Nums[0<</S/D>>]>>
-% (but it would be possible), we also don't test for empty \thepage, hyperref seems to
-% handle this fine and the pdf is valid.
-
-% catalog mapped to expl3 command
-% \Hy@PutCatalog is used only in one place but we
-% we need this for the dvips/xetex route for the page labels.
-% we simply hard code this for now until hyperref.sty itself can be adapted ...
-\cs_new_protected:Npn\__hyp_PageLabels_gpush:
-  {
-    \pdfmanagement_add:nnx {Catalog} {PageLabels}{<</Nums[\HyPL@Labels]>>}
-  }
-
-
-\pdf@ifdraftmode %from pdftexcmds replace??
-  {
-    \let\Hy@PutCatalog \use_none:n
-  }
-  {
-    \def\Hy@PutCatalog #1 { \__hyp_PageLabels_gpush: }
-  }
-
-\legacy_if:nT { Hy@pdfpagelabels }
-  {
-    \sys_if_output_pdf:TF
-      { %pdflatex,lualatex
-        \cs_set_protected:Npn \HyPL@StorePageLabel #1
-          {
-            \tl_gput_right:Nx \HyPL@Labels { \the\Hy@abspage<<#1>> }
-            \__hyp_PageLabels_gpush:
-          }
-      }
-      { %xetex, dvips, dvipdfmx
-        \cs_set_protected:Npn \HyPL@StorePageLabel #1
-          {
-            \legacy_if:nT { @filesw }
-              {
-                 \iow_now:Nx\@mainaux
-                   {
-                      \exp_not:N \HyPL@Entry{\the\Hy@abspage<<#1>>}
-                   }
-              }
-          }
-        \Hy@AtBeginDocument
-          {
-            \legacy_if:nT { @filesw }
-              {
-                \iow_now:Nn \@mainaux
-                   {
-                      \providecommand*\HyPL@Entry[1]{}
-                   }
-              }
-            \tl_if_empty:NTF \HyPL@Labels
-              {
-                \Hy@WarningNoLine{Rerun~to~get~/PageLabels~entry}
-              }
-              {
-                \HyPL@SetPageLabels
-              }
-              \cs_set_eq:NN \HyPL@Entry \use_none:n
-           }
-         \cs_set_protected:Npn \HyPL@Entry #1
-           {
-              \tl_gset:No \HyPL@Labels
-                {
-                   \HyPL@Labels
-                   #1
-                }
-           }
-      }
-  }
 
 %replace Hy@pstringdef definition.
 %!!!!!!!! check if utf16 (string or hex) isn't better, see new-pdfescape!!!!!!!!!
@@ -3445,7 +3423,6 @@
 \expandafter\def\csname Parent2\endcsname{}
 \expandafter\def\csname Parent3\endcsname{}
 \expandafter\def\csname Parent4\endcsname{}
-
 %%
 %% End of file `hgeneric-experimental.def'.
 %</package>
