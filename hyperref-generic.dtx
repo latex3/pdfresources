@@ -93,12 +93,20 @@
 %  As the handling of the outlines are delegated to the \pkg{bookmark} package, they
 %  will for now still use \cs{pdfstringdef}, but all other strings produced by
 %  this driver will use a new method based on \cs{text_purify:n} and
-%  \cs{str_set_convert:Nnnn}. This method requires that files are utf8-encoded
-%  (at least if non-ascii chars are used in for PDF strings). For normal text
+%  \cs{str_set_convert:Nnnn}. For normal text
 %  it shouldn't matter, but a variety of commands and math are handled differently.
 %  Like with \cs{pdfstringdef} they are a number of ways to adjust the outcome of
 % \cs{text_purify:n}. These are described in the expl3 documentation interface3.pdf.
 %
+%  Important differences here are
+%  \begin{itemize}
+%     \item This method requires that files are utf8-encoded
+%      (at least if non-ascii chars are used in for PDF strings).
+%     \item \emph{All} robust commands are removed, unless an equivalent has been
+%     declared.
+%     \item Currently the new method is much more silent: it doesn't warn like
+%     \pkg{hyperref} if it removes commands. 
+%   \end{itemize}
 %  \subsection{Package options from hyperref}
 %  Not all package options are handled by the driver as this would require adaption
 %  of \pkg{hyperref}. Options should be set with \cs{hypersetup} after
