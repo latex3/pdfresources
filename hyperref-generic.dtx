@@ -812,7 +812,13 @@
 %    \begin{macrocode}
 \cs_new_protected:Npn\@@_PageLabels_gpush:
   {
-    \pdfmanagement_add:nnx {Catalog} {PageLabels}{<</Nums[\HyPL@Labels]>>}
+    \str_if_eq:eeTF{\HyPL@Labels}{0<</S/D>>}
+     {
+       \pdfmanagement_remove:nn {Catalog} {PageLabels}
+     }
+     {
+       \pdfmanagement_add:nnx {Catalog} {PageLabels}{<</Nums[\HyPL@Labels]>>}
+     }
   }
 
 \def\Hy@PutCatalog #1 { \__hyp_PageLabels_gpush: }
