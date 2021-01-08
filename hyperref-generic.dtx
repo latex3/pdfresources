@@ -761,6 +761,10 @@
     \group_end:
     \str_set_eq:NN #3 \g_@@_text_tmpa_str
  }
+\cs_generate_variant:Nn \@@_text_pdfstring:nnN {xnN,onN}
+
+\cs_new_protected:Npn\Hy@pstringdef #1 #2
+  { \@@_text_pdfstring:xnN {#2} {string-lit}#1 }
 %    \end{macrocode}
 % This is a special version for info keys:
 %    \begin{macrocode}
@@ -923,26 +927,26 @@
 
 %replace Hy@pstringdef definition.
 %!!!!!!!! check if utf16 (string or hex) isn't better, see new-pdfescape!!!!!!!!!
-\cs_new:Npn \__hyp_pstringdef:Nn #1 #2
-  {
-    \group_begin:
-    \char_set_catcode_other:N \~
-    \char_set_active_eq:NN \~ \c_tilde_str
-    \char_set_catcode_active:N \~
-    \sys_if_engine_pdftex:TF
-      { %pdftex. Should we assume utf8 or allow other input encodings?
-        \str_gset_convert:Nnnn \g_tmpa_str {#2}{utf8}{utf8/string} %utf8 because of hyperref
-      }
-      { %luatex,xetex
-        \str_gset_convert:Nnnn \g_tmpa_str {#2}{}{utf8/string} %utf8 because of hyperref
-      }
-    \group_end:
-    \str_set_eq:NN#1 \g_tmpa_str
-  }
-\cs_generate_variant:Nn \__hyp_pstringdef:Nn {No,Nx}
+%\cs_new:Npn \__hyp_pstringdef:Nn #1 #2
+%  {
+%    \group_begin:
+%    \char_set_catcode_other:N \~
+%    \char_set_active_eq:NN \~ \c_tilde_str
+%    \char_set_catcode_active:N \~
+%    \sys_if_engine_pdftex:TF
+%      { %pdftex. Should we assume utf8 or allow other input encodings?
+%        \str_gset_convert:Nnnn \g_tmpa_str {#2}{utf8}{utf8/string} %utf8 because of hyperref
+%      }
+%      { %luatex,xetex
+%        \str_gset_convert:Nnnn \g_tmpa_str {#2}{}{utf8/string} %utf8 because of hyperref
+%      }
+%    \group_end:
+%    \str_set_eq:NN#1 \g_tmpa_str
+%  }
+%\cs_generate_variant:Nn \__hyp_pstringdef:Nn {No,Nx}
 
 % can go when all occurences in the driver have been replaced.
-\cs_set_eq:NN\Hy@pstringdef \__hyp_pstringdef:Nx
+%\cs_set_eq:NN\Hy@pstringdef \__hyp_pstringdef:Nx
 
 %these patterns are used in hyperref checks.
 %it is unclear if they are really useful and if a backend support is
@@ -1107,7 +1111,8 @@
     \mode_if_horizontal:T { \@savsf\spacefactor }
     \Hy@SaveLastskip      %defined in hyperref
     \Hy@VerboseAnchor{#1} %defined in hyperref, for debugging
-    \@@_pstringdef:Nx  \l_@@_tmpa_tl { \HyperDestNameFilter{#1} } %
+    %\@@_pstringdef:Nx  \l_@@_tmpa_tl { \HyperDestNameFilter{#1} } %
+    \@@_text_pdfstring:xnN  { \HyperDestNameFilter{#1}  } {string-lit} \l_@@_tmpa_tl
     \tl_if_eq:NnTF  \l_@@_dest_pdfview_tl {fitrbox}
       {
         \vbox_to_zero:n
@@ -1145,10 +1150,14 @@
         \tl_set_eq:NN \l_@@_dest_name_tmpa_tl \c_@@_dest_undefined_tl
       }
       { %I hope this is right ...
-        \__hyp_pstringdef:Nx \l_@@_dest_name_tmpa_tl
-          {
-            \exp_args:No \HyperDestNameFilter { \l_@@_dest_name_tmpa_tl }
-          }
+%        \__hyp_pstringdef:Nx \l_@@_dest_name_tmpa_tl
+%          {
+%            \exp_args:No \HyperDestNameFilter { \l_@@_dest_name_tmpa_tl }
+%          }
+       \@@_text_pdfstring:xnN
+         { \exp_args:No \HyperDestNameFilter { \l_@@_dest_name_tmpa_tl } }
+         {string-lit}
+          \l_@@_dest_name_tmpa_tl
       }
     \exp_args:No
       \pdfannot_link_goto_begin:nw  { \l_@@_dest_name_tmpa_tl }
@@ -1209,7 +1218,8 @@
 \cs_new_protected:Npn \hyper@linkurl #1 #2  %#1:link text #2: URI,
   {
     \group_begin:
-    \__hyp_pstringdef:Nx \l_@@_uri_tmpa_tl { #2 }
+    %\__hyp_pstringdef:Nx \l_@@_uri_tmpa_tl { #2 }
+    \@@_text_pdfstring:xnN { #2} {string-hex} \l_@@_uri_tmpa_tl
     %hyper@chars, unneeded as used only once
     \cs_set_eq:NN \# \c_hash_str
     \cs_set_eq:NN \% \c_percent_str
@@ -1249,8 +1259,10 @@
     \group_begin:
     \tl_set:Nn \l_@@_filename_tmpa_tl { #2 }
     \Hy@CleanupFile \l_@@_filename_tmpa_tl
-    \__hyp_pstringdef:No \l_@@_filename_tmpa_tl { \l_@@_filename_tmpa_tl }
-    \__hyp_pstringdef:Nn \l_@@_dest_name_tmpa_tl { #3 }
+    %\__hyp_pstringdef:No \l_@@_filename_tmpa_tl { \l_@@_filename_tmpa_tl }
+    \@@_text_pdfstring:onN  { \l_@@_filename_tmpa_tl } {string-lit} \l_@@_filename_tmpa_tl
+    %\__hyp_pstringdef:Nn \l_@@_dest_name_tmpa_tl { #3 }
+    \@@_text_pdfstring:nnN  { #1 } {string-lit} \l_@@_dest_name_tmpa_tl
     \Hy@MakeRemoteAction
     \mode_leave_vertical:
     \pdfannot_link:nnn %expansion??
@@ -1290,8 +1302,10 @@
 \cs_new_protected:Npn \hyper@linklaunch #1 #2 #3 % filename, anchor text, Parameters
  {
   \group_begin:
-    \__hyp_pstringdef:Nn \l_@@_filename_tmpa_tl { #1 }
-    \__hyp_pstringdef:Nn \l_@@_para_tmpa_tl     { #3 }
+    %\__hyp_pstringdef:Nn \l_@@_filename_tmpa_tl { #1 } %string-hex
+    \@@_text_pdfstring:nnN {#1}{string-lit} \l_@@_filename_tmpa_tl
+    %\__hyp_pstringdef:Nn \l_@@_para_tmpa_tl     { #3 } %string-hex
+    \@@_text_pdfstring:nnN {#3}{string-lit} \l_@@_para_tmpa_tl
     %\Hy@pstringdef\Hy@pstringF{#1}%
     %\Hy@pstringdef\Hy@pstringP{#3}%
     \mode_leave_vertical:
@@ -1374,7 +1388,8 @@
  {
    ,baseurl       .code:n =
      {
-       \__hyp_pstringdef:No \l_@@_tmpa_tl {#1}%
+       %\__hyp_pstringdef:No \l_@@_tmpa_tl {#1}%
+       \@@_text_pdfstring:onN  { #1 } {string-lit} \l_@@_tmpa_tl
         \tl_if_empty:NTF \l_@@_tmpa_tl
           {
              \pdfmanagement_remove:nn {Catalog} { URI }
@@ -2922,7 +2937,7 @@
     \ifx\\#3\\%
     \else
       \expandafter
-      \Hy@pstringdef\csname Hy@esc@\string#2\endcsname{#2}%
+      \Hy@pstringdef\csname Hy@esc@\string#2\endcsname{#2}% probably string-hex
       \ltx@ReturnAfterFi{%
         \Hy@@escapeform#3\@nil
       }%
