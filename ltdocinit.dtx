@@ -125,9 +125,21 @@
         \RequirePackage{l3pdfannot}
         \bool_gset_true:N \g__pdfmanagement_active_bool
         \keys_set_filter:nnn  { pdf / setup } { init } { #1 }
+        \bool_if:NT \g__pdfmanagement_active_bool
+          {
+            \PassOptionsToPackage{customdriver=hgeneric-experimental}{hyperref}
+          }
         \RenewDocumentCommand\DeclareDocumentMetadata { m }
           {
             \keys_set_filter:nnn  { pdf / setup } { init } { ##1 }
+            \bool_if:NTF \g__pdfmanagement_active_bool
+             {
+               \str_remove_all:cn {opt@hyperref.sty}{customdriver=hgeneric-experimental}
+               \PassOptionsToPackage{customdriver=hgeneric-experimental}{hyperref}
+             }
+             {
+               \str_remove_all:cn {opt@hyperref.sty}{customdriver=hgeneric-experimental}
+             }
           }
       }
   }
