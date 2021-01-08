@@ -732,6 +732,8 @@
 % \#2 is str variable,
 % \#1 should be
 % \begin{tabular}{ll}
+%  string-dest-print    & \texttt{(lit)} (without BE marker)\\
+%  string-dest          & \texttt{list} (without BE marker)\\
 %  string-hex-print    & \texttt{<HEX>}\\
 %  string-hex          & \texttt{HEX}\\
 %  string-lit_print    & \texttt{(lit)}\\
@@ -1112,7 +1114,7 @@
     \Hy@SaveLastskip      %defined in hyperref
     \Hy@VerboseAnchor{#1} %defined in hyperref, for debugging
     %\@@_pstringdef:Nx  \l_@@_tmpa_tl { \HyperDestNameFilter{#1} } %
-    \@@_text_pdfstring:xnN  { \HyperDestNameFilter{#1}  } {string-lit} \l_@@_tmpa_tl
+    \@@_text_pdfstring:xnN  { \HyperDestNameFilter{#1}  } {string-dest} \l_@@_tmpa_tl
     \tl_if_eq:NnTF  \l_@@_dest_pdfview_tl {fitrbox}
       {
         \vbox_to_zero:n
@@ -1156,7 +1158,7 @@
 %          }
        \@@_text_pdfstring:xnN
          { \exp_args:No \HyperDestNameFilter { \l_@@_dest_name_tmpa_tl } }
-         {string-lit}
+         {string-dest}
           \l_@@_dest_name_tmpa_tl
       }
     \exp_args:No
@@ -1219,7 +1221,7 @@
   {
     \group_begin:
     %\__hyp_pstringdef:Nx \l_@@_uri_tmpa_tl { #2 }
-    \@@_text_pdfstring:xnN { #2} {string-hex} \l_@@_uri_tmpa_tl
+    \@@_text_pdfstring:xnN { #2} {string-hex-print} \l_@@_uri_tmpa_tl
     %hyper@chars, unneeded as used only once
     \cs_set_eq:NN \# \c_hash_str
     \cs_set_eq:NN \% \c_percent_str
@@ -1234,7 +1236,7 @@
             % the action dictionary has no hook!
             /Type/Action~
             /S/URI~
-            /URI(\l_@@_uri_tmpa_tl)~
+            /URI~\l_@@_uri_tmpa_tl~
             \ifHy@href@ismap
               /IsMap~true%
             \fi
@@ -1260,22 +1262,22 @@
     \tl_set:Nn \l_@@_filename_tmpa_tl { #2 }
     \Hy@CleanupFile \l_@@_filename_tmpa_tl
     %\__hyp_pstringdef:No \l_@@_filename_tmpa_tl { \l_@@_filename_tmpa_tl }
-    \@@_text_pdfstring:onN  { \l_@@_filename_tmpa_tl } {string-lit} \l_@@_filename_tmpa_tl
+    \@@_text_pdfstring:onN  { \l_@@_filename_tmpa_tl } {string-lit-print} \l_@@_filename_tmpa_tl
     %\__hyp_pstringdef:Nn \l_@@_dest_name_tmpa_tl { #3 }
-    \@@_text_pdfstring:nnN  { #1 } {string-lit} \l_@@_dest_name_tmpa_tl
+    \@@_text_pdfstring:nnN  { #3 } {string-dest-print} \l_@@_dest_name_tmpa_tl
     \Hy@MakeRemoteAction
     \mode_leave_vertical:
     \pdfannot_link:nnn %expansion??
       { GoToR }
       {
         /A<<
-          /F( \l_@@_filename_tmpa_tl )
+          /F~\l_@@_filename_tmpa_tl
           /S/GoToR
           \Hy@SetNewWindow
           \ifx\\#3\\
             /D[\Hy@href@page/\l_@@_dest_pdfremotestartview_tl]
           \else
-            /D( \l_@@_dest_name_tmpa_tl )
+            /D~\l_@@_dest_name_tmpa_tl
           \fi
           \Hy@href@nextactionraw
         >>
@@ -1303,9 +1305,9 @@
  {
   \group_begin:
     %\__hyp_pstringdef:Nn \l_@@_filename_tmpa_tl { #1 } %string-hex
-    \@@_text_pdfstring:nnN {#1}{string-lit} \l_@@_filename_tmpa_tl
+    \@@_text_pdfstring:nnN {#1}{string-lit-print} \l_@@_filename_tmpa_tl
     %\__hyp_pstringdef:Nn \l_@@_para_tmpa_tl     { #3 } %string-hex
-    \@@_text_pdfstring:nnN {#3}{string-lit} \l_@@_para_tmpa_tl
+    \@@_text_pdfstring:nnN {#3}{string-lit-print} \l_@@_para_tmpa_tl
     %\Hy@pstringdef\Hy@pstringF{#1}%
     %\Hy@pstringdef\Hy@pstringP{#3}%
     \mode_leave_vertical:
@@ -1313,7 +1315,7 @@
      { Launch }
      {
        /A<<
-          /F( \l_@@_filename_tmpa_tl )
+          /F~\l_@@_filename_tmpa_tl
           /S/Launch
           \Hy@SetNewWindow
           \bool_if:nF
@@ -1323,7 +1325,7 @@
               \pdf_version_compare_p:Nn > {1.9}
             }
             {
-              /Win<</P(\l_@@_para_tmpa_tl)/F(\l_@@_filename_tmpa_tl)>>
+              /Win<</P~\l_@@_para_tmpa_tl~/F~\l_@@_filename_tmpa_tl~>>
             }
           \Hy@href@nextactionraw
          >>
@@ -1389,13 +1391,13 @@
    ,baseurl       .code:n =
      {
        %\__hyp_pstringdef:No \l_@@_tmpa_tl {#1}%
-       \@@_text_pdfstring:onN  { #1 } {string-lit} \l_@@_tmpa_tl
+       \@@_text_pdfstring:onN  { #1 } {string-lit-print} \l_@@_tmpa_tl
         \tl_if_empty:NTF \l_@@_tmpa_tl
           {
              \pdfmanagement_remove:nn {Catalog} { URI }
           }
           {
-             \pdfmanagement_add:nnx {Catalog} { URI }{ <</Base ( \l_@@_tmpa_tl )>> }
+             \pdfmanagement_add:nnx {Catalog} { URI }{ <</Base~\l_@@_tmpa_tl>> }
           }
      }
    ,pdfcenterwindow    .choice:
