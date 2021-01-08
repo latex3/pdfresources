@@ -18,10 +18,6 @@ REM Must be checked for correct working or links due to changed encoding.
   - ./build/test/ocgcolorlinks.luatex.pdf.fc
   - ./build/test/ocgcolorlinks.pdftex.pdf.fc
   - ./build/test/ocgcolorlinks.xetex.pdf.fc
-  - ./build/test/pdffilelink.luatex.pdf.fc
-  - ./build/test/pdffilelink.pdftex.pdf.fc
-  - ./build/test/pdffilelink.xetex.pdf.fc
-  - ./build/test/viewerpreferences.xetex.pdf.fc
 
 Failed tests for configuration config-luatex:
 
@@ -31,6 +27,4 @@ Failed tests for configuration config-luatex:
 Failed tests for configuration config-dvips:
 
   Check failed with difference files
-  - ./build/test-config-dvips/ismap.latexdvips.pdf.fc
-  - ./build/test-config-dvips/linkhook.latexdvips.pdf.fc
-  - ./build/test-config-dvips/pdffilelink.latexdvips.pdf.fc
+   - ./build/test-config-dvips/pdffilelink.latexdvips.pdf.fc

@@ -651,6 +651,33 @@
 %    \end{macrocode}
 % \end{variable}
 %
+% It is still unclear which str convert option is the best in the various
+% places, so we use a variable to allow tests and perhaps external configuration.
+% \begin{variable}
+%   {
+%     \l_@@_text_enc_uri_print_tl,
+%     \l_@@_text_enc_info_print_tl,
+%     \l_@@_text_enc_dest_tl,
+%     \l_@@_text_enc_dest_print_tl,
+%     \l_@@_text_enc_file_print_tl,
+%     \l_@@_text_enc_para_print_tl
+%   }
+%    \begin{macrocode}
+\tl_new:N  \l_@@_text_enc_uri_print_tl
+\tl_new:N  \l_@@_text_enc_info_print_tl
+\tl_new:N  \l_@@_text_enc_dest_tl
+\tl_new:N  \l_@@_text_enc_dest_print_tl
+\tl_new:N  \l_@@_text_enc_file_print_tl
+\tl_new:N  \l_@@_text_enc_para_print_tl
+
+\tl_set:Nn \l_@@_text_enc_uri_print_tl  {string-dest-print}
+\tl_set:Nn \l_@@_text_enc_info_print_tl {string-hex-print}
+\tl_set:Nn \l_@@_text_enc_dest_tl       {string-dest}
+\tl_set:Nn \l_@@_text_enc_dest_print_tl {string-dest-print}
+\tl_set:Nn \l_@@_text_enc_file_print_tl {string-dest-print}
+\tl_set:Nn \l_@@_text_enc_para_print_tl {string-dest-print}
+%    \end{macrocode}
+% \end{variable}
 % \begin{variable}{\l_@@_dest_pdfview_tl}
 % This hold the destination instructions in a format suitable for
 % \cs{pdf_destination:nn}. The special value |fitrbox| indicates a boxed destination.
@@ -732,8 +759,8 @@
 % \#2 is str variable,
 % \#1 should be
 % \begin{tabular}{ll}
-%  string-dest-print    & \texttt{(lit)} (without BE marker)\\
-%  string-dest          & \texttt{list} (without BE marker)\\
+%  string-dest-print   & \texttt{(lit)} (utf8 without BE marker)\\
+%  string-dest         & \texttt{lit}   (utf8 without BE marker)\\
 %  string-hex-print    & \texttt{<HEX>}\\
 %  string-hex          & \texttt{HEX}\\
 %  string-lit_print    & \texttt{(lit)}\\
@@ -763,8 +790,10 @@
     \group_end:
     \str_set_eq:NN #3 \g_@@_text_tmpa_str
  }
-\cs_generate_variant:Nn \@@_text_pdfstring:nnN {xnN,onN}
-
+\cs_generate_variant:Nn \@@_text_pdfstring:nnN {xnN,onN,xoN,ooN,noN}
+%    \end{macrocode}
+% !!! temporary until all instances are gone
+%    \begin{macrocode}
 \cs_new_protected:Npn\Hy@pstringdef #1 #2
   { \@@_text_pdfstring:xnN {#2} {string-lit}#1 }
 %    \end{macrocode}
@@ -772,7 +801,7 @@
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_text_pdfstring_info:nN #1 #2
   {
-    \@@_text_pdfstring:nnN  { #1 }{ string-hex-print } #2
+    \@@_text_pdfstring:noN  { #1 }{ \l_@@_text_enc_info_print_tl } #2
   }
 %    \end{macrocode}
 
@@ -1114,7 +1143,10 @@
     \Hy@SaveLastskip      %defined in hyperref
     \Hy@VerboseAnchor{#1} %defined in hyperref, for debugging
     %\@@_pstringdef:Nx  \l_@@_tmpa_tl { \HyperDestNameFilter{#1} } %
-    \@@_text_pdfstring:xnN  { \HyperDestNameFilter{#1}  } {string-dest} \l_@@_tmpa_tl
+    \@@_text_pdfstring:xoN
+      { \HyperDestNameFilter{#1}  }
+      { \l_@@_text_enc_dest_tl }
+      \l_@@_tmpa_tl
     \tl_if_eq:NnTF  \l_@@_dest_pdfview_tl {fitrbox}
       {
         \vbox_to_zero:n
@@ -1133,7 +1165,7 @@
           }
       }
       {
-        \exp_args:NV \pdf_destination:nf { \l_@@_tmpa_tl } { \l_@@_dest_pdfview_tl } %
+        \exp_args:NV \pdf_destination:nf { \l_@@_tmpa_tl } { \l_@@_dest_pdfview_tl }
       }
     \Hy@RestoreLastskip   %defined in hyperref
     \mode_if_horizontal:T { \spacefactor\@savsf }
@@ -1156,10 +1188,10 @@
 %          {
 %            \exp_args:No \HyperDestNameFilter { \l_@@_dest_name_tmpa_tl }
 %          }
-       \@@_text_pdfstring:xnN
+       \@@_text_pdfstring:xoN
          { \exp_args:No \HyperDestNameFilter { \l_@@_dest_name_tmpa_tl } }
-         {string-dest}
-          \l_@@_dest_name_tmpa_tl
+         { \l_@@_text_enc_dest_tl }
+         \l_@@_dest_name_tmpa_tl
       }
     \exp_args:No
       \pdfannot_link_goto_begin:nw  { \l_@@_dest_name_tmpa_tl }
@@ -1221,7 +1253,10 @@
   {
     \group_begin:
     %\__hyp_pstringdef:Nx \l_@@_uri_tmpa_tl { #2 }
-    \@@_text_pdfstring:xnN { #2} {string-hex-print} \l_@@_uri_tmpa_tl
+    \@@_text_pdfstring:xoN
+      { #2}
+      { \l_@@_text_enc_uri_print_tl }
+      \l_@@_uri_tmpa_tl
     %hyper@chars, unneeded as used only once
     \cs_set_eq:NN \# \c_hash_str
     \cs_set_eq:NN \% \c_percent_str
@@ -1236,7 +1271,7 @@
             % the action dictionary has no hook!
             /Type/Action~
             /S/URI~
-            /URI~\l_@@_uri_tmpa_tl~
+            /URI\l_@@_uri_tmpa_tl~
             \ifHy@href@ismap
               /IsMap~true%
             \fi
@@ -1262,22 +1297,28 @@
     \tl_set:Nn \l_@@_filename_tmpa_tl { #2 }
     \Hy@CleanupFile \l_@@_filename_tmpa_tl
     %\__hyp_pstringdef:No \l_@@_filename_tmpa_tl { \l_@@_filename_tmpa_tl }
-    \@@_text_pdfstring:onN  { \l_@@_filename_tmpa_tl } {string-lit-print} \l_@@_filename_tmpa_tl
+    \@@_text_pdfstring:ooN
+      { \l_@@_filename_tmpa_tl }
+      { \l_@@_text_enc_file_print_tl }
+      \l_@@_filename_tmpa_tl
     %\__hyp_pstringdef:Nn \l_@@_dest_name_tmpa_tl { #3 }
-    \@@_text_pdfstring:nnN  { #3 } {string-dest-print} \l_@@_dest_name_tmpa_tl
+    \@@_text_pdfstring:nnN
+      { #3 }
+      { \l_@@_text_enc_dest_print_tl }
+      \l_@@_dest_name_tmpa_tl
     \Hy@MakeRemoteAction
     \mode_leave_vertical:
     \pdfannot_link:nnn %expansion??
       { GoToR }
       {
         /A<<
-          /F~\l_@@_filename_tmpa_tl
+          /F \l_@@_filename_tmpa_tl
           /S/GoToR
           \Hy@SetNewWindow
           \ifx\\#3\\
             /D[\Hy@href@page/\l_@@_dest_pdfremotestartview_tl]
           \else
-            /D~\l_@@_dest_name_tmpa_tl
+            /D \l_@@_dest_name_tmpa_tl
           \fi
           \Hy@href@nextactionraw
         >>
@@ -1305,9 +1346,15 @@
  {
   \group_begin:
     %\__hyp_pstringdef:Nn \l_@@_filename_tmpa_tl { #1 } %string-hex
-    \@@_text_pdfstring:nnN {#1}{string-lit-print} \l_@@_filename_tmpa_tl
+    \@@_text_pdfstring:nnN
+      { #1 }
+      { \l_@@_text_enc_file_print_tl }
+      \l_@@_filename_tmpa_tl
     %\__hyp_pstringdef:Nn \l_@@_para_tmpa_tl     { #3 } %string-hex
-    \@@_text_pdfstring:nnN {#3}{string-lit-print} \l_@@_para_tmpa_tl
+    \@@_text_pdfstring:noN
+      { #3 }
+      { \l_@@_text_enc_para_print_tl }
+      \l_@@_para_tmpa_tl
     %\Hy@pstringdef\Hy@pstringF{#1}%
     %\Hy@pstringdef\Hy@pstringP{#3}%
     \mode_leave_vertical:
@@ -1320,12 +1367,12 @@
           \Hy@SetNewWindow
           \bool_if:nF
             {
-              \tl_if_empty_p:N \l_@@_para_tmpa_tl
+              \str_if_eq_p:Vn \l_@@_para_tmpa_tl {()}
               ||
               \pdf_version_compare_p:Nn > {1.9}
             }
             {
-              /Win<</P~\l_@@_para_tmpa_tl~/F~\l_@@_filename_tmpa_tl~>>
+              /Win<</P \l_@@_para_tmpa_tl /F \l_@@_filename_tmpa_tl >>
             }
           \Hy@href@nextactionraw
          >>
@@ -1391,13 +1438,13 @@
    ,baseurl       .code:n =
      {
        %\__hyp_pstringdef:No \l_@@_tmpa_tl {#1}%
-       \@@_text_pdfstring:onN  { #1 } {string-lit-print} \l_@@_tmpa_tl
+       \@@_text_pdfstring:ooN  { #1 } {\l_@@_text_enc_uri_print_tl} \l_@@_tmpa_tl
         \tl_if_empty:NTF \l_@@_tmpa_tl
           {
              \pdfmanagement_remove:nn {Catalog} { URI }
           }
           {
-             \pdfmanagement_add:nnx {Catalog} { URI }{ <</Base~\l_@@_tmpa_tl>> }
+             \pdfmanagement_add:nnx {Catalog} { URI }{ <</Base \l_@@_tmpa_tl>> }
           }
      }
    ,pdfcenterwindow    .choice:
