@@ -84,6 +84,10 @@
 %  \begin{description}
 %     \item[name] see above
 %     \item[name-print] see above
+%     \item[string-dest]
+%      this converts with \cs{\str_set_convert:Nnnn} into utf8/string.
+%     \item[string-dest-print]
+%      this converts into utf8/string and add parentheses around.%
 %     \item[string-lit]
 %      this converts with \cs{\str_set_convert:Nnnn} into utf16/string.
 %     \item[string-lit-print]
@@ -284,8 +288,10 @@
 % \end{macro}
 % \end{macro}
 %
-% \begin{macro}{ \@@_text_convert_string-lit:nN }
-% \begin{macro}{ \@@_text_convert_string-lit-print:nN }
+% \begin{macro}{ @@_text_convert_string-dest:nN }
+% \begin{macro}{ @@_text_convert_string-dest-print:nN }
+% \begin{macro}{ @@_text_convert_string-lit:nN }
+% \begin{macro}{ @@_text_convert_string-lit-print:nN }
 % \begin{macro}{ @@_text_convert_string-hex:nN }
 % \begin{macro}{ @@_text_convert_string-hex-print:nN }
 %    \begin{macrocode}
@@ -305,6 +311,34 @@
 
 % "input" is utf8 for pdftex, empty (native) for unicode engine
 % commands to output literal strings  (...)
+\sys_if_engine_pdftex:TF
+  {
+    \cs_new_protected:cpn { @@_text_convert_string-dest:nN }  #1 #2
+      {
+         \str_set_convert:Nnnn #2 { #1 }{ utf8 } {utf8/string}
+      }
+
+    \cs_new_protected:cpn { @@_text_convert_string-dest-print:nN } #1 #2
+      {
+         \str_set_convert:Nnnn #2 { #1 }{ utf8 } {utf8/string}
+         \str_put_left:Nn #2  {(}
+         \str_put_right:Nn #2 {)}
+      }
+  }
+  {
+     \cs_new_protected:cpn { @@_text_convert_string-dest:nN } #1 #2
+      {
+        \str_set_convert:Nnnn #2 { #1 }{  } {utf8/string}
+      }
+
+    \cs_new_protected:cpn { @@_text_convert_string-dest-print:nN } #1 #2
+      {
+        \str_set_convert:Nnnn #2 { #1 }{  } {utf8/string}
+        \str_put_left:Nn #2  {(}
+        \str_put_right:Nn #2 {)}
+      }
+  }
+  
 \sys_if_engine_pdftex:TF
   {
     \cs_new_protected:cpn { @@_text_convert_string-lit:nN }  #1 #2
