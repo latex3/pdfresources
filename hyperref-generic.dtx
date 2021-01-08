@@ -807,8 +807,8 @@
 % (but it would be possible), we also don't test for empty |\thepage|,
 % \pkg{hyperref} seems to handle this fine and the pdf is valid.
 %
-% The code has to refer to some \pkg{hyperref} commands as we can't yet
-% change code there. The switch for draftmode has been removed.
+% The code has to define |\Hy@PutCatalog| as we can't yet
+% change code in hyperref. The switch for draftmode has been removed.
 %
 %    \begin{macrocode}
 \cs_new_protected:Npn\@@_PageLabels_gpush:
@@ -816,7 +816,7 @@
     \pdfmanagement_add:nnx {Catalog} {PageLabels}{<</Nums[\HyPL@Labels]>>}
   }
 
-\def\Hy@PutCatalog #1 { \__hyp_PageLabels_gpush: }
+\def\Hy@PutCatalog #1 {}
 
 
 \legacy_if:nT { Hy@pdfpagelabels }
@@ -824,10 +824,13 @@
     \cs_set_protected:Npn \HyPL@StorePageLabel #1
       {
         \tl_gput_right:Nx \HyPL@Labels { \the\Hy@abspage<<#1>> }
-        \__hyp_PageLabels_gpush:
+        \@@_PageLabels_gpush:
       }
   }
+%    \end{macrocode}
 
+
+%    \begin{macrocode}
 
 % variants of hyperref commands to get attributes in the prop
 % these are (temporary) commands to fill various attributes (color, border style) in
