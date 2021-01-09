@@ -341,6 +341,7 @@
 % \section{messages}
 %  Redirect the message name:
 %    \begin{macrocode}
+\ExplSyntaxOn
 \prop_gput:Nnn \g_msg_module_name_prop { hyp }{ hyperref }
 %    \end{macrocode}
 % At first a message for the testing of the resource management
@@ -473,6 +474,7 @@
     *~and~an~empty~value~which~removes~the~setting.\\
     No~value~is~equivalent~to~using~`true`.
   }
+\ExplSyntaxOff  
 %    \end{macrocode}
 % \section{Overwriting/providing commands from hyperref}
 %  hyperref checks driver version, we need to suppress this during the development
