@@ -338,38 +338,6 @@
 \RequirePackage{l3color}
 %    \end{macrocode}
 %
-% \section{Overwriting/providing commands from hyperref}
-%  hyperref checks driver version, we need to suppress this during the development
-%    \begin{macrocode}
-\chardef\Hy@VersionChecked=1 %don't check the version!
-\ExplSyntaxOn
-%    \end{macrocode}
-%
-% We define a better (expandable) version of \cs{hypercalcbp}
-%    \begin{macrocode}
-\cs_set_eq:NN \hypercalcbp \dim_to_decimal_in_bp:n
-%    \end{macrocode}
-%
-% This is used as default file extension, should probably go into hyperref.
-%    \begin{macrocode}
-\providecommand*{\XR@ext}{pdf} %
-%    \end{macrocode}
-%
-% This command must be provided for now, but they are unused by the driver:
-%    \begin{macrocode}
-\tl_new:N\@pdfborder
-\tl_new:N\@pdfborderstyle
-%    \end{macrocode}
-%
-% We force unicode as option. As bookmarks are still using \cs{pdfstringdef}
-% we also need to load puenc.def.
-%    \begin{macrocode}
-\HyPsd@LoadUnicode
-\Hy@unicodetrue
-\let\HyPsd@pdfencoding\HyPsd@pdfencoding@unicode
-\Hy@DisableOption{unicode}
-%    \end{macrocode}
-%
 % \section{messages}
 %  Redirect the message name:
 %    \begin{macrocode}
@@ -505,6 +473,63 @@
     *~and~an~empty~value~which~removes~the~setting.\\
     No~value~is~equivalent~to~using~`true`.
   }
+%    \end{macrocode}
+% \section{Overwriting/providing commands from hyperref}
+%  hyperref checks driver version, we need to suppress this during the development
+%    \begin{macrocode}
+\chardef\Hy@VersionChecked=1 %don't check the version!
+\ExplSyntaxOn
+%    \end{macrocode}
+%
+% We define a better (expandable) version of \cs{hypercalcbp}
+%    \begin{macrocode}
+\cs_set_eq:NN \hypercalcbp \dim_to_decimal_in_bp:n
+%    \end{macrocode}
+%
+% This is used as default file extension, should probably go into hyperref.
+%    \begin{macrocode}
+\providecommand*{\XR@ext}{pdf} %
+%    \end{macrocode}
+%
+% This command must be provided for now, but they are unused by the driver:
+%    \begin{macrocode}
+\tl_new:N\@pdfborder
+\tl_new:N\@pdfborderstyle
+%    \end{macrocode}
+%
+% We force unicode as option. As bookmarks are still using \cs{pdfstringdef}
+% we also need to load puenc.def.
+%    \begin{macrocode}
+\HyPsd@LoadUnicode
+\Hy@unicodetrue
+\let\HyPsd@pdfencoding\HyPsd@pdfencoding@unicode
+\Hy@DisableOption{unicode}
+%    \end{macrocode}
+% The pdfversion should be set in \cs{DeclareDocumentMetadata} but we must
+% copy it to the \pkg{hyperref} command:
+%    \begin{macrocode}
+\cs_set_eq:NN \Hy@pdfminorversion \pdf_version_minor:
+\cs_set_eq:NN \Hy@pdfmajorversion \pdf_version_major:
+%    \end{macrocode}
+%    \begin{macrocode}
+\legacy_if:nT { Hy@ocgcolorlinks }
+  {
+    \pdf_version_compare:NnT < {1.5}
+     {
+       \msg_warning:nnnx
+        { hyp }
+        { ignore-deprecated-or-unknown-option-in-pdf-version }
+        { ocgcolorlinks } { \pdf_version_major:.\pdf_version_minor: }
+       \Hy@ocgcolorlinksfalse
+       \Hy@DisableOption{ocgcolorlinks}
+     }
+  }
+
+\legacy_if:nT { Hy@setpdfversion }
+ {
+    \msg_warning:nn { hyp }{ pdfversion-disabled }
+ }
+\Hy@DisableOption{pdfversion}
 %    \end{macrocode}
 % \section{Checks}
 % The driver can not work properly if the pdfmanagement is not active,
@@ -653,6 +678,7 @@
 %
 % It is still unclear which str convert option is the best in the various
 % places, so we use a variable to allow tests and perhaps external configuration.
+% The \enquote{print} type should always have the delimiters.
 % \begin{variable}
 %   {
 %     \l_@@_text_enc_uri_print_tl,
@@ -759,12 +785,12 @@
 % \#2 is str variable,
 % \#1 should be
 % \begin{tabular}{ll}
-%  string-dest-print   & \texttt{(lit)} (utf8 without BE marker)\\
-%  string-dest         & \texttt{lit}   (utf8 without BE marker)\\
-%  string-hex-print    & \texttt{<HEX>}\\
-%  string-hex          & \texttt{HEX}\\
-%  string-lit_print    & \texttt{(lit)}\\
-%  string-lit          & \texttt{lit}
+%  string-dest-print   & \texttt{(lit)} (utf8/string)\\
+%  string-dest         & \texttt{lit}   (utf8/string)\\
+%  string-hex-print    & \texttt{<HEX>} (utf16/hex)\\
+%  string-hex          & \texttt{HEX}   (utf16/hex)\\
+%  string-lit_print    & \texttt{(lit)} (utf16/string)\\
+%  string-lit          & \texttt{lit}   (utf16/string)
 %  \end{tabular}
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_text_convert:nN #1 #2
@@ -793,6 +819,11 @@
 \cs_generate_variant:Nn \@@_text_pdfstring:nnN {xnN,onN,xoN,ooN,noN}
 %    \end{macrocode}
 % !!! temporary until all instances are gone
+%^^A TODO check if the redefinition of |~| is needed (probably not)
+%^^A \edef~{\string~}%
+%^^A  \char_set_catcode_other:N \~
+%^^A  \char_set_active_eq:NN \~ \c_tilde_str
+%^^A  \char_set_catcode_active:N \~
 %    \begin{macrocode}
 \cs_new_protected:Npn\Hy@pstringdef #1 #2
   { \@@_text_pdfstring:xnN {#2} {string-lit}#1 }
@@ -954,31 +985,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-
-%replace Hy@pstringdef definition.
-%!!!!!!!! check if utf16 (string or hex) isn't better, see new-pdfescape!!!!!!!!!
-%\cs_new:Npn \__hyp_pstringdef:Nn #1 #2
-%  {
-%    \group_begin:
-%    \char_set_catcode_other:N \~
-%    \char_set_active_eq:NN \~ \c_tilde_str
-%    \char_set_catcode_active:N \~
-%    \sys_if_engine_pdftex:TF
-%      { %pdftex. Should we assume utf8 or allow other input encodings?
-%        \str_gset_convert:Nnnn \g_tmpa_str {#2}{utf8}{utf8/string} %utf8 because of hyperref
-%      }
-%      { %luatex,xetex
-%        \str_gset_convert:Nnnn \g_tmpa_str {#2}{}{utf8/string} %utf8 because of hyperref
-%      }
-%    \group_end:
-%    \str_set_eq:NN#1 \g_tmpa_str
-%  }
-%\cs_generate_variant:Nn \__hyp_pstringdef:Nn {No,Nx}
-
-% can go when all occurences in the driver have been replaced.
-%\cs_set_eq:NN\Hy@pstringdef \__hyp_pstringdef:Nx
-
 %these patterns are used in hyperref checks.
 %it is unclear if they are really useful and if a backend support is
 %needed.
@@ -1010,22 +1016,7 @@
    \def\HyPat@ObjRef/{.+}
  }
 
-%we force the setting of pdfversion in \DeclareDocumentMetadata
-\cs_set_eq:NN \Hy@pdfminorversion \pdf_version_minor:
-\cs_set_eq:NN \Hy@pdfmajorversion \pdf_version_major:
 
-\legacy_if:nT { Hy@ocgcolorlinks }
-  {
-    \pdf_version_min_gset:n { 1.5 }
-  }
-
-\legacy_if:nT { Hy@setpdfversion }
- {
-    \msg_warning:nn { hyp }{ pdfversion-disabled }
- }
-
-
-\Hy@DisableOption{pdfversion}%
 
 % ocg colorlinks should be done as in ocgx. This here
 % are boxes ...
