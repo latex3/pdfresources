@@ -1,0 +1,37 @@
+% !Mode:: "TeX:DE:UTF-8:Main"
+\RequirePackage{pdfmanagement}
+\DeclareDocumentMetadata{uncompress}
+\documentclass{article}
+\usepackage{hyperref}
+\usepackage{parskip}
+\begin{document}
+\section{Test 1}
+\href{https://www.latex-project.org/get/#tex-distributions}{ascii}
+
+\href{http://ang.wikipedia.org/wiki/Elisabeþ_I_Engla_Cwēn}{old english}
+
+\href{http://ja.wikipedia.org/wiki/エリザベス1世_(イングランド女王}{japanese}
+
+\ExplSyntaxOn
+\tl_set:Nn \l__hyp_text_enc_uri_print_tl  {string-lit-print}
+\ExplSyntaxOff
+
+\section{Test 2}
+\href{https://www.latex-project.org/get/#tex-distributions}{ascii}
+
+\href{http://ang.wikipedia.org/wiki/Elisabeþ_I_Engla_Cwēn}{old english}
+
+\href{http://ja.wikipedia.org/wiki/エリザベス1世_(イングランド女王}{japanese}
+
+\ExplSyntaxOn
+\tl_set:Nn \l__hyp_text_enc_uri_print_tl  {string-hex-print}
+\ExplSyntaxOff
+
+\section{Test 3}
+\href{https://www.latex-project.org/get/#tex-distributions}{ascii}
+
+\href{http://ang.wikipedia.org/wiki/Elisabeþ_I_Engla_Cwēn}{old english}
+
+\href{http://ja.wikipedia.org/wiki/エリザベス1世_(イングランド女王}{japanese}
+
+\end{document}
