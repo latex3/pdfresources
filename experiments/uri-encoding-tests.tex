@@ -1,16 +1,58 @@
 % !Mode:: "TeX:DE:UTF-8:Main"
 \RequirePackage{pdfmanagement}
-\DeclareDocumentMetadata{uncompress}
+\DeclareDocumentMetadata{uncompress,pdfversion=1.7}
 \documentclass{article}
 \usepackage{hyperref}
 \usepackage{parskip}
+\ExplSyntaxOn
+\sys_if_engine_pdftex:TF
+  {
+    \cs_new_protected:cpn { __pdf_text_convert_string-url:nN }  #1 #2
+      {
+         \str_set_convert:Nnnn #2 { #1 }{ utf8 } {utf8/url}
+         \exp_args:NNx\str_replace_all:Nnn #2 {\c_percent_str 3A} {:}
+         \exp_args:NNx\str_replace_all:Nnn #2 {\c_percent_str 2F} {/}
+         \exp_args:NNxx\str_replace_all:Nnn #2 {\c_percent_str 23} {\c_hash_str}
+      }
+
+    \cs_new_protected:cpn { __pdf_text_convert_string-url-print:nN } #1 #2
+      {
+         \str_set_convert:Nnnn #2 { #1 }{ utf8 } {utf8/url}
+         \exp_args:NNx\str_replace_all:Nnn #2 {\c_percent_str 3A} {:}
+         \exp_args:NNx\str_replace_all:Nnn #2 {\c_percent_str 2F} {/}
+         \exp_args:NNxx\str_replace_all:Nnn #2 {\c_percent_str 23} {\c_hash_str}
+         \str_put_left:Nn #2  {(}
+         \str_put_right:Nn #2 {)}
+      }
+  }
+  {
+     \cs_new_protected:cpn { __pdf_text_convert_string-url:nN } #1 #2
+      {
+        \str_set_convert:Nnnn #2 { #1 }{  } {utf8/url}
+        \exp_args:NNx\str_replace_all:Nnn #2 {\c_percent_str 3A} {:}
+        \exp_args:NNx\str_replace_all:Nnn #2 {\c_percent_str 2F} {/}
+        \exp_args:NNxx\str_replace_all:Nnn #2 {\c_percent_str 23} {\c_hash_str}
+      }
+
+    \cs_new_protected:cpn { __pdf_text_convert_string-url-print:nN } #1 #2
+      {
+        \str_set_convert:Nnnn #2 { #1 }{  } {utf8/url}
+         \exp_args:NNx\str_replace_all:Nnn #2 {\c_percent_str 3A} {:}
+         \exp_args:NNx\str_replace_all:Nnn #2 {\c_percent_str 2F} {/}
+        \exp_args:NNxx\str_replace_all:Nnn #2 {\c_percent_str 23} {\c_hash_str}
+        \str_put_left:Nn #2  {(}
+        \str_put_right:Nn #2 {)}
+      }
+  }
+
+\ExplSyntaxOff
 \begin{document}
 \section{Test 1}
 \href{https://www.latex-project.org/get/#tex-distributions}{ascii}
 
-\href{http://ang.wikipedia.org/wiki/Elisabeþ_I_Engla_Cwēn}{old english}
+\href{https://ang.wikipedia.org/wiki/Elisabeþ_I_Engla_Cwēn}{old english}
 
-\href{http://ja.wikipedia.org/wiki/エリザベス1世_(イングランド女王}{japanese}
+\href{https://ja.wikipedia.org/wiki/エリザベス1世_(イングランド女王}{japanese}
 
 \ExplSyntaxOn
 \tl_set:Nn \l__hyp_text_enc_uri_print_tl  {string-lit-print}
@@ -19,9 +61,9 @@
 \section{Test 2}
 \href{https://www.latex-project.org/get/#tex-distributions}{ascii}
 
-\href{http://ang.wikipedia.org/wiki/Elisabeþ_I_Engla_Cwēn}{old english}
+\href{https://ang.wikipedia.org/wiki/Elisabeþ_I_Engla_Cwēn}{old english}
 
-\href{http://ja.wikipedia.org/wiki/エリザベス1世_(イングランド女王}{japanese}
+\href{https://ja.wikipedia.org/wiki/エリザベス1世_(イングランド女王}{japanese}
 
 \ExplSyntaxOn
 \tl_set:Nn \l__hyp_text_enc_uri_print_tl  {string-hex-print}
@@ -30,8 +72,19 @@
 \section{Test 3}
 \href{https://www.latex-project.org/get/#tex-distributions}{ascii}
 
-\href{http://ang.wikipedia.org/wiki/Elisabeþ_I_Engla_Cwēn}{old english}
+\href{https://ang.wikipedia.org/wiki/Elisabeþ_I_Engla_Cwēn}{old english}
 
-\href{http://ja.wikipedia.org/wiki/エリザベス1世_(イングランド女王}{japanese}
+\href{https://ja.wikipedia.org/wiki/エリザベス1世_(イングランド女王}{japanese}
+
+\ExplSyntaxOn
+\tl_set:Nn \l__hyp_text_enc_uri_print_tl  {string-url-print}
+\ExplSyntaxOff
+
+\section{Test 4}
+\href{https://www.latex-project.org/get/#tex-distributions}{ascii}
+
+\href{https://ang.wikipedia.org/wiki/Elisabeþ_I_Engla_Cwēn}{old english}
+
+\href{https://ja.wikipedia.org/wiki/エリザベス1世_(イングランド女王}{japanese}
 
 \end{document}
