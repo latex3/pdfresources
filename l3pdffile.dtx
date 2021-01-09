@@ -348,7 +348,7 @@
 % %set the relationship:
 % \pdfdict_put:nnn  {l_file/FileSpec} {AFRelationship}{/Source}
 % %set the description key. The text must first be converted:
-% \pdf_text_convert:nnN {string-lit-print}
+% \pdf_text_convert:nnN {utf16/string-print}
 %    {this~is~an~odd~description~with~öäü}
 %    \l_tmpa_str
 % \pdfdict_put:nnx  {l_file/FileSpec} {Desc}{\l_tmpa_str}
@@ -377,7 +377,7 @@
 %    \begin{macrocode}
 %<@@=pdffile>
 \cs_new_protected:Npn \@@_filename_convert_to_print:nN #1 #2
-  {\pdf_text_convert:nnN {string-hex-print}{#1}{#2}}
+  {\pdf_text_convert:nnN {utf16/hex-print}{#1}{#2}}
 %    \end{macrocode}
 % \subsection{Messages}
 %    \begin{macrocode}

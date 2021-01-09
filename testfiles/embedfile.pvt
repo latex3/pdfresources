@@ -14,7 +14,7 @@ grüße
 \ExplSyntaxOn
 \group_begin:
 \pdfdict_put:nnn  {l_file/FileSpec} {AFRelationship}{/Source}
-\pdf_text_convert:nnN {string-lit-print} {this~is~something~odd~with~öäü}\l_tmpa_str
+\pdf_text_convert:nnN {utf16/string-print} {this~is~something~odd~with~öäü}\l_tmpa_str
 \pdfdict_put:nnx  {l_file/FileSpec} {Desc}{\l_tmpa_str}
 \pdfdict_put:nnx  {l_file/Params} {ModDate}{(D:20200422135851Z)}
 \pdffile_embed_file:nnn {testinput.txt}{grüße.txt}{example1}
@@ -23,7 +23,7 @@ grüße
 
 \group_begin:
 \pdfdict_put:nnn  {l_file/FileSpec} {AFRelationship}{/Source}
-\pdf_text_convert:nnN {string-lit-print} {this~is~something~odd~with~öäü}\l_tmpa_str
+\pdf_text_convert:nnN {utf16/string-print} {this~is~something~odd~with~öäü}\l_tmpa_str
 \pdfdict_put:nnx  {l_file/FileSpec} {Desc}{\l_tmpa_str}
 \pdfdict_put:nnx  {l_file/Params} {ModDate}{(D:20200422155851+02'00')}
 \pdffile_embed_file:nnn {grüße.txt}{echtegrüße.txt}{example2}

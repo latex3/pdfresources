@@ -4,7 +4,7 @@
 \input{regression-test}
 \documentclass{article}
 \ExplSyntaxOn
-\pdf_text_convert:nnN {string-lit-print}{Grüße}\l_tmpa_str
+\pdf_text_convert:nnN {utf16/string-print}{Grüße}\l_tmpa_str
 \pdfmanagement_add:nnx {Info} {Title}{\l_tmpa_str}
 \pdfmanagement_add:nnx {Info} {Author}{(Some~Author)}
 \ExplSyntaxOff

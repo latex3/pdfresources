@@ -75,7 +75,7 @@
 % \begin{function}[added=2020-07-04]
 %   {\pdf_text_convert:nnN}
 %  \begin{syntax}
-%   \cs{pdf_text_convert:nn}  \Arg{format}  \Arg{content} \Arg{tlvar}
+%   \cs{pdf_text_convert:nnN}  \Arg{format}  \Arg{content} \Arg{tlvar}
 %  \end{syntax}
 %  This converts \Arg{content} following the rules defined by \Arg{format} and stores
 %  the result in \Arg{tlvar}. The assignment is done locally.
@@ -84,17 +84,23 @@
 %  \begin{description}
 %     \item[name] see above
 %     \item[name-print] see above
-%     \item[string-dest]
+%     \item[utf8/string]
 %      this converts with \cs{\str_set_convert:Nnnn} into utf8/string.
-%     \item[string-dest-print]
+%     \item[utf8/string-print]
 %      this converts into utf8/string and add parentheses around.%
-%     \item[string-lit]
+%     \item[utf8/url]
+%      this converts with \cs{\str_set_convert:Nnnn} into utf8/url and
+%      then replace :, / and hash back from the percent encoding
+%     \item[utf8/url-print]
+%      this converts into utf8/url, replace color, slash and hash back,
+%      and add parentheses around.%
+%     \item[utf16/string]
 %      this converts with \cs{\str_set_convert:Nnnn} into utf16/string.
-%     \item[string-lit-print]
+%     \item[utf16/string-print]
 %      this converts into utf16/string and add parentheses around.
-%     \item[string-hex]
+%     \item[utf16/hex]
 %      this converts into utf16/hex
-%     \item[string-hex-print]
+%     \item[utf16/hex-print]
 %     this converts into utf16/hex and add bracket around.
 %   \end{description}
 % \end{function}
@@ -214,7 +220,7 @@
 %
 %    \begin{macrocode}
 %<*package>
-\ProvidesExplPackage {l3pdftools} {2020-07-04} {0.1}
+\ProvidesExplPackage {l3pdftools} {2021-01-09} {0.2}
   {various PDF tools}
 %    \end{macrocode}
 %
@@ -288,15 +294,29 @@
 % \end{macro}
 % \end{macro}
 %
-% \begin{macro}{ @@_text_convert_string-dest:nN }
-% \begin{macro}{ @@_text_convert_string-dest-print:nN }
-% \begin{macro}{ @@_text_convert_string-lit:nN }
-% \begin{macro}{ @@_text_convert_string-lit-print:nN }
-% \begin{macro}{ @@_text_convert_string-hex:nN }
-% \begin{macro}{ @@_text_convert_string-hex-print:nN }
+% \begin{variable}{\c_@@_text_utfsrc_str}
+% The convert command must use a different value the source encoding
+% depending on the engines.
 %    \begin{macrocode}
-% TODO Names need a review when it is clear which converters
-% are actually needed 
+\sys_if_engine_pdftex:TF
+  {
+    \str_const:Nn \c_@@_text_utfsrc_str {utf8}
+  }
+  {
+    \str_const:Nn \c_@@_text_utfsrc_str {}
+  }
+%    \end{macrocode}
+% \begin{macro}{ @@_text_convert_utf8/string:nN }
+% \begin{macro}{ @@_text_convert_utf8/string-print:nN }
+% \begin{macro}{ @@_text_convert_utf8/url:nN }
+% \begin{macro}{ @@_text_convert_utf8/url-print:nN }
+% \begin{macro}{ @@_text_convert_utf16/string:nN }
+% \begin{macro}{ @@_text_convert_utf16/string-print:nN }
+% \begin{macro}{ @@_text_convert_utf16/hex:nN }
+% \begin{macro}{ @@_text_convert_utf16/hex-print:nN }
+%    \begin{macrocode}
+%% TODO Names need a review when it is clear which converters
+%% are actually needed
 %% string conversions and printing
 %% we assume here that the text purify step has been done. The input is
 %% a list of (utf8) chars.
@@ -310,95 +330,84 @@
 
 % bookmarks: as pdfoutline uses () currently only utf16 with BE is usable.
 % check if one can use HEX too when directly writing the object
+% ==========
 % uri: utf16BE/string seems not to work, hex neither
-%      utf8/string works
+%      utf8/string works but not on macos,
+%      so a specfic utf8/url variant is needed
+% ==========
 % "input" is utf8 for pdftex, empty (native) for unicode engine
 % commands to output literal strings  (...)
-\sys_if_engine_pdftex:TF
-  {
-    \cs_new_protected:cpn { @@_text_convert_string-dest:nN }  #1 #2
-      {
-         \str_set_convert:Nnnn #2 { #1 }{ utf8 } {utf8/string}
-      }
 
-    \cs_new_protected:cpn { @@_text_convert_string-dest-print:nN } #1 #2
-      {
-         \str_set_convert:Nnnn #2 { #1 }{ utf8 } {utf8/string}
-         \str_put_left:Nn #2  {(}
-         \str_put_right:Nn #2 {)}
-      }
-  }
+\cs_new_protected:cpx { @@_text_convert_utf8/string:nN }  #1 #2
   {
-     \cs_new_protected:cpn { @@_text_convert_string-dest:nN } #1 #2
-      {
-        \str_set_convert:Nnnn #2 { #1 }{  } {utf8/string}
-      }
-
-    \cs_new_protected:cpn { @@_text_convert_string-dest-print:nN } #1 #2
-      {
-        \str_set_convert:Nnnn #2 { #1 }{  } {utf8/string}
-        \str_put_left:Nn #2  {(}
-        \str_put_right:Nn #2 {)}
-      }
+     \exp_not:N \str_set_convert:Nnnn #2
+        { #1 }
+        { \c_@@_text_utfsrc_str }
+        {utf8/string}
   }
 
-\sys_if_engine_pdftex:TF
+\cs_new_protected:cpx { @@_text_convert_utf8/string-print:nN } #1 #2
   {
-    \cs_new_protected:cpn { @@_text_convert_string-lit:nN }  #1 #2
-      {
-         \str_set_convert:Nnnn #2 { #1 }{ utf8 } {utf16/string}
-      }
-
-    \cs_new_protected:cpn { @@_text_convert_string-lit-print:nN } #1 #2
-      {
-         \str_set_convert:Nnnn #2 { #1 }{ utf8 } {utf16/string}
-         \str_put_left:Nn #2  {(}
-         \str_put_right:Nn #2 {)}
-      }
+    \exp_not:N \use:c { @@_text_convert_utf8/string:nN } { #1 } #2
+    \str_put_left:Nn #2  {(}
+    \str_put_right:Nn #2 {)}
   }
+% special url command:
+\cs_new_protected:cpx { @@_text_convert_utf8/url:nN }  #1 #2
   {
-     \cs_new_protected:cpn { @@_text_convert_string-lit:nN } #1 #2
-      {
-        \str_set_convert:Nnnn #2 { #1 }{  } {utf16/string}
-      }
-
-    \cs_new_protected:cpn { @@_text_convert_string-lit-print:nN } #1 #2
-      {
-        \str_set_convert:Nnnn #2 { #1 }{  } {utf16/string}
-        \str_put_left:Nn #2  {(}
-        \str_put_right:Nn #2 {)}
-      }
+     \exp_not:N \str_set_convert:Nnnn #2
+       { #1 }
+       { \c_@@_text_utfsrc_str }
+       {utf8/url}
+     \exp_not:N \str_replace_all:Nnn #2 {\c_percent_str 3A} {:}
+     \exp_not:N \str_replace_all:Nnn #2 {\c_percent_str 2F} {/}
+     \exp_not:N \str_replace_all:Nnn #2 {\c_percent_str 23} {\c_hash_str}
   }
+
+\cs_new_protected:cpx { @@_text_convert_utf8/url-print:nN } #1 #2
+  {
+     \exp_not:N \use:c { @@_text_convert_utf8/url:nN } {#1} #2
+     \exp_not:N \str_put_left:Nn #2  {(}
+     \exp_not:N \str_put_right:Nn #2 {)}
+  }
+% with utf16 with BE marker
+\cs_new_protected:cpx { @@_text_convert_utf16/string:nN }  #1 #2
+  {
+    \exp_not:N \str_set_convert:Nnnn #2
+      { #1 }
+      { \c_@@_text_utfsrc_str }
+      {utf16/string}
+  }
+
+\cs_new_protected:cpx { @@_text_convert_utf16/string-print:nN } #1 #2
+  {
+    \exp_not:N \use:c { @@_text_convert_utf16/string:nN } {#1} #2
+    \exp_not:N \str_put_left:Nn #2  {(}
+    \exp_not:N \str_put_right:Nn #2 {)}
+  }
+
 % commands to output hex strings  (...)
 
-\sys_if_engine_pdftex:TF
+\cs_new_protected:cpx { @@_text_convert_utf16/hex:nN } #1 #2
   {
-    \cs_new_protected:cpn { @@_text_convert_string-hex:nN } #1 #2
-      {
-         \str_set_convert:Nnnn #2 { #1 }{ utf8 } {utf16/hex}
-      }
-    \cs_new_protected:cpn { @@_text_convert_string-hex-print:nN } #1 #2
-      {
-         \str_set_convert:Nnnn #2 { #1 }{ utf8 } {utf16/hex}
-         \str_put_left:Nn #2  {<}
-         \str_put_right:Nn #2 {>}
-      }
+     \exp_not:N \str_set_convert:Nnnn #2
+       { #1 }
+       { \c_@@_text_utfsrc_str }
+       {utf16/hex}
   }
-  {
-    \cs_new_protected:cpn { @@_text_convert_string-hex:nN } #1 #2
-      {
-        \str_set_convert:Nnnn #2 { #1 }{  } {utf16/hex}
-      }
 
-    \cs_new_protected:cpn { @@_text_convert_string-hex-print:nN } #1 #2
-      {
-        \str_set_convert:Nnnn #2 { #1 }{  } {utf16/hex}
-         \str_put_left:Nn #2  {<}
-         \str_put_right:Nn #2 {>}
-      }
+\cs_new_protected:cpx { @@_text_convert_utf16/hex-print:nN } #1 #2
+  {
+    \exp_not:N \use:c { @@_text_convert_utf16/hex:nN } {#1} #2
+    \exp_not:N \str_put_left:Nn #2  {<}
+    \exp_not:N \str_put_right:Nn #2 {>}
   }
 
 %    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
 % \end{macro}
 % \end{macro}
 % \end{macro}

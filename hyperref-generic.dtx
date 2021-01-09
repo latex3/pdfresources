@@ -474,7 +474,7 @@
     *~and~an~empty~value~which~removes~the~setting.\\
     No~value~is~equivalent~to~using~`true`.
   }
-\ExplSyntaxOff  
+\ExplSyntaxOff
 %    \end{macrocode}
 % \section{Overwriting/providing commands from hyperref}
 %  hyperref checks driver version, we need to suppress this during the development
@@ -698,12 +698,12 @@
 \tl_new:N  \l_@@_text_enc_file_print_tl
 \tl_new:N  \l_@@_text_enc_para_print_tl
 
-\tl_set:Nn \l_@@_text_enc_uri_print_tl  {string-dest-print}
-\tl_set:Nn \l_@@_text_enc_info_print_tl {string-hex-print}
-\tl_set:Nn \l_@@_text_enc_dest_tl       {string-dest}
-\tl_set:Nn \l_@@_text_enc_dest_print_tl {string-dest-print}
-\tl_set:Nn \l_@@_text_enc_file_print_tl {string-dest-print}
-\tl_set:Nn \l_@@_text_enc_para_print_tl {string-dest-print}
+\tl_set:Nn \l_@@_text_enc_uri_print_tl  {utf8/url-print}
+\tl_set:Nn \l_@@_text_enc_info_print_tl {utf16/hex-print}
+\tl_set:Nn \l_@@_text_enc_dest_tl       {utf8/string}
+\tl_set:Nn \l_@@_text_enc_dest_print_tl {utf8/string-print}
+\tl_set:Nn \l_@@_text_enc_file_print_tl {utf8/string-print}
+\tl_set:Nn \l_@@_text_enc_para_print_tl {utf8/string-print}
 %    \end{macrocode}
 % \end{variable}
 % \begin{variable}{\l_@@_dest_pdfview_tl}
@@ -787,12 +787,14 @@
 % \#2 is str variable,
 % \#1 should be
 % \begin{tabular}{ll}
-%  string-dest-print   & \texttt{(lit)} (utf8/string)\\
-%  string-dest         & \texttt{lit}   (utf8/string)\\
-%  string-hex-print    & \texttt{<HEX>} (utf16/hex)\\
-%  string-hex          & \texttt{HEX}   (utf16/hex)\\
-%  string-lit_print    & \texttt{(lit)} (utf16/string)\\
-%  string-lit          & \texttt{lit}   (utf16/string)
+%  utf8/string-print   & \texttt{(lit)} (utf8/string)\\
+%  utf8/string         & \texttt{lit}   (utf8/string)\\
+%  utf8/url-print      & \texttt{(percent encoded url)}\\
+%  utf8/url            & \texttt{percent encoded url}\\
+%  utf16/hex-print     & \texttt{<HEX>} (utf16/hex)\\
+%  utf16/hex           & \texttt{HEX}   (utf16/hex)\\
+%  utf16/string_print  & \texttt{(lit)} (utf16/string)\\
+%  utf16/string-lit    & \texttt{lit}   (utf16/string)
 %  \end{tabular}
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_text_convert:nN #1 #2
@@ -828,7 +830,7 @@
 %^^A  \char_set_catcode_active:N \~
 %    \begin{macrocode}
 \cs_new_protected:Npn\Hy@pstringdef #1 #2
-  { \@@_text_pdfstring:xnN {#2} {string-lit}#1 }
+  { \@@_text_pdfstring:xnN {#2} {utf8/string}#1 }
 %    \end{macrocode}
 % This is a special version for info keys:
 %    \begin{macrocode}
