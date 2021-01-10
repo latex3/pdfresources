@@ -116,7 +116,9 @@
 %  don't work in \cs{hypersetup}.
 %
 %  Options that still must be set as package options are
-%  |pdfpagelabels| (a boolean)
+%  \begin{itemize}
+%  \item |pdfpagelabels| (a boolean)
+%  \end{itemize}
 %
 %  \subsection{Draftmode}
 %  pdftex and other engines knows a
@@ -698,7 +700,7 @@
 \tl_new:N  \l_@@_text_enc_file_print_tl
 \tl_new:N  \l_@@_text_enc_para_print_tl
 
-\tl_set:Nn \l_@@_text_enc_uri_print_tl  {utf8/url-print}
+\tl_set:Nn \l_@@_text_enc_uri_print_tl  {utf8/URIpdf-print}
 \tl_set:Nn \l_@@_text_enc_info_print_tl {utf16/hex-print}
 \tl_set:Nn \l_@@_text_enc_dest_tl       {utf8/string}
 \tl_set:Nn \l_@@_text_enc_dest_print_tl {utf8/string-print}
@@ -789,8 +791,8 @@
 % \begin{tabular}{ll}
 %  utf8/string-print   & \texttt{(lit)} (utf8/string)\\
 %  utf8/string         & \texttt{lit}   (utf8/string)\\
-%  utf8/url-print      & \texttt{(percent encoded url)}\\
-%  utf8/url            & \texttt{percent encoded url}\\
+%  utf8/URIpdf-print      & \texttt{(percent encoded url)}\\
+%  utf8/URIpdf            & \texttt{percent encoded url}\\
 %  utf16/hex-print     & \texttt{<HEX>} (utf16/hex)\\
 %  utf16/hex           & \texttt{HEX}   (utf16/hex)\\
 %  utf16/string_print  & \texttt{(lit)} (utf16/string)\\

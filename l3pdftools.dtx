@@ -88,12 +88,12 @@
 %      this converts with \cs{\str_set_convert:Nnnn} into utf8/string.
 %     \item[utf8/string-print]
 %      this converts into utf8/string and add parentheses around.%
-%     \item[utf8/url]
+%     \item[utf8/URIpdf]
 %      this converts with \cs{\str_set_convert:Nnnn} into utf8/url and
-%      then replace :, / and hash back from the percent encoding
+%      then replace reserved and digits back from the percent encoding. Parentheses
+%      are escaped.
 %     \item[utf8/url-print]
-%      this converts into utf8/url, replace color, slash and hash back,
-%      and add parentheses around.%
+%      this converts into utf8/URIpdf  and add parentheses around.%
 %     \item[utf16/string]
 %      this converts with \cs{\str_set_convert:Nnnn} into utf16/string.
 %     \item[utf16/string-print]
@@ -306,10 +306,17 @@
     \str_const:Nn \c_@@_text_utfsrc_str {}
   }
 %    \end{macrocode}
+% \end{variable}
+% Most converter are simply wrapper around the str-convert commands and so
+% use the same name.
+% The exception is the one for url's: it reverts most of the percent encodings
+% and escapes the parentheses.
+% That's why its name is URIpdf instead of url. The current code is probably quite
+% slow and will need a replacement.
 % \begin{macro}{ @@_text_convert_utf8/string:nN }
 % \begin{macro}{ @@_text_convert_utf8/string-print:nN }
-% \begin{macro}{ @@_text_convert_utf8/url:nN }
-% \begin{macro}{ @@_text_convert_utf8/url-print:nN }
+% \begin{macro}{ @@_text_convert_utf8/URIpdf:nN }
+% \begin{macro}{ @@_text_convert_utf8/URIpdf-print:nN }
 % \begin{macro}{ @@_text_convert_utf16/string:nN }
 % \begin{macro}{ @@_text_convert_utf16/string-print:nN }
 % \begin{macro}{ @@_text_convert_utf16/hex:nN }
@@ -353,7 +360,7 @@
     \str_put_right:Nn #2 {)}
   }
 % special url command:
-\cs_new_protected:cpx { @@_text_convert_utf8/url:nN }  #1 #2
+\cs_new_protected:cpx { @@_text_convert_utf8/URIpdf:nN }  #1 #2
   {
      \exp_not:N \str_set_convert:Nnnn #2
        { #1 }
@@ -362,11 +369,35 @@
      \exp_not:N \str_replace_all:Nnn #2 {\c_percent_str 3A} {:}
      \exp_not:N \str_replace_all:Nnn #2 {\c_percent_str 2F} {/}
      \exp_not:N \str_replace_all:Nnn #2 {\c_percent_str 23} {\c_hash_str}
+     \exp_not:N \str_replace_all:Nnn #2 {\c_percent_str 5B} {[}
+     \exp_not:N \str_replace_all:Nnn #2 {\c_percent_str 5D} {]}
+     \exp_not:N \str_replace_all:Nnn #2 {\c_percent_str 40} {\c_atsign_str}
+     \exp_not:N \str_replace_all:Nnn #2 {\c_percent_str 21} {!}
+     \exp_not:N \str_replace_all:Nnn #2 {\c_percent_str 24} {\c_dollar_str}
+     \exp_not:N \str_replace_all:Nnn #2 {\c_percent_str 26} {\c_ampersand_str}
+     \exp_not:N \str_replace_all:Nnn #2 {\c_percent_str 27} {'}
+     \exp_not:N \str_replace_all:Nnn #2 {\c_percent_str 2A} {*}
+     \exp_not:N \str_replace_all:Nnn #2 {\c_percent_str 2B} {+}
+     \exp_not:N \str_replace_all:Nnn #2 {\c_percent_str 2C} {,}
+     \exp_not:N \str_replace_all:Nnn #2 {\c_percent_str 3B} {;}
+     \exp_not:N \str_replace_all:Nnn #2 {\c_percent_str 3D} {=}
+     \exp_not:N \str_replace_all:Nnn #2 {\c_percent_str 30} {0}
+     \exp_not:N \str_replace_all:Nnn #2 {\c_percent_str 31} {1}
+     \exp_not:N \str_replace_all:Nnn #2 {\c_percent_str 32} {2}
+     \exp_not:N \str_replace_all:Nnn #2 {\c_percent_str 33} {3}
+     \exp_not:N \str_replace_all:Nnn #2 {\c_percent_str 34} {4}
+     \exp_not:N \str_replace_all:Nnn #2 {\c_percent_str 35} {5}
+     \exp_not:N \str_replace_all:Nnn #2 {\c_percent_str 36} {6}
+     \exp_not:N \str_replace_all:Nnn #2 {\c_percent_str 37} {7}
+     \exp_not:N \str_replace_all:Nnn #2 {\c_percent_str 38} {8}
+     \exp_not:N \str_replace_all:Nnn #2 {\c_percent_str 39} {9}
+     \exp_not:N \str_replace_all:Nnn #2 {\c_percent_str 28} {\c_backslash_str(}
+     \exp_not:N \str_replace_all:Nnn #2 {\c_percent_str 29} {\c_backslash_str)}
   }
 
-\cs_new_protected:cpx { @@_text_convert_utf8/url-print:nN } #1 #2
+\cs_new_protected:cpx { @@_text_convert_utf8/URIpdf-print:nN } #1 #2
   {
-     \exp_not:N \use:c { @@_text_convert_utf8/url:nN } {#1} #2
+     \exp_not:N \use:c { @@_text_convert_utf8/URIpdf:nN } {#1} #2
      \exp_not:N \str_put_left:Nn #2  {(}
      \exp_not:N \str_put_right:Nn #2 {)}
   }
