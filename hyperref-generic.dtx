@@ -268,9 +268,9 @@
 %^^A %% drivers are loaded in line 4745 in hyperref.sty in a \Hy@AtEndOfPackage command.
 %^^A %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %^^A %% list of new internal commands
-%^^A %% __hyp_link_dest_begin:nw : start command for links to internal destination
+%^^A %% __hyp_link_goto_begin:nw : start command for links to internal destination
 %^^A %%                             replaces \find@pdflink
-%^^A %% __hyp_link_dest_end:
+%^^A %% __hyp_link_goto_end:
 %^^A %% __hyp_destination:n     :  sets an anchor, replaces \new@pdflink
 %^^A %% \__hyp_PageLabels_gpush: : puts pagelabels in the catalog, used on every storing
 %^^A %% PDF String (text)
@@ -486,10 +486,11 @@
 %    \end{macrocode}
 %
 % We define a better (expandable) version of \cs{hypercalcbp}
+% \begin{macro}{\hypercalcbp}
 %    \begin{macrocode}
 \cs_set_eq:NN \hypercalcbp \dim_to_decimal_in_bp:n
 %    \end{macrocode}
-%
+% \end{macro}
 % This is used as default file extension, should probably go into hyperref.
 %    \begin{macrocode}
 \providecommand*{\XR@ext}{pdf} %
@@ -768,26 +769,30 @@
 % The first step to convert input in a PDF string is to purify it, that means
 % to remove/expand commands. As the whole process is not expandable anyway we
 % can use a protected command. The \enquote{output} is a string:
+% \begin{macro}{\@@_text_purify:nN}
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_text_purify:nN #1 #2 %#1 input, #2  str command
   {
      \str_set:Nx #2 {\text_purify:n { #1 } }
   }
 %    \end{macrocode}
+% \end{macro}
 % The second step is to cleanup the output of the first step. This is a dummy
 % currently. The argument should be a string variable.
+% \begin{macro}{\@@_text_cleanup:N}
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_text_cleanup:N #1
  {
 
  }
 %    \end{macrocode}
+% \end{macro}
 % The last step converts the string to a PDF encoding. As we have at least two
 % targets (hex and literal) there is an argument. The conversion assumes
 % utf8 input, it is based on cs{pdf_text_convert:nnN} in l3pdftools.
 %
 % \#2 is str variable,
-% \#1 should be
+% \#1 should be one of
 % \begin{tabular}{ll}
 %  utf8/string-print   & \texttt{(lit)} (utf8/string)\\
 %  utf8/string         & \texttt{lit}   (utf8/string)\\
@@ -798,17 +803,20 @@
 %  utf16/string_print  & \texttt{(lit)} (utf16/string)\\
 %  utf16/string-lit    & \texttt{lit}   (utf16/string)
 %  \end{tabular}
+%  \begin{macro}{ \@@_text_convert:nN }
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_text_convert:nN #1 #2
   {
      \pdf_text_convert:nVN { #1 } #2 #2
   }
 %    \end{macrocode}
+% \end{macro}
 % This command combines everything.
 % |#1|=input, |#2|= handler shortcut |#3|= output str variable
 % The commands uses a group to locally set \cs{Hy@pdfstringtrue}
 % so that \cs{texorpdfstring} works and other local settings can be done.
 %
+% \begin{macro}{ \@@_text_pdfstring:nnN }
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_text_pdfstring:nnN #1 #2 #3
   {
@@ -824,6 +832,7 @@
  }
 \cs_generate_variant:Nn \@@_text_pdfstring:nnN {xnN,onN,xoN,ooN,noN}
 %    \end{macrocode}
+% \end{macro}
 % !!! temporary until all instances are gone
 %^^A TODO check if the redefinition of |~| is needed (probably not)
 %^^A \edef~{\string~}%
@@ -835,13 +844,14 @@
   { \@@_text_pdfstring:xnN {#2} {utf8/string}#1 }
 %    \end{macrocode}
 % This is a special version for info keys:
+% \begin{macro}{ \@@_text_pdfstring_info:nN }
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_text_pdfstring_info:nN #1 #2
   {
     \@@_text_pdfstring:noN  { #1 }{ \l_@@_text_enc_info_print_tl } #2
   }
 %    \end{macrocode}
-
+% \end{macro}
 % \section{Pagelabels}
 % Page labels are representations of the page numbers in the PDF viewer. If the hyperref
 % options |pdfpagelabels| is true (the default) roman numbers are e.g. shown as
@@ -849,7 +859,7 @@
 % and the numbering of the counter must be identified and then written
 % to the catalog.
 %
-% The current implemention in hyperref/hyperref drivers:
+% The current implementation in hyperref/hyperref drivers:
 % \begin{description}
 % \item[xetex:] hxetex.def, line 80-110\\
 %        |\HyPL@StorePageLabel| writes to the aux-file
@@ -882,6 +892,12 @@
 % The code has to define |\Hy@PutCatalog| as we can't yet
 % change code in hyperref. The switch for draftmode has been removed.
 %
+% \begin{macro}
+%   {
+%     \@@_PageLabels_gpush:,
+%     \Hy@PutCatalog,
+%     \HyPL@StorePageLabel
+%   }
 %    \begin{macrocode}
 \cs_new_protected:Npn\@@_PageLabels_gpush:
   {
@@ -900,10 +916,94 @@
       }
   }
 %    \end{macrocode}
-
-
+% \end{macro}
+% \section {Core Hyperref Commands}
+% Every hyperref has to define eight core command:
+% \begin{verbatim}
+% \hyper@anchor
+% \hyper@anchorstart
+% \hyper@anchorend
+% \hyper@link
+% \hyper@linkfile
+% \hyper@linkurl
+% \hyper@linkstart
+% \hyper@linkend
+% \end{verbatim}
+% \subsection{ Anchors / destinations}
+% The first three commands are needed for \enquote{anchors}. At first
+% the internal commands to create a destination. It uses
+% |\Hy@WrapperDef| to make it babel safe, it is not clear if this is
+% still need, but we leave if for now.
+% \begin{macro}{ \@@_destination:n }
 %    \begin{macrocode}
+\Hy@WrapperDef \@@_destination:n #1 % #1 is a destination name.
+  {
+    \mode_if_horizontal:T { \@savsf\spacefactor }
+    \Hy@SaveLastskip      %defined in hyperref
+    \Hy@VerboseAnchor{#1} %defined in hyperref, for debugging
+    \@@_text_pdfstring:xoN
+      { \HyperDestNameFilter{#1}  }
+      { \l_@@_text_enc_dest_tl }
+      \l_@@_tmpa_tl
+    \tl_if_eq:NnTF  \l_@@_dest_pdfview_tl {fitrbox}
+      {
+        \vbox_to_zero:n
+          {
+           \smash
+             {
+               \hbox_to_zero:n
+                 {
+                   \exp_args:NV
+                     \pdf_destination_box:nn
+                       { \l_@@_tmpa_tl }
+                       { \box_use:N \l_@@_dest_box }
+                    \hss
+                 }
+             }
+          }
+      }
+      {
+        \exp_args:NV
+          \pdf_destination:nf
+          { \l_@@_tmpa_tl }
+          { \l_@@_dest_pdfview_tl }
+      }
+    \Hy@RestoreLastskip   %defined in hyperref
+    \mode_if_horizontal:T { \spacefactor\@savsf }
+  }
+%    \end{macrocode}
+% \end{macro}
+% This are the three destinations commands. They are modelled along the
+% xetex version. It is not quite clear if really all three
+% are needed for the backends supported by this driver, but changing the hyperref
+% code would be difficult.
+%  \begin{macro}
+%    {
+%      \hyper@anchor,
+%      \hyper@anchorstart,
+%      \hyper@anchorend
+%    }
+%    \begin{macrocode}
+\cs_new_protected:Npn \hyper@anchor #1
+  {
+    \@@_destination:n {#1}
+  }
 
+\cs_new_protected:Npn \hyper@anchorstart #1
+  {
+    \Hy@activeanchortrue
+    \@@_destination:n {#1}
+  }
+
+\cs_new_protected:Npn \hyper@anchorend
+  {
+    \Hy@activeanchorfalse
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Links}
+%
 % variants of hyperref commands to get attributes in the prop
 % these are (temporary) commands to fill various attributes (color, border style) in
 % the hooks for links from the hyperref keys.
@@ -1132,43 +1232,9 @@
     \pdfannot_link_margin:n { #1 }
   }
 
-% internal definitions for anchors (destinations) and links to destinations.
 
-\Hy@WrapperDef \@@_destination:n #1 % #1 is a destination name.
-  {
-    \mode_if_horizontal:T { \@savsf\spacefactor }
-    \Hy@SaveLastskip      %defined in hyperref
-    \Hy@VerboseAnchor{#1} %defined in hyperref, for debugging
-    %\@@_pstringdef:Nx  \l_@@_tmpa_tl { \HyperDestNameFilter{#1} } %
-    \@@_text_pdfstring:xoN
-      { \HyperDestNameFilter{#1}  }
-      { \l_@@_text_enc_dest_tl }
-      \l_@@_tmpa_tl
-    \tl_if_eq:NnTF  \l_@@_dest_pdfview_tl {fitrbox}
-      {
-        \vbox_to_zero:n
-          {
-           \smash
-             {
-               \hbox_to_zero:n
-                 {
-                   \exp_args:NV
-                     \pdf_destination_box:nn
-                       { \l_@@_tmpa_tl }
-                       { \box_use:N \l_@@_dest_box }
-                    \hss
-                 }
-             }
-          }
-      }
-      {
-        \exp_args:NV \pdf_destination:nf { \l_@@_tmpa_tl } { \l_@@_dest_pdfview_tl }
-      }
-    \Hy@RestoreLastskip   %defined in hyperref
-    \mode_if_horizontal:T { \spacefactor\@savsf }
-  }
 
-\cs_new_protected:Npn \__hyp_link_dest_begin:nw #1
+\cs_new_protected:Npn \__hyp_link_goto_begin:nw #1
   {
     \mode_leave_vertical:
     \protected@edef \l_@@_dest_name_tmpa_tl { #1 }
@@ -1195,29 +1261,12 @@
         \Hy@colorlink\@linkcolor
   }
 
-\cs_new_protected:Npn \__hyp_link_dest_end:
+\cs_new_protected:Npn \__hyp_link_goto_end:
   {
     \Hy@endcolorlink
     \pdfannot_link_goto_end:
   }
 
-%% hyperref commands for destinations (anchor) and links to destinations
-
-\cs_new_protected:Npn \hyper@anchor #1
-  {
-    \__hyp_destination:n {#1}\anchor@spot
-  }
-
-\cs_new_protected:Npn \hyper@anchorstart#1
-  {
-    \__hyp_destination:n {#1}
-    \Hy@activeanchortrue
-  }
-
-\cs_new_protected:Npn \hyper@anchorend
-  {
-    \Hy@activeanchorfalse
-  }
 
 
 % hyper@linkstart/ \hyper@linkend is used for
@@ -1228,20 +1277,20 @@
 \cs_new_protected:Npn \hyper@link #1 #2 #3 %#1 ignored, #2=destination name, #3 content
  {
   \Hy@VerboseLinkStart{#1}{#2}
-  \__hyp_link_dest_begin:nw {#2}#3\Hy@xspace@end
-  \__hyp_link_dest_end:
+  \__hyp_link_goto_begin:nw {#2}#3\Hy@xspace@end
+  \__hyp_link_goto_end:
   \Hy@VerboseLinkStop
 }
 
 \cs_new_protected:Npn \hyper@linkstart #1 #2 %#1 ignored, #2=destination name
   {
     \Hy@VerboseLinkStart{#1}{#2}% only for debug
-    \__hyp_link_dest_begin:nw {#2}%
+    \__hyp_link_goto_begin:nw {#2}%
   }
 
 \cs_new_protected:Npn \hyper@linkend
   {
-    \__hyp_link_dest_end:
+    \__hyp_link_goto_end:
     \Hy@VerboseLinkStop
   }
 
