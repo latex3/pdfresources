@@ -301,7 +301,7 @@
 %^^A %%  \l_@@_dest_pdfremotestartview_tl ,
 %^^A
 %^^A %% Constants
-%^^A %% *\c_@@_map_linktypes_prop
+%^^A %% *\c_@@_map_annot_hyp_prop
 %^^A %% *\c_@@_dest_undefined_tl
 %^^A %% Temp variables
 %^^A %% \l_@@_tmpa_seq
@@ -650,11 +650,14 @@
 %    \end{macrocode}
 % \end{variable}
 % \begin{variable}
-%   { \c_@@_map_linktypes_prop }
+%   {
+%     \c_@@_map_annot_hyp_prop,
+%     \c_@@_map_hyp_annot_prop,
+%   }
 %  This constants holds the link types managed by hyperref
-%  along with a mapping from annot names to hyperref names.
+%  along with a mapping from annot names to hyperref names and back.
 %    \begin{macrocode}
-\prop_const_from_keyval:Nn \c_@@_map_linktypes_prop
+\prop_const_from_keyval:Nn \c_@@_map_annot_hyp_prop
   {
     URI   = url,
     GoTo  = link,
@@ -662,6 +665,15 @@
     Named = menu,
     Launch= run
   }
+\prop_const_from_keyval:Nn \c_@@_map_hyp_annot_prop
+  {
+    url   = URI,
+    link  = GoTo,
+    file  = GoToR,
+    menu  = Named,
+    run   = Launch
+  }
+
 %    \end{macrocode}
 % \end{variable}
 % \subsection{Variables}
@@ -924,10 +936,10 @@
 % \hyper@anchorstart
 % \hyper@anchorend
 % \hyper@link
-% \hyper@linkfile
-% \hyper@linkurl
 % \hyper@linkstart
 % \hyper@linkend
+% \hyper@linkfile
+% \hyper@linkurl
 % \end{verbatim}
 % \subsection{ Anchors / destinations}
 % The first three commands are needed for \enquote{anchors}. At first
@@ -1002,7 +1014,39 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \subsection{Links}
+% \subsection{GoTo Links}
+% The next three commands are for links inside the document, to destinations (GoTo links).
+%
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_link_goto_begin:nw #1
+  {
+    \mode_leave_vertical:
+    \protected@edef \l_@@_dest_name_tmpa_tl { #1 }
+    \tl_if_empty:NTF \l_@@_dest_name_tmpa_tl
+      {
+        \msg_warning:nnx
+          { hyp }
+          { empty-destination-name }
+          { \c_@@_dest_undefined_tl }
+        \tl_set_eq:NN \l_@@_dest_name_tmpa_tl \c_@@_dest_undefined_tl
+      }
+      {
+        \@@_text_pdfstring:xoN
+          { \exp_args:No \HyperDestNameFilter { \l_@@_dest_name_tmpa_tl } }
+          { \l_@@_text_enc_dest_tl }
+          \l_@@_dest_name_tmpa_tl
+      }
+    \exp_args:No
+      \pdfannot_link_goto_begin:nw  { \l_@@_dest_name_tmpa_tl }
+        \Hy@colorlink\@linkcolor
+  }
+
+\cs_new_protected:Npn \@@_link_goto_end:
+  {
+    \Hy@endcolorlink
+    \pdfannot_link_goto_end:
+  }
+%    \end{macrocode}
 %
 % variants of hyperref commands to get attributes in the prop
 % these are (temporary) commands to fill various attributes (color, border style) in
@@ -1065,13 +1109,13 @@
   {
     \seq_map_inline:Nn \c_pdfannot_link_types_seq
       {
-        \tl_if_exist:cTF { @\prop_item:Nn\c__hyp_map_linktypes_prop{##1}bordercolor }
+        \tl_if_exist:cTF { @\prop_item:Nn\c__hyp_map_annot_hyp_prop{##1}bordercolor }
           {
            \exp_args:Nnnx
              \pdfannot_dict_put:nnn
               {link/##1}
               { C }
-              { [\tl_use:c {@\prop_item:Nn\c__hyp_map_linktypes_prop{##1}bordercolor}] }
+              { [\tl_use:c {@\prop_item:Nn\c__hyp_map_annot_hyp_prop{##1}bordercolor}] }
           }
           {
             \pdfannot_dict_remove:nn {link/##1} { C }
@@ -1234,38 +1278,6 @@
 
 
 
-\cs_new_protected:Npn \__hyp_link_goto_begin:nw #1
-  {
-    \mode_leave_vertical:
-    \protected@edef \l_@@_dest_name_tmpa_tl { #1 }
-    \tl_if_empty:NTF \l_@@_dest_name_tmpa_tl
-      {
-        \msg_warning:nnx
-          { hyp }
-          { empty-destination-name }
-          { \c_@@_dest_undefined_tl }
-        \tl_set_eq:NN \l_@@_dest_name_tmpa_tl \c_@@_dest_undefined_tl
-      }
-      { %I hope this is right ...
-%        \__hyp_pstringdef:Nx \l_@@_dest_name_tmpa_tl
-%          {
-%            \exp_args:No \HyperDestNameFilter { \l_@@_dest_name_tmpa_tl }
-%          }
-       \@@_text_pdfstring:xoN
-         { \exp_args:No \HyperDestNameFilter { \l_@@_dest_name_tmpa_tl } }
-         { \l_@@_text_enc_dest_tl }
-         \l_@@_dest_name_tmpa_tl
-      }
-    \exp_args:No
-      \pdfannot_link_goto_begin:nw  { \l_@@_dest_name_tmpa_tl }
-        \Hy@colorlink\@linkcolor
-  }
-
-\cs_new_protected:Npn \__hyp_link_goto_end:
-  {
-    \Hy@endcolorlink
-    \pdfannot_link_goto_end:
-  }
 
 
 
@@ -2105,12 +2117,56 @@
 % what about font changes?
 % hooks are global, is this the right thing to use here?
 % perhaps the hook should only take a tl and this is filled?
+\prop_map_inline:Nn \c_@@_map_hyp_annot_prop
+  {
+    \keys_define:nn { hyp / setup }
+      {
+        #1border .code:n =
+          {
+             \tl_if_empty:nTF { ##1 }
+               {
+                 \pdfannot_dict_remove:nn
+                  {link/#2}
+                  { Border }
+               }
+               {
+                 \pdfannot_dict_put:nnn
+                   {link/#2}
+                   { Border }
+                   { [##1] }
+               }
+          }
+      }
+  }
 \keys_define:nn { hyp / setup }
   {
     ,pdfborder  .code:n =
       {
         \tl_set:Nn \@pdfborder {#1}
+        \tl_if_empty:nTF { #1}
+          {
+            \seq_map_inline:Nn\c_pdfannot_link_types_seq
+              {
+                \exp_args:Nnnx
+                \pdfannot_dict_remove:nn
+                  {link/##1}
+                  { Border }
+              }
+          }
+          {
+            \seq_map_inline:Nn\c_pdfannot_link_types_seq
+              {
+                \exp_args:Nnnx
+                \pdfannot_dict_put:nnn
+                  {link/##1}
+                  { Border }
+                  { [#1] }
+              }
+          }
       }
+  }
+\keys_define:nn { hyp / setup }
+  {
     ,pdfborder .initial:n = {0~0~1},
     ,pdfborderstyle .code:n =
       {
