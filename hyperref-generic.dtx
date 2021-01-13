@@ -2114,6 +2114,33 @@
       }
     ,pdfborder .initial:n = {0~0~1},
   }
+%    \end{macrocode}
+% Color keys need to parse color expressions. Two types are supported:
+%  |color=[rgb]{1,0,.5}| and
+%  |color=red!50!blue|
+%    \begin{macrocode}
+\prop_map_inline:Nn \c_@@_map_hyp_annot_prop
+  {
+    \keys_define:nn { hyp / setup }
+      {
+        #1bordercolor .code:n =
+          {
+             \tl_if_empty:nTF { ##1 }
+               {
+                 \pdfannot_dict_remove:nn
+                  {link/#2}
+                  { C }
+               }
+               {
+                 \pdfannot_dict_put:nnn
+                   {link/#2}
+                   { C }
+                   { [##1] }
+               }
+          }
+      }
+  }
+
 
 \prop_map_inline:Nn \c_@@_map_hyp_annot_prop
   {
