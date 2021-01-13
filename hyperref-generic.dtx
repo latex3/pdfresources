@@ -322,8 +322,6 @@
 %^^A
 %^^A %% \l_@@_dest_pdfview_tl
 %^^A %% list of commands which probably will have to change
-%^^A %%   \Hy@EXPsetpdfborder
-%^^A %%   \Hy@EXPsetpdfhighlight
 %^^A %%   \Hy@EXPsetbordercolor
 %^^A % %   \hypupdateattribute
 
@@ -1057,25 +1055,6 @@
 \pdfannot_link_margin:n { 1pt }
 
 
-% highlight
-\cs_new_protected:Npn \Hy@EXPsetpdfhighlight
-  {
-    \seq_map_inline:Nn \c_pdfannot_link_types_seq
-      {
-        \tl_if_empty:NTF \@pdfhighlight
-          {
-            \pdfannot_dict_remove:nn {link/##1}{ H }
-          }
-          {
-            \exp_args:Nnnx
-             \pdfannot_dict_put:nnn
-              {link/##1}
-              { H }
-              { \@pdfhighlight }
-         }
-     }
-  }
-
 % bordercolor
 \cs_new_protected:Npn \Hy@EXPsetbordercolor
   {
@@ -1100,7 +1079,7 @@
 \NewDocumentCommand\hypupdateattribute { }
  {
    %\Hy@EXPsetpdfborder
-   \Hy@EXPsetpdfhighlight
+   %\Hy@EXPsetpdfhighlight
    \Hy@EXPsetbordercolor
  }
 
@@ -2183,6 +2162,69 @@
     ,pdfborderstyle .initial:n = {},
   }
 
+\prop_map_inline:Nn \c_@@_map_hyp_annot_prop
+  {
+    \keys_define:nn { hyp / setup }
+      {
+        ,#1highlight .choices:nn =
+          { /I, /N, /O, /P}
+          {
+                \pdfannot_dict_put:nnn
+                  {link/#2}
+                  { H }
+                  { ##1 }
+
+          }
+        ,#1highlight / .code:n =
+         {
+           \pdfannot_dict_remove:nn
+             {link/#2}
+             { H }
+
+          }
+        ,#1highlight / unknown .code:n =
+          {
+           \msg_warning:nnxxx { hyp } { unknown-choice+empty }
+             { pdfhighlight }
+             { /I~(inverse), /N~(no effect), /O~(outline), /P~(inset) }
+             { \exp_not:n {##1} }
+          }
+      }
+  }
+
+
+\keys_define:nn { hyp / setup }
+  {
+    ,pdfhighlight .choices:nn =
+      { /I, /N, /O, /P}
+      {
+        \prop_map_inline:Nn \c_@@_map_hyp_annot_prop
+          {
+            \pdfannot_dict_put:nnn
+              {link/####2}
+              { H }
+              { #1  }
+          }
+      }
+    ,pdfhighlight / .code:n =
+     {
+        \prop_map_inline:Nn \c_@@_map_hyp_annot_prop
+          {
+            \pdfannot_dict_remove:nn
+              {link/##2}
+              { H }
+          }
+      }
+    ,pdfhighlight .initial:n = {/I},
+    ,pdfhighlight / unknown .code:n =
+      {
+       \msg_warning:nnxxx { hyp } { unknown-choice+empty }
+         { pdfhighlight }
+         { /I~(inverse), /N~(no effect), /O~(outline), /P~(inset) }
+         { \exp_not:n {#1} }
+      }
+  }
+
 \keys_define:nn { hyp / setup }
   {
     ,colorlinks .meta:n = {pdfborder={0~0~0},pdfborderstyle={}}
@@ -2466,6 +2508,7 @@
   {
     \define@key{Hyp}{#1border}{}
     \define@key{Hyp}{#1borderstyle}{}
+    \define@key{Hyp}{#1highlight}{}
   }
 %%%%%%%%%%%%%%%%%
 \NewDocumentCommand \MakeFieldObject { m m }
