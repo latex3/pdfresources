@@ -1056,34 +1056,6 @@
 %    \begin{macrocode}
 \pdfannot_link_margin:n { 1pt }
 
-\cs_new_protected:Npn \Hy@EXPsetpdfborder
-  {
-    \seq_map_inline:Nn \c_pdfannot_link_types_seq
-      {
-        \tl_if_empty:NTF \@pdfborder
-          {
-            \pdfannot_dict_remove:nn {link/##1}{Border}
-          }
-          {
-            \exp_args:Nnnx
-             \pdfannot_dict_put:nnn
-              {link/##1}
-              { Border }
-              { [\@pdfborder] }
-          }
-        \tl_if_empty:NTF \@pdfborderstyle
-          {
-            \pdfannot_dict_remove:nn {link/##1} { BS }
-          }
-          {
-            \exp_args:Nnnx
-             \pdfannot_dict_put:nnn
-              {link/##1}
-              { BS }
-              { <<\@pdfborderstyle>> }
-          }
-      }
-  }
 
 % highlight
 \cs_new_protected:Npn \Hy@EXPsetpdfhighlight
@@ -1127,7 +1099,7 @@
 % some better method must be found
 \NewDocumentCommand\hypupdateattribute { }
  {
-   \Hy@EXPsetpdfborder
+   %\Hy@EXPsetpdfborder
    \Hy@EXPsetpdfhighlight
    \Hy@EXPsetbordercolor
  }
@@ -2142,37 +2114,77 @@
   {
     ,pdfborder  .code:n =
       {
-        \tl_set:Nn \@pdfborder {#1}
-        \tl_if_empty:nTF { #1}
-          {
-            \seq_map_inline:Nn\c_pdfannot_link_types_seq
-              {
-                \exp_args:Nnnx
-                \pdfannot_dict_remove:nn
-                  {link/##1}
+        \tl_if_empty:nTF { #1 }
+         {
+           \prop_map_inline:Nn \c_@@_map_hyp_annot_prop
+             {
+               \pdfannot_dict_remove:nn
+                  {link/##2}
                   { Border }
-              }
-          }
+             }
+         }
+         {
+           \prop_map_inline:Nn \c_@@_map_hyp_annot_prop
+             {
+               \pdfannot_dict_put:nnn
+                 {link/##2}
+                 { Border }
+                 { [#1] }
+             }
+         }
+      }
+    ,pdfborder .initial:n = {0~0~1},
+  }
+
+\prop_map_inline:Nn \c_@@_map_hyp_annot_prop
+  {
+    \keys_define:nn { hyp / setup }
+      {
+        #1borderstyle .code:n =
           {
-            \seq_map_inline:Nn\c_pdfannot_link_types_seq
-              {
-                \exp_args:Nnnx
-                \pdfannot_dict_put:nnn
-                  {link/##1}
-                  { Border }
-                  { [#1] }
-              }
+             \tl_if_empty:nTF { ##1 }
+               {
+                 \pdfannot_dict_remove:nn
+                  {link/#2}
+                  { BS }
+               }
+               {
+                 \pdfannot_dict_put:nnn
+                   {link/#2}
+                   { BS }
+                   { <<##1>> }
+               }
           }
       }
   }
 \keys_define:nn { hyp / setup }
   {
-    ,pdfborder .initial:n = {0~0~1},
-    ,pdfborderstyle .code:n =
+    ,pdfborderstyle  .code:n =
       {
-        \tl_set:Nn \@pdfborderstyle {#1}
+        \tl_if_empty:nTF { #1 }
+         {
+           \prop_map_inline:Nn \c_@@_map_hyp_annot_prop
+             {
+               \pdfannot_dict_remove:nn
+                  {link/##2}
+                  { BS }
+             }
+         }
+         {
+           \prop_map_inline:Nn \c_@@_map_hyp_annot_prop
+             {
+               \pdfannot_dict_put:nnn
+                 {link/##2}
+                 { BS }
+                 { <<#1>> }
+             }
+         }
       }
     ,pdfborderstyle .initial:n = {},
+  }
+
+\keys_define:nn { hyp / setup }
+  {
     ,colorlinks .meta:n = {pdfborder={0~0~0},pdfborderstyle={}}
     ,ocgcolorlinks .meta:n = {pdfborder={0~0~0},pdfborderstyle={}}
   }
@@ -2449,6 +2461,13 @@
   }
 
 
+%%%%%%%%%%%%%% Temporary stuff
+\prop_map_inline:Nn \c_@@_map_hyp_annot_prop
+  {
+    \define@key{Hyp}{#1border}{}
+    \define@key{Hyp}{#1borderstyle}{}
+  }
+%%%%%%%%%%%%%%%%%
 \NewDocumentCommand \MakeFieldObject { m m }
   {
     \pdf_xform_new:nnn { #2 }{} { #1 }
