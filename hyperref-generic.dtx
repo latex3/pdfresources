@@ -84,6 +84,53 @@
 %  so if commands from \pkg{bookmark} are needed in the preamble the document
 %  still has to load it manually but this is subject to change.
 %
+%  \subsection{Link decorations: border, color, OCG-color, \ldots}
+%
+%  \pkg{hyperref} allows either to color the link text, or to use a border around it.
+%
+%  The \emph{link border} is a setting in the annotation directory. It can be colored
+%  and styled (with the |XXbordercolor|, |pdfborderstyle| and |pdfhighlight| keys),
+%  but the exact look depends on the PDF viewer.
+%
+%  The link text is \emph{colored} with the standard color commands for text. There is
+%  a (rather unknown) option to use small caps instead of colors.
+%
+%  If a link is colored, the color is also printed, which is often not wanted.
+%  PDF allows to avoid this problem with so-called OCG-layers: They allow to add
+%  variants of a text along with instructions which variant should be used for
+%  viewing and which for printing. \pkg{hyperref} implements a rather simple version
+%  for links: the link text is put in a box and printed twice with different colors
+%  on different OCG layers. As boxes are used such links can not be broken.
+%
+%  One of the options has to be chosen in the preamble
+%  and is then used for the whole document and all link types. Only colors and
+%  eventually the border style can be adjusted locally. But there is no technical
+%  reason for these restrictions: It is quite possible to change all these attributes
+%  both by link type and locally. There is also no reason why the formatting of the
+%  link text is restricted to colors.
+%
+%  \subsubsection{new keys}
+%  So a number of keys have been extended to allow individual setting for
+%  the link types |link|, |url|, |file| |menu| and |run|:
+%
+%  \begin{itemize}
+%   \item Beside |pdfborder| there are also |linkborder| etc
+%   \item Beside |pdfhighlight| there are also |linkhighlight| etc
+%   \item Beside |pdfborderstyle| there are also |linkborderstyle|
+%   \item Beside |colorlinks| there are also |colorlink|, |colorurl| etc %TODO
+%   \item Beside |ocgcolorlinks| there are also |ocgcolorlink|, |ocgcolorurl, etc %TODO
+%   \item New keys |formatlinks|, |formatlink|, |formaturl|, etc which %TODO
+%   allow to add arbitrary formatting instructions like |\bfseries|.
+%  \end{itemize}
+%
+%  \subsubsection{Changed behaviour}
+%
+%
+%
+%
+%
+%
+%
 %  \subsection{PDF strings}
 %
 %  \pkg{hyperref} use a command called \cs{pdfstringdef} to convert text input into
@@ -335,7 +382,25 @@
   Hyperref driver for luaTeX]
 
 \RequirePackage{etoolbox} %why?
+%    \end{macrocode}
+% We need l3color for the color export command and need to activate
+% the patches for color and xcolor.
+% It would be too late for colors defined earlier, but is the best one
+% can do for now.%
+%    \begin{macrocode}
 \RequirePackage{l3color}
+\ExplSyntaxOn
+\cs_gset_eq:NN \@expl@color@set@@nnn \color_set:nnn
+\ExplSyntaxOff
+\@ifpackageloaded{xcolor}{\@firstoftwo}{\@secondoftwo}
+  {
+    \RequirePackage{xcolor-patches-tmp}
+    \XC@@names
+  }
+  {
+    \AddToHook{package/after/xcolor}
+      {\RequirePackage{xcolor-patches-tmp}\XC@@names}
+  }
 %    \end{macrocode}
 %
 % \section{messages}

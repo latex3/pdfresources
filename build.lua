@@ -10,6 +10,7 @@ module  = "pdfresources"
 installfiles = {"*.sty","*.cls","*.def","*.lua"}
 sourcefiles =  {"*.dtx","*.ins",
                 "l3ref-tmp.sty",
+                "xcolor-patches-tmp.sty",
                 "hgeneric-experimental.def",
                 "newpackages/new-transparent.sty",
                 "newpackages/new-transparent2.sty",
