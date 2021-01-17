@@ -87,30 +87,42 @@
 %  \subsection{Link decorations: border, color, OCG-color, \ldots}
 %
 %  \pkg{hyperref} allows either to color the link text, or to use a border around it.
+%  There is also a (rather unknown) option to use small caps instead of colors.
 %
 %  The \emph{link border} is a setting in the annotation directory. It can be colored
 %  and styled (with the |XXbordercolor|, |pdfborderstyle| and |pdfhighlight| keys),
-%  but the exact look depends on the PDF viewer.
+%  but the exact look depends on the PDF viewer. Such decorations are normally not
+%  printed.
 %
-%  The link text is \emph{colored} with the standard color commands for text. There is
-%  a (rather unknown) option to use small caps instead of colors.
-%
-%  If a link is colored, the color is also printed, which is often not wanted.
+%  The link text is \emph{colored} with the standard color commands for text.
+%  Such a color is also printed, which is often not wanted.
 %  PDF allows to avoid this problem with so-called OCG-layers: They allow to add
 %  variants of a text along with instructions which variant should be used for
 %  viewing and which for printing. \pkg{hyperref} implements a rather simple version
-%  for links: the link text is put in a box and printed twice with different colors
-%  on different OCG layers. As boxes are used such links can not be broken.
+%  for links: The link text is put in a box and printed twice with different colors
+%  on different OCG layers. As boxes are used such links can not be broken. The
+%  package {ocgx2} implements a more sophisticated version which allows to
+%  use it for links broken over lines and pages too.
 %
-%  One of the options has to be chosen in the preamble
+%  In the current implementation the options are exclusive and global:
+%  One of the options (colorlinks or borders) has to be chosen in the preamble
 %  and is then used for the whole document and all link types. Only colors and
 %  eventually the border style can be adjusted locally. But there is no technical
 %  reason for these restrictions: It is quite possible to change all these attributes
-%  both by link type and locally. There is also no reason why the formatting of the
-%  link text is restricted to colors.
+%  at any time both by link type and locally. There is also no reason why
+%  the formatting of the link text is restricted to colors.
 %
-%  \subsubsection{new keys}
-%  So a number of keys have been extended to allow individual setting for
+%  \pkg{hyperref} has keys to set the color and border for |link|, |url|, |file|,
+%  |menu| and |run| types. They correspond to the PDF annotation types
+%  GoTo, URI, GoToR, Named, Launch.
+%  Beside this there is |anchor| which is not used at all, and |cite| which is
+%  a semantical category and doesn't fit to the other types.
+%
+%  The new driver tries to extend the possible options and to clean up the code while
+%  staying if possible compatible to the current behaviour.
+%
+%  \subsubsection{New Keys}
+%  Some of the existing keys have been extended to allow individual setting for
 %  the link types |link|, |url|, |file| |menu| and |run|:
 %
 %  \begin{itemize}
@@ -118,13 +130,22 @@
 %   \item Beside |pdfhighlight| there are also |linkhighlight| etc
 %   \item Beside |pdfborderstyle| there are also |linkborderstyle|
 %   \item Beside |colorlinks| there are also |colorlink|, |colorurl| etc %TODO
-%   \item Beside |ocgcolorlinks| there are also |ocgcolorlink|, |ocgcolorurl, etc %TODO
+%   \item Beside |ocgcolorlinks| there are also |ocgcolorlink|, |ocgcolorurl|, etc %TODO
+%   \item Beside |hidelinks| there are also |hidelink|, |hideurl|, etc %TODO
 %   \item New keys |formatlinks|, |formatlink|, |formaturl|, etc which %TODO
 %   allow to add arbitrary formatting instructions like |\bfseries|.
 %  \end{itemize}
 %
 %  \subsubsection{Changed behaviour}
+%   \begin{itemize}
+%   \item
+%   \item |colorlinks| will as before disable the |pdfborder|, but it is possible to change
+%  this in the document at any time, or to reenable the border if wanted.
+%  Internally |colorlinks| \& friends will no longer define/undefine
+%  |\Hy@colorlink|,
+%   \item
 %
+%   \end{itemize}
 %
 %
 %
