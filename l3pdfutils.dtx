@@ -231,10 +231,22 @@
       {
         \@@_backend_destination:nn {#1}{#2}
       }
-
-    \cs_new_protected:Npn \pdf_destination_box:nn #1 #2 %#1 name, #2 box content
+    \box_new:N \l_@@_tmpa_box
+    \box_new:N \l_@@_tmpb_box
+    \cs_new_protected:Npn \pdf_destination:nnnn #1 #2 #3 #4
       {
-        \@@_backend_destination_box:nn { #1 }{ #2 } %new name!!
+        \hbox_set_to_wd:Nnn \l_@@_tmpa_box {#2} {}
+        \box_set_ht:Nn \l_@@_tmpa_box {#3}
+        \box_set_dp:Nn \l_@@_tmpa_box {#4}
+        \hbox_set_to_wd:Nnn \l_@@_tmpb_box {0pt}
+          {
+            \@@_backend_destination_box:nn
+              { #1 }
+              { \box_use:N \l_@@_tmpa_box }
+          }
+        \box_set_dp:Nn \l_@@_tmpb_box {0pt}
+        \box_set_ht:Nn \l_@@_tmpb_box {0pt}
+        \box_use:N\l_@@_tmpb_box
       }
   }
 \cs_generate_variant:Nn\pdf_destination:nn {no,nf}
