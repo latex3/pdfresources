@@ -1043,20 +1043,11 @@
       \l_@@_tmpa_tl
     \tl_if_eq:NnTF  \l_@@_dest_pdfview_tl {fitrbox}
       {
-        \vbox_to_zero:n
-          {
-           \smash
-             {
-               \hbox_to_zero:n
-                 {
-                   \exp_args:NV
-                     \pdf_destination_box:nn
-                       { \l_@@_tmpa_tl }
-                       { \box_use:N \l_@@_dest_box }
-                    \hss
-                 }
-             }
-          }
+        \exp_args:NV
+        \pdf_destination:nnnn \l_@@_tmpa_tl
+         { \box_wd:N \l_@@_dest_box }
+         { \box_ht:N \l_@@_dest_box }
+         { \box_dp:N \l_@@_dest_box }
       }
       {
         \exp_args:NV
