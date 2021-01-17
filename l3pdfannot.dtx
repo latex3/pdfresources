@@ -222,7 +222,7 @@
 %    \cs{pdfannot_dict_remove:nn} \Arg{dictionary name} \Arg{key}
 %  \end{syntax}
 %   This removes a key-value from the internal annot dictionary
-%   \Arg{dictionary name} should be currently one of 
+%   \Arg{dictionary name} should be currently one of
 %   \texttt{link/URI}, \texttt{link/GoToR}, \texttt{link/Launch},
 %   \texttt{link/GoTo}, \texttt{link/Named}.
 % \end{function}
@@ -413,6 +413,7 @@
 \cs_new_protected:Npn \pdfannot_link_begin:nnw #1 #2 %#1 type, #2 action spec
   {
     \hook_use:n { pdfannot/link/#1/before}
+    \mode_leave_vertical:
     \exp_args:Nxx %xetex needs expansion
       \__pdf_backend_link_begin_user:nnw
         {
