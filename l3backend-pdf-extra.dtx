@@ -150,17 +150,42 @@
 %    \end{macrocode}
 % \subsubsection{Add the \enquote{shipout} hooks}
 % Now we add to the shipout hooks the relevant token lists.
+% We also push the page resources in shipout/firstpage (AtBeginDvi)
+% as the backend code sets color stack there. The xetex driver needs a rule here.
+% If it clashes on the first page, we will need a test ...
 %    \begin{macrocode}
 %<*drivers>
-\hook_gput_code:nnn{shipout/background}{pdf}
+\tl_if_exist:NTF \@kernel@after@shipout@background
+  {
+    \g@addto@macro \@kernel@before@shipout@background{\relax}
+    \g@addto@macro \@kernel@after@shipout@background
+      {
+        \hook_use:n {pdf/management/thispage_shipout}
+      }
+    \g@addto@macro \@kernel@after@shipout@lastpage
+      {
+        \hook_use:n {pdf/management/lastpage_shipout}
+      }
+  }
+  {
+    \hook_gput_code:nnn{shipout/background}{pdf}
+      {
+        \hook_use:n {pdf/management/thispage_shipout}
+      }
+    \hook_gput_code:nnn {shipout/lastpage} {pdf}
+      {
+        \hook_use:n {pdf/management/lastpage_shipout}
+      }
+  }
+\hook_gput_code:nnn {shipout/firstpage} {pdf}
   {
     \hook_use:n {pdf/management/thispage_shipout}
   }
-\hook_gput_code:nnn {shipout/lastpage} {pdf}
-  {
-     \hook_use:n {pdf/management/lastpage_shipout}
-  }
+
 %</drivers>
+%<*dvipdfmx|xdvipdfmx>
+\hook_gset_rule:nnnn{shipout/firstpage}{l3backend-xetex}{after}{pdf}
+%</dvipdfmx|xdvipdfmx>
 %    \end{macrocode}
 % \subsection{ The /Pages dictionary (pdfpagesattr) }
 % \begin{macro}{\@@_backend_Pages_primitive:n}
