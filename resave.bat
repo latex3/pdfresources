@@ -3,8 +3,7 @@ rem l3build save -e\2 \1
 rem l3build save -cconfig-dvips \1
 rem l3build save -cconfig-luatex -e\2 \1
 
-l3build save -eluatex -cconfig-noxetex pgfpatches
-l3build save -epdftex -cconfig-noxetex pgfpatches
-l3build save -cconfig-luatex non-ascii-links
-
-l3build save -cconfig-dvips destination-options
+l3build save -cconfig-noxetex -eluatex calculationsortorder
+l3build save -cconfig-noxetex -epdftex calculationsortorder
+l3build save -cconfig-noxetex -eluatex metadata
+l3build save -cconfig-noxetex -epdftex metadata
