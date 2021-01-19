@@ -132,7 +132,10 @@
 %  \emph{attr spec} and the code in the begin and end hook
 %  \texttt{pdfannot/link/\Arg{type}/before}
 %  and \texttt{pdfannot/link/\Arg{type}/after}
-%  is executed  before and after the link.
+%  is executed  before and after the link (outside the link command)
+%  while \texttt{pdfannot/link/\Arg{type}/begin}
+%  and \texttt{pdfannot/link/\Arg{type}/end} are directly around the link
+%  text. None of the hooks introduce a group.
 %  \Arg{type} should normally be identical to the value of the |/S| key
 %  in the action dictionary.
 %  As example
@@ -378,6 +381,9 @@
     \hook_new_pair:nn
       {pdfannot/link/#1/before}
       {pdfannot/link/#1/after}
+    \hook_new_pair:nn
+      {pdfannot/link/#1/begin}
+      {pdfannot/link/#1/end}
    }
 %    \end{macrocode}
 %
@@ -403,7 +409,9 @@
         #2 %exp_not?
       }
     \bool_gset_true:N \g_@@_use_lastlink_bool
+    \hook_use:n { pdfannot/link/#1/begin}
     #3
+    \hook_use:n { pdfannot/link/#1/end}
     \__pdf_backend_link_end:
     \bool_gset_true:N \g_@@_use_lastlink_bool
     \hook_use:n { pdfannot/link/#1/after}
@@ -425,10 +433,12 @@
         }
         { #2 }
       \bool_gset_true:N \g_@@_use_lastlink_bool
+      \hook_use:n { pdfannot/link/#1/begin}
   }
 
 \cs_new_protected:Nn \pdfannot_link_end:n %#1 type, e.g. url
   {
+    \hook_use:n { pdfannot/link/#1/end}
     \__pdf_backend_link_end:
     \bool_gset_true:N \g_@@_use_lastlink_bool
     \hook_use:n { pdfannot/link/#1/after}
@@ -446,10 +456,12 @@
       }
       { #1 }
      \bool_gset_true:N \g_@@_use_lastlink_bool
+     \hook_use:n { pdfannot/link/GoTo/begin}
   }
 
 \cs_new_protected:Nn \pdfannot_link_goto_end:
   {
+    \hook_use:n { pdfannot/link/GoTo/end}
     \__pdf_backend_link_end:
     \bool_gset_true:N \g_@@_use_lastlink_bool
      \hook_use:n { pdfannot/link/GoTo/after}
