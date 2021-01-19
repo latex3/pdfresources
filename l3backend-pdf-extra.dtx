@@ -177,15 +177,8 @@
         \hook_use:n {pdf/management/lastpage_shipout}
       }
   }
-\hook_gput_code:nnn {shipout/firstpage} {pdf}
-  {
-    \hook_use:n {pdf/management/thispage_shipout}
-  }
 
 %</drivers>
-%<*dvipdfmx|xdvipdfmx>
-\hook_gset_rule:nnnn{shipout/firstpage}{l3backend-xetex}{after}{pdf}
-%</dvipdfmx|xdvipdfmx>
 %    \end{macrocode}
 % \subsection{ The /Pages dictionary (pdfpagesattr) }
 % \begin{macro}{\@@_backend_Pages_primitive:n}
@@ -605,13 +598,16 @@
 % this must be issued on every page!
 %<*dvipdfmx|xdvipdfmx>
 %objects should not only be created but also "initialized"
-% initialization should be done at begin dvi
+% initialization should be done before anyone tries to write
+% so we add rules for the backend.
+%<xdvipdfmx>\hook_gset_rule:nnnn{shipout/firstpage}{l3backend-xetex}{after}{pdf}
+%<dvipdfmx>\hook_gset_rule:nnnn{shipout/firstpage}{l3backend-dvipdfmx}{after}{pdf}
+%
 \clist_map_inline:Nn \c_@@_backend_PageResources_clist
   {
     \@@_backend_object_new:nn   { Page/Resources/#1 } { dict }
     \hook_gput_code:nnn{shipout/firstpage}{pdf}{\@@_backend_object_write:nn { Page/Resources/#1 } {}}
   }
-
 \cs_new_protected:Npn \@@_backend_PageResources:n #1
   {
     \@@_backend:n {put~@resources~<<#1>>}
