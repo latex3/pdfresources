@@ -142,7 +142,7 @@
 %   \item |colorlinks| will as before disable the |pdfborder|, but it is possible to change
 %  this in the document at any time, or to reenable the border if wanted.
 %  Internally |colorlinks| \& friends will no longer define/undefine
-%  |\Hy@colorlink|,
+%  |\Hy@colorlink|, but instead use the hooks provided by the \pkg{l3pdfannot} package.
 %   \item
 %
 %   \end{itemize}
@@ -582,8 +582,8 @@
 %
 % This command must be provided for now, but they are unused by the driver:
 %    \begin{macrocode}
-\tl_new:N\@pdfborder
-\tl_new:N\@pdfborderstyle
+\providecommand\@pdfborder{}
+\providecommand\@pdfborderstyle{}
 %    \end{macrocode}
 %
 % We force unicode as option. As bookmarks are still using \cs{pdfstringdef}
