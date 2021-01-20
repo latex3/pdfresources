@@ -129,6 +129,7 @@
           {
             \PassOptionsToPackage{customdriver=hgeneric-experimental}{hyperref}
           }
+        \hook_use_once:n {pdfmanagement/add}  
         \RenewDocumentCommand\DeclareDocumentMetadata { m }
           {
             \keys_set_filter:nnn  { pdf / setup } { init } { ##1 }

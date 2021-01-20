@@ -522,14 +522,21 @@
   \pdfmanagement_if_active: \@@_if_active: { p , T , F , TF }
 
 %    \end{macrocode}
+% We use a hook, to collect value added before the backend is ready.
 %    \begin{macrocode}
+\hook_new:n {pdfmanagement/add}
 \cs_new_protected:Npn \pdfmanagement_add:nnn #1 #2 #3
   {
     \@@_if_active:TF
       {
         \pdfdict_if_exist:nTF { g__pdf_Core/#1 }
           {
-            \@@_handler_gput:nnn { #1 }{ #2 }{ #3 }
+            \hook_gput_code:nnn
+              {pdfmanagement/add}
+              {pdfmanagement}
+              {
+                \@@_handler_gput:nnn { #1 }{ #2 }{ #3 }
+              }
           }
           {
             \msg_error:nnn{pdfmanagement}{unknown-dict}{#1}
