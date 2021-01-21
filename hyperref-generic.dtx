@@ -387,7 +387,8 @@
 %^^A %% \l_@@_CheckmarkYes_tl
 %^^A %% \l_@@_CheckmarkOff_tl
 %^^A %% \l_@@_RadioYes_tl
-%^^A
+%^^A %% \g_@@_colormodel_tl
+%
 %^^A %% \l_@@_dest_pdfview_tl
 %^^A %% list of commands which probably will have to change
 %^^A %%   \Hy@EXPsetbordercolor
@@ -813,6 +814,15 @@
 \tl_new:N  \l_@@_dest_pdfview_tl
 %    \end{macrocode}
 % \end{variable}
+%
+% \begin{variable}{\g_@@_colormodel_str}
+% This holds the export model for border color etc.
+% It is currently either |space-sep-cmyk| or |space-sep-rgb|.
+% The default is the second. It can be change by the key |colormodel|
+%    \begin{macrocode}
+\str_new:N \g_@@_colormodel_str
+%    \end{macrocode}
+%
 %
 % \subsection{Boxes}
 % \begin{variable}{\l_@@_dest_box}
@@ -2201,13 +2211,40 @@
 % Color keys need to parse color expressions. Two types are supported:
 %  |color=[rgb]{1,0,.5}| and
 %  |color=red!50!blue|
+%  At first we write an export function.
 %    \begin{macrocode}
+\cs_new_protected:Npn \@@_export_color:nnN #1  #2 #3
+ {
+   \tl_if_head_eq_charcode:nNTF {#1}[ %]
+    {
+      \@@_export_color_model:nnnN #1 {#2} #3
+    }
+    {
+      \color_export:nnN {#1} {#2} #3
+    }
+ }
+
+\cs_new_protected:Npn \@@_export_color_model:nnnN [#1] #2 #3 #4
+  {
+      \color_export:nnnN {#1}{#2}{#3}#4
+  }
+
+\cs_generate_variant:Nn \@@_export_color:nnN {xVN}
+
+\keys_define:nn { hyp / setup }
+  {
+    ,colormodel .choices:nn =
+     {rgb,cmyk}
+     { \str_gset:Nn \g_@@_colormodel_str {space-sep-#1}}
+    ,colormodel .initial:n ={rgb}
+  }
 \prop_map_inline:Nn \c_@@_map_hyp_annot_prop
   {
     \keys_define:nn { hyp / setup }
       {
         #1bordercolor .code:n =
           {
+             \@@_export_color:xnN {#1}
              \tl_if_empty:nTF { ##1 }
                {
                  \pdfannot_dict_remove:nn
