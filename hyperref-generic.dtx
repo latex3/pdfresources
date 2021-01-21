@@ -584,6 +584,7 @@
 %    \begin{macrocode}
 \providecommand\@pdfborder{}
 \providecommand\@pdfborderstyle{}
+\newcommand\OBJ@OCG@view {} % needed in hyperref
 %    \end{macrocode}
 %
 % We force unicode as option. As bookmarks are still using \cs{pdfstringdef}
@@ -1193,21 +1194,17 @@
  { %also set in hyperref sty, so probably not needed.
    \def\HyPat@ObjRef/{.+}
  }
-
-
-
-% ocg colorlinks should be done as in ocgx. This here
-% are boxes ...
-\legacy_if:nTF {Hy@ocgcolorlinks}
+%    \end{macrocode}
+% \begin{macro}{\@@_ocg_init:}
+% This commands write the objects as needed if ocg links are used.
+% The initialization should happens only once.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_ocg_init:
   {
-    \newcommand\OBJ@OCG@view {} % for the hyperref test
-    \pdf@ifdraftmode
-      {}
-      {
-        \pdf_object_new:nn   { l_@@_ocg_view_dict_obj }   { dict }
-        \pdf_object_new:nn   { l_@@_ocg_print_dict_obj }  { dict }
-        \pdf_object_new:nn   { l_@@_ocg_config_dict_obj } { dict }
-        \pdf_object_new:nn   { l_@@_ocg_ref_array_obj }   { array }
+     \pdf_object_new:nn   { l_@@_ocg_view_dict_obj }   { dict }
+     \pdf_object_new:nn   { l_@@_ocg_print_dict_obj }  { dict }
+     \pdf_object_new:nn   { l_@@_ocg_config_dict_obj } { dict }
+     \pdf_object_new:nn   { l_@@_ocg_ref_array_obj }   { array }
         \pdf_object_write:nx { l_@@_ocg_ref_array_obj }
           {
             \pdf_object_ref:n { l_@@_ocg_view_dict_obj }
@@ -1258,7 +1255,16 @@
               ]
          }
        \pdfmanagement_add:nnx { Catalog / OCProperties }{ D }{ \pdf_object_ref:n { l_@@_ocg_config_dict_obj} }
-    }
+       \cs_gset:Npn \@@_ocg_init: {}
+  }
+%    \end{macrocode}
+% \end{macro}
+% ocg colorlinks should be done as in ocgx. This here
+% are boxes ...
+%    \begin{macrocode}
+\legacy_if:nTF {Hy@ocgcolorlinks}
+  {
+    \@@_ocg_init:
     \Hy@AtBeginDocument
       {
         \def\Hy@colorlink#1
@@ -2329,10 +2335,74 @@
       }
   }
 
+%colorlinks unfinished ...
 \keys_define:nn { hyp / setup }
   {
     ,colorlinks .meta:n = {pdfborder={0~0~0},pdfborderstyle={}}
-    ,ocgcolorlinks .meta:n = {pdfborder={0~0~0},pdfborderstyle={}}
+  }
+
+%ocgcolorlinks, unfinished
+\bool_new:c {l_@@_annot_ocgcolorlinks_bool}
+
+\pdf_version_compare:NnTF < {1.5}
+  {
+    \keys_define:nn { hyp / setup }
+      {
+        ,__ocgcolorlinks .code:n =
+          {
+            \msg_warning:nnxx
+              { hyp }
+              { ignore-deprecated-or-unknown-option-in-pdf-version }
+              { ocgcolorlinks } { \pdf_version_major:.\pdf_version_minor: }
+            \keys_define:nn { hyp / setup }
+              {
+                ,__ocgcolorlinks .code:n = {}
+              }
+          }
+      }
+  }
+  {
+    \keys_define:nn { hyp / setup }
+      {
+        ,__ocgcolorlinks .bool_set:N = \l_@@_annot_ocgcolorlinks_bool
+      }
+  }
+
+\keys_define:nn { hyp / setup }
+  {
+    ,ocgcolorlinks .meta:n =
+      {
+        pdfborder={0~0~0},
+        pdfborderstyle={},
+        __ocgcolorlinks = #1
+      }
+    ,ocgcolorlinks .default:n = {true}
+  }
+
+%for now only boolean, if need it can be expanded later
+\prop_map_inline:Nn \c_@@_map_hyp_annot_prop
+  {
+    \bool_new:c {l_@@_annot_ocgcolor#1_bool}
+    \pdf_version_compare:NnTF < {1.5}
+      {
+        \keys_define:nn { hyp / setup }
+          {
+            \msg_warning:nnxx
+              { hyp }
+              { ignore-deprecated-or-unknown-option-in-pdf-version }
+              { ocgcolor#1 } { \pdf_version_major:.\pdf_version_minor: }
+            \keys_define:nn { hyp / setup }
+              {
+                ,__ocgcolor#1 .code:n = {}
+              }
+          }
+      }
+      {
+        \keys_define:nn { hyp / setup }
+          {
+            ,__ocgcolor#1 .bool_set:N = \l_@@_annot_ocgcolorlinks_bool
+          }
+      }
   }
 
 \hypupdateattribute
