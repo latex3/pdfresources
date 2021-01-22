@@ -29,7 +29,7 @@
 \end{document}
 %</driver>
 % \fi
-%
+% \providecommand\hook[1]{\texttt{#1}}
 % \title{^^A
 %   The \pkg{l3pdfannot} package\\ Commands for PDF annotations   ^^A
 % }
@@ -98,7 +98,7 @@
 % Link annotations are quite important as many documents contain links,
 % both internal and external. They need a set of special commands for two reasons:
 %
-% At first the content of links are not not only boxes. Links can contain line
+% At first the content of links are not only boxes. Links can contain line
 % and page breaks (this is normally implemented by the primitive command by
 % creating a set of annotations).
 %
@@ -118,6 +118,31 @@
 % commands described below are provided. The link commands switch to horizontal mode
 % as the commands of pdftex and luatex can't be used in vertical mode.
 %
+% \begin{variable}{\c_pdfannot_link_types_seq}
+% There are currently five link types, \texttt{URI}, \texttt{GoToR},
+%  \texttt{Launch}, \texttt{GoTo} or \texttt{Named}, and there are store in this
+%  constant.
+% \end{variable}
+% \begin{variable}
+%  {
+%   pdfannot/link/TYPE/before,
+%   pdfannot/link/TYPE/begin,
+%   pdfannot/link/TYPE/end,
+%   pdfannot/link/TYPE/after
+%  }
+%  These are the hooks used by the following commands. TYPE can be one of
+%  \texttt{URI}, \texttt{GoToR},
+%  \texttt{Launch}, \texttt{GoTo} or \texttt{Named}
+% \end{variable}
+% \begin{variable}
+%  {
+%    link/TYPE
+%  }
+%  These is the name of the dictionary used by the following commands. TYPE can be one of
+%  \texttt{URI}, \texttt{GoToR},
+%  \texttt{Launch}, \texttt{GoTo} or \texttt{Named}. The dictionary can be changed
+%  by the commands \cs{pdfannot_dict_put:nnn} and friends described below.
+% \end{variable}
 % \begin{function}[added = 2020-03-12, updated = 2020-12-06]{ \pdfannot_link:nnn }
 %   \begin{syntax}
 %     \cs{pdfannot_link:nnn} \Arg{type} \Arg{user action spec} \Arg{link text}
@@ -140,6 +165,8 @@
 %  in the action dictionary.
 %  As example
 %  \begin{verbatim}
+%    \pdfannot_dict_put:nnn
+%      {link/URI} { C } {[1~0~0]} %red border
 %    \pdfannot_link:nnn { URI }
 %     {
 %       /A
@@ -245,7 +272,8 @@
 %  /F flag in an annotation.
 %  It can be used for example like this:
 %  \begin{verbatim}
-%  \pdfannot_dict_put:nnn {link/URI}{F}{ \bitset_to_arabic:N \l_pdfannot_F_bitset }
+%  \pdfannot_dict_put:nnn {link/URI} {F}
+%     { \bitset_to_arabic:N \l_pdfannot_F_bitset }
 %  \bitset_set_true:Nn \l_pdfannot_F_bitset {Print}
 %  \end{verbatim}
 %  The known keys for the bitset are |Invisible|, |Hidden|,
@@ -373,6 +401,15 @@
 % for which hooks and dictionaries exist.
 % \end{variable}
 %
+% \begin{variable}
+%   {
+%     link/TYPE,
+%     pdfannot/link/TYPE/before,
+%     pdfannot/link/TYPE/begin,
+%     pdfannot/link/TYPE/end,
+%     pdfannot/link/TYPE/after
+%   }
+% These setup the dictionary and the hook pairs.
 %    \begin{macrocode}
 \seq_const_from_clist:Nn \c_pdfannot_link_types_seq { URI , GoToR , Launch , GoTo, Named }
 \seq_map_inline:Nn \c_pdfannot_link_types_seq
@@ -386,10 +423,10 @@
       {pdfannot/link/#1/end}
    }
 %    \end{macrocode}
-%
+% \end{variable}
 % \subsubsection{Annotations, subtype Link /management}
 %
-%
+% \begin{macro}{\pdfannot_link:nnn}
 %    \begin{macrocode}
 \cs_new_protected:Nn \pdfannot_link:nnn %#1 type (URI, GoTo etc),
                                         %#2 action spec, #3 link text
@@ -417,7 +454,8 @@
     \hook_use:n { pdfannot/link/#1/after}
   }
 %    \end{macrocode}
-
+% \end{macro}
+% \begin{macro}{\pdfannot_link_begin:nnw, \pdfannot_link_end:n }
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdfannot_link_begin:nnw #1 #2 %#1 type, #2 action spec
   {
@@ -444,6 +482,8 @@
     \hook_use:n { pdfannot/link/#1/after}
   }
 %    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\pdfannot_link_goto_begin:nw, \pdfannot_link_goto_end:}
 %     \begin{macrocode}
 \cs_new_protected:Npn \pdfannot_link_goto_begin:nw #1 %#1 destination
   {
@@ -467,6 +507,8 @@
      \hook_use:n { pdfannot/link/GoTo/after}
   }
 %    \end{macrocode}
+% \end{macro}
+% \begin{macro}[EXP]{\pdfannot_link_last:, \pdfannot_last:}
 %    \begin{macrocode}
 \cs_new:Nn \pdfannot_link_last: { \__pdf_backend_link_last: }
 %    \end{macrocode}
@@ -482,14 +524,21 @@
       }
   }
 %    \end{macrocode}
-%
+% \end{macro}
+% \begin{macro}{ \pdfannot_link_margin:n}
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdfannot_link_margin:n #1
   {
     \__pdf_backend_link_margin:n { #1 }
   }
 %    \end{macrocode}
-%
+% \end{macro}
+% \begin{macro}
+%   {
+%     \pdfannot_dict_put:nnn,
+%     \pdfannot_dict_remove:nn,
+%     \pdfannot_dict_show:n
+%   }
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdfannot_dict_put:nnn #1 #2 #3
   {
@@ -509,6 +558,7 @@
   }
 %</package>
 %    \end{macrocode}
+% \end{macro}
 % \end{implementation}
 %
 % \PrintIndex
