@@ -536,6 +536,7 @@
 % \begin{macro}
 %   {
 %     \pdfannot_dict_put:nnn,
+%     \pdfannot_dict_put:nnx,
 %     \pdfannot_dict_remove:nn,
 %     \pdfannot_dict_show:n
 %   }
@@ -544,6 +545,7 @@
   {
     \pdfdict_put:nnn { l_@@/#1 } { #2 }{ #3 }
   }
+\cs_generate_variant:Nn \pdfannot_dict_put:nnn {nnx}  
 %    \end{macrocode}
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdfannot_dict_remove:nn #1 #2
