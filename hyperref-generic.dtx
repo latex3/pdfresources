@@ -47,13 +47,10 @@
 % \date{Released XXXX-XX-XX}
 %
 % \maketitle
+% \begin{documentation}
 % This package generates a generic driver for \pkg{hyperref} meant to be used
-% with the new LaTeX PDF management code. Currently---until \pkg{hyperref} has been
-% adapted to use this driver it has to be loaded with
-% \begin{verbatim}
-% \usepackage[customdriver=hgeneric-experimental]{hyperref}
-% \end{verbatim}
-% Both the name of the driver and the loading method will change.
+% with the new LaTeX PDF management code. It is loaded automatically
+% if the PDF management code is active. The name of the driver will probably change.
 %
 % The generic driver can be used with pdflatex, lualatex, xelatex, latex with
 % dvipdfmx, latex with dvips+ps2pdf. latex with dvips+distiller could work too
@@ -75,7 +72,7 @@
 %  \section{Differences}
 %  The new driver tries to be compatible with the current \pkg{hyperref} drivers
 %  but there are nevertheless differences. Some of them due to the still experimental
-%  status of the driver, others are design decision: one part of the project is
+%  status of the driver, others are design decisions: one part of the project is
 %  to clean up and modernize the code.
 %
 %  \subsection{Bookmark code}
@@ -86,37 +83,42 @@
 %
 %  \subsection{Link decorations: border, color, OCG-color, \ldots}
 %
-%  \pkg{hyperref} allows either to color the link text, or to use a border around it.
+%  With the standard drivers \pkg{hyperref} allows either to color the link text,
+%  or to use a border around it.
 %  There is also a (rather unknown) option to use small caps instead of colors.
 %
 %  The \emph{link border} is a setting in the annotation directory. It can be colored
-%  and styled (with the |XXbordercolor|, |pdfborderstyle| and |pdfhighlight| keys),
+%  and styled (with the |<xxx>bordercolor|, |pdfborderstyle| and |pdfhighlight| keys),
 %  but the exact look depends on the PDF viewer. Such decorations are normally not
 %  printed.
 %
-%  The link text is \emph{colored} with the standard color commands for text.
-%  Such a color is also printed, which is often not wanted.
-%  PDF allows to avoid this problem with so-called OCG-layers: They allow to add
+%  The \emph{link text} is colored with the standard color commands for text.
+%  Such a color is also printed, which is often not wanted but can be avoided
+%  in PDF with so-called OCG-layers: They allow to add
 %  variants of a text along with instructions which variant should be used for
 %  viewing and which for printing. \pkg{hyperref} implements a rather simple version
 %  for links: The link text is put in a box and printed twice with different colors
-%  on different OCG layers. As boxes are used such links can not be broken. The
+%  on different OCG layers. As boxes are used such links can't be broken. The
 %  package {ocgx2} implements a more sophisticated version which allows to
-%  use it for links broken over lines and pages too.
-%
-%  In the current implementation the options are exclusive and global:
-%  One of the options (colorlinks or borders) has to be chosen in the preamble
-%  and is then used for the whole document and all link types. Only colors and
-%  eventually the border style can be adjusted locally. But there is no technical
-%  reason for these restrictions: It is quite possible to change all these attributes
-%  at any time both by link type and locally. There is also no reason why
-%  the formatting of the link text is restricted to colors.
+%  use it for links broken over lines and pages.
 %
 %  \pkg{hyperref} has keys to set the color and border for |link|, |url|, |file|,
 %  |menu| and |run| types. They correspond to the PDF annotation types
 %  GoTo, URI, GoToR, Named, Launch.
 %  Beside this there is |anchor| which is not used at all, and |cite| which is
 %  a semantical category and doesn't fit to the other types.
+%
+%  In the standard drivers the options are exclusive and global:
+%  One of the options (colorlinks, ocgcolorlinks, or borders) has to be
+%  chosen in the preamble
+%  and is then used for the whole document and all link types. Only colors and
+%  eventually the border style can be adjusted locally. But there is no technical
+%  reason for these restrictions: It is quite possible to change all these attributes
+%  at any time both by link type and locally. There is also no technical reason why
+%  the formatting of the link text is restricted to colors. The restrictions and
+%  some other settings can only be explained by the age of the code: \pkg{hyperref}
+%  has been created at a time when memory was small and the main drivers were html
+%  and postscript based.
 %
 %  The new driver tries to extend the possible options and to clean up the code while
 %  staying if possible compatible to the current behaviour.
@@ -128,22 +130,34 @@
 %  \begin{itemize}
 %   \item Beside |pdfborder| there are also |linkborder| etc
 %   \item Beside |pdfhighlight| there are also |linkhighlight| etc
-%   \item Beside |pdfborderstyle| there are also |linkborderstyle|
+%   \item Beside |pdfborderstyle| there are also |linkborderstyle| etc
 %   \item Beside |colorlinks| there are also |colorlink|, |colorurl| etc %TODO
 %   \item Beside |ocgcolorlinks| there are also |ocgcolorlink|, |ocgcolorurl|, etc %TODO
 %   \item Beside |hidelinks| there are also |hidelink|, |hideurl|, etc %TODO
 %   \item New keys |formatlinks|, |formatlink|, |formaturl|, etc which %TODO
 %   allow to add arbitrary formatting instructions like |\bfseries|.
+%   \item |colormodel| allows to set the model used in annotations, the allowed values
+%   are |rgb| or |cmyk|. |rgb| is the default.
+%   It does \emph{not} change the model of text colors. Be aware
+%   that while the PDF format allows cmyk (4 numbers) in the |/C| key of an annotation,
+%   this is often ignored by pdf viewers and the colors can be wrong.
 %  \end{itemize}
 %
 %  \subsubsection{Changed behaviour}
 %   \begin{itemize}
-%   \item
 %   \item |colorlinks| will as before disable the |pdfborder|, but it is possible to change
-%  this in the document at any time, or to reenable the border if wanted.
-%  Internally |colorlinks| \& friends will no longer define/undefine
-%  |\Hy@colorlink|, but instead use the hooks provided by the \pkg{l3pdfannot} package.
-%   \item
+%    this in the document at any time, or to reenable the border if wanted.
+%    Internally |colorlinks| \& friends will no longer define/undefine
+%    |\Hy@colorlink|, but instead use the hooks provided by the \pkg{l3pdfannot} package.
+%   \item Color keys accept the following input syntax:
+%
+%   \begin{tabular}{ll}
+%    model based      & |urlbordercolor = [rgb]{1,1,0}| \\
+%    color expression & |urlbordercolor =  red!50!blue| \\
+%    command          & |urlbordercolor = \mycolor|
+%   \end{tabular}
+%
+%    where |\mycolor| should expand to one of the other two syntax variants.
 %
 %   \end{itemize}
 %
@@ -154,7 +168,7 @@
 %
 %  \subsection{PDF strings}
 %
-%  \pkg{hyperref} use a command called \cs{pdfstringdef} to convert text input into
+%  \pkg{hyperref} uses a command called \cs{pdfstringdef} to convert text input into
 %  something that both makes sense and is valid in a PDF string, e.g. in the bookmarks
 %  or in the info dictionary or as form field values.
 %
@@ -166,21 +180,23 @@
 %  Like with \cs{pdfstringdef} they are a number of ways to adjust the outcome of
 % \cs{text_purify:n}. These are described in the expl3 documentation interface3.pdf.
 %
+% \emph{The new method is under heavy development!}
+%
 %  Important differences here are
 %  \begin{itemize}
 %     \item \emph{This new method requires that files are utf8-encoded}
 %      (at least if non-ascii chars are used in for PDF strings).
-%     \item \emph{All} robust commands are removed, unless an equivalent has been
-%     declared.
+%     \item \emph{All} robust commands are currently removed,
+%     unless an equivalent has been  declared.
 %     \item Currently the new method is much more silent: it doesn't warn like
 %     \pkg{hyperref} if it removes commands.
 %   \end{itemize}
 %  \subsection{Package options from hyperref}
-%  Only a few package options are recognized by the new driver currently
+%  Only a few package options are currently recognized by the new driver
 %  as \pkg{hyperref} hasn't been adapted yet.
 %
-%  Such options should be set with \cs{hypersetup} after
-%  the package has been loaded. This can also be the case for options which normally
+%  So normally \emph{all} options should be set with \cs{hypersetup} after
+%  the package has been loaded. This is also the case for options which normally
 %  don't work in \cs{hypersetup}.
 %
 %  Options that still must be set as package options are
@@ -190,15 +206,18 @@
 %
 %  \subsection{Draftmode}
 %  pdftex and other engines knows a
-%  draftmode and hyperref honors this in some places. The new
-%  driver ignores this, for example |pagelabels| are always created.
+%  draftmode which can be set with |\pdfdraftmode=1|
+%  and \pkg{hyperref} honors this in some places. The new
+%  driver ignores it, for example |pagelabels| are created in any case.
+%  With todays computer power there is not much to gain and it only complicates
+%  the code.
 %
 %  \subsection{Dropped options}
 %  A number of options are ignored by this driver
 %  \begin{description}
 %  \item[pdfversion] The pdfversion should be set in \cs{DeclareDocumentMetadata}
 %  \item[breaklinks] The option does nothing sensible anyway (apart from triggering
-%  a warning). Currently with latex+dvips links can not be broken. But there is work
+%  a warning). Currently with latex+dvips links can't be broken. But there is work
 %  in progress to change this.
 %  \item[unicode] This is always true.
 %  \item[pdfa] If this option is set to true \pkg{hyperref} normally checks and sets
@@ -210,13 +229,13 @@
 %  \end{verbatim}
 %  Currently |A-1b|, |A-2b|, |A-3b| can be set.
 %  The support for various requirements is still incomplete, but the parts that
-%  \pkg{hyperref} already checked are implemented:
+%  \pkg{hyperref} checked are implemented:
 %  \begin{itemize}
-%  \item The |/F| key is added to links and Print is activated, Hidden, Invisible,
-%   NoView are deactivated.
+%  \item The |/F| key is added to links and |Print| is activated, |Hidden|, |Invisible|,
+%   |NoView| are deactivated.
 %  \item |/NeedAppearances| is suppressed
-%  \item  Pushbuttons, which use the action |/S/JavaScript| are suppressed
-%  \item  Resetbuttons, which use the action |/S/ResetForm| are suppressed Resetbutton
+%  \item  Pushbuttons, which use the action |/S/JavaScript| are suppressed.
+%  \item  Resetbuttons, which use the action |/S/ResetForm| are suppressed.
 %  \item  In widget annotations, the /AA dictionary is suppressed.
 %  \end{itemize}
 %  \end{description}
@@ -230,15 +249,15 @@
 %  the top left corner at the \textit{top left} coordinates---which then gives
 %  the impression that there is an anchor at this position.
 %
-%  From these instructions two |Fit| and |FitB| are absolute. All
-%  others take one (|FitH|, |FitV|, |FitBH|, |FitBV|)
+%  From these instructions two (|Fit| and |FitB|) don't take an argument.
+%  All  others take one (|FitH|, |FitV|, |FitBH|, |FitBV|)
 %  or more (|XYZ|, |FitR|) arguments. These arguments are normally
 %  coordinates, |XYZ| takes also a zoom factor. The coordinates are
-%  absolute coordinates in bp relative to the lower left corner
+%  absolute coordinates in |bp| relative to the lower left corner
 %  of the PDF.
 %
-%  With pdftex almost all instructions
-%  don't take an argument: The needed coordinate is instead calculated from the location
+%  With the primitive command \cs{pdfdest} of pdftex almost all instructions are created
+%  with a keyword only: The needed coordinate is calculated automatically from the location
 %  the \cs{pdfdest} command is issued. So to get a specific coordinate one has to
 %  move the command to the right place. E.g.
 %  \begin{verbatim}
@@ -256,19 +275,19 @@
 %  The manual of \pkg{hyperref} gives a bit the impression as if this
 %  coordinates can be set manually by the user but as described above this is
 %  mostly wrong: It is for normal destination only possible with a dvi-backend like
-%  dvips which make use of pdfmark.def. pdftex and luatex can use manual coordinates
-%  only for |pdfstartview| and |pdfremotestartview|
+%  dvips which make use of |pdfmark.def|. pdftex and luatex can use manual coordinates
+%  only for |pdfstartview| and |pdfremotestartview|.
 %  As dvips was the first driver of \pkg{hyperref} the option |pdfview| was at first
 %  developed for it and then adapted to pdftex. But this had the effect that the handling
 %  of the option |pdfview| is inconsequent across the backend and engines:
 %  For example with |pdfview=FitH 100| pdftex ignores the
-%  number and calculates on its own, while dvips sets the coordinate to the absolute
-%  100. The zoom factor of XYZ is not supported by the pdftex driver at all, and
+%  number and calculates its own, while dvips sets the coordinate to the absolute
+%  100. The zoom factor of |XYZ| is not supported by the pdftex driver at all, and
 %  |FitR| only partially.
 %
 %  The generic driver consolidate this but tries to stay compatible with the other
 %  drivers as far as possible.
-%  It also takes into account the |pdfview| and |pdfstartview| and |pdfremotestartview|
+%  It also takes into account that |pdfview| and |pdfstartview| and |pdfremotestartview|
 %  have different requirements: While for the first relative coordinates are fine,
 %  for the two others absolute coordinates are more sensible.
 %
@@ -287,8 +306,8 @@
 %   the expected coordinates as described above for pdftex with all
 %   supported engines and backends.
 %   \item |pdfstartview| and |pdfremotestartview| will pass the optional
-%   number or keyword after expansion as absolute coordinate. If needed they will
-%   extend them with |null|
+%   number or keyword after expansion as absolute coordinate. Missing numbers will
+%   be filled up with |null|.
 %   \end{itemize}
 %
 %  \item |XYZ|. This can be followed (separated by spaces) by up to three
@@ -301,7 +320,7 @@
 %   set a zoom of 200\%, it is not necessary to fill in dummy values.)
 %   \item |pdfstartview| and |pdfremotestartview| will pass the optional
 %   numbers or keyword after expansion as absolute coordinates and zoom.
-%   If needed they will extend them with |null|.
+%   Missing numbers will  be filled up with |null|.
 %   \end{itemize}
 %   This new behaviour is in part incompatible with previous handling with the dvips driver.
 %
@@ -393,7 +412,8 @@
 %^^A %% list of commands which probably will have to change
 %^^A %%   \Hy@EXPsetbordercolor
 %^^A % %   \hypupdateattribute
-
+% \end{documentation}
+% \begin{implementation}
 %    \begin{macrocode}
 %<*package>
 %<@@=hyp>
@@ -570,8 +590,8 @@
 \ExplSyntaxOn
 %    \end{macrocode}
 %
+% \begin{macro}[EXP]{\hypercalcbp}
 % We define a better (expandable) version of \cs{hypercalcbp}
-% \begin{macro}{\hypercalcbp}
 %    \begin{macrocode}
 \cs_set_eq:NN \hypercalcbp \dim_to_decimal_in_bp:n
 %    \end{macrocode}
@@ -645,6 +665,13 @@
 % The commands use after the module prefix always |_ref|.
 %
 % At first a label command which add the space commands from LaTeX:
+% \begin{macro}
+%  {
+%    \@@_ref_label:nn,
+%    \@@_ref_if_exist:nn,
+%    \@@_ref_check:nn,
+%    \@@_ref_value:nn
+%  }
 %    \begin{macrocode}
 %
 \cs_new_protected:Npn \@@_ref_label:nn #1 #2 %label/attributes
@@ -685,7 +712,7 @@
   }
 \cs_generate_variant:Nn \@@_ref_value:nn {en}
 %    \end{macrocode}
-%
+% \end{macro}
 % \section{Variables}
 % \subsection{Private temporary variables}
 % At first a few generic tmp variables
@@ -822,7 +849,7 @@
 %    \begin{macrocode}
 \str_new:N \g_@@_colormodel_str
 %    \end{macrocode}
-%
+% \end{variable}
 %
 % \subsection{Boxes}
 % \begin{variable}{\l_@@_dest_box}
@@ -870,9 +897,11 @@
 % replaced if some more generic PDF string command/module exists.
 % All commands here use the \enquote{submodule} name \texttt{text}.
 % At first a hook for user additions:
+% \begin{macro}{hyp/text/pdfstring}
 %    \begin{macrocode}
 \hook_new:n {hyp/text/pdfstring}
 %    \end{macrocode}
+% \end{macro}
 % The first step to convert input in a PDF string is to purify it, that means
 % to remove/expand commands. As the whole process is not expandable anyway we
 % can use a protected command. The \enquote{output} is a string:
@@ -900,11 +929,12 @@
 %
 % \#2 is str variable,
 % \#1 should be one of
+%
 % \begin{tabular}{ll}
 %  utf8/string-print   & \texttt{(lit)} (utf8/string)\\
 %  utf8/string         & \texttt{lit}   (utf8/string)\\
-%  utf8/URIpdf-print      & \texttt{(percent encoded url)}\\
-%  utf8/URIpdf            & \texttt{percent encoded url}\\
+%  utf8/URIpdf-print   & \texttt{(percent encoded url)}\\
+%  utf8/URIpdf         & \texttt{percent encoded url}\\
 %  utf16/hex-print     & \texttt{<HEX>} (utf16/hex)\\
 %  utf16/hex           & \texttt{HEX}   (utf16/hex)\\
 %  utf16/string_print  & \texttt{(lit)} (utf16/string)\\
@@ -950,6 +980,7 @@
 \cs_new_protected:Npn\Hy@pstringdef #1 #2
   { \@@_text_pdfstring:xnN {#2} {utf8/string}#1 }
 %    \end{macrocode}
+%
 % This is a special version for info keys:
 % \begin{macro}{ \@@_text_pdfstring_info:nN }
 %    \begin{macrocode}
@@ -959,6 +990,7 @@
   }
 %    \end{macrocode}
 % \end{macro}
+%
 % \section{Pagelabels}
 % Page labels are representations of the page numbers in the PDF viewer. If the hyperref
 % options |pdfpagelabels| is true (the default) roman numbers are e.g. shown as
@@ -1036,14 +1068,18 @@
 % \hyper@linkfile
 % \hyper@linkurl
 % \end{verbatim}
+%
 % \subsection{ Anchors / destinations}
 % The first three commands are needed for \enquote{anchors}. At first
 % the internal commands to create a destination. It uses
 % |\Hy@WrapperDef| to make it babel safe, it is not clear if this is
-% still need, but we leave if for now.
-% \begin{macro}{ \@@_destination:n }
+% still needed, but we leave if for now.
+% \begin{macro}{ \@@_destination:nn }
+%  \begin{syntax}
+%  \@@_destination:nn \Arg{destination name} \Arg{location}
+%  \end{syntax}
 %    \begin{macrocode}
-\Hy@WrapperDef \@@_destination:n #1 % #1 is a destination name.
+\Hy@WrapperDef \@@_destination:nn #1 #2
   {
     \mode_if_horizontal:T { \@savsf\spacefactor }
     \Hy@SaveLastskip      %defined in hyperref
@@ -1052,7 +1088,7 @@
       { \HyperDestNameFilter{#1}  }
       { \l_@@_text_enc_dest_tl }
       \l_@@_tmpa_tl
-    \tl_if_eq:NnTF  \l_@@_dest_pdfview_tl {fitrbox}
+    \str_if_eq:nnTF  {#2} {fitrbox}
       {
         \exp_args:NV
         \pdf_destination:nnnn \l_@@_tmpa_tl
@@ -1064,7 +1100,7 @@
         \exp_args:NV
           \pdf_destination:nf
           { \l_@@_tmpa_tl }
-          { \l_@@_dest_pdfview_tl }
+          { #2 }
       }
     \Hy@RestoreLastskip   %defined in hyperref
     \mode_if_horizontal:T { \spacefactor\@savsf }
@@ -1084,13 +1120,15 @@
 %    \begin{macrocode}
 \cs_new_protected:Npn \hyper@anchor #1
   {
-    \@@_destination:n {#1}
+    \exp_args:NnV
+      \@@_destination:nn {#1} \l_@@_dest_pdfview_tl
   }
 
 \cs_new_protected:Npn \hyper@anchorstart #1
   {
     \Hy@activeanchortrue
-    \@@_destination:n {#1}
+    \exp_args:NnV
+      \@@_destination:nn {#1} \l_@@_dest_pdfview_tl
   }
 
 \cs_new_protected:Npn \hyper@anchorend
@@ -1144,23 +1182,23 @@
 
 
 % bordercolor
-\cs_new_protected:Npn \Hy@EXPsetbordercolor
-  {
-    \seq_map_inline:Nn \c_pdfannot_link_types_seq
-      {
-        \tl_if_exist:cTF { @\prop_item:Nn\c__hyp_map_annot_hyp_prop{##1}bordercolor }
-          {
-           \exp_args:Nnnx
-             \pdfannot_dict_put:nnn
-              {link/##1}
-              { C }
-              { [\tl_use:c {@\prop_item:Nn\c__hyp_map_annot_hyp_prop{##1}bordercolor}] }
-          }
-          {
-            \pdfannot_dict_remove:nn {link/##1} { C }
-          }
-     }
-  }
+%\cs_new_protected:Npn \Hy@EXPsetbordercolor
+%  {
+%    \seq_map_inline:Nn \c_pdfannot_link_types_seq
+%      {
+%        \tl_if_exist:cTF { @\prop_item:Nn\c__hyp_map_annot_hyp_prop{##1}bordercolor }
+%          {
+%           \exp_args:Nnnx
+%             \pdfannot_dict_put:nnn
+%              {link/##1}
+%              { C }
+%              { [\tl_use:c {@\prop_item:Nn\c__hyp_map_annot_hyp_prop{##1}bordercolor}] }
+%          }
+%          {
+%            \pdfannot_dict_remove:nn {link/##1} { C }
+%          }
+%     }
+%  }
 
 % for now we are updating the attributes manually after \hypersetup
 % some better method must be found
@@ -1168,7 +1206,7 @@
  {
    %\Hy@EXPsetpdfborder
    %\Hy@EXPsetpdfhighlight
-   \Hy@EXPsetbordercolor
+   %\Hy@EXPsetbordercolor
  }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -2208,28 +2246,34 @@
     ,pdfborder .initial:n = {0~0~1},
   }
 %    \end{macrocode}
-% Color keys need to parse color expressions. Two types are supported:
-%  |color=[rgb]{1,0,.5}| and
-%  |color=red!50!blue|
-%  At first we write an export function.
+%
+%  \begin{macro}{\@@_export_color:nnN,\@@_export_color_model:nnnN}
+%   Color keys need to parse color expressions. Two types are supported:
+%  |color=[rgb]{1,0,.5}| and |color=red!50!blue|. The colors are exported
+%  to PDF syntax (space separated numbers).
+%   \begin{syntax}
+%    \@@_color_export:nnN \Arg{color} \Arg{export format} \meta{tlvar}\\
+%    \@@_colormodel_export:nnnN \Arg{color model}\Arg{value} \Arg{export format} \meta{tlvar}
+%   \end{syntax}
+%  \end{macro}
 %    \begin{macrocode}
-\cs_new_protected:Npn \@@_export_color:nnN #1  #2 #3
+\cs_new_protected:Npn \@@_color_export:nnN #1  #2  #3
  {
    \tl_if_head_eq_charcode:nNTF {#1}[ %]
     {
-      \@@_export_color_model:nnnN #1 {#2} #3
+      \@@_colormodel_export:wnnN  #1 {#2} #3
     }
     {
       \color_export:nnN {#1} {#2} #3
     }
  }
 
-\cs_new_protected:Npn \@@_export_color_model:nnnN [#1] #2 #3 #4
+\cs_new_protected:Npn \@@_colormodel_export:wnnN  [#1] #2 #3 #4
   {
-      \color_export:nnnN {#1}{#2}{#3}#4
+     \color_export:nnnN {#1}{#2}{#3}#4
   }
 
-\cs_generate_variant:Nn \@@_export_color:nnN {xVN}
+\cs_generate_variant:Nn \@@_color_export:nnN {xVN}
 
 \keys_define:nn { hyp / setup }
   {
@@ -2244,7 +2288,6 @@
       {
         #1bordercolor .code:n =
           {
-             \@@_export_color:xnN {#1}
              \tl_if_empty:nTF { ##1 }
                {
                  \pdfannot_dict_remove:nn
@@ -2252,10 +2295,11 @@
                   { C }
                }
                {
-                 \pdfannot_dict_put:nnn
+                 \@@_color_export:xVN {##1}\g_@@_colormodel_str \l_@@_tmpa_tl
+                 \pdfannot_dict_put:nnx
                    {link/#2}
                    { C }
-                   { [##1] }
+                   { [\l_@@_tmpa_tl] }
                }
           }
       }
@@ -2385,7 +2429,7 @@
   {
     \keys_define:nn { hyp / setup }
       {
-        ,__ocgcolorlinks .code:n =
+        ,_ocgcolorlinks .code:n =
           {
             \msg_warning:nnxx
               { hyp }
@@ -2393,7 +2437,7 @@
               { ocgcolorlinks } { \pdf_version_major:.\pdf_version_minor: }
             \keys_define:nn { hyp / setup }
               {
-                ,__ocgcolorlinks .code:n = {}
+                ,_ocgcolorlinks .code:n = {}
               }
           }
       }
@@ -2401,7 +2445,7 @@
   {
     \keys_define:nn { hyp / setup }
       {
-        ,__ocgcolorlinks .bool_set:N = \l_@@_annot_ocgcolorlinks_bool
+        ,_ocgcolorlinks .bool_set:N = \l_@@_annot_ocgcolorlinks_bool
       }
   }
 
@@ -2411,7 +2455,7 @@
       {
         pdfborder={0~0~0},
         pdfborderstyle={},
-        __ocgcolorlinks = #1
+        _ocgcolorlinks = #1
       }
     ,ocgcolorlinks .default:n = {true}
   }
@@ -2430,14 +2474,14 @@
               { ocgcolor#1 } { \pdf_version_major:.\pdf_version_minor: }
             \keys_define:nn { hyp / setup }
               {
-                ,__ocgcolor#1 .code:n = {}
+                ,_ocgcolor#1 .code:n = {}
               }
           }
       }
       {
         \keys_define:nn { hyp / setup }
           {
-            ,__ocgcolor#1 .bool_set:N = \l_@@_annot_ocgcolorlinks_bool
+            ,_ocgcolor#1 .bool_set:N = \l_@@_annot_ocgcolorlinks_bool
           }
       }
   }
@@ -2516,9 +2560,9 @@
     ,pdftrapped .code:n =
       {
         \exp_args:Nne
-          \keys_set:nn { hyp / setup } { __pdftrapped = \str_uppercase:n { #1 } }
+          \keys_set:nn { hyp / setup } { _pdftrapped = \str_uppercase:n { #1 } }
       }
-    ,__pdftrapped  .choices:nn = {TRUE,FALSE,UNKNOWN}
+    ,_pdftrapped  .choices:nn = {TRUE,FALSE,UNKNOWN}
        {
          \pdfmanagement_add:nnx {Info}{Trapped}
            {/
@@ -2526,7 +2570,7 @@
              \str_lowercase:f { \str_tail:n { #1 } }
            }
        }
-    ,__pdftrapped / unknown .code:n =
+    ,_pdftrapped / unknown .code:n =
        {
          \msg_warning:nnxxx { hyp } { unknown-choice }
            { pdftrapped }
@@ -2824,7 +2868,6 @@
           {
             \pdfmanagement_add:nnx { Catalog / AcroForm } { Fields }{##1}
             %\pdfmanagement_show:n { Catalog / AcroForm }
-            %\seq_show:c { g__pdf_/Catalog/AcroForm/Fields_seq} %!!!!!
           }
         \prop_if_empty:NF \g__hyp_AcroForm_CoFields_prop
           {
@@ -2835,7 +2878,6 @@
             \seq_sort:Nn \l_@@_tmpa_seq
               {
                 \int_compare:nNnTF { \pdf@strcmp{##1}{##2} } > { 0 }
-                %\int_compare:nNnTF { \__str_if_eq:nn {#1}{#2} } > { 0 }
                   { \sort_return_swapped: }
                   { \sort_return_same: }
               }
@@ -3877,3 +3919,4 @@
 %% End of file `hgeneric-experimental.def'.
 %</package>
 %    \end{macrocode}
+% \end{implementation}
