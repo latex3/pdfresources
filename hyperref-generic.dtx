@@ -410,10 +410,9 @@
 %
 %^^A %% \l_@@_dest_pdfview_tl
 %^^A %% list of commands which probably will have to change
-%^^A %%   \Hy@EXPsetbordercolor
-%^^A % %   \hypupdateattribute
 % \end{documentation}
 % \begin{implementation}
+%  \section{\pkg{hyperref-generic} driver implementation}
 %    \begin{macrocode}
 %<*package>
 %<@@=hyp>
@@ -433,6 +432,7 @@
 \RequirePackage{l3color}
 \ExplSyntaxOn
 \cs_gset_eq:NN \@expl@color@set@@@@nnn \color_set:nnn
+\file_input:n {hyperref-colorschemes.def}
 \ExplSyntaxOff
 \@ifpackageloaded{xcolor}{\@firstoftwo}{\@secondoftwo}
   {
@@ -444,6 +444,7 @@
       {\RequirePackage{xcolor-patches-tmp}\XC@@@@names}
   }
 %    \end{macrocode}
+%
 %
 % \section{messages}
 %  Redirect the message name:
@@ -1074,10 +1075,16 @@
 % the internal commands to create a destination. It uses
 % |\Hy@WrapperDef| to make it babel safe, it is not clear if this is
 % still needed, but we leave if for now.
-% \begin{macro}{ \@@_destination:nn }
-%  \begin{syntax}
-%  \@@_destination:nn \Arg{destination name} \Arg{location}
+% \begin{function} { \@@_destination:nn }
+% \begin{syntax}
+%  \cs{@@_destination:nn} \Arg{destination name} \Arg{location}
 %  \end{syntax}
+%  The \meta{destination name} is encoded with the method stored in
+%  in \cs{l_@@_text_enc_dest_tl}. The location should be one of
+%  |fit|, |fith|, |fitv|, |fitbv|, |fitbh|, |fitr|, |xyz|, |fitrbx|.
+%  The last will make use of \cs{l_@@_dest_box}
+% \end{function}
+% \begin{macro}{ \@@_destination:nn }
 %    \begin{macrocode}
 \Hy@WrapperDef \@@_destination:nn #1 #2
   {
@@ -1179,35 +1186,6 @@
 % pdfborder, pdfborderstyle
 %    \begin{macrocode}
 \pdfannot_link_margin:n { 1pt }
-
-
-% bordercolor
-%\cs_new_protected:Npn \Hy@EXPsetbordercolor
-%  {
-%    \seq_map_inline:Nn \c_pdfannot_link_types_seq
-%      {
-%        \tl_if_exist:cTF { @\prop_item:Nn\c__hyp_map_annot_hyp_prop{##1}bordercolor }
-%          {
-%           \exp_args:Nnnx
-%             \pdfannot_dict_put:nnn
-%              {link/##1}
-%              { C }
-%              { [\tl_use:c {@\prop_item:Nn\c__hyp_map_annot_hyp_prop{##1}bordercolor}] }
-%          }
-%          {
-%            \pdfannot_dict_remove:nn {link/##1} { C }
-%          }
-%     }
-%  }
-
-% for now we are updating the attributes manually after \hypersetup
-% some better method must be found
-\NewDocumentCommand\hypupdateattribute { }
- {
-   %\Hy@EXPsetpdfborder
-   %\Hy@EXPsetpdfhighlight
-   %\Hy@EXPsetbordercolor
- }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1535,7 +1513,6 @@
   {
      \kvsetkeys{Hyp}{#1} %for now
      \keys_set:nn { hyp / setup }{ #1 }
-     \hypupdateattribute
   }
 % for now unknown keys should only give warnings.
 \keys_define:nn { hyp / setup }
@@ -2246,16 +2223,18 @@
     ,pdfborder .initial:n = {0~0~1},
   }
 %    \end{macrocode}
-%
-%  \begin{macro}{\@@_export_color:nnN,\@@_export_color_model:nnnN}
-%   Color keys need to parse color expressions. Two types are supported:
+% \begin{function}{\@@_color_export:nnN,\@@_colormodel_export:nnnN}
+%   \begin{syntax}
+%    \cs{@@_color_export:nnN} \Arg{color} \Arg{export format} \meta{tlvar}\\
+%    \cs{@@_colormodel_export:nnnN} \Arg{color model}\Arg{value} \Arg{export format} \meta{tlvar}
+%   \end{syntax}
+%  \Arg{color} should have either the format |[model]{value}| or be a color expression.
+%  For examples: |[rgb]{1,0,.5}| or |red!50!blue|
+% \end{function}
+%  \begin{macro}{\@@_color_export:nnN,\@@_colormodel_export:nnnN}
+%   Color keys need to parse color expressions. Two input types are supported:
 %  |color=[rgb]{1,0,.5}| and |color=red!50!blue|. The colors are exported
 %  to PDF syntax (space separated numbers).
-%   \begin{syntax}
-%    \@@_color_export:nnN \Arg{color} \Arg{export format} \meta{tlvar}\\
-%    \@@_colormodel_export:nnnN \Arg{color model}\Arg{value} \Arg{export format} \meta{tlvar}
-%   \end{syntax}
-%  \end{macro}
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_color_export:nnN #1  #2  #3
  {
@@ -2274,7 +2253,12 @@
   }
 
 \cs_generate_variant:Nn \@@_color_export:nnN {xVN}
-
+%    \end{macrocode}
+% \end{macro}
+% \begin{variable}{}
+% \cmd[module=hyperref keys,index=colormodel]{colormodel}
+% \end{variable}
+%    \begin{macrocode}
 \keys_define:nn { hyp / setup }
   {
     ,colormodel .choices:nn =
@@ -2422,6 +2406,30 @@
     ,colorlinks .meta:n = {pdfborder={0~0~0},pdfborderstyle={}}
   }
 
+% link text colors, we probably need to parse it, but for now it is only stored.
+\prop_map_inline:Nn \c_@@_map_hyp_annot_prop
+  {
+     \keys_define:nn { hyp / setup }
+       {
+         #1color .tl_set:c = { l_@@_annot_#1color_tl }
+       }
+  }
+
+\keys_define:nn { hyp / setup }
+  {
+    colorscheme .code:n =
+      {
+        \prop_map_inline:cn { c_@@_colorscheme_#1_prop }
+          {
+            \keys_set:nn { hyp /setup }
+              {
+                 ##1 = ##2
+              }
+          }
+      }
+  }
+
+\keys_set:nn { hyp / setup } {colorscheme=phelype}
 %ocgcolorlinks, unfinished
 \bool_new:c {l_@@_annot_ocgcolorlinks_bool}
 
@@ -2486,7 +2494,8 @@
       }
   }
 
-\hypupdateattribute
+
+
 
 %"info" keys
 % as hyperref resets some at begin document,
@@ -3919,4 +3928,143 @@
 %% End of file `hgeneric-experimental.def'.
 %</package>
 %    \end{macrocode}
+%    \begin{macrocode}
+%<*colorscheme>
+% collected from https://tex.stackexchange.com/questions/525261/better-default-colors-for-hyperref-links
+% cite color ignored, as it doesn't fit ... should be done by cite packages ?
+% linkcolor=
+%,filecolor=
+%,urlcolor=
+%,menucolor=
+%,runcolor=
+%,linkbordercolor=
+%,filebordercolor=
+%,urlbordercolor=
+%,menubordercolor=
+%,runbordercolor=
+
+\prop_const_from_keyval:Nn \c_@@_colorscheme_hypori_prop
+ {
+   linkcolor       = [rgb]{1,0,0}, %red
+   filecolor       = [rgb]{0,1,1}, %cyan
+   urlcolor        = [rgb]{1,0,1}, %magenta
+   menucolor       = [rgb]{1, 0, 0}, %red
+   runcolor        = [rgb]{0,1,1}, %cyan
+ %-------------
+   linkbordercolor = [rgb]{1, 0 ,0 },
+   filebordercolor = [rgb]{0, .5, .5},
+   urlbordercolor  = [rgb]{0, 1, 1},
+   menubordercolor = [rgb]{1, 0, 0},
+   runbordercolor  = [rgb]{0, .7, .7}
+ }
+
+\prop_const_from_keyval:Nn \c_@@_colorscheme_daleif_prop
+ {
+   linkcolor       = [rgb]{0,0.2,0.6},
+   filecolor       = [rgb]{0.8,0,0.8},
+   urlcolor        = [rgb]{0.8,0,0.8},
+   menucolor       = [rgb]{0,0.2,0.6},
+   runcolor        = [rgb]{0.8,0,0.8},
+ %-------------     %--------
+   linkbordercolor = [rgb]{0,0.2,0.6},
+   filebordercolor = [rgb]{0.8,0,0.8},
+   urlbordercolor  = [rgb]{0.8,0,0.8},
+   menubordercolor = [rgb]{0,0.2,0.6},
+   runbordercolor  = [rgb]{0.8,0,0.8}
+ }
+
+\prop_const_from_keyval:Nn \c_@@_colorscheme_julian_prop
+ { %two colors: intern/extern
+   linkcolor       = [rgb]{0.79216, 0, 0.12549},
+   filecolor       = [rgb]{0.01961, 0.44314, 0.6902},
+   urlcolor        = [rgb]{0.01961, 0.44314, 0.6902},
+   menucolor       = [rgb]{0.79216, 0, 0.12549 },
+   runcolor        = [rgb]{0.01961, 0.44314, 0.6902 },
+ %-------------     %--------
+   linkbordercolor = [rgb]{0.79216, 0, 0.12549},
+   filebordercolor = [rgb]{0.01961, 0.44314, 0.6902},
+   urlbordercolor  = [rgb]{0.01961, 0.44314, 0.6902},
+   menubordercolor = [rgb]{0.79216, 0, 0.12549 },
+   runbordercolor  = [rgb]{0.01961, 0.44314, 0.6902 }
+ }
+
+\prop_const_from_keyval:Nn \c_@@_colorscheme_tivv_prop
+ { %all darkgray
+   linkcolor       = [rgb]{0.4 ,0.4 ,0.4 },
+   filecolor       = [rgb]{0.4 ,0.4 ,0.4 },
+   urlcolor        = [rgb]{0.4 ,0.4 ,0.4 },
+   menucolor       = [rgb]{0.4 ,0.4 ,0.4 },
+   runcolor        = [rgb]{0.4 ,0.4 ,0.4 },
+ %-------------     %--------
+   linkbordercolor = [rgb]{0.4 ,0.4 ,0.4 },
+   filebordercolor = [rgb]{0.4 ,0.4 ,0.4 },
+   urlbordercolor  = [rgb]{0.4 ,0.4 ,0.4 },
+   menubordercolor = [rgb]{0.4 ,0.4 ,0.4 },
+   runbordercolor  = [rgb]{0.4 ,0.4 ,0.4 }
+ }
+
+\prop_const_from_keyval:Nn \c_@@_colorscheme_szabolcsA_prop
+ { %dvipsnam.def
+   linkcolor       = [rgb]{0.06, 0.46, 1}, %NavyBlue
+   filecolor       = [rgb]{1, 0, 0}, %Red
+   urlcolor        = [rgb]{0.06, 0.46, 1}, %NavyBlue
+   menucolor       = [rgb]{1, 0, 0}, %Red
+   runcolor        = [rgb]{1, 0, 0}, %Red
+ %-------------     %------------------
+   linkbordercolor = [rgb]{0.06, 0.46, 1}, %NavyBlue
+   filebordercolor = [rgb]{1, 0, 0}, %Red
+   urlbordercolor  = [rgb]{0.06, 0.46, 1}, %NavyBlue
+   menubordercolor = [rgb]{1, 0, 0}, %Red
+   runbordercolor  = [rgb]{1, 0, 0} %Red
+ }
+
+\prop_const_from_keyval:Nn \c_@@_colorscheme_szabolcsB_prop
+ { %dvipsnam.def
+   linkcolor       = [rgb]{0.72, 0, 0}, %BrickRed
+   filecolor       = [rgb]{0, 1, 0},    %Green
+   urlcolor        = [rgb]{0.64, 0.08, 0.98}, %Mulberry
+   menucolor       = [rgb]{0.06, 0.46, 1}, %NavyBlue
+   runcolor        = [rgb]{0.64, 0.08, 0.98}, %Mulberry
+ %-------------     %------------------
+   linkbordercolor = [rgb]{0.72, 0, 0}, %BrickRed
+   filebordercolor = [rgb]{0, 1, 0},    %Green
+   urlbordercolor  = [rgb]{0.64, 0.08, 0.98}, %Mulberry
+   menubordercolor = [rgb]{0.06, 0.46, 1}, %NavyBlue
+   runbordercolor  = [rgb]{0.64, 0.08, 0.98} %Mulberry
+ }
+
+
+\prop_const_from_keyval:Nn \c_@@_colorscheme_phelype_prop
+ {
+   linkcolor       = [rgb]{0.50196, 0, 0.02353},
+   filecolor       = [rgb]{0.07451, 0.09412, 0.46667},
+   urlcolor        = [rgb]{0.54118, 0, 0.52941},
+   menucolor       = [rgb]{0.44706, 0.45882, 0},
+   runcolor        = [rgb]{0.07451, 0.46667, 0.46275},
+ %-------------      %-------------
+   linkbordercolor = [rgb]{0.701176, 0.4, 0.414118},
+   filebordercolor = [rgb]{0.444706, 0.456472, 0.680002},
+   urlbordercolor  = [rgb]{0.724708, 0.4, 0.717646},
+   menubordercolor = [rgb]{0.668236, 0.675292, 0.4},
+   runbordercolor  = [rgb]{0.444706, 0.680002, 0.67765}
+ }
+
+\prop_const_from_keyval:Nn \c_@@_colorscheme_henryford_prop
+ {
+   linkcolor       = [rgb]{0,0,0},
+   filecolor       = [rgb]{0,0,0},
+   urlcolor        = [rgb]{0,0,0},
+   menucolor       = [rgb]{0,0,0},
+   runcolor        = [rgb]{0,0,0},
+ %-------------     %--------
+   linkbordercolor = [rgb]{0,0,0},
+   filebordercolor = [rgb]{0,0,0},
+   urlbordercolor  = [rgb]{0,0,0},
+   menubordercolor = [rgb]{0,0,0},
+   runbordercolor  = [rgb]{0,0,0}
+ }
+%</colorscheme>
+%    \end{macrocode}
 % \end{implementation}
+
+% \PrintIndex
