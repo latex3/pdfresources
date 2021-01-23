@@ -1203,12 +1203,10 @@
       }
     \exp_args:No
       \pdfannot_link_goto_begin:nw  { \l_@@_dest_name_tmpa_tl }
-        \Hy@colorlink\@linkcolor
   }
 
 \cs_new_protected:Npn \@@_link_goto_end:
   {
-    \Hy@endcolorlink
     \pdfannot_link_goto_end:
   }
 %    \end{macrocode}
@@ -1223,7 +1221,6 @@
       { #2}
       { \l_@@_text_enc_uri_print_tl }
       \l_@@_uri_tmpa_tl
-    %hyper@chars, unneeded as used only once
     \cs_set_eq:NN \# \c_hash_str
     \cs_set_eq:NN \% \c_percent_str
     \Hy@safe@activestrue
@@ -1251,6 +1248,48 @@
       }
     \group_end:
   }
+%    \end{macrocode}
+% \subsection{GoToR Links {files}}
+%    \begin{macrocode}
+\cs_new_protected:Npn \hyper@linkfile #1 #2 #3 % anchor text, filename, destname
+  {
+    \group_begin:
+    \tl_set:Nn \l_@@_filename_tmpa_tl { #2 }
+    \Hy@CleanupFile \l_@@_filename_tmpa_tl
+    \@@_text_pdfstring:ooN
+      { \l_@@_filename_tmpa_tl }
+      { \l_@@_text_enc_file_print_tl }
+      \l_@@_filename_tmpa_tl
+    \@@_text_pdfstring:nnN
+      { #3 }
+      { \l_@@_text_enc_dest_print_tl }
+      \l_@@_dest_name_tmpa_tl
+    \Hy@MakeRemoteAction
+    \mode_leave_vertical:
+    \pdfannot_link:nnn %expansion??
+      { GoToR }
+      {
+        /A<<
+          /F \l_@@_filename_tmpa_tl
+          /S/GoToR
+          \Hy@SetNewWindow
+          \ifx\\#3\\
+            /D[\Hy@href@page/\l_@@_dest_pdfremotestartview_tl]
+          \else
+            /D \l_@@_dest_name_tmpa_tl
+          \fi
+          \Hy@href@nextactionraw
+        >>
+      }
+      {
+%        \Hy@colorlink\@filecolor
+        #1\Hy@xspace@end
+%        \Hy@endcolorlink
+        \Hy@VerboseLinkStop %where is the start??
+      }
+    \group_end:
+  }
+
 % variants of hyperref commands to get attributes in the prop
 % these are (temporary) commands to fill various attributes (color, border style) in
 % the hooks for links from the hyperref keys.
@@ -1444,46 +1483,6 @@
 
 \ExplSyntaxOn
 %file links to pdfs. See test-filelinks.pdf for a few example.
-\cs_new_protected:Npn \hyper@linkfile #1 #2 #3 % anchor text, filename, destname
-  {
-    \group_begin:
-    \tl_set:Nn \l_@@_filename_tmpa_tl { #2 }
-    \Hy@CleanupFile \l_@@_filename_tmpa_tl
-    %\__hyp_pstringdef:No \l_@@_filename_tmpa_tl { \l_@@_filename_tmpa_tl }
-    \@@_text_pdfstring:ooN
-      { \l_@@_filename_tmpa_tl }
-      { \l_@@_text_enc_file_print_tl }
-      \l_@@_filename_tmpa_tl
-    %\__hyp_pstringdef:Nn \l_@@_dest_name_tmpa_tl { #3 }
-    \@@_text_pdfstring:nnN
-      { #3 }
-      { \l_@@_text_enc_dest_print_tl }
-      \l_@@_dest_name_tmpa_tl
-    \Hy@MakeRemoteAction
-    \mode_leave_vertical:
-    \pdfannot_link:nnn %expansion??
-      { GoToR }
-      {
-        /A<<
-          /F \l_@@_filename_tmpa_tl
-          /S/GoToR
-          \Hy@SetNewWindow
-          \ifx\\#3\\
-            /D[\Hy@href@page/\l_@@_dest_pdfremotestartview_tl]
-          \else
-            /D \l_@@_dest_name_tmpa_tl
-          \fi
-          \Hy@href@nextactionraw
-        >>
-      }
-      {
-        \Hy@colorlink\@filecolor
-        #1\Hy@xspace@end
-        \Hy@endcolorlink
-        \Hy@VerboseLinkStop %where is the start??
-      }
-    \group_end:
-  }
 
 % use by run links xxxxxxxxxxx
 %define \hyper@linklaunch for naming consistency
@@ -2495,7 +2494,7 @@
            {
              %need to parse!
              \group_begin:
-             \@@_color_select:v { l_@@_annot_#1color_tl }vyyyyy
+             \@@_color_select:v { l_@@_annot_#1color_tl }
            }
        }
      \hook_gput_code:nnn
