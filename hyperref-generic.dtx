@@ -2403,7 +2403,17 @@
 %colorlinks unfinished ...
 \keys_define:nn { hyp / setup }
   {
-    ,colorlinks .meta:n = {pdfborder={0~0~0},pdfborderstyle={}}
+    ,colorlinks .meta:n =
+      {
+        ,pdfborder={0~0~0}
+        ,pdfborderstyle={}
+        ,colorurl  =#1
+        ,colorlink =#1
+        ,colorrun  =#1
+        ,colormenu =#1
+        ,colorfile =#1
+        }
+    ,colorlinks .default:n = {true}
   }
 
 % link text colors, we probably need to parse it, but for now it is only stored.
@@ -2411,7 +2421,8 @@
   {
      \keys_define:nn { hyp / setup }
        {
-         #1color .tl_set:c = { l_@@_annot_#1color_tl }
+         ,color#1 .bool_set:c = {l_@@_annot_color#1_bool}
+         ,#1color .tl_set:c = { l_@@_annot_#1color_tl }
        }
   }
 
