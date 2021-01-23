@@ -1213,6 +1213,44 @@
   }
 %    \end{macrocode}
 %
+% \subsection{URI links}
+%
+%   \begin{macrocode}
+\cs_new_protected:Npn \hyper@linkurl #1 #2  %#1:link text #2: URI,
+  {
+    \group_begin:
+    \@@_text_pdfstring:xoN
+      { #2}
+      { \l_@@_text_enc_uri_print_tl }
+      \l_@@_uri_tmpa_tl
+    %hyper@chars, unneeded as used only once
+    \cs_set_eq:NN \# \c_hash_str
+    \cs_set_eq:NN \% \c_percent_str
+    \Hy@safe@activestrue
+    \mode_leave_vertical:
+    %Subtype and A could probably also be handled with hooks if needed
+    %but checks for all drivers should be done then.
+    \pdfannot_link:nnn { URI }
+      {
+        /A
+          <<
+            % the action dictionary has no hook!
+            /Type/Action~
+            /S/URI~
+            /URI\l_@@_uri_tmpa_tl~
+            \ifHy@href@ismap
+              /IsMap~true%
+            \fi
+            \Hy@href@nextactionraw
+          >>
+      }
+      {
+        #1
+        \Hy@xspace@end
+        \Hy@VerboseLinkStop %where is the start??
+      }
+    \group_end:
+  }
 % variants of hyperref commands to get attributes in the prop
 % these are (temporary) commands to fill various attributes (color, border style) in
 % the hooks for links from the hyperref keys.
@@ -1401,44 +1439,7 @@
   }
 
 %% this command is used for \url
-\cs_new_protected:Npn \hyper@linkurl #1 #2  %#1:link text #2: URI,
-  {
-    \group_begin:
-    %\__hyp_pstringdef:Nx \l_@@_uri_tmpa_tl { #2 }
-    \@@_text_pdfstring:xoN
-      { #2}
-      { \l_@@_text_enc_uri_print_tl }
-      \l_@@_uri_tmpa_tl
-    %hyper@chars, unneeded as used only once
-    \cs_set_eq:NN \# \c_hash_str
-    \cs_set_eq:NN \% \c_percent_str
-    \Hy@safe@activestrue
-    \mode_leave_vertical:
-    %Subtype and A could probably also be handled with hooks if needed
-    %but checks for all drivers should be done then.
-    \pdfannot_link:nnn { URI }
-      {
-        /A
-          <<
-            % the action dictionary has no hook!
-            /Type/Action~
-            /S/URI~
-            /URI\l_@@_uri_tmpa_tl~
-            \ifHy@href@ismap
-              /IsMap~true%
-            \fi
-            \Hy@href@nextactionraw
-          >>
-      }
-      {
-        \Hy@colorlink\@urlcolor
-        #1
-        \Hy@xspace@end
-        \Hy@endcolorlink
-        \Hy@VerboseLinkStop %where is the start??
-      }
-    \group_end:
-  }
+
 \ExplSyntaxOff
 
 \ExplSyntaxOn
