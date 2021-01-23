@@ -85,7 +85,7 @@
 %
 %  With the standard drivers \pkg{hyperref} allows either to color the link text,
 %  or to use a border around it.
-%  There is also a (rather unknown) option to use small caps instead of colors.
+%  There is also a (rather unknown) option |frenchlinks| to use small caps instead of colors.
 %
 %  The \emph{link border} is a setting in the annotation directory. It can be colored
 %  and styled (with the |<xxx>bordercolor|, |pdfborderstyle| and |pdfhighlight| keys),
@@ -114,14 +114,23 @@
 %  and is then used for the whole document and all link types. Only colors and
 %  eventually the border style can be adjusted locally. But there is no technical
 %  reason for these restrictions: It is quite possible to change all these attributes
-%  at any time both by link type and locally. There is also no technical reason why
-%  the formatting of the link text is restricted to colors. The restrictions and
+%  at any time both by link type and locally. The restrictions and
 %  some other settings can only be explained by the age of the code: \pkg{hyperref}
 %  has been created at a time when memory was small and the main drivers were html
 %  and postscript based.
 %
-%  The new driver tries to extend the possible options and to clean up the code while
-%  staying if possible compatible to the current behaviour.
+%  While link colors have been traditionally more or less left
+%  under the control of \pkg{hyperref},
+%  the situation with other formattings is more complicated. The font in \cs{url}
+%  is for example determined by \cs{Urlfont}, in the cases of references with
+%  internal links packages like \pkg{cleveref} or \pkg{biblatex} or
+%  \pkg{glossaries} offer formatting options too. Formatting here is often
+%  connected to semantics: an acronym should use a different font than a citation.
+%  While \pkg{hyperref} can offer options here, it would probably only clash
+%  with package formatting. It is more sensible not to interfere here.
+%
+%  The new driver tries to extend options where sensible, but also to clean up
+%  the code while staying if possible compatible to the current behaviour.
 %
 %  \subsubsection{New Keys}
 %  Some of the existing keys have been extended to allow individual setting for
@@ -134,8 +143,6 @@
 %   \item Beside |colorlinks| there are also |colorlink|, |colorurl| etc %TODO
 %   \item Beside |ocgcolorlinks| there are also |ocgcolorlink|, |ocgcolorurl|, etc %TODO
 %   \item Beside |hidelinks| there are also |hidelink|, |hideurl|, etc %TODO
-%   \item New keys |formatlinks|, |formatlink|, |formaturl|, etc which %TODO
-%   allow to add arbitrary formatting instructions like |\bfseries|.
 %   \item |colormodel| allows to set the model used in annotations, the allowed values
 %   are |rgb| or |cmyk|. |rgb| is the default.
 %   It does \emph{not} change the model of text colors. Be aware
@@ -158,6 +165,9 @@
 %   \end{tabular}
 %
 %    where |\mycolor| should expand to one of the other two syntax variants.
+%
+%   \item The option |frenchlinks| does nothing at all.
+%   \item citecolor?
 %
 %   \end{itemize}
 %
@@ -845,7 +855,15 @@
 \tl_new:N  \l_@@_dest_pdfview_tl
 %    \end{macrocode}
 % \end{variable}
-%
+% These variables hold the names of the text colors
+% \begin{variable}{l_@@_annot_XXXcolor_tl}
+%    \begin{macrocode}
+\seq_map_inline:Nn \c_@@_annot_types_seq
+  {
+    \tl_new:c { l_@@_annot_#1color_tl }
+  }
+%    \end{macrocode}
+% \end{variable}
 % \begin{variable}{\g_@@_colormodel_str}
 % This holds the export model for border color etc.
 % It is currently either |space-sep-cmyk| or |space-sep-rgb|.
@@ -853,6 +871,19 @@
 %    \begin{macrocode}
 \str_new:N \g_@@_colormodel_str
 %    \end{macrocode}
+% \end{variable}
+% \subsection{Booleans}
+% These booleans are probably needed to control the colors.
+%
+% \begin{variable}
+%   {
+%     \l_@@_annot_ocgcolorlinks_bool
+%   }
+\bool_new:N \l_@@_annot_ocgcolorlinks_bool
+\seq_map_inline:Nn \c_@@_annot_types_seq
+  {
+    \bool_new:c {l_@@_annot_ocgcolor#1_bool}
+  }
 % \end{variable}
 %
 % \subsection{Boxes}
@@ -2258,6 +2289,38 @@
 \cs_generate_variant:Nn \@@_color_export:nnN {xVN}
 %    \end{macrocode}
 % \end{macro}
+% \begin{function}{\@@_color_select:n,\@@_colormodel_select:nn}
+%   \begin{syntax}
+%    \cs{@@_color_select:nN} \Arg{color} \\
+%    \cs{@@_colormodel_select:nn} \Arg{color model}\Arg{values}
+%   \end{syntax}
+%  These commands select a color.
+%  \Arg{color} should have either the format |[model]{value}| or be a color expression.
+%  For examples: |[rgb]{1,0,.5}| or |red!50!blue|
+% \end{function}
+%  \begin{macro}{\@@_color_select:n,\@@_colormodel_select:nn}
+%   Color keys need to parse color expressions. Two input types are supported:
+%  |color=[rgb]{1,0,.5}| and |color=red!50!blue|.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_color_select:n #1
+ {
+   \tl_if_head_eq_charcode:nNTF {#1}[ %]
+    {
+      \@@_colormodel_select:wn  #1
+    }
+    {
+      \color_select:n {#1}
+    }
+ }
+
+\cs_new_protected:Npn \@@_colormodel_select:wn  [#1] #2
+  {
+     \color_select:nn {#1}{#2}
+  }
+
+\cs_generate_variant:Nn \@@_color_select:n {V,v}
+%    \end{macrocode}
+% \end{macro}
 % \begin{variable}{}
 % \cmd[module=hyperref keys,index=colormodel]{colormodel}
 % \end{variable}
@@ -2419,13 +2482,35 @@
     ,colorlinks .default:n = {true}
   }
 
+
 % link text colors, we probably need to parse it, but for now it is only stored.
-\seq_map_inline:Nn \c_@@_annot_types_seq
+\prop_map_inline:Nn \c_@@_map_hyp_annot_prop
   {
+     \hook_gput_code:nnn
+       {pdfannot/link/#2/begin}
+       {.}
+       {
+         \bool_if:cT { l_@@_annot_color#1_bool }
+           {
+             %need to parse!
+             \group_begin:
+             \@@_color_select:v { l_@@_annot_#1color_tl }vyyyyy
+           }
+       }
+     \hook_gput_code:nnn
+       {pdfannot/link/#2/end}
+       {.}
+       {
+         \bool_if:cT { l_@@_annot_color#1_bool }
+           {
+             \group_end:
+           }
+       }
+
      \keys_define:nn { hyp / setup }
        {
-         ,color#1 .bool_set:c = {l_@@_annot_color#1_bool}
-         ,#1color .tl_set:c = { l_@@_annot_#1color_tl }
+         ,color#1 .bool_set:c = { l_@@_annot_color#1_bool }
+         ,#1color .tl_set:c =   { l_@@_annot_#1color_tl }
        }
   }
 
@@ -2433,13 +2518,24 @@
   {
     ,allcolors .code:n =
       {
-        ,urlcolor = #1
-        ,linkcolor= #1
-        ,filecolor= #1
-        ,runcolor = #1
-        ,menucolor= #1
+        \seq_map_inline:Nn \c_@@_annot_types_seq
+         {
+           \keys_set:nn { hyp / setup } { ##1color = #1 }
+         }
       }
     ,allcolors .value_required:n = true
+  }
+
+\keys_define:nn { hyp / setup }
+  {
+    ,allbordercolors .code:n =
+      {
+        \seq_map_inline:Nn \c_@@_annot_types_seq
+         {
+           \keys_set:nn { hyp / setup } { ##1bordercolor = #1 }
+         }
+      }
+    ,allbordercolors .value_required:n = true
   }
 
 
@@ -2459,7 +2555,6 @@
 
 \keys_set:nn { hyp / setup } {colorscheme=phelype}
 %ocgcolorlinks, unfinished
-\bool_new:c {l_@@_annot_ocgcolorlinks_bool}
 
 \pdf_version_compare:NnTF < {1.5}
   {
@@ -2495,7 +2590,6 @@
 %for now only boolean, if need it can be expanded later
 \seq_map_inline:Nn \c_@@_annot_types_seq
   {
-    \bool_new:c {l_@@_annot_ocgcolor#1_bool}
     \pdf_version_compare:NnTF < {1.5}
       {
         \keys_define:nn { hyp / setup }
@@ -2513,7 +2607,7 @@
       {
         \keys_define:nn { hyp / setup }
           {
-            ,ocgcolor#1 .bool_set:N = \l_@@_annot_ocgcolorlinks_bool
+            ,ocgcolor#1 .bool_set:c = { l_@@_annot_ocgcolor#1_bool }
           }
       }
   }
