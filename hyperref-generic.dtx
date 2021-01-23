@@ -765,12 +765,15 @@
 % \end{variable}
 % \begin{variable}
 %   {
+%     \c_@@_annot_types_seq,
 %     \c_@@_map_annot_hyp_prop,
 %     \c_@@_map_hyp_annot_prop,
 %   }
 %  This constants holds the link types managed by hyperref
 %  along with a mapping from annot names to hyperref names and back.
 %    \begin{macrocode}
+\seq_const_from_clist:Nn \c_@@_annot_types_seq
+ {url,link,file,menu,run}
 \prop_const_from_keyval:Nn \c_@@_map_annot_hyp_prop
   {
     URI   = url,
@@ -2417,7 +2420,7 @@
   }
 
 % link text colors, we probably need to parse it, but for now it is only stored.
-\prop_map_inline:Nn \c_@@_map_hyp_annot_prop
+\seq_map_inline:Nn \c_@@_annot_types_seq
   {
      \keys_define:nn { hyp / setup }
        {
@@ -2425,6 +2428,20 @@
          ,#1color .tl_set:c = { l_@@_annot_#1color_tl }
        }
   }
+
+\keys_define:nn { hyp / setup }
+  {
+    ,allcolors .code:n =
+      {
+        ,urlcolor = #1
+        ,linkcolor= #1
+        ,filecolor= #1
+        ,runcolor = #1
+        ,menucolor= #1
+      }
+    ,allcolors .value_required:n = true
+  }
+
 
 \keys_define:nn { hyp / setup }
   {
@@ -2454,10 +2471,6 @@
               { hyp }
               { ignore-deprecated-or-unknown-option-in-pdf-version }
               { ocgcolorlinks } { \pdf_version_major:.\pdf_version_minor: }
-            \keys_define:nn { hyp / setup }
-              {
-                ,_ocgcolorlinks .code:n = {}
-              }
           }
       }
   }
@@ -2480,27 +2493,27 @@
   }
 
 %for now only boolean, if need it can be expanded later
-\prop_map_inline:Nn \c_@@_map_hyp_annot_prop
+\seq_map_inline:Nn \c_@@_annot_types_seq
   {
     \bool_new:c {l_@@_annot_ocgcolor#1_bool}
     \pdf_version_compare:NnTF < {1.5}
       {
         \keys_define:nn { hyp / setup }
           {
-            \msg_warning:nnxx
-              { hyp }
-              { ignore-deprecated-or-unknown-option-in-pdf-version }
-              { ocgcolor#1 } { \pdf_version_major:.\pdf_version_minor: }
-            \keys_define:nn { hyp / setup }
+            ,ocgcolor#1 .code:n=
               {
-                ,_ocgcolor#1 .code:n = {}
+                \msg_warning:nnxx
+                  { hyp }
+                  { ignore-deprecated-or-unknown-option-in-pdf-version }
+                  { ocgcolor#1 }
+                  { \pdf_version_major:.\pdf_version_minor: }
               }
           }
       }
       {
         \keys_define:nn { hyp / setup }
           {
-            ,_ocgcolor#1 .bool_set:N = \l_@@_annot_ocgcolorlinks_bool
+            ,ocgcolor#1 .bool_set:N = \l_@@_annot_ocgcolorlinks_bool
           }
       }
   }
@@ -2779,7 +2792,7 @@
 
 
 %%%%%%%%%%%%%% Temporary stuff
-\prop_map_inline:Nn \c_@@_map_hyp_annot_prop
+\seq_map_inline:Nn \c_@@_annot_types_seq
   {
     \define@key{Hyp}{#1border}{}
     \define@key{Hyp}{#1borderstyle}{}
