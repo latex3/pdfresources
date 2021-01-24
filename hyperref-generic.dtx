@@ -69,6 +69,16 @@
 %   }
 %  \end{verbatim}
 %
+%  \section{Avoiding transistion problems}
+%  Some code will only work properly after other packages have been adapted to
+%  the changes. This will take some time. Until then it is recommended to follow
+%  the following rules
+%  \begin{itemize}
+%  \item Alle options---with the exception of a few mentioned below---should be set
+%  in \cs{hypersetup}, not as package option.
+%  \item Colors used in the keys for link colors should be defined after the
+%  package has been loaded.
+%  \end{itemize}
 %  \section{Differences}
 %  The new driver tries to be compatible with the current \pkg{hyperref} drivers
 %  but there are nevertheless differences. Some of them due to the still experimental
@@ -1180,8 +1190,14 @@
 % \end{macro}
 %
 % \subsection{GoTo Links}
-% The next three commands are for links inside the document, to destinations (GoTo links).
+% The next three commands are for links inside the document,
+% to destinations (GoTo links).
+% The definition in \pkg{hyperref} have a first argument which
+% can be use to pass a semantical context. Currently this argument is
+% only used for \cs{cite} and only to change the color. The new
+% implementation uses it for a real hook.
 %
+% At first the internal link commands:
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_link_goto_begin:nw #1
   {
@@ -1208,6 +1224,58 @@
 \cs_new_protected:Npn \@@_link_goto_end:
   {
     \pdfannot_link_goto_end:
+  }
+%    \end{macrocode}
+%
+% Now the three hyperref commands.
+% The splitted commands \cs{hyper@linkstart} and \cs{hyper@linkend} are used for
+% footnotemarks, toc and natbib-cites.
+% \begin{function}{\hyper@link}
+% \begin{syntax}
+%  \cs{hyper@link}\Arg{context}\Arg{destination name}\Arg{link text}
+% \end{syntax}
+% This creates a complete GoTo link around the \meta{link text}
+% pointing to \meta{destination name}.
+% The hook |hyp/link/|\meta{context}|/before| is executed
+% before if it exist.
+%
+% The only \meta{context} for which a hook is predefined is |cite|.
+% Packages which want to use another \meta{context} should initialize the hook like
+% this:
+% \begin{verbatim}
+% \IfHookExistsTF{hyp/link/context/before}{}
+%   {\NewHook{hyp/link/<context>/before}}
+% \end{verbatim}
+%
+%  The hook code is executed in a group.
+% \end{function}
+% \pkg{hyperref} adds a group with \cs{Hy@colorlink}, we move this outside the link
+% so that it groups the context hook too.
+%    \begin{macrocode}
+\cs_new_protected:Npn \hyper@link #1 #2 #3 %#1 context, #2=destination name, #3 content
+ {
+  \Hy@VerboseLinkStart{#1}{#2}
+  \group_begin:
+  \hook_use:n {hyp/link/#1/before}
+  \__hyp_link_goto_begin:nw {#2}#3\Hy@xspace@end
+  \__hyp_link_goto_end:
+  \group_end:
+  \Hy@VerboseLinkStop
+}
+
+\cs_new_protected:Npn \hyper@linkstart #1 #2 %#1 context, #2=destination name
+  {
+    \Hy@VerboseLinkStart{#1}{#2}% only for debug
+    \group_begin:
+    \hook_use:n {hyp/link/#1/before}
+    \__hyp_link_goto_begin:nw {#2}%
+  }
+
+\cs_new_protected:Npn \hyper@linkend
+  {
+    \__hyp_link_goto_end:
+    \group_end:
+    \Hy@VerboseLinkStop
   }
 %    \end{macrocode}
 %
@@ -1452,30 +1520,6 @@
 
 
 
-% hyper@linkstart/ \hyper@linkend is used for
-% footnotemarks, toc and natbib-cites
-% #1 is for the color only: found {cite} and {link}
-% #2 is the destination name
-
-\cs_new_protected:Npn \hyper@link #1 #2 #3 %#1 ignored, #2=destination name, #3 content
- {
-  \Hy@VerboseLinkStart{#1}{#2}
-  \__hyp_link_goto_begin:nw {#2}#3\Hy@xspace@end
-  \__hyp_link_goto_end:
-  \Hy@VerboseLinkStop
-}
-
-\cs_new_protected:Npn \hyper@linkstart #1 #2 %#1 ignored, #2=destination name
-  {
-    \Hy@VerboseLinkStart{#1}{#2}% only for debug
-    \__hyp_link_goto_begin:nw {#2}%
-  }
-
-\cs_new_protected:Npn \hyper@linkend
-  {
-    \__hyp_link_goto_end:
-    \Hy@VerboseLinkStop
-  }
 
 %% this command is used for \url
 
