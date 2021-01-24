@@ -69,7 +69,7 @@
 %   }
 %  \end{verbatim}
 %
-%  \section{Avoiding transistion problems}
+%  \section{Avoiding transition problems}
 %  Some code will only work properly after other packages have been adapted to
 %  the changes. This will take some time. Until then it is recommended to follow
 %  the following rules
@@ -92,7 +92,15 @@
 %  still has to load it manually but this is subject to change.
 %
 %  \subsection{Link decorations: border, color, OCG-color, \ldots}
+%  Some main changes are
+%  \begin{itemize}
+%  \item The default colors have been changed.
+%  \item |citecolor| is no longer set with |allcolors| and it is not part of the
+%  colorscheme, it is only supported for compability.
+%  \item a number colorschemes have been predefined.
+%  \end{itemize}
 %
+%  \subsection{Background information}
 %  With the standard drivers \pkg{hyperref} allows either to color the link text,
 %  or to use a border around it.
 %  There is also a (rather unknown) option |frenchlinks| to use small caps instead of colors.
@@ -147,9 +155,9 @@
 %  the link types |link|, |url|, |file| |menu| and |run|:
 %
 %  \begin{itemize}
-%   \item Beside |pdfborder| there are also |linkborder| etc
-%   \item Beside |pdfhighlight| there are also |linkhighlight| etc
-%   \item Beside |pdfborderstyle| there are also |linkborderstyle| etc
+%   \item Beside |pdfborder| there are also |linkborder|, |urlborder| etc
+%   \item Beside |pdfhighlight| there are also |linkhighlight|, |urlhighlight| etc
+%   \item Beside |pdfborderstyle| there are also |linkborderstyle|, |urlborderstyle| etc
 %   \item Beside |colorlinks| there are also |colorlink|, |colorurl| etc %TODO
 %   \item Beside |ocgcolorlinks| there are also |ocgcolorlink|, |ocgcolorurl|, etc %TODO
 %   \item Beside |hidelinks| there are also |hidelink|, |hideurl|, etc %TODO
@@ -177,7 +185,12 @@
 %    where |\mycolor| should expand to one of the other two syntax variants.
 %
 %   \item The option |frenchlinks| does nothing at all.
-%   \item citecolor?
+%   \item As mentioned above the support for |citecolor| and |citebordercolor| etc
+%   has been reduced. A package like \pkg{hyperref} can't keep track of such semantic
+%   contexts, like cite, acronym, glossaries, special references and maintain keys for
+%   them. The keys are not completly dropped as this would affect packages like natbib,
+%   but they have been separated, are no longer affected by group keys like |allcolors|
+%   but must be set individually instead.
 %
 %   \end{itemize}
 %
@@ -662,6 +675,33 @@
     \msg_warning:nn { hyp }{ pdfversion-disabled }
  }
 \Hy@DisableOption{pdfversion}
+%    \end{macrocode}
+%
+% \section{Compability commands}
+% \subsection{citecolor}
+% cite is a link context. So we define a hook, and the keys in terms of this hook.
+%
+%    \begin{macrocode}
+\hook_new:n{hyp/link/cite}
+\tl_new:N   \l_@@_annot_citecolor_tl
+\tl_set:Nn  \l_@@_annot_citecolor_tl {@@_color_cite}
+\tl_new:N   \l_@@_annot_citebordercolor_tl
+\tl_set:Nn  \l_@@_annot_citebordercolor_tl {@@_color_citeborder}
+\color_set:nnn {@@_color_cite}{HTML}{2E7E2A}
+\color_set:nn  {@@_color_citeborder}{@@_color_cite!60!white}
+\keys_define:nn { hyp / setup }
+  {
+    ,citecolor .tl_set:N = \l_@@_annot_citecolor_tl
+    ,citebordercolor .tl_set:N = \l_@@_annot_citebordercolor_tl
+  }
+\hook_gput_code:nnn { hyp/link/cite }{hyp/cite}
+  {
+    \hypersetup
+      {
+        ,linkbordercolor= \l_@@_annot_citebordercolor_tl
+        ,linkcolor      = \l_@@_annot_citecolor_tl
+      }
+  }
 %    \end{macrocode}
 % \section{Checks}
 % The driver can not work properly if the pdfmanagement is not active,
@@ -1193,7 +1233,7 @@
 % The next three commands are for links inside the document,
 % to destinations (GoTo links).
 % The definition in \pkg{hyperref} have a first argument which
-% can be use to pass a semantical context. Currently this argument is
+% can be used to pass a semantical context. Currently this argument is
 % only used for \cs{cite} and only to change the color. The new
 % implementation uses it for a real hook.
 %
@@ -1236,44 +1276,56 @@
 % \end{syntax}
 % This creates a complete GoTo link around the \meta{link text}
 % pointing to \meta{destination name}.
-% The hook |hyp/link/|\meta{context}|/before| is executed
-% before if it exist.
+% The hook |hyp/link/|\meta{context}| is executed at the begin if it exists.
 %
 % The only \meta{context} for which a hook is predefined is |cite|.
 % Packages which want to use another \meta{context} should initialize the hook like
 % this:
 % \begin{verbatim}
-% \IfHookExistsTF{hyp/link/context/before}{}
-%   {\NewHook{hyp/link/<context>/before}}
+% \IfHookExistsTF{hyp/link/context}{}
+%   {\NewHook{hyp/link/context}}
 % \end{verbatim}
 %
-%  The hook code is executed in a group.
+%  The hook code is executed in a group but before all the pdfannot hooks.
 % \end{function}
+% \begin{function}{\hyper@linkstart,\hyper@linkend}
+% \begin{syntax}
+%  \cs{hyper@linkstart}\Arg{context}\Arg{destination name}\\
+%  \cs{hyper@linkend}
+% \end{syntax}
+% This creates the start and end commands for a GoTo link around the text
+% between both pointing to \meta{destination name}.
+% The hook |hyp/link/|\meta{context}| is executed at the begin if it exists
+% as with \cs{hyper@link}
+%
+% The commands open and close a group, so should be placed carefully. .
+% \end{function}
+
 % \pkg{hyperref} adds a group with \cs{Hy@colorlink}, we move this outside the link
 % so that it groups the context hook too.
 %    \begin{macrocode}
 \cs_new_protected:Npn \hyper@link #1 #2 #3 %#1 context, #2=destination name, #3 content
- {
-  \Hy@VerboseLinkStart{#1}{#2}
-  \group_begin:
-  \hook_use:n {hyp/link/#1/before}
-  \__hyp_link_goto_begin:nw {#2}#3\Hy@xspace@end
-  \__hyp_link_goto_end:
-  \group_end:
-  \Hy@VerboseLinkStop
-}
+  {
+    \Hy@VerboseLinkStart{#1}{#2}
+    \group_begin:
+    \hook_use:n {hyp/link/#1}
+    \@@_link_goto_begin:nw {#2}#3\Hy@xspace@end
+    \__hyp_link_goto_end:
+    \group_end:
+    \Hy@VerboseLinkStop
+  }
 
 \cs_new_protected:Npn \hyper@linkstart #1 #2 %#1 context, #2=destination name
   {
     \Hy@VerboseLinkStart{#1}{#2}% only for debug
     \group_begin:
-    \hook_use:n {hyp/link/#1/before}
-    \__hyp_link_goto_begin:nw {#2}%
+    \hook_use:n {hyp/link/#1}
+    \@@_link_goto_begin:nw {#2}
   }
 
 \cs_new_protected:Npn \hyper@linkend
   {
-    \__hyp_link_goto_end:
+    \@@_link_goto_end:
     \group_end:
     \Hy@VerboseLinkStop
   }
@@ -1541,12 +1593,12 @@
 \cs_new_protected:Npn \hyper@linklaunch #1 #2 #3 % filename, anchor text, Parameters
  {
   \group_begin:
-    %\__hyp_pstringdef:Nn \l_@@_filename_tmpa_tl { #1 } %string-hex
+    %\@@_pstringdef:Nn \l_@@_filename_tmpa_tl { #1 } %string-hex
     \@@_text_pdfstring:nnN
       { #1 }
       { \l_@@_text_enc_file_print_tl }
       \l_@@_filename_tmpa_tl
-    %\__hyp_pstringdef:Nn \l_@@_para_tmpa_tl     { #3 } %string-hex
+    %\@@_pstringdef:Nn \l_@@_para_tmpa_tl     { #3 } %string-hex
     \@@_text_pdfstring:noN
       { #3 }
       { \l_@@_text_enc_para_print_tl }
@@ -1589,7 +1641,7 @@
 %as a first step hypersetup is overwritten to set (some) keys with expl3.
 \cs_set_protected:Npn \hypersetup #1
   {
-     \kvsetkeys{Hyp}{#1} %for now
+     %\kvsetkeys{Hyp}{#1} %for now
      \keys_set:nn { hyp / setup }{ #1 }
   }
 % for now unknown keys should only give warnings.
@@ -1632,7 +1684,7 @@
  {
    ,baseurl       .code:n =
      {
-       %\__hyp_pstringdef:No \l_@@_tmpa_tl {#1}%
+       %\@@_pstringdef:No \l_@@_tmpa_tl {#1}%
        \@@_text_pdfstring:ooN  { #1 } {\l_@@_text_enc_uri_print_tl} \l_@@_tmpa_tl
         \tl_if_empty:NTF \l_@@_tmpa_tl
           {
@@ -2362,7 +2414,7 @@
      \color_select:nn {#1}{#2}
   }
 
-\cs_generate_variant:Nn \@@_color_select:n {V,v}
+\cs_generate_variant:Nn \@@_color_select:n {e}
 %    \end{macrocode}
 % \end{macro}
 % \begin{variable}{}
@@ -2532,18 +2584,17 @@
   {
      \hook_gput_code:nnn
        {pdfannot/link/#2/begin}
-       {.}
+       {hyp/color}
        {
          \bool_if:cT { l_@@_annot_color#1_bool }
            {
-             %need to parse!
              \group_begin:
-             \@@_color_select:v { l_@@_annot_#1color_tl }
+             \@@_color_select:e { \tl_use:c {l_@@_annot_#1color_tl} }
            }
        }
      \hook_gput_code:nnn
        {pdfannot/link/#2/end}
-       {.}
+       {hyp/color}
        {
          \bool_if:cT { l_@@_annot_color#1_bool }
            {
@@ -2597,6 +2648,28 @@
       }
   }
 
+%hidelinks
+\keys_define:nn { hyp / setup }
+  {
+    hidelinks .meta:n =
+      {
+        ,colorlinks  = false
+        ,ocgcolorlinks = false
+      }
+  }
+
+\seq_map_inline:Nn \c_@@_annot_types_seq
+  {
+    \keys_define:nn { hyp / setup }
+      {
+        hide#1 .meta:n =
+          {
+             color#1=false,
+             ocgcolor#1 = false,
+             % 
+          }
+      }
+  }
 \keys_set:nn { hyp / setup } {colorscheme=phelype}
 %ocgcolorlinks, unfinished
 
@@ -2664,7 +2737,7 @@
 % they only work correctly if set later ...
 % for now they use hex_print_encoding
 % later we can add instruction to add to meta data here
-\cs_new_protected:Npn \__hyp_setup_info_key:nn #1 #2
+\cs_new_protected:Npn \@@_setup_info_key:nn #1 #2
   {
     \keys_define:nn { hyp / setup }
       {
@@ -2701,15 +2774,15 @@
          }
       }
   }
-\__hyp_setup_info_key:nn {author}   {Author}
-\__hyp_setup_info_key:nn {title}    {Title}
-\__hyp_setup_info_key:nn {producer} {Producer}
-\__hyp_setup_info_key:nn {creator}  {Creator}
+\@@_setup_info_key:nn {author}   {Author}
+\@@_setup_info_key:nn {title}    {Title}
+\@@_setup_info_key:nn {producer} {Producer}
+\@@_setup_info_key:nn {creator}  {Creator}
 % ignored key: addtopdfcreator
-\__hyp_setup_info_key:nn {creationdate}  {Creationdate}
-\__hyp_setup_info_key:nn {moddate}  {ModDate}
-\__hyp_setup_info_key:nn {subject}  {Subject}
-\__hyp_setup_info_key:nn {keywords}  {Keywords}
+\@@_setup_info_key:nn {creationdate}  {Creationdate}
+\@@_setup_info_key:nn {moddate}  {ModDate}
+\@@_setup_info_key:nn {subject}  {Subject}
+\@@_setup_info_key:nn {keywords}  {Keywords}
 
 %pdfinfo allows to set the key with keyval ...
 \keys_define:nn { hyp / setup }
@@ -2943,8 +3016,8 @@
   }
 
 
-\prop_new:N   \g__hyp_AcroForm_CoFields_prop
-\prop_new:N   \g__hyp_AcroForm_Fields_prop
+\prop_new:N   \g_@@_AcroForm_CoFields_prop
+\prop_new:N   \g_@@_AcroForm_Fields_prop
 
 \let\HyField@afields\ltx@empty
 \let\HyField@cofields\ltx@empty
