@@ -31,6 +31,16 @@
 \end{document}
 %</driver>
 % \fi
+% \NewDocElement[
+%   idxgroup=hypersetup keys\actualchar\cs{hypersetup} keys,
+%   idxtype = {hypersetup key},
+%   printtype= \textit{\cs[no-index]{hypersetup key}}
+%    ]{Hypkey}{hypkey}
+% \NewDocElement[
+%   idxgroup=Hooks,
+%   printtype= \textit{hook}
+%    ]{Hook}{hook}
+%
 % \title{^^A
 %   The \pkg{hyperref-generic} package  \\ A generic driver for hyperref ^^A
 % }
@@ -90,6 +100,29 @@
 %  the loading of the \pkg{bookmark} package. Currently this is done at the end of the preamble
 %  so if commands from \pkg{bookmark} are needed in the preamble the document
 %  still has to load it manually but this is subject to change.
+%
+%  \subsection{PDF page size (mediabox)}
+%  The other \pkg{hyperref} driver contains code to set the PDF page size.
+%  There is no real justification why this is done by \pkg{hyperref} apart from the
+%  fact that \LaTeX{} itself doesn't do it and that the needed special code could
+%  be added to the backend drivers.
+%
+%  In the new driver this code is gone. The problem is not to set the MediaBox,
+%  actually it could be done with one line of code:
+%  \begin{verbatim}
+%  \pdfmanagement_add:nnn{Page}{MediaBox}
+%    {[0~0~\dim_to_decimal_in_bp:n{\paperwidth}~
+%          \dim_to_decimal_in_bp:n{\paperheight}]}
+%  \end{verbatim}
+%
+%  The problem is to know which value to use (with the memoir class \cs{stockwidth}
+%  should be used), and that there are to many actors here: color/graphicx, geometry,
+%  the KOMA-classes, memoir, \ldots\ all try to set this.
+%
+%  So if the PDF page size is wrong load one of the other packages setting it
+%  e.g. the \pkg{color} or the \pkg{graphicx} package.
+%  At some time this function should then be provided by \pkg{l3backend}.
+%
 %
 %  \subsection{Link decorations: border, color, OCG-color, \ldots}
 %  Some main changes are
@@ -249,6 +282,8 @@
 %  A number of options are ignored by this driver
 %  \begin{description}
 %  \item[pdfversion] The pdfversion should be set in \cs{DeclareDocumentMetadata}
+%  \item[setpagesize] The key is ignored and the PDF page size is not
+%  set. Load \pkg{color} or \pkg{graphicx} or use a class which sets the PDF page size.
 %  \item[breaklinks] The option does nothing sensible anyway (apart from triggering
 %  a warning). Currently with latex+dvips links can't be broken. But there is work
 %  in progress to change this.
@@ -513,6 +548,16 @@
      {
       \DeclareDocumentMetadata { pdfversion=1.7 }
      }
+  }
+%    \end{macrocode}
+% A generic message for ignored keys.
+%    \begin{macrocode}
+\msg_new:nnn
+  { hyp }
+  { key-dropped }
+  {
+    This~hyperref~driver~ignores~the~key~#1!\\
+    Please~check~the~documentation.
   }
 %    \end{macrocode}
 % pdf/A messages for fields, this will probably be moved to an external package
@@ -929,11 +974,13 @@
 %   {
 %     \l_@@_annot_ocgcolorlinks_bool
 %   }
+%    \begin{macrocode}
 \bool_new:N \l_@@_annot_ocgcolorlinks_bool
 \seq_map_inline:Nn \c_@@_annot_types_seq
   {
     \bool_new:c {l_@@_annot_ocgcolor#1_bool}
   }
+%    \end{macrocode}
 % \end{variable}
 %
 % \subsection{Boxes}
@@ -1276,7 +1323,7 @@
 % \end{syntax}
 % This creates a complete GoTo link around the \meta{link text}
 % pointing to \meta{destination name}.
-% The hook |hyp/link/|\meta{context}| is executed at the begin if it exists.
+% The hook |hyp/link/|\meta{context} is executed at the begin if it exists.
 %
 % The only \meta{context} for which a hook is predefined is |cite|.
 % Packages which want to use another \meta{context} should initialize the hook like
@@ -1295,7 +1342,7 @@
 % \end{syntax}
 % This creates the start and end commands for a GoTo link around the text
 % between both pointing to \meta{destination name}.
-% The hook |hyp/link/|\meta{context}| is executed at the begin if it exists
+% The hook |hyp/link/|\meta{context} is executed at the begin if it exists
 % as with \cs{hyper@link}
 %
 % The commands open and close a group, so should be placed carefully. .
@@ -1678,7 +1725,6 @@
          \msg_warning:nn { hyp }{ pdfversion-disabled }
       }
   }
-
 
 \keys_define:nn { hyp / setup }
  {
@@ -2417,9 +2463,13 @@
 \cs_generate_variant:Nn \@@_color_select:n {e}
 %    \end{macrocode}
 % \end{macro}
-% \begin{variable}{}
-% \cmd[module=hyperref keys,index=colormodel]{colormodel}
-% \end{variable}
+% \DescribeHypkey{colormodel} With |colormodel| the colormodel used in the |/C|
+% key of the annotation array and in similar keys is set. It does not affect
+% the text and graphics colors in the page stream.
+% Possible choices are |rgb| (three numbers in the array) and |cmyk| (four numbers).
+% While the PDF reference allows four numbers, PDF readers don't necessarly handle
+% this correctly, so the value can be wrong.
+% \begin{hypkey}{colormodel}
 %    \begin{macrocode}
 \keys_define:nn { hyp / setup }
   {
@@ -2428,6 +2478,9 @@
      { \str_gset:Nn \g_@@_colormodel_str {space-sep-#1}}
     ,colormodel .initial:n ={rgb}
   }
+%    \end{macrocode}
+% \end{hypkey}
+%    \begin{macrocode}
 \prop_map_inline:Nn \c_@@_map_hyp_annot_prop
   {
     \keys_define:nn { hyp / setup }
@@ -2653,8 +2706,10 @@
   {
     hidelinks .meta:n =
       {
-        ,colorlinks  = false
+        ,colorlinks    = false
         ,ocgcolorlinks = false
+        ,pdfborder     = { 0~0~0 }
+        ,pdfborderstyle=
       }
   }
 
@@ -2664,9 +2719,10 @@
       {
         hide#1 .meta:n =
           {
-             color#1=false,
-             ocgcolor#1 = false,
-             % 
+             ,color#1       = false
+             ,ocgcolor#1    = false
+             ,#1border      = { 0~0~0 }
+             ,#1borderstyle =
           }
       }
   }
