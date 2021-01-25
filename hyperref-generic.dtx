@@ -97,7 +97,8 @@
 %
 %  \subsection{Bookmark code}
 %  The driver doesn't contain code to handle bookmarks/outlines. Instead it forces
-%  the loading of the \pkg{bookmark} package. Currently this is done at the end of the preamble
+%  the loading of the \pkg{bookmark} package unless the option |bookmarks=false|
+%  has been used. Currently this is done at the end of the preamble
 %  so if commands from \pkg{bookmark} are needed in the preamble the document
 %  still has to load it manually but this is subject to change.
 %
@@ -685,6 +686,7 @@
 \providecommand\@pdfborder{}
 \providecommand\@pdfborderstyle{}
 \newcommand\OBJ@OCG@view {} % needed in hyperref
+\def\Hy@numberline#1{#1\c_space_tl}   %needed by bookmark
 %    \end{macrocode}
 %
 % We force unicode as option. As bookmarks are still using \cs{pdfstringdef}
@@ -761,8 +763,12 @@
   { \msg_error:nn { hyp}{ missing-resource-management } }
 %    \end{macrocode}
 % Outlines/bookmarks require the bookmark package.
+% TODO check pdfpagemode if booksmarks are suppressed.
 %    \begin{macrocode}
-\AddToHook{begindocument/before}{\RequirePackage{bookmark}}
+\legacy_if:nT { Hy@bookmarks }
+  {
+    \AddToHook{begindocument/before}[hyperref/bookmark]{\RequirePackage{bookmark}}
+  }
 %    \end{macrocode}
 %
 % \section{Reference and label commands}
@@ -1740,6 +1746,20 @@
              \pdfmanagement_add:nnx {Catalog} { URI }{ <</Base \l_@@_tmpa_tl>> }
           }
      }
+   %only false does something ...
+   ,bookmarks .choice:
+   ,bookmarks / false .code:n = {\RemoveFromHook {begindocument/before}[hyperref/bookmark]}
+   ,bookmarks / true .code:n = {}
+   ,bookmarks .default:n = {true}
+   ,bookmarksnumbered .choice:
+   ,bookmarksnumbered / false .code:n = { \Hy@bookmarksnumberedfalse }
+   ,bookmarksnumbered / true .code:n  = { \Hy@bookmarksnumberedtrue }
+   ,bookmarksnumbered .default:n      = {true}
+   ,bookmarksopen .choice:
+   ,bookmarksopen / false .code:n = { \Hy@bookmarksopenfalse }
+   ,bookmarksopen / true .code:n  = { \Hy@bookmarksopentrue }
+   ,bookmarksopen .default:n      = {true}
+   ,bookmarksopenlevel .tl_set:N = \@bookmarksopenlevel
    ,pdfcenterwindow    .choice:
    ,pdfcenterwindow / false .code:n =
      {
