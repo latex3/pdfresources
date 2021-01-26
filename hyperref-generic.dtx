@@ -264,7 +264,7 @@
 %  Options that still must be set as package options are
 %  \begin{itemize}
 %  \item |destlabels|
-%  \item |pdfpagelabels| 
+%  \item |pdfpagelabels|
 %  \item |implicit|
 %  \end{itemize}
 %
@@ -272,6 +272,7 @@
 %  \begin{itemize}
 %  \item |debug|, |verbose| (a boolean)
 %  \item |bookmarks| (a boolean)
+%  \item |plainpages|
 %  \end{itemize}
 %
 %  Ignored options:
@@ -1424,6 +1425,10 @@
 % \subsection{URI links}
 %
 %   \begin{macrocode}
+\pdfdict_new:n   {l_hyp/annot/A/URI}
+\pdfdict_put:nnn {l_hyp/annot/A/URI}{Type}{/Action}
+\pdfdict_put:nnn {l_hyp/annot/A/URI}{S}{/URI}
+
 \cs_new_protected:Npn \hyper@linkurl #1 #2  %#1:link text #2: URI,
   {
     \group_begin:
@@ -1431,24 +1436,24 @@
       { #2}
       { \l_@@_text_enc_uri_print_tl }
       \l_@@_uri_tmpa_tl
+    \pdfdict_put:nno{l_hyp/annot/A/URI}{URI}{\l_@@_uri_tmpa_tl}
+    \ifHy@href@ismap
+       \pdfdict_put:nnn{l_hyp/annot/A/URI}{IsMap}{true}
+    \fi
+    \tl_if_empty:NF \Hy@href@nextactionraw
+      {
+        \str_remove_once:Nn \Hy@href@nextactionraw {/Next}
+        \pdfdict_put:nno{l_hyp/annot/A/Next}{\Hy@href@nextactionraw}
+      }
     \cs_set_eq:NN \# \c_hash_str
     \cs_set_eq:NN \% \c_percent_str
     \Hy@safe@activestrue
     \mode_leave_vertical:
-    %Subtype and A could probably also be handled with hooks if needed
-    %but checks for all drivers should be done then.
-    \pdfannot_link:nnn { URI }
+    \pdfannot_link:nxn { URI }
       {
         /A
           <<
-            % the action dictionary has no hook!
-            /Type/Action~
-            /S/URI~
-            /URI\l_@@_uri_tmpa_tl~
-            \ifHy@href@ismap
-              /IsMap~true%
-            \fi
-            \Hy@href@nextactionraw
+            \pdfdict_use:n {l_hyp/annot/A/URI}
           >>
       }
       {
@@ -1461,6 +1466,10 @@
 %    \end{macrocode}
 % \subsection{GoToR Links {files}}
 %    \begin{macrocode}
+\pdfdict_new:n   {l_hyp/annot/A/GoToR}
+\pdfdict_put:nnn {l_hyp/annot/A/GoToR}{Type}{/Action}
+\pdfdict_put:nnn {l_hyp/annot/A/GoToR}{S}{GoToR}
+
 \cs_new_protected:Npn \hyper@linkfile #1 #2 #3 % anchor text, filename, destname
   {
     \group_begin:
@@ -1470,25 +1479,31 @@
       { \l_@@_filename_tmpa_tl }
       { \l_@@_text_enc_file_print_tl }
       \l_@@_filename_tmpa_tl
+    \pdfdict_put:nno {l_hyp/annot/A/GoToR}{F}{\l_@@_filename_tmpa_tl}
     \@@_text_pdfstring:nnN
       { #3 }
       { \l_@@_text_enc_dest_print_tl }
       \l_@@_dest_name_tmpa_tl
+    \tl_if_blank:eTF {#3}
+      {
+        \pdfdict_put:nnx {l_hyp/annot/A/GoToR}{D}
+          {[\Hy@href@page/\l_@@_dest_pdfremotestartview_tl]}
+      }
+      {
+        \pdfdict_put:nno {l_hyp/annot/A/GoToR}{D}{\l_@@_dest_name_tmpa_tl}
+      }
     \Hy@MakeRemoteAction
+    \tl_if_empty:NF \Hy@href@nextactionraw
+      {
+        \str_remove_once:Nn \Hy@href@nextactionraw {/Next}
+        \pdfdict_put:nno{l_hyp/annot/A/Next}{\Hy@href@nextactionraw}
+      }
     \mode_leave_vertical:
-    \pdfannot_link:nnn %expansion??
+    \pdfannot_link:nxn %expansion??
       { GoToR }
       {
         /A<<
-          /F \l_@@_filename_tmpa_tl
-          /S/GoToR
-          \Hy@SetNewWindow
-          \ifx\\#3\\
-            /D[\Hy@href@page/\l_@@_dest_pdfremotestartview_tl]
-          \else
-            /D \l_@@_dest_name_tmpa_tl
-          \fi
-          \Hy@href@nextactionraw
+          \pdfdict_use:n {l_hyp/annot/A/GoToR}
         >>
       }
       {
@@ -1680,6 +1695,11 @@
     \hyper@linklaunch {#1}{#2}{#3}
   }
 
+\pdfdict_new:n   {l_hyp/annot/A/Launch}
+\pdfdict_put:nnn
+  {l_hyp/annot/A/GoToR}
+  {S}{Launch}
+
 \cs_new_protected:Npn \hyper@linklaunch #1 #2 #3 % filename, anchor text, Parameters
  {
   \group_begin:
@@ -1779,6 +1799,15 @@
    ,debug .meta:n = {verbose=#1}
    ,debug .default:n = {true}
  }
+
+\keys_define:nn { hyp / setup }
+  {
+   ,plainpages .choice:
+   ,plainpages / true  .code:n = { \Hy@plainpagestrue}
+   ,plainpages / false .code:n = { \Hy@plainpagesfalse}
+   ,plainpages .default:n = {true}
+  }
+
 \keys_define:nn { hyp / setup }
  {
    ,baseurl       .code:n =
@@ -1935,6 +1964,22 @@
        \msg_warning:nnxx { hyp } { no-bool }
          { pdfmenubar }
          { \exp_not:n {#1} }
+     }
+   ,pdfnewwindow .choice:
+   ,pdfnewwindow / true .code:n =
+     {
+       \pdfdict_put:nnn {l_hyp/annot/A/GoToR}{/NewWindow}{true}
+       \pdfdict_put:nnn {l_hyp/annot/A/Launch}{/NewWindow}{true}
+     }
+   ,pdfnewwindow / false .code:n =
+     {
+       \pdfdict_put:nnn {l_hyp/annot/A/GoToR}{/NewWindow}{false}
+       \pdfdict_put:nnn {l_hyp/annot/A/Launch}{/NewWindow}{false}
+     }
+   ,pdfnewwindow /  .code:n =
+     {
+       \pdfdict_remove:nn {l_hyp/annot/A/GoToR}{/NewWindow}
+       \pdfdict_remove:nn {l_hyp/annot/A/Launch}{/NewWindow}
      }
    ,pdfnonfullscreenpagemode   .choices:nn =
      { UseNone, UseOutlines, UseThumbs, FullScreen, UseOC } %pdf 1.5
