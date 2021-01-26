@@ -416,6 +416,22 @@
 %  \end{itemize}
 %
 %
+%\section{Assorted key descriptions}
+%The following gives a few details to some keys that are perhaps not
+%completly described in the manual, or are a bit different in this driver.
+%The list is alphabetic.
+%
+% \DescribeHypkey{bookmarkstype} This key takes as value the extension of a list
+% like |toc| or |lof|. If this list uses \cs{addcontentsline} the content will
+% be added to the bookmarks. The key can be use in \cs{hypersetup} and also in
+% the middle of the document to switch the list.
+% 
+% \DescribeHypkey{colormodel} With |colormodel| the colormodel used in the |/C|
+% key of the annotation array and in similar keys is set. It does not affect
+% the text and graphics colors in the page stream.
+% Possible choices are |rgb| (three numbers in the array) and |cmyk| (four numbers).
+% While the PDF reference allows four numbers, PDF readers don't necessarly handle
+% this correctly, so the value can be wrong.
 
 %^^A %% This is an adapted version of hluatex.def
 %^^A %% meant to test the use of the commands
@@ -1760,6 +1776,7 @@
    ,bookmarksopen / true .code:n  = { \Hy@bookmarksopentrue }
    ,bookmarksopen .default:n      = {true}
    ,bookmarksopenlevel .tl_set:N = \@bookmarksopenlevel
+   ,bookmarkstype .tl_set:N = \Hy@bookmarkstype
    ,pdfcenterwindow    .choice:
    ,pdfcenterwindow / false .code:n =
      {
@@ -2483,12 +2500,6 @@
 \cs_generate_variant:Nn \@@_color_select:n {e}
 %    \end{macrocode}
 % \end{macro}
-% \DescribeHypkey{colormodel} With |colormodel| the colormodel used in the |/C|
-% key of the annotation array and in similar keys is set. It does not affect
-% the text and graphics colors in the page stream.
-% Possible choices are |rgb| (three numbers in the array) and |cmyk| (four numbers).
-% While the PDF reference allows four numbers, PDF readers don't necessarly handle
-% this correctly, so the value can be wrong.
 % \begin{hypkey}{colormodel}
 %    \begin{macrocode}
 \keys_define:nn { hyp / setup }
