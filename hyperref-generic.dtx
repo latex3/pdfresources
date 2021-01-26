@@ -84,7 +84,7 @@
 %  the changes. This will take some time. Until then it is recommended to follow
 %  the following rules
 %  \begin{itemize}
-%  \item Alle options---with the exception of a few mentioned below---should be set
+%  \item Almost all options---with the exception of a few mentioned below---should be set
 %  in \cs{hypersetup}, not as package option.
 %  \item Colors used in the keys for link colors should be defined after the
 %  package has been loaded.
@@ -228,11 +228,6 @@
 %
 %   \end{itemize}
 %
-%
-%
-%
-%
-%
 %  \subsection{PDF strings}
 %
 %  \pkg{hyperref} uses a command called \cs{pdfstringdef} to convert text input into
@@ -258,7 +253,7 @@
 %     \item Currently the new method is much more silent: it doesn't warn like
 %     \pkg{hyperref} if it removes commands.
 %   \end{itemize}
-%  \subsection{Package options from hyperref}
+% \subsection{Package options from hyperref}
 %  Only a few package options are currently recognized by the new driver
 %  as \pkg{hyperref} hasn't been adapted yet.
 %
@@ -268,9 +263,22 @@
 %
 %  Options that still must be set as package options are
 %  \begin{itemize}
-%  \item |pdfpagelabels| (a boolean)
+%  \item |destlabels|
+%  \item |pdfpagelabels| 
+%  \item |implicit|
 %  \end{itemize}
 %
+%  Options that can be set as package options are
+%  \begin{itemize}
+%  \item |debug|, |verbose| (a boolean)
+%  \item |bookmarks| (a boolean)
+%  \end{itemize}
+%
+%  Ignored options:
+%  \begin{itemize}
+%  \item All driver options like |pdftex|, |dvipdfmx|
+%  \item |raiselinks| (only used in the dviwind, textures and tex4ht driver anyway)
+%  \end{itemize}
 %  \subsection{Draftmode}
 %  pdftex and other engines knows a
 %  draftmode which can be set with |\pdfdraftmode=1|
@@ -432,6 +440,19 @@
 % Possible choices are |rgb| (three numbers in the array) and |cmyk| (four numbers).
 % While the PDF reference allows four numbers, PDF readers don't necessarly handle
 % this correctly, so the value can be wrong.
+%
+% \DescribeHypkey{destlabel} This is a boolean key. Currently it must be set
+% as package option. If set to true, the name
+% of a destination is taken from a following \cs{label}, if there is one before
+% the next destination command. This requires two compilations to get
+% the correct coordinates in the destination. In the first compilation
+% the alias name is recorded in the aux-file:
+% \begin{verbatim}
+% \hyper@newdestlabel{section.1.2}{sec:sec2}
+% \end{verbatim}
+% The next compilation can then make use of it.
+% The two-pass could be avoided in the future with a better labeling system,
+% where the name if set earlier.
 
 %^^A %% This is an adapted version of hluatex.def
 %^^A %% meant to test the use of the commands
