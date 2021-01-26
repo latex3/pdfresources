@@ -426,7 +426,7 @@
 % \end{variable}
 % \subsubsection{Annotations, subtype Link /management}
 %
-% \begin{macro}{\pdfannot_link:nnn}
+% \begin{macro}{\pdfannot_link:nnn,\pdfannot_link:nxn}
 %    \begin{macrocode}
 \cs_new_protected:Nn \pdfannot_link:nnn %#1 type (URI, GoTo etc),
                                         %#2 action spec, #3 link text
@@ -453,9 +453,13 @@
     \bool_gset_true:N \g_@@_use_lastlink_bool
     \hook_use:n { pdfannot/link/#1/after}
   }
+\cs_generate_variant:Nn \pdfannot_link:nnn {nxn}
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\pdfannot_link_begin:nnw, \pdfannot_link_end:n }
+% \begin{macro}{
+%   \pdfannot_link_begin:nnw,
+%   \pdfannot_link_begin:nxw,
+%   \pdfannot_link_end:n }
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdfannot_link_begin:nnw #1 #2 %#1 type, #2 action spec
   {
@@ -481,6 +485,7 @@
     \bool_gset_true:N \g_@@_use_lastlink_bool
     \hook_use:n { pdfannot/link/#1/after}
   }
+\cs_generate_variant:Nn \pdfannot_link_begin:nnw {nxw}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\pdfannot_link_goto_begin:nw, \pdfannot_link_goto_end:}
@@ -545,7 +550,7 @@
   {
     \pdfdict_put:nnn { l_@@/#1 } { #2 }{ #3 }
   }
-\cs_generate_variant:Nn \pdfannot_dict_put:nnn {nnx}  
+\cs_generate_variant:Nn \pdfannot_dict_put:nnn {nnx}
 %    \end{macrocode}
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdfannot_dict_remove:nn #1 #2
