@@ -425,7 +425,7 @@
 % like |toc| or |lof|. If this list uses \cs{addcontentsline} the content will
 % be added to the bookmarks. The key can be use in \cs{hypersetup} and also in
 % the middle of the document to switch the list.
-% 
+%
 % \DescribeHypkey{colormodel} With |colormodel| the colormodel used in the |/C|
 % key of the annotation array and in similar keys is set. It does not affect
 % the text and graphics colors in the page stream.
@@ -1748,6 +1748,16 @@
       }
   }
 
+%debug, verbose
+\keys_define:nn { hyp / setup }
+ {
+   ,verbose .choice:
+   ,verbose / true  .code:n = { \Hy@verbosetrue}
+   ,verbose / false .code:n = { \Hy@verbosefalse}
+   ,verbose .default:n = {true}
+   ,debug .meta:n = {verbose=#1}
+   ,debug .default:n = {true}
+ }
 \keys_define:nn { hyp / setup }
  {
    ,baseurl       .code:n =
