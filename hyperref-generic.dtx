@@ -261,7 +261,7 @@
 %  the package has been loaded. This is also the case for options which normally
 %  don't work in \cs{hypersetup}.
 %
-%  Options that still must be set as package options are
+%  Options that must be set as package options are
 %  \begin{itemize}
 %  \item |destlabels|
 %  \item |pdfpagelabels|
@@ -1468,7 +1468,7 @@
 %    \begin{macrocode}
 \pdfdict_new:n   {l_hyp/annot/A/GoToR}
 \pdfdict_put:nnn {l_hyp/annot/A/GoToR}{Type}{/Action}
-\pdfdict_put:nnn {l_hyp/annot/A/GoToR}{S}{GoToR}
+\pdfdict_put:nnn {l_hyp/annot/A/GoToR}{S}{/GoToR}
 
 \cs_new_protected:Npn \hyper@linkfile #1 #2 #3 % anchor text, filename, destname
   {
@@ -1484,6 +1484,7 @@
       { #3 }
       { \l_@@_text_enc_dest_print_tl }
       \l_@@_dest_name_tmpa_tl
+    \Hy@MakeRemoteAction
     \tl_if_blank:eTF {#3}
       {
         \pdfdict_put:nnx {l_hyp/annot/A/GoToR}{D}
@@ -1492,7 +1493,6 @@
       {
         \pdfdict_put:nno {l_hyp/annot/A/GoToR}{D}{\l_@@_dest_name_tmpa_tl}
       }
-    \Hy@MakeRemoteAction
     \tl_if_empty:NF \Hy@href@nextactionraw
       {
         \str_remove_once:Nn \Hy@href@nextactionraw {/Next}
@@ -1697,8 +1697,8 @@
 
 \pdfdict_new:n   {l_hyp/annot/A/Launch}
 \pdfdict_put:nnn
-  {l_hyp/annot/A/GoToR}
-  {S}{Launch}
+  {l_hyp/annot/A/Launch}
+  {S}{/Launch}
 
 \cs_new_protected:Npn \hyper@linklaunch #1 #2 #3 % filename, anchor text, Parameters
  {
