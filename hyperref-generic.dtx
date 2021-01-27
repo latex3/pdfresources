@@ -1238,12 +1238,15 @@
 % \hyper@anchor
 % \hyper@anchorstart
 % \hyper@anchorend
-% \hyper@link
-% \hyper@linkstart
-% \hyper@linkend
-% \hyper@linkfile
-% \hyper@linkurl
+% \hyper@link      %GoTo
+% \hyper@linkstart %GoTo
+% \hyper@linkend   %GoTo
+% \hyper@linkfile  %GoToR
+% \hyper@linkurl   %URI
 % \end{verbatim}
+%
+% This driver defines for consistency also
+% |\hyper@linklaunch| for Launch.
 %
 % \subsection{ Anchors / destinations}
 % The first three commands are needed for \enquote{anchors}. At first
@@ -1423,7 +1426,7 @@
 %    \end{macrocode}
 %
 % \subsection{URI links}
-%
+% We define a dictionary for the action dictionary. For now it is public.
 %   \begin{macrocode}
 \pdfdict_new:n   {l_hyp/annot/A/URI}
 \pdfdict_put:nnn {l_hyp/annot/A/URI}{Type}{/Action}
@@ -1432,6 +1435,9 @@
 \cs_new_protected:Npn \hyper@linkurl #1 #2  %#1:link text #2: URI,
   {
     \group_begin:
+%    \end{macrocode}
+% Convert the uri and store it in the dict
+%    \begin{macrocode}
     \@@_text_pdfstring:xoN
       { #2}
       { \l_@@_text_enc_uri_print_tl }
@@ -1470,7 +1476,7 @@
 \pdfdict_put:nnn {l_hyp/annot/A/GoToR}{Type}{/Action}
 \pdfdict_put:nnn {l_hyp/annot/A/GoToR}{S}{/GoToR}
 
-\cs_new_protected:Npn \hyper@linkfile #1 #2 #3 % anchor text, filename, destname
+\cs_new_protected:Npn \hyper@linkfile #1 #2 #3 % link text, filename, destname
   {
     \group_begin:
     \tl_set:Nn \l_@@_filename_tmpa_tl { #2 }
@@ -1496,7 +1502,7 @@
     \tl_if_empty:NF \Hy@href@nextactionraw
       {
         \str_remove_once:Nn \Hy@href@nextactionraw {/Next}
-        \pdfdict_put:nno{l_hyp/annot/A/Next}{\Hy@href@nextactionraw}
+        \pdfdict_put:nno{l_hyp/annot/A/Next}{Next}{\Hy@href@nextactionraw}
       }
     \mode_leave_vertical:
     \pdfannot_link:nxn %expansion??
@@ -1507,19 +1513,79 @@
         >>
       }
       {
-%        \Hy@colorlink\@filecolor
         #1\Hy@xspace@end
-%        \Hy@endcolorlink
         \Hy@VerboseLinkStop %where is the start??
       }
     \group_end:
   }
+%    \end{macrocode}
+%
+% \subsection{Launch links}
+%
+% We define \hyper@linklaunch for naming consistency
+%    \begin{macrocode}
+\pdfdict_new:n   {l_hyp/annot/A/Launch}
+\pdfdict_put:nnn {l_hyp/annot/A/Launch}{Type}{/Action}
+\pdfdict_put:nnn {l_hyp/annot/A/Launch}{S}{/Launch}
 
-% variants of hyperref commands to get attributes in the prop
-% these are (temporary) commands to fill various attributes (color, border style) in
-% the hooks for links from the hyperref keys.
-
-% pdfborder, pdfborderstyle
+\cs_new_protected:Npn \hyper@linklaunch #1 #2 #3 % link text, filename,  Parameters
+  {
+    \group_begin:
+      \@@_text_pdfstring:nnN
+        { #1 }
+        { \l_@@_text_enc_file_print_tl }
+        \l_@@_filename_tmpa_tl
+      \pdfdict_put:nno {l_hyp/annot/A/Launch}{F}{\l_@@_filename_tmpa_tl}
+      \@@_text_pdfstring:noN
+        { #3 }
+        { \l_@@_text_enc_para_print_tl }
+        \l_@@_para_tmpa_tl
+      \bool_if:nTF
+        {
+          \str_if_eq_p:Vn \l_@@_para_tmpa_tl {()}
+          ||
+          \pdf_version_compare_p:Nn > {1.9}
+        }
+        {
+          \pdfdict_remove:nn {l_hyp/annot/A/Launch}{Win}
+        }
+        {
+          \pdfdict_put:nnx {l_hyp/annot/A/Launch}{Win}
+            {<</P \l_@@_para_tmpa_tl /F \l_@@_filename_tmpa_tl >>}
+        }
+      \tl_if_empty:NF \Hy@href@nextactionraw
+        {
+          \str_remove_once:Nn \Hy@href@nextactionraw {/Next}
+          \pdfdict_put:nno{l_hyp/annot/A/Next}{Next}{\Hy@href@nextactionraw}
+        }
+      \mode_leave_vertical:
+      \pdfannot_link:nxn
+        { Launch }
+        {
+          /A
+          <<
+            \pdfdict_use:n {l_hyp/annot/A/Launch}
+          >>
+        }
+        {
+          #2\Hy@xspace@end
+          \Hy@VerboseLinkStop %where is the start??
+        }
+    \group_end:
+  }
+%    \end{macrocode}
+% The actually command used by hyperref is \s{@hyper@launch} which uses a delimited
+% argument, because of the color the definition is a bit convoluted.
+%    \begin{macrocode}
+\use:x
+  { % filename, anchor text, linkname
+    \cs_set_protected:Npn \exp_not:N \@hyper@launch run \c_colon_str ##1 \exp_not:N \\ ##2 ##3
+  }
+  {
+    \hyper@linklaunch {#1}{#2}{#3}
+  }
+%    \end{macrocode}
+%
 %    \begin{macrocode}
 \pdfannot_link_margin:n { 1pt }
 
@@ -1685,64 +1751,6 @@
 \ExplSyntaxOn
 %file links to pdfs. See test-filelinks.pdf for a few example.
 
-% use by run links xxxxxxxxxxx
-%define \hyper@linklaunch for naming consistency
-\use:x
-  { % filename, anchor text, linkname
-    \cs_set_protected:Npn \exp_not:N \@hyper@launch run \c_colon_str ##1 \exp_not:N \\ ##2 ##3
-  }
-  {
-    \hyper@linklaunch {#1}{#2}{#3}
-  }
-
-\pdfdict_new:n   {l_hyp/annot/A/Launch}
-\pdfdict_put:nnn
-  {l_hyp/annot/A/Launch}
-  {S}{/Launch}
-
-\cs_new_protected:Npn \hyper@linklaunch #1 #2 #3 % filename, anchor text, Parameters
- {
-  \group_begin:
-    %\@@_pstringdef:Nn \l_@@_filename_tmpa_tl { #1 } %string-hex
-    \@@_text_pdfstring:nnN
-      { #1 }
-      { \l_@@_text_enc_file_print_tl }
-      \l_@@_filename_tmpa_tl
-    %\@@_pstringdef:Nn \l_@@_para_tmpa_tl     { #3 } %string-hex
-    \@@_text_pdfstring:noN
-      { #3 }
-      { \l_@@_text_enc_para_print_tl }
-      \l_@@_para_tmpa_tl
-    %\Hy@pstringdef\Hy@pstringF{#1}%
-    %\Hy@pstringdef\Hy@pstringP{#3}%
-    \mode_leave_vertical:
-    \pdfannot_link:nnn %expansion?
-     { Launch }
-     {
-       /A<<
-          /F~\l_@@_filename_tmpa_tl
-          /S/Launch
-          \Hy@SetNewWindow
-          \bool_if:nF
-            {
-              \str_if_eq_p:Vn \l_@@_para_tmpa_tl {()}
-              ||
-              \pdf_version_compare_p:Nn > {1.9}
-            }
-            {
-              /Win<</P \l_@@_para_tmpa_tl /F \l_@@_filename_tmpa_tl >>
-            }
-          \Hy@href@nextactionraw
-         >>
-      }
-      {
-        \Hy@colorlink\@runcolor
-        #2\Hy@xspace@end
-        \Hy@endcolorlink
-        \Hy@VerboseLinkStop %where is the start??
-      }
-  \group_end:
-}
 
 
 %this needs central management in the kernel and changes in hyperref.
