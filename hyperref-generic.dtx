@@ -288,6 +288,7 @@
 %  \item |debug|, |verbose| (a boolean)
 %  \item |bookmarks| (a boolean)
 %  \item |plainpages|
+%  \item |draft|, |final|
 %  \end{itemize}
 %
 %  Ignored options:
@@ -297,6 +298,15 @@
 %  \item |frenchlinks|
 %  \item |setpagesize|
 %  \end{itemize}
+%
+%  \section{Disabling links}
+%
+%  \pkg{hyperref} knows like many packages the options |draft| and |final|.
+%  With \pkg{hyperref} they can be used as package options or in the preamble
+%  in \cs{hypersetup} and disable linking completely. The new driver passes the
+%  options also to the \pkg{bookmark} package---this naturally only works if
+%  \pkg{bookmark} hasn't been loaded yet when the option is used.
+%
 %
 %  \section{Draftmode}
 %  pdftex and other engines knows a
@@ -1828,6 +1838,21 @@
    ,debug .meta:n = {verbose=#1}
    ,debug .default:n = {true}
  }
+
+%draft,final
+\keys_define:nn { hyp / setup }
+  {
+   ,draft .code:n =
+     {
+       \Hy@drafttrue
+       \PassOptionsToPackage{draft}{bookmark}
+     }
+   ,final .code:n =
+     {
+       \Hy@finaltrue
+       \PassOptionsToPackage{final}{bookmark}
+     }
+  }
 
 \keys_define:nn { hyp / setup }
   {
