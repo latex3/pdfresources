@@ -1077,6 +1077,7 @@
 \seq_map_inline:Nn \c_pdfannot_link_types_seq
   {
     \bool_new:c {l_@@_annot_#1_bool}
+    \bool_set_true:c {l_@@_annot_#1_bool}
   }
 %    \end{macrocode}
 % \end{variable}
@@ -1464,22 +1465,28 @@
         \__hyp_link_goto_end:
         \group_end:
         \Hy@VerboseLinkStop
-      }{#3}  
+      }{#3}
   }
 
 \cs_new_protected:Npn \hyper@linkstart #1 #2 %#1 context, #2=destination name
   {
-    \Hy@VerboseLinkStart{#1}{#2}% only for debug
-    \group_begin:
-    \hook_use:n {hyp/link/#1}
-    \@@_link_goto_begin:nw {#2}
+    \bool_if:NT \l_@@_annot_GoTo_bool
+      {
+        \Hy@VerboseLinkStart{#1}{#2}% only for debug
+        \group_begin:
+        \hook_use:n {hyp/link/#1}
+        \@@_link_goto_begin:nw {#2}
+      }
   }
 
 \cs_new_protected:Npn \hyper@linkend
   {
-    \@@_link_goto_end:
-    \group_end:
-    \Hy@VerboseLinkStop
+    \bool_if:NT \l_@@_annot_GoTo_bool
+      {
+        \@@_link_goto_end:
+        \group_end:
+        \Hy@VerboseLinkStop
+      }
   }
 %    \end{macrocode}
 %

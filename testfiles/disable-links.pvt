@@ -1,0 +1,28 @@
+\documentclass{article}
+\usepackage[colorlinks]{hyperref}
+%\hypersetup{draft}
+\begin{document}
+\ExplSyntaxOn
+\bool_set_false:N \l__hyp_annot_GoTo_bool
+\ExplSyntaxOff
+
+\tableofcontents
+
+\newpage
+\ExplSyntaxOn
+\bool_set_true:N \l__hyp_annot_GoTo_bool
+\ExplSyntaxOff
+
+\section{abc}\label{x}
+
+\ref{x},
+
+\ExplSyntaxOn
+\bool_set_false:N \l__hyp_annot_GoTo_bool
+\ExplSyntaxOff
+
+\ref{x}
+
+%\url{https://github.com/latex3/luaotfload/issues/154}
+
+\end{document}
