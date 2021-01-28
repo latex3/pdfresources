@@ -64,10 +64,11 @@
 %
 % The generic driver can be used with pdflatex, lualatex, xelatex, latex with
 % dvipdfmx, latex with dvips+ps2pdf. latex with dvips+distiller could work too
-% but is untested.
+% but is untested. (x)dvipdfmx will probably soon support dvilualatex, then this
+% combination should work too.
 %
-% The driver requires the new PDF management code, so document wanting to use it should
-% start like this
+% The driver \emph{requires} the new PDF management code, so documents wanting to use it
+% should start like this
 % \begin{verbatim}
 % \RequirePackage{pdfmanagement} %loads the code
 % \DeclareDocumentMetadata % activates it
@@ -79,112 +80,124 @@
 %   }
 %  \end{verbatim}
 %
-%  \section{Avoiding transition problems}
-%  Some code will only work properly after other packages have been adapted to
-%  the changes. This will take some time. Until then it is recommended to follow
-%  the following rules
-%  \begin{itemize}
-%  \item Almost all options---with the exception of a few mentioned below---should be set
-%  in \cs{hypersetup}, not as package option.
-%  \item Colors used in the keys for link colors should be defined after the
-%  package has been loaded.
-%  \end{itemize}
-%  \section{Differences}
-%  The new driver tries to be compatible with the current \pkg{hyperref} drivers
+%  The new driver tries to be compatible with the standard \pkg{hyperref} drivers
 %  but there are nevertheless differences. Some of them due to the still experimental
 %  status of the driver, others are design decisions: one part of the project is
-%  to clean up and modernize the code.
+%  to clean up and modernize the code. The following sections try to describe
+%  the differences but also to document some of the rationals of the changes,
+%  and to add some details and comments about the existing options and so to
+%  extend the \pkg{hyperref} manual.
 %
-%  \subsection{Bookmark code}
-%  The driver doesn't contain code to handle bookmarks/outlines. Instead it forces
-%  the loading of the \pkg{bookmark} package unless the option |bookmarks=false|
-%  has been used. Currently this is done at the end of the preamble
+%  \section{Avoiding transition problems}
+%  Some code will only work properly after other packages have been adapted to
+%  the new PDF management code and the changes in this driver too.
+%  This will take some time. Until then it is recommended to follow
+%  the following rules
+%  \begin{itemize}
+%  \item Almost all options---with the exception of a few mentioned below in
+%  section~\ref{sec:pkg-options}---should be set in \cs{hypersetup},
+%  not as package option.
+%  \item Colors used in the keys for link colors should be defined after the
+%  package has been loaded.
+%  \item Report problems! Only known problem can be resolved.
+%  \end{itemize}
+%
+%
+%  \section{Bookmarks / outlines}
+%  The new driver doesn't contain code to handle bookmarks/outlines.
+%  Instead it forces the loading of the \pkg{bookmark} package
+%  unless the package option |bookmarks=false|
+%  has been used. Currently \pkg{bookmark} is loaded at the end of the preamble
 %  so if commands from \pkg{bookmark} are needed in the preamble the document
-%  still has to load it manually but this is subject to change.
+%  should load it manually. This is subject to change at some time in the future.
 %
-%  \subsection{PDF page size (mediabox)}
-%  The other \pkg{hyperref} driver contains code to set the PDF page size.
+%  \section{PDF page size (mediabox)}
+%  The standard \pkg{hyperref} driver contain code to set the PDF page size.
 %  There is no real justification why this is done by \pkg{hyperref} apart from the
 %  fact that \LaTeX{} itself doesn't do it and that the needed special code could
 %  be added to the backend drivers.
 %
-%  In the new driver this code is gone. The problem is not to set the MediaBox,
-%  actually it could be done with one line of code:
+%  In the new driver this code is gone. The reason is not that it is
+%  difficult to set the MediaBox, actually it could be done with one line of code:
 %  \begin{verbatim}
 %  \pdfmanagement_add:nnn{Page}{MediaBox}
 %    {[0~0~\dim_to_decimal_in_bp:n{\paperwidth}~
 %          \dim_to_decimal_in_bp:n{\paperheight}]}
 %  \end{verbatim}
 %
-%  The problem is to know which value to use (with the memoir class \cs{stockwidth}
-%  should be used), and that there are to many actors here: color/graphicx, geometry,
-%  the KOMA-classes, memoir, \ldots\ all try to set this.
+%  The problem is to know which value to use (with the memoir class e.g.\cs{stockwidth}
+%  should be used instead of \cs{paperwidth}),
+%  and detecting this not a \pkg{hyperref} task. Instead the packages which change
+%  these values should also set the PDF page size. Also there are
+%  too many actors here: color/graphicx, geometry,the KOMA-classes, memoir,
+%  \ldots\ all try to set this.
 %
-%  So if the PDF page size is wrong load one of the other packages setting it
+%  So if the PDF page size is wrong: load one of the other packages setting it
 %  e.g. the \pkg{color} or the \pkg{graphicx} package.
-%  At some time this function should then be provided by \pkg{l3backend}.
 %
 %
-%  \subsection{Link decorations: border, color, OCG-color, \ldots}
+%  \section{Link decorations: border, color, OCG-color, \ldots}
 %  Some main changes are
 %  \begin{itemize}
 %  \item The default colors have been changed.
 %  \item |citecolor| is no longer set with |allcolors| and it is not part of the
-%  colorscheme, it is only supported for compability.
-%  \item a number colorschemes have been predefined.
+%  color scheme, it is only supported for compability.
+%  \item a number of color schemes have been predefined.
 %  \end{itemize}
 %
 %  \subsection{Background information}
 %  With the standard drivers \pkg{hyperref} allows either to color the link text,
 %  or to use a border around it.
-%  There is also a (rather unknown) option |frenchlinks| to use small caps instead of colors.
+%  There is also a (rather unknown) option |frenchlinks| to use small caps
+%  for some links instead of colors.
 %
-%  The \emph{link border} is a setting in the annotation directory. It can be colored
-%  and styled (with the |<xxx>bordercolor|, |pdfborderstyle| and |pdfhighlight| keys),
-%  but the exact look depends on the PDF viewer. Such decorations are normally not
-%  printed.
+%  The \emph{link border} is a setting in the PDF annotation directory.
+%  It can be colored and styled (with the |<xxx>bordercolor|, |pdfborderstyle|
+%  and |pdfhighlight| keys), but the exact look depends on the PDF viewer.
+%  Such decorations are normally not  printed.
 %
 %  The \emph{link text} is colored with the standard color commands for text.
-%  Such a color is also printed, which is often not wanted but can be avoided
-%  in PDF with so-called OCG-layers: They allow to add
+%  Such a color is also printed, which is often not wanted. The printing
+%  can be avoided in PDF with so-called OCG-layers: They allow to add
 %  variants of a text along with instructions which variant should be used for
 %  viewing and which for printing. \pkg{hyperref} implements a rather simple version
 %  for links: The link text is put in a box and printed twice with different colors
 %  on different OCG layers. As boxes are used such links can't be broken. The
-%  package {ocgx2} implements a more sophisticated version which allows to
+%  package \pkg{ocgx2} implements a more sophisticated version which allows to
 %  use it for links broken over lines and pages.
 %
 %  \pkg{hyperref} has keys to set the color and border for |link|, |url|, |file|,
 %  |menu| and |run| types. They correspond to the PDF annotation types
-%  GoTo, URI, GoToR, Named, Launch.
-%  Beside this there is |anchor| which is not used at all, and |cite| which is
-%  a semantical category and doesn't fit to the other types.
+%  |GoTo|, |URI|, |GoToR|, |Named| and |Launch|.
+%  Beside this there is a |anchorcolor| which isn't used at all, and |citecolor|
+%  which is a semantical category and doesn't fit to the other types.
 %
-%  In the standard drivers the options are exclusive and global:
-%  One of the options (colorlinks, ocgcolorlinks, or borders) has to be
-%  chosen in the preamble
-%  and is then used for the whole document and all link types. Only colors and
-%  eventually the border style can be adjusted locally. But there is no technical
-%  reason for these restrictions: It is quite possible to change all these attributes
-%  at any time both by link type and locally. The restrictions and
-%  some other settings can only be explained by the age of the code: \pkg{hyperref}
+%  In the standard drivers the decoration options are more or less exclusive and global:
+%  One of the options (|colorlinks|, |ocgcolorlinks|, or borders) has to be
+%  chosen in the preamble and is then used for the whole document
+%  and all link types.
+%  Only colors and eventually the border style can be adjusted locally.
+%  But there is no technical reason for these restrictions:
+%  It is quite possible to change all these attributes
+%  at any time both by link type and locally. The restrictions of the current
+%  implementation can only be explained by the age of the code: \pkg{hyperref}
 %  has been created at a time when memory was small and the main drivers were html
 %  and postscript based.
 %
-%  While link colors have been traditionally more or less left
+%  While link colors have been traditionally more or less
 %  under the control of \pkg{hyperref},
-%  the situation with other formattings is more complicated. The font in \cs{url}
-%  is for example determined by \cs{Urlfont}, in the cases of references with
-%  internal links packages like \pkg{cleveref} or \pkg{biblatex} or
-%  \pkg{glossaries} offer formatting options too. Formatting here is often
-%  connected to semantics: an acronym should use a different font than a citation.
-%  While \pkg{hyperref} can offer options here, it would probably only clash
-%  with package formatting. It is more sensible not to interfere here.
+%  the situation with other format options, like the font, is more complicated.
+%  The font in \cs{url} is for example determined by \cs{Urlfont},
+%  a command from the \pkg{url} package.
+%  In the case of internal (GoTo) references packages like \pkg{cleveref} or
+%  \pkg{biblatex} or  \pkg{glossaries} offer formatting options too.
+%  Formatting here is often connected to semantics:
+%  an acronym should use a different font than a citation.
+%  While \pkg{hyperref} could offer options here, it would probably only clash
+%  with package formatting. It is more sensible not to interfere here. For this
+%  reason the |frenchlinks| option has been dropped.
 %
-%  The new driver tries to extend options where sensible, but also to clean up
-%  the code while staying if possible compatible to the current behaviour.
-%
-%  \subsubsection{New Keys}
+%  \subsection{New Keys}
 %  Some of the existing keys have been extended to allow individual setting for
 %  the link types |link|, |url|, |file| |menu| and |run|:
 %
@@ -192,20 +205,20 @@
 %   \item Beside |pdfborder| there are also |linkborder|, |urlborder| etc
 %   \item Beside |pdfhighlight| there are also |linkhighlight|, |urlhighlight| etc
 %   \item Beside |pdfborderstyle| there are also |linkborderstyle|, |urlborderstyle| etc
-%   \item Beside |colorlinks| there are also |colorlink|, |colorurl| etc %TODO
+%   \item Beside |colorlinks| there are also |colorlink|, |colorurl| etc
 %   \item Beside |ocgcolorlinks| there are also |ocgcolorlink|, |ocgcolorurl|, etc %TODO
-%   \item Beside |hidelinks| there are also |hidelink|, |hideurl|, etc %TODO
-%   \item |colormodel| allows to set the model used in annotations, the allowed values
-%   are |rgb| or |cmyk|. |rgb| is the default.
+%   \item Beside |hidelinks| there are also |hidelink|, |hideurl|, etc
+%   \item |colormodel| allows to set the model used in annotations,
+%   the allowed values  are |rgb| or |cmyk|. |rgb| is the default.
 %   It does \emph{not} change the model of text colors. Be aware
 %   that while the PDF format allows cmyk (4 numbers) in the |/C| key of an annotation,
 %   this is often ignored by pdf viewers and the colors can be wrong.
 %  \end{itemize}
 %
-%  \subsubsection{Changed behaviour}
+%  \subsection{Changed behaviour}
 %   \begin{itemize}
-%   \item |colorlinks| will as before disable the |pdfborder|, but it is possible to change
-%    this in the document at any time, or to reenable the border if wanted.
+%   \item |colorlinks| will as before disable the |pdfborder|, but it is possible
+%    to use the key in the document at any time, or to reenable the border if wanted.
 %    Internally |colorlinks| \& friends will no longer define/undefine
 %    |\Hy@colorlink|, but instead use the hooks provided by the \pkg{l3pdfannot} package.
 %   \item Color keys accept the following input syntax:
@@ -222,22 +235,22 @@
 %   \item As mentioned above the support for |citecolor| and |citebordercolor| etc
 %   has been reduced. A package like \pkg{hyperref} can't keep track of such semantic
 %   contexts, like cite, acronym, glossaries, special references and maintain keys for
-%   them. The keys are not completly dropped as this would affect packages like natbib,
-%   but they have been separated, are no longer affected by group keys like |allcolors|
-%   but must be set individually instead.
+%   them. The keys are not completly dropped as this would affect packages like
+%   \pkg{natbib}, but they have been separated and are no longer affected by
+%   group keys like |allcolors|  but must be set individually instead.
 %
 %   \end{itemize}
 %
-%  \subsection{PDF strings}
+%  \section{PDF strings}
 %
 %  \pkg{hyperref} uses a command called \cs{pdfstringdef} to convert text input into
-%  something that both makes sense and is valid in a PDF string, e.g. in the bookmarks
+%  something that makes sense and is valid in a PDF string, e.g. in the bookmarks
 %  or in the info dictionary or as form field values.
 %
 %  As the handling of the outlines are delegated to the \pkg{bookmark} package, they
 %  will for now still use \cs{pdfstringdef}, but all other strings produced by
-%  this driver will use a new method based on \cs{text_purify:n} and
-%  \cs{str_set_convert:Nnnn}. For normal text
+%  this driver will use a new method based on the expl3 commands
+%  \cs{text_purify:n} and  \cs{str_set_convert:Nnnn}. For normal text
 %  it shouldn't matter, but a variety of commands and math are handled differently.
 %  Like with \cs{pdfstringdef} they are a number of ways to adjust the outcome of
 % \cs{text_purify:n}. These are described in the expl3 documentation interface3.pdf.
@@ -246,26 +259,28 @@
 %
 %  Important differences here are
 %  \begin{itemize}
-%     \item \emph{This new method requires that files are utf8-encoded}
+%    \item \emph{This new method requires that files are utf8-encoded}
 %      (at least if non-ascii chars are used in for PDF strings).
-%     \item \emph{All} robust commands are currently removed,
+%    \item \emph{All} robust commands are currently removed,
 %     unless an equivalent has been  declared.
-%     \item Currently the new method is much more silent: it doesn't warn like
+%    \item Currently the new method is much more silent: it doesn't warn like
 %     \pkg{hyperref} if it removes commands.
 %   \end{itemize}
-% \subsection{Package options from hyperref}
-%  Only a few package options are currently recognized by the new driver
-%  as \pkg{hyperref} hasn't been adapted yet.
 %
-%  So normally \emph{all} options should be set with \cs{hypersetup} after
+% \section{Package options from hyperref}\label{sec:pkg-options}
+%  Only a options are currently recognized by the new driver
+%  when used as package options as \pkg{hyperref} hasn't been adapted yet to pass
+%  them to the driver.
+%
+%  So normally options should be set with \cs{hypersetup} after
 %  the package has been loaded. This is also the case for options which normally
 %  don't work in \cs{hypersetup}.
 %
 %  Options that must be set as package options are
 %  \begin{itemize}
-%  \item |destlabels|
-%  \item |pdfpagelabels|
-%  \item |implicit|
+%  \item |destlabels|    (destination names are taken from \cs{label} if possible)
+%  \item |pdfpagelabels| (set PDF page labels)
+%  \item |implicit|      (redefine \LaTeX\ internals)
 %  \end{itemize}
 %
 %  Options that can be set as package options are
@@ -277,10 +292,13 @@
 %
 %  Ignored options:
 %  \begin{itemize}
-%  \item All driver options like |pdftex|, |dvipdfmx|
+%  \item All driver options like |pdftex|, |dvipdfmx|, \ldots
 %  \item |raiselinks| (only used in the dviwind, textures and tex4ht driver anyway)
+%  \item |frenchlinks|
+%  \item |setpagesize|
 %  \end{itemize}
-%  \subsection{Draftmode}
+%
+%  \section{Draftmode}
 %  pdftex and other engines knows a
 %  draftmode which can be set with |\pdfdraftmode=1|
 %  and \pkg{hyperref} honors this in some places. The new
@@ -288,7 +306,10 @@
 %  With todays computer power there is not much to gain and it only complicates
 %  the code.
 %
-%  \subsection{Dropped options}
+%  This should not be confused with the |draft| and |final| package options! They
+%  are still honored.
+%
+%  \section{Dropped options}
 %  A number of options are ignored by this driver
 %  \begin{description}
 %  \item[pdfversion] The pdfversion should be set in \cs{DeclareDocumentMetadata}
