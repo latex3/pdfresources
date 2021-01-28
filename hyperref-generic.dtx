@@ -1545,45 +1545,49 @@
 
 \cs_new_protected:Npn \hyper@linkfile #1 #2 #3 % link text, filename, destname
   {
-    \group_begin:
-    \tl_set:Nn \l_@@_filename_tmpa_tl { #2 }
-    \Hy@CleanupFile \l_@@_filename_tmpa_tl
-    \@@_text_pdfstring:ooN
-      { \l_@@_filename_tmpa_tl }
-      { \l_@@_text_enc_file_print_tl }
-      \l_@@_filename_tmpa_tl
-    \pdfdict_put:nno {l_hyp/annot/A/GoToR}{F}{\l_@@_filename_tmpa_tl}
-    \@@_text_pdfstring:nnN
-      { #3 }
-      { \l_@@_text_enc_dest_print_tl }
-      \l_@@_dest_name_tmpa_tl
-    \Hy@MakeRemoteAction
-    \tl_if_blank:eTF {#3}
-      {
-        \pdfdict_put:nnx {l_hyp/annot/A/GoToR}{D}
-          {[\Hy@href@page/\l_@@_dest_pdfremotestartview_tl]}
-      }
-      {
-        \pdfdict_put:nno {l_hyp/annot/A/GoToR}{D}{\l_@@_dest_name_tmpa_tl}
-      }
-    \tl_if_empty:NF \Hy@href@nextactionraw
-      {
-        \str_remove_once:Nn \Hy@href@nextactionraw {/Next}
-        \pdfdict_put:nno{l_hyp/annot/A/Next}{Next}{\Hy@href@nextactionraw}
-      }
-    \mode_leave_vertical:
-    \pdfannot_link:nxn %expansion??
-      { GoToR }
-      {
-        /A<<
-          \pdfdict_use:n {l_hyp/annot/A/GoToR}
-        >>
-      }
-      {
-        #1\Hy@xspace@end
-        \Hy@VerboseLinkStop %where is the start??
-      }
-    \group_end:
+   \bool_if:NTF \l_@@_annot_GoToR_bool
+     {
+        \group_begin:
+        \tl_set:Nn \l_@@_filename_tmpa_tl { #2 }
+        \Hy@CleanupFile \l_@@_filename_tmpa_tl
+        \@@_text_pdfstring:ooN
+          { \l_@@_filename_tmpa_tl }
+          { \l_@@_text_enc_file_print_tl }
+          \l_@@_filename_tmpa_tl
+        \pdfdict_put:nno {l_hyp/annot/A/GoToR}{F}{\l_@@_filename_tmpa_tl}
+        \@@_text_pdfstring:nnN
+          { #3 }
+          { \l_@@_text_enc_dest_print_tl }
+          \l_@@_dest_name_tmpa_tl
+        \Hy@MakeRemoteAction
+        \tl_if_blank:eTF {#3}
+          {
+            \pdfdict_put:nnx {l_hyp/annot/A/GoToR}{D}
+              {[\Hy@href@page/\l_@@_dest_pdfremotestartview_tl]}
+          }
+          {
+            \pdfdict_put:nno {l_hyp/annot/A/GoToR}{D}{\l_@@_dest_name_tmpa_tl}
+          }
+        \tl_if_empty:NF \Hy@href@nextactionraw
+          {
+            \str_remove_once:Nn \Hy@href@nextactionraw {/Next}
+            \pdfdict_put:nno{l_hyp/annot/A/Next}{Next}{\Hy@href@nextactionraw}
+          }
+        \mode_leave_vertical:
+        \pdfannot_link:nxn %expansion??
+          { GoToR }
+          {
+            /A<<
+              \pdfdict_use:n {l_hyp/annot/A/GoToR}
+            >>
+          }
+          {
+            #1\Hy@xspace@end
+            \Hy@VerboseLinkStop %where is the start??
+          }
+        \group_end:
+     }
+     {#1}
   }
 %    \end{macrocode}
 %
@@ -1595,50 +1599,54 @@
 \pdfdict_put:nnn {l_hyp/annot/A/Launch}{Type}{/Action}
 \pdfdict_put:nnn {l_hyp/annot/A/Launch}{S}{/Launch}
 
-\cs_new_protected:Npn \hyper@linklaunch #1 #2 #3 % link text, filename,  Parameters
+\cs_new_protected:Npn \hyper@linklaunch #1 #2 #3 % filename, link text, Parameters
   {
-    \group_begin:
-      \@@_text_pdfstring:nnN
-        { #1 }
-        { \l_@@_text_enc_file_print_tl }
-        \l_@@_filename_tmpa_tl
-      \pdfdict_put:nno {l_hyp/annot/A/Launch}{F}{\l_@@_filename_tmpa_tl}
-      \@@_text_pdfstring:noN
-        { #3 }
-        { \l_@@_text_enc_para_print_tl }
-        \l_@@_para_tmpa_tl
-      \bool_if:nTF
-        {
-          \str_if_eq_p:Vn \l_@@_para_tmpa_tl {()}
-          ||
-          \pdf_version_compare_p:Nn > {1.9}
-        }
-        {
-          \pdfdict_remove:nn {l_hyp/annot/A/Launch}{Win}
-        }
-        {
-          \pdfdict_put:nnx {l_hyp/annot/A/Launch}{Win}
-            {<</P \l_@@_para_tmpa_tl /F \l_@@_filename_tmpa_tl >>}
-        }
-      \tl_if_empty:NF \Hy@href@nextactionraw
-        {
-          \str_remove_once:Nn \Hy@href@nextactionraw {/Next}
-          \pdfdict_put:nno{l_hyp/annot/A/Next}{Next}{\Hy@href@nextactionraw}
-        }
-      \mode_leave_vertical:
-      \pdfannot_link:nxn
-        { Launch }
-        {
-          /A
-          <<
-            \pdfdict_use:n {l_hyp/annot/A/Launch}
-          >>
-        }
-        {
-          #2\Hy@xspace@end
-          \Hy@VerboseLinkStop %where is the start??
-        }
-    \group_end:
+   \bool_if:NTF \l_@@_annot_Launch_bool
+     {
+        \group_begin:
+          \@@_text_pdfstring:nnN
+            { #1 }
+            { \l_@@_text_enc_file_print_tl }
+            \l_@@_filename_tmpa_tl
+          \pdfdict_put:nno {l_hyp/annot/A/Launch}{F}{\l_@@_filename_tmpa_tl}
+          \@@_text_pdfstring:noN
+            { #3 }
+            { \l_@@_text_enc_para_print_tl }
+            \l_@@_para_tmpa_tl
+          \bool_if:nTF
+            {
+              \str_if_eq_p:Vn \l_@@_para_tmpa_tl {()}
+              ||
+              \pdf_version_compare_p:Nn > {1.9}
+            }
+            {
+              \pdfdict_remove:nn {l_hyp/annot/A/Launch}{Win}
+            }
+            {
+              \pdfdict_put:nnx {l_hyp/annot/A/Launch}{Win}
+                {<</P \l_@@_para_tmpa_tl /F \l_@@_filename_tmpa_tl >>}
+            }
+          \tl_if_empty:NF \Hy@href@nextactionraw
+            {
+              \str_remove_once:Nn \Hy@href@nextactionraw {/Next}
+              \pdfdict_put:nno{l_hyp/annot/A/Next}{Next}{\Hy@href@nextactionraw}
+            }
+          \mode_leave_vertical:
+          \pdfannot_link:nxn
+            { Launch }
+            {
+              /A
+              <<
+                \pdfdict_use:n {l_hyp/annot/A/Launch}
+              >>
+            }
+            {
+              #2\Hy@xspace@end
+              \Hy@VerboseLinkStop %where is the start??
+            }
+        \group_end:
+      }
+      {#2}
   }
 %    \end{macrocode}
 % The actually command used by hyperref is \s{@hyper@launch} which uses a delimited
