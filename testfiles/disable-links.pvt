@@ -1,7 +1,14 @@
+\input{regression-test}
+\RequirePackage{pdfmanagement}
+\DeclareDocumentMetadata
+ {
+  uncompress,
+  standard=A-3b
+  }
 \documentclass{article}
 \usepackage[colorlinks]{hyperref}
-%\hypersetup{draft}
 \begin{document}
+
 \ExplSyntaxOn
 \bool_set_false:N \l__hyp_annot_GoTo_bool
 \ExplSyntaxOff
@@ -17,12 +24,33 @@
 
 \ref{x},
 
+\url{https://github.com/latex3/luaotfload/issues/154}
+
+\href{test-pdfresources.pdf}{test file}
+
+\href{run:tests-nopdf.toc}{blub}
+
+\Acrobatmenu{Find}{Find}
+
+\Acrobatmenu{FirstPage}{FirstPage}
+
 \ExplSyntaxOn
 \bool_set_false:N \l__hyp_annot_GoTo_bool
+\bool_set_false:N \l__hyp_annot_URI_bool
+\bool_set_false:N \l__hyp_annot_GoToR_bool
+\bool_set_false:N \l__hyp_annot_Launch_bool
+\bool_set_false:N \l__hyp_annot_Named_bool
 \ExplSyntaxOff
 
 \ref{x}
 
-%\url{https://github.com/latex3/luaotfload/issues/154}
+\url{https://github.com/latex3/luaotfload/issues/154}
 
+\href{test-pdfresources.pdf}{test file}
+
+\href{run:tests-nopdf.toc}{blub}
+
+\Acrobatmenu{Find}{Find}
+
+\Acrobatmenu{FirstPage}{FirstPage}
 \end{document}

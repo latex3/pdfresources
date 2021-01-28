@@ -644,6 +644,13 @@
   { pdfa-no-reset-button }
   { PDF/A:~Reset~action~is~prohibited }
 %    \end{macrocode}
+% pdf/A message for not allowed Named actions
+%    \begin{macrocode}
+\msg_new:nnn
+  { hyp }
+  { pdfa-no-named-action }
+  { PDF/A:~Named~action~#1~is~prohibited }
+%    \end{macrocode}
 % A message if the destination name is empty.
 %    \begin{macrocode}
 \msg_new:nnn
@@ -1649,7 +1656,7 @@
       {#2}
   }
 %    \end{macrocode}
-% The actually command used by hyperref is \s{@hyper@launch} which uses a delimited
+% The actually command used by hyperref is \cs{@hyper@launch} which uses a delimited
 % argument, because of the color the definition is a bit convoluted.
 %    \begin{macrocode}
 \use:x
@@ -1661,6 +1668,49 @@
   }
 %    \end{macrocode}
 %
+% \subsection{Named links (menu)}
+%    \begin{macrocode}
+\pdfdict_new:n   {l_hyp/annot/A/Named}
+\pdfdict_put:nnn {l_hyp/annot/A/Named}{Type}{/Action}
+\pdfdict_put:nnn {l_hyp/annot/A/Named}{S}{/Named}
+
+\RenewDocumentCommand \Acrobatmenu { m m }
+  {
+    \bool_if:NTF \l_@@_annot_Named_bool
+      {
+         \group_begin:
+         \pdfmeta_if_named_action_allowed:nTF {#1}
+           {
+             \mode_leave_vertical:
+             \pdfdict_put:nnx {l_hyp/annot/A/Named}{N}
+               {\pdf_text_convert:nn{name-print}{#1}}
+             \tl_if_empty:NF \Hy@href@nextactionraw
+               {
+                 \str_remove_once:Nn \Hy@href@nextactionraw {/Next}
+                 \pdfdict_put:nno{l_hyp/annot/A/Next}{Next}{\Hy@href@nextactionraw}
+               }
+             \pdfannot_link:nxn { Named }
+              {
+                /A
+                  <<
+                    \pdfdict_use:n { l_hyp/annot/A/Named }
+                  >>
+              }
+              {
+                #2
+                \Hy@xspace@end
+                \Hy@VerboseLinkStop
+              }
+           }
+           {
+             \msg_warning:nnn { hyp } { pdfa-no-named-action }{#1}
+             #2
+           }
+        \group_end:
+      }
+      {#2}
+  }
+%    \end{macrocode}
 %    \begin{macrocode}
 \pdfannot_link_margin:n { 1pt }
 
@@ -1895,6 +1945,14 @@
      {
        \Hy@finaltrue
        \PassOptionsToPackage{final}{bookmark}
+     }
+  }
+
+\prop_map_inline:Nn \c_@@_map_hyp_annot_prop
+  {
+    \keys_define:nn { hyp / setup }
+     {
+       #1 .bool_set:c = {l_@@_annot_#2_bool}
      }
   }
 
@@ -3233,34 +3291,6 @@
   }
 
 %%% UF removed setpagesize code, should be done by kernel/graphicx
-%!! do we need a action dict type??
-\RenewDocumentCommand \Acrobatmenu { m m }
- {
-   \pdfmeta_if_named_action_allowed:nTF {#1}
-     {
-       \mode_leave_vertical:
-       \pdfannot_link:nnn { Named }
-         {
-           /A
-             <<
-               /S/Named
-               /N\pdf_text_convert:nn{name-print}{#1}
-               \Hy@href@nextactionraw
-             >>
-         }
-         {
-           \Hy@colorlink\@menucolor#2
-           \Hy@xspace@end
-           \Hy@endcolorlink
-           \Hy@VerboseLinkStop
-         }
-      }
-      {
-        % named action not allowed ...
-        % error??
-        #2
-      }
-  }
 
 
 %%%%%%%%%%%%%% Temporary stuff
