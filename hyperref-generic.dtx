@@ -1499,41 +1499,43 @@
 
 \cs_new_protected:Npn \hyper@linkurl #1 #2  %#1:link text #2: URI,
   {
-    \group_begin:
-%    \end{macrocode}
-% Convert the uri and store it in the dict
-%    \begin{macrocode}
-    \@@_text_pdfstring:xoN
-      { #2}
-      { \l_@@_text_enc_uri_print_tl }
-      \l_@@_uri_tmpa_tl
-    \pdfdict_put:nno{l_hyp/annot/A/URI}{URI}{\l_@@_uri_tmpa_tl}
-    \ifHy@href@ismap
-       \pdfdict_put:nnn{l_hyp/annot/A/URI}{IsMap}{true}
-    \fi
-    \tl_if_empty:NF \Hy@href@nextactionraw
+    \bool_if:NTF \l_@@_annot_URI_bool
       {
-        \str_remove_once:Nn \Hy@href@nextactionraw {/Next}
-        \pdfdict_put:nno{l_hyp/annot/A/Next}{\Hy@href@nextactionraw}
+        \group_begin:
+         \@@_text_pdfstring:xoN
+           { #2}
+           { \l_@@_text_enc_uri_print_tl }
+           \l_@@_uri_tmpa_tl
+         \pdfdict_put:nno{l_hyp/annot/A/URI}{URI}{\l_@@_uri_tmpa_tl}
+         \ifHy@href@ismap
+            \pdfdict_put:nnn{l_hyp/annot/A/URI}{IsMap}{true}
+         \fi
+         \tl_if_empty:NF \Hy@href@nextactionraw
+           {
+             \str_remove_once:Nn \Hy@href@nextactionraw {/Next}
+             \pdfdict_put:nno{l_hyp/annot/A/Next}{\Hy@href@nextactionraw}
+           }
+         \cs_set_eq:NN \# \c_hash_str
+         \cs_set_eq:NN \% \c_percent_str
+         \Hy@safe@activestrue
+         \mode_leave_vertical:
+         \pdfannot_link:nxn { URI }
+           {
+             /A
+               <<
+                 \pdfdict_use:n {l_hyp/annot/A/URI}
+               >>
+           }
+           {
+             #1
+             \Hy@xspace@end
+             \Hy@VerboseLinkStop %where is the start??
+           }
+         \group_end:
       }
-    \cs_set_eq:NN \# \c_hash_str
-    \cs_set_eq:NN \% \c_percent_str
-    \Hy@safe@activestrue
-    \mode_leave_vertical:
-    \pdfannot_link:nxn { URI }
-      {
-        /A
-          <<
-            \pdfdict_use:n {l_hyp/annot/A/URI}
-          >>
-      }
-      {
-        #1
-        \Hy@xspace@end
-        \Hy@VerboseLinkStop %where is the start??
-      }
-    \group_end:
+      {#1}
   }
+
 %    \end{macrocode}
 % \subsection{GoToR Links {files}}
 %    \begin{macrocode}
