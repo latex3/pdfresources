@@ -213,6 +213,8 @@
 %   It does \emph{not} change the model of text colors. Be aware
 %   that while the PDF format allows cmyk (4 numbers) in the |/C| key of an annotation,
 %   this is often ignored by pdf viewers and the colors can be wrong.
+%   \item The boolean keys |url|, |link|, |run|, |menu|, |file| allow to deactivate
+%   locally the link types.
 %  \end{itemize}
 %
 %  \subsection{Changed behaviour}
@@ -308,6 +310,11 @@
 %  \pkg{bookmark} hasn't been loaded yet as bookmarks can't work properly if
 %  the anchors from hyperref are missing.
 %
+%  The |draft| option is a global option that can't be undone (at least not easily).
+%  Beside this there are also boolean keys |url|, |link|, |run|, |menu|, |file|
+%  which allow to locally disable a link type. So e.g.
+%  |\hypersetup{link=false}\ref{abc}| will give a reference without link (this
+%  is naturally also possible with |\ref*{abc}|).
 %
 %
 %  \section{Draftmode}
