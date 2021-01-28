@@ -304,8 +304,10 @@
 %  \pkg{hyperref} knows like many packages the options |draft| and |final|.
 %  With \pkg{hyperref} they can be used as package options or in the preamble
 %  in \cs{hypersetup} and disable linking completely. The new driver passes the
-%  options also to the \pkg{bookmark} package---this naturally only works if
-%  \pkg{bookmark} hasn't been loaded yet when the option is used.
+%  options also to the \pkg{bookmark} package if
+%  \pkg{bookmark} hasn't been loaded yet as bookmarks can't work properly if
+%  the anchors from hyperref are missing.
+%
 %
 %
 %  \section{Draftmode}
@@ -1061,6 +1063,23 @@
   }
 %    \end{macrocode}
 % \end{variable}
+% \begin{variable}
+%  {
+%    \l_@@_annot_GoTo_bool
+%    \l_@@_annot_URI_bool
+%    \l_@@_annot_GoToR_bool
+%    \l_@@_annot_Named_bool
+%    \l_@@_annot_Launch_bool
+%  }
+%  This booleans are used to disable some link types
+%  while keeping others.
+%    \begin{macrocode}
+\seq_map_inline:Nn \c_pdfannot_link_types_seq
+  {
+    \bool_new:c {l_@@_annot_#1_bool}
+  }
+%    \end{macrocode}
+% \end{variable}
 %
 % \subsection{Boxes}
 % \begin{variable}{\l_@@_dest_box}
@@ -1433,15 +1452,19 @@
 % \pkg{hyperref} adds a group with \cs{Hy@colorlink}, we move this outside the link
 % so that it groups the context hook too.
 %    \begin{macrocode}
+
 \cs_new_protected:Npn \hyper@link #1 #2 #3 %#1 context, #2=destination name, #3 content
   {
-    \Hy@VerboseLinkStart{#1}{#2}
-    \group_begin:
-    \hook_use:n {hyp/link/#1}
-    \@@_link_goto_begin:nw {#2}#3\Hy@xspace@end
-    \__hyp_link_goto_end:
-    \group_end:
-    \Hy@VerboseLinkStop
+    \bool_if:NTF \l_@@_annot_GoTo_bool
+      {
+        \Hy@VerboseLinkStart{#1}{#2}
+        \group_begin:
+        \hook_use:n {hyp/link/#1}
+        \@@_link_goto_begin:nw {#2}#3\Hy@xspace@end
+        \__hyp_link_goto_end:
+        \group_end:
+        \Hy@VerboseLinkStop
+      }{#3}  
   }
 
 \cs_new_protected:Npn \hyper@linkstart #1 #2 %#1 context, #2=destination name
