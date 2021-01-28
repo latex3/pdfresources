@@ -838,6 +838,10 @@
   {
     \AddToHook{begindocument/before}[hyperref/bookmark]{\RequirePackage{bookmark}}
   }
+\legacy_if:nT {Hy@draft}
+  {
+    \PassOptionsToPackage{draft}{bookmark}
+  }
 %    \end{macrocode}
 %
 % \section{Reference and label commands}
