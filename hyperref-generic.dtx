@@ -283,6 +283,9 @@
 %  \item |destlabels|    (destination names are taken from \cs{label} if possible)
 %  \item |pdfpagelabels| (set PDF page labels)
 %  \item |implicit|      (redefine \LaTeX\ internals)
+%  \item |hyperfigures|  (according to the \pkg{hyperref} manual
+%  it makes figures hyper links, but actually is a no-op for most drivers, and it
+%  does nothing with this driver either.)
 %  \end{itemize}
 %
 %  Options that can be set as package options are
@@ -291,6 +294,7 @@
 %  \item |bookmarks| (a boolean)
 %  \item |plainpages|
 %  \item |draft|, |final|
+%  \item |hypertexnames|
 %  \end{itemize}
 %
 %  Ignored options:
@@ -305,17 +309,22 @@
 %
 %  \pkg{hyperref} knows like many packages the options |draft| and |final|.
 %  With \pkg{hyperref} they can be used as package options or in the preamble
-%  in \cs{hypersetup} and disable linking completely. The new driver passes the
-%  options also to the \pkg{bookmark} package if
+%  in \cs{hypersetup} and disable links and anchors completely.
+%  The new driver passes the options also to the \pkg{bookmark} package if
 %  \pkg{bookmark} hasn't been loaded yet as bookmarks can't work properly if
 %  the anchors from hyperref are missing.
 %
+%  \DescribeHypkey{link}%
+%  \DescribeHypkey{url}%
+%  \DescribeHypkey{file}%
+%  \DescribeHypkey{run}%
+%  \DescribeHypkey{menu}%
 %  The |draft| option is a global option that can't be undone (at least not easily).
-%  Beside this there are also boolean keys |url|, |link|, |run|, |menu|, |file|
+%  So the new driver offers also boolean keys |link|, |url|, |file|, |run| and |menu|
 %  which allow to locally disable a link type. So e.g.
 %  |\hypersetup{link=false}\ref{abc}| will give a reference without link (this
 %  is naturally also possible with |\ref*{abc}|). This disables also all hooks of
-%  the link, so the link is for example no longer colored, it also removes the
+%  the link type, so the link is for example no longer colored. It also removes the
 %  implicit grouping of the content.
 %
 %
@@ -324,7 +333,7 @@
 %  draftmode which can be set with |\pdfdraftmode=1|
 %  and \pkg{hyperref} honors this in some places. The new
 %  driver ignores it, for example |pagelabels| are created in any case.
-%  With todays computer power there is not much to gain and it only complicates
+%  With today's computer power there is not much to gain and it only complicates
 %  the code.
 %
 %  This should not be confused with the |draft| and |final| package options! They
@@ -411,6 +420,9 @@
 %  have different requirements: While for the first relative coordinates are fine,
 %  for the two others absolute coordinates are more sensible.
 %
+%  \DescribeHypkey{pdfview}
+%  \DescribeHypkey{pdfstartview}
+%  \DescribeHypkey{pdfremotestartview}
 %  So with this driver the options
 %  |pdfview|, |pdfstartview| and |pdfremotestartview| take
 %  the following options:
@@ -748,7 +760,6 @@
     *~and~an~empty~value~which~removes~the~setting.\\
     No~value~is~equivalent~to~using~`true`.
   }
-\ExplSyntaxOff
 %    \end{macrocode}
 % \section{Variants}
 %    \begin{macrocode}
@@ -758,7 +769,6 @@
 %  hyperref checks driver version, we need to suppress this during the development
 %    \begin{macrocode}
 \chardef\Hy@VersionChecked=1 %don't check the version!
-\ExplSyntaxOn
 %    \end{macrocode}
 %
 % \begin{macro}[EXP]{\hypercalcbp}
@@ -813,6 +823,32 @@
     \msg_warning:nn { hyp }{ pdfversion-disabled }
  }
 \Hy@DisableOption{pdfversion}
+%    \end{macrocode}
+% \cs{Acrobatmenu} should use the new internal link command
+%    \begin{macrocode}
+\RenewDocumentCommand \Acrobatmenu { m m }
+  {
+    \hyper@linknamed #1 #2
+  }
+%    \end{macrocode}
+%
+% \cs{hypersetup} should set the new keys. As there are a number of new keys
+% which would error with the hyperref key family we do not execute
+% |\kvsetkeys{Hyp}|. This means the driver has to provide code for every key!
+%    \begin{macrocode}
+\cs_set_protected:Npn \hypersetup #1
+  {
+     \keys_set:nn { hyp / setup }{ #1 }
+  }
+% TODO for now unknown keys should only give warnings.
+\keys_define:nn { hyp / setup }
+  {
+    unknown .code:n =
+    {
+      \msg_warning:nnxxx { hyp } { unknown-key }
+      { hyp~/~setup }{ \l_keys_key_str } { #1 }
+    }
+  }
 %    \end{macrocode}
 %
 % \section{Compability commands}
@@ -1613,7 +1649,7 @@
 %
 % \subsection{Launch links}
 %
-% We define \hyper@linklaunch for naming consistency
+% We define \cs{hyper@linklaunch} for naming consistency
 %    \begin{macrocode}
 \pdfdict_new:n   {l_hyp/annot/A/Launch}
 \pdfdict_put:nnn {l_hyp/annot/A/Launch}{Type}{/Action}
@@ -1682,12 +1718,13 @@
 %    \end{macrocode}
 %
 % \subsection{Named links (menu)}
+% We also define \cs{hyper@linknamed} for consistency.
 %    \begin{macrocode}
 \pdfdict_new:n   {l_hyp/annot/A/Named}
 \pdfdict_put:nnn {l_hyp/annot/A/Named}{Type}{/Action}
 \pdfdict_put:nnn {l_hyp/annot/A/Named}{S}{/Named}
 
-\RenewDocumentCommand \Acrobatmenu { m m }
+\cs_new_protected:Npn \hyper@linknamed #1 #2 %#1 action, #2 link text
   {
     \bool_if:NTF \l_@@_annot_Named_bool
       {
@@ -1723,7 +1760,10 @@
       }
       {#2}
   }
+
 %    \end{macrocode}
+%
+%
 %    \begin{macrocode}
 \pdfannot_link_margin:n { 1pt }
 
@@ -1877,52 +1917,14 @@
   }
 
 
-
-
-
-
-
-%% this command is used for \url
-
-\ExplSyntaxOff
-
-\ExplSyntaxOn
 %file links to pdfs. See test-filelinks.pdf for a few example.
 
-
-
-%this needs central management in the kernel and changes in hyperref.
-%with pdfmanagement most attributes can be set directly, there is not need
-%to delay to the begin of the doc.
-%as a first step hypersetup is overwritten to set (some) keys with expl3.
-\cs_set_protected:Npn \hypersetup #1
-  {
-     %\kvsetkeys{Hyp}{#1} %for now
-     \keys_set:nn { hyp / setup }{ #1 }
-  }
-% for now unknown keys should only give warnings.
-\keys_define:nn { hyp / setup }
-  {
-    unknown .code:n =
-    {
-      \msg_warning:nnxxx { hyp } { unknown-key }
-      { hyp~/~setup }{ \l_keys_key_str } { #1 }
-    }
-  }
-
-% This means that the following keys should better be set only in hypersetup and
-% not in the package options (they still could work, but ...)
-% baseurl       (default: empty)
-% pdflang       (default: empty, should be better set in DeclareDocumentMetadata)
-% pdfpagelayout (default:not set, TwoPageLeft,TwoPageRight are 1.5 but we don't test)
-% pdfpagemode   (default: UseNone or UseOutlines, bookmark should do the second)
-% pdfpagescrop  (default: empty/do nothing)
 
 % The following keys are set currently only with the original setup,
 % but we don't want warnings
 \keys_define:nn { hyp / setup }
   {
-    ,unicode        .code:n = {}
+    ,unicode     .code:n = {}
     ,pdfencoding .code:n = {}
   }
 
@@ -1946,6 +1948,14 @@
    ,debug .default:n = {true}
  }
 
+\keys_define:nn { hyp / setup }
+ {
+   ,hypertexnames .choice:
+   ,hypertexnames / true  .code:n = { \Hy@hypertexnamestrue}
+   ,hypertexnames / false .code:n = { \Hy@hypertexnamesfalse}
+   ,hypertexnames .default:n = {true}
+ }
+
 %draft,final
 \keys_define:nn { hyp / setup }
   {
@@ -1960,14 +1970,19 @@
        \PassOptionsToPackage{final}{bookmark}
      }
   }
-
+%    \end{macrocode}
+% \begin{Hypkey}{link,url,file,menu,run}
+%    \begin{macrocode}
 \prop_map_inline:Nn \c_@@_map_hyp_annot_prop
   {
     \keys_define:nn { hyp / setup }
      {
-       #1 .bool_set:c = {l_@@_annot_#2_bool}
+       ,#1 .bool_set:c = {l_@@_annot_#2_bool}
      }
   }
+%    \end{macrocode}
+% \end{Hypkey}
+%    \begin{macrocode}
 
 \keys_define:nn { hyp / setup }
   {
