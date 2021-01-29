@@ -9,16 +9,13 @@
 \usepackage[colorlinks]{hyperref}
 \begin{document}
 
-\ExplSyntaxOn
-\bool_set_false:N \l__hyp_annot_GoTo_bool
-\ExplSyntaxOff
+\hypersetup{link=false}
 
 \tableofcontents
 
 \newpage
-\ExplSyntaxOn
-\bool_set_true:N \l__hyp_annot_GoTo_bool
-\ExplSyntaxOff
+
+\hypersetup{link=true}
 
 \section{abc}\label{x}
 
@@ -34,13 +31,8 @@
 
 \Acrobatmenu{FirstPage}{FirstPage}
 
-\ExplSyntaxOn
-\bool_set_false:N \l__hyp_annot_GoTo_bool
-\bool_set_false:N \l__hyp_annot_URI_bool
-\bool_set_false:N \l__hyp_annot_GoToR_bool
-\bool_set_false:N \l__hyp_annot_Launch_bool
-\bool_set_false:N \l__hyp_annot_Named_bool
-\ExplSyntaxOff
+\hypersetup{link=false,url=false,file=false,run=false,menu=false}
+
 
 \ref{x}
 
