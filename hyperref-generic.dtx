@@ -1956,6 +1956,25 @@
    ,hypertexnames .default:n = {true}
  }
 
+
+\keys_define:nn { hyp / setup }
+ {
+   ,linktoc .choices:nn = { none, section, all, page }
+     {
+       \cs_set_eq:Nc \Hy@linktoc { Hy@linktoc@#1 }
+     }
+   ,linktoc / unknown .code:n =
+     {
+       \msg_warning:nnxxx { hyp } { unknown-choice }
+         { linktoc }
+         { none, section, all, page }
+         { \exp_not:n {#1} }
+     }
+   ,linktocpage .choice:
+   ,linktocpage / true  .meta:n = {linktoc=page}
+   ,linktocpage / false .meta:n = {linktoc=section}
+   ,linktocpage .default:n = true
+ }
 %draft,final
 \keys_define:nn { hyp / setup }
   {
