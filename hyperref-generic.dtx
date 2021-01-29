@@ -510,6 +510,25 @@
 % The next compilation can then make use of it.
 % The two-pass could be avoided in the future with a better labeling system,
 % where the name if set earlier.
+% 
+% \DescribeHypkey{extension} This key sets an variable that has two purposes:
+% It is used if file name has not extension, and it decides if the annotation
+% is a URI or GoToR annotation. So
+% \begin{verbatim}
+% \hypersetup{extension=dvi}
+% \href{mwe1.pdf}{pdf}
+% \href{mwe2.dvi}{dvi}
+% \href{mwe3}{no ext}
+% \end{verbatim}
+% will create
+% \begin{verbatim}
+% /Subtype/Link/A<</S/URI   /URI(mwe1.pdf)>>
+% /Subtype/Link/A<</S/GoToR /F  (mwe2.dvi)>>
+% /Subtype/Link/A<</S/GoToR /F  (mwe3.dvi)>>
+% \end{verbatim}
+% Typically PDF viewer can handle only GoToR annotions pointing to a PDF.
+% So normally the default value |pdf| of this key should not be changed.
+%
 
 %^^A %% This is an adapted version of hluatex.def
 %^^A %% meant to test the use of the commands
@@ -779,10 +798,6 @@
 \cs_set_eq:NN \hypercalcbp \dim_to_decimal_in_bp:n
 %    \end{macrocode}
 % \end{macro}
-% This is used as default file extension, should probably go into hyperref.
-%    \begin{macrocode}
-\providecommand*{\XR@ext}{pdf} %
-%    \end{macrocode}
 %
 % This command must be provided for now, but they are unused by the driver:
 %    \begin{macrocode}
@@ -1966,7 +1981,11 @@
    ,pageanchor .default:n = {true}
  }
 
-
+\keys_define:nn { hyp / setup }
+ {
+   ,extension .tl_set:N = \XR@ext
+   ,extension .initial:n= pdf
+ }
 \keys_define:nn { hyp / setup }
  {
    ,linktoc .choices:nn = { none, section, all, page }
