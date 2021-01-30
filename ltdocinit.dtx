@@ -64,7 +64,7 @@
 %    \item[\texttt{lang}] to set the Lang entry in the Catalog. E.g. \texttt{lang=de-DE}.
 %    \item[\texttt{standard}] Choice key to set the pdf standard.
 %      Currently A-1b, A-2b and A-3b are accepted as
-%      values, but the underlying code to ensure the requirements (as far as it
+%      values, but the underlying code to ensure the requirements (as far as they
 %      can be ensured) is incomplete.
 %^^A     disabled for now.
 %^^A    \item[\texttt{xmpmeta}] Boolean. This includes a skeleton XMP-metadata in the pdf. This clashes
@@ -92,14 +92,14 @@
 % should unify such settings in one place. It should always be the first command
 % in a document.
 % Beside loading the PDF management code \cs{DeclareDocumentMetadata}
-% currently allows to set the PDF version, to set the PDF \texttt{/Lang} and
-% to uncompress a pdf.
-% and set the language.
+% currently allows to set the PDF version, to set the PDF \texttt{/Lang},
+% to uncompress a pdf, to set the language and to declare a few PDF standards.
 % ^^A We also add a key to activate the metadata stream and to set a standard.
 %%
 %    \begin{macrocode}
 %<@@=document>
 %<*package>
+%<@@=pdfmanagement>
 %    \end{macrocode}
 % \begin{function}[updated=2020-11-27]{\DeclareDocumentMetadata}
 %    \begin{macrocode}
@@ -123,9 +123,9 @@
         \ExplSyntaxOff\makeatother
         \RequirePackage{l3pdfutils}
         \RequirePackage{l3pdfannot}
-        \bool_gset_true:N \g__pdfmanagement_active_bool
+        \bool_gset_true:N \g_@@_active_bool
         \keys_set_filter:nnn  { pdf / setup } { init } { #1 }
-        \bool_if:NT \g__pdfmanagement_active_bool
+        \bool_if:NT \g_@@_active_bool
           {
             \PassOptionsToPackage{customdriver=hgeneric-experimental}{hyperref}
           }
@@ -133,7 +133,7 @@
         \RenewDocumentCommand\DeclareDocumentMetadata { m }
           {
             \keys_set_filter:nnn  { pdf / setup } { init } { ##1 }
-            \bool_if:NTF \g__pdfmanagement_active_bool
+            \bool_if:NTF \g_@@_active_bool
              {
                \str_remove_all:cn {opt@hyperref.sty}{customdriver=hgeneric-experimental}
                \PassOptionsToPackage{customdriver=hgeneric-experimental}{hyperref}
