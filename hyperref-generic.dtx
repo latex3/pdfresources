@@ -280,12 +280,24 @@
 %
 %  Options that must be set as package options are
 %  \begin{itemize}
+%  \item |backref|
+%  \item |CJKbookmarks| this key should not be used anymore. At some time
+%  it will be removed.
 %  \item |destlabels|    (destination names are taken from \cs{label} if possible)
-%  \item |pdfpagelabels| (set PDF page labels)
-%  \item |implicit|      (redefine \LaTeX\ internals)
+%  \item |encap|
 %  \item |hyperfigures|  (according to the \pkg{hyperref} manual
 %  it makes figures hyper links, but actually is a no-op for most drivers, and it
 %  does nothing with this driver either.)
+%  \item |hyperfootnotes|
+%  \item |hyperindex|
+%  \item |implicit|      (redefine \LaTeX\ internals)
+%  \item |nesting| unneeded key, see comment below in \ref{sec:keydesc}. At some time
+%  it will be either removed or extended (if some use can be found).
+%  \item |pagebackref|
+%  \item |pdfpagelabels| (set PDF page labels)
+%  \item |psdextra| this loads some extra definitions used by \cs{pdfstringdef}.
+%  The new driver uses \cs{pdfstringdef} only for the bookmarks, for other strings
+%  it is not relevant.
 %  \end{itemize}
 %
 %  Options that can be set as package options are
@@ -481,7 +493,7 @@
 %  \end{itemize}
 %
 %
-%\section{Assorted key descriptions}
+%\section{Assorted key descriptions}\label{sec:keydesc}
 %The following gives a few details to some keys that are perhaps not
 %completly described in the manual, or are a bit different in this driver.
 %The list is alphabetic.
@@ -510,7 +522,7 @@
 % The next compilation can then make use of it.
 % The two-pass could be avoided in the future with a better labeling system,
 % where the name if set earlier.
-% 
+%
 % \DescribeHypkey{extension} This key sets an variable that has two purposes:
 % It is used if file name has not extension, and it decides if the annotation
 % is a URI or GoToR annotation. So
@@ -528,8 +540,11 @@
 % \end{verbatim}
 % Typically PDF viewer can handle only GoToR annotions pointing to a PDF.
 % So normally the default value |pdf| of this key should not be changed.
+% \DescribeHypkey{nesting}\label{key:nesting}%
+% This key is useless in PDF context. The boolean is only used in
+% the code for anchors/destination where nesting doesn't make sense.
+% It should not be changed.
 %
-
 %^^A %% This is an adapted version of hluatex.def
 %^^A %% meant to test the use of the commands
 %^^A %% from pdfmanagement.sty
@@ -737,14 +752,21 @@
     pdf~version~#2. Value~`#3'~is used instead.
   }
 %    \end{macrocode}
-% During development not all standard hyperref keys are known, this issues a warning
-% for now:
+% During development not all standard hyperref keys are known and the
+% Hyp-handler needs to process some new keys unknown to him.
+% This issues warnings for now:
 %    \begin{macrocode}
 \msg_new:nnn
   { hyp }
   { unknown-key }
   {
     unknown~key~#2~of~module~’#1’~set~to~’#3’.
+  }
+\msg_new:nnn
+  { hyp }
+  { unknown-key-to-Hyp }
+  {
+    ignored~in~family~Hyp~unknown~key~#1.
   }
 %    \end{macrocode}
 % There are a lot choice keys. This defines messages which shows the valid
@@ -845,16 +867,23 @@
 %    \begin{macrocode}
 \RenewDocumentCommand \Acrobatmenu { m m }
   {
-    \hyper@linknamed #1 #2
+    \hyper@linknamed {#1} {#2}
   }
 %    \end{macrocode}
 %
-% \cs{hypersetup} should set the new keys. As there are a number of new keys
-% which would error with the hyperref key family we do not execute
-% |\kvsetkeys{Hyp}|. This means the driver has to provide code for every key!
+% \cs{hypersetup} should set the new keys.
+% We for now also execute |\kvsetkeys{Hyp}| to avoid compability problems.
+% To avoid errors with the new keys a handler unknown keys is added.
+% But in the end only the new keyval should be used.
+% This means the driver has to provide new code for every key!
+%
 %    \begin{macrocode}
+%  TODO should go at some time ...
+\kv@set@family@handler{Hyp}
+  { \msg_warning:nnx {hyp}{unknown-key-to-Hyp}{#1} }
 \cs_set_protected:Npn \hypersetup #1
   {
+     \kvsetkeys{Hyp} {#1}
      \keys_set:nn { hyp / setup }{ #1 }
   }
 % TODO for now unknown keys should only give warnings.
@@ -3146,6 +3175,7 @@
                 \@@_text_pdfstring_info:nN {##1}\l_@@_tmpa_str
                 \pdfmanagement_add:nnx {Info}{#2}{\l_@@_tmpa_str}
               }
+             \tl_set:cn {@pdf#1}{##1}
           }
       }
     \keys_define:nn { hyp / info }
@@ -3160,6 +3190,7 @@
                 \@@_text_pdfstring_info:nN {##1}\l_@@_tmpa_str
                 \pdfmanagement_add:nnx {Info}{#2}{\l_@@_tmpa_str}
               }
+            \tl_set:cn {@pdf\str_lowercase:n{#1}}{##1}
           }
         ,unknown .code:n =
          {
