@@ -119,7 +119,7 @@
         \RequirePackage{l3pdf}   %should be loaded after the backend is set.
          % %load backend driver
         \ExplSyntaxOn\makeatletter
-          \file_input:n {l3\g__sys_backend_tl-pdf.def} %should be inside the normal backend
+          \file_input:n {l3\c_sys_backend_str-pdf.def} %should be inside the normal backend
         \ExplSyntaxOff\makeatother
         \RequirePackage{l3pdfutils}
         \RequirePackage{l3pdfannot}
@@ -129,7 +129,7 @@
           {
             \PassOptionsToPackage{customdriver=hgeneric-experimental}{hyperref}
           }
-        \hook_use_once:n {pdfmanagement/add}  
+        \hook_use_once:n {pdfmanagement/add}
         \RenewDocumentCommand\DeclareDocumentMetadata { m }
           {
             \keys_set_filter:nnn  { pdf / setup } { init } { ##1 }
