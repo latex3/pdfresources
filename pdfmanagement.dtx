@@ -85,7 +85,7 @@
 %
 % Some first step for better support of PDF related commands have been already done
 % with the \pkg{l3pdf} package. It offers backend independent commands to create
-% PDF objects, to set the compress level and the PDF version.
+% PDF objects and destination, to set the compress level and the PDF version.
 %
 % The package \pkg{pdfmanagement} extends this to more PDF related areas and provide
 % interfaces to them in a backend independent way.
@@ -95,7 +95,7 @@
 % \item For commands with \enquote{clash potential} it implements commands to
 % replace the primitives which resolve potential conflicts.
 %
-% \item It implements for a variety of PDF related tasks commands
+% \item It implements command for a variety of PDF related tasks
 % which support a well-defined set of backends.
 % \end{itemize}
 %
@@ -104,45 +104,35 @@
 % The central module of this package, \pkg{l3pdfmanagement}, defines an interface
 % for the (pdf\TeX) primitives \cs{pdfcatalog}, \cs{pdfinfo},
 % \cs{pdfpagesattr}, \cs{pdfpagesattr} and \cs{pdfpageresources} and
-% analog commands from the other engines and backends.
+% the analog commands from the other engines and backends.
 %
 % All these commands have a \enquote{clash potential}, this means that the new
 % interface is incompatible with a parallel use of the primitive commands
 % which it targets to replace and supersede.
 % This doesn't affect many packages, but the list of package using such primitives
-% contains central and important package like \pkg{hyperref}, \pkg{tikz},
+% contains central and important packages like \pkg{hyperref}, \pkg{tikz},
 % \pkg{pdfx} and more.
 %
 % So while the goal is to integrate the code into the \LaTeX{} format directly,
-% this can not be done directly to avoid conflicts with existing documents and packages.
+% this can not be done directly without conflicts with existing documents and packages.
 %
-% As an intermediary step this package has been created.
-% It has to be loaded manually \emph{and} the core pdf management has
-% to be activated explicitly. The loading and activation has to be done
+% As an intermediary step this package has been created which load the code
+% manually. With it package authors can test the new code, give feedback
+% and adapt their packages.
+%
+% Loading the package will only load the modules,
+% to activate the core pdf management a trigger command has to be used.
+% The loading and activation has to be done
 % \emph{before} the \cs{documentclass} command.
 %
-% \begin{verbatim}
-% \RequirePackage{pdfmanagement} %load the package
-% \DeclareDocumentMetadata %activates the l3management interface
-%  {
-%    %options
-%  }
-% \end{verbatim}
-%
-% The pdf management can be deactivated either by commenting the
-% \cs{DeclareDocumentMetadata} or by using in the options \texttt{pdfmanagement=false}.
-% The options of \cs{DeclareDocumentMetadata} are described in the documentation of
-% \pkg{ltdocinit}.
-%
-% To test if the pdf management is active the predicate
-% \cs{pdfmanagement_if_active:TF} can be used, see the documentation of \pkg{l3pdfmanagement}.
 %
 % We hope that this setup will allow packages writers and authors to test the
 % pdfmanagement and adapt packages and document safely.
 %
 %
 % \section{Backend support}
-% The supported backends are pdflatex, lualatex, (x)dvipdfmx (latex, xelatex)
+% The supported backends are pdflatex, lualatex, (x)dvipdfmx (latex, xelatex,
+% dvilualatex (in texlive 2021))
 % and dvips with ps2pdf (not completely yet). dvips with distiller could work too
 % but is untested.
 %
@@ -158,11 +148,27 @@
 % backend requirements and run tests for all variants. Also backend specific code
 % will still be needed in some cases.
 %
-% \section{Use}
+% \section{Use}\label{sec:use}
 % The package should be loaded before \cs{documentclass}. To activate
 % the resource management it should be followed by
-% \cs{DeclareDocumentMetadata}\marg{key-val}. The allowed keys are currently
-% described in \pkg{ltdocinit}
+% \cs{DeclareDocumentMetadata}\marg{key-val}.
+% The options of \cs{DeclareDocumentMetadata} are described in the documentation of
+% \pkg{ltdocinit}.
+%
+% \begin{verbatim}
+% \RequirePackage{pdfmanagement} %load the package
+% \DeclareDocumentMetadata %activates the l3management interface
+%  {
+%    %options
+%  }
+%  \documentclass {...}
+% \end{verbatim}
+%
+% The pdf management can be deactivated either by commenting the
+% \cs{DeclareDocumentMetadata} or by using in the option \texttt{pdfmanagement=false}.
+%
+% To test if the pdf management is active the predicate
+% \cs{pdfmanagement_if_active:TF} can be used, see the documentation of \pkg{l3pdfmanagement}.
 %
 % \section{Requirements}
 % \pkg{pdfmanagement} requires a LaTeX format from 2020/10/01 or later.
@@ -170,6 +176,36 @@
 % In some places, e.g. when writing strings to the pdf it assumes that
 % the file is utf8 encoded -- ascii will naturally work too, but 8bit encodings are
 % not supported.
+%
+% \section{Modules}
+% The bundle contains a number of modules. The organization and naming is bound
+% to change over time.
+%
+% \begin{description}
+% \item[l3pdfdict] This modules provides commands for PDF dictionaries. Its main
+% purpose is to create name spaces. It is used e.g. by \pkg{l3pdfmanagement} and
+% \pkg{l3pdfannot} but can also be loaded independently from the bundle.
+%
+% \item[l3pdfannot] This module provides commands for annotations. Currently mainly
+% link annotations, widget will be added later. It can be used independantly from
+% from the bundle. It doesn't require the pdf management to be active.
+%
+% \item[l3pdfmanagement] This is the code code of the pdf management.
+% It should not be loaded directly, but only as described in section~\ref{sec:use}.
+%
+% \item[ltdocinit] This package provides the \cs{DeclareDocumentMetadata} commands.
+% It should not be loaded directly.
+%
+% \item[l3backend-pdf] This module contains backend code needed by the
+% pdf management. It will in due time be integrated into l3backend.
+% It should not be loaded directly.
+%
+% \item[l3pdfmeta] This module contains code to handle PDF standards and XMP-metadata.
+% It is quite incomplete currently. It is loaded by the bundle, and
+% should not be loaded independently.
+%
+% \item[l3pdfutils] A number of commands which like e.g. for xform objects.
+% It will probably disappear.
 %
 % \section{Incompabilities}
 %
@@ -185,10 +221,8 @@
 %
 % \subsection{hyperref}
 % A generic driver that can
-% be used as replacement has been developed. It can be loaded with
-% \begin{verbatim}
-%  \usepackage[customdriver=hgeneric-experimental]{hyperref}
-% \end{verbatim}
+% be used as replacement has been developed and is provided by this bundle.
+% It will be loaded automatically if the pdf management is active.
 %
 % The generic driver differs in some points from other \pkg{hyperref} drivers:
 % \begin{itemize}
@@ -200,6 +234,8 @@
 % \item Incomplete is the support for form fields. Quite probably form fields will
 % be extracted in a dedicated package.
 % \end{itemize}
+%
+% More details can be found in the documentation \pkg{hyperref-generic.pdf}.
 %
 % \subsection{pdfx}
 % \pkg{pdfx} is not compatible. It uses the commands \cs{pdfpagesattr}, \cs{pdfpageattr},
@@ -238,7 +274,6 @@
 % \subsection{embedfile}
 % Tools needed to be able to write a replacement
 % to replace this package have been developed in the \pkg{l3pdffile} package.
-%
 %
 % \subsection{tagpdf}
 % The development code is compatible and will be uploaded in time.
@@ -324,16 +359,7 @@
 % this is needed anyway.
 % \end{NOTE}
 %
-% \subsubsection{\enquote{Info}/backend}
-% The backend code is already in \pkg{expl3}.
-% \cs{@@_backend_info_gput:nn} inserts one name/value pair.
 %
-% \subsubsection{\enquote{Info}/management}
-% moved to \pkg{l3pdfmanagement}
-%
-% \subsection{The \enquote{Pages} dictionary (pdfpagesattr)}
-% The content of the property list associated with this dictionary name is written to the
-% /Pages object. This replaces \cs{pdfpagesattr}.
 % \subsubsection{\enquote{Pages} / backend}
 % \begin{NOTE}{UF}
 %  path: Pages
@@ -351,93 +377,6 @@
 % So we issue the push code only at the end of the document.
 % \end{NOTE}
 % The code has been moved to \pkg{l3pdfmanagement}
-%
-% \subsection{\enquote{Page} and \enquote{ThisPage} (pdfpageattr)}
-% The content of the property lists associated with this dictionary name is written to the
-% /Page objects. This replaces \cs{pdfpageattr}.
-% \subsubsection{\enquote{Page} and \enquote{ThisPage} /backend}
-% The code has been moved to \pkg{l3backend-pdf-extra}.
-% \subsubsection{\enquote{Page} and \enquote{ThisPage} / management}
-% \begin{NOTE}{UF}
-% Open is the question if one need a command to set attribute on a page by page number.
-% Open is the setter for /AF (and perhaps /OutputIntents).
-% See also https://tex.stackexchange.com/questions/479812/extension-of-rotating-package-to-set-pdf-rotation
-% (should work now)
-% \end{NOTE}
-% The code has been moved to \pkg{l3pdfmanagement}.
-%
-% \subsection{\enquote{Page/Resources}: ExtGState, ColorSpace, Shading, Pattern }
-% \begin{NOTE}{UF}
-% Only for pdf/luatex and xdvipdfmx backend- and pdf-code is needed to add values
-% to these resources.
-% With dvips the resources are added through high-level code (e.g. transparency), so the
-% backend/pdf commands are no-ops.
-% For every resources there is only one object. References to these objects are added to
-% all pages starting from the page where the first time something has been added to the
-% resource and to all XObjects. For luatex and pdftex it must be done together
-% with the /Properties, see above.
-% I don't see a need to set e.g. /ColorSpace page wise: preflight handles this
-% fine, see experiment colorspace-resources.
-% As pgf does the same, there is a need to patch it for now. Ditto for package colorspace.
-% \end{NOTE}
-% \subsubsection{\enquote{Page/Resources}: ExtGState, ColorSpace, Shading, Pattern / backend}
-% The code has been moved to \pkg{l3backend-pdf-extra}.
-%
-% \subsection{\enquote{Catalog} \& subdirectories (pdfcatalog) }
-% \subsubsection{\enquote{Catalog} \& subdirectories / backend}
-% The backend command is already in the driver:
-% \cs{@@_backend_catalog_gput:nn}.
-%
-% \subsubsection{\enquote{Catalog} \& subdirectories / management }
-% \begin{NOTE}{UF}
-% The catalog dictionary is filled by e.g. \cs{pdfcatalog}. Multiple appearances of
-% \cs{pdfcatalog} are concatenated, so one could end with multiple entries
-% for the same value with luatex and pdftex -- the other backends normally
-% avoid this problem.
-% We therefore setup a property which is filled and executed at a sensible
-% (not fixed) place.
-% /AF is even an array of dictionaries.
-% There is probably no way to test what has already been added to the catalog,
-% so doublets can only be avoided with ``don't do it''.
-% see catalogue.tex for a list of entries ...
-% Perhaps some tools to create the AF-file specification dictionaries is useful.
-% Open for now:
-% /Extensions               (dict, pdf 2.0)
-% /Dests ? difference to subdict in Names?
-% /DSS                      (dict, pdf 2.0)
-% /Acroform/DR/ExtGState etc probably unneeded.
-% \end{NOTE}
-%
-%  The code has been moved to \pkg{l3pdfmanagement}.
-%
-% \subsection{Local dictionaries}
-%
-% All dictionaries described above were global dictionaries and basically they
-% are written at most once (or at most once per page) to the PDF. The pdfdict module
-% predefines also a number of local dictionaries. These are used in objects like
-% link annotations (see the pdfannot module) which are written in varying
-% numbers to the PDF and allow to set their features and change them locally
-% if needed. The predefined dictionaries are
-% \begin{NOTE}{UF}
-% sync that with the table in pdfdict ...
-% \end{NOTE}
-% \begin{tabular}{lp{6cm}}
-%  \multicolumn{2}{l}{annotation related: here are
-%                     \texttt{Border} and \texttt{C} (color)}\\
-%  annot/Link/Goto   & used in GoTo links (internal references) \\
-%  annot/Link/URI    & used in URI links (external uri references) \\
-%  annot/Link/GotoR  & used in GoToR links (file  references) \\
-%  annot/Link/Named  & used in Named actions (menu calls) \\
-%  annot/Link/Launch & used in Launch links (application calls) \\
-% \end{tabular}
-%
-% \section{Various PDF contents}
-% The following commands allow to create a number of important pdf objects and contents in a
-% backend independant way.
-% moved to l3pdfutils.
-%
-% \section{Document metadata}
-% The code has been moved to \pkg{l3pdfmeta}.
 %
 % \section{Patches}
 % The code has been moved to pageresources-patches.dtx

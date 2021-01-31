@@ -242,6 +242,12 @@
 % \end{function}
 %
 % \subsubsection{\enquote{Page} and \enquote{ThisPage}}
+% \begin{NOTE}{UF}
+% Open is the question if one need a command to set attribute on a page by page number.
+% Open is the setter for /AF (and perhaps /OutputIntents).
+% See also https://tex.stackexchange.com/questions/479812/extension-of-rotating-package-to-set-pdf-rotation
+% (should work now)
+% \end{NOTE}
 % \begin{function}[added = 2020-04-12]
 %   {pdfmanagement: Page}
 %   \begin{syntax}
@@ -285,6 +291,19 @@
 %   show the content of this dictionary with \cs{pdfmanagement_show:n}.
 % \end{function}
 % \subsubsection{\enquote{Page/Resources}: ExtGState, ColorSpace, Shading, Pattern}
+% \begin{NOTE}{UF}
+% Only for pdf/luatex and xdvipdfmx backend- and pdf-code is needed to add values
+% to these resources.
+% With dvips the resources are added through high-level code (e.g. transparency), so the
+% backend/pdf commands are no-ops.
+% For every resources there is only one object. References to these objects are added to
+% all pages starting from the page where the first time something has been added to the
+% resource and to all XObjects. For luatex and pdftex it must be done together
+% with the /Properties, see above.
+% I don't see a need to set e.g. /ColorSpace page wise: preflight handles this
+% fine, see experiment colorspace-resources.
+% As pgf does the same, there is a need to patch it for now. Ditto for package colorspace.
+% \end{NOTE}
 % \begin{function}[updated = 2020-04-10]
 %   {
 %    pdfmanagement: Page/Resources/ExtGState,
@@ -320,6 +339,14 @@
 %   transparent and colorspace.
 % \end{function}
 % \subsubsection{\enquote{Catalog} \& subdirectories}
+% \begin{NOTE}{UF}
+% Perhaps some tools to create the AF-file specification dictionaries is useful.
+% Open for now:
+% /Extensions               (dict, pdf 2.0)
+% /Dests ? difference to subdict in Names?
+% /DSS                      (dict, pdf 2.0)
+% /Acroform/DR/ExtGState etc probably unneeded.
+% \end{NOTE}
 % The catalog is a central dictionary in a PDF with a number of subdictionaries.
 % Entries to the top level of the catalog can be added with
 % |\pdfmanagement_add:nnn {Catalog}|\Arg{Name}\Arg{Value}.
