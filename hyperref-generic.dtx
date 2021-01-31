@@ -1933,7 +1933,18 @@
        }
   }
 %    \end{macrocode}
-% Thus are the keys for ocgcolors
+%
+% \begin{Hypkey}
+%  {
+%   ocgcolorlinks,
+%   ocgcolorlink,
+%   ocgcolorurl,
+%   ocgcolorfile,
+%   ocgcolormenu,
+%   ocgcolorrun
+%   }
+%   These are the keys for ocgcolors. We try to disable it
+%   for pdf version below 1.5
 %    \begin{macrocode}
 \pdf_version_compare:NnTF < {1.5}
   {
@@ -2004,7 +2015,7 @@
       }
   }
 %    \end{macrocode}
-
+% \end{Hypkey}
 %    \begin{macrocode}
 \cs_set_protected:Npn \setpdflinkmargin #1
   {
