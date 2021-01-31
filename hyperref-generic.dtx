@@ -589,6 +589,9 @@
 % the behaviour differs between the backends: with dvips it is possible to
 % change links locally, pdflatex and lualatex work by page, with dvipdfmx
 % the setting is global (and has to be done in the preamble).
+%
+% \DescribeHypkey{pdflang} The key will work, but it is recommended to the set
+% the language in \cs{DeclareDocumentMetadata} instead.
 %^^A %% This is an adapted version of hluatex.def
 %^^A %% meant to test the use of the commands
 %^^A %% from pdfmanagement.sty
@@ -653,7 +656,7 @@
 %^^A %% list of commands which probably will have to change
 % \end{documentation}
 % \begin{implementation}
-%  \section{\pkg{hyperref-generic} driver implementation}
+%  \part{\pkg{hyperref-generic} driver implementation}
 %    \begin{macrocode}
 %<*package>
 %<@@=hyp>
@@ -927,6 +930,18 @@
 %    \end{macrocode}
 %
 % \section{Compability commands}
+% \subsection{Metadata}
+% A number of values should be accessible from other packages. Until know
+% packages like \pkg{hyperxmp} used variables like \cs{@pdfauthor}. As they are
+% gone we need to provide some fallback.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_store_metadata:nn #1 #2 %#1 key, #2 value.
+  {
+    \tl_set:cn {@#1}{#2}
+    \AddToDocumentMetadata {#1}{#2}
+  }
+\cs_generate_variant:Nn \@@_store_metadata:nn {xn,nx,xx}
+%    \end{macrocode}
 % \subsection{citecolor}
 % cite is a link context. So we define a hook, and the keys in terms of this hook.
 %
@@ -2477,26 +2492,31 @@
 \keys_set:nn { hyp / setup } {colorscheme=phelype}
 %    \end{macrocode}
 % \end{hypkey}
-
+%
+% \section{Keys}
+%
+% \subsection{Ignored keys}
+% The following are ignored (with or without warnings)
+% \begin{hypkey}{unicode,pdfencoding,pdfversion}
 %    \begin{macrocode}
-% The following keys are set currently only with the original setup,
-% but we don't want warnings
 \keys_define:nn { hyp / setup }
   {
     ,unicode     .code:n = {}
     ,pdfencoding .code:n = {}
-  }
-
-%pdfversion is disabled
-\keys_define:nn { hyp / setup }
-  {
     ,pdfversion .code:n =
       {
          \msg_warning:nn { hyp }{ pdfversion-disabled }
       }
-  }
-
-%debug, verbose
+   }
+%
+%    \end{macrocode}
+% \end{hypkey}
+%
+% \subsection{Various keys for the pdf and linking behaviour}
+% This keys are typically set only once.
+%
+% \begin{hypkey}{verbose,debug,draft,final}
+%    \begin{macrocode}
 \keys_define:nn { hyp / setup }
  {
    ,verbose .choice:
@@ -2506,9 +2526,28 @@
    ,debug .meta:n = {verbose=#1}
    ,debug .default:n = {true}
  }
-
+\keys_define:nn { hyp / setup }
+  {
+   ,draft .code:n =
+     {
+       \Hy@drafttrue
+       \PassOptionsToPackage{draft}{bookmark}
+     }
+   ,final .code:n =
+     {
+       \Hy@finaltrue
+       \PassOptionsToPackage{final}{bookmark}
+     }
+  }
+%    \end{macrocode}
+% \end{hypkey}
+% \begin{hypkey}{extension,hypertexnames,naturalnames,
+%   pageanchor,linktoc,linktocpage,plainpages}
+%    \begin{macrocode}
 \keys_define:nn { hyp / setup }
  {
+   ,extension .tl_set:N = \XR@ext
+   ,extension .initial:n= pdf
    ,hypertexnames .choice:
    ,hypertexnames / true  .code:n = { \Hy@hypertexnamestrue}
    ,hypertexnames / false .code:n = { \Hy@hypertexnamesfalse}
@@ -2521,13 +2560,12 @@
    ,pageanchor / true  .code:n = { \Hy@pageanchortrue}
    ,pageanchor / false .code:n = { \Hy@pageanchorfalse}
    ,pageanchor .default:n = {true}
+   ,plainpages .choice:
+   ,plainpages / true  .code:n = { \Hy@plainpagestrue}
+   ,plainpages / false .code:n = { \Hy@plainpagesfalse}
+   ,plainpages .default:n = {true}
  }
 
-\keys_define:nn { hyp / setup }
- {
-   ,extension .tl_set:N = \XR@ext
-   ,extension .initial:n= pdf
- }
 \keys_define:nn { hyp / setup }
  {
    ,linktoc .choices:nn = { none, section, all, page }
@@ -2546,22 +2584,11 @@
    ,linktocpage / false .meta:n = {linktoc=section}
    ,linktocpage .default:n = true
  }
-%draft,final
-\keys_define:nn { hyp / setup }
-  {
-   ,draft .code:n =
-     {
-       \Hy@drafttrue
-       \PassOptionsToPackage{draft}{bookmark}
-     }
-   ,final .code:n =
-     {
-       \Hy@finaltrue
-       \PassOptionsToPackage{final}{bookmark}
-     }
-  }
+
 %    \end{macrocode}
+% \end{hypkey}
 % \begin{hypkey}{link,url,file,menu,run}
+% This booleans allow to disable the link types.
 %    \begin{macrocode}
 \prop_map_inline:Nn \c_@@_map_hyp_annot_prop
   {
@@ -2572,21 +2599,12 @@
   }
 %    \end{macrocode}
 % \end{hypkey}
+%
 %    \begin{macrocode}
-
-\keys_define:nn { hyp / setup }
-  {
-   ,plainpages .choice:
-   ,plainpages / true  .code:n = { \Hy@plainpagestrue}
-   ,plainpages / false .code:n = { \Hy@plainpagesfalse}
-   ,plainpages .default:n = {true}
-  }
-
 \keys_define:nn { hyp / setup }
  {
    ,baseurl       .code:n =
      {
-       %\@@_pstringdef:No \l_@@_tmpa_tl {#1}%
        \@@_text_pdfstring:ooN  { #1 } {\l_@@_text_enc_uri_print_tl} \l_@@_tmpa_tl
         \tl_if_empty:NTF \l_@@_tmpa_tl
           {
@@ -2708,16 +2726,6 @@
          { pdffitwindow }
          { \exp_not:n {#1} }
      }
-   ,pdflang       .code:n =
-          {
-            \tl_if_empty:nTF { #1 }
-              {
-                \pdfmanagement_remove:nn {Catalog} { Lang }
-              }
-              {
-                \pdfmanagement_add:nnx {Catalog} { Lang } { (#1) }
-              }
-          }
    ,pdflinkmargin .code:n = { \pdfannot_link_margin:n { #1 } }
    ,pdflinkmargin .initial:n = {1pt}
    ,pdfmenubar    .choice:
@@ -3149,8 +3157,11 @@
      }
    ,pdfwindowui    .default:n = true
  }
-
+%    \end{macrocode}
+%
+% \begin{hypkey}{pdfview}
 % Destination keys. pdfview is a bit more complicated so extra.
+%    \begin{macrocode}
 \keys_define:nn { hyp / setup }
   {
     ,pdfview .code:n =
@@ -3233,17 +3244,26 @@
       }
     ,pdfview .initial:n  = {xyz}
   }
-
-
 %    \end{macrocode}
 
-
+%\subsection{\enquote{MetaData keys}}
+% The following keys are relevant for the metadata: the info dictionary and
+% the xmp-metadata.
 %    \begin{macrocode}
-
-
-
-
-
+\keys_define:nn { hyp / setup }
+  {
+   ,pdflang       .code:n =
+          {
+            \tl_if_empty:nTF { #1 }
+              {
+                \pdfmanagement_remove:nn {Catalog} { Lang }
+              }
+              {
+                \pdfmanagement_add:nnx {Catalog} { Lang } { (#1) }
+              }
+            \@@_store_metadata:nn {pdflang}{#1}
+          }
+   }
 
 %"info" keys
 % as hyperref resets some at begin document,
@@ -3264,7 +3284,7 @@
                 \@@_text_pdfstring_info:nN {##1}\l_@@_tmpa_str
                 \pdfmanagement_add:nnx {Info}{#2}{\l_@@_tmpa_str}
               }
-             \tl_set:cn {@pdf#1}{##1}
+             \@@_store_metadata:nn {pdf#1}{##1}
           }
       }
     \keys_define:nn { hyp / info }
@@ -3279,7 +3299,7 @@
                 \@@_text_pdfstring_info:nN {##1}\l_@@_tmpa_str
                 \pdfmanagement_add:nnx {Info}{#2}{\l_@@_tmpa_str}
               }
-            \tl_set:cn {@pdf\str_lowercase:n{#1}}{##1}
+            \exp_args:Nx \@@_store_metadata:nn {pdf\str_lowercase:n{#1}}{##1}
           }
         ,unknown .code:n =
          {
@@ -3325,6 +3345,11 @@
        {
          \pdfmanagement_add:nnx {Info}{Trapped}
            {/
+             \str_uppercase:f { \str_head:n { #1 } }
+             \str_lowercase:f { \str_tail:n { #1 } }
+           }
+         \@@_store_metadata:nx {pdftrapped}
+           {
              \str_uppercase:f { \str_head:n { #1 } }
              \str_lowercase:f { \str_tail:n { #1 } }
            }
@@ -3486,8 +3511,6 @@
        }
   }
 
-%%% UF removed setpagesize code, should be done by kernel/graphicx
-
 
 %%%%%%%%%%%%%% Temporary stuff
 \seq_map_inline:Nn \c_@@_annot_types_seq
@@ -3497,6 +3520,7 @@
     \define@key{Hyp}{#1highlight}{}
   }
 %%%%%%%%%%%%%%%%%
+%% Form field code
 \NewDocumentCommand \MakeFieldObject { m m }
   {
     \pdf_xform_new:nnn { #2 }{} { #1 }
