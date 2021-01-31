@@ -172,7 +172,7 @@
     backend .code:n =
       {
         \PassOptionsToPackage { driver=#1 } {expl3}
-        \AddToDocumentmetadata {document/backend}{#1}
+        \AddToDocumentmetadata[document]{backend}{#1}
       },
     backend .groups:n = { init } ,
   }
@@ -182,7 +182,7 @@
     ,pdfversion .code:n =
       {
         \pdf_version_gset:n { #1 }
-        \AddToDocumentmetadata {document/pdfversion}{#1}
+        \AddToDocumentmetadata[document]{pdfversion}{#1}
       }
     ,uncompress .code:n =
       {
@@ -191,7 +191,7 @@
     ,lang .code:n =
       {
         \pdfmanagement_add:nnn {Catalog} {Lang}{(#1)}
-        \AddToDocumentmetadata {document/lang}{#1}
+        \AddToDocumentmetadata[document]{lang}{#1}
       }
     ,xmpmeta .bool_gset:N = \g_pdfmeta_xmp_bool %see pdfmeta undocumentated for now!
     ,standard .choices:nn =
@@ -201,7 +201,7 @@
           {
             \prop_gset_eq:Nc \g_pdfmeta_standard_prop { g_pdfmeta_standard_pdf/#1 _prop }
           }
-        \AddToDocumentmetadata {document/standard}{#1}
+        \AddToDocumentmetadata [document]{standard}{#1}
       }
     ,standard / unknown .code:n =
       {
