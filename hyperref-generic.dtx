@@ -218,8 +218,8 @@
 %  \end{itemize}
 %
 %  \subsection{Changed behaviour}
-%   \begin{itemize}
-%   \item |colorlinks| will as before disable the |pdfborder|, but it is possible
+%   \begin{descriptions}
+%   \item[colorlinks] |colorlinks| will as before disable the |pdfborder|, but it is possible
 %    to use the key in the document at any time, or to reenable the border if wanted.
 %    Internally |colorlinks| \& friends will no longer define/undefine
 %    |\Hy@colorlink|, but instead use the hooks provided by the \pkg{l3pdfannot} package.
@@ -233,14 +233,19 @@
 %
 %    where |\mycolor| should expand to one of the other two syntax variants.
 %
-%   \item The option |frenchlinks| does nothing at all.
-%   \item As mentioned above the support for |citecolor| and |citebordercolor| etc
+%   \item[frenchlinks] The option |frenchlinks| does nothing at all.
+%   \item[cite colors] As mentioned above the support for |citecolor| and |citebordercolor| etc
 %   has been reduced. A package like \pkg{hyperref} can't keep track of such semantic
 %   contexts like cite, acronym, glossaries, special references and maintain keys for
 %   them. The keys are not completly dropped as this would affect packages like
 %   \pkg{natbib}, but they have been separated and are no longer affected by
 %   group keys like |allcolors|  but must be set individually instead.
 %
+%   \item[link margin] The driver sets a default link margin---this is identical
+%   to pdftex and luatex driver, but a change for the xetex and dvips driver.
+%   The (undocumentated) command \cs{setpdflinkmargin} does nothing.
+%   Use either the key |pdflinkmargin| or \cs{\pdfannot_link_margin:n} to change the margin.
+%   See also the description in section~\ref{sec:keydesc} and in the hyperref manual.
 %   \end{itemize}
 %
 %  \section{PDF strings}
@@ -545,6 +550,36 @@
 % the code for anchors/destination where nesting doesn't make sense.
 % It should not be changed.
 %
+% \DescribeHypkey{pdfborder}\DescribeHypkey{linkborder}\DescribeHypkey{urlborder}
+% \DescribeHypkey{runborder}\DescribeHypkey{menuborder}
+% This key set accept as value three numbers or three numbers and an array describing
+% a dash pattern, examples are |0 0 1| or |0 0 1 [3 2]|.
+% The first two numbers should according to the reference set round
+% corners, but PDF viewer seem to ignore it. The third number is the line width
+% of the border. Settings done with |pdfborderstyle| should take precedence.
+%
+% \DescribeHypkey{pdfborderstyle}\DescribeHypkey{linkborderstyle}
+% \DescribeHypkey{urlborderstyle}\DescribeHypkey{fileborderstyle}
+% \DescribeHypkey{runborderstyle}\DescribeHypkey{menuborderstyle}
+% The value of this key is the content of the |BS| dictionary.
+% As an example |/Type/Border /W 1  /S/U  /D[3 2]|
+%
+% \begin{tabular}{>{\ttfamily} lll}
+% Key & Values & comment / example\\\hline
+% /Type & |/Border| & optional \\
+% /W    & \meta{number} & Width of border line \\
+% /S    & |/S|      & solid (default)\\
+%       & |/D| &dash  pattern can be set with /D\\
+%       & |/B| & beveled\\
+%       & |/I| & inset\\
+%       & |/U| & underline\\
+% /D    & \meta{array of numbers} & dash pattern (lines/gaps) (default [3])
+% \end{tabular}
+%
+% \DescribeHypkey{pdflinkmargin}As described in the \pkg{hyperref} manual
+% the behaviour differs between the backends: with dvips it is possible to
+% change links locally, pdflatex and lualatex work by page, with dvipdfmx
+% the setting is global (and has to be done in the preamble).
 %^^A %% This is an adapted version of hluatex.def
 %^^A %% meant to test the use of the commands
 %^^A %% from pdfmanagement.sty
@@ -1820,10 +1855,296 @@
 
 %    \end{macrocode}
 %
-% \section{Colorlinks}
+% \section{Color of links and borders}
+% \subsection{Functions to export and select colors}
+% We support two input syntax: color expressions and model with values.
+% \begin{function}{\@@_color_export:nnN,\@@_colormodel_export:nnnN}
+%   \begin{syntax}
+%    \cs{@@_color_export:nnN} \Arg{color} \Arg{export format} \meta{tlvar}\\
+%    \cs{@@_colormodel_export:nnnN} \Arg{color model}\Arg{value} \Arg{export format} \meta{tlvar}
+%   \end{syntax}
+%   This exports a color as space separated numbers as needed in in |/C|.
+%  \Arg{color} should have either the format |[model]{value}| or be a color expression.
+%  For examples: |[rgb]{1,0,.5}| or |red!50!blue|. The export format is either
+%  |space-sep-cmyk| or |space-sep-rgb|.
+% \end{function}
+%  \begin{macro}{\@@_color_export:nnN,\@@_colormodel_export:nnnN}
+%   Color keys need to parse color expressions. Two input types are supported:
+%  |color=[rgb]{1,0,.5}| and |color=red!50!blue|. The colors are exported
+%  to PDF syntax (space separated numbers).
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_color_export:nnN #1  #2  #3
+ {
+   \tl_if_head_eq_charcode:nNTF {#1}[ %]
+    {
+      \@@_colormodel_export:wnnN  #1 {#2} #3
+    }
+    {
+      \color_export:nnN {#1} {#2} #3
+    }
+ }
+
+\cs_new_protected:Npn \@@_colormodel_export:wnnN  [#1] #2 #3 #4
+  {
+     \color_export:nnnN {#1}{#2}{#3}#4
+  }
+
+\cs_generate_variant:Nn \@@_color_export:nnN {xVN}
+%    \end{macrocode}
+% \end{macro}
 %
+% \begin{function}{\@@_color_select:n}
+%   \begin{syntax}
+%    \cs{@@_color_select:nN} \Arg{color} \\
+%   \end{syntax}
+%  These commands select a (text) color.
+%  \Arg{color} should have either the format |[model]{value}| or be a color expression.
+%  For examples: |[rgb]{1,0,.5}| or |red!50!blue|
+% \end{function}
+%  \begin{macro}{\@@_color_select:n,\@@_colormodel_select_aux:wn}
+%   Color keys need to parse color expressions. Two input types are supported:
+%  |color=[rgb]{1,0,.5}| and |color=red!50!blue|.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_color_select:n #1
+ {
+   \tl_if_head_eq_charcode:nNTF {#1}[ %]
+    {
+      \@@_colormodel_select_aux:wn  #1
+    }
+    {
+      \color_select:n {#1}
+    }
+ }
+
+\cs_new_protected:Npn \@@_colormodel_select_aux:wn  [#1] #2
+  {
+     \color_select:nn {#1}{#2}
+  }
+
+\cs_generate_variant:Nn \@@_color_select:n {e}
+%    \end{macrocode}
+% \end{macro}
 %
+% \subsection{Textcolor of links}
+% colors are added in the hooks. This means that they can also be removed if needed.
+% They add a group---this isn't needed with hyperref code, but could be relevant
+% with low-level annotations.
+%    \begin{macrocode}
+\prop_map_inline:Nn \c_@@_map_hyp_annot_prop
+  {
+     \hook_gput_code:nnn
+       {pdfannot/link/#2/begin}
+       {hyp/color}
+       {
+         \bool_if:cT { l_@@_annot_color#1_bool }
+           {
+             \group_begin:
+             \@@_color_select:e { \tl_use:c {l_@@_annot_#1color_tl} }
+           }
+       }
+     \hook_gput_code:nnn
+       {pdfannot/link/#2/end}
+       {hyp/color}
+       {
+         \bool_if:cT { l_@@_annot_color#1_bool }
+           {
+             \group_end:
+           }
+       }
+  }
+%    \end{macrocode}
 %
+% \begin{hypkey}{colorlinks}
+% This key also resets the border and borderstyle.
+%    \begin{macrocode}
+\keys_define:nn { hyp / setup }
+  {
+    ,colorlinks .meta:n =
+      {
+        ,pdfborder={0~0~0}
+        ,pdfborderstyle=
+        ,colorurl  =#1
+        ,colorlink =#1
+        ,colorrun  =#1
+        ,colormenu =#1
+        ,colorfile =#1
+        }
+    ,colorlinks .default:n = {true}
+  }
+%    \end{macrocode}
+% \end{hypkey}
+% \begin{hypkey}{colorurl,colorlink,colorrun,colormenu,colorfile}
+% \begin{hypkey}{urlcolor,linkcolor,runcolor,menucolor,filecolor}
+% \begin{hypkey}{allcolor}
+%    \begin{macrocode}
+\prop_map_inline:Nn \c_@@_map_hyp_annot_prop
+  {
+     \keys_define:nn { hyp / setup }
+       {
+         ,color#1 .bool_set:c = { l_@@_annot_color#1_bool }
+         ,#1color .tl_set:c =   { l_@@_annot_#1color_tl }
+       }
+  }
+
+\keys_define:nn { hyp / setup }
+  {
+    ,allcolors .meta:n =
+      {
+        ,urlcolor=#1
+        ,linkcolor=#1
+        ,runcolor=#1
+        ,filecolor=#1
+        ,menucolor=#1
+      }
+    ,allcolors .value_required:n = true
+  }
+%    \end{macrocode}
+% \subsection{Style and color of borders}
+% \subsubsection{Border color}
+% The border color is set by link type.
+%    \begin{macrocode}
+\prop_map_inline:Nn \c_@@_map_hyp_annot_prop
+  {
+    \keys_define:nn { hyp / setup }
+      {
+        #1bordercolor .code:n =
+          {
+             \tl_if_empty:nTF { ##1 }
+               {
+                 \pdfannot_dict_remove:nn
+                  {link/#2}
+                  { C }
+               }
+               {
+                 \@@_color_export:xVN {##1}\g_@@_colormodel_str \l_@@_tmpa_tl
+                 \pdfannot_dict_put:nnx
+                   {link/#2}
+                   { C }
+                   { [\l_@@_tmpa_tl] }
+               }
+          }
+      }
+  }
+
+\keys_define:nn { hyp / setup }
+  {
+    ,allbordercolors .meta:n =
+      {
+        ,linkbordercolor=#1
+        ,urlbordercolor =#1
+        ,filebordercolor=#1
+        ,menubordercolor=#1
+        ,runbordercolor =#1
+      }
+    ,allbordercolors .value_required:n = true
+  }
+
+%    \end{macrocode}
+%
+% \subsubsection{Borderwidth and arc}
+%
+%    \begin{macrocode}
+\prop_map_inline:Nn \c_@@_map_hyp_annot_prop
+  {
+    \keys_define:nn { hyp / setup }
+      {
+        #1border .code:n =
+          {
+             \tl_if_empty:nTF { ##1 }
+               {
+                 \pdfannot_dict_remove:nn
+                  {link/#2}
+                  { Border }
+               }
+               {
+                 \pdfannot_dict_put:nnn
+                   {link/#2}
+                   { Border }
+                   { [##1] }
+               }
+          }
+      }
+  }
+\keys_define:nn { hyp / setup }
+  {
+    ,pdfborder  .code:n =
+      {
+        \tl_if_empty:nTF { #1 }
+         {
+           \prop_map_inline:Nn \c_@@_map_hyp_annot_prop
+             {
+               \pdfannot_dict_remove:nn
+                  {link/##2}
+                  { Border }
+             }
+         }
+         {
+           \prop_map_inline:Nn \c_@@_map_hyp_annot_prop
+             {
+               \pdfannot_dict_put:nnn
+                 {link/##2}
+                 { Border }
+                 { [#1] }
+             }
+         }
+      }
+    ,pdfborder .initial:n = {0~0~1},
+  }
+%    \end{macrocode}
+% \subsubection{Borderstyle}
+% This keys fill the extended /BS entry (a dictionary).
+% \begin{Hypkey}{pdfborderstyle,urlborderstyle,linkborderstyle,
+% runborderstyle,fileborderstyle,
+% menuborderstyle}
+%    \begin{macrocode}
+\prop_map_inline:Nn \c_@@_map_hyp_annot_prop
+  {
+    \keys_define:nn { hyp / setup }
+      {
+        #1borderstyle .code:n =
+          {
+             \tl_if_empty:nTF { ##1 }
+               {
+                 \pdfannot_dict_remove:nn
+                  {link/#2}
+                  { BS }
+               }
+               {
+                 \pdfannot_dict_put:nnn
+                   {link/#2}
+                   { BS }
+                   { <<##1>> }
+               }
+          }
+      }
+  }
+\keys_define:nn { hyp / setup }
+  {
+    ,pdfborderstyle  .code:n =
+      {
+        \tl_if_empty:nTF { #1 }
+         {
+           \prop_map_inline:Nn \c_@@_map_hyp_annot_prop
+             {
+               \pdfannot_dict_remove:nn
+                  {link/##2}
+                  { BS }
+             }
+         }
+         {
+           \prop_map_inline:Nn \c_@@_map_hyp_annot_prop
+             {
+               \pdfannot_dict_put:nnn
+                 {link/##2}
+                 { BS }
+                 { <<#1>> }
+             }
+         }
+      }
+    ,pdfborderstyle .initial:n = {},
+  }
+%    \end{macrocode}
+% \end{Hypkey}
 % \subsection{ocgcolorlinks}
 % OCG colorlinks need objects and an entry in the catalog.
 % Perhaps the objects need public names to avoid that ocgx2 has to create
@@ -2017,50 +2338,6 @@
 %    \end{macrocode}
 % \end{Hypkey}
 %    \begin{macrocode}
-\cs_set_protected:Npn \setpdflinkmargin #1
-  {
-    \pdfannot_link_margin:n { #1 }
-  }
-
-\pdfannot_link_margin:n { 1pt }
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%these patterns are used in hyperref checks.
-%it is unclear if they are really useful and if a backend support is
-%needed.
-\str_case:VnF \c_sys_backend_str
- {
-   { pdfmode }
-   {
-     \def\HyPat@ObjRef
-      {
-       [0-9]*[1-9][0-9]*~0~R
-      }
-   }
-   { dvipdfmx }
-   {
-     \def\HyPat@ObjRef
-      {
-        @[^~]+
-      }
-   }
-   { xdvipdfmx }
-   {
-     \def\HyPat@ObjRef
-      {
-        @[^~]+
-      }
-   }
- }
- { %also set in hyperref sty, so probably not needed.
-   \def\HyPat@ObjRef/{.+}
- }
-
-%file links to pdfs. See test-filelinks.pdf for a few example.
-
-
 % The following keys are set currently only with the original setup,
 % but we don't want warnings
 \keys_define:nn { hyp / setup }
@@ -2300,6 +2577,8 @@
                 \pdfmanagement_add:nnx {Catalog} { Lang } { (#1) }
               }
           }
+   ,pdflinkmargin .code:n = { \pdfannot_link_margin:n { #1 } }
+   ,pdflinkmargin .initial:n = {1pt} 
    ,pdfmenubar    .choice:
    ,pdfmenubar / true .code:n =
      {
@@ -2813,125 +3092,10 @@
       }
     ,pdfview .initial:n  = {xyz}
   }
-% styles and colors.
-% this needs some sorting.
-% should colorlinks reset the border?
-% which colors should be used?
-% should we use the generic hooks or make hyp specific hooks?
-% what about font changes?
-% hooks are global, is this the right thing to use here?
-% perhaps the hook should only take a tl and this is filled?
-\prop_map_inline:Nn \c_@@_map_hyp_annot_prop
-  {
-    \keys_define:nn { hyp / setup }
-      {
-        #1border .code:n =
-          {
-             \tl_if_empty:nTF { ##1 }
-               {
-                 \pdfannot_dict_remove:nn
-                  {link/#2}
-                  { Border }
-               }
-               {
-                 \pdfannot_dict_put:nnn
-                   {link/#2}
-                   { Border }
-                   { [##1] }
-               }
-          }
-      }
-  }
-\keys_define:nn { hyp / setup }
-  {
-    ,pdfborder  .code:n =
-      {
-        \tl_if_empty:nTF { #1 }
-         {
-           \prop_map_inline:Nn \c_@@_map_hyp_annot_prop
-             {
-               \pdfannot_dict_remove:nn
-                  {link/##2}
-                  { Border }
-             }
-         }
-         {
-           \prop_map_inline:Nn \c_@@_map_hyp_annot_prop
-             {
-               \pdfannot_dict_put:nnn
-                 {link/##2}
-                 { Border }
-                 { [#1] }
-             }
-         }
-      }
-    ,pdfborder .initial:n = {0~0~1},
-  }
+
+
 %    \end{macrocode}
-% \begin{function}{\@@_color_export:nnN,\@@_colormodel_export:nnnN}
-%   \begin{syntax}
-%    \cs{@@_color_export:nnN} \Arg{color} \Arg{export format} \meta{tlvar}\\
-%    \cs{@@_colormodel_export:nnnN} \Arg{color model}\Arg{value} \Arg{export format} \meta{tlvar}
-%   \end{syntax}
-%  \Arg{color} should have either the format |[model]{value}| or be a color expression.
-%  For examples: |[rgb]{1,0,.5}| or |red!50!blue|
-% \end{function}
-%  \begin{macro}{\@@_color_export:nnN,\@@_colormodel_export:nnnN}
-%   Color keys need to parse color expressions. Two input types are supported:
-%  |color=[rgb]{1,0,.5}| and |color=red!50!blue|. The colors are exported
-%  to PDF syntax (space separated numbers).
-%    \begin{macrocode}
-\cs_new_protected:Npn \@@_color_export:nnN #1  #2  #3
- {
-   \tl_if_head_eq_charcode:nNTF {#1}[ %]
-    {
-      \@@_colormodel_export:wnnN  #1 {#2} #3
-    }
-    {
-      \color_export:nnN {#1} {#2} #3
-    }
- }
 
-\cs_new_protected:Npn \@@_colormodel_export:wnnN  [#1] #2 #3 #4
-  {
-     \color_export:nnnN {#1}{#2}{#3}#4
-  }
-
-\cs_generate_variant:Nn \@@_color_export:nnN {xVN}
-%    \end{macrocode}
-% \end{macro}
-% \begin{function}{\@@_color_select:n,\@@_colormodel_select:nn}
-%   \begin{syntax}
-%    \cs{@@_color_select:nN} \Arg{color} \\
-%    \cs{@@_colormodel_select:nn} \Arg{color model}\Arg{values}
-%   \end{syntax}
-%  These commands select a color.
-%  \Arg{color} should have either the format |[model]{value}| or be a color expression.
-%  For examples: |[rgb]{1,0,.5}| or |red!50!blue|
-% \end{function}
-%  \begin{macro}{\@@_color_select:n,\@@_colormodel_select:nn}
-%   Color keys need to parse color expressions. Two input types are supported:
-%  |color=[rgb]{1,0,.5}| and |color=red!50!blue|.
-%    \begin{macrocode}
-\cs_new_protected:Npn \@@_color_select:n #1
- {
-   \tl_if_head_eq_charcode:nNTF {#1}[ %]
-    {
-      \@@_colormodel_select:wn  #1
-    }
-    {
-      \color_select:n {#1}
-    }
- }
-
-\cs_new_protected:Npn \@@_colormodel_select:wn  [#1] #2
-  {
-     \color_select:nn {#1}{#2}
-  }
-
-\cs_generate_variant:Nn \@@_color_select:n {e}
-%    \end{macrocode}
-% \end{macro}
 % \begin{hypkey}{colormodel}
 %    \begin{macrocode}
 \keys_define:nn { hyp / setup }
@@ -2944,76 +3108,7 @@
 %    \end{macrocode}
 % \end{hypkey}
 %    \begin{macrocode}
-\prop_map_inline:Nn \c_@@_map_hyp_annot_prop
-  {
-    \keys_define:nn { hyp / setup }
-      {
-        #1bordercolor .code:n =
-          {
-             \tl_if_empty:nTF { ##1 }
-               {
-                 \pdfannot_dict_remove:nn
-                  {link/#2}
-                  { C }
-               }
-               {
-                 \@@_color_export:xVN {##1}\g_@@_colormodel_str \l_@@_tmpa_tl
-                 \pdfannot_dict_put:nnx
-                   {link/#2}
-                   { C }
-                   { [\l_@@_tmpa_tl] }
-               }
-          }
-      }
-  }
 
-
-\prop_map_inline:Nn \c_@@_map_hyp_annot_prop
-  {
-    \keys_define:nn { hyp / setup }
-      {
-        #1borderstyle .code:n =
-          {
-             \tl_if_empty:nTF { ##1 }
-               {
-                 \pdfannot_dict_remove:nn
-                  {link/#2}
-                  { BS }
-               }
-               {
-                 \pdfannot_dict_put:nnn
-                   {link/#2}
-                   { BS }
-                   { <<##1>> }
-               }
-          }
-      }
-  }
-\keys_define:nn { hyp / setup }
-  {
-    ,pdfborderstyle  .code:n =
-      {
-        \tl_if_empty:nTF { #1 }
-         {
-           \prop_map_inline:Nn \c_@@_map_hyp_annot_prop
-             {
-               \pdfannot_dict_remove:nn
-                  {link/##2}
-                  { BS }
-             }
-         }
-         {
-           \prop_map_inline:Nn \c_@@_map_hyp_annot_prop
-             {
-               \pdfannot_dict_put:nnn
-                 {link/##2}
-                 { BS }
-                 { <<#1>> }
-             }
-         }
-      }
-    ,pdfborderstyle .initial:n = {},
-  }
 
 \prop_map_inline:Nn \c_@@_map_hyp_annot_prop
   {
@@ -3078,76 +3173,7 @@
       }
   }
 
-%colorlinks unfinished ...
-\keys_define:nn { hyp / setup }
-  {
-    ,colorlinks .meta:n =
-      {
-        ,pdfborder={0~0~0}
-        ,pdfborderstyle={}
-        ,colorurl  =#1
-        ,colorlink =#1
-        ,colorrun  =#1
-        ,colormenu =#1
-        ,colorfile =#1
-        }
-    ,colorlinks .default:n = {true}
-  }
 
-
-% link text colors, we probably need to parse it, but for now it is only stored.
-\prop_map_inline:Nn \c_@@_map_hyp_annot_prop
-  {
-     \hook_gput_code:nnn
-       {pdfannot/link/#2/begin}
-       {hyp/color}
-       {
-         \bool_if:cT { l_@@_annot_color#1_bool }
-           {
-             \group_begin:
-             \@@_color_select:e { \tl_use:c {l_@@_annot_#1color_tl} }
-           }
-       }
-     \hook_gput_code:nnn
-       {pdfannot/link/#2/end}
-       {hyp/color}
-       {
-         \bool_if:cT { l_@@_annot_color#1_bool }
-           {
-             \group_end:
-           }
-       }
-
-     \keys_define:nn { hyp / setup }
-       {
-         ,color#1 .bool_set:c = { l_@@_annot_color#1_bool }
-         ,#1color .tl_set:c =   { l_@@_annot_#1color_tl }
-       }
-  }
-
-\keys_define:nn { hyp / setup }
-  {
-    ,allcolors .code:n =
-      {
-        \seq_map_inline:Nn \c_@@_annot_types_seq
-         {
-           \keys_set:nn { hyp / setup } { ##1color = #1 }
-         }
-      }
-    ,allcolors .value_required:n = true
-  }
-
-\keys_define:nn { hyp / setup }
-  {
-    ,allbordercolors .code:n =
-      {
-        \seq_map_inline:Nn \c_@@_annot_types_seq
-         {
-           \keys_set:nn { hyp / setup } { ##1bordercolor = #1 }
-         }
-      }
-    ,allbordercolors .value_required:n = true
-  }
 
 
 \keys_define:nn { hyp / setup }
@@ -4457,6 +4483,39 @@
          \Fld@additionalactions
        }%
    }
+
+ %these patterns are used in hyperref checks.
+%it is unclear if they are really useful and if a backend support is
+%needed.
+\str_case:VnF \c_sys_backend_str
+ {
+   { pdfmode }
+   {
+     \def\HyPat@ObjRef
+      {
+       [0-9]*[1-9][0-9]*~0~R
+      }
+   }
+   { dvipdfmx }
+   {
+     \def\HyPat@ObjRef
+      {
+        @[^~]+
+      }
+   }
+   { xdvipdfmx }
+   {
+     \def\HyPat@ObjRef
+      {
+        @[^~]+
+      }
+   }
+ }
+ { %also set in hyperref sty, so probably not needed.
+   \def\HyPat@ObjRef/{.+}
+ }
+
+
 \ExplSyntaxOff
 % UF: removed Hy@writebookmark
 %     \Hy@currentbookmarklevel{0}
