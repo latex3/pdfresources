@@ -145,19 +145,44 @@
       }
   }
 
+\prop_new:N \g_@@_documentmetadata_prop %
+
+\NewDocumentCommand\AddToDocumentmetadata{O{\@currname}mm}
+  {
+    \exp_args:NNx
+      \prop_gput:Nnn \g_@@_documentmetadata_prop
+        {
+          \tl_if_blank:eTF {#1}{top-level/}{#1/} #2
+        }
+        { #3}
+  }
+
+\NewExpandableDocumentCommand\GetDocumentmetadata{m}
+  {
+    \prop_item:Nn \g_@@_documentmetadata_prop {#1}
+  }
+
+\NewDocumentCommand\ShowDocumentmetadata {}
+  {
+    \prop_show:N \g_@@_documentmetadata_prop
+  }
 
 \keys_define:nn { pdf / setup }
   {
-    backend .code:n = { \PassOptionsToPackage { driver=#1 } {expl3} },
+    backend .code:n =
+      {
+        \PassOptionsToPackage { driver=#1 } {expl3}
+        \AddToDocumentmetadata {document/backend}{#1}
+      },
     backend .groups:n = { init } ,
   }
 
-%perhaps it should be a seq?
 \keys_define:nn { pdf / setup }
   {
     ,pdfversion .code:n =
       {
         \pdf_version_gset:n { #1 }
+        \AddToDocumentmetadata {document/pdfversion}{#1}
       }
     ,uncompress .code:n =
       {
@@ -166,6 +191,7 @@
     ,lang .code:n =
       {
         \pdfmanagement_add:nnn {Catalog} {Lang}{(#1)}
+        \AddToDocumentmetadata {document/lang}{#1}
       }
     ,xmpmeta .bool_gset:N = \g_pdfmeta_xmp_bool %see pdfmeta undocumentated for now!
     ,standard .choices:nn =
@@ -175,7 +201,7 @@
           {
             \prop_gset_eq:Nc \g_pdfmeta_standard_prop { g_pdfmeta_standard_pdf/#1 _prop }
           }
-
+        \AddToDocumentmetadata {document/standard}{#1}
       }
     ,standard / unknown .code:n =
       {
