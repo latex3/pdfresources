@@ -196,7 +196,7 @@
 % \item[ltdocinit] This package provides the \cs{DeclareDocumentMetadata} commands.
 % It should not be loaded directly.
 %
-% \item[l3backend-pdf] This module contains backend code needed by the
+% \item[l3backend-pdf-extra] This module contains backend code needed by the
 % pdf management. It will in due time be integrated into l3backend.
 % It should not be loaded directly.
 %
@@ -204,9 +204,14 @@
 % It is quite incomplete currently. It is loaded by the bundle, and
 % should not be loaded independently.
 %
-% \item[l3pdfutils] A number of commands which like e.g. for xform objects.
-% It will probably disappear.
+% \item[l3pdfutils] A number of commands  like e.g. for xform objects.
+% It will probably disappear. It is loaded by the bundle, and
+% should not be loaded independently.
 %
+% \item[l3pdftool] A number of commands like text conversion commands and
+% bcd/emc.  It will probably disappear. It is loaded by the bundle, and
+% should not be loaded independently.
+% 
 % \section{Incompabilities}
 %
 % As described in section~\ref{sec:change}, if activated
@@ -337,49 +342,6 @@
 
 %</package>
 %    \end{macrocode}
-%
-% \section{The core dictionaries}
-% \subsection{The \enquote{Info} dictionary (pdfinfo)}
-% The content of the property list associated with this dictionary name is written to the
-% /Info object. This replaces \cs{pdfinfo}.
-% \begin{NOTE}{UF}
-% path: Info
-% The info dictionary is filled by e.g. \cs{pdfinfo}. Multiple appearances of
-% \cs{pdfinfo} are concatenated, so one could end with multiple /Title or /Author entries.
-% It is then viewer dependent which one is showed, so it is better to avoid this.
-% We therefore setup a property which is filled and written to the info
-% directory in one go. According to hyperref a few odd drivers (hvtex, dvipsone, dviwind)
-% don't support arbitrary keys, but this should be handle elsewhere.
-% As entries with empty content
-% should be omitted we add a test. The string command should perhaps escape the argument,
-% but for now we are assuming that the argument is pdf safe.
-% hyperref writes to the info dictionary at the shipout of the first page --
-% probably to catch the  case that \cs{title} is issued after the begin of the document.
-% We are outputting at the last page -- this needs a second compilation but
-% this is needed anyway.
-% \end{NOTE}
-%
-%
-% \subsubsection{\enquote{Pages} / backend}
-% \begin{NOTE}{UF}
-%  path: Pages
-%  pdfpagesattr is a single token register which is used at the end of the compilation.
-%  dvips syntax: \verb+\special{ps: [/ABC /CDE /EFG /FGH /Rotate 90 /PAGES pdfmark}+
-%  dvipdfmx syntax: \verb+\special{pdf:put @pages <</ABC /WEZ /EFG /XYZ /Rotate 0>>}+
-%  both remove duplicate entries automatically, so there is no need to be careful.
-% \end{NOTE}
-% The code is in the extra backend code in \pkg{l3backend-pdf-extra}.
-% \subsubsection{\enquote{Pages} / management}
-% \begin{NOTE}{UF}
-% The register is normally used only a few times in a document, so it would be
-% okay to update the register/add the special at every change,
-% but with dvips/dvipdfmx this would disable removing entries.
-% So we issue the push code only at the end of the document.
-% \end{NOTE}
-% The code has been moved to \pkg{l3pdfmanagement}
-%
-% \section{Patches}
-% The code has been moved to pageresources-patches.dtx
 % \end{implementation}
 % \newpage
 % \PrintIndex

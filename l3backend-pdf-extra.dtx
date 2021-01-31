@@ -181,6 +181,13 @@
 %</drivers>
 %    \end{macrocode}
 % \subsection{ The /Pages dictionary (pdfpagesattr) }
+% \begin{NOTE}{UF}
+%  path: Pages
+%  pdfpagesattr is a single token register which is used at the end of the compilation.
+%  dvips syntax: \verb+\special{ps: [/ABC /CDE /EFG /FGH /Rotate 90 /PAGES pdfmark}+
+%  dvipdfmx syntax: \verb+\special{pdf:put @pages <</ABC /WEZ /EFG /XYZ /Rotate 0>>}+
+%  both remove duplicate entries automatically, so there is no need to be careful.
+% \end{NOTE}
 % \begin{macro}{\@@_backend_Pages_primitive:n}
 % This is the primitive command to add something to the /Pages dictionary.
 % It works differently for the backends: pdftex and luatex overwrite existing
