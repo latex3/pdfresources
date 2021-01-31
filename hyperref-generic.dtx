@@ -34,8 +34,17 @@
 % \NewDocElement[
 %   idxgroup=hypersetup keys\actualchar\cs{hypersetup} keys,
 %   idxtype = {hypersetup key},
-%   printtype= \textit{\cs[no-index]{hypersetup key}}
-%    ]{Hypkey}{hypkey}
+%   printtype= \textit{setup key}
+%    ]{Hypkey}{xhypkey}
+% \ExplSyntaxOn
+% \NewDocumentEnvironment{hypkey}{m}
+% {
+%   \clist_map_inline:nn {#1}{\begin{xhypkey}{##1}}
+% }
+% {
+%   \clist_map_inline:nn {#1}{\end{xhypkey}}
+% }
+% \ExplSyntaxOff
 % \NewDocElement[
 %   idxgroup=Hooks,
 %   printtype= \textit{hook}
@@ -208,7 +217,7 @@
 %   \item Beside |colorlinks| there are also |colorlink|, |colorurl| etc
 %   \item Beside |ocgcolorlinks| there are also |ocgcolorlink|, |ocgcolorurl|, etc %TODO
 %   \item Beside |hidelinks| there are also |hidelink|, |hideurl|, etc
-%   \item |colormodel| allows to set the model used in annotations,
+%   \item |bordercolormodel| allows to set the model used in annotations,
 %   the allowed values  are |rgb| or |cmyk|. |rgb| is the default.
 %   It does \emph{not} change the model of text colors. Be aware
 %   that while the PDF format allows cmyk (4 numbers) in the |/C| key of an annotation,
@@ -218,7 +227,7 @@
 %  \end{itemize}
 %
 %  \subsection{Changed behaviour}
-%   \begin{descriptions}
+%   \begin{description}
 %   \item[colorlinks] |colorlinks| will as before disable the |pdfborder|, but it is possible
 %    to use the key in the document at any time, or to reenable the border if wanted.
 %    Internally |colorlinks| \& friends will no longer define/undefine
@@ -244,9 +253,9 @@
 %   \item[link margin] The driver sets a default link margin---this is identical
 %   to pdftex and luatex driver, but a change for the xetex and dvips driver.
 %   The (undocumentated) command \cs{setpdflinkmargin} does nothing.
-%   Use either the key |pdflinkmargin| or \cs{\pdfannot_link_margin:n} to change the margin.
+%   Use either the key |pdflinkmargin| or \cs{pdfannot_link_margin:n} to change the margin.
 %   See also the description in section~\ref{sec:keydesc} and in the hyperref manual.
-%   \end{itemize}
+%   \end{description}
 %
 %  \section{PDF strings}
 %
@@ -387,7 +396,7 @@
 %  \item  In widget annotations, the /AA dictionary is suppressed.
 %  \end{itemize}
 %  \end{description}
-%  \subsection{Destinations}
+%  \section{Destinations}
 %  Destinations (sometimes call anchors in the \pkg{hyperref} documentation)
 %  are the places a link jumped too. Unlike the name may suggest they don't described
 %  an exact location in the PDF. Instead a destination contains a reference to
@@ -508,7 +517,7 @@
 % be added to the bookmarks. The key can be use in \cs{hypersetup} and also in
 % the middle of the document to switch the list.
 %
-% \DescribeHypkey{colormodel} With |colormodel| the colormodel used in the |/C|
+% \DescribeHypkey{bordercolormodel} With |bordercolormodel| the colormodel used in the |/C|
 % key of the annotation array and in similar keys is set. It does not affect
 % the text and graphics colors in the page stream.
 % Possible choices are |rgb| (three numbers in the array) and |cmyk| (four numbers).
@@ -638,7 +647,7 @@
 %^^A %% \l_@@_CheckmarkYes_tl
 %^^A %% \l_@@_CheckmarkOff_tl
 %^^A %% \l_@@_RadioYes_tl
-%^^A %% \g_@@_colormodel_tl
+%^^A %% \g_@@_bordercolormodel_tl
 %
 %^^A %% \l_@@_dest_pdfview_tl
 %^^A %% list of commands which probably will have to change
@@ -1170,12 +1179,12 @@
   }
 %    \end{macrocode}
 % \end{variable}
-% \begin{variable}{\g_@@_colormodel_str}
+% \begin{variable}{\g_@@_bordercolormodel_str}
 % This holds the export model for border color etc.
 % It is currently either |space-sep-cmyk| or |space-sep-rgb|.
-% The default is the second. It can be change by the key |colormodel|
+% The default is the second. It can be change by the key |bordercolormodel|
 %    \begin{macrocode}
-\str_new:N \g_@@_colormodel_str
+\str_new:N \g_@@_bordercolormodel_str
 %    \end{macrocode}
 % \end{variable}
 % \subsection{Booleans}
@@ -1855,7 +1864,7 @@
 
 %    \end{macrocode}
 %
-% \section{Color of links and borders}
+% \section{Link decorations}
 % \subsection{Functions to export and select colors}
 % We support two input syntax: color expressions and model with values.
 % \begin{function}{\@@_color_export:nnN,\@@_colormodel_export:nnnN}
@@ -1924,7 +1933,6 @@
 \cs_generate_variant:Nn \@@_color_select:n {e}
 %    \end{macrocode}
 % \end{macro}
-%
 % \subsection{Textcolor of links}
 % colors are added in the hooks. This means that they can also be removed if needed.
 % They add a group---this isn't needed with hyperref code, but could be relevant
@@ -1999,9 +2007,24 @@
     ,allcolors .value_required:n = true
   }
 %    \end{macrocode}
+% \end{hypkey}
+% \end{hypkey}
+% \end{hypkey}
 % \subsection{Style and color of borders}
 % \subsubsection{Border color}
-% The border color is set by link type.
+% The border color is set by link type. The color can be set as rgb (default)
+% or cmyk (unusual). This can be set with the |bordercolormodel| key:
+%\begin{hypkey}{bordercolormodel}
+%    \begin{macrocode}
+\keys_define:nn { hyp / setup }
+  {
+    ,bordercolormodel .choices:nn =
+     {rgb,cmyk}
+     { \str_gset:Nn \g_@@_bordercolormodel_str {space-sep-#1}}
+    ,bordercolormodel .initial:n ={rgb}
+  }
+%    \end{macrocode}
+% \end{hypkey}
 %    \begin{macrocode}
 \prop_map_inline:Nn \c_@@_map_hyp_annot_prop
   {
@@ -2016,7 +2039,7 @@
                   { C }
                }
                {
-                 \@@_color_export:xVN {##1}\g_@@_colormodel_str \l_@@_tmpa_tl
+                 \@@_color_export:xVN {##1}\g_@@_bordercolormodel_str \l_@@_tmpa_tl
                  \pdfannot_dict_put:nnx
                    {link/#2}
                    { C }
@@ -2041,7 +2064,7 @@
 
 %    \end{macrocode}
 %
-% \subsubsection{Borderwidth and arc}
+% \subsubsection{Borderwidth and -arc}
 %
 %    \begin{macrocode}
 \prop_map_inline:Nn \c_@@_map_hyp_annot_prop
@@ -2091,9 +2114,9 @@
     ,pdfborder .initial:n = {0~0~1},
   }
 %    \end{macrocode}
-% \subsubection{Borderstyle}
+% \subsubsection{Borderstyle}
 % This keys fill the extended /BS entry (a dictionary).
-% \begin{Hypkey}{pdfborderstyle,urlborderstyle,linkborderstyle,
+% \begin{hypkey}{pdfborderstyle,urlborderstyle,linkborderstyle,
 % runborderstyle,fileborderstyle,
 % menuborderstyle}
 %    \begin{macrocode}
@@ -2144,7 +2167,7 @@
     ,pdfborderstyle .initial:n = {},
   }
 %    \end{macrocode}
-% \end{Hypkey}
+% \end{hypkey}
 % \subsection{ocgcolorlinks}
 % OCG colorlinks need objects and an entry in the catalog.
 % Perhaps the objects need public names to avoid that ocgx2 has to create
@@ -2255,7 +2278,7 @@
   }
 %    \end{macrocode}
 %
-% \begin{Hypkey}
+% \begin{hypkey}
 %  {
 %   ocgcolorlinks,
 %   ocgcolorlink,
@@ -2336,7 +2359,125 @@
       }
   }
 %    \end{macrocode}
-% \end{Hypkey}
+% \end{hypkey}
+% \subsection{Highlighting}
+% This keys set what happens if you click on a link
+%    \begin{macrocode}
+\prop_map_inline:Nn \c_@@_map_hyp_annot_prop
+  {
+    \keys_define:nn { hyp / setup }
+      {
+        ,#1highlight .choices:nn =
+          { /I, /N, /O, /P}
+          {
+                \pdfannot_dict_put:nnn
+                  {link/#2}
+                  { H }
+                  { ##1 }
+
+          }
+        ,#1highlight / .code:n =
+         {
+           \pdfannot_dict_remove:nn
+             {link/#2}
+             { H }
+
+          }
+        ,#1highlight / unknown .code:n =
+          {
+           \msg_warning:nnxxx { hyp } { unknown-choice+empty }
+             { pdfhighlight }
+             { /I~(inverse), /N~(no effect), /O~(outline), /P~(inset) }
+             { \exp_not:n {##1} }
+          }
+      }
+  }
+
+
+\keys_define:nn { hyp / setup }
+  {
+    ,pdfhighlight .choices:nn =
+      { /I, /N, /O, /P}
+      {
+        \prop_map_inline:Nn \c_@@_map_hyp_annot_prop
+          {
+            \pdfannot_dict_put:nnn
+              {link/####2}
+              { H }
+              { #1  }
+          }
+      }
+    ,pdfhighlight / .code:n =
+     {
+        \prop_map_inline:Nn \c_@@_map_hyp_annot_prop
+          {
+            \pdfannot_dict_remove:nn
+              {link/##2}
+              { H }
+          }
+      }
+    ,pdfhighlight .initial:n = {/I},
+    ,pdfhighlight / unknown .code:n =
+      {
+       \msg_warning:nnxxx { hyp } { unknown-choice+empty }
+         { pdfhighlight }
+         { /I~(inverse), /N~(no effect), /O~(outline), /P~(inset) }
+         { \exp_not:n {#1} }
+      }
+  }
+%    \end{macrocode}
+%
+% \subsection{Hiding links}
+% This key disable all appearance keys. The link themselves are still there.
+% \begin{hypkey}{hidelinks,hidelink,hideurl,hidefile,hiderun,hidemenu}
+%    \begin{macrocode}
+\keys_define:nn { hyp / setup }
+  {
+    hidelinks .meta:n =
+      {
+        ,colorlinks    = false
+        ,ocgcolorlinks = false
+        ,pdfborder     = { 0~0~0 }
+        ,pdfborderstyle=
+      }
+  }
+
+\seq_map_inline:Nn \c_@@_annot_types_seq
+  {
+    \keys_define:nn { hyp / setup }
+      {
+        hide#1 .meta:n =
+          {
+             ,color#1       = false
+             ,ocgcolor#1    = false
+             ,#1border      = { 0~0~0 }
+             ,#1borderstyle =
+          }
+      }
+  }
+%    \end{macrocode}
+% \end{hypkey}
+% \subsection{color schemes and settings}
+% This define the key for the color schemes and sets the default colors.
+% \begin{hypkey}{colorscheme}
+%    \begin{macrocode}
+\keys_define:nn { hyp / setup }
+  {
+    colorscheme .code:n =
+      {
+        \prop_map_inline:cn { c_@@_colorscheme_#1_prop }
+          {
+            \keys_set:nn { hyp /setup }
+              {
+                 ##1 = ##2
+              }
+          }
+      }
+  }
+\keys_set:nn { hyp / setup } {colorscheme=phelype}
+%    \end{macrocode}
+% \end{hypkey}
+
 %    \begin{macrocode}
 % The following keys are set currently only with the original setup,
 % but we don't want warnings
@@ -2420,7 +2561,7 @@
      }
   }
 %    \end{macrocode}
-% \begin{Hypkey}{link,url,file,menu,run}
+% \begin{hypkey}{link,url,file,menu,run}
 %    \begin{macrocode}
 \prop_map_inline:Nn \c_@@_map_hyp_annot_prop
   {
@@ -2430,7 +2571,7 @@
      }
   }
 %    \end{macrocode}
-% \end{Hypkey}
+% \end{hypkey}
 %    \begin{macrocode}
 
 \keys_define:nn { hyp / setup }
@@ -2578,7 +2719,7 @@
               }
           }
    ,pdflinkmargin .code:n = { \pdfannot_link_margin:n { #1 } }
-   ,pdflinkmargin .initial:n = {1pt} 
+   ,pdflinkmargin .initial:n = {1pt}
    ,pdfmenubar    .choice:
    ,pdfmenubar / true .code:n =
      {
@@ -3096,126 +3237,8 @@
 
 %    \end{macrocode}
 
-% \begin{hypkey}{colormodel}
+
 %    \begin{macrocode}
-\keys_define:nn { hyp / setup }
-  {
-    ,colormodel .choices:nn =
-     {rgb,cmyk}
-     { \str_gset:Nn \g_@@_colormodel_str {space-sep-#1}}
-    ,colormodel .initial:n ={rgb}
-  }
-%    \end{macrocode}
-% \end{hypkey}
-%    \begin{macrocode}
-
-
-\prop_map_inline:Nn \c_@@_map_hyp_annot_prop
-  {
-    \keys_define:nn { hyp / setup }
-      {
-        ,#1highlight .choices:nn =
-          { /I, /N, /O, /P}
-          {
-                \pdfannot_dict_put:nnn
-                  {link/#2}
-                  { H }
-                  { ##1 }
-
-          }
-        ,#1highlight / .code:n =
-         {
-           \pdfannot_dict_remove:nn
-             {link/#2}
-             { H }
-
-          }
-        ,#1highlight / unknown .code:n =
-          {
-           \msg_warning:nnxxx { hyp } { unknown-choice+empty }
-             { pdfhighlight }
-             { /I~(inverse), /N~(no effect), /O~(outline), /P~(inset) }
-             { \exp_not:n {##1} }
-          }
-      }
-  }
-
-
-\keys_define:nn { hyp / setup }
-  {
-    ,pdfhighlight .choices:nn =
-      { /I, /N, /O, /P}
-      {
-        \prop_map_inline:Nn \c_@@_map_hyp_annot_prop
-          {
-            \pdfannot_dict_put:nnn
-              {link/####2}
-              { H }
-              { #1  }
-          }
-      }
-    ,pdfhighlight / .code:n =
-     {
-        \prop_map_inline:Nn \c_@@_map_hyp_annot_prop
-          {
-            \pdfannot_dict_remove:nn
-              {link/##2}
-              { H }
-          }
-      }
-    ,pdfhighlight .initial:n = {/I},
-    ,pdfhighlight / unknown .code:n =
-      {
-       \msg_warning:nnxxx { hyp } { unknown-choice+empty }
-         { pdfhighlight }
-         { /I~(inverse), /N~(no effect), /O~(outline), /P~(inset) }
-         { \exp_not:n {#1} }
-      }
-  }
-
-
-
-
-\keys_define:nn { hyp / setup }
-  {
-    colorscheme .code:n =
-      {
-        \prop_map_inline:cn { c_@@_colorscheme_#1_prop }
-          {
-            \keys_set:nn { hyp /setup }
-              {
-                 ##1 = ##2
-              }
-          }
-      }
-  }
-
-%hidelinks
-\keys_define:nn { hyp / setup }
-  {
-    hidelinks .meta:n =
-      {
-        ,colorlinks    = false
-        ,ocgcolorlinks = false
-        ,pdfborder     = { 0~0~0 }
-        ,pdfborderstyle=
-      }
-  }
-
-\seq_map_inline:Nn \c_@@_annot_types_seq
-  {
-    \keys_define:nn { hyp / setup }
-      {
-        hide#1 .meta:n =
-          {
-             ,color#1       = false
-             ,ocgcolor#1    = false
-             ,#1border      = { 0~0~0 }
-             ,#1borderstyle =
-          }
-      }
-  }
-\keys_set:nn { hyp / setup } {colorscheme=phelype}
 
 
 
