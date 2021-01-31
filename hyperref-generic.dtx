@@ -236,7 +236,7 @@
 %   \item The option |frenchlinks| does nothing at all.
 %   \item As mentioned above the support for |citecolor| and |citebordercolor| etc
 %   has been reduced. A package like \pkg{hyperref} can't keep track of such semantic
-%   contexts, like cite, acronym, glossaries, special references and maintain keys for
+%   contexts like cite, acronym, glossaries, special references and maintain keys for
 %   them. The keys are not completly dropped as this would affect packages like
 %   \pkg{natbib}, but they have been separated and are no longer affected by
 %   group keys like |allcolors|  but must be set individually instead.
@@ -844,19 +844,6 @@
 \cs_set_eq:NN \Hy@pdfmajorversion \pdf_version_major:
 %    \end{macrocode}
 %    \begin{macrocode}
-\legacy_if:nT { Hy@ocgcolorlinks }
-  {
-    \pdf_version_compare:NnT < {1.5}
-     {
-       \msg_warning:nnnx
-        { hyp }
-        { ignore-deprecated-or-unknown-option-in-pdf-version }
-        { ocgcolorlinks } { \pdf_version_major:.\pdf_version_minor: }
-       \Hy@ocgcolorlinksfalse
-       \Hy@DisableOption{ocgcolorlinks}
-     }
-  }
-
 \legacy_if:nT { Hy@setpdfversion }
  {
     \msg_warning:nn { hyp }{ pdfversion-disabled }
@@ -872,18 +859,16 @@
 %    \end{macrocode}
 %
 % \cs{hypersetup} should set the new keys.
-% We for now also execute |\kvsetkeys{Hyp}| to avoid compability problems.
-% To avoid errors with the new keys a handler unknown keys is added.
-% But in the end only the new keyval should be used.
+% We can't also execute |\kvsetkeys{Hyp}| as this errors for example with colors.
 % This means the driver has to provide new code for every key!
 %
 %    \begin{macrocode}
 %  TODO should go at some time ...
-\kv@set@family@handler{Hyp}
-  { \msg_warning:nnx {hyp}{unknown-key-to-Hyp}{#1} }
+% \kv@set@family@handler{Hyp}
+%  { \msg_warning:nnx {hyp}{unknown-key-to-Hyp}{#1} }
 \cs_set_protected:Npn \hypersetup #1
   {
-     \kvsetkeys{Hyp} {#1}
+     %\kvsetkeys{Hyp} {#1}
      \keys_set:nn { hyp / setup }{ #1 }
   }
 % TODO for now unknown keys should only give warnings.
@@ -916,7 +901,7 @@
   }
 \hook_gput_code:nnn { hyp/link/cite }{hyp/cite}
   {
-    \hypersetup
+    \keys_set:nn { hyp / setup }
       {
         ,linkbordercolor= \l_@@_annot_citebordercolor_tl
         ,linkcolor      = \l_@@_annot_citecolor_tl
@@ -1133,8 +1118,16 @@
 \tl_new:N  \l_@@_dest_pdfview_tl
 %    \end{macrocode}
 % \end{variable}
-% These variables hold the names of the text colors
-% \begin{variable}{l_@@_annot_XXXcolor_tl}
+% These variables hold the names of the text. The variables are also used as
+% ocg color.
+% \begin{variable}
+%   {
+%     \l_@@_annot_linkcolor_tl,
+%     \l_@@_annot_urlcolor_tl,
+%     \l_@@_annot_filecolor_tl,
+%     \l_@@_annot_runcolor_tl,
+%     \l_@@_annot_menucolor_tl,
+%   }
 %    \begin{macrocode}
 \seq_map_inline:Nn \c_@@_annot_types_seq
   {
@@ -1151,14 +1144,32 @@
 %    \end{macrocode}
 % \end{variable}
 % \subsection{Booleans}
-% These booleans are probably needed to control the colors.
-%
 % \begin{variable}
 %   {
-%     \l_@@_annot_ocgcolorlinks_bool
+%     \l_@@_annot_colorlink_bool,
+%     \l_@@_annot_colorurl_bool,
+%     \l_@@_annot_colorfile_bool,
+%     \l_@@_annot_colorrun_bool,
+%     \l_@@_annot_colormenu_bool,
 %   }
+%  These booleans are needed to control the colors.
 %    \begin{macrocode}
-\bool_new:N \l_@@_annot_ocgcolorlinks_bool
+\seq_map_inline:Nn \c_@@_annot_types_seq
+  {
+    \bool_new:c {l_@@_annot_color#1_bool}
+  }
+%    \end{macrocode}
+% \end{variable}
+% \begin{variable}
+%   {
+%     \l_@@_annot_ocgcolorlink_bool,
+%     \l_@@_annot_ocgcolorurl_bool,
+%     \l_@@_annot_ocgcolorfile_bool,
+%     \l_@@_annot_ocgcolorrun_bool,
+%     \l_@@_annot_ocgcolormenu_bool,
+%   }
+%  These booleans are needed to control the ocgcolors.
+%    \begin{macrocode}
 \seq_map_inline:Nn \c_@@_annot_types_seq
   {
     \bool_new:c {l_@@_annot_ocgcolor#1_bool}
@@ -1403,7 +1414,7 @@
 % \end{verbatim}
 %
 % This driver defines for consistency also
-% |\hyper@linklaunch| for Launch.
+% |\hyper@linklaunch| for Launch and |\hyper@linknamed| for Named.
 %
 % \subsection{ Anchors / destinations}
 % The first three commands are needed for \enquote{anchors}. At first
@@ -1809,44 +1820,15 @@
 
 %    \end{macrocode}
 %
+% \section{Colorlinks}
 %
-%    \begin{macrocode}
-\pdfannot_link_margin:n { 1pt }
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%these patterns are used in hyperref checks.
-%it is unclear if they are really useful and if a backend support is
-%needed.
-\str_case:VnF \c_sys_backend_str
- {
-   { pdfmode }
-   {
-     \def\HyPat@ObjRef
-      {
-       [0-9]*[1-9][0-9]*~0~R
-      }
-   }
-   { dvipdfmx }
-   {
-     \def\HyPat@ObjRef
-      {
-        @[^~]+
-      }
-   }
-   { xdvipdfmx }
-   {
-     \def\HyPat@ObjRef
-      {
-        @[^~]+
-      }
-   }
- }
- { %also set in hyperref sty, so probably not needed.
-   \def\HyPat@ObjRef/{.+}
- }
-%    \end{macrocode}
+%
+%
+% \subsection{ocgcolorlinks}
+% OCG colorlinks need objects and an entry in the catalog.
+% Perhaps the objects need public names to avoid that ocgx2 has to create
+% duplicates?
+% TODO
 % \begin{macro}{\@@_ocg_init:}
 % This commands write the objects as needed if ocg links are used.
 % The initialization should happens only once.
@@ -1911,31 +1893,29 @@
   }
 %    \end{macrocode}
 % \end{macro}
-% ocg colorlinks should be done as in ocgx. This here
-% are boxes ...
+% We use like with colors a hook, this allows ocgx to replace it.
+% The implementation is rather simple and uses a box.
 %    \begin{macrocode}
-\legacy_if:nTF {Hy@ocgcolorlinks}
+\prop_map_inline:Nn \c_@@_map_hyp_annot_prop
   {
-    \@@_ocg_init:
-    \Hy@AtBeginDocument
-      {
-        \def\Hy@colorlink#1
-          {
-            \group_begin:
-            \legacy_if:nTF {Hy@ocgcolorlinks}
-              {
-                \def\Hy@ocgcolor{#1}
-                \hbox_set:Nw \l_@@_tmpa_box
-              }
-              {
-                \HyColor@UseColor#1
-              }
-          }
-        \def\Hy@endcolorlink
-         {
-           \legacy_if:nT {Hy@ocgcolorlinks}
-             {
-               \hbox_set_end:
+     \hook_gput_code:nnn
+       {pdfannot/link/#2/begin}
+       {hyp/ocg}
+       {
+         \bool_if:cT { l_@@_annot_ocgcolor#1_bool }
+           {
+             \@@_ocg_init:
+             \group_begin:
+             \hbox_set:Nw \l_@@_tmpa_box
+           }
+       }
+     \hook_gput_code:nnn
+       {pdfannot/link/#2/end}
+       {hyp/ocg}
+       {
+         \bool_if:cT { l_@@_annot_ocgcolor#1_bool }
+           {
+             \hbox_set_end:
                \mbox
                  {
                    \pdf_bdc_obj:nn {OC}{l_@@_ocg_print_dict_obj}
@@ -1943,25 +1923,129 @@
                    \pdf_emc:
                    \pdf_bdc_obj:nn {OC}{l_@@_ocg_view_dict_obj}
                    \group_begin:
-                   \expandafter\HyColor@UseColor\Hy@ocgcolor
+                   \@@_color_select:e { \tl_use:c {l_@@_annot_#1color_tl} }
                    \box_use_drop:N \l_@@_tmpa_box
                    \group_end:
                    \pdf_emc:
-                }
-             }
-           \group_end:
-         }
+                 }
+             \group_end:
+           }
+       }
+  }
+%    \end{macrocode}
+% Thus are the keys for ocgcolors
+%    \begin{macrocode}
+\pdf_version_compare:NnTF < {1.5}
+  {
+    \keys_define:nn { hyp / setup }
+      {
+        ,_ocgcolorlinks .code:n =
+          {
+            \msg_warning:nnxx
+              { hyp }
+              { ignore-deprecated-or-unknown-option-in-pdf-version }
+              { ocgcolorlinks } { \pdf_version_major:.\pdf_version_minor: }
+          }
       }
-   }
-   {
-     \Hy@DisableOption{ocgcolorlinks}
-   }
+  }
+  {
+     \keys_define:nn { hyp / setup }
+       {
+         ,_ocgcolorlinks .meta:n =
+            {
+              ocgcolorlink=#1,
+              ocgcolorurl=#1,
+              ocgcolorfile=#1,
+              ocgcolorrun=#1,
+              ocgcolormenu=#1
+            }
+         ,_ocgcolorlinks .default:n = true
+       }
+  }
 
+\keys_define:nn { hyp / setup }
+  {
+    ,ocgcolorlinks .choice:
+    ,ocgcolorlinks / true .meta:n =
+      {
+        pdfborder      ={0~0~0},
+        pdfborderstyle ={},
+        colorlinks     = false,
+        _ocgcolorlinks = true
+      }
+    ,ocgcolorlinks / false .meta:n =
+      {
+        _ocgcolorlinks = false
+      }
+    ,ocgcolorlinks .default:n = {true}
+  }
+
+\seq_map_inline:Nn \c_@@_annot_types_seq
+  {
+    \pdf_version_compare:NnTF < {1.5}
+      {
+        \keys_define:nn { hyp / setup }
+          {
+            ,ocgcolor#1 .code:n=
+              {
+                \msg_warning:nnxx
+                  { hyp }
+                  { ignore-deprecated-or-unknown-option-in-pdf-version }
+                  { ocgcolor#1 }
+                  { \pdf_version_major:.\pdf_version_minor: }
+              }
+          }
+      }
+      {
+        \keys_define:nn { hyp / setup }
+          {
+            ,ocgcolor#1 .bool_set:c = { l_@@_annot_ocgcolor#1_bool }
+          }
+      }
+  }
+%    \end{macrocode}
+
+%    \begin{macrocode}
 \cs_set_protected:Npn \setpdflinkmargin #1
   {
     \pdfannot_link_margin:n { #1 }
   }
 
+\pdfannot_link_margin:n { 1pt }
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%these patterns are used in hyperref checks.
+%it is unclear if they are really useful and if a backend support is
+%needed.
+\str_case:VnF \c_sys_backend_str
+ {
+   { pdfmode }
+   {
+     \def\HyPat@ObjRef
+      {
+       [0-9]*[1-9][0-9]*~0~R
+      }
+   }
+   { dvipdfmx }
+   {
+     \def\HyPat@ObjRef
+      {
+        @[^~]+
+      }
+   }
+   { xdvipdfmx }
+   {
+     \def\HyPat@ObjRef
+      {
+        @[^~]+
+      }
+   }
+ }
+ { %also set in hyperref sty, so probably not needed.
+   \def\HyPat@ObjRef/{.+}
+ }
 
 %file links to pdfs. See test-filelinks.pdf for a few example.
 
@@ -3095,63 +3179,8 @@
       }
   }
 \keys_set:nn { hyp / setup } {colorscheme=phelype}
-%ocgcolorlinks, unfinished
 
-\pdf_version_compare:NnTF < {1.5}
-  {
-    \keys_define:nn { hyp / setup }
-      {
-        ,_ocgcolorlinks .code:n =
-          {
-            \msg_warning:nnxx
-              { hyp }
-              { ignore-deprecated-or-unknown-option-in-pdf-version }
-              { ocgcolorlinks } { \pdf_version_major:.\pdf_version_minor: }
-          }
-      }
-  }
-  {
-    \keys_define:nn { hyp / setup }
-      {
-        ,_ocgcolorlinks .bool_set:N = \l_@@_annot_ocgcolorlinks_bool
-      }
-  }
 
-\keys_define:nn { hyp / setup }
-  {
-    ,ocgcolorlinks .meta:n =
-      {
-        pdfborder={0~0~0},
-        pdfborderstyle={},
-        _ocgcolorlinks = #1
-      }
-    ,ocgcolorlinks .default:n = {true}
-  }
-
-%for now only boolean, if need it can be expanded later
-\seq_map_inline:Nn \c_@@_annot_types_seq
-  {
-    \pdf_version_compare:NnTF < {1.5}
-      {
-        \keys_define:nn { hyp / setup }
-          {
-            ,ocgcolor#1 .code:n=
-              {
-                \msg_warning:nnxx
-                  { hyp }
-                  { ignore-deprecated-or-unknown-option-in-pdf-version }
-                  { ocgcolor#1 }
-                  { \pdf_version_major:.\pdf_version_minor: }
-              }
-          }
-      }
-      {
-        \keys_define:nn { hyp / setup }
-          {
-            ,ocgcolor#1 .bool_set:c = { l_@@_annot_ocgcolor#1_bool }
-          }
-      }
-  }
 
 
 
