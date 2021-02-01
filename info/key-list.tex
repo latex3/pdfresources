@@ -123,3 +123,274 @@ done & verbose            & \textit{false}         & be chatty \\
 \textbf{Missing keys in docu}\\
 done & pdflinkmargin    &
 \end{longtable} 
+
+hyperxmp keys:
+
+pdfcopyright 
+pdftype   (Text)
+pdflicenseurl
+pdfauthortitle
+pdfcaptionwriter
+pdfmetalang
+
+pdfapart  (number)
+pdfaconformance
+pdfuapart (number)
+
+pdfxstandard  (X-standard) 
+pdfsource (jobname.tex)
+
+pdfdocumentid
+pdfinstanceid
+pdfversionid
+
+pdfrendition (draft/default)
+pdfpublication
+pdfpubtype
+pdfbytes
+pdfnumpages
+pdfissn
+pdfeissn
+pdfisbn
+pdfbookedition
+pdfpublisher
+pdfvolumenum
+pdfissuenum
+pdfpagerange
+pdfdoi
+pdfurl
+pdfidentifier
+pdfsubtitle
+pdfpubstatus
+pdfcontactaddress
+pdfcontactcity
+pdfcontactregion
+pdfcontactpostcode
+pdfcontactcountry
+pdfcontactphone
+pdfcontactemail
+pdfcontacturl
+
+pdfdate -> \@pdfdatetime
+pdfmetadate -> \@pdfmetadatetime
+
+keeppdfinfo
+
+
+Also info keys:
+
+pdfauthor    -> patched?
+pdfkeywords
+
+
+% begin document hook
+Can go is true
+\Hy@AtBeginDocument{%
+  \ifx\HyPsd@LoadUnicode\relax
+  \else
+    \def\HyPsd@LoadUnicode{%
+      \Hy@Error{%
+        Unicode support for bookmarks is not available.\MessageBreak
+        Activate unicode support by using one of the options\MessageBreak
+        `unicode', `pdfencoding=unicode', `pdfencoding=auto'\MessageBreak
+        in the preamble%
+      }\@ehc
+      \global\let\HyPsd@LoadUnicode\relax
+      \global\Hy@unicodefalse
+      \global\let\Hy@unicodetrue\Hy@unicodefalse
+    }%
+  \fi
+}
+
+Can imho go
+\Hy@AtBeginDocument{%
+  \@ifpackageloaded{stringenc}{%
+    \let\HyPsd@LoadStringEnc\relax
+  }{%
+    \def\HyPsd@LoadStringEnc{%
+      \Hy@WarningNoLine{%
+        Missing package `stringenc'. Use `pdfencoding=auto'\MessageBreak
+        in the preamble or load the package there%
+      }%
+    }%
+  }%
+}
+
+Can go
+\Hy@AtBeginDocument{%
+  \begingroup
+    \@ifundefined{OBJ@OCG@view}{%
+      \ifHy@ocgcolorlinks
+        \Hy@Warning{%
+          Driver does not support `ocgcolorlinks',\MessageBreak
+          using `colorlinks' instead%
+        }%
+      \fi
+    }{}%
+  \endgroup
+}
+can go, only used in two other drivers 
+\Hy@AtBeginDocument{%
+  \begingroup
+    \edef\x{\@ifundefined{stockheight}\paperheight\stockheight}%
+    \dimen@=\x\relax
+    \ifdim\dimen@>\z@
+    \else
+      \dimen@=11in\relax
+      \Hy@WarningNoLine{%
+        Height of page (\expandafter\string\x) %
+        is invalid (\the\x),\MessageBreak
+        using 11in%
+      }%
+    \fi
+    \dimen@=0.99626401\dimen@
+    \xdef\Hy@pageheight{\strip@pt\dimen@}%
+  \endgroup
+}
+
+% can be donne with package hook:
+\ltx@IfUndefined{xspaceaddexceptions}{%
+  \Hy@AtBeginDocument{%
+    \ltx@IfUndefined{xspaceaddexceptions}{%
+    }{%
+      \def\Hy@xspace@end{%
+        \ltx@gobble{end for xspace}%
+      }%
+      \xspaceaddexceptions{%
+        \Hy@xspace@end,\hyper@linkend,\hyper@anchorend
+      }%
+    }%
+  }%
+}{%
+  \def\Hy@xspace@end{%
+    \ltx@gobble{end for xspace}%
+  }%
+  \xspaceaddexceptions{\Hy@xspace@end,\hyper@linkend,\hyper@anchorend}%
+}
+
+%needed
+% draft option
+\Hy@AtBeginDocument{%
+  \ifHy@draft
+    \let\hyper@@anchor\@gobble
+    \gdef\hyper@link#1#2#3{#3\Hy@xspace@end}%
+    \def\hyper@anchorstart#1#2{#2\Hy@xspace@end}%
+    \def\hyper@anchorend{\Hy@xspace@end}%
+    \let\hyper@linkstart\@gobbletwo
+    \def\hyper@linkend{\Hy@xspace@end}%
+    \def\hyper@linkurl#1#2{#1\Hy@xspace@end}%
+    \def\hyper@linkfile#1#2#3{#1\Hy@xspace@end}%
+    \def\hyper@link@[#1]#2#3#4{#4\Hy@xspace@end}%
+    \def\Acrobatmenu#1#2{\leavevmode#2\Hy@xspace@end}%
+    \let\PDF@SetupDoc\@empty
+    \let\PDF@FinishDoc\@empty
+    \let\@fifthoffive\@secondoftwo
+    \let\@secondoffive\@secondoftwo
+    \let\ReadBookmarks\relax
+    \let\WriteBookmarks\relax
+    \Hy@WarningNoLine{Draft mode on}%
+  \fi
+  \Hy@DisableOption{draft}%
+  \Hy@DisableOption{nolinks}%
+  \Hy@DisableOption{final}%
+}
+
+%probably unneeded
+  \def\MaybeStopEarly{%
+    \Hy@Message{Stopped early}%
+    \Hy@AtBeginDocument{%
+      \PDF@FinishDoc
+      \gdef\PDF@FinishDoc{}%
+    }%
+    \endinput
+  }%
+
+  This is probably needed:
+  (perhaps color is needed too ...)
+      \Hy@CatcodeWrapper{%
+        \RequirePackage{nameref}[2012/07/28]%
+      }%
+    \fi
+  \fi
+  \DeclareRobustCommand\ref{%
+    \@ifstar\@refstar\T@ref
+  }%
+  \DeclareRobustCommand\pageref{%
+    \@ifstar\@pagerefstar\T@pageref
+  }%
+    \DeclareRobustCommand*{\nameref}{%
+      \@ifstar\@namerefstar\T@nameref
+    }%
+ \ifHy@implicit
+ \else
+   \let \@pagerefstar\T@pageref
+   \let \@refstar\T@ref
+   \let \@namerefstar\T@nameref
+ \fi
+}
+  
+  \Hy@CatcodeWrapper\ReadBookmarks ???
+
+\PDF@SetupDoc
+  
+\hyper@anchorstart{Doc-Start}\hyper@anchorend  
+  
+  
+\Hy@AtBeginDocument{%
+  \if@filesw
+    \ifHy@typexml
+      \immediate\closeout\@mainaux
+      \immediate\openout\@mainaux\jobname.aux\relax
+      \immediate\write\@auxout{<relaxxml>\relax}%
+    \fi
+    \immediate\write\@auxout{%
+      \string\providecommand\string\HyperFirstAtBeginDocument{%
+        \string\AtBeginDocument}^^J%
+      \string\HyperFirstAtBeginDocument{%
+        \string\ifx\string\hyper@anchor\string\@undefined^^J%
+          \string\global\string\let\string\oldcontentsline\string\contentsline^^J%
+          \string\gdef\string\contentsline%
+            \string#1\string#2\string#3\string#4{%
+            \string\oldcontentsline%
+              {\string#1}{\string#2}{\string#3}}^^J%
+          \string\global\string\let\string\oldnewlabel\string\newlabel^^J%
+          \string\gdef\string\newlabel\string#1\string#2{%
+             \string\newlabelxx{\string#1}\string#2}^^J%
+          \string\gdef\string\newlabelxx%
+             \string#1\string#2\string#3\string#4\string#5\string#6{%
+             \string\oldnewlabel{\string#1}{{\string#2}{\string#3}}}^^J%
+          \string\AtEndDocument{%
+            \string\ifx\string\hyper@anchor\string\@undefined^^J%
+              \string\let\string\contentsline\string\oldcontentsline^^J%
+              \string\let\string\newlabel\string\oldnewlabel^^J%
+            \string\fi%
+          }^^J%
+        \string\fi%
+      }^^J%
+      \string\global\string\let\string\hyper@last\relax^^J%
+      \string\gdef\string\HyperFirstAtBeginDocument\string#1{\string#1}%
+    }%
+  \fi
+  \let\HyperFirstAtBeginDocument\ltx@firstofone
+  \ifx\hyper@last\@undefined
+    \def\@starttoc#1{%
+      \begingroup
+        \makeatletter
+        \ltx@ifpackageloaded{parskip}{\parskip\z@}{}%
+        \IfFileExists{\jobname.#1}{%
+          \Hy@WarningNoLine{%
+            old #1 file detected, not used; run LaTeX again%
+          }%
+        }{}%
+        \if@filesw
+          \expandafter\newwrite\csname tf@#1\endcsname
+          \immediate\openout\csname tf@#1\endcsname \jobname.#1\relax
+        \fi
+        \@nobreakfalse
+      \endgroup
+    }%
+    \def\newlabel#1#2{\@newl@bel r{#1}{#2{}{}{}{}}}%
+  \fi
+}  
+Hy@AtEndOfPackage
+- driver test (unneeded?)  
