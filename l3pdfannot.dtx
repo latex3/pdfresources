@@ -151,7 +151,9 @@
 %  \Arg{user action spec}\footnote{The wording follows the pdftex documentation}.
 %  \texttt{/Subtype/Link} is added automatically.
 %  \Arg{type} should be one of \texttt{URI}, \texttt{GoToR},
-%  \texttt{Launch}, \texttt{GoTo} or \texttt{Named}.
+%  \texttt{Launch}, \texttt{GoTo} or \texttt{Named}. The |GoTo| variant does
+%  \emph{not} complain if the destination name is not known like
+%  \cs{pdfannot_link_goto_begin:nw}.
 %  The attributes stored in the local dictionary
 %  \texttt{link/}\Arg{type} are inserted as
 %  \emph{attr spec} and the code in the begin and end hook
@@ -216,7 +218,11 @@
 %   \end{syntax}
 % This is a special, shorter version for links to internal destinations. It always
 % uses the hooks and dictionary of the |GoTo| link type. \Arg{destination} is a
-% destination name.
+% destination name. In difference to |\pdfannot_link:nnn { GoTo }| it will complain if
+% \Arg{destination} is an unknown destination and give the message
+%
+% |name{ZZZZ} has been referenced but does not exist, replaced by a fixed one|
+%
 % \end{function}
 % \begin{function}[added = 2020-03-12]{  \pdfannot_link_last: }
 %   This retrieves the object reference a link created previously with the commands
