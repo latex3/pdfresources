@@ -585,6 +585,13 @@
 % /D    & \meta{array of numbers} & dash pattern (lines/gaps) (default [3])
 % \end{tabular}
 %
+% \DecribeHypkey{pdfcreationdate}\DecribeHypkey{pdfmoddate}
+% Setting these keys is normally not needed. If they are used the values
+% are stored directly in the Info dictionary for |/Creationdate| and |/ModDate|.
+% The values are converted to strings but not processed further, so they should
+% have the correct PDF format without the enclosing parentheses,
+% e.g. |D:20200202111111+01'00'|.
+%
 % \DescribeHypkey{pdflinkmargin}As described in the \pkg{hyperref} manual
 % the behaviour differs between the backends: with dvips it is possible to
 % change links locally, pdflatex and lualatex work by page, with dvipdfmx
@@ -2542,7 +2549,8 @@
 %    \end{macrocode}
 % \end{hypkey}
 % \begin{hypkey}{extension,hypertexnames,naturalnames,
-%   pageanchor,linktoc,linktocpage,plainpages}
+%   pageanchor,linktoc,linktocpage,plainpages,localanchorname,
+%   linkfileprefix}
 %    \begin{macrocode}
 \keys_define:nn { hyp / setup }
  {
@@ -2552,6 +2560,11 @@
    ,hypertexnames / true  .code:n = { \Hy@hypertexnamestrue}
    ,hypertexnames / false .code:n = { \Hy@hypertexnamesfalse}
    ,hypertexnames .default:n = {true}
+   ,linkfileprefix .tl_set:N  = \Hy@linkfileprefix
+   ,localanchorname .choice:
+   ,localanchorname / true  .code:n = { \Hy@localanchornametrue }
+   ,localanchorname / false .code:n = { \Hy@localanchornamefalse }
+   ,localanchorname .default:n = {true}
    ,naturalnames .choice:
    ,naturalnames / true  .code:n = { \Hy@naturalnamestrue}
    ,naturalnames / false .code:n = { \Hy@naturalnamesfalse}
@@ -3314,10 +3327,44 @@
 \@@_setup_info_key:nn {producer} {Producer}
 \@@_setup_info_key:nn {creator}  {Creator}
 % ignored key: addtopdfcreator
-\@@_setup_info_key:nn {creationdate}  {Creationdate}
-\@@_setup_info_key:nn {moddate}  {ModDate}
 \@@_setup_info_key:nn {subject}  {Subject}
 \@@_setup_info_key:nn {keywords}  {Keywords}
+
+\cs_new_protected:Npn \@@_setup_info_date_key:nn #1 #2
+  {
+    \keys_define:nn { hyp / setup }
+      {
+        pdf#1  .code:n =
+          {
+            \tl_if_blank:nTF {##1}
+              {
+                \pdfmanagement_remove:nn {Info}{#2}
+              }
+              {
+                \pdfmanagement_add:nnx {Info}{#2}{(\tl_to_str:n {##1})}
+              }
+             \@@_store_metadata:nn {pdf#1}{##1}
+          }
+      }
+    \keys_define:nn { hyp / info }
+      {
+        #2  .code:n =
+          {
+            \tl_if_blank:nTF {##1}
+              {
+                \pdfmanagement_remove:nn {Info}{#2}
+              }
+              {
+                \pdfmanagement_add:nnx {Info}{#2}{(\tl_to_str:n {##1})}
+              }
+            \exp_args:Nx \@@_store_metadata:nn {pdf\str_lowercase:n{#1}}{##1}
+          }
+      }
+  }
+
+%CreationDate and ModDate is special and should not use the hex encoding.
+\@@_setup_info_date_key:nn {creationdate}  {CreationDate}
+\@@_setup_info_date_key:nn {moddate}  {ModDate}
 
 %pdfinfo allows to set the key with keyval ...
 \keys_define:nn { hyp / setup }
@@ -3327,6 +3374,7 @@
         \keys_set:nn { hyp / info } { #1 }
       }
   }
+
 
 % default values
 \keys_set:nn { hyp / setup} {pdfcreator = LaTeX~with~hyperref}
