@@ -294,16 +294,20 @@
 % \end{macro}
 % \end{macro}
 %
-% \begin{variable}{\c_@@_text_utfsrc_str}
 % The convert command must use a different value the source encoding
-% depending on the engines.
+% depending on the engines. Until the PR in str-convert is active we add the alias here
+% too
 %    \begin{macrocode}
-\sys_if_engine_pdftex:TF
+\bool_lazy_any:nTF
   {
-    \str_const:Nn \c_@@_text_utfsrc_str {utf8}
+    \sys_if_engine_luatex_p:
+    \sys_if_engine_xetex_p:
   }
   {
-    \str_const:Nn \c_@@_text_utfsrc_str {}
+    \prop_gput:Nnn \g__str_alias_prop { default } {  }
+  }
+  {
+    \prop_gput:Nnn \g__str_alias_prop { default } { utf8 }
   }
 %    \end{macrocode}
 % \end{variable}
@@ -345,17 +349,17 @@
 % "input" is utf8 for pdftex, empty (native) for unicode engine
 % commands to output literal strings  (...)
 
-\cs_new_protected:cpx { @@_text_convert_utf8/string:nN }  #1 #2
+\cs_new_protected:cpn { @@_text_convert_utf8/string:nN }  #1 #2
   {
-     \exp_not:N \str_set_convert:Nnnn #2
+     \str_set_convert:Nnnn #2
         { #1 }
-        { \c_@@_text_utfsrc_str }
+        { default }
         {utf8/string}
   }
 
-\cs_new_protected:cpx { @@_text_convert_utf8/string-print:nN } #1 #2
+\cs_new_protected:cpn { @@_text_convert_utf8/string-print:nN } #1 #2
   {
-    \exp_not:N \use:c { @@_text_convert_utf8/string:nN } { #1 } #2
+    \use:c { @@_text_convert_utf8/string:nN } { #1 } #2
     \str_put_left:Nn #2  {(}
     \str_put_right:Nn #2 {)}
   }
@@ -364,7 +368,7 @@
   {
      \exp_not:N \str_set_convert:Nnnn #2
        { #1 }
-       { \c_@@_text_utfsrc_str }
+       { default }
        {utf8/url}
      \exp_not:N \str_replace_all:Nnn #2 {\c_percent_str 3A} {:}
      \exp_not:N \str_replace_all:Nnn #2 {\c_percent_str 2F} {/}
@@ -395,43 +399,43 @@
      \exp_not:N \str_replace_all:Nnn #2 {\c_percent_str 29} {\c_backslash_str)}
   }
 
-\cs_new_protected:cpx { @@_text_convert_utf8/URIpdf-print:nN } #1 #2
+\cs_new_protected:cpn { @@_text_convert_utf8/URIpdf-print:nN } #1 #2
   {
-     \exp_not:N \use:c { @@_text_convert_utf8/URIpdf:nN } {#1} #2
-     \exp_not:N \str_put_left:Nn #2  {(}
-     \exp_not:N \str_put_right:Nn #2 {)}
+     \use:c { @@_text_convert_utf8/URIpdf:nN } {#1} #2
+     \str_put_left:Nn #2  {(}
+     \str_put_right:Nn #2 {)}
   }
 % with utf16 with BE marker
-\cs_new_protected:cpx { @@_text_convert_utf16/string:nN }  #1 #2
+\cs_new_protected:cpn { @@_text_convert_utf16/string:nN }  #1 #2
   {
-    \exp_not:N \str_set_convert:Nnnn #2
+    \str_set_convert:Nnnn #2
       { #1 }
-      { \c_@@_text_utfsrc_str }
+      { default }
       {utf16/string}
   }
 
-\cs_new_protected:cpx { @@_text_convert_utf16/string-print:nN } #1 #2
+\cs_new_protected:cpn { @@_text_convert_utf16/string-print:nN } #1 #2
   {
-    \exp_not:N \use:c { @@_text_convert_utf16/string:nN } {#1} #2
-    \exp_not:N \str_put_left:Nn #2  {(}
-    \exp_not:N \str_put_right:Nn #2 {)}
+    \use:c { @@_text_convert_utf16/string:nN } {#1} #2
+    \str_put_left:Nn #2  {(}
+    \str_put_right:Nn #2 {)}
   }
 
 % commands to output hex strings  (...)
 
-\cs_new_protected:cpx { @@_text_convert_utf16/hex:nN } #1 #2
+\cs_new_protected:cpn { @@_text_convert_utf16/hex:nN } #1 #2
   {
-     \exp_not:N \str_set_convert:Nnnn #2
+     \str_set_convert:Nnnn #2
        { #1 }
-       { \c_@@_text_utfsrc_str }
+       { default }
        {utf16/hex}
   }
 
-\cs_new_protected:cpx { @@_text_convert_utf16/hex-print:nN } #1 #2
+\cs_new_protected:cpn { @@_text_convert_utf16/hex-print:nN } #1 #2
   {
-    \exp_not:N \use:c { @@_text_convert_utf16/hex:nN } {#1} #2
-    \exp_not:N \str_put_left:Nn #2  {<}
-    \exp_not:N \str_put_right:Nn #2 {>}
+    \use:c { @@_text_convert_utf16/hex:nN } {#1} #2
+    \str_put_left:Nn #2  {<}
+    \str_put_right:Nn #2 {>}
   }
 
 %    \end{macrocode}
