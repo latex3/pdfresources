@@ -1232,17 +1232,18 @@
 % \end{variable}
 % \begin{variable}
 %   {
-%     \l_@@_annot_ocgcolorlink_bool,
-%     \l_@@_annot_ocgcolorurl_bool,
-%     \l_@@_annot_ocgcolorfile_bool,
-%     \l_@@_annot_ocgcolorrun_bool,
-%     \l_@@_annot_ocgcolormenu_bool,
+%     \l_hyp_annot_ocgcolorlink_bool,
+%     \l_hyp_annot_ocgcolorurl_bool,
+%     \l_hyp_annot_ocgcolorfile_bool,
+%     \l_hyp_annot_ocgcolorrun_bool,
+%     \l_hyp_annot_ocgcolormenu_bool,
 %   }
 %  These booleans are needed to control the ocgcolors.
+%  They are public so that other packages can query the state too.
 %    \begin{macrocode}
 \seq_map_inline:Nn \c_@@_annot_types_seq
   {
-    \bool_new:c {l_@@_annot_ocgcolor#1_bool}
+    \bool_new:c {l_hyp_annot_ocgcolor#1_bool}
   }
 %    \end{macrocode}
 % \end{variable}
@@ -2272,7 +2273,7 @@
        {pdfannot/link/#2/begin}
        {hyp/ocg}
        {
-         \bool_if:cT { l_@@_annot_ocgcolor#1_bool }
+         \bool_if:cT { l_hyp_annot_ocgcolor#1_bool }
            {
              \@@_ocg_init:
              \group_begin:
@@ -2283,7 +2284,7 @@
        {pdfannot/link/#2/end}
        {hyp/ocg}
        {
-         \bool_if:cT { l_@@_annot_ocgcolor#1_bool }
+         \bool_if:cT { l_hyp_annot_ocgcolor#1_bool }
            {
              \hbox_set_end:
                \mbox
@@ -2380,7 +2381,7 @@
       {
         \keys_define:nn { hyp / setup }
           {
-            ,ocgcolor#1 .bool_set:c = { l_@@_annot_ocgcolor#1_bool }
+            ,ocgcolor#1 .bool_set:c = { l_hyp_annot_ocgcolor#1_bool }
           }
       }
   }
