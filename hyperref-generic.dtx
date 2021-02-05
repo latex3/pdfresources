@@ -1960,6 +1960,38 @@
 \cs_generate_variant:Nn \@@_color_select:n {e}
 %    \end{macrocode}
 % \end{macro}
+%
+% \begin{function}{\@@_color_set:nn}
+%   \begin{syntax}
+%    \cs{@@_color_set:nN} \Arg{ name } \Arg{color} \\
+%   \end{syntax}
+%  These commands store the color in \Arg{name}.
+%  \Arg{color} should have either the format |[model]{value}| or be a color expression.
+%  For examples: |[rgb]{1,0,.5}| or |red!50!blue|
+% \end{function}
+%  \begin{macro}{\@@_color_set:nn,\@@_colormodel_set_aux:nwn}
+%   Color keys need to parse color expressions. Two input types are supported:
+%  |color=[rgb]{1,0,.5}| and |color=red!50!blue|.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_color_set:nn #1 #2
+ {
+   \tl_if_head_eq_charcode:nNTF {#2}[ %]
+    {
+      \@@_colormodel_set_aux:nwn  { #1 } #2
+    }
+    {
+      \color_set:nn {#1} {#2}
+    }
+ }
+
+\cs_new_protected:Npn \@@_colormodel_set_aux:nwn #1 [#2] #3
+  {
+     \color_set:nnn {#1}{#2}{#3}
+  }
+
+\cs_generate_variant:Nn \@@_color_set:nn {ne}
+%    \end{macrocode}
+% \end{macro}
 % \subsection{Textcolor of links}
 % colors are added in the hooks. This means that they can also be removed if needed.
 % They add a group---this isn't needed with hyperref code, but could be relevant
