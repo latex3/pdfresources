@@ -1212,17 +1212,18 @@
 % \subsection{Booleans}
 % \begin{variable}
 %   {
-%     \l_@@_annot_colorlink_bool,
-%     \l_@@_annot_colorurl_bool,
-%     \l_@@_annot_colorfile_bool,
-%     \l_@@_annot_colorrun_bool,
-%     \l_@@_annot_colormenu_bool,
+%     \l_hyp_annot_colorlink_bool,
+%     \l_hyp_annot_colorurl_bool,
+%     \l_hyp_annot_colorfile_bool,
+%     \l_hyp_annot_colorrun_bool,
+%     \l_hyp_annot_colormenu_bool,
 %   }
 %  These booleans are needed to control the colors.
+%  They are public so that other packages can query the state too.
 %    \begin{macrocode}
 \seq_map_inline:Nn \c_@@_annot_types_seq
   {
-    \bool_new:c {l_@@_annot_color#1_bool}
+    \bool_new:c {l_hyp_annot_color#1_bool}
   }
 %    \end{macrocode}
 % \end{variable}
@@ -1966,7 +1967,7 @@
        {pdfannot/link/#2/begin}
        {hyp/color}
        {
-         \bool_if:cT { l_@@_annot_color#1_bool }
+         \bool_if:cT { l_hyp_annot_color#1_bool }
            {
              \group_begin:
              \@@_color_select:e { \tl_use:c {l_@@_annot_#1color_tl} }
@@ -1976,7 +1977,7 @@
        {pdfannot/link/#2/end}
        {hyp/color}
        {
-         \bool_if:cT { l_@@_annot_color#1_bool }
+         \bool_if:cT { l_hyp_annot_color#1_bool }
            {
              \group_end:
            }
@@ -2011,7 +2012,7 @@
   {
      \keys_define:nn { hyp / setup }
        {
-         ,color#1 .bool_set:c = { l_@@_annot_color#1_bool }
+         ,color#1 .bool_set:c = { l_hyp_annot_color#1_bool }
          ,#1color .tl_set:c =   { l_@@_annot_#1color_tl }
        }
   }
