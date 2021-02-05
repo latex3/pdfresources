@@ -46,6 +46,20 @@
 % }
 % \ExplSyntaxOff
 % \NewDocElement[
+%   idxgroup=color names,
+%   idxtype = {color name},
+%   printtype= \textit{color name}
+%    ]{HypColor}{xhypcolor}
+% \ExplSyntaxOn
+% \NewDocumentEnvironment{hypcolor}{m}
+% {
+%   \clist_map_inline:nn {#1}{\begin{xhypcolor}{##1}}
+% }
+% {
+%   \clist_map_inline:nn {#1}{\end{xhypcolor}}
+% }
+% \ExplSyntaxOff
+% \NewDocElement[
 %   idxgroup=Hooks,
 %   printtype= \textit{hook}
 %    ]{Hook}{hook}
@@ -226,6 +240,35 @@
 %   locally the link types.
 %  \end{itemize}
 %
+%  \subsection{Public interfaces}
+%  The |colorlinks| and |ocgcolorlinks| and related keys are
+%  using these booleans:
+%  \begin{verbatim}
+%     \l_hyp_annot_colorlink_bool,
+%     \l_hyp_annot_colorurl_bool,
+%     \l_hyp_annot_colorfile_bool,
+%     \l_hyp_annot_colorrun_bool,
+%     \l_hyp_annot_colormenu_bool,
+%     \l_hyp_annot_ocgcolorlink_bool,
+%     \l_hyp_annot_ocgcolorurl_bool,
+%     \l_hyp_annot_ocgcolorfile_bool,
+%     \l_hyp_annot_ocgcolorrun_bool,
+%     \l_hyp_annot_ocgcolormenu_bool,
+%  \end{verbatim}
+%
+%   They are both inserting hook code in the |pdfannot/link/|\meta{type}|/begin|
+%   and |pdfannot/link/|\meta{type}|/end| hooks. \meta{type} is one of
+%   |GoTo|, |URI|, |GoToR|, |Named| or |Launch|.
+%
+%   |colorlinks| uses the label |hyp/color|, and |ocgcolorlinks| the label |hyp/ocg|.
+%
+%   They both use the same color names: |hyp/color/link|, |hyp/color/url|,
+%   |hyp/color/file|, |hyp/color/run|, |hyp/color/menu|.
+%
+%   The cite colors uses the names |hyp/color/cite| and |hyp/color/citeborder|.
+%
+%   The border colors aren't saved in color names currently, but if the need
+%   would arise it would possible to change this.
 %  \subsection{Changed behaviour}
 %   \begin{description}
 %   \item[colorlinks] |colorlinks| will as before disable the |pdfborder|, but it is possible
@@ -243,9 +286,10 @@
 %    where |\mycolor| should expand to one of the other two syntax variants.
 %
 %   \item[frenchlinks] The option |frenchlinks| does nothing at all.
-%   \item[cite colors] As mentioned above the support for |citecolor| and |citebordercolor| etc
-%   has been reduced. A package like \pkg{hyperref} can't keep track of such semantic
-%   contexts like cite, acronym, glossaries, special references and maintain keys for
+%   \item[cite colors] As mentioned above the support for |citecolor|
+%   and |citebordercolor|   has been reduced. A package like \pkg{hyperref}
+%   can't keep track of such semantic
+%   contexts like cite, acronym, glossaries and special references and maintain keys for
 %   them. The keys are not completly dropped as this would affect packages like
 %   \pkg{natbib}, but they have been separated and are no longer affected by
 %   group keys like |allcolors|  but must be set individually instead.
@@ -957,23 +1001,20 @@
 %
 %    \begin{macrocode}
 \hook_new:n{hyp/link/cite}
-\tl_new:N   \l_@@_annot_citecolor_tl
-\tl_set:Nn  \l_@@_annot_citecolor_tl {@@_color_cite}
-\tl_new:N   \l_@@_annot_citebordercolor_tl
-\tl_set:Nn  \l_@@_annot_citebordercolor_tl {@@_color_citeborder}
-\color_set:nnn {@@_color_cite}{HTML}{2E7E2A}
-\color_set:nn  {@@_color_citeborder}{@@_color_cite!60!white}
+\color_set:nnn {hyp/color/cite}{HTML}{2E7E2A}
+\color_set:nn  {hyp/color/citeborder}{hyp/color/cite!60!white}
 \keys_define:nn { hyp / setup }
   {
-    ,citecolor .tl_set:N = \l_@@_annot_citecolor_tl
-    ,citebordercolor .tl_set:N = \l_@@_annot_citebordercolor_tl
+    ,citecolor .code:n = {\@@_color_set:nn {hyp/color/cite}{#1}}
+    ,citebordercolor
+      .code:n = {\@@_color_set:nn {hyp/color/citeborder}{#1}}
   }
 \hook_gput_code:nnn { hyp/link/cite }{hyp/cite}
   {
     \keys_set:nn { hyp / setup }
       {
-        ,linkbordercolor= \l_@@_annot_citebordercolor_tl
-        ,linkcolor      = \l_@@_annot_citecolor_tl
+        ,linkbordercolor= hyp/color/citeborder
+        ,linkcolor      = hyp/color/cite
       }
   }
 %    \end{macrocode}
@@ -1187,23 +1228,17 @@
 \tl_new:N  \l_@@_dest_pdfview_tl
 %    \end{macrocode}
 % \end{variable}
-% These variables hold the names of the text. The variables are also used as
-% ocg color.
-% \begin{variable}
+% \begin{hypcolor}
 %   {
-%     \l_@@_annot_linkcolor_tl,
-%     \l_@@_annot_urlcolor_tl,
-%     \l_@@_annot_filecolor_tl,
-%     \l_@@_annot_runcolor_tl,
-%     \l_@@_annot_menucolor_tl,
+%     hyp/annot/link,
+%     hyp/annot/url,
+%     hyp/annot/file,
+%     hyp/annot/run,
+%     hyp/annot/menu,
 %   }
-%    \begin{macrocode}
-\seq_map_inline:Nn \c_@@_annot_types_seq
-  {
-    \tl_new:c { l_@@_annot_#1color_tl }
-  }
-%    \end{macrocode}
-% \end{variable}
+% These color names are used for the annotations (colorlinks). They are initialized
+% at the end when the color scheme is used
+% \end{hypcolor}
 % \begin{variable}{\g_@@_bordercolormodel_str}
 % This holds the export model for border color etc.
 % It is currently either |space-sep-cmyk| or |space-sep-rgb|.
@@ -2006,7 +2041,7 @@
          \bool_if:cT { l_hyp_annot_color#1_bool }
            {
              \group_begin:
-             \@@_color_select:e { \tl_use:c {l_@@_annot_#1color_tl} }
+             \color_select:n { hyp/color/#1}
            }
        }
      \hook_gput_code:nnn
@@ -2044,12 +2079,12 @@
 % \begin{hypkey}{urlcolor,linkcolor,runcolor,menucolor,filecolor}
 % \begin{hypkey}{allcolor}
 %    \begin{macrocode}
-\prop_map_inline:Nn \c_@@_map_hyp_annot_prop
+\seq_map_inline:Nn \c_@@_annot_types_seq
   {
      \keys_define:nn { hyp / setup }
        {
          ,color#1 .bool_set:c = { l_hyp_annot_color#1_bool }
-         ,#1color .tl_set:c =   { l_@@_annot_#1color_tl }
+         ,#1color .code:n =     { \@@_color_set:ne {hyp/color/#1}{##1} }
        }
   }
 
@@ -2326,7 +2361,7 @@
                    \pdf_emc:
                    \pdf_bdc_obj:nn {OC}{l_@@_ocg_view_dict_obj}
                    \group_begin:
-                   \@@_color_select:e { \tl_use:c {l_@@_annot_#1color_tl} }
+                   \color_select:n { hyp/color/#1 }
                    \box_use_drop:N \l_@@_tmpa_box
                    \group_end:
                    \pdf_emc:
