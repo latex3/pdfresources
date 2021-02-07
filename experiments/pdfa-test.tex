@@ -1,0 +1,24 @@
+\RequirePackage{pdfmanagement}
+\DeclareDocumentMetadata
+ { uncompress,
+   lang=de-DE,
+   standard=A-1b
+ }
+\documentclass{article}
+\usepackage{new-hyperxmp}
+\usepackage[]{hyperref}
+
+
+\hypersetup{
+   pdfproducer=TeX,
+   pdfauthor={Ulrike Fischer},
+   pdftitle={A test of metadata},
+   }
+
+% Kompabilität mit hyperxmf ...
+\makeatletter \Hy@pdfatrue \makeatother
+\kvsetkeys{Hyp} {pdfapart=1,pdfaconformance=b,pdfauthor={Ulrike Fischer},pdfproducer=TeX,pdftitle=A test of metadata}
+
+\begin{document}
+abc
+\end{document}

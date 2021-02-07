@@ -86,9 +86,10 @@
 %    \begin{macrocode}
 \msg_new:nnn  {pdf }{unknown-standard}{The~standard~'#1'~is~unknown~and~has~been~ignored}
 %    \end{macrocode}
-% \begin{variable}{\l_@@_tmpa_tl}
+% \begin{variable}{\l_@@_tmpa_tl,\l_@@_tmpa_str}
 %    \begin{macrocode}
 \tl_new:N\l_@@_tmpa_tl
+\str_new:N \l_@@_tmpa_str
 %    \end{macrocode}
 % \end{variable}
 % \section{XMP-metadata}
@@ -233,6 +234,11 @@
     %===============
     % to be continued https://docs.verapdf.org/validation/pdfa-part1/
     % - Outputintent/colorprofiles requirements
+    % an outputintent should be loaded. There are more requirements
+    % but these are not tested
+    ,outputintent         =
+    ,outputintent_subtype = {GTS_PDFA1}
+    ,outputintent_profile = {sRGB.icc}
     % - no Alternates key in image dictionaries
     % - no OPI, Ref, Subtype2 with PS key in xobjects
     % - Interpolate  = false in images
@@ -283,6 +289,85 @@
 %        },
 %    \end{macrocode}
 % \end{variable}
+%
+% \subsection{Colorprofiles and Outputintents}
+% The following provides a minimum of interface to add a color profile
+% and an outputintent need for PDF/A for now. There will be need to extend it later,
+% so we try for enough generality.
+%
+%    \begin{macrocode}
+\pdfdict_new:n   {l_pdfmeta/outputintent}
+\pdfdict_put:nnn {l_pdfmeta/outputintent}
+  {Type}{/OutputIntent}
+\prop_const_from_keyval:cn { c_@@_colorprofile_sRGB.icc}
+  {
+    ,OutputConditionIdentifier=IEC~sRGB
+    ,Info=IEC~61966-2.1~Default~RGB~colour~space~-~sRGB
+    ,RegistryName=http://www.iec.ch
+    ,N = 3
+  }
+\prop_const_from_keyval:cn { c_@@_colorprofile_FOGRA39L_coated.icc}
+  {
+    ,OutputConditionIdentifier=FOGRA39L~Coated
+    ,Info={Offset~printing,~according~to~ISO~12647-2:2004/Amd~1,~OFCOM,~ %
+   paper~type~1~or~2~=~coated~art,~115~g/m2,~tone~value~increase~curves~A~(CMY)~and~B~(K)}
+    ,RegistryName=http://www.fogra.org
+    ,N = 4
+  }
+
+\cs_new_protected:Npn \@@_embed_colorprofile:n #1%#1 file name
+  {
+    \pdf_object_if_exist:nF {@@_colorprofile_#1}
+      {
+        \pdf_object_new:nn  {@@_colorprofile_#1}{fstream}
+        \pdf_object_write:nx {@@_colorprofile_#1}
+         {
+           {/N\c_space_tl
+             \prop_item:cn{c_@@_colorprofile_#1}{N}
+           }
+           {#1}
+         }
+      }
+  }
+
+\cs_new_protected:Npn \@@_write_outputintent:nn #1 #2 %#1 file name, #2 subtype
+  {
+    \group_begin:
+     \pdfdict_put:nnx {l_pdfmeta/outputintent}{S}{/\str_convert_pdfname:n{#2}}
+     \pdfdict_put:nnx {l_pdfmeta/outputintent}
+       {DestOutputProfile}
+       {\pdf_object_ref:n{@@_colorprofile_#1}}
+     \clist_map_inline:nn { OutputConditionIdentifier, Info, RegistryName }
+       {
+         \prop_get:cnNT
+          { c_@@_colorprofile_#1}
+          { ##1 }
+          \l_@@_tmpa_tl
+          {
+            \pdf_text_convert:nVN {utf8/string-print}\l_@@_tmpa_tl\l_@@_tmpa_str
+            \pdfdict_put:nnx
+              {l_pdfmeta/outputintent}{##1}{\l_@@_tmpa_str}
+          }
+       }
+     \pdf_object_now:nx {dict}{\pdfdict_use:n {l_pdfmeta/outputintent} }
+     \pdfmanagement_add:nnx {Catalog}{OutputIntents}{\pdf_object_last:}
+    \group_end:
+  }
+
+\AddToHook{begindocument/end}
+  {
+     \prop_if_in:NnTF\g_pdfmeta_standard_prop {outputintent}
+      {
+        \exp_args:Nx
+        \@@_embed_colorprofile:n
+          {\prop_item:Nn \g_pdfmeta_standard_prop {outputintent_profile}}
+        \exp_args:Nxx
+        \@@_write_outputintent:nn
+          {\prop_item:Nn \g_pdfmeta_standard_prop {outputintent_profile}}
+          {\prop_item:Nn \g_pdfmeta_standard_prop {outputintent_subtype}}
+      }
+   }
+%    \end{macrocode}
 %
 %    \begin{macrocode}
 %</package>
