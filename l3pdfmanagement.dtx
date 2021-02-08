@@ -235,10 +235,12 @@
 %  always something like |GPL Ghostscript 9.53.3|.
 %  \item[Creator] Added by all engines and backends. Removal only possible in luatex by adding
 %  16 to the bitset. Changing is possible with the management command.
-%  \item[CreationDate] Added by all engines and backends. Suppressing it is possible in pdftex with
-%  |\pdfinfoomitdate = 1|, and in luatex by adding 32 to the bitset. Changing is possible with
-%  the management command.
+%  \item[CreationDate] Added by all engines and backends. With the exception of |dvips/ps2pdf|
+%  |SOURCE_DATE_EPOCH| is honored. Suppressing it is possible in pdftex with
+%  |\pdfinfoomitdate = 1|, and in luatex by adding 32 to the bitset.
+%  Changing is possible with the management command and will overwrite an epoch setting.
 %  \item[ModDate] Added by all engines and backends with the exception of xdvipdfmx.
+%  With the exception of |dvips/ps2pdf| |SOURCE_DATE_EPOCH| is honored.
 %   Suppressing it is possible in pdftex with
 %  |\pdfinfoomitdate = 1|, and in luatex by adding 64 to the bitset. Changing is possible with
 %  the management command.
