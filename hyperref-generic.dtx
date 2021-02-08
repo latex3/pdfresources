@@ -3388,7 +3388,10 @@
               }
               {
                 \@@_text_pdfstring_info:nN {##1}\l_@@_tmpa_str
-                \pdfmanagement_add:nnx {Info}{#2}{\l_@@_tmpa_str}
+                \str_if_eq:VnF\l_@@_tmpa_str{<FEFF>}
+                  {
+                    \pdfmanagement_add:nnx {Info}{#2}{\l_@@_tmpa_str}
+                  }
               }
              \@@_store_metadata:nn {pdf#1}{##1}
           }
@@ -3403,15 +3406,22 @@
               }
               {
                 \@@_text_pdfstring_info:nN {##1}\l_@@_tmpa_str
-                \pdfmanagement_add:nnx {Info}{#2}{\l_@@_tmpa_str}
+                \str_if_eq:VnF\l_@@_tmpa_str{<FEFF>}
+                  {
+                    \pdfmanagement_add:nnx {Info}{#2}{\l_@@_tmpa_str}
+                  }
               }
             \exp_args:Nx \@@_store_metadata:nn {pdf\str_lowercase:n{#1}}{##1}
           }
         ,unknown .code:n =
          {
             \@@_text_pdfstring_info:nN {##1}\l_@@_tmpa_str
-            \exp_args:Nnx
-              \pdfmanagement_add:nnx {Info}{\pdf_text_convert:nV {name }\l_keys_key_str}{\l_@@_tmpa_str}
+            \str_if_eq:VnF\l_@@_tmpa_str{<FEFF>}
+              {
+                \exp_args:Nnx
+                  \pdfmanagement_add:nnx {Info}
+                    {\pdf_text_convert:nV {name }\l_keys_key_str}{\l_@@_tmpa_str}
+              }      
          }
       }
   }
