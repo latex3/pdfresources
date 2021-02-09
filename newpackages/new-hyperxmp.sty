@@ -20,7 +20,7 @@
 % for those people who are interested.
 \NeedsTeXFormat{LaTeX2e}[2020/10/01]
 \ProvidesPackage{new-hyperxmp}
-    [2020/12/02 v0.2 Store hyperref metadata in XMP format / testing pdfresource management ...UF]
+    [2021/02/09 v0.3 Store hyperref metadata in XMP format / testing pdfresource management ...UF]
 
 \RequirePackage{hyperxmp}
 
@@ -34,15 +34,17 @@
      }
   }
 
-% uncompressed stream??
+%
 \newcommand*{\hyxmp@embed@packet@generic}
  {%
    \typeout{}
    \typeout{!!~new-hyperxmp--generic~packet~command~used!!}{}
    \typeout{}
    \hyxmp@construct@packet
+   %or some other command to write a object:
    \exp_args:Nnx
     \pdf_object_now:nn{stream}{{/Type~/Metadata~/Subtype~/XML}{\hyxmp@xml}}%
+    % reference in the Catalog:
     \pdfmanagement_add:nnx {Catalog} {Metadata}{\pdf_object_last:}
  }
 
@@ -93,13 +95,13 @@
       ,pdfcontacturl
       ,pdfdate
     %hyperref
-      ,pdfauthor
+      ,pdfauthor %??
       ,pdftitle
       ,pdfsubject
       ,pdfkeywords
     }
-    {\tl_set:cx {@#1}{\GetDocumentMetadata{hyp/#1}}}
- }
+    {\tl_set:cx {@##1}{\GetDocumentMetadata{hyp/##1}}}
+  }
 \AtEndDocument{\__hyxmp_get_metadata:}
 \ExplSyntaxOff
 \DeclareHookRule{enddocument}{newhyperxmp}{before}{hyperxmp}
