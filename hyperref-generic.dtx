@@ -139,21 +139,29 @@
 %
 %  \enquote{Metadata}, informations about the document, are stored in a PDF in two
 %  places: The |/Info| dictionary and the XMP-metadata. \pkg{hyperref} only handles the
-%  |/Info| dictionary. The XMP-metadata are created by packages like \pkg{pdfx} and
+%  |/Info| dictionary. The XMP-metadata can be added with like \pkg{pdfx} and
 %  \pkg{hyperxmp}.
-%  The |/Info| dictionary can be filled with arbitrary keys, but the PDF viewer typically
-%  care only about a few, like author, title and keywords.
 %
-%  The handling of the metadata is problematic for two reasons:
+%  The |/Info| dictionary can be filled with arbitrary keys, but the PDF viewer typically
+%  care only about a few, like |/Author|, |/Title| and |/Keywords|.
+%  A number of |/Info| keys, like dates and the producer, are added automatically
+%  by the engines and backends.
+%  Some of them can only be removed with special commands, some not at all.
+%  But---with the exception of |/Producer| when using the dvips backend---they
+%  can be overwritten.
+%
+%  The current handling of the metadata is problematic for two reasons:
 %  \begin{itemize}
 %  \item External package like \pkg{hyperxmp} want access to them too.
-%  \item \pkg {hyperref} tries to deduce this data from document commands like
+%  \item \pkg {hyperref} (and also \pkg{hyperxmp})
+%  tries to deduce some datas from document commands like
 %  \cs{title} or \cs{author}---something that worked reasonably well when only
 %  some standard classes with well-known definitions of these command existed,
-%  but gets problematic with classes and packages which try to define
-%  more powerful commands with a variety of optional arguments to set authors and
+%  but gets problematic with classes and packages which define
+%  more powerful commands knowing a variety of optional arguments to set authors and
 %  affiliations and title information.
 %  \end{itemize}
+%
 %
 %  \section{PDF page size (mediabox)}
 %  The standard \pkg{hyperref} driver contain code to set the PDF page size.
@@ -748,7 +756,8 @@
 % It would be too late for colors defined earlier, but is the best one
 % can do for now.%
 %    \begin{macrocode}
-\RequirePackage{l3color}
+\@ifundefined{color_set:nn}{
+\RequirePackage{l3color}}{}
 \ExplSyntaxOn
 \cs_gset_eq:NN \@expl@color@set@@@@nnn \color_set:nnn
 \file_input:n {hyperref-colorschemes.def}
@@ -3421,7 +3430,7 @@
                 \exp_args:Nnx
                   \pdfmanagement_add:nnx {Info}
                     {\pdf_text_convert:nV {name }\l_keys_key_str}{\l_@@_tmpa_str}
-              }      
+              }
          }
       }
   }
