@@ -162,6 +162,35 @@
 %  affiliations and title information.
 %  \end{itemize}
 %
+%  To resolve some of this problem the driver will
+%  \begin{itemize}
+%  \item \emph{Not} try deduce author and title from documents. They have to be set in
+%  \cs{hypersetup} with |pdfauthor| and |pdftitle|. It is recommended to separate more than one
+%  author by commas, and to hide commas inside braces if needed:
+%
+%  \begin{verbatim}
+%  pdfauthor = {Bär, Peter Anteater, {Riley, the sloth}}
+%  \end{verbatim}
+%  \item All values of relevant keys (including keys from the hyperxmp package)
+%  will be store in a Metadata container, and can be retrieved with
+%  \cs{GetDocumentMetadata}.
+%
+%  \begin{verbatim}
+%  \edef\my@pdfauthor{\GetDocumentMetadata{hyp/pdfauthor}}
+%  \end{verbatim}
+%  If the key hasn't be set, the result is empty.
+%
+%  \item |pdflang| is deprecated. Instead \cs{DeclareDocumentMetadata}
+%  should be used:
+%  \begin{verbatim}
+%  \DeclareDocumentMetadata{lang=de-DE}
+%  \end{verbatim}
+%
+%  The value can be retrieved as |document/lang|.
+%
+%  \end{itemize}
+%  \section{Dates}
+%  % XMP: yyyy-mm-ddThh:mm:ss+tt:tt, PDF: D:YYYYMMDDhhmmss+01'00'
 %
 %  \section{PDF page size (mediabox)}
 %  The standard \pkg{hyperref} driver contain code to set the PDF page size.
@@ -3493,6 +3522,8 @@
 \keys_set:nn { hyp / setup} {pdfauthor  = }
 \keys_set:nn { hyp / setup} {pdftitle   = }
 \keys_set:nn { hyp / setup} {pdfsubject  = }
+
+
 %Trapped is a bit curious, it has an value "unknown", and one can't suppress it ...
 \keys_define:nn { hyp / setup }
   {
@@ -3523,17 +3554,71 @@
        }
   }
 
+
+%%% hyperxmp keys. They are only stored as metadata:
+\clist_map_inline:nn
+  {
+   ,pdfcopyright
+   ,pdftype
+   ,pdflicenseurl
+   ,pdfauthortitle
+   ,pdfcaptionwriter
+   ,pdfmetalang
+   ,pdfapart
+   ,pdfaconformance
+   ,pdfuapart
+   ,pdfxstandard
+   ,pdfsource
+   ,pdfdocumentid
+   ,pdfinstanceid
+   ,pdfversionid
+   ,pdfrendition
+   ,pdfpublication
+   ,pdfpubtype
+   ,pdfbytes
+   ,pdfnumpages
+   ,pdfissn
+   ,pdfeissn
+   ,pdfisbn
+   ,pdfbookedition
+   ,pdfpublisher
+   ,pdfvolumenum
+   ,pdfissuenum
+   ,pdfpagerange
+   ,pdfdoi
+   ,pdfurl
+   ,pdfidentifier
+   ,pdfsubtitle
+   ,pdfpubstatus
+   ,pdfcontactaddress
+   ,pdfcontactcity
+   ,pdfcontactregion
+   ,pdfcontactpostcode
+   ,pdfcontactcountry
+   ,pdfcontactphone
+   ,pdfcontactemail
+   ,pdfcontacturl
+   ,pdfdate
+  }
+  {
+    \keys_define:nn { hyp / setup }
+      {
+        #1 .code:n= { \@@_store_metadata:nn {#1}{##1}}
+      }
+  }
+
 \cs_set_protected:Npn \PDF@SetupDoc
   {}
 
 \def\PDF@FinishDoc{}% dummy needed for hyperref ...
 
 
-\AddToHook{env/document/before}{
-  \pdf@ifdraftmode{}{
-    %!!!!! this must be handled somehow
-    \Hy@UseMaketitleInfos %get/set Title/Author from \title if pdfusetitle is true
-    }}
+%\AddToHook{env/document/before}{
+%  \pdf@ifdraftmode{}{
+%    %!!!!! this must be handled somehow
+%    %\Hy@UseMaketitleInfos %get/set Title/Author from \title if pdfusetitle is true
+%    }
+%    }
 
 
 % pdfpageduration sets the duration a page is shown in full screen mode.

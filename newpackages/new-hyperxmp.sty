@@ -45,7 +45,64 @@
     \pdf_object_now:nn{stream}{{/Type~/Metadata~/Subtype~/XML}{\hyxmp@xml}}%
     \pdfmanagement_add:nnx {Catalog} {Metadata}{\pdf_object_last:}
  }
+
+\cs_new_protected:Npn \__hyxmp_get_metadata:
+ {
+   \clist_map_inline:nn
+    {
+      % hyperxmp keys:
+      ,pdfcopyright
+      ,pdftype
+      ,pdflicenseurl
+      ,pdfauthortitle
+      ,pdfcaptionwriter
+      ,pdfmetalang
+      ,pdfapart
+      ,pdfaconformance
+      ,pdfuapart
+      ,pdfxstandard
+      ,pdfsource
+      ,pdfdocumentid
+      ,pdfinstanceid
+      ,pdfversionid
+      ,pdfrendition
+      ,pdfpublication
+      ,pdfpubtype
+      ,pdfbytes
+      ,pdfnumpages
+      ,pdfissn
+      ,pdfeissn
+      ,pdfisbn
+      ,pdfbookedition
+      ,pdfpublisher
+      ,pdfvolumenum
+      ,pdfissuenum
+      ,pdfpagerange
+      ,pdfdoi
+      ,pdfurl
+      ,pdfidentifier
+      ,pdfsubtitle
+      ,pdfpubstatus
+      ,pdfcontactaddress
+      ,pdfcontactcity
+      ,pdfcontactregion
+      ,pdfcontactpostcode
+      ,pdfcontactcountry
+      ,pdfcontactphone
+      ,pdfcontactemail
+      ,pdfcontacturl
+      ,pdfdate
+    %hyperref
+      ,pdfauthor
+      ,pdftitle
+      ,pdfsubject
+      ,pdfkeywords
+    }
+    {\tl_set:cx {@#1}{\GetDocumentMetadata{hyp/#1}}}
+ }
+\AtEndDocument{\__hyxmp_get_metadata:}
 \ExplSyntaxOff
+\DeclareHookRule{enddocument}{newhyperxmp}{before}{hyperxmp}
 
 
 \endinput
