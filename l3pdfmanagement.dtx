@@ -219,17 +219,40 @@
 %   The Info dictionary expects utf16be in the strings, so a conversion like this is
 %   normally sensible:
 %   \begin{verbatim}
-%   \sys_if_engine_pdftex:TF
-%     {
-%       \str_set_convert:Nnnn \l_tmpa_str { Grüße }{ utf8 } {utf16/string}
-%     }
-%     {
-%       \str_set_convert:Nnnn \l_tmpa_str { Grüße }{  } {utf16/string}
-%     }
-%   \pdfmanagement_add:nnx {Info} {Title}{(\l_tmpa_str)}
+%    \str_set_convert:Nnnn \l_tmpa_str { Grüße }{ default } {utf16/string}
+%    \pdfmanagement_add:nnx {Info} {Title}{(\l_tmpa_str)}
 %   \end{verbatim}
 % \end{function}
 %
+%  The entries in Info dictionary are rather special as the engines/backends adds some
+%  core entries, and changing or removing these entries is not always possible.
+%
+%  The special entries are
+%  \begin{description}
+%  \item[Producer] Added by all engines and backends. Removing the entry is only possible
+%  with luatex with |\pdfvariable suppressoptionalinfo 128|. Changing is possible
+%  with \cs{pdfmanagement_add:nnn} with the exception of dvips/pstopdf where the entry is
+%  always something like |GPL Ghostscript 9.53.3|.
+%  \item[Creator] Added by all engines and backends. Removal only possible in luatex by adding
+%  16 to the bitset. Changing is possible with the management command.
+%  \item[CreationDate] Added by all engines and backends. With the exception of |dvips/ps2pdf|
+%  |SOURCE_DATE_EPOCH| is honored. Suppressing it is possible in pdftex with
+%  |\pdfinfoomitdate = 1|, and in luatex by adding 32 to the bitset.
+%  Changing is possible with the management command and will overwrite an epoch setting.
+%  \item[ModDate] Added by all engines and backends with the exception of xdvipdfmx.
+%  With the exception of |dvips/ps2pdf| |SOURCE_DATE_EPOCH| is honored.
+%   Suppressing it is possible in pdftex with
+%  |\pdfinfoomitdate = 1|, and in luatex by adding 64 to the bitset. Changing is possible with
+%  the management command.
+%  \item[Trapped] Added by pdftex and luatex. Removal only possible in
+%  luatex by adding 256 to the bitset. Changing (and adding in the other backends) is
+%  possible with the management command.
+%  \item[PTEX.Fullbanner] Added by pdftex and luatex. Removal possible in pdftex with
+%  |\pdfsuppressptexinfo-1|, in luatex by adding 512 to the bitset.
+%  Changing is not possible.
+%  \item[Title] Added by dvips/ps2pdf and set to |filename.dvi|. Removal is probably
+%  not possible, but it can be overwritten with the management command.%
+%  \end{description}
 % \subsubsection{Pages: The \enquote{Pages} dictionary}
 % \potentialclash As the content of this dictionary is written at the end it will
 % in pdftex and luatex overwrite values added with the primitive commands (e.g.
