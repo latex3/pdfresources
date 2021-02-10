@@ -4,34 +4,7 @@
 %%
 \NeedsTeXFormat{LaTeX2e}[2020/10/01]
 \ProvidesExplPackage{new-transparent}%
-  {2021-02-10}{v1.43}{Transparency with color stacks (based on transparent from Heiko Oberdiek)}%
-
-\cs_if_free:NT \color_set:nn{\RequirePackage{l3color}}
-
-\RequirePackage{l3opacity}
-\cs_set_eq:NN \__opacity_backend_stack_push:nn\__color_backend_stack_push:nn
-\cs_set_eq:NN \__opacity_backend_stack_pop:n  \__color_backend_stack_pop:n
-
-\NewDocumentCommand{\transparent} { m }
-      {
-       \opacity_select:n{\fp_eval:n{ min(max(0,#1),1) } }
-      }
-
-\NewDocumentCommand{\texttransparent}{m m}
-  {
-   \protect\leavevmode
-   \begingroup
-     \transparent{#1}
-     #2
-   \endgroup
-  }
-
-
-\endinput
-
-%%% old code
-
-
+  {2020-09-06}{v1.42}{Transparency with color stacks (based on transparent from Heiko Oberdiek)}%
 %pdftex + luatex in pdf mode
 \sys_if_output_pdf:T
   {
