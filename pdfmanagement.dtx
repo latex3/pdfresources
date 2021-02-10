@@ -318,18 +318,11 @@
   {
     \msg_redirect_module:nnn { pdf } { none } { warning }
   }
-\DeclareOption { patches }{\AtEndOfPackage{\RequirePackage{pdfmanagement-patches}}}
+\DeclareOption { patches }
+  {
+    %nothing
+  }
 \ProcessOptions\relax
-%</package>
-%    \end{macrocode}
-% \section{messages}
-%    \begin{macrocode}
-%<*package>
-\msg_new:nnn  { pdf } { patches }
-              { loading~patch~code }
-\msg_new:nnn  { pdf } { pgf-too-late }
-              { pgf~is~already~loaded.~Patching~not~possible.}
-
 %</package>
 %    \end{macrocode}
 % \section{Loading the core files.}

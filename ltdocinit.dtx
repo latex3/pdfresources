@@ -142,6 +142,7 @@
                \str_remove_all:cn {opt@hyperref.sty}{customdriver=hgeneric-experimental}
              }
           }
+        \RequirePackage{pdfmanagement-firstaid}
       }
   }
 
@@ -167,6 +168,7 @@
     \prop_show:N \g_@@_documentmetadata_prop
   }
 
+\clist_new:N \g_@@_firstaidoff_clist
 \keys_define:nn { pdf / setup }
   {
     backend .code:n =
@@ -207,8 +209,9 @@
       {
         \msg_warning:nnn{pdf}{unknown-standard}{#1}
       }
-    ,pdfmanagement .bool_gset:N = \g__pdfmanagement_active_bool
+    ,pdfmanagement .bool_gset:N = \g_@@_active_bool
     ,pdfmanagement .initial:n =  {true}
+    ,firstaidoff .clist_gset:N = \g_@@_firstaidoff_clist
   }
 %    \end{macrocode}
 % \end{function}
