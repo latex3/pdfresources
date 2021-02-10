@@ -1,0 +1,229 @@
+%%
+%% This is file `new-transparent.sty',
+%% base on transparent sty from Heiko Oberdiek
+%%
+\NeedsTeXFormat{LaTeX2e}[2020/10/01]
+\ProvidesExplPackage{new-transparent}%
+  {2021-02-10}{v1.43}{Transparency with color stacks (based on transparent from Heiko Oberdiek)}%
+
+\cs_if_free:NT \color_set:nn{\RequirePackage{l3color}}
+
+\RequirePackage{l3opacity}
+\cs_set_eq:NN \__opacity_backend_stack_push:nn\__color_backend_stack_push:nn
+\cs_set_eq:NN \__opacity_backend_stack_pop:n  \__color_backend_stack_pop:n
+
+\NewDocumentCommand{\transparent} { m }
+      {
+       \opacity_select:n{\fp_eval:n{ min(max(0,#1),1) } }
+      }
+
+\NewDocumentCommand{\texttransparent}{m m}
+  {
+   \protect\leavevmode
+   \begingroup
+     \transparent{#1}
+     #2
+   \endgroup
+  }
+
+
+\endinput
+
+%%% old code
+
+
+%pdftex + luatex in pdf mode
+\sys_if_output_pdf:T
+  {
+    \bool_lazy_and:nnF
+      {\cs_if_exist_p:N \pdfmanagement_add:nnn }
+      { \pdfmanagement_if_active_p: }
+      {
+        \PackageWarningNoLine{new-transparent}
+         {
+           Loading~aborted,~because~pdf~resource~management~code~not~found~%
+           or~not~active
+         }
+        \endinput
+      }
+   }
+\sys_if_engine_pdftex:T
+  {
+    \let\TRP@pdfcolorstackinit\tex_pdfcolorstackinit:D
+    \let\TRP@pdfcolorstack\tex_pdfcolorstack:D
+  }
+
+\sys_if_engine_luatex:T
+  {
+    \def\TRP@pdfcolorstackinit           {\pdffeedback~colorstackinit}
+    \protected\def\TRP@pdfcolorstack     {\pdfextension~colorstack}
+  }
+
+\sys_if_output_pdf:T
+  {
+    %initialize opacity 1
+    \pdfmanagement_add:nnn{Page/Resources/ExtGState}{TRP1}{<</ca~1/CA~1>>}
+    %
+    \cs_new_protected:Npn \__transparent_use:n #1
+      {
+        \tl_if_exist:cF { c__transparent_TRP#1_tl }
+          {
+            \pdfmanagement_add:nnn{Page/Resources/ExtGState}{TRP#1}{<</ca~#1/CA~#1>>}
+            \tl_const:cn { c__transparent_TRP#1_tl }{ /TRP#1~gs }
+          }
+      }
+    \xdef\TRP@colorstack{%
+         \TRP@pdfcolorstackinit~page~direct{/TRP1~gs}}
+    \NewDocumentCommand{\transparent} { m }
+      {
+        \exp_args:Nx\__transparent_use:n { \fp_eval:n{ min(max(0,#1),1)}}
+        \tl_set:Nx  \transparent@current { \fp_eval:n{ min(max(0,#1),1)}}
+        \transparent@set
+      }
+
+    \def\transparent@current{/TRP1~gs}
+    \def\transparent@set
+      {
+        \TRP@pdfcolorstack\TRP@colorstack~push~
+          {
+            \tl_use:c { c__transparent_TRP\transparent@current _tl }
+          }
+            \aftergroup\transparent@reset
+      }
+
+    \def\transparent@reset{\TRP@pdfcolorstack\TRP@colorstack~pop\relax}
+
+  }
+
+%xetex, dvipdfmx
+\str_case_e:nnT {\g__sys_backend_tl}
+ {
+   {xetex}{}
+   {dvipdfmx}{}
+ }
+ {
+   \PackageInfo{new-transparent}{xetex~and~dvipdfmx~need~dvipdfmx~newer~than~20200901}{}
+   \NewDocumentCommand{\transparent} { m }
+      {
+       \transparent@set{#1}
+      }
+   \def\transparent@set #1
+      {
+        \special{pdf:bxgstate~<</CA~#1/ca~#1>>}
+        \aftergroup\transparent@reset
+      }
+
+    \def\transparent@reset{\special{pdf:exgstate}}
+ }
+
+%warning for dvips currently missing
+% but it should at least not error
+\ProvideDocumentCommand\transparent { m }{}
+
+\NewDocumentCommand{\texttransparent}{m m}
+  {
+   \protect\leavevmode
+   \begingroup
+     \transparent{#1}
+     #2
+   \endgroup
+  }
+
+
+\endinput
+%%
+%% End of file `new-transparent.sty'.
+
+
+dvips could at least on one page along this lines
+\ExplSyntaxOn
+\let\backendpostscript\__kernel_backend_postscript:n
+\ExplSyntaxOff
+xxxx
+
+\backendpostscript
+ {
+   /STACK 50 array def % the stack data structure
+   /PTR 0 def % the stack pointer
+   /stackpush % any stackpush
+     { %def
+       STACK exch PTR exch put
+       /PTR PTR 1 add def
+     } bind def
+   /stackget % stackget any
+    { %def
+      /PTR PTR 1 sub def
+      STACK PTR get
+    } bind def
+ }
+\ExplSyntaxOn
+\__kernel_backend_postscript:n {.currentstrokeconstantalpha~stackpush}
+\__kernel_backend_postscript:n {.currentfillconstantalpha~stackpush}
+\__kernel_backend_postscript:n {0.1~.setstrokeconstantalpha}
+\__kernel_backend_postscript:n {0.1~.setfillconstantalpha}
+zzzz
+\__kernel_backend_postscript:n {.currentstrokeconstantalpha~stackpush}
+\__kernel_backend_postscript:n {.currentfillconstantalpha~stackpush}
+\__kernel_backend_postscript:n {0.4~.setstrokeconstantalpha}
+\__kernel_backend_postscript:n {0.4~.setfillconstantalpha}
+blub
+\__kernel_backend_postscript:n {stackget~.setstrokeconstantalpha}
+\__kernel_backend_postscript:n {stackget~.setfillconstantalpha}
+aaaa
+\__kernel_backend_postscript:n {stackget~.setstrokeconstantalpha}
+\__kernel_backend_postscript:n {stackget~.setfillconstantalpha}
+
+xxxx
+\ExplSyntaxOff
+
+%% colorstack abstraction
+\documentclass[12pt]{article}
+\usepackage{kantlipsum,iftex}
+
+\begin{document}
+\ifxetex
+\special{pdfcolorstackinit 1 page direct (0 g)}
+\special{pdfcolorstackinit 2 direct (0 g)}
+\special{pdfcolorstack 2 push (0 1 0 rg)}
+\special{pdfcolorstack 1 push (1 0 0 rg)}
+1: red abc
+\special{pdfcolorstack 1 push (0 0 1 rg)}
+1: blue abc
+\special{pdfcolorstack 1 pop}
+1: red again
+\special{pdfcolorstack 2 current}
+2: green
+\special{pdfcolorstack 1 current}
+1: still red
+\special{pdfcolorstack 2 current}
+2: green
+\newpage
+
+should be red
+\else
+\edef\stackA {\pdfcolorstackinit page direct {0 g}}
+\edef\stackB {\pdfcolorstackinit direct {0 g}}
+
+\pdfcolorstack\stackB push {0 1 0 rg}
+\pdfcolorstack\stackA push {1 0 0 rg}
+1: red abc
+\pdfcolorstack\stackA push {0 0 1 rg}
+1: blue abc
+\pdfcolorstack\stackA pop
+1: red again
+\pdfcolorstack\stackB current
+2: green
+\pdfcolorstack\stackA current
+1: still red
+\pdfcolorstack\stackB current
+2: green
+\newpage
+
+should be red
+
+\pdfcolorstack\stackB pop
+aa
+
+
+\fi
+\end{document}
