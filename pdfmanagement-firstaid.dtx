@@ -62,7 +62,7 @@
   {experimental pdf-resource management / firstaid}
 
 %<@@=pdfmanagement>
-\clist_map_inline:nn {pgf,transparent}
+\clist_map_inline:nn {pgf,transparent,hyperxmp}
   {
     \bool_new:c       { g_@@_firstaid_#1_bool }
     \bool_gset_true:c { g_@@_firstaid_#1_bool }
@@ -187,6 +187,15 @@
 \bool_if:NT \g_@@_firstaid_transparent_bool
  {
    \declare@file@substitution{transparent.sty}{transparent-ltx.sty}
+ }
+%    \end{macrocode}
+% \subsection{hyperxmp}
+% We replace it by a new version. It doesn't cover everything
+% But allows at least some testing
+%    \begin{macrocode}
+\bool_if:NT \g_@@_firstaid_hyperxmp_bool
+ {
+   \declare@file@substitution{hyperxmp.sty}{new-hyperxmp.sty}
  }
 %</package>
 %    \end{macrocode}

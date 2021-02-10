@@ -20,7 +20,7 @@
 % for those people who are interested.
 \NeedsTeXFormat{LaTeX2e}[2020/10/01]
 \ProvidesPackage{new-hyperxmp}
-    [2021/02/09 v0.3 Store hyperref metadata in XMP format / testing pdfresource management ...UF]
+    [2021/02/11 v0.4 Store hyperref metadata in XMP format / testing pdfresource management ...UF]
 
 \RequirePackage{hyperxmp}
 
@@ -95,15 +95,21 @@
       ,pdfcontacturl
       ,pdfdate
     %hyperref
-      ,pdfauthor %??
       ,pdftitle
       ,pdfsubject
       ,pdfkeywords
     }
     {\tl_set:cx {@##1}{\GetDocumentMetadata{hyp/##1}}}
+    % author, this is only a work around for simple author
+    % TODO needs improvement
+    \pdfstringdef\@pdfauthor{\GetDocumentMetadata{hyp/pdfauthor}}
+    \cs_set_eq:NN\hyxmp@pdfauthor\@pdfauthor
+    %lang
+    \tl_set:cx {@pdflang}{\GetDocumentMetadata{document/pdflang}}
   }
 \AtEndDocument{\__hyxmp_get_metadata:}
 \ExplSyntaxOff
+
 \DeclareHookRule{enddocument}{newhyperxmp}{before}{hyperxmp}
 
 

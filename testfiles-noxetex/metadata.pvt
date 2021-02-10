@@ -1,10 +1,11 @@
-\input{regression-test}
-\PassOptionsToPackage{debug}{pdfmanagement}
+\PassOptionsToPackage{enable-debug,check-declarations}{expl3}
 \RequirePackage{pdfmanagement}
-\DeclareDocumentMetadata { }
+\DeclareDocumentMetadata {  }
+\RequirePackage{pdfmanagement-regressiontest}
+
 \documentclass{article}
 
-\usepackage{hyperxmp,lipsum}
+\usepackage{hyperxmp,kantlipsum}
 
 \usepackage[]
    {hyperref}
@@ -18,15 +19,6 @@
    }
 
 
-\ExplSyntaxOn
-\pdf_object_new:nn{metadata-obj}{stream}
-\pdfmanagement_add:nnx {Catalog} {Metadata}{\pdf_object_ref:n{metadata-obj}}
-\ExplSyntaxOff
-
- \begin{document}
- blblb \lipsum
- \ExplSyntaxOn\makeatletter
- \hyxmp@construct@packet
- \exp_args:Nnx\pdf_object_write:nn{metadata-obj}{{/Type~/Metadata~/Subtype~/XML}{\hyxmp@xml}}%
-\ExplSyntaxOff
+\begin{document}
+ blblb \kant
 \end{document}
