@@ -1,0 +1,110 @@
+%% This is file `new-hyperxmp.sty',
+% Copyright (C) 2019-2020 The LaTeX3 Project
+%
+% It may be distributed and/or modified under the conditions of the
+% LaTeX Project Public License (LPPL), either version 1.3c of this
+% license or (at your option) any later version.  The latest version
+% of this license is in the file
+%
+%    https://www.latex-project.org/lppl.txt
+%
+% This file is part of the "pdfmanagement bundle" (The Work in LPPL)
+% and all files in that bundle must be distributed together.
+%
+% -----------------------------------------------------------------------
+%
+% The development version of the bundle can be found at
+%
+%    https://github.com/latex3/pdfresources
+%
+% for those people who are interested.
+\NeedsTeXFormat{LaTeX2e}[2020/10/01]
+\ProvidesPackage{new-hyperxmp}
+    [2021/02/09 v0.3 Store hyperref metadata in XMP format / testing pdfresource management ...UF]
+
+\RequirePackage{hyperxmp}
+
+\ExplSyntaxOn
+
+\cs_if_exist:NT \pdfmanagement_add:nnn
+  {
+    \pdfmanagement_if_active:T
+     {
+       \renewcommand\hyxmp@embed@packet{\hyxmp@embed@packet@generic}
+     }
+  }
+
+%
+\newcommand*{\hyxmp@embed@packet@generic}
+ {%
+   \typeout{}
+   \typeout{!!~new-hyperxmp--generic~packet~command~used!!}{}
+   \typeout{}
+   \hyxmp@construct@packet
+   %or some other command to write a object:
+   \exp_args:Nnx
+    \pdf_object_now:nn{stream}{{/Type~/Metadata~/Subtype~/XML}{\hyxmp@xml}}%
+    % reference in the Catalog:
+    \pdfmanagement_add:nnx {Catalog} {Metadata}{\pdf_object_last:}
+ }
+
+\cs_new_protected:Npn \__hyxmp_get_metadata:
+ {
+   \clist_map_inline:nn
+    {
+      % hyperxmp keys:
+      ,pdfcopyright
+      ,pdftype
+      ,pdflicenseurl
+      ,pdfauthortitle
+      ,pdfcaptionwriter
+      ,pdfmetalang
+      ,pdfapart
+      ,pdfaconformance
+      ,pdfuapart
+      ,pdfxstandard
+      ,pdfsource
+      ,pdfdocumentid
+      ,pdfinstanceid
+      ,pdfversionid
+      ,pdfrendition
+      ,pdfpublication
+      ,pdfpubtype
+      ,pdfbytes
+      ,pdfnumpages
+      ,pdfissn
+      ,pdfeissn
+      ,pdfisbn
+      ,pdfbookedition
+      ,pdfpublisher
+      ,pdfvolumenum
+      ,pdfissuenum
+      ,pdfpagerange
+      ,pdfdoi
+      ,pdfurl
+      ,pdfidentifier
+      ,pdfsubtitle
+      ,pdfpubstatus
+      ,pdfcontactaddress
+      ,pdfcontactcity
+      ,pdfcontactregion
+      ,pdfcontactpostcode
+      ,pdfcontactcountry
+      ,pdfcontactphone
+      ,pdfcontactemail
+      ,pdfcontacturl
+      ,pdfdate
+    %hyperref
+      ,pdfauthor %??
+      ,pdftitle
+      ,pdfsubject
+      ,pdfkeywords
+    }
+    {\tl_set:cx {@##1}{\GetDocumentMetadata{hyp/##1}}}
+  }
+\AtEndDocument{\__hyxmp_get_metadata:}
+\ExplSyntaxOff
+\DeclareHookRule{enddocument}{newhyperxmp}{before}{hyperxmp}
+
+
+\endinput
