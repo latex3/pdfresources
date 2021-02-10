@@ -1,12 +1,12 @@
 % !Mode:: "TeX:DE:UTF-8:Main"
 % ok for pdftex and luatex. Perhaps some changes to avoid a two pass are possible/needed
 % fails with xetex because of the missing \pdf_link_last:
-\input{regression-test}
+\PassOptionsToPackage{enable-debug,check-declarations}{expl3}
 \RequirePackage{pdfmanagement}
-\DeclareDocumentMetadata { }
+\DeclareDocumentMetadata {  }
+\RequirePackage{pdfmanagement-regressiontest}
 \documentclass{article}
-\usepackage[]
-{hyperref}
+\usepackage{hyperref}
 \begin{document}
 \begin{Form}
 \TextField[
