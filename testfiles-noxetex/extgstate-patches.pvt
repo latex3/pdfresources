@@ -4,13 +4,13 @@
 % work with transparent and colorspace anyway ...
 % the patches looks ok, there are a few duplicates in the object
 % but nothing harmful
-\RequirePackage[enable-debug,check-declarations]{expl3}
-\RequirePackage[patches]{pdfmanagement}
+\PassOptionsToPackage{enable-debug,check-declarations}{expl3}
+\RequirePackage{pdfmanagement}
 \DeclareDocumentMetadata {  }
-\input{regression-test}
+\RequirePackage{pdfmanagement-regressiontest}
 \documentclass{article}
 
-\usepackage{tikz,new-transparent}
+\usepackage{tikz,transparent}
 \usetikzlibrary{patterns,shadings}
 \usepackage[overprint]{colorspace}
 
