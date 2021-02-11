@@ -60,18 +60,18 @@
 % they work like them with a few PDF specific changes:
 % \begin{itemize}
 % \item The keys are always converted with \cs{str_convert_pdfname}
-% to get a correct PDF name,
-% \item key with empty values can not be added, but will be ignored
-% \item There is a dedicated function to output the property as space
+% to get a correct PDF name;
+% \item a key with a empty value can not be added, it will be ignored;
+% \item there is a dedicated function to output the property as space
 % separated list with keys with slash: \texttt{/key1 value1 /key2 value2}.
-%
+% \end{itemize}
 % Local and global dictionaries can be created.
 %
 % \subsection{User Commands}
 % \begin{function}[updated = 2020-12-03]
 %   {\pdfdict_new:n}
 %   \begin{syntax}
-%     \cs{pdfdict_new:n} \Arg{dictionary name}\\
+%     \cs{pdfdict_new:n} \Arg{dictionary name}
 %   \end{syntax}
 % This function create a new local or global dictionary. Which one depends on
 % \Arg{dictionary name}: If it begins with the standard |g| the dictionary is global.
@@ -95,7 +95,7 @@
 % \begin{function}[EXP,updated = 2020-12-03]
 %   {\pdfdict_name:n}
 %   \begin{syntax}
-%     \cs{pdfdict_name:n} \Arg{dictionary name}\\
+%     \cs{pdfdict_name:n} \Arg{dictionary name}
 %   \end{syntax}
 % These command expand to the internal name. With these commands
 % it is possible to use standard commands of the \texttt{prop} module
@@ -155,7 +155,7 @@
 %\begin{function}[EXP, pTF,updated = 2020-12-03]
 %   { \pdfdict_if_exist:n  }
 %   \begin{syntax}
-%     \cs{pdfdict_if_exist:n} \Arg{dictionary}\\
+%     \cs{pdfdict_if_exist:n} \Arg{dictionary}
 %   \end{syntax}
 %   This tests if the dictionary exists.
 % \end{function}
@@ -273,8 +273,8 @@
                 Names~of~dictionaries~should~start~with~'g_'~or~'l_' }
 
 %    \end{macrocode}
-
-
+%
+%
 % \subsection{Creating dictionaries}
 % \begin{variable}
 %    {\g_@@_names_seq,\g_@@_gnames_seq}
@@ -339,6 +339,7 @@
 %</package>
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}
 %   {
 %     \@@_set_eq:nn,\pdfdict_set_eq:nn,
@@ -483,7 +484,7 @@
 %</package>
 %    \end{macrocode}
 % \end{macro}
-
+%
 % \begin{macro}
 %   {
 %     \@@_get:nnN, \pdfdict_get:nnN,
@@ -549,6 +550,7 @@
 %</package>
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}
 %   { \@@_show:Nn, \pdfdict_show:n }
 % This allows to show the content of dictionaries. It also displays if a
@@ -591,6 +593,7 @@
 \cs_generate_variant:Nn \pdfdict_item:nn {ne}
 %</package>
 %    \end{macrocode}
+% \end{macro}
 % \end{macro}
 % \begin{macro}
 %   {

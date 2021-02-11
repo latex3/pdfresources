@@ -216,6 +216,7 @@
 % bcd/emc.  It will probably disappear. It is loaded by the bundle, and
 % should not be loaded independently.
 %
+% \end{description}
 % \section{Incompabilities}
 %
 % As described in section~\ref{sec:change}, if activated
@@ -265,20 +266,27 @@
 % but it is not complete currently. Failures are e.g. possible with complicated
 % author or title settings.
 %
+% This can be disabled by using |firstaidoff=hyperxmp| in \cs{DeclareDocumentmetadata}
+% 
 % \subsection{tikz/pgf}
 % \pkg{pgf} writes to the page resources too and so is incompatible. The needed
 % changes are rather small and will be done in coordination with the maintainer.
-% Until this works, \pkg{pagemanagement} can be loaded with the option \texttt{patches}
-% which will add the needed patches.
+%
+% Until this works, \pkg{pagemanagement} will load the patches automatically.
+%
+% This can be disabled by using |firstaidoff=pgf| in \cs{DeclareDocumentmetadata}
 %
 % \subsection{transparent}
 % The package \pkg{transparent} is incompatible. A replacement has been written
 % (\pkg{transparent-ltx}) and is loaded automatically. It requires a very recent
 % l3 layer!
 %
+% This can be disabled by using |firstaidoff=transparent| in \cs{DeclareDocumentmetadata}
 % \subsection{pdflscape}
 % The package \pkg{pdflscape} is incompatible. A replacement has been written
 % (\pkg{pdflscape-ltx}) and is loaded automatically.
+%
+% This can be disabled by using |firstaidoff=pdflscape| in \cs{DeclareDocumentmetadata}
 %
 % \subsection{colorspace}
 % The package is incompatible. It works more or less with the option \texttt{patches}.

@@ -30,7 +30,7 @@
 %</driver>
 % \fi
 % \title{^^A
-%   The \pkg{pdfmanagement-firstaid} package  -- temporarly patches and package replacements  ^^A
+%   The \pkg{pdfmanagement-firstaid} package  -- temporary patches and package replacements  ^^A
 % }
 %
 % \author{^^A
@@ -108,7 +108,9 @@
     \msg_info:nnn{pdfmanagement }{firstaid}{pgf}
     \AddToHook{file/after/pgfrcs.sty}
       {
-        \cs_set_eq:NN \@@_pgfori_pgfutil@setuppdfresources\pgfutil@setuppdfresources
+        \cs_set_eq:NN
+          \@@_pgfori_pgfutil@setuppdfresources
+          \pgfutil@setuppdfresources
         \def\pgfutil@setuppdfresources
           {
             \pdfmanagement_if_active:TF
@@ -168,16 +170,21 @@
 
 \cs_new:Npn \@@_patch_pgfextgs:w  #1/#2<<#3>>#4\q_stop
   {
-    \exp_args:Nne \__pdf_backend_PageResources_gput:nnn {ExtGState}{\tl_trim_spaces:n{#2}}{<<#3>>}
+    \exp_args:Nne
+      \__pdf_backend_PageResources_gput:nnn
+        {ExtGState}{\tl_trim_spaces:n{#2}}{<<#3>>}
   }
 \cs_new:Npn \@@_patch_pgfpatterns:w  #1/#2\space#3\q_stop
   {
-    \exp_args:Nnxx \__pdf_backend_PageResources_gput:nnn {Pattern}{\tl_trim_spaces:n{#2}}{#3}
+    \exp_args:Nnxx
+      \__pdf_backend_PageResources_gput:nnn
+        {Pattern}{\tl_trim_spaces:n{#2}}{#3}
   }
 \cs_new:Npn \@@_patch_pgfcolorspaces:w  #1/#2[#3]#4\q_stop
   {
     \exp_args:Nne
-    \__pdf_backend_PageResources_gput:nnn {ColorSpace}{\tl_trim_spaces:n{#2}}{[#3]}
+    \__pdf_backend_PageResources_gput:nnn
+      {ColorSpace}{\tl_trim_spaces:n{#2}}{[#3]}
   }
 
 %    \end{macrocode}
@@ -259,4 +266,5 @@
   }
 %</package>
 %    \end{macrocode}%
+% \end{documentation}
 % \PrintIndex
