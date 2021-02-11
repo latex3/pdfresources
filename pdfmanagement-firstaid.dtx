@@ -190,12 +190,13 @@
  }
 %    \end{macrocode}
 % \subsection{hyperxmp}
-% We replace it by a new version. It doesn't cover everything
-% But allows at least some testing
+% We add some code at the end of hyperxmp.sty.
 %    \begin{macrocode}
 \bool_if:NT \g_@@_firstaid_hyperxmp_bool
  {
-   \declare@file@substitution{hyperxmp.sty}{new-hyperxmp.sty}
+    \AddToHook
+      {file/after/hyperxmp.sty}
+      {\RequirePackage{hyperxmp-patches-tmp-ltx}}
  }
 %</package>
 %    \end{macrocode}
