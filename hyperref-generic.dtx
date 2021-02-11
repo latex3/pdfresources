@@ -117,11 +117,14 @@
 %  This will take some time. Until then it is recommended to follow
 %  the following rules
 %  \begin{itemize}
-%  \item Almost all options---with the exception of a few mentioned below in
-%  section~\ref{sec:pkg-options}---should be set in \cs{hypersetup},
+%  \item Package options are processed at the end of the driver,
+%  Class options are ignored. But not every option already works as package options,
+%  in some cases \pkg{hyperref} interferes. So
+%  it is recommended for most options ---with the exception of a few mentioned below in
+%  section~\ref{sec:pkg-options}---to set them in \cs{hypersetup},
 %  not as package option.
-%  \item Colors used in the keys for link colors should be defined after the
-%  package has been loaded.
+%  \item If the package \pkg{color} is used it is currently recommended to define
+%  colors after \pkg{hyperref}.
 %  \item Load a color package or graphicx to get the right page sizes.
 %  \item Report problems! Only known problem can be resolved.
 %  \end{itemize}
@@ -386,16 +389,13 @@
 %   \end{itemize}
 %
 % \section{Package options from hyperref}\label{sec:pkg-options}
-%  Only a few options are currently recognized by the new driver
-%  when used as package options as \pkg{hyperref} hasn't been adapted yet to pass
-%  them to the driver.
-%
-%  So normally options should be set with \cs{hypersetup} after
+%  The driver will process the package options at the end.
+%  But normally options should better be set with \cs{hypersetup} after
 %  the package has been loaded. This is also the case for options which normally
 %  don't work in \cs{hypersetup}.
+%  One option that currently doesn't work correctly as package option is
+%  |ocgcolorlinks|
 %
-%  Important options that currently don't work as package options are |ocgcolorlinks|
-%  and |colorlinks|.
 %
 %  Options that still must be set as package options are
 %  \begin{itemize}
@@ -419,7 +419,7 @@
 %  it is not relevant.
 %  \end{itemize}
 %
-%  Options that can be set as package options are
+%  Options that can be without problems set as package options are
 %  \begin{itemize}
 %  \item |debug|, |verbose| (a boolean)
 %  \item |bookmarks| (a boolean)
@@ -436,6 +436,7 @@
 %  \item |raiselinks| (only used in the dviwind, textures and tex4ht driver anyway)
 %  \item |frenchlinks|
 %  \item |setpagesize|
+%  \item |addtopdfcreator|
 %  \end{itemize}
 %
 %  \section{Disabling links}
@@ -958,7 +959,10 @@
 %    \begin{macrocode}
 \chardef\Hy@VersionChecked=1 %don't check the version!
 %    \end{macrocode}
-%
+%    \begin{macrocode}
+%\cs_set_protected:Npn \PDF@SetupDoc{}
+%\\PDF@FinishDoc{}% dummy needed for hyperref ...
+%    \end{macrocode}
 % \begin{macro}[EXP]{\hypercalcbp}
 % We define a better (expandable) version of \cs{hypercalcbp}
 %    \begin{macrocode}
@@ -3378,6 +3382,8 @@
 %\subsection{\enquote{MetaData keys}}
 % The following keys are relevant for the metadata: the info dictionary and
 % the xmp-metadata.
+% \begin{hypkey}{pdflang}
+% |pdflang| should be deprecated.
 %    \begin{macrocode}
 \keys_define:nn { hyp / setup }
   {
@@ -3393,12 +3399,14 @@
             \@@_store_metadata:nn {pdflang}{#1}
           }
    }
-
-%"info" keys
-% as hyperref resets some at begin document,
-% they only work correctly if set later ...
-% for now they use hex_print_encoding
-% later we can add instruction to add to meta data here
+%    \end{macrocode}
+% \end{hypkey}
+%
+% \subsubsection{\enquote{info keys}}
+% \begin{hypkey}{pdfauthor,pdftitle,pdfcreator,pdfsubject,pdfproducer,pdfkeywords}
+% The keys store their value also in the metadate container, so that hyperxmp can
+% use them.
+%    \begin{macrocode}
 \cs_new_protected:Npn \@@_setup_info_key:nn #1 #2
   {
     \keys_define:nn { hyp / setup }
@@ -3455,7 +3463,12 @@
 % ignored key: addtopdfcreator
 \@@_setup_info_key:nn {subject}  {Subject}
 \@@_setup_info_key:nn {keywords}  {Keywords}
-
+%    \end{macrocode}
+% \end{hypkey}
+% \begin{hypkey}{pdfcreationdate,pdfmoddate}
+% These keys are not really needed. We store them too in the container.
+% CreationDate and ModDate should not use the hex encoding.
+%    \begin{macrocode}
 \cs_new_protected:Npn \@@_setup_info_date_key:nn #1 #2
   {
     \keys_define:nn { hyp / setup }
@@ -3488,28 +3501,13 @@
       }
   }
 
-%CreationDate and ModDate is special and should not use the hex encoding.
 \@@_setup_info_date_key:nn {creationdate}  {CreationDate}
 \@@_setup_info_date_key:nn {moddate}  {ModDate}
-
-%pdfinfo allows to set the key with keyval ...
-\keys_define:nn { hyp / setup }
-  {
-    pdfinfo .code:n =
-      {
-        \keys_set:nn { hyp / info } { #1 }
-      }
-  }
-
-
-% default values
-\keys_set:nn { hyp / setup} {pdfcreator = LaTeX~with~hyperref}
-\keys_set:nn { hyp / setup} {pdfauthor  = }
-\keys_set:nn { hyp / setup} {pdftitle   = }
-\keys_set:nn { hyp / setup} {pdfsubject  = }
-
-
-%Trapped is a bit curious, it has an value "unknown", and one can't suppress it ...
+%    \end{macrocode}
+% \end{hypkey}
+% \begin{hypkey}{pdftrapped}
+% Trapped is a bit curious, it has an value "unknown", and one can't suppress it ...
+%    \begin{macrocode}
 \keys_define:nn { hyp / setup }
   {
     ,pdftrapped .code:n =
@@ -3538,9 +3536,32 @@
            { \exp_not:n {#1} }
        }
   }
-
-
-%%% hyperxmp keys. They are only stored as metadata:
+%    \end{macrocode}
+% \begin{hypkey}{pdfinfo}
+%  pdfinfo allows to set the info keys with keyval ...
+%    \begin{macrocode}
+\keys_define:nn { hyp / setup }
+  {
+    pdfinfo .code:n =
+      {
+        \keys_set:nn { hyp / info } { #1 }
+      }
+  }
+%    \end{macrocode}
+% \end{hypkey}
+% Now we set some default values
+%    \begin{macrocode}
+\keys_set:nn { hyp / setup} {pdfcreator = LaTeX~with~hyperref}
+\keys_set:nn { hyp / setup} {pdfauthor  = }
+\keys_set:nn { hyp / setup} {pdftitle   = }
+\keys_set:nn { hyp / setup} {pdfsubject  = }
+%    \end{macrocode}
+%
+% \subsection{hyperxmp keys}
+% hyperxmp defines lots of keys for \cs{hypersetup}.
+% They now longer work with this driver. So we provide them,
+% but they are only stored as metadata:
+%    \begin{macrocode}
 \clist_map_inline:nn
   {
    ,pdfcopyright
@@ -3591,23 +3612,11 @@
         #1 .code:n= { \@@_store_metadata:nn {#1}{##1}}
       }
   }
-
-\cs_set_protected:Npn \PDF@SetupDoc
-  {}
-
-\def\PDF@FinishDoc{}% dummy needed for hyperref ...
-
-
-%\AddToHook{env/document/before}{
-%  \pdf@ifdraftmode{}{
-%    %!!!!! this must be handled somehow
-%    %\Hy@UseMaketitleInfos %get/set Title/Author from \title if pdfusetitle is true
-%    }
-%    }
-
-
+%    \end{macrocode}
+%
+%
 % pdfpageduration sets the duration a page is shown in full screen mode.
-
+%    \begin{macrocode}
 \keys_define:nn { hyp / setup }
   {
     pdfpageduration .code:n =
@@ -3741,14 +3750,17 @@
        }
   }
 
+%% process the option list:
+
+\keys_set_known:nv{hyp/setup}{opt@hyperref.sty}
 
 %%%%%%%%%%%%%% Temporary stuff
-\seq_map_inline:Nn \c_@@_annot_types_seq
-  {
-    \define@key{Hyp}{#1border}{}
-    \define@key{Hyp}{#1borderstyle}{}
-    \define@key{Hyp}{#1highlight}{}
-  }
+%^^A\seq_map_inline:Nn \c_@@_annot_types_seq
+%^^A  {
+%^^A    \define@key{Hyp}{#1border}{}
+%^^A    \define@key{Hyp}{#1borderstyle}{}
+%^^A    \define@key{Hyp}{#1highlight}{}
+%^^A  }
 %%%%%%%%%%%%%%%%%
 %% Form field code
 \NewDocumentCommand \MakeFieldObject { m m }
