@@ -19,7 +19,7 @@ sourcefiles =  {"*.dtx","*.ins",
                 "newpackages/new-attachfile.sty",
                 "newpackages/atfi-generic.def",
                 "newpackages/hyperxmp-patches-tmp-ltx.sty",                
-                "newpackages/new-pdflscape.sty"
+                "newpackages/pdflscape-ltx.sty"
                 }
 
 checkruns = 3

@@ -62,7 +62,7 @@
   {experimental pdf-resource management / firstaid}
 
 %<@@=pdfmanagement>
-\clist_map_inline:nn {pgf,transparent,hyperxmp}
+\clist_map_inline:nn {pgf,transparent,hyperxmp,pdflscape}
   {
     \bool_new:c       { g_@@_firstaid_#1_bool }
     \bool_gset_true:c { g_@@_firstaid_#1_bool }
@@ -187,6 +187,14 @@
 \bool_if:NT \g_@@_firstaid_transparent_bool
  {
    \declare@file@substitution{transparent.sty}{transparent-ltx.sty}
+ }
+%    \end{macrocode}
+% \subsection{\pkg{pdflscape}}
+% We simply replace by the new version.
+%    \begin{macrocode}
+\bool_if:NT \g_@@_firstaid_pdflscape_bool
+ {
+   \declare@file@substitution{pdflscape.sty}{pdflscape-ltx.sty}
  }
 %    \end{macrocode}
 % \subsection{hyperxmp}

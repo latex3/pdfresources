@@ -1,10 +1,9 @@
 %%
-%% This is file `new-pdflscape.sty',
+%% This is file `pdflscape-ltx.sty',
 %%
-%% Project: new-pdflscape
-%% Version: 2020/11/18 v0.2
+%% Version: 2021/02/11 v0.3
 %%
-%% Copyright (C) 2020 The LaTeX3 Project
+%% Copyright (C) 2021 The LaTeX3 Project
 %%
 %% This work may be distributed and/or modified under the
 %% conditions of the LaTeX Project Public License, either
@@ -22,18 +21,19 @@
 %% The LaTeX3 Project
 %%
 %%
-%% This work consists of the main source file new-lscape.sty
+%% This work consists of the main source file pdflscape-ltx.sty
 %%
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesExplPackage {new-pdflscape}{2020/11/18}{v0.2}
- {Display of landscape pages in PDF - UF}
-\RequirePackage{pdfmanagement}
+\ProvidesExplPackage {pdflscape-ltx}{2021/02/11}{v0.3}
+ {Display of landscape pages in PDF - adaption of pdflscape to pdfmanagement}
+
 \RequirePackage{lscape}
-% this always turns in the same direction as pdflscape did too.
+% this always turns in the same direction as pdflscape does too.
 % left and right would need
 % \pdfmanagement_add:nnn{ThisPage}{Rotate}{..}
 % on every page (e.g. in a shipout hook) and some option to control the wanted
 % orientation.
+
 \tl_new:N\g__pdflscape_saverotate_tl
 \hook_gput_code:nnn {env/landscape/begin}{pdflscape}
   {
@@ -51,4 +51,4 @@
 
 \endinput
 %%
-%% End of file `new-pdflscape.sty'.
+%% End of file `pdflscape-ltx.sty'.
