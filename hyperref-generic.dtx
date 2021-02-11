@@ -3537,6 +3537,7 @@
        }
   }
 %    \end{macrocode}
+% \end{hypkey}
 % \begin{hypkey}{pdfinfo}
 %  pdfinfo allows to set the info keys with keyval ...
 %    \begin{macrocode}
@@ -3643,7 +3644,7 @@
 % |\hypersetup{pdfpagetransition={style=Fly,duration=2,direction=90,opaque=false}}|
 %
 % The keys allowed in the argument of |pdfpagetransition| are
-% \begin{tabular}{l>{\raggedright}p{6cm}}
+% \begin{tabular}{l>{\raggedright\arraybackslash}p{6cm}}
 % style    &  one of Split, Blinds, Box, Wipe, Dissolve, Glitter, R, Fly, Push, Cover, Uncover, Fade\\
 % duration &  a number, describes the duration of the transition\\
 % direction& \begin{tabular}[t]{l}
@@ -3758,7 +3759,7 @@
 %
 %  Unfinished
 %% Form field code
-%    \begin{macrocode}  
+%    \begin{macrocode}
 \NewDocumentCommand \MakeFieldObject { m m }
   {
     \pdf_xform_new:nnn { #2 }{} { #1 }
