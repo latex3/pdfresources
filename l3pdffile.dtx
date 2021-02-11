@@ -23,7 +23,6 @@
 % for those people who are interested.
 %
 %<*driver>
-\RequirePackage{expl3}
 \documentclass[full]{l3doc}
 \providecommand\potentialclash{\noindent\llap{\dbend\ }}
 \begin{document}
@@ -240,13 +239,13 @@
 % \caption{Preset values in the file dictionaries\label{tab:filedict}}
 % \begin{tabular}{lll}
 % dictionary & key      & value \\\hline
-% file       & Type     & /EmbeddedFile\\
-% file/Params& Size     & |\file_size:n{\l_pdffile_source_name_str}|\\
-% file/Params& ModDate  & |(\file_timestamp:n {\l_pdffile_source_name_str})|\\
-% file/Params& CheckSum & |(\file_mdfive_hash:n{\l_pdffile_source_name_str})|\\
-% file/streamParams&    &  empty (used with \cs{pdffile_embed_stream:nnn})\\
-% file/FileSpec & Type  & /FileSpec\\
-% file/FileSpec & AFRelationship &Unspecified
+% l\_pdffile       & Type     & /EmbeddedFile\\
+% l\_pdffile/Params& Size     & |\file_size:n{\l_pdffile_source_name_str}|\\
+% l\_pdffile/Params& ModDate  & |(\file_timestamp:n {\l_pdffile_source_name_str})|\\
+% l\_pdffile/Params& CheckSum & |(\file_mdfive_hash:n{\l_pdffile_source_name_str})|\\
+% l\_pdffile/streamParams&    &  empty (used with \cs{pdffile_embed_stream:nnn})\\
+% l\_pdffile/FileSpec & Type  & /FileSpec\\
+% l\_pdffile/FileSpec & AFRelationship &Unspecified
 % \end{tabular}
 % \end{table}
 % \begin{function}{\pdffile_embed_file:nnn}
@@ -257,7 +256,7 @@
 %   and creates a \texttt{/FileSpec} dictionary object named \meta{object name}.
 %   The object name must be unique.
 %   The command uses the content of the local
-%   dictionaries \texttt{file}, \texttt{file/Params} and \texttt{file/FileSpec}
+%   dictionaries |l_pdffile|, |l_pdffile/Params| and |l_pdffile/FileSpec|
 %   to setup the dictionary entries of the stream object and the
 %   \texttt{/FileSpec} dictionary. The/F and /UF entry are filled
 %   with \Arg{target filename}.
@@ -270,7 +269,7 @@
 %   If \Arg{source filename} is empty, only a \texttt{/FileSpec} dictionary is
 %   created.
 %
-%   If the \texttt{file} dictionary doesn't  contain a
+%   If the |l_pdffile| dictionary doesn't  contain a
 %   Subtype entry with the mimetype, the command tries to guess it
 %   from the file extension of \Arg{source filename}. Unknown file extensions can be
 %   added (or known extension be changed) by adding or changing the value to
@@ -298,13 +297,13 @@
 %   creates a /FileSpec dictionary object named \Arg { object name }.
 %   \Arg{content} is wrapped in a \cs{exp_not:n}.
 %   The object name must be unique. The command uses the content of the local
-%   dictionaries \texttt{file}, \texttt{file/streamParams} and \texttt{file/FileSpec}
+%   dictionaries |l_pdffile|, |l_pdffile/streamParams| and |l_pdffile/FileSpec|
 %   to setup the dictionary entries of the stream object and the /FileSpec dictionary.
 %   The /F and /UF entry are filled with \Arg{target filename}.
 %   If \Arg{target filename} is empty the fix name \texttt{stream.txt}
 %   is used instead.
 %
-%   If the \texttt{file} dictionary doesn't  contain a
+%   If the |l_pdffile| dictionary doesn't  contain a
 %   Subtype entry with the mimetype, the command tries to guess it
 %   from the file extension of \Arg{target filename}.
 %
@@ -346,12 +345,12 @@
 % \begin{verbatim}
 % \group_begin:
 % %set the relationship:
-% \pdfdict_put:nnn  {l_file/FileSpec} {AFRelationship}{/Source}
+% \pdfdict_put:nnn  {l_pdffile/FileSpec} {AFRelationship}{/Source}
 % %set the description key. The text must first be converted:
 % \pdf_text_convert:nnN {utf16/string-print}
 %    {this~is~an~odd~description~with~öäü}
 %    \l_tmpa_str
-% \pdfdict_put:nnx  {l_file/FileSpec} {Desc}{\l_tmpa_str}
+% \pdfdict_put:nnx  {l_pdffile/FileSpec} {Desc}{\l_tmpa_str}
 % %embeds testinput.txt and calls it grüße.txt
 % \pdffile_embed_file:nnn {testinput.txt}{grüße.txt}{file:example1}
 % %reference it in the panel
@@ -461,20 +460,20 @@
 %    \end{macrocode}
 % Here we define and setup the local dictionaries.
 %    \begin{macrocode}
-\pdfdict_new:n { l_file }
-\pdfdict_put:nnn { l_file }{Type}{/EmbeddedFile}
-\pdfdict_new:n { l_file/Params }
-\pdfdict_put:nnn { l_file/Params }
+\pdfdict_new:n { l_pdffile }
+\pdfdict_put:nnn { l_pdffile }{Type}{/EmbeddedFile}
+\pdfdict_new:n { l_pdffile/Params }
+\pdfdict_put:nnn { l_pdffile/Params }
   {ModDate}  { (\file_timestamp:n { \l_pdffile_source_name_str }) }
-\pdfdict_put:nnn { l_file/Params }
+\pdfdict_put:nnn { l_pdffile/Params }
   {Size}     { \file_size:n { \l_pdffile_source_name_str } }
-\pdfdict_put:nnn { l_file/Params }
+\pdfdict_put:nnn { l_pdffile/Params }
   {CheckSum} { (\file_mdfive_hash:n { \l_pdffile_source_name_str }) }
-\pdfdict_new:n { l_file/streamParams }
-\pdfdict_new:n { l_file/FileSpec }
-\pdfdict_put:nnn { l_file/FileSpec }
+\pdfdict_new:n { l_pdffile/streamParams }
+\pdfdict_new:n { l_pdffile/FileSpec }
+\pdfdict_put:nnn { l_pdffile/FileSpec }
   {Type} { /FileSpec }
-\pdfdict_put:nnn { l_file/FileSpec }
+\pdfdict_put:nnn { l_pdffile/FileSpec }
   {AFRelationship} { /Unspecified }
 
 %    \end{macrocode}
@@ -517,7 +516,7 @@
           \l_@@_tmpb_str %unused
           \l_@@_ext_str
         %check if Subtype has been set
-        \pdfdict_get:nnN { l_file}{Subtype}\l_@@_tmpa_tl
+        \pdfdict_get:nnN { l_pdffile}{Subtype}\l_@@_tmpa_tl
         %if not look up in the prop:
         \quark_if_no_value:NT \l_@@_tmpa_tl
           {
@@ -546,12 +545,12 @@
       {
         {
           #2
-          \pdfdict_use:n { l_file}
-          \pdfdict_if_empty:nF { l_file/Params}
+          \pdfdict_use:n { l_pdffile}
+          \pdfdict_if_empty:nF { l_pdffile/Params}
             {
               /Params
                 <<
-                  \pdfdict_use:n { l_file/Params}
+                  \pdfdict_use:n { l_pdffile/Params}
                 >>
             }
         }
@@ -571,12 +570,12 @@
       {
         {
           #2
-          \pdfdict_use:n { l_file}
-          \pdfdict_if_empty:nF { l_file/streamParams}
+          \pdfdict_use:n { l_pdffile}
+          \pdfdict_if_empty:nF { l_pdffile/streamParams}
             {
               /Params
                 <<
-                  \pdfdict_use:n { l_file/streamParams}
+                  \pdfdict_use:n { l_pdffile/streamParams}
                 >>
             }
         }
@@ -600,11 +599,11 @@
         \pdf_object_new:nn   { #1 } {dict}
         \group_begin:
           \@@_filename_convert_to_print:nN  { #2 } \l_@@_tmpa_str
-          \pdfdict_put:nnx {l_file/FileSpec}{F} { \l_@@_tmpa_str }
-          \pdfdict_put:nnx {l_file/FileSpec}{UF}{ \l_@@_tmpa_str }
+          \pdfdict_put:nnx {l_pdffile/FileSpec}{F} { \l_@@_tmpa_str }
+          \pdfdict_put:nnx {l_pdffile/FileSpec}{UF}{ \l_@@_tmpa_str }
           \pdf_object_write:nx { #1 }
             {
-              \pdfdict_use:n { l_file/FileSpec}
+              \pdfdict_use:n { l_pdffile/FileSpec}
               \tl_if_empty:nF { #3 }
                 {
                   /EF <</F~#3 /UF~#3>>
