@@ -10,16 +10,16 @@ module  = "pdfresources"
 installfiles = {"*.sty","*.cls","*.def","*.lua"}
 sourcefiles =  {"*.dtx","*.ins",
                 "l3ref-tmp.sty",
-                "newpackages/xcolor-patches-tmp.sty",
                 "pdfmanagement-regressiontest.sty",
                 "hgeneric-experimental.def",
-                "newpackages/transparent-ltx.sty",
+                "firstaid/transparent-ltx.sty",          
+                "firstaid/hyperxmp-patches-tmp-ltx.sty",                
+                "firstaid/pdflscape-ltx.sty",
+                "firstaid/xcolor-patches-tmp.sty",                
                 "newpackages/new-bookmark.sty",
                 "newpackages/bkm-generic.def",
                 "newpackages/new-attachfile.sty",
-                "newpackages/atfi-generic.def",
-                "newpackages/hyperxmp-patches-tmp-ltx.sty",                
-                "newpackages/pdflscape-ltx.sty"
+                "newpackages/atfi-generic.def"                
                 }
 
 checkruns = 3
