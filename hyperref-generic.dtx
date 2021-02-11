@@ -3614,8 +3614,8 @@
   }
 %    \end{macrocode}
 %
-%
-% pdfpageduration sets the duration a page is shown in full screen mode.
+% \subsection{Transitions}
+%  pdfpageduration sets the duration a page is shown in full screen mode.
 %    \begin{macrocode}
 \keys_define:nn { hyp / setup }
   {
@@ -3630,7 +3630,7 @@
           }
      }
   }
-
+%    \end{macrocode}
 % Transition settings are used by (some) pdf viewers when presenting a
 % pdf in full screen mode. They are added to the page settings and describe the
 % transition from the previous page to current page. Transition setting can be
@@ -3660,7 +3660,7 @@
 % scale    & a number, only relevant for Fly style \\
 % opaque   & true or false, only relevant for Fly style
 % \end{tabular}
-
+%    \begin{macrocode}
 \keys_define:nn { hyp / setup }
   {
     pdfpagetransition .code:n =
@@ -3749,20 +3749,16 @@
          \exp_args:Nnx\keys_set:nn {hyp/trans}{ style=\l_keys_key_str }
        }
   }
-
-%% process the option list:
-
+%    \end{macrocode}
+%
+% Finally we process the package option list, to get most keys working
+%    \begin{macrocode}
 \keys_set_known:nv{hyp/setup}{opt@hyperref.sty}
-
-%%%%%%%%%%%%%% Temporary stuff
-%^^A\seq_map_inline:Nn \c_@@_annot_types_seq
-%^^A  {
-%^^A    \define@key{Hyp}{#1border}{}
-%^^A    \define@key{Hyp}{#1borderstyle}{}
-%^^A    \define@key{Hyp}{#1highlight}{}
-%^^A  }
-%%%%%%%%%%%%%%%%%
+%    \end{macrocode}
+%
+%  Unfinished
 %% Form field code
+%    \begin{macrocode}  
 \NewDocumentCommand \MakeFieldObject { m m }
   {
     \pdf_xform_new:nnn { #2 }{} { #1 }
