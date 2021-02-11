@@ -62,7 +62,7 @@
   {experimental pdf-resource management / firstaid}
 
 %<@@=pdfmanagement>
-\clist_map_inline:nn {pgf,transparent,hyperxmp,pdflscape}
+\clist_map_inline:nn {pgf,transparent,hyperxmp,pdflscape,xcolor}
   {
     \bool_new:c       { g_@@_firstaid_#1_bool }
     \bool_gset_true:c { g_@@_firstaid_#1_bool }
@@ -76,6 +76,22 @@
   }
 \msg_new:nnn  { pdfmanagement } { firstaid }
               { loading~pdfmanagement~firstaid~code~for~#1 }
+%    \end{macrocode}
+% \subsection{\pkg{xcolor}}
+%
+%  \pkg{xcolor} is not incompatible, but the new \pkg{hyperref} driver makes use of
+%  \pkg{l3color} to set the colors. It is therefore necessary to patch \pkg{xcolor}, so
+%  that colors defined with its \cs{definecolor} command are known to \pkg{l3color} and
+%  so \pkg{hyperref}.
+%
+%    \begin{macrocode}
+\@ifundefined{color_set:nn}{
+\RequirePackage{l3color}}{}
+\bool_if:NT \g_@@_xcolor_pgf_bool
+  {
+    \AddToHook{package/after/xcolor}
+       {\RequirePackage{xcolor-patches-tmp-ltx}\XC@@@@names}
+  }
 %    \end{macrocode}
 % \subsection{\pkg{pgf}}
 %

@@ -780,26 +780,11 @@
 
 \RequirePackage{etoolbox} %why?
 %    \end{macrocode}
-% We need l3color for the color export command and need to activate
-% the patches for color and xcolor.
-% It would be too late for colors defined earlier, but is the best one
-% can do for now.%
 %    \begin{macrocode}
-\@ifundefined{color_set:nn}{
-\RequirePackage{l3color}}{}
 \ExplSyntaxOn
 \cs_gset_eq:NN \@expl@color@set@@@@nnn \color_set:nnn
 \file_input:n {hyperref-colorschemes.def}
 \ExplSyntaxOff
-\@ifpackageloaded{xcolor}{\@firstoftwo}{\@secondoftwo}
-  {
-    \RequirePackage{xcolor-patches-tmp}
-    \XC@@@@names
-  }
-  {
-    \AddToHook{package/after/xcolor}
-      {\RequirePackage{xcolor-patches-tmp-ltx}\XC@@@@names}
-  }
 %    \end{macrocode}
 %
 %
