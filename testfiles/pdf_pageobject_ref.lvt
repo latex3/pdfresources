@@ -1,4 +1,7 @@
-\input{regression-test}
+\PassOptionsToPackage{enable-debug,check-declarations}{expl3}
+\RequirePackage[debug]{pdfmanagement}
+\DeclareDocumentMetadata {  }
+\RequirePackage{pdfmanagement-regressiontest}
 \documentclass{article}
 \begin{document}\START
 abc
@@ -6,4 +9,4 @@ abc
 \tl_set:Nx \l_tmpa_tl{\__pdf_backend_pageobject_ref:n{1}}
 \tl_show:N\l_tmpa_tl
 \ExplSyntaxOff
-\end{document}
+\end{document} 
