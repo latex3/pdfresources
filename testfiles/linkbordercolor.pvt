@@ -3,11 +3,11 @@
 % xetex doesn't use the hyperdestname provided by hyperref, but e.g.
 % /S/GoTo/D(0)
 % large borders in xetex are imho not our fault ...
-\input{regression-test}
+\PassOptionsToPackage{enable-debug,check-declarations}{expl3}
 \RequirePackage{pdfmanagement}
 \DeclareDocumentMetadata{uncompress}
+\RequirePackage{pdfmanagement-regressiontest}
 
-%\input{regression-test}
 \documentclass{article}
 \usepackage{xcolor}
 \usepackage{hyperref}
