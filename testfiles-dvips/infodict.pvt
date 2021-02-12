@@ -1,0 +1,14 @@
+\PassOptionsToPackage{enable-debug,check-declarations}{expl3}
+\RequirePackage[debug]{pdfmanagement}
+\DeclareDocumentMetadata { }
+\RequirePackage{pdfmanagement-regressiontest}
+\documentclass{article}
+\ExplSyntaxOn
+\pdf_text_convert:nnN {utf16/string-print}{Grüße}\l_tmpa_str
+\pdfmanagement_add:nnx {Info} {Title}{\l_tmpa_str}
+\pdfmanagement_add:nnx {Info} {Author}{(Some~Author)}
+\ExplSyntaxOff
+\begin{document}
+\START
+some text
+\end{document} 
