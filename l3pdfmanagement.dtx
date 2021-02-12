@@ -27,6 +27,13 @@
 \documentclass[full]{l3doc}
 \usepackage{tabularx}
 \providecommand\potentialclash{\noindent\llap{\dbend\ }}
+
+% Fixing footnotes in  functions and variables: this should be in l3doc!
+\newcommand\fixfootnote[2]{\footnotemark
+  \AddToHookNext{env/#1/after}{\footnotetext{#2}}}
+\AddToHook{env/function/begin}{\def\footnote{\fixfootnote{function}}}
+\AddToHook{env/variable/begin}{\def\footnote{\fixfootnote{variable}}}
+
 \begin{document}
   \DocInput{\jobname.dtx}
 \end{document}
@@ -88,13 +95,13 @@
 % dictionary entries and resources to the PDF is handled by
 % the kernel code.
 %
-% The interface uses as main name to address the resources \emph{Pathes}
+% The interface uses as main name to address the resources \emph{Paths}
 % which follow the names and structure described in the PDF reference. This
 % should make it easy to identify the names needed to insert a specific
 % PDF resources with the new interfaces.
-% All \emph{Pathes} have names starting with an uppercase letter.
+% All \emph{Paths} have names starting with an uppercase letter.
 %
-% The following tabular summarize the \emph{Pathes} and which pdftex primitive they
+% The following tabular summarize the \emph{Paths} and which pdftex primitive they
 % replace:
 %
 % \begin{tabular}{ll}
@@ -108,8 +115,8 @@
 %  Page/Resources/ColorSpace             & \cs{pdfpageresources}  \\%
 %  \end{tabular}
 %
-%  There is no \texttt{Page/Resources/Properties} dictionary in the list
-%  as this dictionary is not filled directly but
+%  There is no \texttt{Page/Resources/Properties} dictionary in the list,
+%  because this dictionary is not filled directly, but
 %  managed through side effects when setting BDC-marks.
 %
 %  \subsection{User Commands}
@@ -151,6 +158,8 @@
 % in place.
 % \end{itemize}
 % \end{function}
+%
+%
 % \begin{function}[added = 2020-04-08]
 %   {\pdfmanagement_show:n }
 %   \begin{syntax}
