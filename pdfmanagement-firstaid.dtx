@@ -82,7 +82,8 @@
 %  \pkg{xcolor} is not incompatible, but the new \pkg{hyperref} driver makes use of
 %  \pkg{l3color} to set the colors. It is therefore necessary to patch \pkg{xcolor}, so
 %  that colors defined with its \cs{definecolor} command are known to \pkg{l3color} and
-%  so \pkg{hyperref}.
+%  so \pkg{hyperref}. This only supports the color model from l3color. Colors defined
+%  with the models |cmy|, |tHsb| and |named| are silently ignored. 
 %
 %    \begin{macrocode}
 \@ifundefined{color_set:nn}{
