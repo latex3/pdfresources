@@ -164,17 +164,18 @@
 %  \documentclass {...}
 % \end{verbatim}
 %
-% The pdf management can be deactivated either by commenting the
-% \cs{DeclareDocumentMetadata} or by using in the option \texttt{pdfmanagement=false}.
+% The pdf management can be deactivated either setting the key
+% \texttt{pdfmanagement} to \texttt{false} or by commenting the out
+% the whole \cs{DeclareDocumentMetadata} declaration.
 %
 % To test if the pdf management is active the predicate
 % \cs{pdfmanagement_if_active:TF} can be used, see the documentation of \pkg{l3pdfmanagement}.
 %
 % \section{Requirements}
-% \pkg{pdfmanagement} requires a LaTeX format from 2020/10/01 or later.
+% \pkg{pdfmanagement} requires a \LaTeX{} format from 2020/10/01 or later.
 % It currently depends on the experimental packages \pkg{l3ref-tmp} and \pkg{l3bitset}.
 % In some places, e.g. when writing strings to the pdf it assumes that
-% the file is utf8 encoded -- ascii will naturally work too, but 8bit encodings are
+% the file is utf8 encoded -- ascii will naturally work too, but legacy 8bit encodings are
 % not supported.
 %
 % \section{Modules}
@@ -226,7 +227,7 @@
 % that bypass this package and access these dictionaries with primitives like
 % \cs{pdfcatalog}, \cs{pdfinfo}, \cs{pdfpageresources}, \cs{pdfpagesattr}
 % and \cs{pdfpageattr} or similar commands from other engines and backends are
-% basically incompatible: values can get lost or be wrong.
+% basically incompatible: values can get lost or willbe wrong.
 %
 % The following describes known incompatible packages along with some suggestions
 % how this should or will be handled in future. The list is not exhaustive.
@@ -268,7 +269,7 @@
 % but it is not complete currently. Failures are e.g. possible with complicated
 % author or title settings.
 %
-% This can be disabled by using |firstaidoff=hyperxmp| in \cs{DeclareDocumentmetadata}
+% This can be disabled by using |firstaidoff=hyperxmp| in \cs{DeclareDocumentMetadata}
 %
 % \subsection{tikz/pgf}
 % \pkg{pgf} writes to the page resources too and so is incompatible. The needed
@@ -276,19 +277,19 @@
 %
 % Until this works, \pkg{pagemanagement} will load the patches automatically.
 %
-% This can be disabled by using |firstaidoff=pgf| in \cs{DeclareDocumentmetadata}
+% This can be disabled by using |firstaidoff=pgf| in \cs{DeclareDocumentMetadata}
 %
 % \subsection{transparent}
 % The package \pkg{transparent} is incompatible. A replacement has been written
 % (\pkg{transparent-ltx}) and is loaded automatically. It requires a very recent
 % l3 layer!
 %
-% This can be disabled by using |firstaidoff=transparent| in \cs{DeclareDocumentmetadata}
+% This can be disabled by using |firstaidoff=transparent| in \cs{DeclareDocumentMetadata}
 % \subsection{pdflscape}
 % The package \pkg{pdflscape} is incompatible. A replacement has been written
 % (\pkg{pdflscape-ltx}) and is loaded automatically.
 %
-% This can be disabled by using |firstaidoff=pdflscape| in \cs{DeclareDocumentmetadata}
+% This can be disabled by using |firstaidoff=pdflscape| in \cs{DeclareDocumentMetadata}
 %
 % \subsection{colorspace}
 % The package is incompatible. It works more or less with the option \texttt{patches}.
@@ -313,7 +314,12 @@
 % \subsection{fancytooltips}
 % This package uses \cs{pdfpageattr} and \pkg{acrotex} and so must be reviewed.
 % \end{documentation}
+%
+%
 % \begin{implementation}
+%
+% \section{Implementation}
+%
 %    \begin{macrocode}
 %<@@=pdf>
 %<*package>
@@ -339,7 +345,8 @@
 \ProcessOptions\relax
 %</package>
 %    \end{macrocode}
-% \section{Loading the core files.}
+%
+% \subsection{Loading the core files.}
 % This loads the core files. The backend should not be loaded
 % to allow to set it in the document.
 %    \begin{macrocode}
