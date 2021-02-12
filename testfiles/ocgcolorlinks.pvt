@@ -1,9 +1,10 @@
-\input{regression-test}
-\RequirePackage{pdfmanagement}
-\DeclareDocumentMetadata { }
+\PassOptionsToPackage{enable-debug,check-declarations}{expl3}
+\RequirePackage[debug]{pdfmanagement}
+\DeclareDocumentMetadata {  }
+\RequirePackage{pdfmanagement-regressiontest}
 \documentclass{article}
 \usepackage{xcolor}
-\usepackage[verbose,ocgcolorlinks]{hyperref}
+\usepackage[verbose]{hyperref}
 \hypersetup{ocgcolorlinks}
 
 \begin{document}
@@ -20,7 +21,7 @@
 \end{tabular}
 
 \section{hyperref colors / border }
-\makeatletter \def\HyColor@UseColor#1{}\makeatother
+
 \hypersetup{pdfborder={1 1 1}}
 
 \begin{tabular}{lll}
