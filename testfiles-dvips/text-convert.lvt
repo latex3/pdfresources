@@ -1,0 +1,25 @@
+\PassOptionsToPackage{enable-debug,check-declarations}{expl3}
+\RequirePackage[debug]{pdfmanagement}
+\DeclareDocumentMetadata {  }
+\RequirePackage{pdfmanagement-regressiontest}
+\documentclass{article}
+
+\usepackage{l3pdftools}
+
+\begin{document}
+\START \showoutput
+\ExplSyntaxOn \providecommand\x{}
+\pdf_text_convert:nn{name}{abc/abc}
+\pdf_text_convert:nn{name-print}{abc/abc}
+\pdf_text_convert:nnN{name-print}{abc/abc}\x
+\show\x
+\pdf_text_convert:nnN{utf16/string}{abc/abc}\x
+\show\x
+\pdf_text_convert:nnN{utf16/string-print}{abc/abc}\x
+\show\x
+\pdf_text_convert:nnN{utf16/hex}{abc/abc}\x
+\show\x
+\pdf_text_convert:nnN{utf16/hex-print}{abc/abc}\x
+\show\x
+\ExplSyntaxOff
+\end{document} 

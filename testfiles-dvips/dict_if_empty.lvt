@@ -1,0 +1,21 @@
+\PassOptionsToPackage{enable-debug,check-declarations}{expl3}
+\RequirePackage{pdfmanagement}
+\DeclareDocumentMetadata { }
+\RequirePackage{pdfmanagement-regressiontest}
+\documentclass{article}
+\begin{document}\START
+\showoutput
+
+\ExplSyntaxOn
+\pdfdict_if_empty:nTF { l_test}{empty}{not empty}\par
+\pdfdict_new:n {l_test}
+\pdfdict_if_empty:nTF { l_test}{empty}{not empty}\par
+\pdfdict_put:nnn {l_test}{key}{value}
+\pdfdict_if_empty:nTF { l_test}{empty}{not empty}\par
+
+\pdfdict_if_empty:nTF { g__pdf_Core/Page}{empty}{not empty}\par
+\pdfmanagement_add:nnn {Page}{Rotate}{90}
+\pdfdict_if_empty:nTF { g__pdf_Core/Page}{empty}{not empty}\par
+\ExplSyntaxOff
+
+\end{document}

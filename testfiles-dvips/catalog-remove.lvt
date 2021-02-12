@@ -1,0 +1,33 @@
+\RequirePackage{pdfmanagement}
+\DeclareDocumentMetadata{}
+\RequirePackage{pdfmanagement-regressiontest}
+\documentclass{article}
+
+
+
+\begin{document}
+\START
+\ExplSyntaxOn
+\pdfmanagement_add:nnn {Catalog }                   {Lang}        {(de-De)}
+\pdfmanagement_add:nnn {Catalog }                   {PageLayout}  {/SinglePage}
+\pdfmanagement_add:nnn {Catalog / MarkInfo}         {Marked}      {True}
+\pdfmanagement_add:nnn {Catalog / ViewerPreferences}{HideToolbar} {true}
+\pdfmanagement_add:nnn {Catalog / AcroForm/DR/Font} {Name}       {<</ABC/CDE>>}
+\pdfmanagement_add:nnn {Catalog / AcroForm/DR/Font} {NameB}      {<</ABC/CDE>>}
+\pdfmanagement_show:n {Catalog}
+\pdfmanagement_show:n {Catalog/ViewerPreferences}
+\pdfmanagement_show:n {Catalog/MarkInfo}
+\pdfmanagement_show:n {Catalog/AcroForm/DR/Font}
+\pdfmanagement_remove:nn {Catalog / ViewerPreferences } {HideToolbar}
+\pdfmanagement_remove:nn {Catalog }                     {PageMode}
+\pdfmanagement_remove:nn {Catalog }                     {PageLayout}
+\pdfmanagement_remove:nn {Catalog / MarkInfo }          {Marked }
+\pdfmanagement_remove:nn {Catalog / AcroForm/DR/Font}   {Name}
+\pdfmanagement_show:n {Catalog}
+\pdfmanagement_show:n {Catalog/ViewerPreferences}
+\pdfmanagement_show:n {Catalog/MarkInfo}
+\pdfmanagement_show:n {Catalog/AcroForm/DR/Font}
+
+\ExplSyntaxOff
+blub
+\end{document} 

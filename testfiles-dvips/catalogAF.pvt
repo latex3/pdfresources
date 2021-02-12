@@ -1,21 +1,15 @@
-\input{regression-test}
 \PassOptionsToPackage{enable-debug,check-declarations}{expl3}
-\RequirePackage[debug]{pdfmanagement}
+\RequirePackage{pdfmanagement}
 \DeclareDocumentMetadata
  {
    pdfversion=2.0, %not so good with pdftex ...
    lang=de-DE,
    uncompress
  }
-\ExplSyntaxOn
-%%% for reproducible tests:
-\pdfmanagement_add:nnn {Info}{CreationDate}{(D:20200202111111+01'00')}
-\pdfmanagement_add:nnn {Info}{ModDate}{(D:20200202111111+01'00')}
-\pdfmanagement_add:nnn {Info}{Creator}{(l3build test)}
-%%%%%
-\ExplSyntaxOff
+\RequirePackage{pdfmanagement-regressiontest}
 \documentclass{article}
 \ExplSyntaxOn
+%senseless values ...
 \pdf_object_new:nn   {filespec1}{dict}
 \pdf_object_write:nn {filespec1} {/Type /Filespec /UF (example1.pdf)}
 \pdf_object_new:nn   {filespec2}{dict}

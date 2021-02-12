@@ -1,18 +1,11 @@
 \PassOptionsToPackage{enable-debug,check-declarations}{expl3}
-\input{regression-test}
 \RequirePackage{pdfmanagement}
-\DeclareDocumentMetadata{uncompress}
+\DeclareDocumentMetadata{}
+\RequirePackage{pdfmanagement-regressiontest}
 \documentclass{article}
 \usepackage[
 ]{hyperref}
 \hypersetup{pdfremotestartview={Fit},pdfstartview={FitR 0 0 \hypercalcbp{0.5\paperheight} \hypercalcbp{0.5\paperwidth}}}
-\ExplSyntaxOn
-%%% for reproducible tests:
-\pdfmanagement_add:nnn {Info}{CreationDate}{(D:20200202111111+01'00')}
-\pdfmanagement_add:nnn {Info}{ModDate}{(D:20200202111111+01'00')}
-\pdfmanagement_add:nnn {Info}{Creator}{(l3build test)}
-%%%%%
-\ExplSyntaxOff
 \begin{document}%
 \section{ABC}
 

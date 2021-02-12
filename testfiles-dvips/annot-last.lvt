@@ -1,0 +1,38 @@
+\RequirePackage{pdfmanagement}
+\DeclareDocumentMetadata {}
+\RequirePackage{pdfmanagement-regressiontest}
+\documentclass{article}
+
+\begin{document}
+\START \showoutput
+\ExplSyntaxOn
+x    \pdfannot_link_begin:nnw { URI }
+     {
+       /A<<
+         /Type/Action
+         /S/URI
+         /URI(https://www.latex-project.org)
+       >>
+     }
+     link text
+    \pdfannot_link_end:n { URI }
+
+    \pdfannot_last:
+\par
+x   \pdfannot_link:nnn { URI }
+     {
+       /A
+         <<
+           /Type/Action
+           /S/URI
+           /URI(https://www.latex-project.org)
+         >>
+     }
+     { link text }
+    \pdfannot_last:
+\par
+x\pdfannot_box:nnnn {1cm}{1cm}{1cm}{}
+ \pdfannot_link_last:
+ \pdfannot_last:
+\ExplSyntaxOff
+\end{document} 

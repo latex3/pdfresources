@@ -1,22 +1,18 @@
-\input{regression-test}
 \RequirePackage{pdfmanagement}
-\DeclareDocumentMetadata { }
-
+\DeclareDocumentMetadata{}
+\RequirePackage{pdfmanagement-regressiontest}
 \documentclass{article}
 \ExplSyntaxOn
-%%% for reproducible tests:
-\pdfmanagement_add:nnn {Info}{CreationDate}{(D:20200202111111+01'00')}
-\pdfmanagement_add:nnn {Info}{ModDate}{(D:20200202111111+01'00')}
-\pdfmanagement_add:nnn {Info}{Creator}{(l3build test)}
-%%%%%
+\pdf_uncompress:
 \ExplSyntaxOff
 \begin{document}
 \START
 % just to avoid to have to escape every space ...
 \def\testcontent{/Subtype/Widget/F 4/T(abc)/FT/Tx/Q 0/BS<</W 1 /S /S>>/MK<</BC[1 0 0]/BG[1 1 1]>>/DA(/Helv 10 Tf 0 0 0 rg)/DV()/V()}
 \ExplSyntaxOn
-\cs_generate_variant:Nn \pdfannot_box:nnnn {nnno}
-xx\pdfannot_box:nnno
+\cs_generate_variant:Nn \pdfannot_box:nnnnn {nnnno}
+xx\pdfannot_box:nnnno
+          {}
           {1cm}
           {1cm}
           {0pt}

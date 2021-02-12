@@ -1,0 +1,27 @@
+\PassOptionsToPackage{enable-debug,check-declarations}{expl3}
+\RequirePackage[debug]{pdfmanagement}
+\DeclareDocumentMetadata {  }
+\RequirePackage{pdfmanagement-regressiontest}
+\documentclass{article}
+\begin{document}\START\showoutput
+\ExplSyntaxOn
+
+$>$  1.4:~\pdf_version_compare:NnTF > {1.4}{true}{false}
+\par
+$>$  2.0:~\pdf_version_compare:NnTF > {2.0}{true}{false}
+\par
+$=$  1.4:~\pdf_version_compare:NnTF = {1.4}{true}{false}
+\par
+$=$  1.5:~\pdf_version_compare:NnTF = {1.5}{true}{false}
+\par
+$<$  1.5:~\pdf_version_compare:NnTF < {1.5}{true}{false}
+\par
+$<$  1.6:~\pdf_version_compare:NnTF < {1.6}{true}{false}
+
+
+\par
+\pdf_version_major:\pdf_version_minor:
+
+\ExplSyntaxOff
+
+\end{document} 
