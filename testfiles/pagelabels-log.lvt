@@ -1,6 +1,7 @@
-\input{regression-test}
-\RequirePackage{pdfmanagement}
-\DeclareDocumentMetadata { }
+\PassOptionsToPackage{enable-debug,check-declarations}{expl3}
+\RequirePackage[debug]{pdfmanagement}
+\DeclareDocumentMetadata {  }
+\RequirePackage{pdfmanagement-regressiontest}
 \documentclass{article}
 \usepackage{l3pdf}
 \ExplSyntaxOn
@@ -9,7 +10,6 @@
 \ExplSyntaxOff
 \usepackage[pdfpagelabels=true
 ]{hyperref}
-
 \renewcommand\thepage{λέγ\arabic{page}}
 \begin{document}\START \showoutput
 abc \newpage abc \newpage abc  \newpage \pagenumbering{roman} abc  \newpage \pagenumbering{Roman}\setcounter{page}{5} abc
