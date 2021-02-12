@@ -1940,7 +1940,15 @@
     \bool_if:NTF \l_@@_annot_Named_bool
       {
          \group_begin:
-         \pdfmeta_if_named_action_allowed:nTF {#1}
+         \bool_set_true:N\l_tmpa_bool
+         \prop_get:NnNT \g_pdfmeta_standard_prop {named_actions} \l_@@_tmpa_tl
+           {
+             \tl_if_in:NnF \l_@@_tmpa_tl {#1}
+               {
+                 \bool_set_false:N\l_tmpa_bool
+               }
+           }
+         \bool_if:NTF \l_tmpa_bool
            {
              \mode_leave_vertical:
              \pdfdict_put:nnx {l_hyp/annot/A/Named}{N}
