@@ -1,10 +1,17 @@
 %% LaTeX2e file `xcolor-patches.sty'
 %%
-\ProvidesPackage{xcolor-patches-tmp}[2021/02/10 v0.2 patch xcolor for l3color]
+\ProvidesPackage{xcolor-patches-tmp-ltx}[2021/02/10 v0.2 patch xcolor for l3color]
 \@ifundefined{color_set:nn}{\RequirePackage{l3color}}{}
 
 \ExplSyntaxOn
  \cs_gset_eq:NN \@expl@color@set@@nnn \color_set:nnn
+ \cs_gset_protected:Npn \@expl@color@set@@nnn #1 #2 #3
+    {
+      \cs_if_exist:cT { __color_parse_model_ #2 :w }
+       { 
+         \color_set:nnn {#1}{#2}{#3}
+       }
+    }
  \cs_generate_variant:Nn \color_set:nn {ne}
  \cs_new_protected:Npn \@expl@color@set@@ne #1 #2
     {
