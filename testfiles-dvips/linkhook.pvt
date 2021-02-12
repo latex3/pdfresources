@@ -6,20 +6,11 @@
    lang=de-DE,
    uncompress
  }
-\ExplSyntaxOn
-%%% for reproducible tests:
-\pdfmanagement_add:nnn {Info}{CreationDate}{(D:20200202111111+01'00')}
-\pdfmanagement_add:nnn {Info}{ModDate}{(D:20200202111111+01'00')}
-\pdfmanagement_add:nnn {Info}{Creator}{(l3build test)}
-%%%%%
-\ExplSyntaxOff
-\input{regression-test}
+\RequirePackage{pdfmanagement-regressiontest}
 \documentclass{article}
 \usepackage{xcolor}
-\usepackage[]{hyperref}
-\hypersetup{pdfmoddate={D:20200202111111+01'00'},pdfcreationdate={D:20200202111111+01'00'}}
+\usepackage{hyperref}
 \hypersetup{urlcolor=red,pdfborder={1 1 1},linkbordercolor=yellow}
-
 
 %add hooks:
 \ExplSyntaxOn\makeatletter

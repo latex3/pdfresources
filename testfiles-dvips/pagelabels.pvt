@@ -1,20 +1,15 @@
-\input{regression-test}
-\RequirePackage{pdfmanagement}
-\DeclareDocumentMetadata { }
-
+\PassOptionsToPackage{enable-debug,check-declarations}{expl3}
+\RequirePackage[debug]{pdfmanagement}
+\DeclareDocumentMetadata {  }
+\RequirePackage{pdfmanagement-regressiontest}
 \documentclass{article}
 \ExplSyntaxOn
 \sys_if_engine_pdftex:T {\usepackage[LGR]{fontenc}}
 \ExplSyntaxOff
-\usepackage[pdfpagelabels=true,
+\usepackage[pdfpagelabels=true
 ]{hyperref}
 
 \renewcommand\thepage{λέγ\arabic{page}}
 \begin{document}
-\ExplSyntaxOn
-\pdfmanagement_add:nnn {Info}{CreationDate}{(D:20200202111111+01'00')}
-\pdfmanagement_add:nnn {Info}{ModDate}{(D:20200202111111+01'00')}
-\pdfmanagement_add:nnn {Info}{Creator}{(l3build test)}
-\ExplSyntaxOff
 abc \newpage abc \newpage abc  \newpage \pagenumbering{roman} abc  \newpage \pagenumbering{Roman}\setcounter{page}{5} abc
 \end{document}

@@ -1,15 +1,18 @@
-\input{regression-test}
-\RequirePackage{pdfmanagement}
-\DeclareDocumentMetadata { }
+\PassOptionsToPackage{enable-debug,check-declarations}{expl3}
+\RequirePackage[debug]{pdfmanagement}
+\DeclareDocumentMetadata {  }
+\RequirePackage{pdfmanagement-regressiontest}
+
 \documentclass{article}
-\usepackage[customdriver=hgeneric-experimental]{hyperref}
+
+\usepackage{l3pdf}
+\ExplSyntaxOn
+\pdf_uncompress:
+\ExplSyntaxOff
+\usepackage{hyperref}
 
 \begin{document}
-\ExplSyntaxOn
-\pdfmanagement_add:nnn {Info}{CreationDate}{(D:20200202111111+01'00')}
-\pdfmanagement_add:nnn {Info}{ModDate}{(D:20200202111111+01'00')}
-\pdfmanagement_add:nnn {Info}{Creator}{(l3build test)}
-\ExplSyntaxOff
+
 \href{blub.pdf#destination}{pdf}
 
 \end{document}

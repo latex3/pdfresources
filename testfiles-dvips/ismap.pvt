@@ -1,17 +1,11 @@
-\input{regression-test}
+\PassOptionsToPackage{enable-debug,check-declarations}{expl3}
 \RequirePackage{pdfmanagement}
 \DeclareDocumentMetadata { }
+\RequirePackage{pdfmanagement-regressiontest}
 \documentclass{report}
-\usepackage[]{hyperref}
+\usepackage{hyperref}
 
 \begin{document}
-\ExplSyntaxOn
-%%% for reproducible tests:
-\pdfmanagement_add:nnn {Info}{CreationDate}{(D:20200202111111+01'00')}
-\pdfmanagement_add:nnn {Info}{ModDate}{(D:20200202111111+01'00')}
-\pdfmanagement_add:nnn {Info}{Creator}{(l3build test)}
-%%%%%
-\ExplSyntaxOff
 \href[ismap=true]{https://www.latex-project.org#abc~xyz}{xxxxx}
 
 \href{https://www.latex-project.org#abc~xyz}{xxxxx}
