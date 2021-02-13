@@ -74,7 +74,7 @@
 %     \cs{pdfdict_new:n} \Arg{dictionary name}
 %   \end{syntax}
 % This function create a new local or global dictionary. Which one depends on
-% \Arg{dictionary name}: If it begins with the standard |g| the dictionary is global.
+% \meta{dictionary name}: If it begins with the standard |g| the dictionary is global.
 % With |l| the dictionary is local. Other begins will give an error. It is recommended
 % to begin the name in the standard expl3 naming scheme with a module name, so |g_module_XXXX|
 % or |g__module_XXXX|.
@@ -86,21 +86,11 @@
 %     \cs{pdfdict_set_eq:nn}  \Arg{local dictionary name_1} \Arg{dictionary name_2}\\
 %     \cs{pdfdict_gset_eq:nn} \Arg{global dictionary name_1}\Arg{dictionary name_2}
 %   \end{syntax}
-% This functions copy \Arg{dictionary name_2} into
-% \Arg{local/global dictionary name_1} locally or globally. If the
-% dictionary \Arg{local/global dictionary name_1} doesn't exist yet, it will be created.
-% If \Arg{dictionary name_2} doesn't exist yet, an error will be raised.
+% This functions copy \meta{dictionary name_2} into
+% \meta{local/global dictionary name_1} locally or globally. If the
+% dictionary \meta{local/global dictionary name_1} doesn't exist yet, it will be created.
+% If \meta{dictionary name_2} doesn't exist yet, an error will be raised.
 %
-% \end{function}
-% \begin{function}[EXP,updated = 2020-12-03]
-%   {\pdfdict_name:n}
-%   \begin{syntax}
-%     \cs{pdfdict_name:n} \Arg{dictionary name}
-%   \end{syntax}
-% These command expand to the internal name. With these commands
-% it is possible to use standard commands of the \texttt{prop} module
-% to deal with the dictionaries. For example\\
-% |\prop_clear:c { \pdfdict_name:n { name }}|
 % \end{function}
 % \begin{function}[added = 2020-04-06]
 %   {\pdfdict_put:nnn, \pdfdict_gput:nnn}
@@ -108,12 +98,12 @@
 %     \cs{pdfdict_put:nnn}  \Arg{local dictionary}  \Arg{name} \Arg{value} \\
 %     \cs{pdfdict_gput:nnn} \Arg{global dictionary} \Arg{name} \Arg{value}
 %   \end{syntax}
-% This function puts \Arg{name} \Arg{value} locally or globally in the
-% \Arg{dictionary} created with \cs{pdfdict_new:n}.
+% This function puts key \meta{name} and value \meta{value} locally or globally in the
+% \meta{dictionary} created with \cs{pdfdict_new:n}.
 % \Arg{name} should be a PDF Name without the starting slash. It will be stored
 % with \cs{str_convert_pdfname}, so will be automatically correctly escaped in case
 % it contains slashes, spaces or other chars not allowed in a PDF name.
-% \Arg{value} should be a valid PDF value for this name in the
+% \meta{value} should be a valid PDF value for this name in the
 % target dictionary. The value is \emph{neither} converted \emph{nor} escaped automatically.
 % If the value is blank nothing is added to the dictionary.
 %
@@ -121,10 +111,10 @@
 % of the backends can differ. Some backends expand a
 % value always fully when writing to the PDF, with other backends commands
 % could end as strings in the PDF. So one should neither rely on
-% \Arg{value} to be expanded nor not expanded by the backend commands.
+% \meta{value} to be expanded nor not expanded by the backend commands.
 % \end{function}
 % \begin{function}[EXP,added = 2020-12-04]
-%   { \pdfdict_item:nn, pdfdict_item:ne  }
+%   { \pdfdict_item:nn, \pdfdict_item:ne  }
 %   \begin{syntax}
 %     \cs{pdfdict_item:nn} \Arg{key} \Arg{value}
 %   \end{syntax}
@@ -141,7 +131,7 @@
 %     \cs{pdfdict_use:n} \Arg{dictionary}
 %   \end{syntax}
 %   This outputs the property list of the dictionary as a list of
-%   \texttt{/key value} pairs.
+%   |/key value| pairs.
 %   This can be used e.g. when writing a dictionary object with
 %   \cs{pdf_object_write:nx}
 % \end{function}
@@ -150,7 +140,7 @@
 %   \begin{syntax}
 %     \cs{pdfdict_show:n}  \Arg{dictionary}
 %   \end{syntax}
-%   This shows the content of \Arg{dictionary} in the log and on the terminal.
+%   This shows the content of \meta{dictionary} in the log and on the terminal.
 %\end{function}
 %\begin{function}[EXP, pTF,updated = 2020-12-03]
 %   { \pdfdict_if_exist:n  }
@@ -189,43 +179,15 @@
 %     \cs{pdfdict_remove:nn}  \Arg{local dictionary}  \Arg{name}\\
 %     \cs{pdfdict_gremove:nn} \Arg{global dictionary} \Arg{name}
 %   \end{syntax}
-%   Removes  |/|\meta{name} and its associated \meta{value} from
+%   Removes  \meta{name} and its associated \meta{value} from
 %   the \Arg{dictionary}
 %   The removal is local from local dictionaries
 %   and global from global dictionaries.
 %   If \meta{name} is not found no change occurs,
 %   \emph{i.e}~there is no need to test for the existence of a name before
-%   trying to remove it. \Arg{name} is first converted
+%   trying to remove it. \meta{name} is first converted
 %   with \cs{str_convert_pdfname}.
 % \end{function}
-% \subsection{Predeclared dictionaries}
-% The module predeclares a number of local dictionaries and fills them with
-% some standard values. Some are not more than templates. But others are used
-% in core commands and can be used to change their settings.
-% For example an link created with \cs{pdfannot_link:nnn}
-% will use the \texttt{annot/Link/URI} dictionary. By adding or changing entries
-% in this dictionary user or packages can for example adapt the border color or
-% add keys needed for ocg layers.
-%
-%
-% The following tabular summarize the predeclared dictionaries.
-% \begin{NOTE}{UF}
-% Check which (local) dictionaries should be predefined.
-% Check also if the reset idea makes sense. (Removed for now)
-% Move page/Trans to hyperref driver. Belongs imho there
-% \end{NOTE}
-%
-% \medskip
-% \noindent
-% \begin{tabular}{p{\dimexpr0.25\textwidth-6\tabcolsep}p{0.25\textwidth}>{\raggedright}p{0.5\textwidth}}
-%  name      & default keys & notes \tabularnewline\hline
-%  l_annot/Link/Goto   &F (Flag)& used in GoTo links (internal references) \tabularnewline
-%  l_annot/Link/URI    &F (Flag)& used in URI links (external uri references) \tabularnewline
-%  l_annot/Link/GotoR  &F (Flag)& used in GoToR links (file  references) \tabularnewline
-%  l_annot/Link/Named  &F (Flag)& used in Named actions (menu calls) \tabularnewline
-%  l_annot/Link/Launch &F (Flag)& used in Launch links (application calls) \tabularnewline
-%  \end{tabular}
-
 % \end{documentation}
 %
 % \begin{implementation}
@@ -289,12 +251,18 @@
 %
 % \begin{macro}
 %   {
-%    \@@_name:n, \pdfdict_name:n,
+%    \@@_name:n, \__kernel_pdfdict_name:n,
 %    \@@_new:n,  \pdfdict_new:n,
 %   }
 %
 %   This are the commands to create new dictionaries and to access their internal
 %   name. All internal names start with |g__pdfdict_/| or |l__pdfdict_/|.
+%
+%  For the other modules we also need a kernel command to access the internal
+%  name to speed up the code and allow the use standard commands
+%  of the \texttt{prop} module to deal with the dictionaries. For example\\
+%  |\prop_clear:c { \__kernel_pdfdict_name:n { name }}|
+% \end{function}
 %
 %    \begin{macrocode}
 %<*package>
@@ -302,7 +270,7 @@
   {
     \str_head:n{#1}_@@_/#1_prop
   }
-\cs_set_eq:NN \pdfdict_name:n \@@_name:n
+\cs_set_eq:NN \__kernel_pdfdict_name:n \@@_name:n
 
 \cs_new_protected:Npn \@@_new:n #1
   {

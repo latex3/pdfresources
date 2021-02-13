@@ -731,7 +731,7 @@
                   { \use:c {@@_handler/#1/#2_gput:n} {#3} } %special handler
                   {
                     \prop_gput:cnn
-                      { \pdfdict_name:n { g__pdf_Core/#1 } }{ #2 } { #3 }
+                      { \__kernel_pdfdict_name:n { g__pdf_Core/#1 } }{ #2 } { #3 }
                   }
               }
           }
@@ -747,7 +747,7 @@
 \cs_new_protected:Npn \@@_get:nnN  #1 #2 #3 %path,key,macro
   {
     \prop_get:cnN
-      { \pdfdict_name:n { g__pdf_Core/#1 } }
+      { \__kernel_pdfdict_name:n { g__pdf_Core/#1 } }
       { #2 } #3
   }
 
@@ -765,7 +765,7 @@
                   { \use:c {@@_handler/#1/#2_gremove:} } %special handler
                   {
                     \prop_gremove:cn
-                      { \pdfdict_name:n { g__pdf_Core/#1 } }{ #2 }
+                      { \__kernel_pdfdict_name:n { g__pdf_Core/#1 } }{ #2 }
                   }
               }
           }
@@ -779,7 +779,7 @@
     \pdfdict_if_exist:nTF { g__pdf_Core/#1 }
           {
             \prop_gremove:cn
-              { \pdfdict_name:n { g__pdf_Core/#1 } }{ #2 }
+              { \__kernel_pdfdict_name:n { g__pdf_Core/#1 } }{ #2 }
           }
           {
             \msg_error:nnn { pdfmanagement } { unknown-dict } { #1 }
@@ -793,12 +793,12 @@
       { @@_handler/#2/?_show: } %general, name independant handler
       { \use:c {@@_handler/#2/?_show:} }
       {
-        \prop_if_exist:cTF { \pdfdict_name:n { g__pdf_Core/#2 } }
+        \prop_if_exist:cTF { \__kernel_pdfdict_name:n { g__pdf_Core/#2 } }
           {
              #1
                { pdfmanagement } { show-dict }
                { \tl_to_str:n {#2} }
-               { \prop_map_function:cN {\pdfdict_name:n { g__pdf_Core/#2 }} \msg_show_item:nn }
+               { \prop_map_function:cN {\__kernel_pdfdict_name:n { g__pdf_Core/#2 }} \msg_show_item:nn }
                { } { }
           }
           {
@@ -809,7 +809,7 @@
 
 \cs_new_protected:Npn \@@_show:n #1  %path
   {
-    \prop_show:c { \pdfdict_name:n { g__pdf_Core/#1 } }
+    \prop_show:c { \__kernel_pdfdict_name:n { g__pdf_Core/#1 } }
   }
 %    \end{macrocode}
 % \end{macro}
@@ -858,8 +858,8 @@
 % push to the register command / issue the special
 \cs_new_protected:Npn \@@_Info_gpush:
   {
-    \prop_map_function:cN  { \pdfdict_name:n { g__pdf_Core/Info} } \__pdf_backend_info_gput:nn
-    \prop_gclear:c { \pdfdict_name:n { g__pdf_Core/Info} }
+    \prop_map_function:cN  { \__kernel_pdfdict_name:n { g__pdf_Core/Info} } \__pdf_backend_info_gput:nn
+    \prop_gclear:c { \__kernel_pdfdict_name:n { g__pdf_Core/Info} }
   }
 %    \end{macrocode}
 % \end{macro}
@@ -910,7 +910,7 @@
 % handler for pdfmanagement
 \cs_new_protected:cpn { @@_handler/ThisPage/?_gput:nn } #1 #2
   {
-    \prop_gput:cnn  { \pdfdict_name:n { g__pdf_Core/ThisPage } }{ #1 } { #2 }
+    \prop_gput:cnn  { \__kernel_pdfdict_name:n { g__pdf_Core/ThisPage } }{ #1 } { #2 }
     \bool_if:NT \g_@@_active_bool
       {
         \__pdf_backend_ThisPage_gput:nn { #1 }{ #2 }
@@ -1064,7 +1064,7 @@
     \use:c { @@_/Catalog/Requirements_gpush: }
     \use:c { @@_/Catalog/ViewerPreferences_gpush: }
     % output the single values:
-    \prop_map_function:cN { \pdfdict_name:n { g__pdf_Core/Catalog} }  \__pdf_backend_catalog_gput:nn
+    \prop_map_function:cN { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog} }  \__pdf_backend_catalog_gput:nn
     % output names tree:
     \use:c { @@_/Catalog/Names/EmbeddedFiles_gpush: }
   }
@@ -1076,7 +1076,7 @@
 \cs_new_protected:cpn { @@_/Catalog/AA_gpush: }
   {
     \prop_if_empty:cF
-     { \pdfdict_name:n { g__pdf_Core/Catalog/AA } }
+     { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/AA } }
      {
        \__pdf_backend_object_new:nn  { g_@@_/Catalog/AA_obj } { dict }
        \__pdf_backend_object_write:nx
@@ -1114,7 +1114,7 @@
             { \seq_use:cn { g_@@_/Catalog/AcroForm/Fields_seq } {~} }
         \exp_args:Nnnx
           \prop_gput:cnn %we have to use \prop here to avoid the handler ...
-            { \pdfdict_name:n { g__pdf_Core/Catalog/AcroForm } }
+            { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/AcroForm } }
             { Fields }
             { \__pdf_backend_object_ref:n { g_@@_/Catalog/AcroForm/Fields_obj } }
       }
@@ -1127,11 +1127,11 @@
             { \seq_use:cn { g_@@_/Catalog/AcroForm/CO_seq } {~} }
         \exp_args:Nnnx
           \prop_gput:cnn %we have to use \prop here to avoid the handler ...
-            { \pdfdict_name:n { g__pdf_Core/Catalog/AcroForm } }
+            { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/AcroForm } }
             { CO }
             { \__pdf_backend_object_ref:n { g_@@_/Catalog/AcroForm/CO_obj } }
       }
-     \prop_if_empty:cF { \pdfdict_name:n { g__pdf_Core/Catalog/AcroForm/DR/Font}}
+     \prop_if_empty:cF { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/AcroForm/DR/Font}}
        {
          \__pdf_backend_object_new:nn { g_@@_/Catalog/AcroForm/DR/Font_obj } {dict}
          \exp_args:Nnx
@@ -1140,11 +1140,11 @@
              { \pdfdict_use:n { g__pdf_Core/Catalog/AcroForm/DR/Font } }
          \exp_args:Nnnx
            \prop_gput:cnn %we have to use \prop here to avoid the handler ...
-             { \pdfdict_name:n { g__pdf_Core/Catalog/AcroForm/DR } }
+             { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/AcroForm/DR } }
              { Font }
              { \__pdf_backend_object_ref:n { g_@@_/Catalog/AcroForm/DR/Font_obj } }
        }
-     \prop_if_empty:cF { \pdfdict_name:n { g__pdf_Core/Catalog/AcroForm/DR}}
+     \prop_if_empty:cF { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/AcroForm/DR}}
        {
          \__pdf_backend_object_new:nn { g_@@_/Catalog/AcroForm/DR_obj } {dict}
          \exp_args:Nnx
@@ -1153,11 +1153,11 @@
              { \pdfdict_use:n { g__pdf_Core/Catalog/AcroForm/DR } }
          \exp_args:Nnnx
            \prop_gput:cnn %we have to use \prop here to avoid the handler ...
-             { \pdfdict_name:n { g__pdf_Core/Catalog/AcroForm } }
+             { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/AcroForm } }
              { DR }
              { \__pdf_backend_object_ref:n { g_@@_/Catalog/AcroForm/DR_obj } }
        }
-     \prop_if_empty:cF { \pdfdict_name:n { g__pdf_Core/Catalog/AcroForm} }
+     \prop_if_empty:cF { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/AcroForm} }
        {
          \__pdf_backend_object_new:nn { g_@@_/Catalog/AcroForm_obj } {dict}
          \exp_args:Nnx
@@ -1206,7 +1206,7 @@
 \cs_new_protected:cpn { @@_/Catalog/MarkInfo_gpush: }
   {
     \prop_if_empty:cF
-     { \pdfdict_name:n { g__pdf_Core/Catalog/MarkInfo } }
+     { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/MarkInfo } }
      {
        \__pdf_backend_object_new:nn  { g_@@_/Catalog/MarkInfo_obj } { dict }
        \exp_args:Nnx
@@ -1328,7 +1328,7 @@
 \cs_new_protected:cpn { @@_/Catalog/ViewerPreferences_gpush: }
   {
     \prop_if_empty:cF
-     { \pdfdict_name:n { g__pdf_Core/Catalog/ViewerPreferences } }
+     { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/ViewerPreferences } }
      {
        \__pdf_backend_object_new:nn  { g_@@_/Catalog/ViewerPreferences_obj } { dict }
        \exp_args:Nnx
@@ -1386,7 +1386,7 @@
       {
         \iow_newline:
         The~Catalog~contains~in~the~top~level~the~single~value~entries
-        \prop_map_function:cN {\pdfdict_name:n { g__pdf_Core/Catalog }} \msg_show_item:nn
+        \prop_map_function:cN {\__kernel_pdfdict_name:n { g__pdf_Core/Catalog }} \msg_show_item:nn
       }
     \clist_map_inline:Nn \c_@@_Catalog_seq_clist
      {
@@ -1401,12 +1401,12 @@
       }
     \clist_map_inline:Nn \c_@@_Catalog_sub_clist
       {
-        \prop_if_empty:cF { \pdfdict_name:n { g__pdf_Core/Catalog/##1 } }
+        \prop_if_empty:cF { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/##1 } }
           {
             \iow_term:x
               {
                 The~Catalog~subdirectory~'##1'~contains~the~single~value~entries
-                \prop_map_function:cN {\pdfdict_name:n { g__pdf_Core/Catalog/##1 }} \msg_show_item:nn
+                \prop_map_function:cN {\__kernel_pdfdict_name:n { g__pdf_Core/Catalog/##1 }} \msg_show_item:nn
               }
           }
       }
