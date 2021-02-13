@@ -98,16 +98,16 @@
     }
     {
      \tl_if_exist:cF{@##1}{\tl_new:c{@##1}}
-     \tl_set:cx {@##1}{\GetDocumentMetadata{hyp/##1}}}
+     \tl_set:cx {@##1}{\GetDocumentProperties{hyp/##1}}}
 
     % pdfauthor, this is only a work around for simple author
     % TODO needs improvement
-    \pdfstringdef\@pdfauthor{\GetDocumentMetadata{hyp/pdfauthor}}
+    \pdfstringdef\@pdfauthor{\GetDocumentProperties{hyp/pdfauthor}}
     \cs_set_eq:NN\hyxmp@pdfauthor\@pdfauthor
 
-    % pdflang, 
+    % pdflang,
     \tl_if_exist:cF{@pdflang}{\tl_new:c{@pdflang}}
-    \tl_set:cx {@pdflang}{\GetDocumentMetadata{document/lang}}
+    \tl_set:cx {@pdflang}{\GetDocumentProperties{document/lang}}
   }
 
 \AddToHook{enddocument}[pdfmanagement-firstaid]{\__hyxmp_get_metadata:}

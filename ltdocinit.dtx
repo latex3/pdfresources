@@ -50,9 +50,39 @@
 %
 % \section{\pkg{ltdocinit} documentation}
 % This small package defines \cs{DeclareDocumentMetadata} and the related keys.
-% \cs{DeclareDocumentMetadata} loads the new PDF management code.
-% This forces the loading of the backend files the backend.
-% So it needs at least a key to set the backend is needed.
+% It also defines commands to store document properties in a global container.
+%
+% \subsection{\cs{DeclareDocumentMetadata}}
+%
+% \begin{function}{\DeclareDocumentMetadata}
+% \begin{syntax}
+%  \cs{DeclareDocumentMetadata}\Arg{key-value list}
+% \end{syntax}
+% \end{function}
+%
+% Currently there is no dedicated location to declare settings concerning
+% a document as a whole. Settings are placed somewhere in the preamble or
+% with the class options or even with some package options.
+% For some settings this can be too late,
+% for example the pdf version can no longer be changed if a
+% package has used code which already opened the PDF.
+%
+% \cs{DeclareDocumentMetadata} as a new command
+% should unify such settings in one place.
+% It should be used before \cs{documentclass}, directly after
+% loading \pkg{pdfmanagement-beta}. \cs{DeclareDocumentMetadata}
+% can be used more than once.
+%
+% The keys defined for \cs{DeclareDocumentMetadata}
+% currently allows to set the PDF version, to set the PDF \texttt{/Lang},
+% to uncompress a pdf, to set the language and to declare a few PDF standards.
+%
+% \cs{DeclareDocumentMetadata} is also used to
+% activate the new PDF management code and it loads
+% a number of required files for the PDF management code.
+% As this forces the loading of the backend files, a backend
+% which can't be detected automatically like |dvipdfmx|,
+% must be set in the first \cs{DeclareDocumentMetadata}.
 %
 % Currently the following keys are implemented
 %
@@ -61,75 +91,123 @@
 %    This will probably be extended to  pass the value also to packages.
 %    \item[\texttt{pdfversion}] e.g. \texttt{pdfversion=1.7}
 %    \item[\texttt{uncompress}] no value. Forces an uncompressed pdf.
-%    \item[\texttt{lang}] to set the Lang entry in the Catalog. E.g. \texttt{lang=de-DE}.
-%    \item[\texttt{standard}] Choice key to set the pdf standard.
-%      Currently A-1b, A-2b and A-3b are accepted as
-%      values, but the underlying code to ensure the requirements (as far as they
-%      can be ensured) is incomplete.
+%    \item[\texttt{lang}] to set the Lang entry in the Catalog.
+%    E.g. \texttt{lang=de-DE}. The initial value is |en-US|
+%    \item[\texttt{pdfstandard}] Choice key to set the pdf standard.
+%      Currently |A-1b|, |A-2b| and |A-3b| are accepted as
+%      values. The underlying code to ensure the requirements (as far as they
+%      can be ensured) is incomplete, but a color profile is included and the
+%      /OutputIntent is set. More information can be found in the documentation
+%      of \pkg{l3pdfmeta}.
 %^^A     disabled for now.
 %^^A    \item[\texttt{xmpmeta}] Boolean. This includes a skeleton XMP-metadata in the pdf. This clashes
 %^^A     with e.g. hyperxmp, and the code to extend the metadata isn't finished yet.
 %    \item[\texttt{pdfmanagement}] Boolean. This activates/deactivates
 %      the core management code. By default the value is true.
+%    \item[firstaidoff] This accepts a comma lists of keysword and disable the patches
+%    related to them. More information can be found in the documentation of
+%    \pkg{pdfmanagement-first}.
 % \end{description}
+%
+% \subsection{Container for document properties}
+%
+% The package provides a container where classes, packages and users can store
+% properties of the document which are perhaps of interest
+% or use for other packages or the author.
+%
+% The properties are stored with a key |label/property|. The values can be
+% retrieved expandably.
+%
+% \begin{function}{\AddToDocumentProperties}
+% \begin{syntax}
+%  \cs{AddToDocumentProperties}\oarg{label}\Arg{property}\Arg{value}
+% \end{syntax}
+% This stores \meta{value} under the key \meta{label}/\meta{property}.
+% By default \meta{label} is the current package name |\@currname|. If another
+% label is choosen, it should be one which avoids clashes with other packages
+% using the container. The label |document| is reserved.
+% \end{function}
+%
+% \begin{function}{\GetDocumentProperties}
+% \begin{syntax}
+%  \cs{AddToDocumentProperties}\Arg{label/property}
+% \end{syntax}
+% Expands to the \meta{value} corresponding to \meta{label/property}
+% in the conttainer. If \meta{label/property} is missing,
+% this has an empty expansion.
+% The result is returned within \cs{exp_not:n}, which means
+% that the \meta{value} does not expand further
+% when appearing in an x-type argument expansion.
+% \end{function}
+%
+% \begin{function}{\ShowDocumentProperties}
+% \begin{syntax}
+%  \cs{ShowDocumentProperties}
+% \end{syntax}
+% This show the current content of the container.
+% \end{function}
+%
 % \end{documentation}
 %
 % \begin{implementation}
 %
 % \section{\pkg{ltdocinit} implementation}
-%
+% \subsection{\cs{DeclareDocumentMetadata}}
 %    \begin{macrocode}
-%<*package>
-\ProvidesExplPackage {ltdocinit} {2020-11-27} {0.2}
-  {Set document metadata}
-%    \end{macrocode}
-% \section{Document metadata}
-% Currently there is no dedicated location to declare settings concerning
-% a document as a whole. Settings are placed somewhere in the preamble or
-% with the class options. For some settings this can be too late,
-% for example the pdf version can no longer be changed if a
-% package has already opened the PDF. \cs{DeclareDocumentMetadata} as a new command
-% should unify such settings in one place. It should always be the first command
-% in a document.
-% Beside loading the PDF management code \cs{DeclareDocumentMetadata}
-% currently allows to set the PDF version, to set the PDF \texttt{/Lang},
-% to uncompress a pdf, to set the language and to declare a few PDF standards.
-% ^^A We also add a key to activate the metadata stream and to set a standard.
-%%
-%    \begin{macrocode}
-%<@@=document>
 %<*package>
 %<@@=pdfmanagement>
+\ProvidesExplPackage {ltdocinit} {2021-02-13} {1.0}
+  {Initialize document metadata}
 %    \end{macrocode}
-% \begin{function}[updated=2020-11-27]{\DeclareDocumentMetadata}
+% \cs{DeclareDocumentMetadata} should for now not be used after
+% \cs{documentclass} so we error in this case. It can be used more than once
+% but follow-up calls should not do the initialization code.
 %    \begin{macrocode}
 \msg_new:nnn  { document } { setup-after-documentclass }
               {
                 \token_to_str:N \DeclareDocumentMetadata \c_space_tl
                 should~be~used~only~before~\token_to_str:N\documentclass
               }
-
-
+%    \end{macrocode}
+% \begin{macro}{\DeclareDocumentMetadata}
+%    \begin{macrocode}
 \NewDocumentCommand\DeclareDocumentMetadata { m }
   {
     \cs_if_eq:NNTF \documentclass \@twoclasseserror
       { \msg_error:nn { document }{ setup-after-documentclass } }
       {
+%    \end{macrocode}
+% The wanted backend must be detected first, we read the init key and then
+% force the loading by either loading l3pdf (+ expl3) or only expl3.
+%    \begin{macrocode}
         \keys_set_groups:nnn { pdf / setup} {init}{ #1 }
-        \RequirePackage{l3pdf}   %should be loaded after the backend is set.
-         % %load backend driver
+        %should be loaded after the backend is set, and only if not in the kernel
+        \cs_if_free:NTF \pdf_uncompress:
+         {\RequirePackage{l3pdf}}{\RequirePackage{expl3}}
+%    \end{macrocode}
+% Now we load the extra backend code and set the boolean to true
+%    \begin{macrocode}
         \ExplSyntaxOn\makeatletter
-          \file_input:n {l3\c_sys_backend_str-pdf.def} %should be inside the normal backend
+          \file_input:n {l3\c_sys_backend_str-pdf.def}
         \ExplSyntaxOff\makeatother
-        \RequirePackage{l3pdfutils}
-        \RequirePackage{l3pdfannot}
         \bool_gset_true:N \g_@@_active_bool
-        \keys_set_filter:nnn  { pdf / setup } { init } { #1 }
+%    \end{macrocode}
+% set the default language, process the rest of the keys,
+% and setup the generic driver
+%    \begin{macrocode}
+        \keys_set_filter:nnn  { pdf / setup } { init } { lang=en-US, #1 }
         \bool_if:NT \g_@@_active_bool
           {
             \PassOptionsToPackage{customdriver=hgeneric-experimental}{hyperref}
           }
+%    \end{macrocode}
+% \cs{pdfmanagement_add:nnn} has collected values in this hook.
+%    \begin{macrocode}
         \hook_use_once:n {pdfmanagement/add}
+%    \end{macrocode}
+% Redefine \cs{DeclareDocumentMetadata} so that it only process the keys.
+% We need to update the hyperref option if the active status changes.
+%    \begin{macrocode}
         \RenewDocumentCommand\DeclareDocumentMetadata { m }
           {
             \keys_set_filter:nnn  { pdf / setup } { init } { ##1 }
@@ -142,39 +220,78 @@
                \str_remove_all:cn {opt@hyperref.sty}{customdriver=hgeneric-experimental}
              }
           }
+%    \end{macrocode}
+% Load more modules and the firstaid code.
+%    \begin{macrocode}
+        \RequirePackage{l3pdfutils}
+        \RequirePackage{l3pdfannot}
         \RequirePackage{pdfmanagement-firstaid}
       }
   }
-
-\prop_new:N \g_@@_documentmetadata_prop %
-
-\NewDocumentCommand\AddToDocumentMetadata{O{\@currname}mm}
+%    \end{macrocode}
+% \end{macro}
+% \subsection{Container for document Properties}
+% The container for the document properties is a prop
+% \begin{variable}{\g_@@_documentproperties_prop}
+%    \begin{macrocode}
+\prop_new:N \g_@@_documentproperties_prop %
+%    \end{macrocode}
+% \end{variable}
+% \begin{macro}{\AddToDocumentProperties}
+%    \begin{macrocode}
+\NewDocumentCommand\AddToDocumentProperties{O{\@currname}mm}
   {
     \exp_args:NNx
-      \prop_gput:Nnn \g_@@_documentmetadata_prop
+      \prop_gput:Nnn \g_@@_documentproperties_prop
         {
           \tl_if_blank:eTF {#1}{top-level/}{#1/} #2
         }
         { #3}
   }
-
-\NewExpandableDocumentCommand\GetDocumentMetadata{m}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\GetDocumentProperties}
+%    \begin{macrocode}
+\NewExpandableDocumentCommand\GetDocumentProperties{m}
   {
-    \prop_item:Nn \g_@@_documentmetadata_prop {#1}
+    \prop_item:Nn \g_@@_documentproperties_prop {#1}
   }
-
-\NewDocumentCommand\ShowDocumentMetadata {}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ShowDocumentProperties}
+%    \begin{macrocode}
+\msg_new:nnn  { pdfmanagement } { show-properties }
   {
-    \prop_show:N \g_@@_documentmetadata_prop
+    The~following~document~properties~have~been~stored:
+    #1
   }
-
+\NewDocumentCommand\ShowDocumentProperties {}
+  {
+    \msg_show:nnx {pdfmanagement}{show-properties}
+      {
+        %\prop_show:N \g_@@_documentproperties_prop
+        \prop_map_function:NN \g_@@_documentproperties_prop \msg_show_item:nn
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+%  \subsection{The keys for \cs{DeclareDocumentMetadata}}
+%  As they use \cs{AddToDocumentProperties} they have to come after
+%  it has been defined.
+%
+%  \begin{variable}{\g_@@_firstaidoff_clist}
+%  A list to store the firstaid code which should be disabled
+%    \begin{macrocode}
 \clist_new:N \g_@@_firstaidoff_clist
+%    \end{macrocode}
+% \end{variable}
+%    \begin{macrocode}
 \keys_define:nn { pdf / setup }
   {
     backend .code:n =
       {
         \PassOptionsToPackage { driver=#1 } {expl3}
-        \AddToDocumentMetadata[document]{backend}{#1}
+        \AddToDocumentProperties[document]{backend}{#1}
       },
     backend .groups:n = { init } ,
   }
@@ -184,28 +301,29 @@
     ,pdfversion .code:n =
       {
         \pdf_version_gset:n { #1 }
-        \AddToDocumentMetadata[document]{pdfversion}{#1}
+        \AddToDocumentProperties[document]{pdfversion}{#1}
       }
     ,uncompress .code:n =
       {
         \pdf_uncompress:
       }
+    ,uncompress .value_forbidden:n = true
     ,lang .code:n =
       {
         \pdfmanagement_add:nnn {Catalog} {Lang}{(#1)}
-        \AddToDocumentMetadata[document]{lang}{#1}
+        \AddToDocumentProperties[document]{lang}{#1}
       }
-    ,xmpmeta .bool_gset:N = \g_pdfmeta_xmp_bool %see pdfmeta undocumentated for now!
-    ,standard .choices:nn =
+    %,xmpmeta .bool_gset:N = \g_pdfmeta_xmp_bool %see pdfmeta unused and undefined for now!
+    ,pdfstandard .choices:nn =
       {A-1b,A-2b,A-3b}
       {
         \prop_if_exist:cT { g_pdfmeta_standard_pdf/#1_prop }
           {
             \prop_gset_eq:Nc \g_pdfmeta_standard_prop { g_pdfmeta_standard_pdf/#1 _prop }
           }
-        \AddToDocumentMetadata [document]{standard}{#1}
+        \AddToDocumentProperties [document]{standard}{#1}
       }
-    ,standard / unknown .code:n =
+    ,pdfstandard / unknown .code:n =
       {
         \msg_warning:nnn{pdf}{unknown-standard}{#1}
       }
@@ -214,7 +332,6 @@
     ,firstaidoff .clist_gset:N = \g_@@_firstaidoff_clist
   }
 %    \end{macrocode}
-% \end{function}
 %    \begin{macrocode}
 %</package>
 %    \end{macrocode}
