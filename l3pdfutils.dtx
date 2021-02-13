@@ -49,34 +49,7 @@
 % \begin{documentation}
 %
 % \section{\pkg{l3pdfutils} documentation}
-% This module contains a number of commands to create pdf structures with
-% meaningful contents, currently xform, annotations and destinations.
-% \end{documentation}
-%
-% \begin{implementation}
-%
-% \section{\pkg{l3pdfutils} implementation}
-%
-%    \begin{macrocode}
-%<*package>
-%<@@=pdf>
-\ProvidesExplPackage {l3pdfutils} {2020-12-04} {0.2}
-  {PDF-utils}
-%    \end{macrocode}
-% \subsection{Form XObject (pdfxform)}
-% \begin{NOTE}{UF}
-%  - As in dvi mode the xform is immediate, this is done for pdftex/luatex too.
-%    If needed a delayed version can be added later.
-%  - the argument for attributes is needed to add e.g. /StructParents
-%  - it is not clear if an argument for additional resources is needed, probably they
-%    should / need to be added automatically.
-%  - code for adding ExtGState etc to the local resource is missing, will be
-%    added when the object name is clear.!!!!!!!!!!!!
-%  - should the size be stored in dim or tl?
-%  - dvips implementation is missing for ideas: pdfbase, atfi-dvips.def,
-%  \end{NOTE}
-%
-%  \subsubsection{Form XObject / management}
+% This module contains a number of commands to create xforms.
 %  \begin{function}[added = 2019-08-05]
 %   {
 %     \pdf_xform_new:nnn
@@ -86,7 +59,7 @@
 %   \end{syntax}
 %    This command create a new form XObject that can be used as appearance or
 %    directly later.
-%    If the content contains BDC-marks it should \emph{not} be given as a
+%    If the \meta{content} contains BDC-marks it should \emph{not} be given as a
 %    previously typeset box, but directly so that the names of the
 %    BDC-marks can be added to the resources of the xform. The xform will automatically
 %    include the resources of the current page.
@@ -136,6 +109,32 @@
 %   \end{syntax}
 %    These command tests if an xform with name \Arg{name} has been already defined.
 %   \end{function}%
+% \end{documentation}
+%
+% \begin{implementation}
+%
+% \section{\pkg{l3pdfutils} implementation}
+%
+%    \begin{macrocode}
+%<*package>
+%<@@=pdf>
+\ProvidesExplPackage {l3pdfutils} {2020-12-04} {0.2}
+  {command to create xforms}
+%    \end{macrocode}
+% \subsection{Form XObject (pdfxform)}
+% \begin{NOTE}{UF}
+%  - As in dvi mode the xform is immediate, this is done for pdftex/luatex too.
+%    If needed a delayed version can be added later.
+%  - the argument for attributes is needed to add e.g. /StructParents
+%  - it is not clear if an argument for additional resources is needed, probably they
+%    should / need to be added automatically.
+%  - code for adding ExtGState etc to the local resource is missing, will be
+%    added when the object name is clear.
+%  - should the size be stored in dim or tl?
+%  - dvips implementation is missing for ideas: pdfbase, atfi-dvips.def,
+%  \end{NOTE}
+%
+%  \subsubsection{Form XObject / management}
 %    \begin{macrocode}
 %<*package>
 \cs_new_protected:Npn  \pdf_xform_new:nnn #1 #2 #3
@@ -171,39 +170,6 @@
   }
 %</package>
 %    \end{macrocode}
-%%
-% \section{Drop?}
-% \subsubsection{Doc View/Openaction}
-% Dropped for now. Is probably not needed
-% \begin{NOTE}{UF}
-%   /OpenAction can be an array:
-%   |/OpenAction [5 0 R /Fit]| or an action: |<< /S /GoTo /D [ 7 0 R /Fit ] >>|.
-%  The implementation below allows only the first. It is not quite clear, if
-%  this is sensible (and if a special docview command is needed at all).
-%  The second could be set directly.
-% \end{NOTE}
-%
-% \begin{function}[added = 2019-08-18]
-%   {\pdf_docview:nn}
-%   \begin{syntax}
-%     \cs{pdf_docview:nn} \Arg{page} \Arg{view}
-%   \end{syntax}
-% This command allows to set the OpenAction array. The \meta{page}
-% is an absolute page number. \Arg{view} a string for the destination
-% without the leading slash. Examples are e.g. |XYZ left top zoom| or |Fit|.
-% The OpenAction uses (and could also be set directly with)
-% \cs{pdfmanagement_add:nnn}|{Catalog}|.
-% \end{function}
-%
-%    \begin{macrocode}
-%<*package>
-%\cs_new_protected:Npn \pdf_docview:nn #1 #2
-%  {
-%    \pdfmanagement_add:nnx {Catalog }{ OpenAction }{[\pdf_object_pageref:n {#1}~/#2]}
-%  }
-%</package>
-%    \end{macrocode}
-
 %
 % \end{implementation}
 %
