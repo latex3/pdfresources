@@ -60,7 +60,7 @@
 %  \begin{syntax}
 %   \cs{pdf_text_convert:nn}  \Arg{format}  \Arg{content}
 %  \end{syntax}
-%  This converts \Arg{content} following the rules defined by \Arg{format}.
+%  This converts \meta{content} following the rules defined by \meta{format}.
 %  Non-ascii input should be utf8 encoded.
 %  Currently the following formats exist:
 %  \begin{description}
@@ -77,8 +77,8 @@
 %  \begin{syntax}
 %   \cs{pdf_text_convert:nnN}  \Arg{format}  \Arg{content} \Arg{tlvar}
 %  \end{syntax}
-%  This converts \Arg{content} following the rules defined by \Arg{format} and stores
-%  the result in \Arg{tlvar}. The assignment is done locally.
+%  This converts \meta{content} following the rules defined by \meta{format} and stores
+%  the result in \meta{tlvar}. The assignment is done locally.
 %  Non-ascii input should be utf8 encoded.
 %  Currently the following formats exist:
 %  \begin{description}
@@ -92,7 +92,7 @@
 %      this converts with \cs{str_set_convert:Nnnn} into utf8/url and
 %      then replace reserved and digits back from the percent encoding. Parentheses
 %      are escaped.
-%     \item[utf8/url-print]
+%     \item[utf8/URIpdf-print]
 %      this converts into utf8/URIpdf  and add parentheses around.%
 %     \item[utf16/string]
 %      this converts with \cs{str_set_convert:Nnnn} into utf16/string.
@@ -332,9 +332,12 @@
 %% a list of (utf8) chars.
 %% str convert, not expandable.
 %  filespec (attachment view)  tests:
-%  utf8:  gr\303\274\303\237e.txt                    %doesn't work, umlaut wrong,
-%  utf8 with BOM \357\273\277gr\303\274\303\237e.txt %doesn't work, umlaut wrong, bom visible
-%  utf16 with BE: (FEFF)  \376\377\000g\000r\000\374\000\337\000e\000.\000t\000x\000t %works
+%  utf8:  gr\303\274\303\237e.txt
+%    %doesn't work, umlaut wrong,
+%  utf8 with BOM \357\273\277gr\303\274\303\237e.txt
+%    %doesn't work, umlaut wrong, bom visible
+%  utf16 with BE: (FEFF)
+%   \376\377\000g\000r\000\374\000\337\000e\000.\000t\000x\000t %works
 %                xetex converts to <feff0067007200fc00df0065002e007400780074>
 %  utf16 with BE / HEX: <FEFF0067007200FC00DF0065002E007400780074> works
 
