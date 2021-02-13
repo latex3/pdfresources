@@ -49,17 +49,22 @@
 % \begin{documentation}
 %
 % \section{\pkg{l3pdfmeta} documentation}
-% This module sets up some tools and commands needed for pdf standards in general
-% and to setup XMP-metadata needed by the various standards in special.
+% This module sets up some tools and commands needed
+% for pdf standards in general.The goal is to collect the requirements and
+% to provide code to check and fulfill them.
+%
+% In future is will probably also contain
+% code to setup XMP-metadata needed by the various standards in special.
 % Currently XMP-metadata can be added by two mutual incompatible packages:
 % \pkg{hyperxmp} and \pkg{pdfx}. Both
-% packages are currently also incompatible with the pdf resource management.
+% packages are currently also incompatible with the pdf resource management,
+% but for \pkg{hyperxmp} some patches are provided.
 %
+% \begin{NOTE}{UF}
 % This package should not replace both packages. Regarding XMP-metadata its goal
 % is to create a skeleton metadata stream, add some core default values
 % and to define interfaces that allows other packages
 % to add data to this metadata and so to extend them.
-%
 % The problems to solve here are
 % \begin{itemize}
 % \item which tree structure is sensible
@@ -67,10 +72,25 @@
 % the users to correctly escape their input)
 % \item how interface to input data should look
 % \end{itemize}
+% \end{NOTE}
+% \begin{variable}{\g_pdfmeta_standard_prop}
+% This public property is filled with the requirements of the requested standard(s).
+% packages wanting to test a requirement can query the variable. For some of the values
+% it also makes sense to change them. Currently this is only relevant for the colorprofile:
+% With one of the pdf/A standards a colorprofile is embedded and added to the /OutputIntent.
+% The default value is sRGB.icc, this can be changed
+% by setting the key |outputintent_profile|. Currently the only alternative is
+% |FOGRA39L_coated.icc|. Interfaces to add more colorprofiles will be added later.
+% \end{variable}
 %
-% Regarding the pdf standards the goal is to collect the requirements and
-% to set check how to set them.
-
+% \begin{variable}
+%  {
+%   \g_pdfmeta_standard_pdf/A-1b_prop ,
+%   \g_pdfmeta_standard_pdf/A-2b_prop,
+%   \g_pdfmeta_standard_pdf/A-3b_prop
+%  }
+%  These three properties contain the settings for the three pdf/A-standards.
+%  \end{variable}
 % \end{documentation}
 %
 % \begin{implementation}
@@ -83,6 +103,7 @@
 \ProvidesExplPackage {l3pdfmeta} {2020-05-17} {0.2}
   {XMP-Metadata and PDF-Standards}
 %    \end{macrocode}
+% Message for unknown standards
 %    \begin{macrocode}
 \msg_new:nnn  {pdf }{unknown-standard}{The~standard~'#1'~is~unknown~and~has~been~ignored}
 %    \end{macrocode}
@@ -92,54 +113,7 @@
 \str_new:N \l_@@_tmpa_str
 %    \end{macrocode}
 % \end{variable}
-% \section{XMP-metadata}
-%    \begin{macrocode}
-% we need a command to write a BOM to the pdf:
-\str_const:Nx\c_@@_bom_str
- {
-  \bool_if:nTF
-    {
-      \sys_if_engine_luatex_p: || \sys_if_engine_xetex_p:
-    }
-    {
-     \char_generate:nn {65279}{12}
-    }
-    {
-      \char_generate:nn {239}{12}
-      \char_generate:nn {187}{12}
-      \char_generate:nn {191}{12}
-    }
- }
-% writing the stream:
-\str_new:N \g_@@_xmppacket_str
 
-\str_gset:Nx      \g_@@_xmppacket_str {<?xpacket~begin="\c_@@_bom_str"~id="W5M0MpCehiHzreSzNTczkc9d"?>\iow_newline:}
-\str_gput_right:Nx \g_@@_xmppacket_str {<x:xmpmeta~xmlns:x="adobe:ns:meta/">\iow_newline:}
-
-%here more contents ...
-\str_gput_right:Nx \g_@@_xmppacket_str { </x:xmpmeta> \iow_newline: }
-%here padding??
-\str_gput_right:Nn \g_@@_xmppacket_str { <?xpacket~end="w"?> }
-%
-%    \end{macrocode}
-% \subsection{The stream object}
-%
-%    \begin{macrocode}
-
-%\hook_gput_code:nnn {shipout/lastpage}{pdf}
-%  {
-%    \bool_if:NT \g_pdfmeta_xmp_bool
-%      {
-%        \pdf_object_new:nn {__pdf_Metadata} {stream}
-%        \pdf_object_write:nx {__pdf_Metadata}
-%         {
-%           { /Type /Metadata /Subtype /XML }
-%           {\g_@@_xmppacket_str}
-%         }
-%      }
-%  }
-%    \end{macrocode}
-%
 % \section{Standards (work in progress)}
 % \subsection{Tools and tests}
 % This public property will contain the settings for the document.
@@ -354,6 +328,56 @@
           {\prop_item:Nn \g_pdfmeta_standard_prop {outputintent_subtype}}
       }
    }
+%    \end{macrocode}
+% \section{XMP-metadata (work in progress)}
+% We need a command to write a BOM to the pdf:
+%    \begin{macrocode}
+%
+\str_const:Nx\c_@@_bom_str
+ {
+  \bool_if:nTF
+    {
+      \sys_if_engine_luatex_p: || \sys_if_engine_xetex_p:
+    }
+    {
+     \char_generate:nn {65279}{12}
+    }
+    {
+      \char_generate:nn {239}{12}
+      \char_generate:nn {187}{12}
+      \char_generate:nn {191}{12}
+    }
+ }
+% writing the stream:
+\str_new:N \g_@@_xmppacket_str
+
+\str_gset:Nx      \g_@@_xmppacket_str
+ {<?xpacket~begin="\c_@@_bom_str"~id="W5M0MpCehiHzreSzNTczkc9d"?>\iow_newline:}
+\str_gput_right:Nx \g_@@_xmppacket_str
+ {<x:xmpmeta~xmlns:x="adobe:ns:meta/">\iow_newline:}
+
+%here more contents ...
+\str_gput_right:Nx \g_@@_xmppacket_str { </x:xmpmeta> \iow_newline: }
+%here padding??
+\str_gput_right:Nn \g_@@_xmppacket_str { <?xpacket~end="w"?> }
+%
+%    \end{macrocode}
+% \subsection{The stream object}
+% This code is currently not activated.
+%    \begin{macrocode}
+
+%\hook_gput_code:nnn {shipout/lastpage}{pdf}
+%  {
+%    \bool_if:NT \g_pdfmeta_xmp_bool
+%      {
+%        \pdf_object_new:nn {__pdf_Metadata} {stream}
+%        \pdf_object_write:nx {__pdf_Metadata}
+%         {
+%           { /Type /Metadata /Subtype /XML }
+%           {\g_@@_xmppacket_str}
+%         }
+%      }
+%  }
 %    \end{macrocode}
 %
 %    \begin{macrocode}
