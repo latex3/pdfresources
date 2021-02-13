@@ -126,18 +126,18 @@
 %
 %    \begin{macrocode}
 
-\hook_gput_code:nnn {shipout/lastpage}{pdf}
-  {
-    \bool_if:NT \g_pdfmeta_xmp_bool
-      {
-        \pdf_object_new:nn {__pdf_Metadata} {stream}
-        \pdf_object_write:nx {__pdf_Metadata}
-         {
-           { /Type /Metadata /Subtype /XML }
-           {\g_@@_xmppacket_str}
-         }
-      }
-  }
+%\hook_gput_code:nnn {shipout/lastpage}{pdf}
+%  {
+%    \bool_if:NT \g_pdfmeta_xmp_bool
+%      {
+%        \pdf_object_new:nn {__pdf_Metadata} {stream}
+%        \pdf_object_write:nx {__pdf_Metadata}
+%         {
+%           { /Type /Metadata /Subtype /XML }
+%           {\g_@@_xmppacket_str}
+%         }
+%      }
+%  }
 %    \end{macrocode}
 %
 % \section{Standards (work in progress)}
