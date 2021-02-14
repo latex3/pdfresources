@@ -199,9 +199,9 @@
 % engines are unclear.
 % \end{NOTE}
 % \begin{function}[EXP, added = 2019-08-18]
-%   {\pdf_object_pageref:n}
+%   {\pdf_pageobject_ref:n}
 %   \begin{syntax}
-%     \cs{pdf_object_pageref:n} \Arg{number}
+%     \cs{pdf_pageobject_ref:n} \Arg{number}
 %   \end{syntax}
 %   This returns the object reference of a page object. The \Arg{number} is
 %   the absolute page number. The count starts with one.
@@ -430,10 +430,10 @@
 %    \end{macrocode}
 %
 % \subsection{Reference to the page object}
-% \begin{macro}{ \pdf_object_pageref:n }
+% \begin{macro}{ \pdf_pageobject_ref:n }
 %    \begin{macrocode}
 %<*package>
-\cs_new:Npn \pdf_object_pageref:n #1 { \@@_backend_pageobject_ref:n { #1 }}
+\cs_new:Npn \pdf_pageobject_ref:n #1 { \@@_backend_pageobject_ref:n { #1 }}
 %</package>
 %    \end{macrocode}
 % \end{macro}
