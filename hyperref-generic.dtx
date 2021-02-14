@@ -3457,8 +3457,9 @@
             \@@_text_pdfstring_info:nN {##1}\l_@@_tmpa_str
             \str_if_eq:VnF\l_@@_tmpa_str{<FEFF>}
               {
-                \pdfmanagement_add:nVx {Info}
-                    \l_keys_key_str {\l_@@_tmpa_str}
+                \exp_args:Nno
+                \pdfmanagement_add:nnx {Info}
+                    { \l_keys_key_str } {\l_@@_tmpa_str}
               }
          }
       }
