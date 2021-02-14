@@ -2,7 +2,7 @@
 %
 %% File: l3pdftools.dtx
 %
-% Copyright (C) 2018-2020 The LaTeX3 Project
+% Copyright (C) 2018-2021 The LaTeX3 Project
 %
 % It may be distributed and/or modified under the conditions of the
 % LaTeX Project Public License (LPPL), either version 1.3c of this
@@ -52,13 +52,12 @@
 %
 % \section{\pkg{l3pdftools} documentation}
 %
-% This module collects a number of commands of the tool type which haven't found
-% another home yet ... Probably this module will disappear again at some time.
+% This module collects a number of candidate commands for the l3pdf module
 %
 % \begin{function}[EXP,added=2021-02-14]
 %   {\pdf_name_from_unicode_e:n}
 %  \begin{syntax}
-%   \cs{\pdf_name_from_unicode_e:n}  \Arg{content}
+%   \cs{pdf_name_from_unicode_e:n}  \Arg{content}
 %  \end{syntax}
 %  This converts \meta{content} to a format suitable for a PDF Name.
 %  It will first expand the content with \cs{text_expand:n} and
@@ -67,7 +66,7 @@
 %  Typically such names use only ascii,
 %  but non-ascii is supported, but should be utf8 encoded. For example\\
 %  |\pdf_name_from_unicode_e:n {A~B\c_percent_str C\c_hash_str D€}}|\\
-%   will    output |/A#20B#25C#23D#E2#82#AC|}.
+%   will    output |/A#20B#25C#23D#E2#82#AC|.
 % \end{function}
 % \begin{function}[added=2020-07-04]
 %   {\pdf_string_from_unicode:nnN}
