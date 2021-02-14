@@ -622,7 +622,9 @@
 \cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
   {
    % this is not used for output, but there is a test if the resource is empty
-   \prop_gput:cnn { \__kernel_pdfdict_name:n { g_@@_Core/Page/Resources/#1} } { #2 }{ #3 }
+   \exp_args:Nnx
+   \prop_gput:cnn { \__kernel_pdfdict_name:n { g_@@_Core/Page/Resources/#1} }
+     { \str_convert_pdfname:n {#2} }{ #3 }
    %objects are not filled with \pdf_object_write as this is not additive!
     \@@_backend:x
       {

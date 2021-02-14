@@ -139,8 +139,9 @@
 % property lists and writes it later into the right PDF dictionary\footnote{Currently all
 % resources are PDF dictionaries, so resource and dictionary mean the same.}
 % Which values for \Arg{resource path} exist is described in the following.
-% \Arg{name} should be a valid PDF Name without
-% the starting slash.
+% \Arg{name} should be a PDF Name without the starting slash. Like with all
+% keys used in PDF dictionaries (see the l3pdfdict module) the name is escaped
+% with \cs{str_convert_pdfname:n} when stored.
 % \Arg{value} should be a valid PDF value for this Name in the
 % target dictionary.
 %
@@ -219,7 +220,10 @@
 %     \cs{pdfmanagement_add:nnn} \{Info\} \Arg{name} \Arg{value}
 %   \end{syntax}
 %   Adds |/|\meta{name} and the \meta{value} to the Info dictionary.
-%   \meta{name} should be a valid pdf name without the leading slash,
+%   \meta{name} should be a PDF name without the leading slash,
+%   Like with all
+%   keys used in PDF dictionaries (see the l3pdfdict module) the name is escaped
+%   with \cs{str_convert_pdfname:n} when stored.
 %   \meta{value} should be a valid pdf value. Any escaping or (re)encoding must be
 %   done explicitly.
 %   If a \meta{name} is used twice, only the last \meta{value}
@@ -730,8 +734,11 @@
                   { @@_handler/#1/#2_gput:n }
                   { \use:c {@@_handler/#1/#2_gput:n} {#3} } %special handler
                   {
+                    \exp_args:Nnx
                     \prop_gput:cnn
-                      { \__kernel_pdfdict_name:n { g__pdf_Core/#1 } }{ #2 } { #3 }
+                      { \__kernel_pdfdict_name:n { g__pdf_Core/#1 } }
+                      { \str_convert_pdfname:n { #2 } }
+                      { #3 }
                   }
               }
           }
@@ -746,9 +753,10 @@
 
 \cs_new_protected:Npn \@@_get:nnN  #1 #2 #3 %path,key,macro
   {
+    \exp_args:Nnx
     \prop_get:cnN
       { \__kernel_pdfdict_name:n { g__pdf_Core/#1 } }
-      { #2 } #3
+      { \str_convert_pdfname:n {#2} } #3
   }
 
 
@@ -764,8 +772,9 @@
                   { @@_handler/#1/#2_gremove: }
                   { \use:c {@@_handler/#1/#2_gremove:} } %special handler
                   {
+                    \exp_args:Nnx
                     \prop_gremove:cn
-                      { \__kernel_pdfdict_name:n { g__pdf_Core/#1 } }{ #2 }
+                      { \__kernel_pdfdict_name:n { g__pdf_Core/#1 } }{ \str_convert_pdfname:n {#2} }
                   }
               }
           }
@@ -778,8 +787,9 @@
   {
     \pdfdict_if_exist:nTF { g__pdf_Core/#1 }
           {
+            \exp_args:Nnx
             \prop_gremove:cn
-              { \__kernel_pdfdict_name:n { g__pdf_Core/#1 } }{ #2 }
+              { \__kernel_pdfdict_name:n { g__pdf_Core/#1 } }{ \str_convert_pdfname:n{#2} }
           }
           {
             \msg_error:nnn { pdfmanagement } { unknown-dict } { #1 }
