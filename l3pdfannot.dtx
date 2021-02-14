@@ -86,9 +86,9 @@
 %   Hooks are not used.
 % \end{function}
 % \begin{function}[added = 2019-09-05]
-%   { \pdfannot_box_last: }
+%   { \pdfannot_box_ref_last: }
 %   \begin{syntax}
-%     \cs{pdfannot_box_last:}
+%     \cs{pdfannot_box_ref_last:}
 %   \end{syntax}
 %   This retrieves the object reference of the last box annotation created.
 % \end{function}
@@ -224,12 +224,12 @@
 % |name{ZZZZ} has been referenced but does not exist, replaced by a fixed one|
 %
 % \end{function}
-% \begin{function}[added = 2020-03-12]{  \pdfannot_link_last: }
+% \begin{function}[added = 2021-02-14]{  \pdfannot_link_ref_last: }
 %   This retrieves the object reference a link created previously with the commands
 %   above. This doesn't work currently with xelatex but a feature request has
 %   been made. see https://tug.org/pipermail/dvipdfmx/2020-December/000134.html
 % \end{function}
-% \begin{function}[added = 2020-06-29]{  \pdfannot_last: }
+% \begin{function}[added = 2021-02-14]{  \pdfannot_ref_last: }
 %   This retrieves the object reference a previously annotation
 %   created either with a link or a general box command. When the last was a link
 %   it won't work with xelatex.
@@ -322,12 +322,11 @@
 % link under a common name.
 % regarding naming and relation of annotation commands see
 % https://github.com/FrankMittelbach/AccessiblePDF/issues/73
-% \end{NOTE}
-
-%\subsection{Annotations / backend}
+% \subsection{Annotations / backend}
 % The backend commands are in l3backend:
 % \cs{__pdf_backend_annotation:nnnn} and \cs{__pdf_backend_annotation_last:}
 % \cs{__pdf_backend_link_begin_user:nnw}, etc
+% \end{NOTE}
 %
 % \subsection{ General Annotations }
 % \begin{variable}
@@ -351,7 +350,7 @@
     \bool_gset_false:N\g_@@_use_lastlink_bool
   }
 
-\cs_new:Npn \pdfannot_box_last:
+\cs_new:Npn \pdfannot_box_ref_last:
   {
     \__pdf_backend_annotation_last:
   }
@@ -519,12 +518,12 @@
   }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}[EXP]{\pdfannot_link_last:, \pdfannot_last:}
+% \begin{macro}[EXP]{\pdfannot_link_ref_last:, \pdfannot_ref_last:}
 %    \begin{macrocode}
-\cs_new:Nn \pdfannot_link_last: { \__pdf_backend_link_last: }
+\cs_new:Nn \pdfannot_link_ref_last: { \__pdf_backend_link_last: }
 %    \end{macrocode}
 %    \begin{macrocode}
-\cs_new:Npn \pdfannot_last:
+\cs_new:Npn \pdfannot_ref_last:
   {
     \bool_if:NTF \g_@@_use_lastlink_bool
       {
