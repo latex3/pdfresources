@@ -55,24 +55,6 @@
 % This module collects a number of commands of the tool type which haven't found
 % another home yet ... Probably this module will disappear again at some time.
 %
-% \begin{function}[EXP,added=2020-07-04]
-%   {\pdf_text_convert:nn}
-%  \begin{syntax}
-%   \cs{pdf_text_convert:nn}  \Arg{format}  \Arg{content}
-%  \end{syntax}
-%  This converts \meta{content} following the rules defined by \meta{format}.
-%  Non-ascii input should be utf8 encoded.
-%  Currently the following formats exist:
-%  \begin{description}
-%     \item[name] This will first expand the content with \cs{text_expand:n} and
-%      then escape it in the way needed in a PDF Name with
-%      \cs{str_convert_pdfname:e}.
-%     \item[name-print] This does the same as the \texttt{name} format, but also
-%     adds a slash before, so
-%      |\pdf_text_convert:nn{name-print}{abc}| will
-%     output \texttt{/abc}.
-%   \end{description}
-% \end{function}
 % \begin{function}[EXP,added=2021-02-14]
 %   {\pdf_name_from_unicode_e:n}
 %  \begin{syntax}
@@ -88,33 +70,33 @@
 %   will    output |/A#20B#25C#23D#E2#82#AC|}.
 % \end{function}
 % \begin{function}[added=2020-07-04]
-%   {\pdf_text_convert:nnN}
+%   {\pdf_string_from_unicode:nnN}
 %  \begin{syntax}
-%   \cs{pdf_text_convert:nnN}  \Arg{format}  \Arg{content} \Arg{tlvar}
+%   \cs{pdf_string_from_unicode:nnN}  \Arg{format}  \Arg{content} \Arg{tlvar}
 %  \end{syntax}
 %  This converts \meta{content} following the rules defined by \meta{format} and stores
 %  the result in \meta{tlvar}. The assignment is done locally.
 %  Non-ascii input should be utf8 encoded.
 %  Currently the following formats exist:
 %  \begin{description}
-%     \item[utf8/string]
+%     \item[utf8/string-raw]
 %      this converts with \cs{str_set_convert:Nnnn} into utf8/string.
-%     \item[utf8/string-print]
-%      this converts into utf8/string and add parentheses around.%
-%     \item[utf8/URIpdf]
+%     \item[utf8/string]
+%      this converts into utf8/string and adds parentheses around the result.%
+%     \item[utf8/URI-raw]
 %      this converts with \cs{str_set_convert:Nnnn} into utf8/url and
-%      then replace reserved and digits back from the percent encoding. Parentheses
+%      then replaces reserved and digits back from the percent encoding. Parentheses
 %      are escaped.
-%     \item[utf8/URIpdf-print]
-%      this converts into utf8/URIpdf  and add parentheses around.%
-%     \item[utf16/string]
+%     \item[utf8/URI]
+%      this converts into utf8/URI  and adds parentheses around the result.%
+%     \item[utf16/string-raw]
 %      this converts with \cs{str_set_convert:Nnnn} into utf16/string.
-%     \item[utf16/string-print]
-%      this converts into utf16/string and add parentheses around.
-%     \item[utf16/hex]
+%     \item[utf16/string]
+%      this converts into utf16/string and adds parentheses around the result.
+%     \item[utf16/hex-raw]
 %      this converts into utf16/hex
-%     \item[utf16/hex-print]
-%     this converts into utf16/hex and add bracket around.
+%     \item[utf16/hex]
+%     this converts into utf16/hex and adds bracket around the result.
 %   \end{description}
 % \end{function}
 %
@@ -257,7 +239,6 @@
 % The convert command must use a different value the source encoding
 % depending on the engines. Until the PR in str-convert is active we add the alias here
 % too
-% \begin{macro}{\pdf_text_convert:nnN}
 %    \begin{macrocode}
 \bool_lazy_any:nTF
   {
@@ -270,9 +251,12 @@
   {
     \prop_gput:Nnn \g__str_alias_prop { default } { utf8 }
   }
-\cs_new:Npn \pdf_text_convert:nnN #1 #2 #3
+%    \end{macrocode}
+% \begin{macro}{\pdf_string_from_unicode:nnN}
+%    \begin{macrocode}
+\cs_new:Npn \pdf_string_from_unicode:nnN #1 #2 #3
   {
-    \cs_if_exist_use:cF { @@_text_convert_#1:nN }
+    \cs_if_exist_use:cF { @@_string_from_unicode_#1:nN }
       {
         \__kernel_msg_error:nnn { pdf } { unknown-convert } {#1}
         \use_none:nn
@@ -280,23 +264,23 @@
     { #2 } #3
   }
 
-\cs_generate_variant:Nn \pdf_text_convert:nnN {nVN}
+\cs_generate_variant:Nn \pdf_string_from_unicode:nnN {nVN}
 %    \end{macrocode}
 % \end{macro}
 % Most converter are simply wrapper around the str-convert commands and so
-% use the same name.
+% use the same names, with the addition raw if no delimiters are added.
 % The exception is the one for url's: it reverts most of the percent encodings
 % and escapes the parentheses.
-% That's why its name is URIpdf instead of url. The current code is probably quite
+% That's why its name is URI instead of url. The current code is probably quite
 % slow and will need a replacement.
-% \begin{macro}{ @@_text_convert_utf8/string:nN }
-% \begin{macro}{ @@_text_convert_utf8/string-print:nN }
-% \begin{macro}{ @@_text_convert_utf8/URIpdf:nN }
-% \begin{macro}{ @@_text_convert_utf8/URIpdf-print:nN }
-% \begin{macro}{ @@_text_convert_utf16/string:nN }
-% \begin{macro}{ @@_text_convert_utf16/string-print:nN }
-% \begin{macro}{ @@_text_convert_utf16/hex:nN }
-% \begin{macro}{ @@_text_convert_utf16/hex-print:nN }
+% \begin{macro}{ @@_string_from_unicode_utf8/string-raw:nN }
+% \begin{macro}{ @@_string_from_unicode_utf8/string:nN }
+% \begin{macro}{ @@_string_from_unicode_utf8/URI-raw:nN }
+% \begin{macro}{ @@_string_from_unicode_utf8/URI:nN }
+% \begin{macro}{ @@_string_from_unicode_utf16/string-raw:nN }
+% \begin{macro}{ @@_string_from_unicode_utf16/string:nN }
+% \begin{macro}{ @@_string_from_unicode_utf16/hex-raw:nN }
+% \begin{macro}{ @@_string_from_unicode_utf16/hex:nN }
 %    \begin{macrocode}
 %% TODO Names need a review when it is clear which converters
 %% are actually needed
@@ -324,7 +308,7 @@
 % "input" is utf8 for pdftex, empty (native) for unicode engine
 % commands to output literal strings  (...)
 
-\cs_new_protected:cpn { @@_text_convert_utf8/string:nN }  #1 #2
+\cs_new_protected:cpn { @@_string_from_unicode_utf8/string-raw:nN }  #1 #2
   {
      \str_set_convert:Nnnn #2
         { #1 }
@@ -332,14 +316,14 @@
         {utf8/string}
   }
 
-\cs_new_protected:cpn { @@_text_convert_utf8/string-print:nN } #1 #2
+\cs_new_protected:cpn { @@_string_from_unicode_utf8/string:nN } #1 #2
   {
-    \use:c { @@_text_convert_utf8/string:nN } { #1 } #2
+    \use:c { @@_string_from_unicode_utf8/string-raw:nN } { #1 } #2
     \str_put_left:Nn #2  {(}
     \str_put_right:Nn #2 {)}
   }
 % special url command:
-\cs_new_protected:cpx { @@_text_convert_utf8/URIpdf:nN }  #1 #2
+\cs_new_protected:cpx { @@_string_from_unicode_utf8/URI-raw:nN }  #1 #2
   {
      \exp_not:N \str_set_convert:Nnnn #2
        { #1 }
@@ -374,14 +358,14 @@
      \exp_not:N \str_replace_all:Nnn #2 {\c_percent_str 29} {\c_backslash_str)}
   }
 
-\cs_new_protected:cpn { @@_text_convert_utf8/URIpdf-print:nN } #1 #2
+\cs_new_protected:cpn { @@_string_from_unicode_utf8/URI:nN } #1 #2
   {
-     \use:c { @@_text_convert_utf8/URIpdf:nN } {#1} #2
+     \use:c { @@_string_from_unicode_utf8/URI-raw:nN } {#1} #2
      \str_put_left:Nn #2  {(}
      \str_put_right:Nn #2 {)}
   }
 % with utf16 with BE marker
-\cs_new_protected:cpn { @@_text_convert_utf16/string:nN }  #1 #2
+\cs_new_protected:cpn { @@_string_from_unicode_utf16/string-raw:nN }  #1 #2
   {
     \str_set_convert:Nnnn #2
       { #1 }
@@ -389,16 +373,14 @@
       {utf16/string}
   }
 
-\cs_new_protected:cpn { @@_text_convert_utf16/string-print:nN } #1 #2
+\cs_new_protected:cpn { @@_string_from_unicode_utf16/string:nN } #1 #2
   {
-    \use:c { @@_text_convert_utf16/string:nN } {#1} #2
+    \use:c { @@_string_from_unicode_utf16/string-raw:nN } {#1} #2
     \str_put_left:Nn #2  {(}
     \str_put_right:Nn #2 {)}
   }
 
-% commands to output hex strings  (...)
-
-\cs_new_protected:cpn { @@_text_convert_utf16/hex:nN } #1 #2
+\cs_new_protected:cpn { @@_string_from_unicode_utf16/hex-raw:nN } #1 #2
   {
      \str_set_convert:Nnnn #2
        { #1 }
@@ -406,9 +388,9 @@
        {utf16/hex}
   }
 
-\cs_new_protected:cpn { @@_text_convert_utf16/hex-print:nN } #1 #2
+\cs_new_protected:cpn { @@_string_from_unicode_utf16/hex:nN } #1 #2
   {
-    \use:c { @@_text_convert_utf16/hex:nN } {#1} #2
+    \use:c { @@_string_from_unicode_utf16/hex-raw:nN } {#1} #2
     \str_put_left:Nn #2  {<}
     \str_put_right:Nn #2 {>}
   }

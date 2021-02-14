@@ -151,7 +151,7 @@
             \pdfdict_remove:nn {file}{Subtype}
           }
           {
-            \pdfdict_put:nnx   {file}{Subtype}{\pdf_text_convert:nn {name}{#1} }
+            \pdfdict_put:nnx   {file}{Subtype}{\pdf_name_from_unicode_e:n{#1} }
           }
       }
     ,mimetype  .groups:n = { embed }
@@ -159,7 +159,7 @@
       {
         \tl_if_empty:nF { #1 }
           {
-           \pdf_text_convert:nnN {string-hex-print}  { #1 } \l__atfi_filename_tl %variable
+           \pdf_string_from_unicode:nnN {string-hex}  { #1 } \l__atfi_filename_tl %variable
            \pdfdict_put:nnx { file/FileSpec } {F}  { \l__atfi_filename_tl }
            \pdfdict_put:nnx { file/FileSpec } {UF} { \l__atfi_filename_tl }
           }
@@ -168,7 +168,7 @@
     ,afrelationship .choices:nn =
       {Source, Data, Alternative, Supplement, EncryptedPayload, FormData, Schema, Unspecified }
       {
-        \pdfdict_put:nnx { file/FileSpec } {AFRelationship }  { \pdf_text_convert:nn {name} {#1} }
+        \pdfdict_put:nnx { file/FileSpec } {AFRelationship }  { \pdf_name_from_unicode_e:n {#1} }
       }
     ,afrelationship .default:n = { Unspecified }
     ,afrelationship / .code:n =
@@ -192,7 +192,7 @@
                 \pdfdict_put:nnx
                   { file/FileSpec }
                   {AFRelationship }
-                  { \pdf_text_convert:nn {name} {#1} }
+                  { \pdf_name_from_unicode_e:n {#1} }
               }
           }
       }
@@ -207,7 +207,7 @@
             \pdfdict_remove:nn {file/FileSpec}{ModDate}
           }
           {
-            \pdfdict_put:nnx   {file}{ModDate}{\pdf_text_convert:nnN {string-lit}{#1} } %or print??
+            \pdfdict_put:nnx   {file}{ModDate}{\pdf_string_from_unicode:nnN {string}{#1} } %or print??
           }
       }
     ,moddate  .groups:n  = { embed }

@@ -305,7 +305,7 @@
           { ##1 }
           \l_@@_tmpa_tl
           {
-            \pdf_text_convert:nVN {utf8/string-print}\l_@@_tmpa_tl\l_@@_tmpa_str
+            \pdf_string_from_unicode:nVN {utf8/string}\l_@@_tmpa_tl\l_@@_tmpa_str
             \pdfdict_put:nnx
               {l_pdfmeta/outputintent}{##1}{\l_@@_tmpa_str}
           }

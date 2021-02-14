@@ -8,18 +8,43 @@
 
 \begin{document}
 \START \showoutput
-\ExplSyntaxOn \providecommand\x{}
-\pdf_text_convert:nn{name}{abc/abc}
-\pdf_text_convert:nn{name-print}{abc/abc}
-\pdf_text_convert:nnN{name-print}{abc/abc}\x
-\show\x
-\pdf_text_convert:nnN{utf16/string}{abc/abc}\x
-\show\x
-\pdf_text_convert:nnN{utf16/string-print}{abc/abc}\x
-\show\x
-\pdf_text_convert:nnN{utf16/hex}{abc/abc}\x
-\show\x
-\pdf_text_convert:nnN{utf16/hex-print}{abc/abc}\x
-\show\x
+\ExplSyntaxOn 
+\TESTEXP {show~name}
+ {
+   \str_convert_pdfname:e    {abc~aaa/abc}
+   \pdf_name_from_unicode_e:n{abc~aaa/abc}
+ }
+
+\TEST{show~string-raw}
+ {
+   \pdf_string_from_unicode:nnN{utf16/string-raw}{abc/abc}\l_tmpa_str
+   \str_if_eq:onTF { \l_tmpa_str } 
+     { \376\377\000a\000b\000c\000/\000a\000b\000c } { \TRUE } { \ERROR }
+   \pdf_string_from_unicode:nnN{utf16/string}{abc/abc}\l_tmpa_str
+     \str_if_eq:onTF { \l_tmpa_str }
+     { (\376\377\000a\000b\000c\000/\000a\000b\000c) } { \TRUE } { \ERROR }
+ 
+ }
+
+
+\TEST{show~string-hex}
+ {
+   \pdf_string_from_unicode:nnN{utf16/hex-raw}{abc/abc}\l_tmpa_str
+   \str_if_eq:onTF { \l_tmpa_str }
+     { FEFF006100620063002F006100620063 } { \TRUE } { \ERROR }
+   \pdf_string_from_unicode:nnN{utf16/hex}{abc/abc}\l_tmpa_str
+   \str_if_eq:onTF { \l_tmpa_str }
+     { <FEFF006100620063002F006100620063> } { \TRUE } { \ERROR }
+
+ }
+
+
+\TEST{show~string-URI}
+ {
+   \pdf_string_from_unicode:nnN{utf8/URI}{https://www.123.cy&abc=blub+}\l_tmpa_str
+   \str_if_eq:onTF { \l_tmpa_str }
+     { (https://www.123.cy&abc=blub+) } { \TRUE } { \ERROR }
+ }
+
 \ExplSyntaxOff
 \end{document} 

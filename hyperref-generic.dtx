@@ -1261,12 +1261,12 @@
 \tl_new:N  \l_@@_text_enc_file_print_tl
 \tl_new:N  \l_@@_text_enc_para_print_tl
 
-\tl_set:Nn \l_@@_text_enc_uri_print_tl  {utf8/URIpdf-print}
-\tl_set:Nn \l_@@_text_enc_info_print_tl {utf16/hex-print}
-\tl_set:Nn \l_@@_text_enc_dest_tl       {utf8/string}
-\tl_set:Nn \l_@@_text_enc_dest_print_tl {utf8/string-print}
-\tl_set:Nn \l_@@_text_enc_file_print_tl {utf8/string-print}
-\tl_set:Nn \l_@@_text_enc_para_print_tl {utf8/string-print}
+\tl_set:Nn \l_@@_text_enc_uri_print_tl  {utf8/URI}
+\tl_set:Nn \l_@@_text_enc_info_print_tl {utf16/hex}
+\tl_set:Nn \l_@@_text_enc_dest_tl       {utf8/string-raw}
+\tl_set:Nn \l_@@_text_enc_dest_print_tl {utf8/string}
+\tl_set:Nn \l_@@_text_enc_file_print_tl {utf8/string}
+\tl_set:Nn \l_@@_text_enc_para_print_tl {utf8/string}
 %    \end{macrocode}
 % \end{variable}
 % \begin{variable}{\l_@@_dest_pdfview_tl}
@@ -1423,26 +1423,26 @@
 % \end{macro}
 % The last step converts the string to a PDF encoding. As we have at least two
 % targets (hex and literal) there is an argument. The conversion assumes
-% utf8 input, it is based on cs{pdf_text_convert:nnN} in l3pdftools.
+% utf8 input, it is based on cs{pdf_string_from_unicode:nnN} in l3pdftools.
 %
 % \#2 is str variable,
 % \#1 should be one of
 %
 % \begin{tabular}{ll}
-%  utf8/string-print   & \texttt{(lit)} (utf8/string)\\
-%  utf8/string         & \texttt{lit}   (utf8/string)\\
-%  utf8/URIpdf-print   & \texttt{(percent encoded url)}\\
-%  utf8/URIpdf         & \texttt{percent encoded url}\\
-%  utf16/hex-print     & \texttt{<HEX>} (utf16/hex)\\
-%  utf16/hex           & \texttt{HEX}   (utf16/hex)\\
-%  utf16/string_print  & \texttt{(lit)} (utf16/string)\\
-%  utf16/string-lit    & \texttt{lit}   (utf16/string)
+%  utf8/string         & \texttt{(lit)} (utf8/string)\\
+%  utf8/string-raw     & \texttt{lit}   (utf8/string)\\
+%  utf8/URI            & \texttt{(percent encoded url)}\\
+%  utf8/URI-raw         & \texttt{percent encoded url}\\
+%  utf16/hex            & \texttt{<HEX>} (utf16/hex)\\
+%  utf16/hex-raw           & \texttt{HEX}   (utf16/hex)\\
+%  utf16/string        & \texttt{(lit)} (utf16/string)\\
+%  utf16/string-raw    & \texttt{lit}   (utf16/string)
 %  \end{tabular}
-%  \begin{macro}{ \@@_text_convert:nN }
+%  \begin{macro}{ \@@_text_string_from_unicode:nN }
 %    \begin{macrocode}
-\cs_new_protected:Npn \@@_text_convert:nN #1 #2
+\cs_new_protected:Npn \@@_text_string_from_unicode:nN #1 #2
   {
-     \pdf_text_convert:nVN { #1 } #2 #2
+     \pdf_string_from_unicode:nVN { #1 } #2 #2
   }
 %    \end{macrocode}
 % \end{macro}
@@ -1460,7 +1460,7 @@
     \hook_use:n {hyp/text/pdfstring}
     \@@_text_purify:nN  { #1 } \l_@@_text_tmpa_str
     \@@_text_cleanup:N         \l_@@_text_tmpa_str
-    \@@_text_convert:nN { #2 } \l_@@_text_tmpa_str
+    \@@_text_string_from_unicode:nN { #2 } \l_@@_text_tmpa_str
     \str_gset_eq:NN \g_@@_text_tmpa_str\l_@@_text_tmpa_str
     \group_end:
     \str_set_eq:NN #3 \g_@@_text_tmpa_str
@@ -1476,7 +1476,7 @@
 %^^A  \char_set_catcode_active:N \~
 %    \begin{macrocode}
 \cs_new_protected:Npn\Hy@pstringdef #1 #2
-  { \@@_text_pdfstring:xnN {#2} {utf8/string}#1 }
+  { \@@_text_pdfstring:xnN {#2} {utf8/string-raw}#1 }
 %    \end{macrocode}
 %
 % This is a special version for info keys:
