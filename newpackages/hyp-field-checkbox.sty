@@ -49,10 +49,10 @@
 %  }
 %
 
-\cs_generate_variant:Nn \pdf_xform_wd:n {e}
-\cs_generate_variant:Nn \pdf_xform_ht:n {e}
-\cs_generate_variant:Nn \pdf_xform_dp:n {e}
-\cs_generate_variant:Nn \pdf_xform_ref:n{e}
+\cs_generate_variant:Nn \pdfxform_wd:n {e}
+\cs_generate_variant:Nn \pdfxform_ht:n {e}
+\cs_generate_variant:Nn \pdfxform_dp:n {e}
+\cs_generate_variant:Nn \pdfxform_ref:n{e}
 
 \pdfdict_new:nn {l} {hyp/checkbox/Field}
 \pdfdict_new:nn {l} {hyp/checkbox/Annot}
@@ -102,7 +102,7 @@
 
 \NewDocumentCommand \newcheckboxappearance { s  m m  }  %#2=name, #3 = content
  {
-   \pdf_xform_new:nnn {#2}{}
+   \pdfxform_new:nnn {#2}{}
      {
       \normalsize
       \hbox_set:Nn   \l_tmpa_box { #3 \strut }
@@ -173,11 +173,11 @@
 \cs_new_protected:Nn \__uf_normalise_boxes:
   {
     \dim_set:Nn \l__uf_field_wd_dim
-       { \dim_max:nn { \pdf_xform_wd:e {\l__uf_normal_off_tl} }{ \pdf_xform_wd:e {\l__uf_normal_yes_tl} } }
+       { \dim_max:nn { \pdfxform_wd:e {\l__uf_normal_off_tl} }{ \pdfxform_wd:e {\l__uf_normal_yes_tl} } }
     \dim_set:Nn \l__uf_field_ht_dim
-      { \dim_max:nn { \pdf_xform_ht:e {\l__uf_normal_off_tl} }{ \pdf_xform_ht:e {\l__uf_normal_yes_tl} } }
+      { \dim_max:nn { \pdfxform_ht:e {\l__uf_normal_off_tl} }{ \pdfxform_ht:e {\l__uf_normal_yes_tl} } }
     \dim_set:Nn \l__uf_field_dp_dim
-      { \dim_max:nn { \pdf_xform_dp:e {\l__uf_normal_off_tl} }{ \pdf_xform_dp:e {\l__uf_normal_yes_tl} } }
+      { \dim_max:nn { \pdfxform_dp:e {\l__uf_normal_off_tl} }{ \pdfxform_dp:e {\l__uf_normal_yes_tl} } }
   }
 
 
@@ -232,8 +232,8 @@
             /AP ~
               <<
                 /N ~
-                  << /Yes ~ \pdf_xform_ref:e { \l__uf_normal_yes_tl}
-                     /Off ~ \pdf_xform_ref:e { \l__uf_normal_off_tl}
+                  << /Yes ~ \pdfxform_ref:e { \l__uf_normal_yes_tl}
+                     /Off ~ \pdfxform_ref:e { \l__uf_normal_off_tl}
                   >>
               >>
            }

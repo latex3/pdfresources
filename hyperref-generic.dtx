@@ -3770,7 +3770,7 @@
 %    \begin{macrocode}
 \NewDocumentCommand \MakeFieldObject { m m }
   {
-    \pdf_xform_new:nnn { #2 }{} { #1 }
+    \pdfxform_new:nnn { #2 }{} { #1 }
   }
 
 
@@ -4130,8 +4130,8 @@
          <<
          /N
           <<
-          /\@currValue\c_space_tl \pdf_xform_ref:o {__hyp_xform_Ding}
-          %/Off \c_space_tl \pdf_xform_ref:n {__hyp_xform_DingOff} %hm
+          /\@currValue\c_space_tl \pdfxform_ref:o {__hyp_xform_Ding}
+          %/Off \c_space_tl \pdfxform_ref:n {__hyp_xform_DingOff} %hm
           >>
          >>
       }
@@ -4225,8 +4225,8 @@
       {
         \PDFForm@Submit
         /AP<<
-          /N~\pdf_xform_ref:n {__hyp_xform_Submit}~
-          /D~\pdf_xform_ref:n {__hyp_xform_SubmitP}
+          /N~\pdfxform_ref:n {__hyp_xform_Submit}~
+          /D~\pdfxform_ref:n {__hyp_xform_SubmitP}
          >>
        }
       \HyField@AddToFields
@@ -4510,8 +4510,8 @@
      <<
       /N
         <<
-          /Yes~\pdf_xform_ref:o{\l_@@_CheckmarkYes_tl}
-          /Off~\pdf_xform_ref:o{\l_@@_CheckmarkOff_tl}
+          /Yes~\pdfxform_ref:o{\l_@@_CheckmarkYes_tl}
+          /Off~\pdfxform_ref:o{\l_@@_CheckmarkOff_tl}
         >>
     >>
   /MK<<

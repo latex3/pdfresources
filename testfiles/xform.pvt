@@ -9,18 +9,18 @@
 text
 \ExplSyntaxOn
 
-\pdf_xform_new:nnn  {myxformA}{/yyy~(bla)}{yyyyy}
+\pdfxform_new:nnn  {myxformA}{/yyy~(bla)}{yyyyy}
 
 \pdfmanagement_add:nnn{Page/Resources/ExtGState}{bearopacity}{<</ca~0.7/CA~0.7>>}
 
-\pdf_xform_new:nnn  {myxform}{/yyy~(bla)}{xxxxxxxxxx}
+\pdfxform_new:nnn  {myxform}{/yyy~(bla)}{xxxxxxxxxx}
 
-\pdf_xform_use:n {myxform}~\pdf_xform_use:n {myxformA}
+\pdfxform_use:n {myxform}~\pdfxform_use:n {myxformA}
 some~text~
-\pdf_xform_use:n {myxform}
+\pdfxform_use:n {myxform}
 ~
-~\pdf_xform_ref:n {myxform}
-%~\pdf_xform_name_ref:n {myxform}
-%\prop_show:N\g__pdf_xform_prop
+~\pdfxform_ref:n {myxform}
+%~\pdfxform_name_ref:n {myxform}
+%\prop_show:N\g__pdfxform_prop
 \ExplSyntaxOff
 \end{document} 

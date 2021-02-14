@@ -180,7 +180,8 @@
 %
 % \section{Modules}
 % The bundle contains a number of modules. The organization and naming is bound
-% to change over time.
+% to change over time. The description items give the name of the documentation
+% of the bundles. There doesn't exist in all cases a related |.sty|.
 %
 % \begin{description}
 % \item[l3pdfdict] This modules provides commands for PDF dictionaries. Its main
@@ -209,9 +210,8 @@
 % It is quite incomplete currently. It is loaded by the bundle, and
 % should not be loaded independently.
 %
-% \item[l3pdfutils] A number of commands  like e.g. for xform objects.
-% It will probably disappear. It is loaded by the bundle, and
-% should not be loaded independently.
+% \item[l3pdfxform]  Commands for form XObjects (xforms).
+% The code is loaded by the bundle.
 %
 % \item[l3pdftool] A number of commands like text conversion commands and
 % bcd/emc.  It will probably disappear. It is loaded by the bundle, and
@@ -353,8 +353,10 @@
 %<*package>
 \RequirePackage{l3pdfdict}       % needed by l3pdfmanagement
 \RequirePackage{l3pdfmanagement} % loads the core code with the boolean
-\RequirePackage{ltdocinit}       % DeclareDocumentMetadata, l3pdfannot, l3pdfutils
-% optional?
+\RequirePackage{ltdocinit}       % DeclareDocumentMetadata,
+% can perhaps be combined or made optional ...
+\RequirePackage{l3pdfannot}
+\RequirePackage{l3pdfxform-beta}
 \RequirePackage{l3pdfmeta}       %
 \RequirePackage{l3pdftools}
 

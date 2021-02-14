@@ -1365,9 +1365,9 @@
              \@@_backend:x
                {
                  bxobj  ~ \@@_backend_xform_ref:n  { #1 }
-                 \c_space_tl width  ~ \pdf_xform_wd:n { #1 }
-                 \c_space_tl height ~ \pdf_xform_ht:n { #1 }
-                 \c_space_tl depth  ~ \pdf_xform_dp:n { #1 }
+                 \c_space_tl width  ~ \pdfxform_wd:n { #1 }
+                 \c_space_tl height ~ \pdfxform_ht:n { #1 }
+                 \c_space_tl depth  ~ \pdfxform_dp:n { #1 }
                }
              \box_use_drop:c { g_@@_backend_xform_#1_box }
              \@@_backend:x {put ~ @resources ~<<#3>> }
@@ -1421,9 +1421,9 @@
                uxobj~ \@@_backend_xform_ref:n { #1 }
              }
          }
-       \box_set_wd:Nn  \l_@@_backend_tmpa_box { \pdf_xform_wd:n { #1 } }
-       \box_set_ht:Nn  \l_@@_backend_tmpa_box { \pdf_xform_ht:n { #1 } }
-       \box_set_dp:Nn  \l_@@_backend_tmpa_box { \pdf_xform_dp:n { #1 } }
+       \box_set_wd:Nn  \l_@@_backend_tmpa_box { \pdfxform_wd:n { #1 } }
+       \box_set_ht:Nn  \l_@@_backend_tmpa_box { \pdfxform_ht:n { #1 } }
+       \box_set_dp:Nn  \l_@@_backend_tmpa_box { \pdfxform_dp:n { #1 } }
        \box_use_drop:N \l_@@_backend_tmpa_box
      }
 %</dvipdfmx|xdvipdfmx>
@@ -1441,7 +1441,7 @@
      { \prg_return_true: }
      { \prg_return_false:}
   }
-\prg_new_eq_conditional:NNn \pdf_xform_if_exist:n\@@_backend_xform_if_exist:n
+\prg_new_eq_conditional:NNn \pdfxform_if_exist:n\@@_backend_xform_if_exist:n
   { TF , T , F , p }
 %</drivers>
 %    \end{macrocode}

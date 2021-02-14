@@ -4,13 +4,13 @@
 \RequirePackage{pdfmanagement-regressiontest}
 \documentclass{article}
 \ExplSyntaxOn
-\pdf_xform_new:nnn  {myxformA}{/yyy~(bla)}{yyyyy}
+\pdfxform_new:nnn  {myxformA}{/yyy~(bla)}{yyyyy}
 \ExplSyntaxOff
 \begin{document}
 \START
 text
 \ExplSyntaxOn
-\pdf_xform_use:n {myxformA}
+\pdfxform_use:n {myxformA}
 some~text~
 \ExplSyntaxOff
 \end{document} 

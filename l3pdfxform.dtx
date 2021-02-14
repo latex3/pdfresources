@@ -1,8 +1,8 @@
 % \iffalse meta-comment
 %
-%% File: l3pdfutils.dtx
+%% File: l3pdfxform.dtx
 %
-% Copyright (C) 2018-2020 The LaTeX3 Project
+% Copyright (C) 2018-2021 The LaTeX3 Project
 %
 % It may be distributed and/or modified under the conditions of the
 % LaTeX Project Public License (LPPL), either version 1.3c of this
@@ -31,7 +31,7 @@
 % \fi
 %
 % \title{^^A
-%   The \pkg{l3pdfutils} package\\ pdf-utilities   ^^A
+%   The \pkg{l3pdfxform} package\\ Commands for form XObjects   ^^A
 % }
 %
 % \author{^^A
@@ -48,14 +48,20 @@
 % \maketitle
 % \begin{documentation}
 %
-% \section{\pkg{l3pdfutils} documentation}
-% This module contains a number of commands to create xforms.
-%  \begin{function}[added = 2019-08-05]
+% \section{\pkg{l3pdfxform} documentation}
+% This module contains a number of commands to create \enquote{form XObjects},
+% for which pdf\TeX{} introduced the short name \enquote{xforms}.
+%
+% The status is still beta, so the style itself is named
+% \pkg{l3pdfxform-beta}. Missing is for example code for the dvips route.
+% Probably some of the function will also need to be enhanced by hooks.
+%
+%  \begin{function}[added = 2019-08-05,updated=2021-02-14]
 %   {
-%     \pdf_xform_new:nnn
+%     \pdfxform_new:nnn
 %   }
 %   \begin{syntax}
-%     \cs{pdf_xform_new:nnn} \Arg{name} \Arg{attributes} \Arg{content}
+%     \cs{pdfxform_new:nnn} \Arg{name} \Arg{attributes} \Arg{content}
 %   \end{syntax}
 %    This command create a new form XObject that can be used as appearance or
 %    directly later.
@@ -64,48 +70,48 @@
 %    BDC-marks can be added to the resources of the xform. The xform will automatically
 %    include the resources of the current page.
 %    The content will be typeset in a hbox. With pdflatex and luatex
-%    the surrounding color is \emph{not} stored in the XObject
+%    the surrounding color is \emph{not} stored in the form XObject
 %    but should be if wanted added e.g. with |\color_select:n{.}|. This keeps
 %    the option of color injection open.
 %   \end{function}
 %   \begin{function}[added = 2019-08-05]
 %     {
-%      \pdf_xform_use:n
+%      \pdfxform_use:n
 %     }
 %   \begin{syntax}
-%     \cs{pdf_xform_use:n} \Arg{name}
+%     \cs{pdfxform_use:n} \Arg{name}
 %   \end{syntax}
 %    This command uses (typesets) a previously created form XObject.
-%    If the surrounding color is different, it is injected in the XObject with the
+%    If the surrounding color is different, it is injected in the form XObject with the
 %    engines pdftex or luatex.
 %   \end{function}
 %   \begin{function}[EXP,added = 2019-08-05]
 %     {
-%       \pdf_xform_ref:n
+%       \pdfxform_ref:n
 %     }
 %   \begin{syntax}
-%     \cs{pdf_xform_ref:n} \Arg{name}
+%     \cs{pdfxform_ref:n} \Arg{name}
 %   \end{syntax}
 %   Inserts the appropriate information to reference the xform \meta{name}
 %   in for example appearance dictionaries.
 %   \end{function}
 %   \begin{function}[EXP,added = 2019-08-05]
 %     {
-%       \pdf_xform_wd:n, \pdf_xform_ht:n, \pdf_xform_dp:n
+%       \pdfxform_wd:n, \pdfxform_ht:n, \pdfxform_dp:n
 %     }
 %   \begin{syntax}
-%     \cs{pdf_xform_wd:n} \Arg{name}
+%     \cs{pdfxform_wd:n} \Arg{name}
 %   \end{syntax}
-%    These command give back the sizes of the XObject. The values are stored in
+%    These command give back the sizes of the form XObject. The values are stored in
 %    tl-variables with the unit pt and not in dimensions!
 %   \end{function}
 %   \begin{function}[EXP,pTF,added = 2020-04-29]
 %     {
-%       \pdf_xform_if_exist:n
+%       \pdfxform_if_exist:n
 %     }
 %   \begin{syntax}
-%     \cs{pdf_xform_if_exist_p:n} \Arg{name}
-%     \cs{pdf_xform_if_exist:NTF} \meta{name} \Arg{true code} \Arg{false code}
+%     \cs{pdfxform_if_exist_p:n} \Arg{name}
+%     \cs{pdfxform_if_exist:NTF} \meta{name} \Arg{true code} \Arg{false code}
 %   \end{syntax}
 %    These command tests if an xform with name \Arg{name} has been already defined.
 %   \end{function}%
@@ -113,12 +119,12 @@
 %
 % \begin{implementation}
 %
-% \section{\pkg{l3pdfutils} implementation}
+% \section{\pkg{l3pdfxform} implementation}
 %
 %    \begin{macrocode}
 %<*package>
 %<@@=pdf>
-\ProvidesExplPackage {l3pdfutils} {2020-12-04} {0.2}
+\ProvidesExplPackage {l3pdfxform-beta} {2021-02-14} {0.3}
   {command to create xforms}
 %    \end{macrocode}
 % \subsection{Form XObject (pdfxform)}
@@ -134,37 +140,36 @@
 %  - dvips implementation is missing for ideas: pdfbase, atfi-dvips.def,
 %  \end{NOTE}
 %
-%  \subsubsection{Form XObject / management}
 %    \begin{macrocode}
 %<*package>
-\cs_new_protected:Npn  \pdf_xform_new:nnn #1 #2 #3
+\cs_new_protected:Npn  \pdfxform_new:nnn #1 #2 #3
   {
     \@@_backend_xform_new:nnnn { #1 } { #2 } {  } { #3 }
   }
 
-\cs_new_protected:Npn \pdf_xform_use:n #1
+\cs_new_protected:Npn \pdfxform_use:n #1
   {
     \@@_backend_xform_use:n { #1 }
   }
 % expansion?
-\cs_new:Npn \pdf_xform_ref:n #1
+\cs_new:Npn \pdfxform_ref:n #1
   {
     \@@_backend_xform_ref:n { #1 }
   }
 
-\cs_generate_variant:Nn \pdf_xform_ref:n {o}
+\cs_generate_variant:Nn \pdfxform_ref:n {o}
 
-\cs_new:Npn \pdf_xform_wd:n #1
+\cs_new:Npn \pdfxform_wd:n #1
   {
     \tl_use:c { c_@@_backend_xform_wd_ \tl_to_str:n { #1 } _tl }
   }
 
-\cs_new:Npn \pdf_xform_ht:n #1
+\cs_new:Npn \pdfxform_ht:n #1
   {
     \tl_use:c { c_@@_backend_xform_ht_ \tl_to_str:n { #1 } _tl }
   }
 
-\cs_new:Npn \pdf_xform_dp:n #1
+\cs_new:Npn \pdfxform_dp:n #1
   {
     \tl_use:c { c_@@_backend_xform_dp_ \tl_to_str:n { #1 } _tl }
   }

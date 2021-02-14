@@ -403,9 +403,9 @@
 % create the appearance xform:
 \cs_new_protected:Npn \__atfi_annot_xform_appearance:n #1
   {
-    \pdf_xform_if_exist:nF { g__atfi_annot_iconxform_#1 }
+    \pdfxform_if_exist:nF { g__atfi_annot_iconxform_#1 }
       {
-        \pdf_xform_new:nnn
+        \pdfxform_new:nnn
           { g__atfi_annot_iconxform_#1 }
           { } % attributes?
           { \use:c { __atfi_annot_print_icon_#1 } }
@@ -426,36 +426,36 @@
         \pdfdict_put:nnx
           { annot/FileAttachment/AP }
           { N }
-          { \pdf_xform_ref:n { g__atfi_annot_iconxform_\l__atfi_annot_icon_tl } }
+          { \pdfxform_ref:n { g__atfi_annot_iconxform_\l__atfi_annot_icon_tl } }
         \pdfdict_put:nnx
           { annot/FileAttachment/AP }
           { R }
-          { \pdf_xform_ref:n { g__atfi_annot_iconxform_\l__atfi_annot_icon_tl } }
+          { \pdfxform_ref:n { g__atfi_annot_iconxform_\l__atfi_annot_icon_tl } }
         \pdfdict_put:nnx
           { annot/FileAttachment/AP }
           { D }
-          { \pdf_xform_ref:n { g__atfi_annot_iconxform_\l__atfi_annot_icon_tl } }
+          { \pdfxform_ref:n { g__atfi_annot_iconxform_\l__atfi_annot_icon_tl } }
        }
      \pdfannot_box:nnnn
         {
           \fp_to_dim:n
             {
               \l__atfi_annot_scale_fp *
-              \pdf_xform_wd:n{g__atfi_annot_iconxform_\l__atfi_annot_icon_tl}
+              \pdfxform_wd:n{g__atfi_annot_iconxform_\l__atfi_annot_icon_tl}
             }
         }
         {
           \fp_to_dim:n
             {
               \l__atfi_annot_scale_fp *
-              \pdf_xform_ht:n{g__atfi_annot_iconxform_\l__atfi_annot_icon_tl}
+              \pdfxform_ht:n{g__atfi_annot_iconxform_\l__atfi_annot_icon_tl}
             }
         }
         {
           \fp_to_dim:n
             {
               \l__atfi_annot_scale_fp *
-              \pdf_xform_dp:n{g__atfi_annot_iconxform_\l__atfi_annot_icon_tl}
+              \pdfxform_dp:n{g__atfi_annot_iconxform_\l__atfi_annot_icon_tl}
             }
         }
         {
@@ -538,7 +538,7 @@
     \__atfi_annot_store_appearancebox: %????
     \bool_if:NTF \l__atfi_annot_print_bool
       {
-        \pdf_xform_use:n { atfi@appearancebox\l__atfi_annot_icon_tl } %icon, is use meant here??
+        \pdfxform_use:n { atfi@appearancebox\l__atfi_annot_icon_tl } %icon, is use meant here??
       }
       {
         \makebox[\atfi@appearancewidth]{}% \strut?
