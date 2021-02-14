@@ -659,13 +659,13 @@
 % \begin{macro}
 %   {
 %     \@@_backend_bdc:nn,
-%     \@@_backend_bdc_obj:nn,
-%     \@@_backend_bdc_obj:n,
+%     \@@_backend_bdcobject:nn,
+%     \@@_backend_bdcobject:n,
 %     \@@_backend_bmc:n,
 %     \@@_backend_emc:,
 %     \@@_backend_PageResources_gpush:n
 %   }
-% \cs{@@_backend_bdc:nn}, \cs{@@_backend_bdc_obj:nn}, \cs{@@_backend_bdc_obj:n},
+% \cs{@@_backend_bdc:nn}, \cs{@@_backend_bdcobject:nn}, \cs{@@_backend_bdcobject:n},
 % \cs{@@_backend_bmc:n} and \cs{@@_backend_emc:}
 %  are the backend command that
 %  create the bdc/emc marker and store the properties.
@@ -688,11 +688,11 @@
   {
     \__pdf_backend_pdfmark:x{/#1~<<#2>>~/BDC}
   }
-\cs_set_protected:Npn \@@_backend_bdc_obj:nn #1 #2 % #1 eg. Span, #2: object name
+\cs_set_protected:Npn \@@_backend_bdcobject:nn #1 #2 % #1 eg. Span, #2: object name
   {
     \__pdf_backend_pdfmark:x{/#1~\@@_backend_object_ref:n{#2}~/BDC}
   }
-\cs_set_protected:Npn \@@_backend_bdc_obj:n #1  % #1 eg. Span,
+\cs_set_protected:Npn \@@_backend_bdcobject:n #1  % #1 eg. Span,
   {
     \__pdf_backend_pdfmark:x{/#1~\@@_backend_object_last:~/BDC}
   }
@@ -712,9 +712,9 @@
 %
 \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: dict_content
   {}
-\cs_set_protected:Npn \@@_backend_bdc_obj:nn #1 #2 % #1 eg. Span, #2: object name
+\cs_set_protected:Npn \@@_backend_bdcobject:nn #1 #2 % #1 eg. Span, #2: object name
   {}
-\cs_set_protected:Npn \@@_backend_bdc_obj:n #1  % #1 eg. Span,
+\cs_set_protected:Npn \@@_backend_bdcobject:n #1  % #1 eg. Span,
   {}
 \cs_set_protected:Npn \@@_backend_emc:
   {}
@@ -731,7 +731,7 @@
 % the property is added to xform resources automatically,
 % no need to worry about it.
 %<*dvipdfmx|xdvipdfmx>
- \cs_set_protected:Npn \@@_backend_bdc_obj:nn #1 #2 % #1 eg. Span, #2: object name
+ \cs_set_protected:Npn \@@_backend_bdcobject:nn #1 #2 % #1 eg. Span, #2: object name
    {
      \int_gincr:N \g_@@_backend_name_int
      \__kernel_backend_literal:x
@@ -750,7 +750,7 @@
            >>
        }
    }
- \cs_set_protected:Npn \@@_backend_bdc_obj:n #1  % #1 eg. Span
+ \cs_set_protected:Npn \@@_backend_bdcobject:n #1  % #1 eg. Span
    {
      \int_gincr:N \g_@@_backend_name_int
      \__kernel_backend_literal:x
@@ -778,7 +778,7 @@
 \cs_set_protected:Npn \@@_backend_bdc_contobj:nn #1 #2
   {
     \pdf_object_now:nn { dict }{ #2 }
-    \@@_backend_bdc_obj:n { #1 }
+    \@@_backend_bdcobject:n { #1 }
   }
 
 \cs_set_protected:Npn \@@_backend_bdc_contstream:nn #1 #2
@@ -816,7 +816,7 @@
 %</dvipdfmx|xdvipdfmx>
 % luatex + pdftex
 %<*luatex>
-\cs_set_protected:Npn \@@_backend_bdc_obj:nn #1 #2 % #1 eg. Span, #2: object name
+\cs_set_protected:Npn \@@_backend_bdcobject:nn #1 #2 % #1 eg. Span, #2: object name
   {
     \int_gincr:N \g_@@_backend_name_int
     \exp_args:Nx\__kernel_backend_literal_page:n
@@ -840,7 +840,7 @@
           }
       }
   }
-\cs_set_protected:Npn \@@_backend_bdc_obj:n #1% #1 eg. Span
+\cs_set_protected:Npn \@@_backend_bdcobject:n #1% #1 eg. Span
   {
     \int_gincr:N \g_@@_backend_name_int
     \exp_args:Nx\__kernel_backend_literal_page:n
@@ -871,7 +871,7 @@
 \cs_set_protected:Npn \@@_backend_bdc_contobj:nn #1 #2
   {
     \pdf_object_now:nn { dict } { #2 }
-    \@@_backend_bdc_obj:n { #1 }
+    \@@_backend_bdcobject:n { #1 }
   }
 \cs_set_protected:Npn \@@_backend_bdc_contstream:nn #1 #2
   {
@@ -894,7 +894,7 @@
 %<*pdftex>
 % pdflatex is the most complicated as it has to go through the aux ...
 % the push command is extended to take other resources too
-\cs_set_protected:Npn \@@_backend_bdc_obj:nn #1 #2 % #1 eg. Span, #2: object name
+\cs_set_protected:Npn \@@_backend_bdcobject:nn #1 #2 % #1 eg. Span, #2: object name
   {
     \int_gincr:N \g_@@_backend_name_int
     \exp_args:Nx\__kernel_backend_literal_page:n
@@ -933,7 +933,7 @@
           { \@@_backend_object_ref:n{#2} }
       }
   }
-\cs_set_protected:Npn \@@_backend_bdc_obj:n #1% #1 eg. Span
+\cs_set_protected:Npn \@@_backend_bdcobject:n #1% #1 eg. Span
   {
     \int_gincr:N \g_@@_backend_name_int
     \exp_args:Nx\__kernel_backend_literal_page:n
@@ -980,7 +980,7 @@
 \cs_set_protected:Npn \@@_backend_bdc_contobj:nn #1 #2
    {
      \pdf_object_now:nn { dict } { #2 }
-     \@@_backend_bdc_obj:n { #1 }
+     \@@_backend_bdcobject:n { #1 }
    }
 \cs_set_protected:Npn \@@_backend_bdc_contstream:nn #1 #2
    {

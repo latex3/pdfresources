@@ -130,7 +130,7 @@
 % dvips/ghostscript will automatically create the necessary objects and names.
 % To get a sensible abstraction the code does the same for the other backends if the
 % core management code has been activated. This means that the behaviour
-% of the command is different then. The \cs{pdf_bdc_obj:..} should only be used
+% of the command is different then. The \cs{pdf_bdcobject:..} should only be used
 % if the management is active.
 % \begin{function}[updated = 2020-07-03]
 %   {
@@ -151,10 +151,10 @@
 % \end{function}
 % \begin{function}[added = 2020-07-03]
 %   {
-%     \pdf_bdc_obj:nn
+%     \pdf_bdcobject:nn
 %   }
 %   \begin{syntax}
-%     \cs{pdf_bdc_obj:nn} \Arg{tag} \Arg{object name}
+%     \cs{pdf_bdcobject:nn} \Arg{tag} \Arg{object name}
 %   \end{syntax}
 %   This command adds a BDC marked content operator to the current page stream.
 %   \meta{tag} is the tag of this operator (without the leading slash),
@@ -167,16 +167,16 @@
 % \end{function}
 % \begin{function}[updated = 2020-07-03]
 %   {
-%     \pdf_bdc_obj:n
+%     \pdf_bdcobject:n
 %   }
 %   \begin{syntax}
-%     \cs{pdf_bdc_obj:n} \Arg{tag}
+%     \cs{pdf_bdcobject:n} \Arg{tag}
 %   \end{syntax}
 %    This command adds a BDC marked content operator to the current page stream.
 %   \meta{tag} is the tag of this operator (without the leading slash).
 %   As object this commands uses the last anonymous dictionary object created with
 %   \cs{pdf_object_now:nn}. It lies in the responsibility of the user that the last
-%   object is the wanted one. Like with \cs{pdf_bdc_obj:nn} the command works correctly
+%   object is the wanted one. Like with \cs{pdf_bdcobject:nn} the command works correctly
 %   only if the resources management has been activated and should be used only
 %   if this can be ensured.
 % \end{function}
@@ -425,15 +425,15 @@
 %
 % \subsubsection{BDC  operator commands}
 % \begin{macro}{\pdf_bdc:nn}
-% \begin{macro}{\pdf_bdc_obj:nn}
-% \begin{macro}{\pdf_bdc_obj:n}
+% \begin{macro}{\pdf_bdcobject:nn}
+% \begin{macro}{\pdf_bdcobject:n}
 % \begin{macro}{\pdf_bmc:n}
 % \begin{macro}{\pdf_emc:}
 %    \begin{macrocode}
 %<*package>
 \cs_new_protected:Npn  \pdf_bdc:nn #1 #2 { \@@_backend_bdc:nn { #1 }{ #2 } }
-\cs_new_protected:Npn  \pdf_bdc_obj:nn #1 #2 { \@@_backend_bdc_obj:nn { #1 }{ #2 } }
-\cs_new_protected:Npn  \pdf_bdc_obj:n #1     { \@@_backend_bdc_obj:n  { #1 } }
+\cs_new_protected:Npn  \pdf_bdcobject:nn #1 #2 { \@@_backend_bdcobject:nn { #1 }{ #2 } }
+\cs_new_protected:Npn  \pdf_bdcobject:n #1     { \@@_backend_bdcobject:n  { #1 } }
 \cs_new_protected:Npn  \pdf_bmc:n #1     { \@@_backend_bmc:n  { #1 } }
 \cs_new_protected:Npn  \pdf_emc:         { \@@_backend_emc: }
 %</package>
