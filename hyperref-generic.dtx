@@ -1952,7 +1952,7 @@
            {
              \mode_leave_vertical:
              \pdfdict_put:nnx {l_hyp/annot/A/Named}{N}
-               {\pdf_text_convert:nn{name-print}{#1}}
+               {\pdf_name_from_unicode_e:n{#1}}
              \tl_if_empty:NF \Hy@href@nextactionraw
                {
                  \str_remove_once:Nn \Hy@href@nextactionraw {/Next}
@@ -3457,9 +3457,8 @@
             \@@_text_pdfstring_info:nN {##1}\l_@@_tmpa_str
             \str_if_eq:VnF\l_@@_tmpa_str{<FEFF>}
               {
-                \exp_args:Nnx
-                  \pdfmanagement_add:nnx {Info}
-                    {\pdf_text_convert:nV {name }\l_keys_key_str}{\l_@@_tmpa_str}
+                \pdfmanagement_add:nVx {Info}
+                    \l_keys_key_str {\l_@@_tmpa_str}
               }
          }
       }

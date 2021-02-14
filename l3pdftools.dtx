@@ -68,9 +68,24 @@
 %      then escape it in the way needed in a PDF Name with
 %      \cs{str_convert_pdfname:e}.
 %     \item[name-print] This does the same as the \texttt{name} format, but also
-%     adds a slash before, so |\pdf_text_convert:nn{name-print}{abc}| will
+%     adds a slash before, so
+%      |\pdf_text_convert:nn{name-print}{abc}| will
 %     output \texttt{/abc}.
 %   \end{description}
+% \end{function}
+% \begin{function}[EXP,added=2021-02-14]
+%   {\pdf_name_from_unicode_e:n}
+%  \begin{syntax}
+%   \cs{\pdf_name_from_unicode_e:n}  \Arg{content}
+%  \end{syntax}
+%  This converts \meta{content} to a format suitable for a PDF Name.
+%  It will first expand the content with \cs{text_expand:n} and
+%  then escape it in the way needed in a PDF Name with
+%  \cs{str_convert_pdfname:e}, and at last prepend a slash before.
+%  Typically such names use only ascii,
+%  but non-ascii is supported, but should be utf8 encoded. For example\\
+%  |\pdf_name_from_unicode_e:n {A~B\c_percent_str C\c_hash_str D€}}|\\
+%   will    output |/A#20B#25C#23D#E2#82#AC|}.
 % \end{function}
 % \begin{function}[added=2020-07-04]
 %   {\pdf_text_convert:nnN}
@@ -82,8 +97,6 @@
 %  Non-ascii input should be utf8 encoded.
 %  Currently the following formats exist:
 %  \begin{description}
-%     \item[name] see above
-%     \item[name-print] see above
 %     \item[utf8/string]
 %      this converts with \cs{str_set_convert:Nnnn} into utf8/string.
 %     \item[utf8/string-print]
@@ -228,75 +241,23 @@
 %<@@=pdf>
 %    \end{macrocode}
 % \subsection{Conversions and export functions}
-% \begin{macro}{\pdf_text_convert:nn,\pdf_text_convert:nV}
-% \begin{macro}{\pdf_text_convert:nnN}
-% \begin{macro}{\@@_text_convert_name:n}
-% \begin{macro}{\@@_text_convert_name:nN}
-% \begin{macro}{\@@_text_convert_name-print:n}
-% \begin{macro}{\@@_text_convert_name-print:n}
+% \begin{macro}{\pdf_name_from_unicode_e:n,\pdf_name_from_unicode_e:V}
 %    \begin{macrocode}
-
-\cs_new:Npn \pdf_text_convert:nn #1 #2
-  {
-    \cs_if_exist_use:cF { @@_text_convert_#1:n }
-      {
-        \__kernel_msg_error:nnn { pdf } { unknown-exp-convert } {#1}
-        \use_none:n
-      }
-    { #2 }
-  }
-\cs_generate_variant:Nn \pdf_text_convert:nn {nV}
-
-\cs_new:Npn \pdf_text_convert:nnN #1 #2 #3
-  {
-    \cs_if_exist_use:cF { @@_text_convert_#1:nN }
-      {
-        \__kernel_msg_error:nnn { pdf } { unknown-convert } {#1}
-        \use_none:nn
-      }
-    { #2 } #3
-  }
-
-\cs_generate_variant:Nn \pdf_text_convert:nnN {nVN}
-%% tool command escape name
-%% commands in the argument are expanded if possible
-%% with \text_expand:n
-%% name: only name,
-%% name_print: with / before, see also string naming
-
 \cs_generate_variant:Nn \str_convert_pdfname:n { e }
 
-\cs_new:Npn \@@_text_convert_name:n #1
-  {
-    \str_convert_pdfname:e { \text_expand:n { #1 } }
-  }
-
-\cs_new_protected:Npn \@@_text_convert_name:nN #1 #2
-  {
-    \tl_set:Nx #2 {\@@_text_convert_name:n {#1} }
-  }
-
-\cs_new:cpn { @@_text_convert_name-print:n } #1
+\cs_new:Npn \pdf_name_from_unicode_e:n #1
   {
     / \str_convert_pdfname:e { \text_expand:n { #1 } }
   }
 
-\cs_new_protected:cpn { @@_text_convert_name-print:nN } #1 #2
-  {
-    \tl_set:Nx #2 {\use:c { @@_text_convert_name-print:n } {#1} }
-  }
-
+\cs_generate_variant:Nn \pdf_name_from_unicode_e:n {V}
 %    \end{macrocode}
-% \end{macro}
-% \end{macro}
-% \end{macro}
-% \end{macro}
-% \end{macro}
 % \end{macro}
 %
 % The convert command must use a different value the source encoding
 % depending on the engines. Until the PR in str-convert is active we add the alias here
 % too
+% \begin{macro}{\pdf_text_convert:nnN}
 %    \begin{macrocode}
 \bool_lazy_any:nTF
   {
@@ -309,7 +270,19 @@
   {
     \prop_gput:Nnn \g__str_alias_prop { default } { utf8 }
   }
+\cs_new:Npn \pdf_text_convert:nnN #1 #2 #3
+  {
+    \cs_if_exist_use:cF { @@_text_convert_#1:nN }
+      {
+        \__kernel_msg_error:nnn { pdf } { unknown-convert } {#1}
+        \use_none:nn
+      }
+    { #2 } #3
+  }
+
+\cs_generate_variant:Nn \pdf_text_convert:nnN {nVN}
 %    \end{macrocode}
+% \end{macro}
 % Most converter are simply wrapper around the str-convert commands and so
 % use the same name.
 % The exception is the one for url's: it reverts most of the percent encodings
