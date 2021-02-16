@@ -145,7 +145,7 @@
 %    \begin{macrocode}
 \hook_gput_code:nnn {begindocument} {pdf}
   {
-    \prop_if_in:NnTF\g_pdfmeta_standard_prop { annot_flags }
+    \prop_if_in:NnT\g_pdfmeta_standard_prop { annot_flags }
      { \@@_verify_pdfa_annot_flags: }
   }
 %    \end{macrocode}
@@ -163,10 +163,10 @@
     ,name             = pdf/A-1b
     ,type             = A
     ,year             = 2005
-    ,pdf_version      = 1.4        %minimum
-    ,encryption       = false
-    ,external_content = false  % no F, FFilter, or FDecodeParms in stream dicts
-    ,embed_content    = false, % no EF key in filespec, no /Type/EmbeddedFiles
+    ,min_pdf_version  = 1.4        %minimum
+    ,no_encryption    =
+    ,no_external_content =  % no F, FFilter, or FDecodeParms in stream dicts
+    ,no_embed_content = % no EF key in filespec, no /Type/EmbeddedFiles
     ,max_string_size  = 65535
     ,max_array_size   = 8191
     ,max_dict_size    = 4095

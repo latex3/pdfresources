@@ -1,0 +1,123 @@
+% !Mode:: "TeX:UTF-8:Main"
+
+\RequirePackage{pdfmanagement}
+
+\DeclareDocumentMetadata
+ {
+  uncompress,
+  %lang=de-DE,
+  %pdfversion=1.4,
+  pdfstandard={A-1b}
+ }
+\documentclass{l3doc}
+\usepackage{booktabs}
+\ExplSyntaxOn
+\prg_new_protected_conditional:Npnn \pdfmeta_verify_standard:n #1 {T,F,TF}
+  {
+     \prop_if_in:NnTF \g_pdfmeta_standard_prop {#1}
+       {
+          \tl_set:Nx \l_pdfmeta_value_tl
+            { \prop_item:Nn \g_pdfmeta_standard_prop {#1} }
+         \prg_return_true:
+       }
+       {
+         \tl_set:Nn \l_pdfmeta_value_tl {}
+         \prg_return_false:
+       }
+  }
+
+
+\prg_new_protected_conditional:Npnn \pdfmeta_verify_standard:nn #1 #2 {T,F,TF}
+  {       
+    \prop_if_in:NnTF \g_pdfmeta_standard_prop {#1}
+     {
+       \tl_set:Nx \l_pdfmeta_value_tl
+        { \prop_item:Nn \g_pdfmeta_standard_prop {#1} }
+       \cs_if_exist:cTF {__pdfmeta_verify_standard_handler_#1:n}
+        { % dedicated test handler:
+          % should return true of false.
+          \show\blub
+          \use_c{ __pdfmeta_verify_standard_handler_#1:n} {#2}
+        }
+        {
+          \prg_return_true:
+        }
+
+     }
+     {
+       \tl_set:Nn \l_pdfmeta_value_tl  {}
+       \prg_return_false:
+     }
+  }
+
+\cs_new_protected:Npn \__pdfmeta_verify_standard_handler_min_pdf_version:n #1
+ {
+   \pdf_version_compare:NnTF < {#1}{\prg_return_true:}{\prg_return_false:}
+ }
+
+
+\pdfmeta_verify_standard:nTF {min_pdf_version}
+ {\show\true \show\l_pdfmeta_value_tl}{\show\false}
+\ExplSyntaxOff
+
+\begin{document}
+Verifying standard requirements.
+
+Standards like pdf/A have requirements which basically fall into two group: Some things have be there in the PDF, e.g. the catalog has to contain a /Lang entry and an colorprofile and an /OutputIntent, some other things are forbidden or restricted, e.g. the action dictionary of an annotation should not contain Javascript.
+
+The \pkg{l3pdfmeta} packages collects a number of relevant requirements, tries to enforce the ones which can be enforced and offers some tools for package authors to test if an action is allowed in the standard or not.
+
+This is work in progress and more tests will be added. But it should be noted that it will probably never be possible to check and prevent all actions not allowed by a standard. The commands here don't replace a check with an external validator.
+
+
+\begin{function}[pTF]{\pdfmeta_verify_standard:n}
+\begin{syntax}
+\cs{pdfmeta_verify_standard:n}\Arg{requirement}
+\end{syntax}
+
+This checks if \meta{requirement} is listed in the standard. |true| as result means that the requirement is in the standard and that probably some special action is required---which one depends on the requirement, see the descriptions below.
+|false| that the requirement is not there and so no special option is needed.
+\cs{l_pdfmeta_value_tl} will contain the value of the requirement if one exist. So for example it can contain |1.4| for the |min_pdf_version|, or a list of allowed named actions like |NextPage, PrevPage, FirstPage, LastPage|. 
+\end{function}
+
+\begin{function}[pTF]{\pdfmeta_verify_standard:nn}
+\begin{syntax}
+\cs{pdfmeta_verify_standard:nn}\Arg{requirement}\Arg{value}
+\end{syntax}
+
+This checks if \meta{requirement} is listed in the standard and if the \meta{value} requires some action.
+|true| as result means that probably some special action is required---which one depends on the requirement, see the descriptions below. |false| that special option is needed. (should value be available as \cs{l_pdfmeta_value_tl}?)
+\end{function}
+
+The following describe the requirements which can be tested. Requirements with a value should use \cs{pdfmeta_verify:nn}.
+The rule numbers refer to \url{https://docs.verapdf.org/validation/pdfa-part1/}
+
+\footnotesize
+\extrarowheight2pt
+\noindent\begin{tabular}{l>{\raggedright}p{2cm}l>{\raggedright\arraybackslash}p{5cm}}
+\toprule
+\bfseries requirement &\bfseries test value              &\bfseries rule &\bfseries possible action if |true|    \\
+\midrule
+|min_pdf_version|  & --- &&check if the pdf version is large enough and increase it if needed. \bfseries This check is done by \pkg{l3pdfmeta}. \\
+|no_encryption|    & ---                && don't encrypt\\
+|no_external_content|& ---               && no F, FFilter, or FDecodeParms in stream dictionaries\\
+|no_embed_content| & --- && no /EF key in filespec, no /Type/EmbeddedFiles\\
+|named_actions|    & a named action name && don't use this action, only NextPage, PrevPage, FirstPage, LastPage are allowed \\
+|annot_flags|      & --- && Print flag should be true, Hidden, Invisible, NoView should be false. This requirement is detected  and set by \pkg{l3pdfmeta}.\\
+|Catalog_no_OCProperties| & --- &6.1.13-1&  don't add /OCProperties to the catalog\\
+|annot_action_no_A| & annot action subtype like |GoTo| or |Movie| &6.6.1-1& don't use the subtype. \\
+|annot_widget_no_AA| & --- &6.6.2-1& no AA dictionary in widget annotation\\
+|annot_widget_no_A_AA| &---&6.9-2& no A and AA dictionary in widget.\\
+|form_no_AA|  &---& 6.9-3& no /AA dictionary in form field\\
+|outputintent| & ---&& embed a color profile and reference it as /Outputintent. This requirement is detected and fullfilled by \pkg{l3pdfmeta}, see below.\\
+|outputintent_subtype| & a subtype like |GTS_PDFA1| & & change subtype.\\
+\bottomrule
+\end{tabular}
+
+
+
+
+
+
+blub
+\end{document}
