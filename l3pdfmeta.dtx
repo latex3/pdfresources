@@ -122,12 +122,34 @@
 \prop_new:N \g_pdfmeta_standard_prop
 %    \end{macrocode}
 % \end{variable}
+% \subsection{Enforcing requirements}
+%  A number of requirements can sensibly be enforced by use.
+%  \subsubsection{Annot flags}
+% pdf/A require a number of settings here, we store them in a command which
+% can be added to the property of the standard:
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_verify_pdfa_annot_flags:
+  {
+    \bitset_set_true:Nn  \l_pdfannot_F_bitset {Print}
+    \bitset_set_false:Nn \l_pdfannot_F_bitset {Hidden}
+    \bitset_set_false:Nn \l_pdfannot_F_bitset {Invisible}
+    \bitset_set_false:Nn \l_pdfannot_F_bitset {NoView}
+    \pdfannot_dict_put:nnn {link/URI}{F}{ \bitset_to_arabic:N \l_pdfannot_F_bitset }
+    \pdfannot_dict_put:nnn {link/GoTo}{F}{ \bitset_to_arabic:N \l_pdfannot_F_bitset }
+    \pdfannot_dict_put:nnn {link/GoToR}{F}{ \bitset_to_arabic:N \l_pdfannot_F_bitset }
+    \pdfannot_dict_put:nnn {link/Launch}{F}{ \bitset_to_arabic:N \l_pdfannot_F_bitset }
+    \pdfannot_dict_put:nnn {link/Named}{F}{ \bitset_to_arabic:N \l_pdfannot_F_bitset }
+  }
+%    \end{macrocode}
+% At begin document this should be checked:
 %    \begin{macrocode}
 \hook_gput_code:nnn {begindocument} {pdf}
   {
-    \prop_item:Nn \g_pdfmeta_standard_prop { annot_flags }
+    \prop_if_in:NnTF\g_pdfmeta_standard_prop { annot_flags }
+     { \@@_verify_pdfa_annot_flags: }
   }
 %    \end{macrocode}
+%
 %  \subsection{pdf/A}
 %  \begin{variable}{
 %   \g_pdfmeta_standard_pdf/A-1b_prop ,
@@ -151,17 +173,7 @@
     ,max_obj_num      = 8388607
     ,max_nest_qQ      = 28
     ,named_actions    = {NextPage, PrevPage, FirstPage, LastPage}
-    ,annot_flags      = {
-                          \bitset_set_true:Nn  \l_pdfannot_F_bitset {Print}
-                          \bitset_set_false:Nn \l_pdfannot_F_bitset {Hidden}
-                          \bitset_set_false:Nn \l_pdfannot_F_bitset {Invisible}
-                          \bitset_set_false:Nn \l_pdfannot_F_bitset {NoView}
-                          \pdfannot_dict_put:nnn {link/URI}{F}{ \bitset_to_arabic:N \l_pdfannot_F_bitset }
-                          \pdfannot_dict_put:nnn {link/GoTo}{F}{ \bitset_to_arabic:N \l_pdfannot_F_bitset }
-                          \pdfannot_dict_put:nnn {link/GoToR}{F}{ \bitset_to_arabic:N \l_pdfannot_F_bitset }
-                          \pdfannot_dict_put:nnn {link/Launch}{F}{ \bitset_to_arabic:N \l_pdfannot_F_bitset }
-                          \pdfannot_dict_put:nnn {link/Named}{F}{ \bitset_to_arabic:N \l_pdfannot_F_bitset }
-                        }
+    ,annot_flags      =
     %booleans. Only the existence of the key matter.
     %If the entry is added it means true (so in most cases "don't use ...")
     %
