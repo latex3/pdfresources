@@ -125,6 +125,7 @@
 % end hooks.
 %    \begin{macrocode}
 %<*pdftex|luatex>
+% put in \@kernel@after@enddocument@afterlastpage
 \hook_gput_code:nnn {enddocument/afterlastpage}
   {pdf/endrun}
   {
@@ -132,6 +133,7 @@
   }
 %</pdftex|luatex>
 %<*dvipdfmx|xdvipdfmx>
+% put in \@kernel@after@shipout@lastpage
 \hook_gput_code:nnn {shipout/lastpage}
   {pdf/endrun}
   {
@@ -140,6 +142,7 @@
 \hook_gset_rule:nnnn {shipout/lastpage}{pdf}{before}{pdf/endrun}
 %</dvipdfmx|xdvipdfmx>
 %<*dvips>
+% put in \@kernel@after@shipout@lastpage
 \hook_gput_code:nnn {shipout/lastpage}
   {pdf/endrun}
   {
