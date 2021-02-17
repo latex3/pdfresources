@@ -74,24 +74,157 @@
 % \item how interface to input data should look
 % \end{itemize}
 % \end{NOTE}
-% \begin{variable}{\g_pdfmeta_standard_prop}
-% This public property is filled with the requirements of the requested standard(s).
-% packages wanting to test a requirement can query the variable. For some of the values
-% it also makes sense to change them. Currently this is only relevant for the colorprofile:
-% With one of the pdf/A standards a colorprofile is embedded and added to the /OutputIntent.
-% The default value is sRGB.icc, this can be changed
-% by setting the key |outputintent_profile|. Currently the only alternative is
-% |FOGRA39L_coated.icc|. Interfaces to add more colorprofiles will be added later.
-% \end{variable}
 %
-% \begin{variable}
-%  {
-%   \g_pdfmeta_standard_pdf/A-1b_prop ,
-%   \g_pdfmeta_standard_pdf/A-2b_prop,
-%   \g_pdfmeta_standard_pdf/A-3b_prop
-%  }
-%  These three properties contain the settings for the three pdf/A-standards.
-%  \end{variable}
+% \subsection{Verifying requirements of PDF standards}
+%
+% Standards like pdf/A set requirements on a PDF: Some things have be in the PDF,
+% e.g. the catalog has to contain a /Lang entry and an colorprofile and
+% an /OutputIntent, some other things are forbidden or restricted, e.g.
+% the action dictionary of an annotation should not contain Javascript.
+%
+% The \pkg{l3pdfmeta} packages collects a number of relevant requirements,
+% tries to enforce the ones which can be enforced and offers some tools
+% for package authors to test if an action is allowed in the standard or not.
+%
+% This is work in progress and more tests will be added. But it should be noted
+% that it will probably never be possible to prevent all forbidden actions
+% or enforce all required ones or even to simply check all of them.
+% The commands here don't replace a check with an external validator.
+%
+% Verifying against a PDF-standard involves two different task:
+%
+% \begin{itemize}
+%   \item Check if you are allowed to ignore the requirement.
+%   \item Decide which action to take if the answer to the first question is NO.
+% \end{itemize}
+%
+% The following conditionals address the first task. Because of the second task
+% a return value |FALSE| means that the standard requires you to do some
+% special action. |TRUE| means that you can ignore this
+% requirement.\footnote{One could also make the logic the
+% other way round---there are arguments for both---but I had to decide.}
+%
+% In most cases it only matters if a requirement is in the standard,
+% for example |Catalog_no_OCProperties| means \enquote{don't use |/OCProperties|
+% in the catalog}. For a small number of requirements it is also needed to
+% test a user value against a standard value. For example, |named_actions|
+% restricts the allowed named actions in an annotation of subtype |/Named|,
+% in this case it is needed to check not only if the requirement is
+% in the standard but also if the user value is in the allowed list.
+%
+% \begin{function}[EXP,pTF]{\pdfmeta_standard_verify:n}
+% \begin{syntax}
+% \cs{pdfmeta_standard_verify:n}\Arg{requirement}
+% \end{syntax}
+%
+% This checks if \meta{requirement} is listed in the standard.
+% |FALSE| as result means that the requirement is in the standard and
+% that probably some special action is required---which one depends
+% on the requirement, see the descriptions below.
+% |TRUE| means that the requirement is not there and so no special
+% action is needed.
+% This check can be used for simple requirements where neither
+% a user nor a standard value is of importance.
+% \end{function}
+%
+% \begin{function}[TF]{\pdfmeta_standard_verify:nn}
+% \begin{syntax}
+% \cs{pdfmeta_standard_verify:nn}\Arg{requirement}\Arg{value}
+% \end{syntax}
+%
+% This checks if \meta{requirement} is listed in the standard,
+% if yes it tries to find a predefined test handler for
+% the requirement and passes \meta{value} and the value recorded
+% in the standard to it. The handler returns |FALSE| if some special
+% action is needed (e.g. if \meta{value} violates the rule)
+% and |TRUE| if no special action is needed. If no handler exists
+% this commands works like \cs{pdfmeta_standard_verify:n}.
+% \end{function}
+%
+% In some cases one needs to query the value in the standard,
+% e.g. to correct a wrong minimal PDF version you need to know
+% which version is required by |min_pdf_version|.
+%  For this two commands to access the value are provided:
+%
+% \begin{function}[EXP]{\pdfmeta_standard_item:n}
+% \begin{syntax}
+% \cs{pdfmeta_standard_item:n}\Arg{requirement}
+% \end{syntax}
+% This retrieves the value of \meta{requirement} and leaves it in the input.
+% If the requirement isn't in the standard the result is empty,
+% that means that requirements not in the standard and
+% requirement without values can not be distinguished here.
+% \end{function}
+%
+%
+% \begin{function}{\pdfmeta_standard_get:nN}
+% \begin{syntax}
+% \cs{pdfmeta_standard_get:nN}\Arg{requirement} \meta{tl var}
+% \end{syntax}
+% This retrieves the value of \meta{requirement} and stores
+% it in the \meta{token list variable}.
+% If the \meta{requirement} is not found the special
+% value |\q_no_value| is used.
+% The  \meta{token list variable} is assigned locally.
+% \end{function}
+%
+%
+% The following describe the requirements which can be currently tested.
+% Requirements with a value should use \cs{pdfmeta_standard_verify:nn}
+% or \cs{pdfmeta_standard_verify:nnN} to test a local value against the standard.
+% The rule numbers refer to \url{https://docs.verapdf.org/validation/pdfa-part1/}
+%
+% \subsubsection{Simple tests without handler}
+%
+% \begin{description}
+%
+% \item[|outputintent|] requires to embed a color profile and
+%  reference it in a /Outputintent.
+%  {\em This requirement is detected and fulfilled by \pkg{l3pdfmeta}, see below}.
+%
+% \item[|annot_flags|] in annotations the |Print| flag should be true,
+%  |Hidden|, |Invisible|, |NoView| should be false.
+%  {\em This requirement is detected  and set by \pkg{l3pdfmeta} for annotations
+%  created with the \pkg{l3pdfannot}.
+%  A new check is only needed if the flags are changed
+%  or if links are created by other means.}
+%
+% \item[|no_encryption|] don't encrypt
+% \item[|no_external_content|] no |/F|, |/FFilter|, or |/FDecodeParms|
+%  in stream dictionaries
+% \item[|no_embed_content|]    no |/EF| key in filespec, no |/Type/EmbeddedFiles|
+%  (this will be checked in future by \pkg{l3pdffiles} for the files it inserts.)
+% \item[|Catalog_no_OCProperties|] don't add |/OCProperties| to the catalog
+% {\em l3pdfmeta removes this entry at the end of the document}
+% \item[|annot_widget_no_AA|] (rule 6.6.2-1)
+%  no AA dictionary in widget annotation,
+%  this will e.g. be checked by the new hyperref driver.
+% \item[|annot_widget_no_A_AA|] (rule 6.9-2)  no A and AA dictionary in widget.
+% \item[|form_no_AA|] (6.9-3)  no /AA dictionary in form field
+% \end{description}
+%
+% \subsubsection{Tests with values and special handlers}
+%
+% \begin{description}
+%
+% \item[|min_pdf_version|]  stores the minimal PDF version.
+%  It should be checked against the current PDF version (\cs{pdf_version:}).
+%  A failure means that the version should be changed.
+%  This check is done by \pkg{l3pdfmeta} when the version is set with
+%  \cs{DeclareDocumentMetadata} so more checks are only needed if the version is changed later.
+% \item[|outputintent_subtype|] this requirement stores allowed
+% names for the |/Outputintent| subtype  like |GTS_PDFA1|.
+% This value is typically only read.
+% \item[|named_actions|]    this requirement restricts the list of
+% allowed named actions to |NextPage|, |PrevPage|, |FirstPage|, |LastPage|.
+% The check should supply the named action without slash
+% (e.g. |View| (failure) or |NextPage| (pass)).
+%
+% \item[|annot_action_A|] (rule 6.6.1-1) this requirement restricts
+%  the allowed subtypes of the
+% |/A| dictionary of an action. The check should supply the user
+%  subtype without slash e.g. as |GoTo| (pass) or |Movie| (failure).
+% \end{description}
 % \end{documentation}
 %
 % \begin{implementation}
@@ -114,17 +247,126 @@
 \str_new:N \l_@@_tmpa_str
 %    \end{macrocode}
 % \end{variable}
-
 % \section{Standards (work in progress)}
 % \subsection{Tools and tests}
-% This public property will contain the settings for the document.
-% \begin{variable}{\g_pdfmeta_standard_prop}
+% This internal property will contain for now the settings for the document.
+% \begin{variable}{\g_@@_standard_prop}
 %    \begin{macrocode}
-\prop_new:N \g_pdfmeta_standard_prop
+\prop_new:N \g_@@_standard_prop
 %    \end{macrocode}
 % \end{variable}
+% \subsection{Functions to check a requirement}
+% At first two commands to get the standard value if needed:
+% \begin{macro}[EXP]{\pdfmeta_standard_item:n}
+%    \begin{macrocode}
+\cs_new:Npn \pdfmeta_standard_item:n #1
+ {
+   \prop_item:Nn \g_@@_standard_prop {#1}
+ }
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\pdfmeta_standard_get:nN}
+%    \begin{macrocode}
+\cs_new_protected:Npn \pdfmeta_standard_get:nN #1 #2
+ {
+   \prop_get:NnN \g_@@_standard_prop {#1} #2
+ }
+%    \end{macrocode}
+% \end{macro}
+% Now two functions to check the requirement. A simple and one value/handler based.
+% \begin{macro}[pTF]{\pdfmeta_standard_verify:n}
+%  This is a simple test is the requirement is in the prop.
+%    \begin{macrocode}
+\prg_new_conditional:Npnn \pdfmeta_standard_verify:n #1 {T,F,TF}
+  {
+     \prop_if_in:NnTF \g_@@_standard_prop {#1}
+       {
+         \prg_return_false:
+       }
+       {
+         \prg_return_true:
+       }
+  }
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}[TF]{\pdfmeta_standard_verify:nn}
+%    \begin{macrocode}
+\prg_new_protected_conditional:Npnn \pdfmeta_standard_verify:nn #1 #2  {T,F,TF}
+  {
+    \prop_if_in:NnTF \g_@@_standard_prop {#1}
+      {
+        \cs_if_exist:cTF {@@_standard_verify_handler_#1:nn}
+          { % dedicated test handler:
+            % should return true of false.
+            \exp_args:Nnnx
+            \use:c
+              {@@_standard_verify_handler_#1:nn}
+              { #2 }
+              { \prop_item:Nn \g_@@_standard_prop {#1} }
+          }
+          {
+            \prg_return_false:
+          }
+      }
+      {
+        \prg_return_true:
+      }
+   }
+%    \end{macrocode}
+% \end{macro}
+%
+% Now we setup a number of handlers.
+%
+% The first actually ignores the user values and tests against the
+% current pdf version. If this is smaller than the minimum we report a failure.
+% \begin{macro}{\@@_standard_verify_handler_min_pdf_version:nn}
+%    \begin{macrocode}
+% #1 = user value, #2 = standard value
+\cs_new_protected:Npn \@@_standard_verify_handler_min_pdf_version:nn #1 #2
+ {
+   \pdf_version_compare:NnTF <
+     { #2 }
+     {\prg_return_false:}
+     {\prg_return_true:}
+ }
+%    \end{macrocode}
+% \end{macro}
+% The next checks if the user value is in the list and returns a failure if not.
+% \begin{macro}{\@@_standard_verify_handler_named_actions:nn}
+%    \begin{macrocode}
+
+\cs_new_protected:Npn \@@_standard_verify_handler_named_actions:nn #1 #2
+ {
+   \tl_if_in:nnTF { #2 }{ #1 }
+     {\prg_return_true:}
+     {\prg_return_false:}
+ }
+%    \end{macrocode}
+% \end{macro}
+% The next checks if the user value is in the list and returns a failure if not.
+% \begin{macro}{\@@_standard_verify_handler_annot_action_A:nn}
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_standard_verify_handler_annot_action_A:nn #1 #2
+ {
+   \tl_if_in:nnTF { #2 }{ #1 }
+     {\prg_return_true:}
+     {\prg_return_false:}
+ }
+%    \end{macrocode}
+% \end{macro}
+% This check is probably not needed, but for completeness
+% \begin{macro}{\@@_standard_verify_handler_outputintent_subtype:nn}
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_standard_verify_handler_outputintent_subtype:nn #1 #2
+ {
+   \tl_if_eq:nnTF { #2 }{ #1 }
+     {\prg_return_true:}
+     {\prg_return_false:}
+ }
+%    \end{macrocode}
+% \end{macro}
 % \subsection{Enforcing requirements}
-%  A number of requirements can sensibly be enforced by use.
+%  A number of requirements can sensibly be enforced by us.
 %  \subsubsection{Annot flags}
 % pdf/A require a number of settings here, we store them in a command which
 % can be added to the property of the standard:
@@ -146,20 +388,24 @@
 %    \begin{macrocode}
 \hook_gput_code:nnn {begindocument} {pdf}
   {
-    \prop_if_in:NnT\g_pdfmeta_standard_prop { annot_flags }
+    \pdfmeta_standard_verify:nF { annot_flags }
      { \@@_verify_pdfa_annot_flags: }
   }
 %    \end{macrocode}
 %
 %  \subsection{pdf/A}
+%  We use global properties so that follow up standards can be
+%  copied and then adjusted.
+%  Some note about requirements for more standard can
+%  be found in info/pdfstandard.tex.
 %  \begin{variable}{
-%   \g_pdfmeta_standard_pdf/A-1b_prop ,
-%   \g_pdfmeta_standard_pdf/A-2b_prop,
-%   \g_pdfmeta_standard_pdf/A-3b_prop
+%   \g_@@_standard_pdf/A-1b_prop ,
+%   \g_@@_standard_pdf/A-2b_prop ,
+%   \g_@@_standard_pdf/A-3b_prop
 %   }
 %     \begin{macrocode}
-\prop_new:c { g_pdfmeta_standard_pdf/A-1b_prop }
-\prop_set_from_keyval:cn { g_pdfmeta_standard_pdf/A-1b_prop }
+\prop_new:c { g_@@_standard_pdf/A-1b_prop }
+\prop_set_from_keyval:cn { g_@@_standard_pdf/A-1b_prop }
   {
     ,name             = pdf/A-1b
     ,type             = A
@@ -214,53 +460,32 @@
   }
 
 %A-2b ==============
-\prop_new:c { g_pdfmeta_standard_pdf/A-2b_prop }
+\prop_new:c { g_@@_standard_pdf/A-2b_prop }
 \prop_gset_eq:cc
-  { g_pdfmeta_standard_pdf/A-2b_prop }
-  { g_pdfmeta_standard_pdf/A-1b_prop }
+  { g_@@_standard_pdf/A-2b_prop }
+  { g_@@_standard_pdf/A-1b_prop }
 \prop_gput:cnn
-  { g_pdfmeta_standard_pdf/A-2b_prop }{name}{pdf/A-2b}
+  { g_@@_standard_pdf/A-2b_prop }{name}{pdf/A-2b}
 \prop_gput:cnn
-  { g_pdfmeta_standard_pdf/A-2b_prop }{year}{2011}
+  { g_@@_standard_pdf/A-2b_prop }{year}{2011}
 % embedding files is allowed (with restrictions)
 \prop_gremove:cn
-  { g_pdfmeta_standard_pdf/A-2b_prop }
+  { g_@@_standard_pdf/A-2b_prop }
   { embed_content}
 
 %A-3b ==============
-\prop_new:c { g_pdfmeta_standard_pdf/A-3b_prop }
+\prop_new:c { g_@@_standard_pdf/A-3b_prop }
 \prop_gset_eq:cc
-  { g_pdfmeta_standard_pdf/A-3b_prop }
-  { g_pdfmeta_standard_pdf/A-2b_prop }
+  { g_@@_standard_pdf/A-3b_prop }
+  { g_@@_standard_pdf/A-2b_prop }
 \prop_gput:cnn
-  { g_pdfmeta_standard_pdf/A-3b_prop }{name}{pdf/A-3b}
+  { g_@@_standard_pdf/A-3b_prop }{name}{pdf/A-3b}
 \prop_gput:cnn
-  { g_pdfmeta_standard_pdf/A-2b_prop }{year}{2012}
+  { g_@@_standard_pdf/A-2b_prop }{year}{2012}
 % embedding files is allowed (with restrictions)
 \prop_gremove:cn
-  { g_pdfmeta_standard_pdf/A-3b_prop }
+  { g_@@_standard_pdf/A-3b_prop }
   { embed_content}
-
-%   ["pdf/a-1b:2005"] = {
-%            pdf_version             = 1.4,
-%            format_name             = "pdf/a-1b:2005",
-%            xmp_file                = "lpdf-pda.xml",
-%            gts_flag                = "GTS_PDFA1",
-%            gray_scale              = true,
-%            cmyk_colors             = true,
-%            rgb_colors              = true,
-%            spot_colors             = true,
-%            calibrated_rgb_colors   = true, -- unknown
-%            cielab_colors           = true, -- unknown
-%            include_intents         = true,
-%            forms                   = true,
-%            internal_icc_profiles   = true,
-%            include_cidsets         = true,
-%            include_charsets        = true,
-%            inject_metadata         = function()
-%                injectxmpinfo("xml://rdf:RDF","<rdf:Description rdf:about='' xmlns:pdfaid='http://www.aiim.org/pdfa/ns/id/'><pdfaid:part>1</pdfaid:part><pdfaid:conformance>B</pdfaid:conformance></rdf:Description>",false)
-%            end
-%        },
 %    \end{macrocode}
 % \end{variable}
 %
@@ -330,15 +555,15 @@
 
 \AddToHook{begindocument/end}
   {
-     \prop_if_in:NnT\g_pdfmeta_standard_prop {outputintent}
+     \prop_if_in:NnT\g_@@_standard_prop {outputintent}
       {
         \exp_args:Nx
         \@@_embed_colorprofile:n
-          {\prop_item:Nn \g_pdfmeta_standard_prop {outputintent_profile}}
+          {\prop_item:Nn \g_@@_standard_prop {outputintent_profile}}
         \exp_args:Nxx
         \@@_write_outputintent:nn
-          {\prop_item:Nn \g_pdfmeta_standard_prop {outputintent_profile}}
-          {\prop_item:Nn \g_pdfmeta_standard_prop {outputintent_subtype}}
+          {\prop_item:Nn \g_@@_standard_prop {outputintent_profile}}
+          {\prop_item:Nn \g_@@_standard_prop {outputintent_subtype}}
       }
    }
 %    \end{macrocode}

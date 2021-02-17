@@ -1940,15 +1940,7 @@
     \bool_if:NTF \l_@@_annot_Named_bool
       {
          \group_begin:
-         \bool_set_true:N\l_tmpa_bool
-         \prop_get:NnNT \g_pdfmeta_standard_prop {named_actions} \l_@@_tmpa_tl
-           {
-             \tl_if_in:NnF \l_@@_tmpa_tl {#1}
-               {
-                 \bool_set_false:N\l_tmpa_bool
-               }
-           }
-         \bool_if:NTF \l_tmpa_bool
+         \pdfmeta_standard_verify:nnTF {named_actions}{#1}
            {
              \mode_leave_vertical:
              \pdfdict_put:nnx {l_hyp/annot/A/Named}{N}
@@ -3896,15 +3888,15 @@
          {Helv} {\pdf_object_ref:n {l_@@_font_helvetica_obj} }
        \pdfmanagement_add:nnx {Catalog /AcroForm}
          {DA}{(/Helv~10~Tf~0~g)}
-       \prop_if_in:NnTF\g_pdfmeta_standard_prop {form_no_NeedAppearance}
-         {
-           \pdfmanagement_remove:nn {Catalog / AcroForm }{NeedAppearances}
-         }
+       \pdfmeta_standard_verify:nTF {form_no_NeedAppearance}
          {
            \legacy_if:nT { HyField@NeedAppearances }
              {
                \pdfmanagement_add:nnn {Catalog / AcroForm }{NeedAppearances}{true}
              }
+         }
+         {
+           \pdfmanagement_remove:nn {Catalog / AcroForm }{NeedAppearances}
          }
        }
      \MakeFieldObject
@@ -4166,15 +4158,7 @@
       \DefaultOptionsofPushButton,#1
      }
     \PDFForm@Name
-    \prop_if_in:NnTF \g_pdfmeta_standard_prop {annot_action_no_A}
-      {
-        \msg_error:nn { hyp }{ pdfa-no-push-button }
-        \LayoutPushButtonField
-          {
-            \mode_leave_vertical:
-            \MakeButtonField{#2}
-          }
-      }
+    \pdfmeta_standard_verify:nnTF {annot_action_A}{JavaScript}
       {
         \HyField@FlagsPushButton
         \legacy_if:nT {Fld@hidden}
@@ -4195,7 +4179,15 @@
              {\box_use:N\l_tmpa_box}
             \HyField@AddToFields
           }
-     }
+      }
+      {
+        \msg_error:nn { hyp }{ pdfa-no-push-button }
+        \LayoutPushButtonField
+          {
+            \mode_leave_vertical:
+            \MakeButtonField{#2}
+          }
+      }
   \group_end:
 }
 
@@ -4245,11 +4237,7 @@
          \DefaultOptionsofReset,#1
        }
      \mode_leave_vertical:
-     \prop_if_in:NnTF \g_pdfmeta_standard_prop {annot_action_no_A}
-       {
-         \msg_error:nn { hyp }{ pdfa-no-reset-button }
-         \MakeButtonField{#2}
-       }
+     \pdfmeta_standard_verify:nnTF {annot_action_A}{ResetForm}
        {
          \HyField@FlagsPushButton
          \legacy_if:nT { Fld@hidden }
@@ -4264,6 +4252,10 @@
            { \PDFForm@Reset }
          \HyField@AddToFields
          \box_use:N \l_tmpa_box
+       }
+       {
+         \msg_error:nn { hyp }{ pdfa-no-reset-button }
+         \MakeButtonField{#2}
        }
     \group_end:
   }
@@ -4479,7 +4471,7 @@
  {%
   \exp_args:Ne\str_if_eq:nnF {\Fld@X@additionalactions}{}
     {
-      \prop_if_in:NnF \g_pdfmeta_standard_prop {annot_widget_no_AA}
+      \pdfmeta_standard_verify:nT {annot_widget_no_AA}
         {/AA<<\Fld@X@additionalactions>>}
     }
  }
@@ -4549,8 +4541,6 @@
 }
 \ExplSyntaxOff
 \ExplSyntaxOn
-\prop_if_in:NnF \g_pdfmeta_standard_prop {annot_action_no_A}
-  {
    \def\PDFForm@Push
      {
        /Subtype/Widget
@@ -4583,7 +4573,7 @@
        /A<</S/JavaScript/JS(\Hy@escapestring{\Fld@onclick@code})>>
        \Fld@additionalactions
      }
-  }
+
 \ExplSyntaxOff
 \def\PDFForm@List{%
   /Subtype/Widget%
@@ -4744,8 +4734,6 @@
   \Fld@additionalactions
 }
 \ExplSyntaxOn
-\prop_if_in:NnF \g_pdfmeta_standard_prop {annot_action_no_A}
-    {
        \def\PDFForm@Reset{%
          /Subtype/Widget%
          \Fld@annotflags
@@ -4774,7 +4762,7 @@
          /A<</S/ResetForm>>%
          \Fld@additionalactions
        }%
-   }
+
 
  %these patterns are used in hyperref checks.
 %it is unclear if they are really useful and if a backend support is

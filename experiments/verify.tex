@@ -101,7 +101,7 @@
 \ExplSyntaxOff
 
 \begin{document}
-\section{Verifying standard requirements}
+\subsection{Verifying standard requirements}
 
 Standards like pdf/A set requirements on a PDF: Some things have be in the PDF, e.g. the catalog has to contain a /Lang entry and an colorprofile and an /OutputIntent, some other things are forbidden or restricted, e.g. the action dictionary of an annotation should not contain Javascript.
 
@@ -164,7 +164,7 @@ If the \meta{requirement} is not found the special value |\q_no_value| is used. 
 The following describe the requirements which can be currently tested. Requirements with a value should use \cs{pdfmeta_standard_verify:nn} or \cs{pdfmeta_standard_verify:nnN} to test a local value against the standard.
 The rule numbers refer to \url{https://docs.verapdf.org/validation/pdfa-part1/}
 
-\subsection{Simple tests without handler}
+\subsubsection{Simple tests without handler}
 
 
 \begin{description}
@@ -184,7 +184,7 @@ The rule numbers refer to \url{https://docs.verapdf.org/validation/pdfa-part1/}
 \item[|form_no_AA|] (6.9-3)  no /AA dictionary in form field
 \end{description}
 
-\subsection{Tests with values and special handlers}
+\subsubsection{Tests with values and special handlers}
 
 \begin{description}
 
@@ -195,10 +195,10 @@ The rule numbers refer to \url{https://docs.verapdf.org/validation/pdfa-part1/}
 \item[|outputintent_subtype|] this requirement stores allowed names for the /Outputintent subtype  like |GTS_PDFA1|. 
 This value is typically only read. 
 \item[|named_actions|]    this requirement restricts the list of allowed named actions to |NextPage|, |PrevPage|, |FirstPage|, |LastPage|.
-The check should supply the named action without slash (e.g. |View|). 
+The check should supply the named action without slash (e.g. |View| (failure) or |NextPage| (pass)). 
 
 \item[|annot_action_A|] (rule 6.6.1-1) this requirement restricts the allowed subtypes of the
-/A dictionary of an action. The check should supply the user subtype without slash e.g. as |GoTo| or |Movie|. 
+/A dictionary of an action. The check should supply the user subtype without slash e.g. as |GoTo| (pass) or |Movie| (failure). 
 \end{description}
 
 
