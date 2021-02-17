@@ -670,9 +670,9 @@
   {
     \bool_if:NT \g_@@_active_bool
        {
-         \__pdfmanagement_Pages_gpush:            %pagesattr
-         \__pdfmanagement_Info_gpush:             %pdfinfo
-         \__pdfmanagement_Catalog_gpush:
+         \@@_Pages_gpush:            %pagesattr
+         \@@_Info_gpush:             %pdfinfo
+         \@@_Catalog_gpush:
        }
   }
 %    \end{macrocode}
@@ -1069,7 +1069,10 @@
     \use:c { @@_/Catalog/AcroForm_gpush: }
     \use:c { @@_/Catalog/AF_gpush: }
     \use:c { @@_/Catalog/MarkInfo_gpush: }
-    \use:c { @@_/Catalog/OCProperties_gpush: }
+    \pdfmeta_standard_verify:nT {Catalog_no_OCProperties}
+      {
+        \use:c { @@_/Catalog/OCProperties_gpush: }
+      }
     \use:c { @@_/Catalog/OutputIntents_gpush: }
     \use:c { @@_/Catalog/Requirements_gpush: }
     \use:c { @@_/Catalog/ViewerPreferences_gpush: }
