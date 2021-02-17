@@ -1,0 +1,51 @@
+% \section{XMP-metadata (work in progress)}
+% This part of code is currently not activated.
+%    \begin{macrocode}
+%
+% \str_const:Nx\c_@@_bom_str
+%  {
+%   \bool_if:nTF
+%     {
+%       \sys_if_engine_luatex_p: || \sys_if_engine_xetex_p:
+%     }
+%     {
+%      \char_generate:nn {65279}{12}
+%     }
+%     {
+%       \char_generate:nn {239}{12}
+%       \char_generate:nn {187}{12}
+%       \char_generate:nn {191}{12}
+%     }
+%  }
+% % writing the stream:
+% \str_new:N \g_@@_xmppacket_str
+%
+% \str_gset:Nx      \g_@@_xmppacket_str
+%  {<?xpacket~begin="\c_@@_bom_str"~id="W5M0MpCehiHzreSzNTczkc9d"?>\iow_newline:}
+% \str_gput_right:Nx \g_@@_xmppacket_str
+%  {<x:xmpmeta~xmlns:x="adobe:ns:meta/">\iow_newline:}
+%
+% %here more contents ...
+% \str_gput_right:Nx \g_@@_xmppacket_str { </x:xmpmeta> \iow_newline: }
+% %here padding??
+% \str_gput_right:Nn \g_@@_xmppacket_str { <?xpacket~end="w"?> }
+
+%    \end{macrocode}
+% \subsection{The stream object}
+% This code is currently not activated.
+%    \begin{macrocode}
+
+%\hook_gput_code:nnn {shipout/lastpage}{pdf}
+%  {
+%    \bool_if:NT \g_pdfmeta_xmp_bool
+%      {
+%        \pdf_object_new:nn {__pdf_Metadata} {stream}
+%        \pdf_object_write:nx {__pdf_Metadata}
+%         {
+%           { /Type /Metadata /Subtype /XML }
+%           {\g_@@_xmppacket_str}
+%         }
+%      }
+%  }
+%    \end{macrocode}
+%
