@@ -314,12 +314,13 @@
         \AddToDocumentProperties[document]{lang}{#1}
       }
     %,xmpmeta .bool_gset:N = \g_pdfmeta_xmp_bool %see pdfmeta unused and undefined for now!
+    % this uses internal command from pdfmeta, it should probably move there ...
     ,pdfstandard .choices:nn =
       {A-1b,A-2b,A-3b}
       {
-        \prop_if_exist:cT { g_pdfmeta_standard_pdf/#1_prop }
+        \prop_if_exist:cT { g__pdfmeta_standard_pdf/#1_prop }
           {
-            \prop_gset_eq:Nc \g_pdfmeta_standard_prop { g_pdfmeta_standard_pdf/#1 _prop }
+            \prop_gset_eq:Nc \g__pdfmeta_standard_prop { g__pdfmeta_standard_pdf/#1 _prop }
           }
         \AddToDocumentProperties [document]{standard}{#1}
       }
