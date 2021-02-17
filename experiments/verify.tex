@@ -20,7 +20,7 @@
        }
        {
          \prg_return_true:
-       }     
+       }
   }
 
 \prg_new_protected_conditional:Npnn \pdfmeta_standard_verify:nn #1 #2  {T,F,TF}
@@ -44,32 +44,18 @@
         \prg_return_true:
       }
    }
-   
-\prg_new_protected_conditional:Npnn \pdfmeta_standard_verify:nnN #1 #2 #3 {T,F,TF}
-  {
-    \prop_if_in:NnTF \g_pdfmeta_standard_prop {#1}
-      {
-        \tl_set:Nx #3  {\prop_item:Nn \g_pdfmeta_standard_prop {#1}}
-        \cs_if_exist:cTF {__pdfmeta_standard_verify_handler_#1:nn}
-          { % dedicated test handler:
-            % should return true of false.
-            \exp_args:Nnno
-            \use:c
-              { __pdfmeta_standard_verify_handler_#1:nn}
-              { #2 }
-              { #3 }
-          }
-          {
-            \prg_return_false:
-          }
-      }
-      {
-        \tl_set:Nn #3  {}
-        \prg_return_true:
-      }
-   }
 
 
+\cs_new:Npn \pdfmeta_standard_item:n #1
+ {
+   \prop_item:Nn \g_pdfmeta_standard_prop {#1}
+ }
+ 
+\cs_new_protected:Npn \pdfmeta_standard_get:nN #1 #2
+ {
+   \prop_get:NnN \g_pdfmeta_standard_prop {#1} #2
+ }
+ 
 % #1 = user value, #2 = standard value
 \cs_new_protected:Npn \__pdfmeta_standard_verify_handler_min_pdf_version:nn #1 #2
  {
@@ -92,7 +78,7 @@
      {\prg_return_true:}
      {\prg_return_false:}
  }
-%not really need probably, but ...
+%not really needed probably, but ...
 \cs_new_protected:Npn \__pdfmeta_standard_verify_handler_outputintent_subtype:nn #1 #2
  {
    \tl_if_eq:nnTF { #2 }{ #1 }
@@ -100,59 +86,73 @@
      {\prg_return_false:}
  }
 
-\pdfmeta_standard_verify:nnNF {min_pdf_version}{} \l_tmpa_tl
+\pdfmeta_standard_verify:nnF {min_pdf_version}{} 
   {
-    \exp_args:NV \pdf_version_gset:n \l_tmpa_tl
+    \exp_args:Nx \pdf_version_gset:n { \pdfmeta_standard_item:n {min_pdf_version} }
   }
 
-%\pdfmeta_standard_verify:nnNTF {named_actions}{XXXPage}\l_tmpa_tl
+%\pdfmeta_standard_verify:nnTF {named_actions}{XXXPage}\l_tmpa_tl
 % {\show\Fine \show\l_tmpa_tl}{ \show\Problem \show\l_tmpa_tl}
 
-\pdfmeta_standard_verify:nnNTF {annot_action_A}{GoTo}\l_tmpa_tl
- {\show\Fine \show\l_tmpa_tl}{ \show\Problem \show\l_tmpa_tl}
+\pdfmeta_standard_verify:nnTF {annot_action_A}{GoTo}
+ {\show\Fine }{ \show\Problem }
 
 
 \ExplSyntaxOff
 
 \begin{document}
-Verifying standard requirements.
+\section{Verifying standard requirements}
 
-Standards like pdf/A have requirements which basically fall into two group: Some things have be there in the PDF, e.g. the catalog has to contain a /Lang entry and an colorprofile and an /OutputIntent, some other things are forbidden or restricted, e.g. the action dictionary of an annotation should not contain Javascript.
+Standards like pdf/A set requirements on a PDF: Some things have be in the PDF, e.g. the catalog has to contain a /Lang entry and an colorprofile and an /OutputIntent, some other things are forbidden or restricted, e.g. the action dictionary of an annotation should not contain Javascript.
 
 The \pkg{l3pdfmeta} packages collects a number of relevant requirements, tries to enforce the ones which can be enforced and offers some tools for package authors to test if an action is allowed in the standard or not.
 
-This is work in progress and more tests will be added. But it should be noted that it will probably never be possible to check and prevent all actions not allowed by a standard. The commands here don't replace a check with an external validator.
+This is work in progress and more tests will be added. But it should be noted that it will probably never be possible to prevent all forbidden actions or enforce all required ones or even to simply check all of them. 
+The commands here don't replace a check with an external validator.
 
+Verifying against a PDF-standard involves two different task: 
 
-\begin{function}[pTF]{\pdfmeta_standard_verify:n}
+\begin{itemize}
+  \item Check if you are allowed to ignore the requirement. 
+  \item Decide which action to take if the answer to the first question is NO.
+\end{itemize}
+
+The following conditionals address the first task. Because of the second task a return value |FALSE| means that the standard requires you to do some special action. |TRUE| means that you can ignore this requirement.\footnote{One could also make the logic the other way round---there are arguments for both---but I had to decide.}
+
+In most cases it only matters if a requirement is in the standard, for example |Catalog_no_OCProperties| means \enquote{don't use |/OCProperties| in the catalog}. For a small number of requirements it is also needed to test a user value against a standard value. For example, |named_actions| restricts the allowed named actions in an annotation of subtype |/Named|, in this case it is needed to
+check not only if the requirement is in the standard but also if the user value is in the allowed list.
+
+\begin{function}[EXP,pTF]{\pdfmeta_standard_verify:n}
 \begin{syntax}
 \cs{pdfmeta_standard_verify:n}\Arg{requirement}
 \end{syntax}
 
-This checks if \meta{requirement} is listed in the standard. |false| as result means that the requirement is in the standard and that probably some special action is required---which one depends on the requirement, see the descriptions below.
-|true| means that the requirement is not there and so no special option is needed.
-This check can be used for simply requirements where neither a user nor a standard value is of importance.
+This checks if \meta{requirement} is listed in the standard. |FALSE| as result means that the requirement is in the standard and that probably some special action is required---which one depends on the requirement, see the descriptions below.
+|TRUE| means that the requirement is not there and so no special action is needed.
+This check can be used for simple requirements where neither a user nor a standard value is of importance.
 \end{function}
 
-\begin{function}[pTF]{\pdfmeta_standard_verify:nn}
+\begin{function}[TF]{\pdfmeta_standard_verify:nn}
 \begin{syntax}
 \cs{pdfmeta_standard_verify:nn}\Arg{requirement}\Arg{value}
 \end{syntax}
 
-This checks if \meta{requirement} is listed in the standard, if yes it tries to find a predefined test handler for 
-the requirement.   calls a special  and if the \meta{value} requires some action.
-|false| as result means that the value is problematic and some special action is required---which one depends on the requirement, see the descriptions below. |true| that no special action is needed.
+This checks if \meta{requirement} is listed in the standard, if yes it tries to find a predefined test handler for
+the requirement, passes \meta{value} and the value recorded in the standard to it. The handler returns |FALSE| if some special action is needed (e.g. if \meta{value} violates the rule) and |TRUE| if no special action is needed. If no handler exists
+this commands works like \cs{pdfmeta_standard_verify:n}.  
 \end{function}
 
-\begin{function}[pTF]{\pdfmeta_standard_verify:nnN}
+In some cases one needs to query the value in the standard, e.g. to correct a wrong minimal PDF version you need to know which version is required by |min_pdf_version|. For this two commands to access the value are provided:
+
+\begin{function}[EXP]{\pdfmeta_standard_item:n}
 \begin{syntax}
-\cs{pdfmeta_standard_verify:nn}\Arg{requirement}\Arg{value} \meta{tl var}
+\cs{pdfmeta_standard_item:n}\Arg{requirement} 
 \end{syntax}
-This works like \cs{pdfmeta_standard_verify:nn} but additionally stores the reference value of the standard
-in the \meta{token list variable}. The \meta{token list variable} can then e.g be used in the true or false branch, to fulfill a requirement or to issue a message.
+This retrieves the value of \meta{requirement} and leaves it in the input. If the requirement isn't in the standard the result is empty, that means that requirements not in the standard and requirement without values can not be distinguished here. 
 \end{function}
 
-\begin{function}[pTF]{\pdfmeta_standard_get:nN}
+
+\begin{function}{\pdfmeta_standard_get:nN}
 \begin{syntax}
 \cs{pdfmeta_standard_get:nN}\Arg{requirement} \meta{tl var}
 \end{syntax}
@@ -161,40 +161,45 @@ If the \meta{requirement} is not found the special value |\q_no_value| is used. 
 \end{function}
 
 
-The following describe the requirements which can be tested. Requirements with a value should use \cs{pdfmeta_standard_verify:nn} or \cs{pdfmeta_standard_verify:nnN} to test a local value against the standard.
+The following describe the requirements which can be currently tested. Requirements with a value should use \cs{pdfmeta_standard_verify:nn} or \cs{pdfmeta_standard_verify:nnN} to test a local value against the standard.
 The rule numbers refer to \url{https://docs.verapdf.org/validation/pdfa-part1/}
 
-\footnotesize
-\extrarowheight2pt
-\noindent\begin{tabular}{l>{\raggedright}p{2cm}l>{\raggedright\arraybackslash}p{5cm}}
-\toprule
-\bfseries requirement &\bfseries test value              &\bfseries rule &\bfseries possible action if |false|    \\
-\midrule
-|min_pdf_version|      & current pdf version && 
-increase the pdf version. \bfseries This check is done by \pkg{l3pdfmeta}. \\
-|outputintent|         & ---                 && 
- embed a color profile and reference it as /Outputintent. \bfseries This requirement is detected and fulfilled by \pkg{l3pdfmeta}, see below.\\
-|outputintent_subtype| & a subtype like |GTS_PDFA1| && 
-change subtype to use the correct name. \bfseries This requirement is detected and fullfilled by \pkg{l3pdfmeta}, see below.\\
-|annot_flags|           & --- && Print flag should be true, Hidden, Invisible, NoView should be false. This requirement is detected  and set by \pkg{l3pdfmeta}.\\
-\midrule
-|no_encryption|        & ---                 && don't encrypt\\
-|no_external_content|  & ---                 && no F, FFilter, or FDecodeParms in stream dictionaries\\
-|no_embed_content|     & ---                 && no /EF key in filespec, no /Type/EmbeddedFiles\\
-|named_actions|        & a named action name && 
- don't use this action, only NextPage, PrevPage, FirstPage, LastPage are allowed \\
-|Catalog_no_OCProperties| & ---              &6.1.13-1
- & don't add /OCProperties to the catalog\\
-|annot_action_A|       & annot action subtype like |GoTo| or |Movie| & 6.6.1-1 & 
- don't use the subtype. \\
-|annot_widget_no_AA|   & ---                 &6.6.2-1& 
- no AA dictionary in widget annotation\\
-|annot_widget_no_A_AA| &---                   &6.9-2& 
- no A and AA dictionary in widget.\\
-|form_no_AA|           &---                   & 6.9-3& 
- no /AA dictionary in form field\\
-\bottomrule
-\end{tabular}
+\subsection{Simple tests without handler}
+
+
+\begin{description}
+
+\item[|outputintent|] requires to embed a color profile and reference it in a /Outputintent. 
+ {\em This requirement is detected and fulfilled by \pkg{l3pdfmeta}, see below}.
+ 
+\item[|annot_flags|] |Print| flag should be true, |Hidden|, |Invisible|, |NoView| should be false. 
+ {\em This requirement is detected  and set by \pkg{l3pdfmeta} for annotations created with the l3pdfannot. A new check is only needed if the flags are changed or if links are created with other means.}
+
+\item[|no_encryption|] don't encrypt
+\item[|no_external_content|] no F, FFilter, or FDecodeParms in stream dictionaries
+\item[|no_embed_content|]    no /EF key in filespec, no /Type/EmbeddedFiles (this will be checked in future by l3pdffiles for the files it inserts.)
+\item[|Catalog_no_OCProperties|] don't add /OCProperties to the catalog {\em l3pdfmeta removes this entry at the end of the document}
+\item[|annot_widget_no_AA|] (rule 6.6.2-1)  no AA dictionary in widget annotation, this will e.g. be checked by the new hyperref driver.
+\item[|annot_widget_no_A_AA|] (rule 6.9-2)  no A and AA dictionary in widget.
+\item[|form_no_AA|] (6.9-3)  no /AA dictionary in form field
+\end{description}
+
+\subsection{Tests with values and special handlers}
+
+\begin{description}
+
+\item[|min_pdf_version|]  stores the minimal PDF version.  It should be checked against the current PDF version (\cs{pdf_version:}).
+ A failure means that the version should be changed.
+ This check is done by \pkg{l3pdfmeta} when the version is set with 
+ \cs{DeclareDocumentMetadata} so more checks are only needed if the version is changed later.
+\item[|outputintent_subtype|] this requirement stores allowed names for the /Outputintent subtype  like |GTS_PDFA1|. 
+This value is typically only read. 
+\item[|named_actions|]    this requirement restricts the list of allowed named actions to |NextPage|, |PrevPage|, |FirstPage|, |LastPage|.
+The check should supply the named action without slash (e.g. |View|). 
+
+\item[|annot_action_A|] (rule 6.6.1-1) this requirement restricts the allowed subtypes of the
+/A dictionary of an action. The check should supply the user subtype without slash e.g. as |GoTo| or |Movie|. 
+\end{description}
 
 
 \end{document}
