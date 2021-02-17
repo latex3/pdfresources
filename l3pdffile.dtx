@@ -170,14 +170,14 @@
 % \subsubsection{Task 1: Embedding a file}
 % Embedding an existing file is in most cases quite straightforward. This module
 % offers commands, but it can also be done with the basic commands
-% from the l3pdf module \cs{pdf_object_now:nn} or
+% from the l3pdf module \cs{pdf_object_unnamed_write:nn} or
 % \cs{pdf_object_new:nn}/\cs{pdf_object_write:nn} or primitive commands
 % to create objects.
 % The object number should be stored for the reference
 % in the /FileSpec dictionary.
 %
 % \begin{verbatim}
-% \pdf_object_now:nx {fstream}
+% \pdf_object_unnamed_write:nx {fstream}
 %   {
 %     {
 %       /Type /EmbeddedFile
@@ -191,7 +191,7 @@
 %     }
 %     {example-image.eps}
 %   }
-% \tl_set:Nx \l_my_fileobj_tl {\pdf_object_last:}
+% \tl_set:Nx \l_my_fileobj_tl {\pdf_object_ref_last:}
 % \end{verbatim}
 %
 % \begin{itemize}
@@ -541,7 +541,7 @@
 %   e.g. result from \@@_mimetype_set:NN
 \cs_new_protected:Npn \@@_fstream_write:nN #1 #2
   {
-    \pdf_object_now:nx { fstream }
+    \pdf_object_unnamed_write:nx { fstream }
       {
         {
           #2
@@ -566,7 +566,7 @@
 %   e.g. result from \@@_mimetype_set:NN
 \cs_new_protected:Npn \@@_stream_write:nN #1 #2
   {
-    \pdf_object_now:nx { stream }
+    \pdf_object_unnamed_write:nx { stream }
       {
         {
           #2
@@ -638,7 +638,7 @@
                 \@@_fstream_write:VN
                   \l_pdffile_source_name_str
                   \l_@@_automimetype_tl
-                \tl_set:Nx \l_@@_embed_ref_tl { \pdf_object_last: }
+                \tl_set:Nx \l_@@_embed_ref_tl { \pdf_object_ref_last: }
               }
               {
                 \msg_error:nnn { pdffile }{ file-not-found }{ #1 }
@@ -699,7 +699,7 @@
          \@@_stream_write:nN
            { #1 }
            \l_@@_automimetype_tl
-         \tl_set:Nx \l_@@_embed_ref_tl { \pdf_object_last: }
+         \tl_set:Nx \l_@@_embed_ref_tl { \pdf_object_ref_last: }
          \exp_args:Nnxx
            \@@_filespec_write:nnn
              %#1 dict, #2 target file name, #3 object ref

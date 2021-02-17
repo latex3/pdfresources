@@ -40,7 +40,7 @@
    \hyxmp@construct@packet
    %or some other command to write a object:
    \exp_args:Nnx
-    \pdf_object_now:nn{stream}{{/Type~/Metadata~/Subtype~/XML}{\hyxmp@xml}}%
+    \pdf_object_unnamed_write:nn{stream}{{/Type~/Metadata~/Subtype~/XML}{\hyxmp@xml}}%
     % reference in the Catalog:
     \pdfmanagement_add:nnx {Catalog} {Metadata}{\pdf_object_last:}
  }

@@ -548,8 +548,8 @@
               {l_pdfmeta/outputintent}{##1}{\l_@@_tmpa_str}
           }
        }
-     \pdf_object_now:nx {dict}{\pdfdict_use:n {l_pdfmeta/outputintent} }
-     \pdfmanagement_add:nnx {Catalog}{OutputIntents}{\pdf_object_last:}
+     \pdf_object_unnamed_write:nx {dict}{\pdfdict_use:n {l_pdfmeta/outputintent} }
+     \pdfmanagement_add:nnx {Catalog}{OutputIntents}{\pdf_object_ref_last:}
     \group_end:
   }
 

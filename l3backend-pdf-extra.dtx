@@ -777,7 +777,7 @@
 %this require management
 \cs_set_protected:Npn \@@_backend_bdc_contobj:nn #1 #2
   {
-    \pdf_object_now:nn { dict }{ #2 }
+    \pdf_object_unnamed_write:nn { dict }{ #2 }
     \@@_backend_bdcobject:n { #1 }
   }
 
@@ -870,7 +870,7 @@
    }
 \cs_set_protected:Npn \@@_backend_bdc_contobj:nn #1 #2
   {
-    \pdf_object_now:nn { dict } { #2 }
+    \pdf_object_unnamed_write:nn { dict } { #2 }
     \@@_backend_bdcobject:n { #1 }
   }
 \cs_set_protected:Npn \@@_backend_bdc_contstream:nn #1 #2
@@ -979,7 +979,7 @@
   }
 \cs_set_protected:Npn \@@_backend_bdc_contobj:nn #1 #2
    {
-     \pdf_object_now:nn { dict } { #2 }
+     \pdf_object_unnamed_write:nn { dict } { #2 }
      \@@_backend_bdcobject:n { #1 }
    }
 \cs_set_protected:Npn \@@_backend_bdc_contstream:nn #1 #2
@@ -1044,23 +1044,23 @@
 %<*pdftex>
 \cs_new_protected:Npn \@@_backend_NamesEmbeddedFiles_gpush:n #1 %array content
   {
-     \pdf_object_now:nn {dict} {/Names [#1] }
-     \tex_pdfnames:D {/EmbeddedFiles~\pdf_object_last:}
+     \pdf_object_unnamed_write:nn {dict} {/Names [#1] }
+     \tex_pdfnames:D {/EmbeddedFiles~\pdf_object_ref_last:}
   }
 %</pdftex>
 %<*luatex>
 \cs_new_protected:Npn \@@_backend_NamesEmbeddedFiles_gpush:n #1 %array content
   {
-    \pdf_object_now:nn {dict} {/Names [#1] }
-    \tex_pdfextension:D~names~{/EmbeddedFiles~\pdf_object_last: }
+    \pdf_object_unnamed_write:nn {dict} {/Names [#1] }
+    \tex_pdfextension:D~names~{/EmbeddedFiles~\pdf_object_ref_last: }
   }
 %</luatex>
 %<*dvipdfmx|xdvipdfmx>
 \cs_new_protected:Npn \@@_backend_NamesEmbeddedFiles_gpush:n #1 %array content
   {
-    \pdf_object_now:nn {dict} { /Names [#1] }
+    \pdf_object_unnamed_write:nn {dict} { /Names [#1] }
     %n or x?
-    \__pdf_backend:x {put~@names~<</EmbeddedFiles~\pdf_object_last: >>}
+    \__pdf_backend:x {put~@names~<</EmbeddedFiles~\pdf_object_ref_last: >>}
   }
 %</dvipdfmx|xdvipdfmx>
 

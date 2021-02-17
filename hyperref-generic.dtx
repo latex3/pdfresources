@@ -3673,11 +3673,11 @@
          {
            \group_begin:
            \keys_set:nn { hyp / trans }{style=R,#1}
-           \pdf_object_now:nx { dict }
+           \pdf_object_unnamed_write:nx { dict }
              {
                \pdfdict_use:n {l_@@_page/Trans}
              }
-           \pdfmanagement_add:nnx {Page}{Trans}{\pdf_object_last:}
+           \pdfmanagement_add:nnx {Page}{Trans}{\pdf_object_ref_last:}
            \group_end:
          }
      }
