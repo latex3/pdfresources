@@ -613,7 +613,7 @@
  {
    ,A .code:n =
       {
-        \tl_if_blank:nF
+        \tl_if_blank:nF {#1}
           {
             \prop_gput:Nnn \g_@@_outputintents_prop
              { GTS_PDFA1  } {#1}
@@ -621,7 +621,7 @@
       }
    ,a .code:n =
       {
-        \tl_if_blank:nF
+        \tl_if_blank:nF {#1}
           {
             \prop_gput:Nnn \g_@@_outputintents_prop
               { GTS_PDFA1  } {#1}
@@ -629,7 +629,7 @@
       }
    ,X .code:n =
       {
-        \tl_if_blank:nF
+        \tl_if_blank:nF {#1}
           {
              \prop_gput:Nnn \g_@@_outputintents_prop
               { GTS_PDFX  } {#1}
@@ -637,7 +637,7 @@
       }
    ,x .code:n =
       {
-        \tl_if_blank:nF
+        \tl_if_blank:nF {#1}
           {
             \prop_gput:Nnn \g_@@_outputintents_prop
               { GTS_PDFX  } {#1}
@@ -645,11 +645,12 @@
       }
    ,unknown .code:n =
      {
-       \tl_if_blank:nF
+       \tl_if_blank:nF {#1}
           {
-            \prop_gput:Nxn \g_@@_outputintents_prop
+           \exp_args:NNo
+            \prop_gput:Nnn \g_@@_outputintents_prop
               { \l_keys_key_str  } {#1}
-          }    
+          }
      }
  }
 %    \end{macrocode}
