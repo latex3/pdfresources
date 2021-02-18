@@ -180,7 +180,7 @@
 % The wanted backend must be detected first, we read the init key and then
 % force the loading by either loading l3pdf (+ expl3) or only expl3.
 %    \begin{macrocode}
-        \keys_set_groups:nnn { pdf / setup} {init}{ #1 }
+        \keys_set_groups:nnn { document / metadata} {init}{ #1 }
         %should be loaded after the backend is set, and only if not in the kernel
         \cs_if_free:NTF \pdf_uncompress:
          {\RequirePackage{l3pdf}}{\RequirePackage{expl3}}
@@ -195,7 +195,7 @@
 % set the default language, process the rest of the keys,
 % and setup the generic driver
 %    \begin{macrocode}
-        \keys_set_filter:nnn  { pdf / setup } { init } { lang=en-US, #1 }
+        \keys_set_filter:nnn  { document / metadata } { init } { lang=en-US, #1 }
         \bool_if:NT \g_@@_active_bool
           {
             \PassOptionsToPackage{customdriver=hgeneric-experimental}{hyperref}
@@ -210,7 +210,7 @@
 %    \begin{macrocode}
         \RenewDocumentCommand\DeclareDocumentMetadata { m }
           {
-            \keys_set_filter:nnn  { pdf / setup } { init } { ##1 }
+            \keys_set_filter:nnn  { document / metadata } { init } { ##1 }
             \bool_if:NTF \g_@@_active_bool
              {
                \str_remove_all:cn {opt@hyperref.sty}{customdriver=hgeneric-experimental}
@@ -286,7 +286,7 @@
 %    \end{macrocode}
 % \end{variable}
 %    \begin{macrocode}
-\keys_define:nn { pdf / setup }
+\keys_define:nn { document / metadata }
   {
     backend .code:n =
       {
@@ -296,7 +296,7 @@
     backend .groups:n = { init } ,
   }
 
-\keys_define:nn { pdf / setup }
+\keys_define:nn { document / metadata }
   {
     ,pdfversion .code:n =
       {
