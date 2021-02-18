@@ -225,6 +225,79 @@
 % |/A| dictionary of an action. The check should supply the user
 %  subtype without slash e.g. as |GoTo| (pass) or |Movie| (failure).
 % \end{description}
+%
+% \subsection{Colorprofiles and OutputIntent}
+%
+% The pdf/A standards require that a color profile is embedded and
+% referenced in the catalog in the |/OutputIntent| array.
+%
+% The problem is that the pdf/A standards also require, that if the PDF has more then
+% one entry in the |/OutputIntent| array (which is allowed), their /DestOutputProfile
+% should all reference the same color profile\footnote{see rule 6.2.2-2 at
+% \url{https://docs.verapdf.org/validation/pdfa-part1/}}.
+%
+% Enforcing this fully is impossible as it is difficult to inspect
+% and remove entries from the |/OutputIntent| added manually by users or packages with
+% |\pdfmanagement_add:nnn {Catalog}{OutputIntents}{|\meta{object reference}|}|.
+%
+% So we provide a dedicated interface to avoid the need of manual
+% user settings and allow the code to handle the requirements of the standard.
+%
+% The interface has to handle the following points:
+% \begin{itemize}
+% \item  We have to assume that some documents wants to add more than one OutputIntent with
+% varying subtypes.
+% \item While currently only |/GTS_PDFA1| and |/GTS_PDFX| seem to
+% be relevant, we have to assume that the list of subtypes is open.
+% \item But we can imho assume that every subtype is there at most once.
+% \item The referenced color profile can be used also other means, e.g. an /ICCBased
+% color space. We must avoid that it is embedded twice in this case.
+% \item While we can predeclare some standard icc-profiles, an interface to
+% setup more is needed.
+% \end{itemize}
+%
+% The interface looks like this
+%
+% \begin{verbatim}
+%  \DeclareDocumentMetadata
+%    {
+%      %other options
+%      colorprofiles=
+%        {
+%          A = sRGB.icc, %or a or longer GTS_PDFA1 = sRGB.icc
+%          X = FOGRA39L_coated.icc, % or x or longer GTS_PDFX
+%          ISO_PDFE1 = whatever.icc
+%        }
+%
+%    }
+% \end{verbatim}
+%
+% |sRGB.icc| and |FOGRA39L_coated.icc| (from the \pkg{colorprofiles} package
+% are predefined and will work directly. |whatever.icc| will need special setup in
+% the document preamble (how exactly will be decided later).
+%
+% If a standard is detected or set which requires
+% that all |/DestOutputProfile| reference the same
+% color profile, the setting is changed to the equivalent of
+%
+% \begin{verbatim}
+%  \DeclareDocumentMetadata
+%    {
+%      %other options
+%      colorprofiles=
+%        {
+%          A = sRGB.icc, %or longer GTS_PDFA1 = sRGB.icc
+%          X = sRGB.icc,
+%          ISO_PDFE1 = sRGB.icc
+%        }
+%
+%    }
+% \end{verbatim}
+%
+% The pdf/A standards will use |A=sRGB.icc| by default, so this doesn't
+% need to be declared explicitly.
+%
+%
 % \end{documentation}
 %
 % \begin{implementation}
@@ -448,11 +521,12 @@
     %===============
     % to be continued https://docs.verapdf.org/validation/pdfa-part1/
     % - Outputintent/colorprofiles requirements
-    % an outputintent should be loaded. There are more requirements
-    % but these are not tested
-    ,outputintent         =
-    ,outputintent_subtype = {GTS_PDFA1}
-    ,outputintent_profile = {sRGB.icc}
+    % an outputintent should be loaded.
+    ,outputintent          =
+    % its subtype:
+    ,outputintent_subtype  = {GTS_PDFA1}
+    % only one (A) profile
+    ,outputintent_unique   =
     % - no Alternates key in image dictionaries
     % - no OPI, Ref, Subtype2 with PS key in xobjects
     % - Interpolate  = false in images
@@ -494,6 +568,78 @@
 % and an outputintent need for PDF/A for now. There will be need to extend it later,
 % so we try for enough generality.
 %
+% Adding a profile and an intent is technically easy:
+% \begin{enumerate}
+% \item Embed the profile as stream with
+% \begin{verbatim}
+%  \pdf_object_unnamed_write:nn{fstream} {{/N~4}{XXX.icc}}
+% \end{verbatim}
+% \item Write a |/OutputIntent| dictionary for this
+% \begin{verbatim}
+% \pdf_object_unnamed_write:nx {dict}
+%  {
+%    /Type /OutputIntent
+%    /S /GTS_PDFA1  % or GTS_PDFX or ISO_PDFE1 or ...
+%    /DestOutputProfile \pdf_object_ref_last: % ref the color profile
+%    /OutputConditionIdentifier ...
+%    ... %more info
+%  }
+% \end{verbatim}
+% \item Reference the dictionary in the catalog:
+% \begin{verbatim}
+% \pdfmanagement_add:nnx {Catalog}{OutputIntents}{\pdf_object_ref_last:}
+% \end{verbatim}
+%
+% But we need to do a bit more work, to get the interface right.
+% The object for the profile should be named, to allow l3color to reuse it
+% if needed. And we need container to store the profiles, to handle the
+% standard requirements.
+%
+% \begin{variable}{\g_@@_outputintents_prop}
+% This variable will hold the profiles for the subtypes. We assume
+% that every subtype has only only color profile.
+%    \begin{macrocode}
+\prop_new:N \g_@@_outputintents_prop
+%    \end{macrocode}
+% \end{variable}
+% Some keys to fill the property.
+%    \begin{macrocode}
+\keys_define:nn { document / metadata }
+  {
+    colorprofiles .code:n =
+     {
+       \keys_set:nn { document / metadata / colorprofiles }{#1}
+     }
+  }
+\keys_define:nn { document / metadata / colorprofiles }
+ {
+   ,A .code:n =
+      {
+        \prop_gput:Nnn \g_@@_outputintents_prop
+          { GTS_PDFA1  } {#1}
+      }
+   ,a .code:n =
+      {
+        \prop_gput:Nnn \g_@@_outputintents_prop
+          { GTS_PDFA1  } {#1}
+      }
+   X .code:n =
+      {
+        \prop_gput:Nnn \g_@@_outputintents_prop
+          { GTS_PDFX  } {#1}
+      }
+   x .code:n =
+      {
+        \prop_gput:Nnn \g_@@_outputintents_prop
+          { GTS_PDFX  } {#1}
+      }
+  unknown .code:n =
+     {
+       \prop_gput:Nxn \g_@@_outputintents_prop
+          { \l_keys_key_str  } {#1}
+     }
+ }
+%    \end{macrocode}
 %    \begin{macrocode}
 \pdfdict_new:n   {l_pdfmeta/outputintent}
 \pdfdict_put:nnn {l_pdfmeta/outputintent}
@@ -555,15 +701,41 @@
 
 \AddToHook{begindocument/end}
   {
-     \prop_if_in:NnT\g_@@_standard_prop {outputintent}
+    \pdfmeta_standard_verify:nF {outputintent}
+      {
+        \exp_args:NNx
+         \prop_if_in:NnF \g_@@_outputintents_prop
+           {
+             \pdfmeta_standard_item:n {outputintent_subtype}
+           }
+           {
+             \prop_gput:Nxn { \pdfmeta_standard_item:n {outputintent_subtype} }{sRGB.icc}
+           }
+      }
+    \pdfmeta_standard_verify:nTF {outputintent_unique}
+      {
+       \prop_map_inline:Nn \g_@@_outputintents_prop
+         {
+           \exp_args:Nx
+             \@@_embed_colorprofile:n
+              {\prop_item:Nn \g_@@_outputintents_prop {#2}}
+           \exp_args:Nxx
+             \@@_write_outputintent:nn
+              {#2}
+              {#1}
+         }
+      }
       {
         \exp_args:Nx
-        \@@_embed_colorprofile:n
-          {\prop_item:Nn \g_@@_standard_prop {outputintent_profile}}
-        \exp_args:Nxx
-        \@@_write_outputintent:nn
-          {\prop_item:Nn \g_@@_standard_prop {outputintent_profile}}
-          {\prop_item:Nn \g_@@_standard_prop {outputintent_subtype}}
+          \@@_embed_colorprofile:n
+            {\prop_item:Nn \g_@@_outputintents_prop {GTS_PDFA1}}
+        \prop_map_inline:Nn \g_@@_outputintents_prop
+           {
+             \exp_args:Nxx
+               \@@_write_outputintent:nn
+                {#2}
+                {GTS_PDFA1}
+          }
       }
    }
 %    \end{macrocode}
