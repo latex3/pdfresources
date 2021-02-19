@@ -45,8 +45,20 @@
     \pdfmanagement_add:nnx {Catalog} {Metadata}{\pdf_object_last:}
  }
 
+% A standard should be retrieved from the document settings.
+\cs_new:Npn \__hypxmp_get_Astandard:w #1-#2#3#4\q_stop
+ {
+   \tl_if_eq:nnT{#1}{A}
+    {
+      \Hy@pdfatrue
+      \tl_set:Nn \@pdfapart{#2}
+      \tl_set:Nx \@pdfaconformance{#3}
+    }
+ }
 \cs_new_protected:Npn \__hyxmp_get_metadata:
  {
+  \exp_last_unbraced:Ne \__hypxmp_get_Astandard:w
+    {\GetDocumentProperties{document/pdfstandard}}Z-ZZZ\q_stop
    \clist_map_inline:nn
     {
       % hyperxmp keys:
@@ -56,9 +68,9 @@
       ,pdfauthortitle
       ,pdfcaptionwriter
       ,pdfmetalang
-      ,pdfapart
-      ,pdfaconformance
-      ,pdfuapart
+      %,pdfapart %document
+      %,pdfaconformance %document
+      ,pdfuapart %probably document too but later ...
       ,pdfxstandard
       ,pdfsource
       ,pdfdocumentid
@@ -95,20 +107,29 @@
       ,pdftitle
       ,pdfsubject
       ,pdfkeywords
+      ,pdfproducer
     }
     {
      \tl_if_exist:cF{@##1}{\tl_new:c{@##1}}
-     \tl_set:cx {@##1}{\GetDocumentProperties{hyp/##1}}}
+     \tl_set:cx {@##1}{\GetDocumentProperties{hyperref/##1}}
+    }
 
     % pdfauthor, this is only a work around for simple author
     % TODO needs improvement
-    \pdfstringdef\@pdfauthor{\GetDocumentProperties{hyp/pdfauthor}}
+    \pdfstringdef\@pdfauthor{\GetDocumentProperties{hyperref/pdfauthor}}
     \cs_set_eq:NN\hyxmp@pdfauthor\@pdfauthor
 
     % pdflang,
     \tl_if_exist:cF{@pdflang}{\tl_new:c{@pdflang}}
     \tl_set:cx {@pdflang}{\GetDocumentProperties{document/lang}}
   }
+
+% we need to provide a few commands so that hyperxmp stops to overwrite them
+% in \AtEndPreamble
+\AddToHook{begindocument/before}[pdfmanagement/firstaid/hyperxmp]{%
+ \def\@pdfauthor{Author}\def\@pdftitle {Title}}
+
+\DeclareHookRule{begindocument/before}{pdfmanagement/firstaid/hyperxmp}{before}{hyperxmp}
 
 \AddToHook{enddocument}[pdfmanagement-firstaid]{\__hyxmp_get_metadata:}
 

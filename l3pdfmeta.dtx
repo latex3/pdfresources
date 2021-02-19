@@ -194,8 +194,15 @@
 % \item[|no_encryption|] don't encrypt
 % \item[|no_external_content|] no |/F|, |/FFilter|, or |/FDecodeParms|
 %  in stream dictionaries
-% \item[|no_embed_content|]    no |/EF| key in filespec, no |/Type/EmbeddedFiles|
-%  (this will be checked in future by \pkg{l3pdffiles} for the files it inserts.)
+% \item[|no_embed_content|]    no |/EF| key in filespec, no |/Type/EmbeddedFiles|.
+%  \emph{This will be checked in future by \pkg{l3pdffiles}
+%  for the files it embeds.}
+%  The restrictment is set for only PDF/A-1b.
+%  PDF/A-2b and PDF/A3-b lifted this restriction: PDF/A-2b allows
+%  to embed other PDF documents conforming to either PDF/A-1 or PDF/A-2,
+%  and PDF/A-3 allows any embedded files. I don't see a way to test the
+%  PDF/A-2b requirement so currently it will simply allow everything. Perhaps
+%  a test for at least the PDF-format will be added in future.
 % \item[|Catalog_no_OCProperties|] don't add |/OCProperties| to the catalog
 % {\em l3pdfmeta removes this entry at the end of the document}
 % \item[|annot_widget_no_AA|] (rule 6.6.2-1)
@@ -232,7 +239,7 @@
 % referenced in the catalog in the |/OutputIntent| array.
 %
 % The problem is that the pdf/A standards also require, that if the PDF has more then
-% one entry in the |/OutputIntent| array (which is allowed), their /DestOutputProfile
+% one entry in the |/OutputIntent| array (which is allowed), their |/DestOutputProfile|
 % should all reference the same color profile\footnote{see rule 6.2.2-2 at
 % \url{https://docs.verapdf.org/validation/pdfa-part1/}}.
 %
@@ -242,27 +249,36 @@
 %
 % So we provide a dedicated interface to avoid the need of manual
 % user settings and allow the code to handle the requirements of the standard.
+% The interface doesn't handle yet all finer points for PDF/X standards, e.g.
+% named profiles, it is meant as a starting point to get at least PDF/A validation
+% here.
 %
+% \begin{NOTE}{UF}
 % The interface has to handle the following points:
 % \begin{itemize}
-% \item  We have to assume that some documents wants to add more than one OutputIntent with
-% varying subtypes.
+% \item  We have to assume that some documents wants to add more
+%  than one OutputIntent with varying subtypes.
 % \item While currently only |/GTS_PDFA1| and |/GTS_PDFX| seem to
 % be relevant, we have to assume that the list of subtypes is open.
 % \item But we can imho assume that every subtype is there at most once.
 % \item The referenced color profile can be used also other means, e.g. an /ICCBased
 % color space. We must avoid that it is embedded twice in this case.
+% This will need coordination with l3color. It should probably provide the
+% code to embed the profile.
 % \item While we can predeclare some standard icc-profiles, an interface to
-% setup more is needed.
+% setup more is needed. This is currently not handled, as it needs
+% coordination with a setup in l3color too.
+% \item The implementation doesn't really handle yet all finer points for pdf/X
+% see \url{tn0002_color_in_pdfa-1_2008-03-141.pdf}
 % \end{itemize}
-%
+% \end{NOTE}
 % The interface looks like this
 %
 % \begin{verbatim}
 %  \DeclareDocumentMetadata
 %    {
-%      %other options
-%      colorprofiles=
+%      %other options for example pdfstandard
+%       colorprofiles=
 %        {
 %          A = sRGB.icc, %or a or longer GTS_PDFA1 = sRGB.icc
 %          X = FOGRA39L_coated.icc, % or x or longer GTS_PDFX
@@ -273,8 +289,13 @@
 % \end{verbatim}
 %
 % |sRGB.icc| and |FOGRA39L_coated.icc| (from the \pkg{colorprofiles} package
-% are predefined and will work directly. |whatever.icc| will need special setup in
-% the document preamble (how exactly will be decided later).
+% are predefined and will work directly\footnote{The \texttt{dvips} route
+% will require that \texttt{ps2pdf} is called with \texttt{-dNOSAFER},
+% and that the color profiles are in the current folder as \texttt{ps2pdf} doesn't
+% use \texttt{kpathsea} to find them.}. |whatever.icc| will need special setup in
+% the document preamble to declare the values for the
+% |OutputIntent| dictionary, but the interface hasn't be added yet. This will be
+% decided later.
 %
 %
 % If an A-standard is detected or set which requires
@@ -285,7 +306,8 @@
 %  \DeclareDocumentMetadata
 %    {
 %      %other options
-%      colorprofiles=
+%       pdfstandard=A-2b,
+%       colorprofiles=
 %        {
 %          A = sRGB.icc, %or longer GTS_PDFA1 = sRGB.icc
 %          X = sRGB.icc,
@@ -308,7 +330,7 @@
 %    \begin{macrocode}
 %<*package>
 %<@@=pdfmeta>
-\ProvidesExplPackage {l3pdfmeta} {2020-05-17} {0.2}
+\ProvidesExplPackage {l3pdfmeta} {2021-02-19} {0.3}
   {XMP-Metadata and PDF-Standards}
 %    \end{macrocode}
 % Message for unknown standards
@@ -322,15 +344,15 @@
 \str_new:N \l_@@_tmpa_str
 %    \end{macrocode}
 % \end{variable}
-% \section{Standards (work in progress)}
-% \subsection{Tools and tests}
+% \subsection{Standards (work in progress)}
+% \subsubsection{Tools and tests}
 % This internal property will contain for now the settings for the document.
 % \begin{variable}{\g_@@_standard_prop}
 %    \begin{macrocode}
 \prop_new:N \g_@@_standard_prop
 %    \end{macrocode}
 % \end{variable}
-% \subsection{Functions to check a requirement}
+% \subsubsection{Functions to check a requirement}
 % At first two commands to get the standard value if needed:
 % \begin{macro}[EXP]{\pdfmeta_standard_item:n}
 %    \begin{macrocode}
@@ -365,14 +387,16 @@
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}[TF]{\pdfmeta_standard_verify:nn}
+% This allows to test against a user value. It calls a test handler if this
+% exists and passes the user and the standard value to it. The test
+% handler should return true or false.
 %    \begin{macrocode}
 \prg_new_protected_conditional:Npnn \pdfmeta_standard_verify:nn #1 #2  {T,F,TF}
   {
     \prop_if_in:NnTF \g_@@_standard_prop {#1}
       {
         \cs_if_exist:cTF {@@_standard_verify_handler_#1:nn}
-          { % dedicated test handler:
-            % should return true of false.
+          {
             \exp_args:Nnnx
             \use:c
               {@@_standard_verify_handler_#1:nn}
@@ -394,9 +418,10 @@
 %
 % The first actually ignores the user values and tests against the
 % current pdf version. If this is smaller than the minimum we report a failure.
+% |#1| is the user value, |#2| the reference value from the standard.
 % \begin{macro}{\@@_standard_verify_handler_min_pdf_version:nn}
 %    \begin{macrocode}
-% #1 = user value, #2 = standard value
+%
 \cs_new_protected:Npn \@@_standard_verify_handler_min_pdf_version:nn #1 #2
  {
    \pdf_version_compare:NnTF <
@@ -440,9 +465,9 @@
  }
 %    \end{macrocode}
 % \end{macro}
-% \subsection{Enforcing requirements}
+% \subsubsection{Enforcing requirements}
 %  A number of requirements can sensibly be enforced by us.
-%  \subsubsection{Annot flags}
+%  \paragraph{Annot flags}
 % pdf/A require a number of settings here, we store them in a command which
 % can be added to the property of the standard:
 %    \begin{macrocode}
@@ -468,21 +493,21 @@
   }
 %    \end{macrocode}
 %
-%  \subsection{pdf/A}
+%  \subsubsection{pdf/A}
 %  We use global properties so that follow up standards can be
 %  copied and then adjusted.
 %  Some note about requirements for more standard can
 %  be found in info/pdfstandard.tex.
 %  \begin{variable}{
-%   \g_@@_standard_pdf/A-1b_prop ,
-%   \g_@@_standard_pdf/A-2b_prop ,
-%   \g_@@_standard_pdf/A-3b_prop
+%   \g_@@_standard_pdf/A-1B_prop ,
+%   \g_@@_standard_pdf/A-2B_prop ,
+%   \g_@@_standard_pdf/A-3B_prop
 %   }
 %     \begin{macrocode}
-\prop_new:c { g_@@_standard_pdf/A-1b_prop }
-\prop_set_from_keyval:cn { g_@@_standard_pdf/A-1b_prop }
+\prop_new:c { g_@@_standard_pdf/A-1B_prop }
+\prop_set_from_keyval:cn { g_@@_standard_pdf/A-1B_prop }
   {
-    ,name             = pdf/A-1b
+    ,name             = pdf/A-1B
     ,type             = A
     ,year             = 2005
     ,min_pdf_version  = 1.4        %minimum
@@ -497,14 +522,17 @@
     ,named_actions    = {NextPage, PrevPage, FirstPage, LastPage}
     ,annot_flags      =
     %booleans. Only the existence of the key matter.
-    %If the entry is added it means true (so in most cases "don't use ...")
+    %If the entry is added it means a requirements is there
+    %(in most cases "don't use ...")
     %
     %===============
     % Rule 6.1.13-1 CosDocument, isOptionalContentPresent == false
       ,Catalog_no_OCProperties =
     %===============
-    % Rule 6.6.1-1: PDAction, S == "GoTo" || S == "GoToR" || S == "Thread" || S == "URI" || S == "Named" || S == "SubmitForm"
-    % means: no /S/Launch, /S/Sound, /S/Movie, /S/ResetForm, /S/ImportData, /S/JavaScript, /S/Hide
+    % Rule 6.6.1-1: PDAction, S == "GoTo" || S == "GoToR" || S == "Thread"
+    %               || S == "URI" || S == "Named" || S == "SubmitForm"
+    % means: no /S/Launch, /S/Sound, /S/Movie, /S/ResetForm, /S/ImportData,
+    %        /S/JavaScript, /S/Hide
       ,annot_action_A        = {GoTo,GoToR,Thread,URI,Named,SubmitForm}
     %===============
     % Rule 6.6.2-1: PDAnnot, Subtype != "Widget" || AA_size == 0
@@ -532,36 +560,36 @@
   }
 
 %A-2b ==============
-\prop_new:c { g_@@_standard_pdf/A-2b_prop }
+\prop_new:c { g_@@_standard_pdf/A-2B_prop }
 \prop_gset_eq:cc
-  { g_@@_standard_pdf/A-2b_prop }
-  { g_@@_standard_pdf/A-1b_prop }
+  { g_@@_standard_pdf/A-2B_prop }
+  { g_@@_standard_pdf/A-1B_prop }
 \prop_gput:cnn
-  { g_@@_standard_pdf/A-2b_prop }{name}{pdf/A-2b}
+  { g_@@_standard_pdf/A-2B_prop }{name}{pdf/A-2B}
 \prop_gput:cnn
-  { g_@@_standard_pdf/A-2b_prop }{year}{2011}
+  { g_@@_standard_pdf/A-2B_prop }{year}{2011}
 % embedding files is allowed (with restrictions)
 \prop_gremove:cn
-  { g_@@_standard_pdf/A-2b_prop }
+  { g_@@_standard_pdf/A-2B_prop }
   { embed_content}
 
 %A-3b ==============
-\prop_new:c { g_@@_standard_pdf/A-3b_prop }
+\prop_new:c { g_@@_standard_pdf/A-3B_prop }
 \prop_gset_eq:cc
-  { g_@@_standard_pdf/A-3b_prop }
-  { g_@@_standard_pdf/A-2b_prop }
+  { g_@@_standard_pdf/A-3B_prop }
+  { g_@@_standard_pdf/A-2B_prop }
 \prop_gput:cnn
-  { g_@@_standard_pdf/A-3b_prop }{name}{pdf/A-3b}
+  { g_@@_standard_pdf/A-3B_prop }{name}{pdf/A-3B}
 \prop_gput:cnn
-  { g_@@_standard_pdf/A-2b_prop }{year}{2012}
+  { g_@@_standard_pdf/A-2B_prop }{year}{2012}
 % embedding files is allowed (with restrictions)
 \prop_gremove:cn
-  { g_@@_standard_pdf/A-3b_prop }
+  { g_@@_standard_pdf/A-3B_prop }
   { embed_content}
 %    \end{macrocode}
 % \end{variable}
 %
-% \subsection{Colorprofiles and Outputintents}
+% \subsubsection{Colorprofiles and Outputintents}
 % The following provides a minimum of interface to add a color profile
 % and an outputintent need for PDF/A for now. There will be need to extend it later,
 % so we try for enough generality.
@@ -587,7 +615,7 @@
 % \begin{verbatim}
 % \pdfmanagement_add:nnx {Catalog}{OutputIntents}{\pdf_object_ref_last:}
 % \end{verbatim}
-%
+% \end{enumerate}
 % But we need to do a bit more work, to get the interface right.
 % The object for the profile should be named, to allow l3color to reuse it
 % if needed. And we need container to store the profiles, to handle the
@@ -654,6 +682,8 @@
      }
  }
 %    \end{macrocode}
+% At first we setup our two default profiles. This is internal as
+% the public interface is still undecided.
 %    \begin{macrocode}
 \pdfdict_new:n   {l_pdfmeta/outputintent}
 \pdfdict_put:nnn {l_pdfmeta/outputintent}
@@ -669,11 +699,19 @@
   {
     ,OutputConditionIdentifier=FOGRA39L~Coated
     ,Info={Offset~printing,~according~to~ISO~12647-2:2004/Amd~1,~OFCOM,~ %
-   paper~type~1~or~2~=~coated~art,~115~g/m2,~tone~value~increase~curves~A~(CMY)~and~B~(K)}
+           paper~type~1~or~2~=~coated~art,~115~g/m2,~tone~value~increase~
+           curves~A~(CMY)~and~B~(K)}
     ,RegistryName=http://www.fogra.org
     ,N = 4
   }
-
+%    \end{macrocode}
+% \begin{macro}{\@@_embed_colorprofile:n,\@@_write_outputintent:nn}
+% The commands embed the profile, and write the dictionary and add it to
+% the catalog. The first command should perhaps be moved to l3color
+% as it needs such profiles too. We used named objects so that we can
+% check if the profile is already there. This is not full proof if pathes are
+% used.
+%    \begin{macrocode}
 \cs_new_protected:Npn \@@_embed_colorprofile:n #1%#1 file name
   {
     \pdf_object_if_exist:nF {@@_colorprofile_#1}
@@ -713,6 +751,7 @@
     \group_end:
   }
 %    \end{macrocode}
+% \end{macro}
 % Now the verifying code.
 % If no requirement is set we simply loop over the property
 %    \begin{macrocode}
@@ -723,42 +762,43 @@
       {
          \prop_map_inline:Nn \g_@@_outputintents_prop
            {
-             \exp_args:Nx
-               \@@_embed_colorprofile:n
-                 {#2}
-             \exp_args:Nxx
-               \@@_write_outputintent:nn
-                 {#2}
-                 {#1}
+             \@@_embed_colorprofile:n
+               {#2}
+             \@@_write_outputintent:nn
+               {#2}
+               {#1}
            }
       }
 %    \end{macrocode}
-% If an outputintent is required for pdf/A we need to ensure, that the key of
+% If an output intent is required for pdf/A we need to ensure, that the key of
 % default subtype has a value, as default we take sRGB.icc.
 % Then we loop but take always the same profile.
 %    \begin{macrocode}
       {
-        \exp_args:NNx
-         \prop_if_in:NnF \g_@@_outputintents_prop
-            { \pdfmeta_standard_item:n { outputintent_A } }
-            {
-              \exp_args:NNx
-              \prop_gput:Nnn \g_@@_outputintents_prop
-                { \pdfmeta_standard_item:n { outputintent_A } }
-                { sRGB.icc }
-            }
          \exp_args:NNx
-           \prop_get:NnN \g_@@_outputintents_prop
-             { \pdfmeta_standard_item:n { outputintent_A } }
-             \l_@@_tmpb_tl
-        \exp_args:NV \@@_embed_colorprofile:n \l_@@_tmpb_tl
-        \prop_map_inline:Nn \g_@@_outputintents_prop
-            {
-              \exp_args:NV
-                \@@_write_outputintent:nn
-                  \l_@@_tmpb_tl
-                  { #1 }
-            }
+         \prop_if_in:NnF
+           \g_@@_outputintents_prop
+           { \pdfmeta_standard_item:n { outputintent_A } }
+           {
+             \exp_args:NNx
+             \prop_gput:Nnn
+               \g_@@_outputintents_prop
+               { \pdfmeta_standard_item:n { outputintent_A } }
+               { sRGB.icc }
+           }
+         \exp_args:NNx
+         \prop_get:NnN
+           \g_@@_outputintents_prop
+           { \pdfmeta_standard_item:n { outputintent_A } }
+           \l_@@_tmpb_tl
+         \exp_args:NV \@@_embed_colorprofile:n \l_@@_tmpb_tl
+         \prop_map_inline:Nn \g_@@_outputintents_prop
+           {
+             \exp_args:NV
+             \@@_write_outputintent:nn
+               \l_@@_tmpb_tl
+               { #1 }
+           }
        }
    }
 %    \end{macrocode}
