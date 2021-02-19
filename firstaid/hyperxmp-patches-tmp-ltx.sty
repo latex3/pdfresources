@@ -45,8 +45,20 @@
     \pdfmanagement_add:nnx {Catalog} {Metadata}{\pdf_object_last:}
  }
 
+% A standard should be retrieved from the document settings.
+\cs_new:Npn \__hypxmp_get_Astandard:w #1-#2#3#4\q_stop
+ {
+   \tl_if_eq:nnT{#1}{A}
+    {
+      \Hy@pdfatrue
+      \tl_set:Nn \@pdfapart{#2}
+      \tl_set:Nn \@pdfaconformance{#3}
+    }
+ }
 \cs_new_protected:Npn \__hyxmp_get_metadata:
  {
+  \exp_last_unbraced:Ne \__hypxmp_get_Astandard:w
+    {\GetDocumentProperties{document/pdfstandard}}Z-ZZZ\q_stop
    \clist_map_inline:nn
     {
       % hyperxmp keys:
@@ -56,9 +68,9 @@
       ,pdfauthortitle
       ,pdfcaptionwriter
       ,pdfmetalang
-      ,pdfapart
-      ,pdfaconformance
-      ,pdfuapart
+      %,pdfapart %document
+      %,pdfaconformance %document
+      ,pdfuapart %probably document too but later ...
       ,pdfxstandard
       ,pdfsource
       ,pdfdocumentid
