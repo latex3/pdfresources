@@ -107,10 +107,12 @@
       ,pdftitle
       ,pdfsubject
       ,pdfkeywords
+      ,pdfproducer
     }
     {
      \tl_if_exist:cF{@##1}{\tl_new:c{@##1}}
-     \tl_set:cx {@##1}{\GetDocumentProperties{hyp/##1}}}
+     \tl_set:cx {@##1}{\GetDocumentProperties{hyp/##1}}
+    }
 
     % pdfauthor, this is only a work around for simple author
     % TODO needs improvement
@@ -121,6 +123,13 @@
     \tl_if_exist:cF{@pdflang}{\tl_new:c{@pdflang}}
     \tl_set:cx {@pdflang}{\GetDocumentProperties{document/lang}}
   }
+
+% we need to provide a few commands so that hyperxmp stops to overwrite them
+% in \AtEndPreamble
+\AddToHook{begindocument/before}[pdfmanagement/firstaid/hyperxmp]{%
+ \def\@pdfauthor{Author}\def\@pdftitle {Title}}
+
+\DeclareHookRule{begindocument/before}{pdfmanagement/firstaid/hyperxmp}{before}{hyperxmp}
 
 \AddToHook{enddocument}[pdfmanagement-firstaid]{\__hyxmp_get_metadata:}
 
