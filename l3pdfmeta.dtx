@@ -344,15 +344,15 @@
 \str_new:N \l_@@_tmpa_str
 %    \end{macrocode}
 % \end{variable}
-% \section{Standards (work in progress)}
-% \subsection{Tools and tests}
+% \subsection{Standards (work in progress)}
+% \subsubsection{Tools and tests}
 % This internal property will contain for now the settings for the document.
 % \begin{variable}{\g_@@_standard_prop}
 %    \begin{macrocode}
 \prop_new:N \g_@@_standard_prop
 %    \end{macrocode}
 % \end{variable}
-% \subsection{Functions to check a requirement}
+% \subsubsection{Functions to check a requirement}
 % At first two commands to get the standard value if needed:
 % \begin{macro}[EXP]{\pdfmeta_standard_item:n}
 %    \begin{macrocode}
@@ -465,9 +465,9 @@
  }
 %    \end{macrocode}
 % \end{macro}
-% \subsection{Enforcing requirements}
+% \subsubsection{Enforcing requirements}
 %  A number of requirements can sensibly be enforced by us.
-%  \subsubsection{Annot flags}
+%  \paragraph{Annot flags}
 % pdf/A require a number of settings here, we store them in a command which
 % can be added to the property of the standard:
 %    \begin{macrocode}
@@ -493,7 +493,7 @@
   }
 %    \end{macrocode}
 %
-%  \subsection{pdf/A}
+%  \subsubsection{pdf/A}
 %  We use global properties so that follow up standards can be
 %  copied and then adjusted.
 %  Some note about requirements for more standard can
@@ -589,7 +589,7 @@
 %    \end{macrocode}
 % \end{variable}
 %
-% \subsection{Colorprofiles and Outputintents}
+% \subsubsection{Colorprofiles and Outputintents}
 % The following provides a minimum of interface to add a color profile
 % and an outputintent need for PDF/A for now. There will be need to extend it later,
 % so we try for enough generality.
