@@ -111,12 +111,12 @@
     }
     {
      \tl_if_exist:cF{@##1}{\tl_new:c{@##1}}
-     \tl_set:cx {@##1}{\GetDocumentProperties{hyp/##1}}
+     \tl_set:cx {@##1}{\GetDocumentProperties{hyperref/##1}}
     }
 
     % pdfauthor, this is only a work around for simple author
     % TODO needs improvement
-    \pdfstringdef\@pdfauthor{\GetDocumentProperties{hyp/pdfauthor}}
+    \pdfstringdef\@pdfauthor{\GetDocumentProperties{hyperref/pdfauthor}}
     \cs_set_eq:NN\hyxmp@pdfauthor\@pdfauthor
 
     % pdflang,

@@ -179,7 +179,7 @@
 %  \cs{GetDocumentProperties}.
 %
 %  \begin{verbatim}
-%  \edef\my@pdfauthor{\GetDocumentProperties{hyp/pdfauthor}}
+%  \edef\my@pdfauthor{\GetDocumentProperties{hyperref/pdfauthor}}
 %  \end{verbatim}
 %  If the key hasn't be set, the result is empty.
 %
@@ -1040,7 +1040,7 @@
 \cs_new_protected:Npn \@@_store_metadata:nn #1 #2 %#1 key, #2 value.
   {
     %\tl_set:cn {@#1}{#2}
-    \AddToDocumentProperties[hyp]{#1}{#2}
+    \AddToDocumentProperties{#1}{#2}
   }
 \cs_generate_variant:Nn \@@_store_metadata:nn {xn,nx,xx}
 %    \end{macrocode}
