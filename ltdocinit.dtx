@@ -2,7 +2,7 @@
 %
 %% File: ltdocinit.dtx
 %
-% Copyright (C) 2018-2020 The LaTeX3 Project
+% Copyright (C) 2018-2021 The LaTeX3 Project
 %
 % It may be distributed and/or modified under the conditions of the
 % LaTeX Project Public License (LPPL), either version 1.3c of this
@@ -11,7 +11,7 @@
 %
 %    http://www.latex-project.org/lppl.txt
 %
-% This file is part of the "(experimental) pdfmanagement bundle" (The Work in LPPL)
+% This file is part of the "PDFmanagement (testphase) bundle" (The Work in LPPL)
 % and all files in that bundle must be distributed together.
 %
 % -----------------------------------------------------------------------
@@ -43,7 +43,7 @@
 %    }^^A
 % }
 %
-% \date{Released XXXX-XX-XX}
+% \date{Released 2021-02-21}
 %
 % \maketitle
 % \begin{documentation}
@@ -70,7 +70,7 @@
 % \cs{DeclareDocumentMetadata} as a new command
 % should unify such settings in one place.
 % It should be used before \cs{documentclass}, directly after
-% loading \pkg{pdfmanagement-beta}. \cs{DeclareDocumentMetadata}
+% loading \pkg{pdfmanagement-testphase}. \cs{DeclareDocumentMetadata}
 % can be used more than once.
 %
 % The keys defined for \cs{DeclareDocumentMetadata}
@@ -99,14 +99,13 @@
 %      can be ensured) is incomplete, but a color profile is included and the
 %      /OutputIntent is set. More information can be found in the documentation
 %      of \pkg{l3pdfmeta}.
-%^^A     disabled for now.
-%^^A    \item[\texttt{xmpmeta}] Boolean. This includes a skeleton XMP-metadata in the pdf. This clashes
-%^^A     with e.g. hyperxmp, and the code to extend the metadata isn't finished yet.
+%    \item[\texttt{colorprofiles}] This allows to load icc-colorprofiles. Details
+%    are described in the documentation of \pkg{l3pdfmeta}.
 %    \item[\texttt{pdfmanagement}] Boolean. This activates/deactivates
 %      the core management code. By default the value is true.
 %    \item[firstaidoff] This accepts a comma lists of keysword and disable the patches
 %    related to them. More information can be found in the documentation of
-%    \pkg{pdfmanagement-first}.
+%    \pkg{pdfmanagement-firstaid}.
 % \end{description}
 %
 % \subsection{Container for document properties}
@@ -133,7 +132,7 @@
 %  \cs{AddToDocumentProperties}\Arg{label/property}
 % \end{syntax}
 % Expands to the \meta{value} corresponding to \meta{label/property}
-% in the conttainer. If \meta{label/property} is missing,
+% in the container. If \meta{label/property} is missing,
 % this has an empty expansion.
 % The result is returned within \cs{exp_not:n}, which means
 % that the \meta{value} does not expand further
@@ -223,8 +222,6 @@
 %    \end{macrocode}
 % Load more modules and the firstaid code.
 %    \begin{macrocode}
-       % \RequirePackage{l3pdfutils}
-       % \RequirePackage{l3pdfannot}
         \RequirePackage{pdfmanagement-firstaid}
       }
   }
@@ -269,7 +266,6 @@
   {
     \msg_show:nnx {pdfmanagement}{show-properties}
       {
-        %\prop_show:N \g_@@_documentproperties_prop
         \prop_map_function:NN \g_@@_documentproperties_prop \msg_show_item:nn
       }
   }
