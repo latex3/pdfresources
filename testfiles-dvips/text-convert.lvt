@@ -1,5 +1,5 @@
 \PassOptionsToPackage{enable-debug,check-declarations}{expl3}
-\RequirePackage[debug]{pdfmanagement}
+\RequirePackage[debug]{pdfmanagement-testphase}
 \DeclareDocumentMetadata {  }
 \RequirePackage{pdfmanagement-regressiontest}
 \documentclass{article}
@@ -8,7 +8,7 @@
 
 \begin{document}
 \START \showoutput
-\ExplSyntaxOn 
+\ExplSyntaxOn
 \TESTEXP {show~name}
  {
    \str_convert_pdfname:e    {abc~aaa/abc}
@@ -18,12 +18,12 @@
 \TEST{show~string-raw}
  {
    \pdf_string_from_unicode:nnN{utf16/string-raw}{abc/abc}\l_tmpa_str
-   \str_if_eq:onTF { \l_tmpa_str } 
+   \str_if_eq:onTF { \l_tmpa_str }
      { \376\377\000a\000b\000c\000/\000a\000b\000c } { \TRUE } { \ERROR }
    \pdf_string_from_unicode:nnN{utf16/string}{abc/abc}\l_tmpa_str
      \str_if_eq:onTF { \l_tmpa_str }
      { (\376\377\000a\000b\000c\000/\000a\000b\000c) } { \TRUE } { \ERROR }
- 
+
  }
 
 
