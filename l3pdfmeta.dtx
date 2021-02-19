@@ -249,6 +249,9 @@
 %
 % So we provide a dedicated interface to avoid the need of manual
 % user settings and allow the code to handle the requirements of the standard.
+% The interface doesn't handle yet all finer points for PDF/X standards, e.g.
+% named profiles, it is meant as a starting point to get at least PDF/A validation
+% here.
 %
 % \begin{NOTE}{UF}
 % The interface has to handle the following points:
@@ -265,6 +268,8 @@
 % \item While we can predeclare some standard icc-profiles, an interface to
 % setup more is needed. This is currently not handled, as it needs
 % coordination with a setup in l3color too.
+% \item The implementation doesn't really handle yet all finer points for pdf/X
+% see \url{tn0002_color_in_pdfa-1_2008-03-141.pdf}
 % \end{itemize}
 % \end{NOTE}
 % The interface looks like this
