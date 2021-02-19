@@ -315,8 +315,13 @@
       }
     %,xmpmeta .bool_gset:N = \g_pdfmeta_xmp_bool %see pdfmeta unused and undefined for now!
     % this uses internal command from pdfmeta, it should probably move there ...
-    ,pdfstandard .choices:nn =
-      {A-1b,A-2b,A-3b}
+    ,pdfstandard .code:n =
+      {
+        \exp_args:Nnx
+        \keys_set:nn {document / metadata} {_pdfstandard=\str_uppercase:n{#1}}
+      }
+    ,_pdfstandard .choices:nn =
+      {A-1B,A-2B,A-3B}
       {
         \prop_if_exist:cT { g__pdfmeta_standard_pdf/#1_prop }
           {
@@ -324,7 +329,7 @@
           }
         \AddToDocumentProperties [document]{pdfstandard}{#1}
       }
-    ,pdfstandard / unknown .code:n =
+    ,_pdfstandard / unknown .code:n =
       {
         \msg_warning:nnn{pdf}{unknown-standard}{#1}
       }
