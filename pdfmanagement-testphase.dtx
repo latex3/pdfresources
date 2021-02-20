@@ -2,7 +2,7 @@
 %
 %% File: pdfmanagement-testphase.dtx
 %
-% Copyright (C) 2019-2021 The LaTeX3 Project
+% Copyright (C) 2019-2021 The LaTeX Project
 %
 % It may be distributed and/or modified under the conditions of the
 % LaTeX Project Public License (LPPL), either version 1.3c of this
@@ -23,8 +23,14 @@
 % for those people who are interested.
 %
 %<*driver>
+\RequirePackage{pdfmanagement-testphase}
+\DeclareDocumentMetadata{pdfstandard=A-2b}
+\makeatletter
+\declare@file@substitution{doc.sty}{doc-v3beta.sty}
+\makeatother
 \documentclass{l3doc}
-\usepackage{tabularx,array,booktabs}
+\usepackage{tabularx,array,booktabs,hyperxmp}
+\hypersetup{pdfauthor=The LaTeX Project,pdftitle=PDFmanagement (testphase) bundle}
 \newcommand\potentialclash{\noindent\llap{\dbend\ }}
 \raggedbottom
 \begin{document}
@@ -37,7 +43,7 @@
 % \title{\pkg{PDFmanagement (testphase) bundle}}
 %
 % \author{^^A
-%  The \LaTeX3 Project\thanks
+%  The \LaTeX{} Project\thanks
 %    {^^A
 %      E-mail:
 %        \href{mailto:latex-team@latex-project.org}
@@ -45,21 +51,21 @@
 %    }^^A
 % }
 %
-% \date{Released 2021-02-21}
+% \date{Version 0.95a, released 2021-02-22}
 %
 % \maketitle
 % \begin{documentation}
 % \section*{Abstract}
 %  {\em This is a temporary package created to allow the manual
 %   loading of the new \LaTeX{} PDF management code during the test phase.
+%  It will disappear when the code is integrated into the \LaTeX{} format}
 %
-%   It will disappear when the code is integrated into the \LaTeX{} format}
-%
-%  During the test phase the package should be used like this:
+%  \medskip
+%  \noindent During the test phase the package should be used like this:
 %
 % \begin{verbatim}
 % \RequirePackage{pdfmanagement-testphase} %load the package
-% \DeclareDocumentMetadata      %activates the l3management interface
+% \DeclareDocumentMetadata      %activate the PDF management
 %  {
 %    %options
 %  }
@@ -142,9 +148,9 @@
 % \pkg{pdfx} and more.
 %
 % So while the goal is to integrate the code into the \LaTeX{} format directly,
-% this can not be done directly without conflicts with existing documents and packages.
+% this can not be done immediately without conflicts with existing documents and packages.
 %
-% As an intermediary step the package\pkg{pdfmanagement-testphase} has been
+% As an intermediary step the package \pkg{pdfmanagement-testphase} has been
 % created which loads the code manually.
 % With it package authors and users can test the new code, give feedback
 % and packages can be adapted.
@@ -188,9 +194,9 @@
 % \begin{verbatim}
 % \RequirePackage{pdfmanagement-testphase} %load the package
 % \DeclareDocumentMetadata %activates the l3management interface
-%  {
-%    %options
-%  }
+%   {
+%      %options
+%   }
 %  \documentclass {...}
 % \end{verbatim}
 %
@@ -251,14 +257,14 @@
 %
 % \item[l3pdftool] A number of commands like text conversion commands and
 % bcd/emc.  The commands will at some time be moved into the \pkg{l3pdf}
-% module of l3kernel. It is should not be loaded independently.
+% module of l3kernel. It should not be loaded independently.
 %
 % \item[l3pdffile] This module provides commands for to embed files.
 % It is currently not loaded automatically, but it requires the PDF management.
 %
 % \item[pdfmanagement-firstaid] This module provides a number of patches
 % for external incompatible packages. This patches will disappear as soon as
-% the packages are natively compatible.
+% the packages are natively compatible. It is loaded automatically.
 % \end{description}
 % \section{Incompabilities}
 %
@@ -313,33 +319,29 @@
 % Some patch code is provided by the bundle and loaded automatically,
 % but it is not complete currently. Failures are e.g. possible with complicated
 % author or title settings. The handling of dates isn't correct either yet.
-%
 % The patch code can be disabled by using |firstaidoff=hyperxmp| in \cs{DeclareDocumentMetadata}
 %
 % \subsection{tikz/pgf}
 % \pkg{pgf} writes to the page resources too and so is incompatible. The needed
 % changes are rather small and will be done in coordination with the maintainer.
-%
 % Until this works, \pkg{pagemanagement} will load the patches automatically.
-%
 % This can be disabled by using |firstaidoff=pgf| in \cs{DeclareDocumentMetadata}
 %
 % \subsection{transparent}
 % The package \pkg{transparent} is incompatible. A replacement has been written
 % (\pkg{transparent-ltx}) and is loaded automatically. It requires a very recent
 % L3 programming layer!
-%
 % This can be disabled by using |firstaidoff=transparent| in \cs{DeclareDocumentMetadata}
 % \subsection{pdflscape}
 % The package \pkg{pdflscape} is incompatible. A replacement has been written
 % (\pkg{pdflscape-ltx}) and is loaded automatically.
-%
 % This can be disabled by using |firstaidoff=pdflscape| in \cs{DeclareDocumentMetadata}
 %
 % \subsection{colorspace}
-% The package is incompatible. Some patches have been added to \pkg{pdfmanagement-firstaid}
-% Alternative code for spot colors is under development
-% in the \pkg{l3color} package.
+% The package is incompatible. Some patches
+% have been added to \pkg{pdfmanagement-firstaid}.
+% Alternative code for spot colors is
+% in the \pkg{l3color} package which has now been add to \pkg{l3kernel}.
 %
 % \subsection{embedfile, attachfile, attachfile2}
 % Tools needed to be able to write a replacement
@@ -369,13 +371,15 @@
 %    \begin{macrocode}
 %<@@=pdf>
 %<*package>
-\ProvidesExplPackage {pdfmanagement-testphase} {2021-02-19} {1.0}
+\ProvidesExplPackage {pdfmanagement-testphase} {2021-02-22} {0.95a}
   {experimental PDF resource management}
 \providecommand\IfFormatAtLeastTF{\@ifl@t@r\fmtversion}
-\IfFormatAtLeastTF{2020-10-01}{}{%
- \PackageWarning{pdfmanagement-testphase}{This~package~needs~LaTeX~2020-10-01~or~newer.\MessageBreak Loading~is~aborted.}{}
+\IfFormatAtLeastTF{2020-10-01}{}{
+ \PackageWarning{pdfmanagement-testphase}
+   {This~package~needs~LaTeX~2020-10-01~or~newer.
+    \MessageBreak Loading~is~aborted.}{}
  \DeclareOption { debug }{}
- \newcommand\DeclareDocumentMetadata[1]{}%
+ \newcommand\DeclareDocumentMetadata[1]{}
  \ProcessOptions\relax
  }
 \IfFormatAtLeastTF{2020-10-01}{}{\endinput}
