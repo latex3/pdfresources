@@ -11,7 +11,7 @@
 %
 %    http://www.latex-project.org/lppl.txt
 %
-% This file is part of the "(experimental) pdfmanagement bundle" (The Work in LPPL)
+% This file is part of the "PDFmanagement bundle (testphase)" (The Work in LPPL)
 % and all files in that bundle must be distributed together.
 %
 % -----------------------------------------------------------------------
@@ -23,7 +23,15 @@
 % for those people who are interested.
 %
 %<*driver>
+\RequirePackage{pdfmanagement-testphase}
+\DeclareDocumentMetadata{pdfstandard=A-2b}
+\makeatletter
+\declare@file@substitution{doc.sty}{doc-v3beta.sty}
+\makeatother
 \documentclass[full]{l3doc}
+\usepackage{array,booktabs,hyperxmp}
+\hypersetup{pdfauthor=The LaTeX Project,pdftitle=l3pdfxform (PDFmanagement bundle (testphase))}
+
 \begin{document}
   \DocInput{\jobname.dtx}
 \end{document}
@@ -32,10 +40,11 @@
 %
 % \title{^^A
 %   The \pkg{l3pdfxform} package\\ Commands for form XObjects   ^^A
+%   \\ PDFmanagement bundle (testphase)
 % }
 %
 % \author{^^A
-%  The \LaTeX3 Project\thanks
+%  The \LaTeX Project\thanks
 %    {^^A
 %      E-mail:
 %        \href{mailto:latex-team@latex-project.org}
@@ -43,7 +52,7 @@
 %    }^^A
 % }
 %
-% \date{Released XXXX-XX-XX}
+% \date{Version 0.95a, released 2021-02-22}
 %
 % \maketitle
 % \begin{documentation}
@@ -52,7 +61,7 @@
 % This module contains a number of commands to create \enquote{form XObjects},
 % for which pdf\TeX{} introduced the short name \enquote{xforms}.
 %
-% The status is still beta, so the style itself is named
+% The status is still beta, so the style itself is currently named
 % \pkg{l3pdfxform-beta}. Missing is for example code for the dvips route.
 % Probably some of the function will also need to be enhanced by hooks.
 %
@@ -124,8 +133,8 @@
 %    \begin{macrocode}
 %<*package>
 %<@@=pdf>
-\ProvidesExplPackage {l3pdfxform-beta} {2021-02-14} {0.3}
-  {command to create xforms}
+\ProvidesExplPackage {l3pdfxform-beta} {2021-02-22} {0.95a}
+  {command to create xforms (beta)---PDFmanagement bundle (testphase)}
 %    \end{macrocode}
 % \subsection{Form XObject (pdfxform)}
 % \begin{NOTE}{UF}
@@ -139,18 +148,25 @@
 %  - should the size be stored in dim or tl?
 %  - dvips implementation is missing for ideas: pdfbase, atfi-dvips.def,
 %  \end{NOTE}
-%
+% \begin{macro}{\pdfxform_new:nnn}
 %    \begin{macrocode}
 %<*package>
 \cs_new_protected:Npn  \pdfxform_new:nnn #1 #2 #3
   {
     \@@_backend_xform_new:nnnn { #1 } { #2 } {  } { #3 }
   }
-
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\pdfxform_use:n}
+%    \begin{macrocode}
 \cs_new_protected:Npn \pdfxform_use:n #1
   {
     \@@_backend_xform_use:n { #1 }
   }
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\pdfxform_ref:n,\pdfxform_ref:o}
+%    \begin{macrocode}
 % expansion?
 \cs_new:Npn \pdfxform_ref:n #1
   {
@@ -158,7 +174,10 @@
   }
 
 \cs_generate_variant:Nn \pdfxform_ref:n {o}
-
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\pdfxform_wd:n,\pdfxform_ht:n,\pdfxform_dp:n,}
+%    \begin{macrocode}
 \cs_new:Npn \pdfxform_wd:n #1
   {
     \tl_use:c { c_@@_backend_xform_wd_ \tl_to_str:n { #1 } _tl }
@@ -173,6 +192,9 @@
   {
     \tl_use:c { c_@@_backend_xform_dp_ \tl_to_str:n { #1 } _tl }
   }
+%    \end{macrocode}
+% \end{macro}
+%    \begin{macrocode}
 %</package>
 %    \end{macrocode}
 %
