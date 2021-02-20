@@ -11,7 +11,7 @@
 %
 %    http://www.latex-project.org/lppl.txt
 %
-% This file is part of the "PDFmanagement (testphase) bundle" (The Work in LPPL)
+% This file is part of the "PDFmanagement bundle (testphase)" (The Work in LPPL)
 % and all files in that bundle must be distributed together.
 %
 % -----------------------------------------------------------------------
@@ -23,9 +23,16 @@
 % for those people who are interested.
 %
 %<*driver>
-\RequirePackage{expl3}
+\RequirePackage{pdfmanagement-testphase}
+\DeclareDocumentMetadata{pdfstandard=A-2b}
+\makeatletter
+\declare@file@substitution{doc.sty}{doc-v3beta.sty}
+\makeatother
 \documentclass[full]{l3doc}
 \usepackage{tabularx}
+\usepackage{array,booktabs,hyperxmp}
+\hypersetup{pdfauthor=The LaTeX Project,pdftitle=l3pdfmanagement (PDFmanagement bundle (testphase))}
+
 \providecommand\potentialclash{\noindent\llap{\dbend\ }}
 
 % Fixing footnotes in  functions and variables: this should be in l3doc!
@@ -42,10 +49,11 @@
 %
 % \title{^^A
 %   The \pkg{l3pdfmanagement} package\\ Managing central PDF resources ^^A
+%   \\PDFmanagement bundle (testphase)
 % }
 %
 % \author{^^A
-%  The \LaTeX3 Project\thanks
+%  The \LaTeX Project\thanks
 %    {^^A
 %      E-mail:
 %        \href{mailto:latex-team@latex-project.org}
@@ -53,7 +61,7 @@
 %    }^^A
 % }
 %
-% \date{Released 2021-02-21}
+% \date{Version 0.95a,released 2021-02-22}
 %
 % \maketitle
 % \begin{documentation}
@@ -68,7 +76,8 @@
 % \cs{pdfpagesattr}, \cs{pdfinfo}, \cs{pdfpageresources}
 % and similar commands of the other backends in a backend independant way.
 %
-% The supported backends are pdflatex, lualatex, (x)dvipdfmx (latex, xelatex)
+% The supported backends are pdflatex, lualatex, (x)dvipdfmx (latex, xelatex
+% and---starting in texlive 2021--lualatex)
 % and dvips with ps2pdf (not completely yet). dvips with distiller could work too
 % but is untested.
 %
@@ -85,7 +94,7 @@
 % management by the \LaTeX{} kernel is necessary to avoid
 % that packages overwrite settings from
 % other packages which would lead to clashes and incompatibilities.
-% It is therefore necessary that all packages which want to add content to this
+% It is therefore necessary that \emph{all} packages which want to add content to these
 % dictionaries and resources use the interface provided by this module.
 %
 % As these dictionaries and resources are so central for the PDF format values to these
@@ -127,8 +136,8 @@
 %  \begin{function}[EXP,pTF,added=2020-07-04]
 %   {\pdfmanagement_if_active:}
 %   This conditional tests if the resource management code is active.
-%
 %  \end{function}
+%
 % \begin{function}[added = 2020-04-06]
 %   {\pdfmanagement_add:nnn}
 %   \begin{syntax}
@@ -160,7 +169,6 @@
 % \end{itemize}
 % \end{function}
 %
-%
 % \begin{function}[added = 2020-04-08]
 %   {\pdfmanagement_show:n }
 %   \begin{syntax}
@@ -171,9 +179,11 @@
 %
 %   It is not reliable for page resources as these are filled at shipout.
 %
-%   It also doesn't show necessarly all the content. For example most backends add automatically
+%   It also doesn't show necessarly all the content.
+%   For example most backends add automatically
 %   entries to the Info dictionary.
-%\end{function}
+% \end{function}
+%
 % \begin{function}[added = 2020-04-07]
 %   {
 %     \pdfmanagement_remove:nn,
@@ -190,6 +200,7 @@
 %   Values from the special Catalog entries where the values are collected in arrays
 %   can't be removed (but should ever a use case appear it could be added).
 % \end{function}
+%
 % \subsection{Description of the resource pathes}
 % \subsubsection{Info: The Info dictionary}
 % \begin{NOTE}{UF}
@@ -546,8 +557,8 @@
 %<@@=pdfmanagement>
 %<*package>
 %
-\ProvidesExplPackage {l3pdfmanagement} {2020-04-08} {0.5}
-  {Main PDF Management}
+\ProvidesExplPackage {l3pdfmanagement} {2021-02-22} {0.95a}
+  {Management of core PDF dictionaries (PDFmanagement bundle (testphase))}
 %    \end{macrocode}
 % \subsection{Messages}
 %    \begin{macrocode}
@@ -621,7 +632,8 @@
           }
       }
       {
-        \msg_warning:nnx {pdfmanagement}{inactive}{\tl_to_str:n {\pdfmanagement_add:nnn}}
+        \msg_warning:nnx {pdfmanagement}{inactive}
+          {\tl_to_str:n {\pdfmanagement_add:nnn}}
       }
   }
 
@@ -774,7 +786,8 @@
                   {
                     \exp_args:Nnx
                     \prop_gremove:cn
-                      { \__kernel_pdfdict_name:n { g__pdf_Core/#1 } }{ \str_convert_pdfname:n {#2} }
+                      { \__kernel_pdfdict_name:n { g__pdf_Core/#1 } }
+                      { \str_convert_pdfname:n {#2} }
                   }
               }
           }
@@ -789,7 +802,8 @@
           {
             \exp_args:Nnx
             \prop_gremove:cn
-              { \__kernel_pdfdict_name:n { g__pdf_Core/#1 } }{ \str_convert_pdfname:n{#2} }
+              { \__kernel_pdfdict_name:n { g__pdf_Core/#1 } }
+              { \str_convert_pdfname:n{#2} }
           }
           {
             \msg_error:nnn { pdfmanagement } { unknown-dict } { #1 }
@@ -808,7 +822,11 @@
              #1
                { pdfmanagement } { show-dict }
                { \tl_to_str:n {#2} }
-               { \prop_map_function:cN {\__kernel_pdfdict_name:n { g__pdf_Core/#2 }} \msg_show_item:nn }
+               {
+                 \prop_map_function:cN
+                  {\__kernel_pdfdict_name:n { g__pdf_Core/#2 }}
+                  \msg_show_item:nn
+               }
                { } { }
           }
           {
@@ -868,7 +886,9 @@
 % push to the register command / issue the special
 \cs_new_protected:Npn \@@_Info_gpush:
   {
-    \prop_map_function:cN  { \__kernel_pdfdict_name:n { g__pdf_Core/Info} } \__pdf_backend_info_gput:nn
+    \prop_map_function:cN
+      { \__kernel_pdfdict_name:n { g__pdf_Core/Info} }
+      \__pdf_backend_info_gput:nn
     \prop_gclear:c { \__kernel_pdfdict_name:n { g__pdf_Core/Info} }
   }
 %    \end{macrocode}
@@ -1077,7 +1097,9 @@
     \use:c { @@_/Catalog/Requirements_gpush: }
     \use:c { @@_/Catalog/ViewerPreferences_gpush: }
     % output the single values:
-    \prop_map_function:cN { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog} }  \__pdf_backend_catalog_gput:nn
+    \prop_map_function:cN
+      { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog} }
+      \__pdf_backend_catalog_gput:nn
     % output names tree:
     \use:c { @@_/Catalog/Names/EmbeddedFiles_gpush: }
   }
@@ -1399,7 +1421,9 @@
       {
         \iow_newline:
         The~Catalog~contains~in~the~top~level~the~single~value~entries
-        \prop_map_function:cN {\__kernel_pdfdict_name:n { g__pdf_Core/Catalog }} \msg_show_item:nn
+        \prop_map_function:cN
+          {\__kernel_pdfdict_name:n { g__pdf_Core/Catalog }}
+          \msg_show_item:nn
       }
     \clist_map_inline:Nn \c_@@_Catalog_seq_clist
      {
@@ -1419,7 +1443,9 @@
             \iow_term:x
               {
                 The~Catalog~subdirectory~'##1'~contains~the~single~value~entries
-                \prop_map_function:cN {\__kernel_pdfdict_name:n { g__pdf_Core/Catalog/##1 }} \msg_show_item:nn
+                \prop_map_function:cN
+                  {\__kernel_pdfdict_name:n { g__pdf_Core/Catalog/##1 }}
+                  \msg_show_item:nn
               }
           }
       }
