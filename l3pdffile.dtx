@@ -2,7 +2,7 @@
 %
 %% File: l3pdffile.dtx
 %
-% Copyright (C) 2018-2020 The LaTeX3 Project
+% Copyright (C) 2018-2021 The LaTeX3 Project
 %
 % It may be distributed and/or modified under the conditions of the
 % LaTeX Project Public License (LPPL), either version 1.3c of this
@@ -23,7 +23,15 @@
 % for those people who are interested.
 %
 %<*driver>
+\RequirePackage{pdfmanagement-testphase}
+\DeclareDocumentMetadata{pdfstandard=A-2b}
+\makeatletter
+\declare@file@substitution{doc.sty}{doc-v3beta.sty}
+\makeatother
 \documentclass[full]{l3doc}
+\usepackage{array,booktabs,hyperxmp}
+\hypersetup{pdfauthor=The LaTeX Project,pdftitle=l3pdffile (PDFmanagement bundle (testphase))}
+
 \providecommand\potentialclash{\noindent\llap{\dbend\ }}
 \begin{document}
   \DocInput{\jobname.dtx}
@@ -33,10 +41,11 @@
 %
 % \title{^^A
 %   The \pkg{l3pdffile} package\\ Embedding and referencing files in a PDF ^^A
+%   \\ PDFmanagement bundle (testphase)
 % }
 %
 % \author{^^A
-%  The \LaTeX3 Project\thanks
+%  The \LaTeX Project\thanks
 %    {^^A
 %      E-mail:
 %        \href{mailto:latex-team@latex-project.org}
@@ -44,7 +53,7 @@
 %    }^^A
 % }
 %
-% \date{Released XXXX-XX-XX}
+% \date{Version 0.95a, released 2021-02-22}
 %
 % \maketitle
 % \begin{documentation}
@@ -103,8 +112,8 @@
 %             /AS       & name\\
 %             \end{tabular}
 %
-%             The AP takes precedence over Border and similar keys.
-%      \item Through an entry in the /EmbeddedFiles name tree.
+%             The |/AP| takes precedence over Border and similar keys.
+%      \item Through an entry in the |/EmbeddedFiles| name tree.
 %       This is what \pkg{embedfiles} does.
 %       \begin{verbatim}
 %       20 0 obj %Document Name tree
@@ -114,26 +123,26 @@
 %        <</Names [(AcmeCustomCrypto Protected PDF.pdf) 17 0 R]>>
 %        endobj
 %       \end{verbatim}
-%       The strings (keys) in the /Names dictionary must be sorted lexically.
+%       The strings (keys) in the |/Names| dictionary must be sorted lexically.
 %       But they don't have to be the file name or anything related to
 %       the file name. The resource management code uses l3emb0001, l3emb0002~\ldots,
 %       which allows up to 9999 files.
-%       The key  can be needed to identify the start file in a collection,
+%       The key can be needed to identify the start file in a collection,
 %       so their relation to the files are stored in a property list.
 %
-%      \item Through the /AF key in various objects (pdf 2.0).
+%      \item Through the |/AF| key in various objects (pdf 2.0).
 %       The value is normally an array of object
 %       references, but it can also be a name which is mapped to an array in /Properties:
 %        \begin{verbatim}
 %        /AF /NamedAF BDC
 %        /Properties <</NamedAF [12 0 R]
 %        \end{verbatim}
-%        The related FileSpec dictionary should contain an
-%        /AFRelationship key in this case (but it doesn't harm to add it by
+%        The related |/FileSpec| dictionary should contain an
+%        |/AFRelationship| key in this case (but it doesn't harm to add it by
 %        default anyway). The values of this key is describe in table~\ref{tab:AFrel}.
 %
 % \begin{table}
-%       \caption{Values of the /AFRelationship key\label{tab:AFrel}}
+%       \caption{Values of the \texttt{/AFRelationship} key\label{tab:AFrel}}
 %       \begin{tabular}{lp{8cm}}
 %       Source  & shall be used if this file specification is the original
 %                source material for the associated content.\\
@@ -170,11 +179,11 @@
 % \subsubsection{Task 1: Embedding a file}
 % Embedding an existing file is in most cases quite straightforward. This module
 % offers commands, but it can also be done with the basic commands
-% from the l3pdf module \cs{pdf_object_unnamed_write:nn} or
+% from the |l3pdf| module \cs{pdf_object_unnamed_write:nn} or
 % \cs{pdf_object_new:nn}/\cs{pdf_object_write:nn} or primitive commands
 % to create objects.
 % The object number should be stored for the reference
-% in the /FileSpec dictionary.
+% in the |/FileSpec| dictionary.
 %
 % \begin{verbatim}
 % \pdf_object_unnamed_write:nx {fstream}
@@ -195,28 +204,28 @@
 % \end{verbatim}
 %
 % \begin{itemize}
-% \item The /Params dictionary is not always required, but the commands of
-% these module will prefill them as shown in the examples. A /CreationDate entry
+% \item The |/Params| dictionary is not always required, but the commands of
+% these module will prefill them as shown in the examples. A |/CreationDate| entry
 % has to be added explicitly as there is no sensible way
 % to retrieve this automatically.
-% \item The mimetype (in the /Subtype) should be properly escaped.
+% \item The mimetype (in the |/Subtype|) should be properly escaped.
 % This module contains a property list with maps a number of file extensions
 % to mimetypes and the commands try to detect and fill the mimetype automatically.
-% \item The dictionary can contain additional keys (/Filter, /DecodeParms),
+% \item The dictionary can contain additional keys (|/Filter|, |/DecodeParms|),
 % see the pdf reference.
 % \end{itemize}
 %
-% \subsubsection{Task 2: Creating the FileSpec dictionary}
-% The FileSpec dictionary is a simple dictionary object, and can also
+% \subsubsection{Task 2: Creating the \texttt{/FileSpec} dictionary}
+% The |/FileSpec| dictionary is a simple dictionary object, and can also
 % be created in various ways. If it refers to an embedded file it should
-% reference it in the /EF key.
+% reference it in the |/EF| key.
 %
-% \subsubsection{Task 3: Referencing the FileSpec dictionary}
+% \subsubsection{Task 3: Referencing the \texttt{/FileSpec} dictionary}
 %
-% Using the dictionary reference in annotations and /AF keys is unproblematic.
+% Using the dictionary reference in annotations and |/AF| keys is unproblematic.
 %
 % \potentialclash
-% But to add it to the \texttt{/EmbeddedFiles} name tree so that it appears in the
+% But to add it to the |/EmbeddedFiles| name tree so that it appears in the
 % attachment panel requires special care:
 % This name tree is a global resource and uncoordinated access can lead to
 % clashes and files that are not visible or inaccessible.
@@ -226,14 +235,13 @@
 % \subsection{Commands and tools of these module}
 % \begin{function}{file, file/Params, file/streamParams,file/FileSpec}
 % The module predefines and uses a number of local dictionaries for the
-% components of the stream and the /FileSpec object. These dictionaries are
-% are used by the \cs{pdffile_embed_XX}.
+% components of the stream and the |/FileSpec| object. These dictionaries are
+% then used by the \cs{pdffile_embed_XX}.
 % The content of these dictionaries can be changed by users with the commands
-% from the \texttt{l3pdfdict} module, but it should be done only locally
+% from the \pkg{l3pdfdict} module, but it should be done only locally
 % to avoid side effects on uses by other packages/commands.
 
 % The preset values are of these dictionaries are shown in table~\ref{tab:filedict}.
-%
 % \end{function}
 % \begin{table}
 % \caption{Preset values in the file dictionaries\label{tab:filedict}}
@@ -252,27 +260,27 @@
 %   \begin{syntax}
 %     \cs{pdffile_embed_file:nnn} \Arg{source filename} \Arg{target filename} \Arg{object name }
 %   \end{syntax}
-%   This commands embeds the file \Arg{source filename} in the PDF,
-%   and creates a \texttt{/FileSpec} dictionary object named \meta{object name}.
+%   This commands embeds the file \meta{source filename} in the PDF,
+%   and creates a |/FileSpec| dictionary object named \meta{object name}.
 %   The object name must be unique.
 %   The command uses the content of the local
 %   dictionaries |l_pdffile|, |l_pdffile/Params| and |l_pdffile/FileSpec|
 %   to setup the dictionary entries of the stream object and the
-%   \texttt{/FileSpec} dictionary. The/F and /UF entry are filled
-%   with \Arg{target filename}.
+%   |/FileSpec| dictionary. The |/F| and |/UF| entry are filled
+%   with \meta{target filename}.
 %
-%   It is an error if both \Arg{target filename} and \Arg{source filename}
+%   It is an error if both \meta{target filename} and \meta{source filename}
 %   are empty.
 %
-%   If \Arg{target filename} is empty \Arg{source filename} is used instead.
+%   If \meta{target filename} is empty \meta{source filename} is used instead.
 %
-%   If \Arg{source filename} is empty, only a \texttt{/FileSpec} dictionary is
+%   If \meta{source filename} is empty, only a |/FileSpec| dictionary is
 %   created.
 %
 %   If the |l_pdffile| dictionary doesn't  contain a
 %   Subtype entry with the mimetype, the command tries to guess it
-%   from the file extension of \Arg{source filename}. Unknown file extensions can be
-%   added (or known extension be changed) by adding or changing the value to
+%   from the file extension of \meta{source filename}. Unknown file extensions can be
+%   added (or known extension be changed) by adding to or changing the value in
 %   the property \cs{g_pdffile_mimetypes_prop}, see below.
 %
 %   When using \texttt{dvips} and \texttt{pstopdf} the actual embedding is
@@ -280,41 +288,41 @@
 %   only if used with the option \texttt{-dNOSAFER} and will not be able
 %   to use files which are found with \texttt{kpathsea}.
 %
-%   \Arg{target filename} doesn't need to be a file name with an extension,
+%   \meta{target filename} doesn't need to be a file name with an extension,
 %   but it is recommended as security settings in the pdf
 %   viewer can restrict access to known file types.
-%
 % \end{function}
+%
 % \begin{NOTE}{UF}
 %  we should perhaps also consider the chunk method see pdfbase and
 %  https://chat.stackexchange.com/transcript/message/54181193#54181193
 % \end{NOTE}
+%
 % \begin{function}{\pdffile_embed_stream:nnn}
 %   \begin{syntax}
 %     \cs{pdffile_embed_stream:nnn} \Arg{content} \Arg{target filename} \Arg{object name }
 %   \end{syntax}
-%   This commands embeds the \Arg{content} in the PDF in a stream objects and
-%   creates a /FileSpec dictionary object named \Arg { object name }.
-%   \Arg{content} is wrapped in a \cs{exp_not:n}.
+%   This commands embeds the \meta{content} in the PDF in a stream objects and
+%   creates a |/FileSpec| dictionary object named \meta{object name}.
+%   \meta{content} is wrapped in a \cs{exp_not:n}.
 %   The object name must be unique. The command uses the content of the local
 %   dictionaries |l_pdffile|, |l_pdffile/streamParams| and |l_pdffile/FileSpec|
 %   to setup the dictionary entries of the stream object and the /FileSpec dictionary.
-%   The /F and /UF entry are filled with \Arg{target filename}.
-%   If \Arg{target filename} is empty the fix name \texttt{stream.txt}
+%   The /F and /UF entry are filled with \meta{target filename}.
+%   If \meta{target filename} is empty the fix name \texttt{stream.txt}
 %   is used instead.
 %
 %   If the |l_pdffile| dictionary doesn't  contain a
 %   Subtype entry with the mimetype, the command tries to guess it
-%   from the file extension of \Arg{target filename}.
+%   from the file extension of \meta{target filename}.
 %
-%   \Arg{target filename} doesn't need to be a file name with an extension,
+%   \meta{target filename} doesn't need to be a file name with an extension,
 %   but it is recommended as security settings in the pdf
 %   viewer can restrict access to known file types.
 %
 %   The stream should not be too long, at least PS imposes a size limit for strings.
-%
-
 % \end{function}
+%
 %  \begin{variable}{\g_pdffile_mimetypes_prop}
 %   This property contains a list of extensions and their mimetypes.
 %   Values can be added or changed with the standard commands:
@@ -368,8 +376,8 @@
 %
 %    \begin{macrocode}
 %<*package>
-\ProvidesExplPackage {l3pdffile} {2020-07-02} {0.2}
-  {embedding and referencing files in PDF}
+\ProvidesExplPackage {l3pdffile} {2021-02-22} {0.95a}
+  {embedding and referencing files in PDF---PDFmanagement bundle (testphase)}
 \RequirePackage{l3pdftools}  %temporarly!!
 %    \end{macrocode}
 %
