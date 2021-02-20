@@ -11,7 +11,7 @@
 %
 %    http://www.latex-project.org/lppl.txt
 %
-% This file is part of the "(experimental) pdfmanagement bundle" (The Work in LPPL)
+% This file is part of the "PDFmanagement bundle (testphase)" (The Work in LPPL)
 % and all files in that bundle must be distributed together.
 %
 % -----------------------------------------------------------------------
@@ -23,18 +23,28 @@
 % for those people who are interested.
 %
 %<*driver>
+\RequirePackage{pdfmanagement-testphase}
+\DeclareDocumentMetadata{pdfstandard=A-2b}
+\makeatletter
+\declare@file@substitution{doc.sty}{doc-v3beta.sty}
+\makeatother
 \documentclass[full]{l3doc}
+\usepackage{array,booktabs,hyperxmp}
+\hypersetup{pdfauthor=The LaTeX Project,pdftitle=l3pdfdict (PDFmanagement bundle (testphase))}
+
 \begin{document}
   \DocInput{\jobname.dtx}
 \end{document}
 %</driver>
 % \fi
 % \title{^^A
-%   The \pkg{l3pdfdict} package  -- tools for PDF dictionaries ^^A
+%   The \pkg{l3pdfdict} package---tools for PDF dictionaries ^^A
+%   \\
+%   PDFmanagement bundle (testphase)
 % }
 %
 % \author{^^A
-%  The \LaTeX3 Project\thanks
+%  The \LaTeX Project\thanks
 %    {^^A
 %      E-mail:
 %        \href{mailto:latex-team@latex-project.org}
@@ -42,24 +52,24 @@
 %    }^^A
 % }
 %
-% \date{Released XXXX-XX-XX}
+% \date{Version 0.95a, released 2021-02-22}
 %
 % \maketitle
 % \begin{documentation}
 %
 % \section{\pkg{l3pdfdict} documentation}
-% Many PDF objects are or contain dictionaries -- structures
-% containing a number of \mbox{(pdf-)}Name/value pairs.
+% Many PDF objects are or contain dictionaries---structures
+% containing a number of \mbox{(pdf-)}name/value pairs.
 % Examples are attributes of links,
 % filespec dictionaries, xform dictionaries, the catalog, the info dictionary.
 % The commands in this module offer an number of
-% tools to handle such dictionaries. The module setups a namespace for the
+% tools to handle such dictionaries. The module setups a name space for the
 % dictionary names and offers some commands to output dictionaries.
 %
-% The dictionaries are implemented with property lists and in many respects
-% they work like them with a few PDF specific changes:
+% The dictionaries work in many respects
+% like property lists with a few PDF specific changes:
 % \begin{itemize}
-% \item The keys are always converted with \cs{str_convert_pdfname}
+% \item The keys are always converted with \cs{str_convert_pdfname:n}
 % to get a correct PDF name;
 % \item a key with a empty value can not be added, it will be ignored;
 % \item there is a dedicated function to output the property as space
@@ -74,12 +84,13 @@
 %     \cs{pdfdict_new:n} \Arg{dictionary name}
 %   \end{syntax}
 % This function create a new local or global dictionary. Which one depends on
-% \meta{dictionary name}: If it begins with the standard |g| the dictionary is global.
-% With |l| the dictionary is local. Other begins will give an error. It is recommended
-% to begin the name in the standard expl3 naming scheme with a module name, so |g_module_XXXX|
-% or |g__module_XXXX|.
-%
+% \meta{dictionary name}: If it begins with the standard |g| the dictionary is global,
+% with |l| the dictionary is local, other starting chars will give an error.
+% It is recommended to begin the name in the standard expl3 naming scheme
+% with one or two underscores and a module name,
+% so |g_module_XXXX| or |g__module_XXXX|.
 % \end{function}
+%
 % \begin{function}[added = 2020-06-16,updated = 2020-12-03]
 %   {\pdfdict_set_eq:nn,\pdfdict_gset_eq:nn}
 %   \begin{syntax}
@@ -90,8 +101,8 @@
 % \meta{local/global dictionary name_1} locally or globally. If the
 % dictionary \meta{local/global dictionary name_1} doesn't exist yet, it will be created.
 % If \meta{dictionary name_2} doesn't exist yet, an error will be raised.
-%
 % \end{function}
+%
 % \begin{function}[added = 2020-04-06]
 %   {\pdfdict_put:nnn, \pdfdict_gput:nnn}
 %   \begin{syntax}
@@ -101,18 +112,20 @@
 % This function puts key \meta{name} and value \meta{value} locally or globally in the
 % \meta{dictionary} created with \cs{pdfdict_new:n}.
 % \Arg{name} should be a PDF Name without the starting slash. It will be stored
-% with \cs{str_convert_pdfname}, so will be automatically correctly escaped in case
+% with \cs{str_convert_pdfname:n}, so will be automatically correctly escaped in case
 % it contains slashes, spaces or other chars not allowed in a PDF name.
 % \meta{value} should be a valid PDF value for this name in the
 % target dictionary. The value is \emph{neither} converted \emph{nor} escaped automatically.
 % If the value is blank nothing is added to the dictionary.
 %
 % When adding a value keep in mind that the expansion behaviour
-% of the backends can differ. Some backends expand a
+% of the backends differ. Some backends expand a
 % value always fully when writing to the PDF, with other backends commands
-% could end as strings in the PDF. So one should neither rely on
+% could end as strings in the PDF. This makes controlling the
+% expansion quite tricky. It is better to not rely on
 % \meta{value} to be expanded nor not expanded by the backend commands.
 % \end{function}
+%
 % \begin{function}[EXP,added = 2020-12-04]
 %   { \pdfdict_item:nn, \pdfdict_item:ne  }
 %   \begin{syntax}
@@ -124,7 +137,8 @@
 % has been stored into the dictionary.
 % If the value is blank nothing is output.
 % The command is expandable if the content is it.
-% \end{function}%
+% \end{function}
+%
 % \begin{function}[EXP,updated = 2020-12-03]
 %   { \pdfdict_use:n  }
 %   \begin{syntax}
@@ -135,13 +149,14 @@
 %   This can be used e.g. when writing a dictionary object with
 %   \cs{pdf_object_write:nx}
 % \end{function}
+%
 % \begin{function}[updated = 2020-12-03]
 %   {\pdfdict_show:n }
 %   \begin{syntax}
 %     \cs{pdfdict_show:n}  \Arg{dictionary}
 %   \end{syntax}
 %   This shows the content of \meta{dictionary} in the log and on the terminal.
-%\end{function}
+% \end{function}
 %\begin{function}[EXP, pTF,updated = 2020-12-03]
 %   { \pdfdict_if_exist:n  }
 %   \begin{syntax}
@@ -168,9 +183,10 @@
 %   variable}. If \meta{name} is not found
 %   then the \meta{token list variable} is set
 %   to the special marker \cs{q_no_value}. \meta{name} is first converted
-%   with \cs{str_convert_pdfname}.  The \meta{token list
+%   with \cs{str_convert_pdfname:n}.  The \meta{token list
 %   variable} is set within the current \TeX{} group.
 % \end{function}
+%
 % \begin{function}[updated = 2020-12-03]
 %   {
 %     \pdfdict_remove:nn, \pdfdict_gremove:nn
@@ -186,7 +202,7 @@
 %   If \meta{name} is not found no change occurs,
 %   \emph{i.e}~there is no need to test for the existence of a name before
 %   trying to remove it. \meta{name} is first converted
-%   with \cs{str_convert_pdfname}.
+%   with \cs{str_convert_pdfname:n}.
 % \end{function}
 % \end{documentation}
 %
@@ -195,8 +211,8 @@
 %    \begin{macrocode}
 %<@@=pdfdict>
 %<*package>
-\ProvidesExplPackage {l3pdfdict} {2020-12-03} {0.6}
-  {Tools for PDF dictionaries}
+\ProvidesExplPackage {l3pdfdict} {2021-02-22} {0.95a}
+  {Tools for PDF dictionaries (PDFmanagement bundle (testphase))}
 %</package>
 %    \end{macrocode}
 % \subsection{messages}
@@ -564,7 +580,7 @@
 % \end{macro}
 % \begin{macro}
 %   {
-%     \@@_use:n
+%     \@@_use:n,\pdfdict_use:n
 %   }
 % \cs{@@_use:n} outputs a prop as needed in a dictionary:
 %  as a list of /\meta{key} \meta{value} pairs.
