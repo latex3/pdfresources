@@ -1,11 +1,11 @@
-# LaTeX PDF Management bundle (testphase)
+# LaTeX PDF management testphase bundle
 
 Version: 0.95a, 2021-02-22
 
 This package is used during a testphase to load the new PDF management code
 of LaTeX.
 
-The new PDF management code offers backend inpendant interfaces to central
+The new PDF management code offers backend independant interfaces to central
 PDF dictionaries, tools to create annotations, form Xobjects, to embed
 files, and to handle PDF standards.
 

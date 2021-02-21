@@ -11,7 +11,7 @@ installfiles = {"*.sty","*.cls","*.def","*.lua","*.ltx"}
 sourcefiles =  {"*.dtx","*.ins",
                 "l3ref-tmp.sty",
                 "pdfmanagement-regressiontest.sty",
-                "hgeneric-experimental.def",
+                "hgeneric-testphase.def",
                 "firstaid/transparent-ltx.sty",          
                 "firstaid/hyperxmp-patches-tmp-ltx.sty",                
                 "firstaid/pdflscape-ltx.sty",
