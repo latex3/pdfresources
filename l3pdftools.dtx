@@ -11,7 +11,7 @@
 %
 %    http://www.latex-project.org/lppl.txt
 %
-% This file is part of the "(experimental) pdfmanagement bundle" (The Work in LPPL)
+% This file is part of the "PDFmanagement bundle (testphase)" (The Work in LPPL)
 % and all files in that bundle must be distributed together.
 %
 % -----------------------------------------------------------------------
@@ -23,8 +23,15 @@
 % for those people who are interested.
 %
 %<*driver>
-\RequirePackage{expl3}
+\RequirePackage{pdfmanagement-testphase}
+\DeclareDocumentMetadata{pdfstandard=A-2b}
+\makeatletter
+\declare@file@substitution{doc.sty}{doc-v3beta.sty}
+\makeatother
 \documentclass[full]{l3doc}
+\usepackage{array,booktabs,hyperxmp}
+\hypersetup{pdfauthor=The LaTeX Project,pdftitle=l3pdftools (PDFmanagement bundle (testphase))}
+
 \providecommand\potentialclash{\noindent\llap{\dbend\ }}
 \begin{document}
   \DocInput{\jobname.dtx}
@@ -33,11 +40,12 @@
 % \fi
 %
 % \title{^^A
-%   The \pkg{l3pdftools} package\\ collection of pdf related commands ^^A
+%   The \pkg{l3pdftools} package\\ temporary collection of pdf related commands ^^A
+%   \\ PDFmanagement bundle (testphase)
 % }
 %
 % \author{^^A
-%  The \LaTeX3 Project\thanks
+%  The \LaTeX Project\thanks
 %    {^^A
 %      E-mail:
 %        \href{mailto:latex-team@latex-project.org}
@@ -45,7 +53,7 @@
 %    }^^A
 % }
 %
-% \date{Released XXXX-XX-XX}
+% \date{Version 0.95a, released 2021-02-22}
 %
 % \maketitle
 % \begin{documentation}
@@ -191,20 +199,6 @@
 %   \end{verbatim}
 % \end{function}
 %
-%\subsection{references to page objects}
-% \begin{NOTE}{UF}
-% a reference to the current page would be useful, but difficult to
-% abstract in a sensible way. With xetex it is simply @thispage, but the other
-% engines are unclear.
-% \end{NOTE}
-% \begin{function}[EXP, added = 2019-08-18]
-%   {\pdf_pageobject_ref:n}
-%   \begin{syntax}
-%     \cs{pdf_pageobject_ref:n} \Arg{number}
-%   \end{syntax}
-%   This returns the object reference of a page object. The \Arg{number} is
-%   the absolute page number. The count starts with one.
-% \end{function}
 %
 % \end{documentation}
 %
@@ -214,8 +208,8 @@
 %
 %    \begin{macrocode}
 %<*package>
-\ProvidesExplPackage {l3pdftools} {2021-01-09} {0.2}
-  {various PDF tools}
+\ProvidesExplPackage {l3pdftools} {2021-02-22} {0.95a}
+  {candidate commands for l3pdf---PDFmanagement bundle (testphase)}
 %    \end{macrocode}
 %
 %    \begin{macrocode}
@@ -428,34 +422,6 @@
 %</package>
 %    \end{macrocode}
 %
-% \subsection{Reference to the page object}
-% \begin{macro}{ \pdf_pageobject_ref:n }
-%    \begin{macrocode}
-%<*package>
-\cs_if_free:NT \pdf_pageobject_ref:n
-  {
-   \cs_new:Npn \pdf_pageobject_ref:n #1 { \@@_backend_pageobject_ref:n { #1 }}
-  }
-%</package>
-%    \end{macrocode}
-% \end{macro}
-%
-% \subsection{transition commands}
-%    \begin{macrocode}
-%define old for new formats
-\cs_if_free:NT \pdf_object_now:nn
- {
-   \cs_set_eq:NN \pdf_object_now:nn \pdf_object_unnamed_write:nn
-   \cs_set_eq:NN \pdf_object_last: \pdf_object_ref_last:
- }
-%define new for old formats
-\cs_if_free:NT \pdf_object_unnamed_write:nn
- {
-   \cs_set_eq:NN \pdf_object_unnamed_write:nn \pdf_object_now:nn
-   \cs_generate_variant:Nn \pdf_object_unnamed_write:nn {nx}
-   \cs_set_eq:NN \pdf_object_ref_last: \pdf_object_last:
- }
-%    \end{macrocode}
 % \end{implementation}
 %
 % \PrintIndex

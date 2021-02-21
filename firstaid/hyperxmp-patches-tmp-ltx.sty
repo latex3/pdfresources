@@ -1,5 +1,5 @@
 %% This is file `hyperxmp-patches-tmp-ltx.sty"
-% Copyright (C) 2019-2020 The LaTeX3 Project
+% Copyright (C) 2019-2021 The LaTeX3 Project
 %
 % It may be distributed and/or modified under the conditions of the
 % LaTeX Project Public License (LPPL), either version 1.3c of this
@@ -20,7 +20,7 @@
 % for those people who are interested.
 \NeedsTeXFormat{LaTeX2e}[2020/10/01]
 \ProvidesExplPackage{hyperxmp-patches-tmp-ltx}
-  {2021-02-11} {0.4}
+  {2021-02-22} {0.95a}
   {Store hyperref metadata in XMP format / temporay patches to test pdfresource management ... UF}
 
 \cs_if_exist:NT \pdfmanagement_add:nnn
@@ -42,7 +42,7 @@
    \exp_args:Nnx
     \pdf_object_unnamed_write:nn{stream}{{/Type~/Metadata~/Subtype~/XML}{\hyxmp@xml}}%
     % reference in the Catalog:
-    \pdfmanagement_add:nnx {Catalog} {Metadata}{\pdf_object_last:}
+    \pdfmanagement_add:nnx {Catalog} {Metadata}{\pdf_object_ref_last:}
  }
 
 % A standard should be retrieved from the document settings.
