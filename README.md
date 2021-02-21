@@ -12,7 +12,8 @@ files, and to handle PDF standards.
 The code is provided during a testphase as independant package to allow
 user and package authors to safely test the code.
 
-Bug reports and feedbacks should be made at 
+## Feedback
+Bug reports and feedbacks are welcome and should be made at 
 https://github.com/latex3/pdfresources
 
 ## Requirements 
