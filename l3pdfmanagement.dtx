@@ -651,19 +651,19 @@
 %
 % \begin{variable}
 %   {
-%    pdf/management/end_run,
-%    pdf/management/lastpage_shipout,
-%    pdf/management/thispage_shipout
+%      \g__kernel_pdfmanagement_thispage_shipout_code_tl
+%      \g__kernel_pdfmanagement_lastpage_shipout_code_tl
+%      \g__kernel_pdfmanagement_end_run_code_tl
 %   }
-% This hooks contain the code run in the three places.
+% This variables contain the code run in the three places.
 %    \begin{macrocode}
-\hook_new:n {pdf/management/end_run}
-\hook_new:n {pdf/management/lastpage_shipout}
-\hook_new:n {pdf/management/thispage_shipout}
+\tl_new:N \g__kernel_pdfmanagement_thispage_shipout_code_tl
+\tl_new:N \g__kernel_pdfmanagement_lastpage_shipout_code_tl
+\tl_new:N \g__kernel_pdfmanagement_end_run_code_tl
 %    \end{macrocode}
 % \end{variable}
 %    \begin{macrocode}
-\hook_gput_code:nnn {pdf/management/thispage_shipout} {pdf}
+\tl_gset:Nn \g__kernel_pdfmanagement_thispage_shipout_code_tl
   {
      \bool_if:NT \g_@@_active_bool
        {
@@ -672,7 +672,7 @@
        }
   }
 
-\hook_gput_code:nnn {pdf/management/lastpage_shipout} {pdf}
+\tl_gset:Nn \g__kernel_pdfmanagement_lastpage_shipout_code_tl
   {
     \bool_if:NT \g_@@_active_bool
        {
@@ -680,7 +680,7 @@
        }
   }
 
-\hook_gput_code:nnn {pdf/management/end_run} {pdf}
+\tl_gset:Nn \g__kernel_pdfmanagement_end_run_code_tl
   {
     \bool_if:NT \g_@@_active_bool
        {

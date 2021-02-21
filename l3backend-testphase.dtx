@@ -151,29 +151,24 @@
 %    \begin{macrocode}
 %<*pdftex|luatex>
 % put in \@kernel@after@enddocument@afterlastpage
-\hook_gput_code:nnn {enddocument/afterlastpage}
-  {pdf/endrun}
+\tl_gput_right:Nn \@kernel@after@enddocument@afterlastpage
   {
-    \hook_use:n {pdf/management/end_run}
+    \g__kernel_pdfmanagement_end_run_code_tl
   }
 %</pdftex|luatex>
 %<*dvipdfmx|xdvipdfmx>
 % put in \@kernel@after@shipout@lastpage
-\hook_gput_code:nnn {shipout/lastpage}
-  {pdf/endrun}
+\tl_gput_right:Nn \@kernel@after@shipout@lastpage
   {
-    \hook_use:n {pdf/management/end_run}
+    \g__kernel_pdfmanagement_end_run_code_tl
   }
-\hook_gset_rule:nnnn {shipout/lastpage}{pdf}{before}{pdf/endrun}
 %</dvipdfmx|xdvipdfmx>
 %<*dvips>
 % put in \@kernel@after@shipout@lastpage
-\hook_gput_code:nnn {shipout/lastpage}
-  {pdf/endrun}
+\tl_gput_right:Nn\@kernel@after@shipout@lastpage
   {
-    \hook_use:n {pdf/management/end_run}
+    \g__kernel_pdfmanagement_end_run_code_tl
   }
-\hook_gset_rule:nnnn {shipout/lastpage}{pdf}{before}{pdf/endrun}
 %</dvips>
 %    \end{macrocode}
 % \subsubsection{Add the \enquote{shipout} hooks}
@@ -188,21 +183,21 @@
     \g@addto@macro \@kernel@before@shipout@background{\relax}
     \g@addto@macro \@kernel@after@shipout@background
       {
-        \hook_use:n {pdf/management/thispage_shipout}
+        \g__kernel_pdfmanagement_thispage_shipout_code_tl
       }
-    \g@addto@macro \@kernel@after@shipout@lastpage
+    \tl_gput_left:Nn\@kernel@after@shipout@lastpage
       {
-        \hook_use:n {pdf/management/lastpage_shipout}
+        \g__kernel_pdfmanagement_lastpage_shipout_code_tl
       }
   }
   {
     \hook_gput_code:nnn{shipout/background}{pdf}
       {
-        \hook_use:n {pdf/management/thispage_shipout}
+        \g__kernel_pdfmanagement_thispage_shipout_code_tl
       }
     \hook_gput_code:nnn {shipout/lastpage} {pdf}
       {
-        \hook_use:n {pdf/management/lastpage_shipout}
+        \g__kernel_pdfmanagement_lastpage_shipout_code_tl
       }
   }
 
