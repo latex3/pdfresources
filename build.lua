@@ -7,7 +7,7 @@ bundle  = ""
 module  = "pdfresources"
 
 
-installfiles = {"*.sty","*.cls","*.def","*.lua"}
+installfiles = {"*.sty","*.cls","*.def","*.lua","*.ltx"}
 sourcefiles =  {"*.dtx","*.ins",
                 "l3ref-tmp.sty",
                 "pdfmanagement-regressiontest.sty",

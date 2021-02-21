@@ -216,7 +216,9 @@
 % not supported.
 %
 % \section{Modules}
-% The bundle contains a number of modules. The organization and naming is bound
+% The package contains a number of modules. The majority of the modules don't
+% have a stand alone sty, their code is combined
+% in one file and loaded by the package. The organization and naming is bound
 % to change over time: For almost all modules the goal is to
 % integrate them into the format and the individual style will disappear.
 %
@@ -224,47 +226,40 @@
 % of the bundles. There doesn't exist in all cases a related |.sty|.
 %
 % \begin{description}
-% \item[l3pdfdict] This modules provides commands for PDF dictionaries. Its main
-% purpose is to create name spaces. It is used e.g. by \pkg{l3pdfmanagement} and
+% \item[l3pdfdict] This module provides commands for PDF dictionaries. Its main
+% purpose is to create name spaces. The code used e.g. by \pkg{l3pdfmanagement} and
 % \pkg{l3pdfannot}.
 %
 % \item[l3pdfannot] This module provides commands for annotations. Currently mainly
 % link annotations, widget annotations will be added later. It doesn't require
-% the PDF management to be active so it is possible to load and test it individually.
+% the PDF management to be active.
 %
-% \item[l3pdfmanagement] This is the code code of the PDF management.
-% It should not be loaded directly, but only as described in section~\ref{sec:use}.
+% \item[l3pdfmanagement] This is the core code of the PDF management.
 %
 % \item[ltdocinit] This package provides the \cs{DeclareDocumentMetadata} command.
-% It should not be loaded directly.
 %
 % \item[hyperref-generic] This package provides a new generic hyperref driver.
 % The driver will
 % be loaded automatically by hyperref if the PDF management code is active.
-% It should not be loaded directly.
 %
 % \item[l3backend-testphase] This module contains backend code needed by the
 % PDF management. It will in due time be integrated into l3backend.
-% It should not be loaded directly.
 %
 % \item[l3pdfmeta] This module contains code to handle PDF standards.
 % Currently it handles pdf/A and colorprofiles/outputintents.
-% It is loaded by the bundle, and
-% should not be loaded independently.
 %
 % \item[l3pdfxform]  Commands for form XObjects (xforms).
-% The code is loaded by the bundle.
 %
 % \item[l3pdftool] A number of commands like text conversion commands and
 % bcd/emc.  The commands will at some time be moved into the \pkg{l3pdf}
-% module of l3kernel. It should not be loaded independently.
+% module of l3kernel.
 %
 % \item[l3pdffile] This module provides commands for to embed files.
-% It is currently not loaded automatically, but it requires the PDF management.
 %
 % \item[pdfmanagement-firstaid] This module provides a number of patches
 % for external incompatible packages. This patches will disappear as soon as
 % the packages are natively compatible. It is loaded automatically.
+% 
 % \end{description}
 % \section{Incompabilities}
 %
@@ -397,16 +392,22 @@
 % This loads the core files. The backend should not be loaded
 % to allow to set it in the document.
 %    \begin{macrocode}
+%<*header>
+\ProvidesExplFile
+  {pdfmanagement-testphase.ltx}{2021-02-22}{0.95a}
+  {PDF~management~code~(testphase)}
+%</header>
 %<*package>
-\RequirePackage{l3pdfdict}       % needed by l3pdfmanagement
-\RequirePackage{l3pdfmanagement} % loads the core code with the boolean
-\RequirePackage{ltdocinit}       % DeclareDocumentMetadata,
-% can perhaps be combined or made optional ...
-\RequirePackage{l3pdfannot}
-\RequirePackage{l3pdfxform-beta}
-\RequirePackage{l3pdfmeta}       %
-\RequirePackage{l3pdftools}
-
+%\RequirePackage{l3pdfdict}       % needed by l3pdfmanagement
+%\RequirePackage{l3pdfmanagement} % loads the core code with the boolean
+%\RequirePackage{ltdocinit}       % DeclareDocumentMetadata,
+%% can perhaps be combined or made optional ...
+%\RequirePackage{l3pdfannot}
+%\RequirePackage{l3pdfxform-beta}
+%\RequirePackage{l3pdfmeta}       %
+%\RequirePackage{l3pdftools}
+%\RequirePackage{l3pdffile}
+\input{pdfmanagement-testphase.ltx}
 %</package>
 %    \end{macrocode}
 % \end{implementation}

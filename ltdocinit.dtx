@@ -162,15 +162,17 @@
 % \section{\pkg{ltdocinit} implementation}
 % \subsection{\cs{DeclareDocumentMetadata}}
 %    \begin{macrocode}
-%<*package>
 %<@@=pdfmanagement>
+%<*header>
 \ProvidesExplPackage {ltdocinit} {2021-02-22} {0.95a}
   {Initialize document metadata}
+%</header>
 %    \end{macrocode}
 % \cs{DeclareDocumentMetadata} should for now not be used after
 % \cs{documentclass} so we error in this case. It can be used more than once
 % but follow-up calls should not do the initialization code.
 %    \begin{macrocode}
+%<*package>
 \msg_new:nnn  { document } { setup-after-documentclass }
               {
                 \token_to_str:N \DeclareDocumentMetadata \c_space_tl

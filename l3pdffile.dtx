@@ -375,13 +375,15 @@
 % \section{\pkg{l3pdffile} implementation}
 %
 %    \begin{macrocode}
-%<*package>
+%<*header>
 \ProvidesExplPackage {l3pdffile} {2021-02-22} {0.95a}
   {embedding and referencing files in PDF---PDFmanagement bundle (testphase)}
 \RequirePackage{l3pdftools}  %temporarly!!
+%</header>
 %    \end{macrocode}
 %
 %    \begin{macrocode}
+%<*package>
 %<@@=pdffile>
 \cs_new_protected:Npn \@@_filename_convert_to_print:nN #1 #2
   {\pdf_string_from_unicode:nnN {utf16/hex}{#1}{#2}}

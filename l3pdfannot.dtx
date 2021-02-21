@@ -297,15 +297,17 @@
 % \section{\pkg{l3pdfannot} implementation}
 %
 %    \begin{macrocode}
-%<*package>
 %<@@=pdfannot>
+%<*header>
 \ProvidesExplPackage {l3pdfannot} {2021-02-22} {0.95a}
   {PDF-annotations}
 \RequirePackage{l3pdfdict}
+%</header>
 %    \end{macrocode}
 % Annotations have a /F flag, we provide a public
 % bitset for it.
 %    \begin{macrocode}
+%<*package>
 \RequirePackage{l3bitset}
 \bitset_new:Nn \l_pdfannot_F_bitset
   {
