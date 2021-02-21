@@ -206,7 +206,7 @@
         \keys_set_filter:nnn  { document / metadata } { init } { lang=en-US, #1 }
         \bool_if:NT \g_@@_active_bool
           {
-            \PassOptionsToPackage{customdriver=hgeneric-experimental}{hyperref}
+            \PassOptionsToPackage{customdriver=hgeneric-testphase}{hyperref}
           }
 %    \end{macrocode}
 % \cs{pdfmanagement_add:nnn} has collected values in this hook.
@@ -221,11 +221,11 @@
             \keys_set_filter:nnn  { document / metadata } { init } { ##1 }
             \bool_if:NTF \g_@@_active_bool
              {
-               \str_remove_all:cn {opt@hyperref.sty}{customdriver=hgeneric-experimental}
-               \PassOptionsToPackage{customdriver=hgeneric-experimental}{hyperref}
+               \str_remove_all:cn {opt@hyperref.sty}{customdriver=hgeneric-testphase}
+               \PassOptionsToPackage{customdriver=hgeneric-testphase}{hyperref}
              }
              {
-               \str_remove_all:cn {opt@hyperref.sty}{customdriver=hgeneric-experimental}
+               \str_remove_all:cn {opt@hyperref.sty}{customdriver=hgeneric-testphase}
              }
           }
 %    \end{macrocode}
