@@ -125,56 +125,48 @@ and all files in that bundle must be distributed together.
 
 \generate
   {
-   \file{l3dvipdfmx-pdf.def}
+   \file{l3backend-testphase-dvipdfmx.def}
      {
-       \from{l3backend-pdf-extra.dtx}{drivers,dvipdfmx}
+       \from{l3backend-testphase.dtx}{drivers,dvipdfmx}
      }
   }
 
 \generate
   {
-    \file{l3dvips-pdf.def}
+    \file{l3backend-testphase-dvips.def}
       {
-        \from{l3backend-pdf-extra.dtx}{drivers,dvips}
+        \from{l3backend-testphase.dtx}{drivers,dvips}
       }
   }
 
 \generate
   {
-    \file{l3dvisvgm-pdf.def}
+    \file{l3backend-testphase-dvisvgm.def}
       {
-        \from{l3backend-pdf-extra.dtx}{drivers,dvisvgm}
+        \from{l3backend-testphase.dtx}{drivers,dvisvgm}
       }
   }
 
 \generate
   {
-    \file{l3luatex-pdf.def}
+    \file{l3backend-testphase-luatex.def}
       {
-        \from{l3backend-pdf-extra.dtx}{drivers,luatex}
+        \from{l3backend-testphase.dtx}{drivers,luatex}
       }
   }
 
 \generate
   {
-    \file{l3pdftex-pdf.def}
+    \file{l3backend-testphase-pdftex.def}
       {
-        \from{l3backend-pdf-extra.dtx}{drivers,pdftex}
+        \from{l3backend-testphase.dtx}{drivers,pdftex}
       }
   }
 \generate
   {
-    \file {l3xetex-pdf.def}
+    \file {l3backend-testphase-xetex.def}
       {
-       \from{l3backend-pdf-extra.dtx}{drivers,xdvipdfmx}
-      }
-  }
-
-\generate
-  {
-    \file {l3dvisvgm-pdf.def}
-      {
-       \from{l3backend-pdf-extra.dtx}{drivers,dvisvgm}
+       \from{l3backend-testphase.dtx}{drivers,xdvipdfmx}
       }
   }
 
@@ -199,5 +191,5 @@ and all files in that bundle must be distributed together.
   \MetaPrefix\space End of File `\outFileName'.%
 }
 \def\currentpostamble{\defaultpostamble}%
-\generate{\file{l3backend-pdf.lua}   {\from{l3backend-pdf-extra.dtx}{lua}}}
+\generate{\file{l3backend-pdf.lua}   {\from{l3backend-testphase.dtx}{lua}}}
 \endbatchfile

@@ -1,8 +1,8 @@
 % \iffalse meta-comment
 %
-%% File: l3backend-pdf.dtx
+%% File: l3backend-testphase.dtx
 %
-% Copyright (C) 2019,2020 The LaTeX3 Project
+% Copyright (C) 2019-2021 The LaTeX Project
 %
 % It may be distributed and/or modified under the conditions of the
 % LaTeX Project Public License (LPPL), either version 1.3c of this
@@ -11,7 +11,7 @@
 %
 %    https://www.latex-project.org/lppl.txt
 %
-% This file is part of the "pdfmanagement bundle" (The Work in LPPL)
+% This file is part of the "PDFmanagement bundle (testphase)" (The Work in LPPL)
 % and all files in that bundle must be distributed together.
 %
 % -----------------------------------------------------------------------
@@ -32,11 +32,12 @@
 % \fi
 %
 % \title{^^A
-%   The \textsf{l3backend-pdf-extra} package\\ Additional backend PDF features^^A
+%   The \textsf{l3backend-testphase} package\\ Additional backend PDF features^^A
+%   \\ PDFmanagement bundle (testphase)
 % }
 %
 % \author{^^A
-%  The \LaTeX3 Project\thanks
+%  The \LaTeX{} Project\thanks
 %    {^^A
 %      E-mail:
 %        \href{mailto:latex-team@latex-project.org}
@@ -44,17 +45,41 @@
 %    }^^A
 % }
 %
-% \date{Released XXXX-XX-XX}
+% \date{Version 0.95a, released 2021-02-22}
 %
 % \maketitle
 %
-% \begin{documentation}
-%
-% \end{documentation}
 %
 % \begin{implementation}
 %
-% \section{\pkg{l3backend-pdf-extra} Implementation}
+% \section{\pkg{l3backend-testphase} Implementation}
+%    \begin{macrocode}
+%<drivers>\ProvidesExplFile
+%<*dvipdfmx>
+  {l3backend-testphase-dvipdfmx.def}{2021-02-22}{}
+  {PDFmanagement bundle (testphase) backend support: dvipdfmx}
+%</dvipdfmx>
+%<*dvips>
+  {l3backend-testphase-dvips.def}{2021-02-22}{}
+  {PDFmanagement bundle (testphase): dvips}
+%</dvips>
+%<*dvisvgm>
+  {l3backend-testphase-dvisvgm.def}{2021-02-22}{}
+  {PDFmanagement bundle (testphase): dvisvgm}
+%</dvisvgm>
+%<*luatex>
+  {l3backend-testphase-luatex.def}{2021-02-22}{}
+  {PDFmanagement bundle (testphase): PDF output (LuaTeX)}
+%</luatex>
+%<*pdftex>
+  {l3backend-testphase-pdftex.def}{2021-02-22}{}
+  {PDFmanagement bundle (testphase): PDF output (pdfTeX)}
+%</pdftex>
+%<*xetex>
+  {l3backend-testphase-xetex.def}{2021-02-22}{}
+  {PDFmanagement bundle (testphase): XeTeX}
+%</xetex>
+%    \end{macrocode}
 % \subsection{Crossreferences}
 % This uses the temporary l3ref-tmp.sty. It will
 % will be replaced by kernel code later.

@@ -2,7 +2,7 @@
 %
 %% File: l3pdfannot.dtx
 %
-% Copyright (C) 2020 The LaTeX3 Project
+% Copyright (C) 2021 The LaTeX3 Project
 %
 % It may be distributed and/or modified under the conditions of the
 % LaTeX Project Public License (LPPL), either version 1.3c of this
@@ -11,7 +11,7 @@
 %
 %    http://www.latex-project.org/lppl.txt
 %
-% This file is part of the "(experimental) pdfmanagement bundle" (The Work in LPPL)
+% This file is part of the "PDFmanagement bundle (testphase)" (The Work in LPPL)
 % and all files in that bundle must be distributed together.
 %
 % -----------------------------------------------------------------------
@@ -23,7 +23,14 @@
 % for those people who are interested.
 %
 %<*driver>
+\RequirePackage{pdfmanagement-testphase}
+\DeclareDocumentMetadata{pdfstandard=A-2b}
+\makeatletter
+\declare@file@substitution{doc.sty}{doc-v3beta.sty}
+\makeatother
 \documentclass[full]{l3doc}
+\usepackage{array,booktabs,hyperxmp}
+\hypersetup{pdfauthor=The LaTeX Project,pdftitle=l3pdfannot (PDFmanagement bundle (testphase))}
 \begin{document}
   \DocInput{\jobname.dtx}
 \end{document}
@@ -32,10 +39,11 @@
 % \providecommand\hook[1]{\texttt{#1}}
 % \title{^^A
 %   The \pkg{l3pdfannot} package\\ Commands for PDF annotations   ^^A
+%   \\ PDFmanagement bundle (testphase)
 % }
 %
 % \author{^^A
-%  The \LaTeX3 Project\thanks
+%  The \LaTeX Project\thanks
 %    {^^A
 %      E-mail:
 %        \href{mailto:latex-team@latex-project.org}
@@ -43,26 +51,22 @@
 %    }^^A
 % }
 %
-% \date{Released XXXX-XX-XX}
+% \date{Version 0.95a, released 2021-02-21}
 %
 % \maketitle
 % \begin{documentation}
 %
 % \section{\pkg{l3pdfannot} documentation}
 % This module contains a number of commands to create PDF annotations.
-% The commands are \emph{not} only simple wrappers around primitive commands.
+% The commands are \emph{not} always simple wrappers around primitive commands.
 % To allow external packages to configure links and other annotations,
 % some of the commands have hooks and use shared attribute dictionaries.
-% For these commands the hooks and dictionaries are selected depending on the \Arg{type}
+% For these commands the hooks and dictionaries are selected depending on the \meta{type}
 % of the annotation. Currently the module only supports some general commands
 % and link annotations. Commands for other annotations like widgets will be added
 % later.
 %
 % \subsection{General annotation commands}
-% \begin{NOTE}{UF}
-%  There was a \cs{pdfannot:nnnn} for general text, but no definition.
-%  Perhaps an overlook or copy\&paste error.
-% \end{NOTE}
 %
 % \begin{function}[added = 2019-09-05, updated = 2020-04-14]
 %   { \pdfannot_box:nnnn }
@@ -78,10 +82,10 @@
 %     \cs{pdfannot_box:nnnnn} \Arg{type} \Arg{width} \Arg{height} \Arg{depth} \Arg{annot spec}
 %   \end{syntax}
 %   This creates an \texttt{/Type/Annot} object with the given dimensions.
-%   \Arg{type} should be currently one of |link/URI|, |link/GoToR|,
+%   \meta{type} should be currently one of |link/URI|, |link/GoToR|,
 %  |link/Launch|, |link/GoTo| or |link/Named| or
 %  |widget|, it will then insert the attribute dictionary of this type
-%   additionally to the manually given \Arg{annot spec}.
+%   additionally to the manually given \meta{annot spec}.
 %   The attribute dictionaries can be filled with commands described below.
 %   Hooks are not used.
 % \end{function}
@@ -147,23 +151,23 @@
 %   \begin{syntax}
 %     \cs{pdfannot_link:nnn} \Arg{type} \Arg{user action spec} \Arg{link text}
 %   \end{syntax}
-%  This creates a link around the \Arg{link text} with the specified
-%  \Arg{user action spec}\footnote{The wording follows the pdftex documentation}.
+%  This creates a link around the \meta{link text} with the specified
+%  \meta{user action spec}\footnote{The wording follows the pdftex documentation}.
 %  \texttt{/Subtype/Link} is added automatically.
-%  \Arg{type} should be one of \texttt{URI}, \texttt{GoToR},
+%  \meta{type} should be one of \texttt{URI}, \texttt{GoToR},
 %  \texttt{Launch}, \texttt{GoTo} or \texttt{Named}. The |GoTo| variant does
 %  \emph{not} complain if the destination name is not known like
 %  \cs{pdfannot_link_goto_begin:nw}.
 %  The attributes stored in the local dictionary
-%  \texttt{link/}\Arg{type} are inserted as
+%  \texttt{link/}\meta{type} are inserted as
 %  \emph{attr spec} and the code in the begin and end hook
-%  \texttt{pdfannot/link/\Arg{type}/before}
-%  and \texttt{pdfannot/link/\Arg{type}/after}
+%  \texttt{pdfannot/link/\meta{type}/before}
+%  and \texttt{pdfannot/link/\meta{type}/after}
 %  is executed  before and after the link (outside the link command)
-%  while \texttt{pdfannot/link/\Arg{type}/begin}
-%  and \texttt{pdfannot/link/\Arg{type}/end} are directly around the link
+%  while \texttt{pdfannot/link/\meta{type}/begin}
+%  and \texttt{pdfannot/link/\meta{type}/end} are directly around the link
 %  text. None of the hooks introduce a group.
-%  \Arg{type} should normally be identical to the value of the |/S| key
+%  \meta{type} should normally be identical to the value of the |/S| key
 %  in the action dictionary.
 %  As example
 %  \begin{verbatim}
@@ -217,9 +221,9 @@
 %     \cs{pdfannot_link_goto_end:}
 %   \end{syntax}
 % This is a special, shorter version for links to internal destinations. It always
-% uses the hooks and dictionary of the |GoTo| link type. \Arg{destination} is a
+% uses the hooks and dictionary of the |GoTo| link type. \meta{destination} is a
 % destination name. In difference to |\pdfannot_link:nnn { GoTo }| it will complain if
-% \Arg{destination} is an unknown destination and give the message
+% \meta{destination} is an unknown destination and give the message
 %
 % |name{ZZZZ} has been referenced but does not exist, replaced by a fixed one|
 %
@@ -250,7 +254,7 @@
 %  \end{syntax}
 %   This adds (locally) a key-value to the internal annot dictionaries used
 %   by the link commands above.
-%   \Arg{dictionary name} should be currently one of \texttt{link/URI},
+%   \meta{dictionary name} should be currently one of \texttt{link/URI},
 %   \texttt{link/URI},\texttt{link/GoToR}, \texttt{link/Launch},
 %   \texttt{link/GoTo}, \texttt{link/Named}.
 % \end{function}
@@ -259,7 +263,7 @@
 %    \cs{pdfannot_dict_remove:nn} \Arg{dictionary name} \Arg{key}
 %  \end{syntax}
 %   This removes a key-value from the internal annot dictionary
-%   \Arg{dictionary name} should be currently one of
+%   \meta{dictionary name} should be currently one of
 %   \texttt{link/URI}, \texttt{link/GoToR}, \texttt{link/Launch},
 %   \texttt{link/GoTo}, \texttt{link/Named}.
 % \end{function}
@@ -268,7 +272,7 @@
 %    \cs{pdfannot_dict_show:n} \Arg{dictionary name}
 %  \end{syntax}
 %   This shows the content of the internal annot dictionary.
-%  \Arg{dictionary name} should be currently one of \texttt{link/URI},
+%  \meta{dictionary name} should be currently one of \texttt{link/URI},
 %   \texttt{link/URI}, \texttt{link/GoToR}, \texttt{link/Launch},
 %   \texttt{link/GoTo}, \texttt{link/Named}.
 % \end{function}
@@ -295,7 +299,7 @@
 %    \begin{macrocode}
 %<*package>
 %<@@=pdfannot>
-\ProvidesExplPackage {l3pdfannot} {2020-12-04} {0.1}
+\ProvidesExplPackage {l3pdfannot} {2021-02-22} {0.95a}
   {PDF-annotations}
 \RequirePackage{l3pdfdict}
 %    \end{macrocode}
