@@ -4,8 +4,7 @@
 \@ifundefined{color_set:nn}{\RequirePackage{l3color}}{}
 
 \ExplSyntaxOn
- \cs_gset_eq:NN \@expl@color@set@@nnn \color_set:nnn
- \cs_gset_protected:Npn \@expl@color@set@@nnn #1 #2 #3
+\cs_gset_protected:Npn \@expl@xcolor@set@@nnn #1 #2 #3
     {
       \cs_if_exist:cTF { __color_parse_model_ #2 :w }
        {
@@ -24,7 +23,7 @@
        }
     }
  \cs_generate_variant:Nn \color_set:nn {ne}
- \cs_new_protected:Npn \@expl@color@set@@ne #1 #2
+ \cs_new_protected:Npn \@expl@xcolor@set@@ne #1 #2
     {
       \exp_args:Nx \__color_if_defined:nT {#2}
            { \color_set:ne {#1}{#2} }
@@ -32,7 +31,7 @@
 \ExplSyntaxOff
 %\pretocmd{\XC@col@rlet}   {\@expl@color@set@@ne{#2}{#4}}{}{\fail}
 \def\XC@col@rlet[#1]#2[#3]#4%
- {\@expl@color@set@@ne{#2}{#4}%
+ {\@expl@xcolor@set@@ne{#2}{#4}%
   \begingroup
   \edef\@@cls{#1}\XC@edef\@@nam{#2}\XC@sdef\@@mod{#3}\XC@edef\@@clr{#4}%
   \XC@info\@@clr\@@tmp\XC@@tstfalse
@@ -59,7 +58,7 @@
 
 %\pretocmd{\XC@definec@lor}{\@expl@color@set@@nnn{#2}{#4}{#5}}{}{\fail}
 \def\XC@definec@lor[#1]#2[#3]#4#5%
- {\@expl@color@set@@nnn{#2}{#4}{#5}%
+ {\@expl@xcolor@set@@nnn{#2}{#4}{#5}%
   \begingroup
   \XC@sdef\@@cls{#1}\XC@edef\@@nam{#2}\edef\colornameprefix{#3}%
   \XC@logdef\@@nam
