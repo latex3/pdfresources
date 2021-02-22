@@ -57,20 +57,26 @@
 % \begin{documentation}
 % \section*{Abstract}
 %  {\em This is a temporary package created to allow the manual
-%   loading of the new \LaTeX{} PDF management code during the test phase.
-%  It will disappear when the code is integrated into the \LaTeX{} format}
+%   loading of the new \LaTeX{} PDF management code during a test phase.
+%  It will disappear when the code is integrated into the \LaTeX{} format.}
 %
 %  \medskip
 %  \noindent During the test phase the package should be used like this:
 %
 % \begin{verbatim}
-% \RequirePackage{pdfmanagement-testphase} %load the package
-% \DeclareDocumentMetadata      %activate the PDF management
-%  {
-%    %options
-%  }
+% \RequirePackage{pdfmanagement-testphase}   % load the package
+%
+% \DeclareDocumentMetadata      % activate the PDF management (with options)
+%     {
+%       % options
+%     }
+%
 %  \documentclass {...}
 % \end{verbatim}
+%  Note that the activation has to happen before the \cs{documentclass} declaration.
+%  Because of this, the package needs loading with \cs{RequirePackage}.
+%
+%
 %
 % \section*{Feedback wanted!}
 %
@@ -200,12 +206,12 @@
 % \pkg{ltdocinit}.
 %
 % \begin{verbatim}
-% \RequirePackage{pdfmanagement-testphase} %load the package
-% \DeclareDocumentMetadata %activates the l3management interface
-%   {
-%      %options
-%   }
-%  \documentclass {...}
+% \RequirePackage{pdfmanagement-testphase} % load the package
+% \DeclareDocumentMetadata % activates the PDF management interface
+%     {
+%        %options
+%     }
+% \documentclass {...}
 % \end{verbatim}
 %
 % The PDF management can be deactivated either setting the key
@@ -224,14 +230,14 @@
 % not supported.
 %
 % \section{Modules}
-% The package contains a number of modules. The majority of the modules don't
-% have a stand alone sty, their code is combined
-% in one file and loaded by the package. The organization and naming is bound
+% The bundle contains a number of modules. The majority of the modules don't
+% have a stand alone \texttt{sty}, their code is combined
+% in one file and loaded by the main package. The organization and naming is bound
 % to change over time: For almost all modules the goal is to
-% integrate them into the format and the individual style will disappear.
+% integrate them into the format and the individual files to disappear.
 %
 % The description items give the name of the documentation
-% of the bundles. There doesn't exist in all cases a related |.sty|.
+% of the modules. There doesn't exist in all cases a related |.sty|.
 %
 % \begin{description}
 % \item[l3pdfdict] This module provides commands for PDF dictionaries. Its main
@@ -244,9 +250,9 @@
 %
 % \item[l3pdfmanagement] This is the core code of the PDF management.
 %
-% \item[ltdocinit] This package provides the \cs{DeclareDocumentMetadata} command.
+% \item[ltdocinit] This module provides the \cs{DeclareDocumentMetadata} command.
 %
-% \item[hyperref-generic] This package provides a new generic hyperref driver.
+% \item[hyperref-generic] This module provides a new generic hyperref driver.
 % The driver will
 % be loaded automatically by hyperref if the PDF management code is active.
 %
@@ -258,11 +264,11 @@
 %
 % \item[l3pdfxform]  Commands for form XObjects (xforms).
 %
-% \item[l3pdftool] A number of commands like text conversion commands and
+% \item[l3pdf\/tool] A number of commands like text conversion commands and
 % bcd/emc.  The commands will at some time be moved into the \pkg{l3pdf}
 % module of l3kernel.
 %
-% \item[l3pdffile] This module provides commands for to embed files.
+% \item[l3pdf\/file] This module provides commands for to embed files.
 %
 % \item[pdfmanagement-firstaid] This module provides a number of patches
 % for external incompatible packages. This patches will disappear as soon as
