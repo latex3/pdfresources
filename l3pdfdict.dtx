@@ -39,7 +39,7 @@
 %</driver>
 % \fi
 % \title{^^A
-%   The \pkg{l3pdfdict} package---tools for PDF dictionaries ^^A
+%   The \pkg{l3pdfdict} module---tools for PDF dictionaries ^^A
 %   \\
 %   \LaTeX{} PDF management testphase bundle
 % }
@@ -259,10 +259,8 @@
 %    {\g_@@_names_seq,\g_@@_gnames_seq}
 % Two seq to store the used names for diagnostics.
 %    \begin{macrocode}
-%<*package>
 \seq_new:N \g_@@_lnames_seq
 \seq_new:N \g_@@_gnames_seq
-%</package>
 %    \end{macrocode}
 % \end{variable}
 %
@@ -281,7 +279,6 @@
 %  |\prop_clear:c { \__kernel_pdfdict_name:n { name }}|
 %
 %    \begin{macrocode}
-%<*package>
 \cs_new:Npn \@@_name:n #1  % #1 dictionary name
   {
     \str_head:n{#1}_@@_/#1_prop
@@ -319,8 +316,6 @@
   }
 
 \cs_set_eq:NN \pdfdict_new:n \@@_new:n
-
-%</package>
 %    \end{macrocode}
 % \end{macro}
 %
@@ -330,7 +325,6 @@
 %     \@@_gset_eq:nn,\pdfdict_gset_eq:nn
 %   }
 %    \begin{macrocode}
-%<*package>
 \cs_new_protected:Npn \@@_set_eq:nn #1 #2
   {
     \@@_if_exist:nTF  { #2 }
@@ -364,9 +358,10 @@
   }
 
 \cs_set_eq:NN \pdfdict_gset_eq:nn \@@_gset_eq:nn
-%</package>
 %    \end{macrocode}
 % \end{macro}
+%
+%
 % \begin{macro}
 %   {
 %     \@@_if_exist:n,  \pdfdict_if_exist:n,
@@ -374,7 +369,6 @@
 %
 % Existence tests.
 %    \begin{macrocode}
-%<*package>
 %local
 \prg_new_conditional:Npnn \@@_if_exist:n #1 { p , T , F , TF }
   {
@@ -385,10 +379,10 @@
   }
 \prg_set_eq_conditional:NNn
   \pdfdict_if_exist:n \@@_if_exist:n { p , T , F , TF }
-
-%</package>
 %    \end{macrocode}
 % \end{macro}
+%
+%
 % \begin{macro}
 %   {
 %     \@@_if_empty:n,  \pdfdict_if_empty:n,
@@ -396,7 +390,6 @@
 %
 % Tests for emptiness.
 %    \begin{macrocode}
-%<*package>
 \prg_new_conditional:Npnn \@@_if_empty:n #1 { p , T , F , TF }
   {
     \prop_if_empty:cTF
@@ -407,10 +400,9 @@
 
 \prg_set_eq_conditional:NNn
   \pdfdict_if_empty:n \@@_if_empty:n { p , T , F , TF }
-
-%</package>
 %    \end{macrocode}
 %  \end{macro}
+%
 %
 % \begin{macro}
 %   {
@@ -422,7 +414,6 @@
 % that the keys are converted with \cs{str_convert_pdfname:n}
 % and that empty values are ignored.
 %    \begin{macrocode}
-%<*package>
 \cs_new_protected:Npn \@@_put:nnn #1 #2 #3  %#1 (local) dict, #2 name, #3 value
   {
     \tl_if_blank:nTF { #3 }
@@ -440,7 +431,6 @@
           }
       }
   }
-
 
 \cs_set_eq:NN \pdfdict_put:nnn \@@_put:nnn
 \cs_generate_variant:Nn \pdfdict_put:nnn {nnx,nno}
@@ -465,7 +455,6 @@
 
 \cs_set_eq:NN \pdfdict_gput:nnn \@@_gput:nnn
 \cs_generate_variant:Nn \pdfdict_gput:nnn {nnx,nno}
-%</package>
 %    \end{macrocode}
 % \end{macro}
 %
@@ -475,7 +464,6 @@
 %   }
 % Recover the values. The name must be first escaped to match the stored name.
 %    \begin{macrocode}
-%<*package>
 \cs_new_protected:Npn \@@_get:nnN  #1 #2 #3 %dict,key,macro
   {
     \@@_if_exist:nTF { #1 }
@@ -490,8 +478,6 @@
   }
 
 \cs_set_eq:NN \pdfdict_get:nnN \@@_get:nnN
-
-%</package>
 %    \end{macrocode}
 % \end{macro}
 %
@@ -503,8 +489,6 @@
 % This removes a name/value pair from a dictionary.
 % The name has to be passed through the escaping.
 %    \begin{macrocode}
-%<*package>
-
 \cs_new_protected:Npn \@@_remove:nn #1 #2 %dict,name
   {
     \@@_if_exist:nTF { #1 }
@@ -531,7 +515,6 @@
   }
 
 \cs_set_eq:NN \pdfdict_gremove:nn \@@_gremove:nn
-%</package>
 %    \end{macrocode}
 % \end{macro}
 %
@@ -540,7 +523,6 @@
 % This allows to show the content of dictionaries. It also displays if a
 % dictionary is local or global. If both exists both are shown.
 %    \begin{macrocode}
-%<*package>
 \cs_new_protected:Npn \@@_show:Nn #1#2 %#1 message command, #2 dict
   {
     \prop_if_exist:cTF { \@@_name:n { #2 } }
@@ -561,13 +543,13 @@
   {
     \@@_show:Nn \msg_show:nnxxxx {#1}
   }
-%</package>
 %    \end{macrocode}
 % \end{macro}
+%
+%
 % \begin{macro}{\@@_item:nn, \@@_item:ne}
 % \begin{macro}{\pdfdict_item:nn, \pdfdict_item:ne}
 %   \begin{macrocode}
-%<*package>
 \cs_new:Npn \@@_item:nn #1 #2 %#1 name, #2 value
   {
     \tl_if_blank:nF {#2} { /#1~#2~ }
@@ -575,10 +557,11 @@
 \cs_generate_variant:Nn \@@_item:nn {ne}
 \cs_set_eq:NN \pdfdict_item:nn \@@_item:nn
 \cs_generate_variant:Nn \pdfdict_item:nn {ne}
-%</package>
 %    \end{macrocode}
 % \end{macro}
 % \end{macro}
+%
+%
 % \begin{macro}
 %   {
 %     \@@_use:n,\pdfdict_use:n
@@ -589,17 +572,19 @@
 %  !! is e-expansion the right thing?
 % \end{NOTE}
 %    \begin{macrocode}
-%<*package>
 \cs_new:Npn \@@_use:n #1  %#1 dict
   {
     \prop_map_function:cN { \@@_name:n { #1 } } \@@_item:ne
   }
 
 \cs_set_eq:NN \pdfdict_use:n \@@_use:n
-%</package>
 %    \end{macrocode}
 % \end{macro}
 %
+%
+%    \begin{macrocode}
+%</package>
+%    \end{macrocode}
 %
 % \end{implementation}
 %
