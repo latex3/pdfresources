@@ -10,7 +10,9 @@ PDF dictionaries, tools to create annotations, form Xobjects, to embed
 files, and to handle PDF standards.
 
 The code is provided during a testphase as independant package to allow
-user and package authors to safely test the code.
+user and package authors to safely test the code. At a later stage it will
+be integrated into the LaTeX kernel (or in parts into permanent support
+packages) and the current testphase bundle will be removed.
 
 ## Feedback
 Bug reports and feedbacks are welcome and should be made at 
@@ -32,4 +34,4 @@ For manual installation: unpack by compiling the .ins, then move all
 * 2021 The LaTeX Project
 
 ## License
-LATEX Project Public License, version 1.3c or later.
+LaTeX Project Public License, version 1.3c or later.
