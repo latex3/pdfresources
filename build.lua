@@ -44,7 +44,7 @@ checkruns = 3
     luatex     = {binary="luahbtex",format = "lualatex-dev"},
     pdftex     = {format = "pdflatex-dev"},
     xetex     = {format = "xelatex-dev"},
-    latexdvips = {binary="latex.exe",format = "latex-dev"}
+    latexdvips = {binary="latex",format = "latex-dev"}
     }
 
 -- to try without dev-format
