@@ -20,6 +20,13 @@ https://github.com/latex3/pdfresources
 The package requires a LaTeX format 2020-10-01 or newer.
 It requires an L3 programming 2021-02-18 or later.
 
+## Installation
+
+Installation should be done with the package managers of the TeX systems.
+
+For manual installation: unpack by compiling the .ins, then move all
+.sty, .def, .ltx, .lua into tex/latex/pdfmanagement-testphase.
+
 
 ## Copyright (C)
 * 2021 The LaTeX Project
