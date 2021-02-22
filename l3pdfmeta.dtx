@@ -726,10 +726,10 @@
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_embed_colorprofile:n #1%#1 file name
   {
-    \pdf_object_if_exist:nF {@@_colorprofile_#1}
+    \pdf_object_if_exist:nF { __color_icc_ #1 }
       {
-        \pdf_object_new:nn  {@@_colorprofile_#1}{fstream}
-        \pdf_object_write:nx {@@_colorprofile_#1}
+        \pdf_object_new:nn  { __color_icc_ #1 }{fstream}
+        \pdf_object_write:nx { __color_icc_ #1 }
          {
            {/N\c_space_tl
              \prop_item:cn{c_@@_colorprofile_#1}{N}
@@ -745,7 +745,7 @@
      \pdfdict_put:nnx {l_pdfmeta/outputintent}{S}{/\str_convert_pdfname:n{#2}}
      \pdfdict_put:nnx {l_pdfmeta/outputintent}
        {DestOutputProfile}
-       {\pdf_object_ref:n{@@_colorprofile_#1}}
+       {\pdf_object_ref:n{ __color_icc_ #1 }}
      \clist_map_inline:nn { OutputConditionIdentifier, Info, RegistryName }
        {
          \prop_get:cnNT
