@@ -40,7 +40,7 @@
 % \fi
 %
 % \title{^^A
-%   The \pkg{l3pdftools} package\\ temporary collection of pdf related commands ^^A
+%   The \pkg{l3pdftools} module\\ temporary collection of pdf related commands ^^A
 %   \\ LaTeX PDF management testphase bundle
 % }
 %
@@ -407,13 +407,11 @@
 % \begin{macro}{\pdf_bmc:n}
 % \begin{macro}{\pdf_emc:}
 %    \begin{macrocode}
-%<*package>
 \cs_new_protected:Npn  \pdf_bdc:nn #1 #2 { \@@_backend_bdc:nn { #1 }{ #2 } }
 \cs_new_protected:Npn  \pdf_bdcobject:nn #1 #2 { \@@_backend_bdcobject:nn { #1 }{ #2 } }
 \cs_new_protected:Npn  \pdf_bdcobject:n #1     { \@@_backend_bdcobject:n  { #1 } }
 \cs_new_protected:Npn  \pdf_bmc:n #1     { \@@_backend_bmc:n  { #1 } }
 \cs_new_protected:Npn  \pdf_emc:         { \@@_backend_emc: }
-%</package>
 %    \end{macrocode}
 % \end{macro}
 % \end{macro}
