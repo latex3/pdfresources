@@ -47,6 +47,16 @@ checkruns = 3
     latexdvips = {binary="latex.exe",format = "latex-dev"}
     }
 
+-- to try without dev-format
+--   specialformats["latex"] = specialformats["latex"] or 
+--    {
+--     luatex     = {binary="luahbtex",format = "lualatex"},
+--     pdftex     = {format = "pdflatex"},
+--     xetex     = {format = "xelatex"},
+--     latexdvips = {binary="latex.exe",format = "latex"}
+--     }
+
+-- packtdszip = true
 checkengines = {"luatex","pdftex","xetex"}
 
 
