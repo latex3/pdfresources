@@ -15,7 +15,7 @@ be integrated into the LaTeX kernel (or in parts into permanent support
 packages) and the current test phase bundle will be removed.
 
 ## Feedback
-Bug reports and feedbacks are welcome and should be made at 
+Bug reports and feedback are welcome and should be made at 
 https://github.com/latex3/pdfresources
 
 ## Requirements 
