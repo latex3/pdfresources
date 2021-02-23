@@ -251,7 +251,7 @@
 % l\_pdffile/Params& Size     & |\file_size:n{\l_pdffile_source_name_str}|\\
 % l\_pdffile/Params& ModDate  & |(\file_timestamp:n {\l_pdffile_source_name_str})|\\
 % l\_pdffile/Params& CheckSum & |(\file_mdfive_hash:n{\l_pdffile_source_name_str})|\\
-% l\_pdffile/streamParams&    &  empty (used with \cs{pdffile_embed_stream:nnn})\\
+% l\_pdffile/streamParams&    &  a /ModDate entry with year/month/date  (used with \cs{pdffile_embed_stream:nnn})\\
 % l\_pdffile/FileSpec & Type  & /FileSpec\\
 % l\_pdffile/FileSpec & AFRelationship &Unspecified
 % \end{tabular}
@@ -469,6 +469,8 @@
 \str_new:N  \l_pdffile_source_name_str
 %    \end{macrocode}
 % Here we define and setup the local dictionaries.
+% We add a ModDate to ensure that there is an entry if
+% associated files are used.
 %    \begin{macrocode}
 \pdfdict_new:n { l_pdffile }
 \pdfdict_put:nnn { l_pdffile }{Type}{/EmbeddedFile}
@@ -480,6 +482,16 @@
 \pdfdict_put:nnn { l_pdffile/Params }
   {CheckSum} { (\file_mdfive_hash:n { \l_pdffile_source_name_str }) }
 \pdfdict_new:n { l_pdffile/streamParams }
+\pdfdict_put:nnn { l_pdffile/streamParams }
+  {ModDate}  {
+               (
+                 D:\int_use:N\c_sys_year_int
+                  \int_compare:nNnT{\c_sys_month_int}<{10}{0}
+                  \int_use:N\c_sys_month_int
+                  \int_compare:nNnT{\c_sys_day_int}<{10}{0}
+                  \int_use:N\c_sys_day_int
+               )
+             }
 \pdfdict_new:n { l_pdffile/FileSpec }
 \pdfdict_put:nnn { l_pdffile/FileSpec }
   {Type} { /FileSpec }
