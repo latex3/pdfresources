@@ -2,17 +2,17 @@
 
 Version: 0.95a, 2021-02-22
 
-This package is used during a testphase to load the new PDF management code
+This package is used during a test phase to load the new PDF management code
 of LaTeX.
 
-The new PDF management code offers backend independant interfaces to central
+The new PDF management code offers backend independent interfaces to central
 PDF dictionaries, tools to create annotations, form Xobjects, to embed
 files, and to handle PDF standards.
 
-The code is provided during a testphase as independant package to allow
+The code is provided during a test phase as independent package to allow
 user and package authors to safely test the code. At a later stage it will
 be integrated into the LaTeX kernel (or in parts into permanent support
-packages) and the current testphase bundle will be removed.
+packages) and the current test phase bundle will be removed.
 
 ## Feedback
 Bug reports and feedbacks are welcome and should be made at 
