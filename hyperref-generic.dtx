@@ -133,7 +133,12 @@
 %  it is recommended for most options ---with the exception of a few mentioned below in
 %  section~\ref{sec:pkg-options}---to set them in \cs{hypersetup},
 %  not as package option.
-%  \item If the package \pkg{color} is used it is currently recommended to define
+%  \item This driver uses \pkg{l3color} for the colors. All colors
+%  defined with \cs{color_set:nn} or \cs{color_set:nnn} will work.
+%  Colors defined with \pkg{xcolor} will work if they don't use one of
+%  the special color models not supported by \pkg{l3color} as
+%  \pkg{pdfmanagement-firstaid} contains a patch for xcolor.
+%  If the package \pkg{color} is used it is currently recommended to define
 %  colors after \pkg{hyperref}. This driver uses \pkg{l3color} for the colors,
 %  some special color models of \pkg{xcolor} won't work.
 %  \item Load a color package or graphicx to get the right page sizes.
@@ -815,7 +820,6 @@
 %    \end{macrocode}
 %    \begin{macrocode}
 \ExplSyntaxOn
-\cs_gset_eq:NN \@expl@color@set@@@@nnn \color_set:nnn
 \file_input:n {hyperref-colorschemes.def}
 \ExplSyntaxOff
 %    \end{macrocode}

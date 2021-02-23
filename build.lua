@@ -16,6 +16,7 @@ if options["target"] == "ctan" then
                 "firstaid/hyperxmp-patches-tmp-ltx.sty",                
                 "firstaid/pdflscape-ltx.sty",
                 "firstaid/xcolor-patches-tmp-ltx.sty",                
+                "firstaid/color-ltx.sty",
                  }
 else
  sourcefiles =  {"*.dtx","*.ins",
@@ -24,6 +25,7 @@ else
                 "firstaid/hyperxmp-patches-tmp-ltx.sty",                
                 "firstaid/pdflscape-ltx.sty",
                 "firstaid/xcolor-patches-tmp-ltx.sty",  
+                "firstaid/color-ltx.sty",
                 "support/pdfmanagement-regressiontest.sty",              
                 "newpackages/new-bookmark.sty",
                 "newpackages/bkm-generic.def",

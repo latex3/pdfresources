@@ -71,7 +71,7 @@
   {LaTeX PDF management testphase bundle / firstaid-patches}
 
 %<@@=pdfmanagement>
-\clist_map_inline:nn {pgf,transparent,hyperxmp,pdflscape,xcolor}
+\clist_map_inline:nn {pgf,transparent,hyperxmp,pdflscape,xcolor,color}
   {
     \bool_new:c       { g_@@_firstaid_#1_bool }
     \bool_gset_true:c { g_@@_firstaid_#1_bool }
@@ -86,13 +86,36 @@
 \msg_new:nnn  { pdfmanagement } { firstaid }
               { loading~pdfmanagement~firstaid~code~for~#1 }
 %    \end{macrocode}
+% \subsection{\pkg{color}}
+%
+%  \pkg{color} is not incompatible, but the new \pkg{hyperref} driver makes use of
+%  \pkg{l3color} to set the colors. It is therefore necessary to patch some
+%  internal \pkg{color} commands, so
+%  that colors defined with its \cs{definecolor} command are known to \pkg{l3color} and
+%  so \pkg{hyperref}. This only supports the color models from l3color (which covers
+%  all standard model of the \pkg{color} package). The |named| model is mapped to
+%  \cs{color_set:nn}.
+%
+%  This patch serves also as test to check if this change can be safely
+%  added to \pkg{color} later.
+%    \begin{macrocode}
+\@ifundefined{color_set:nn}{
+\RequirePackage{l3color}}{}
+\bool_if:NT \g_@@_firstaid_color_bool
+  {
+    \declare@file@substitution{color.sty}{color-ltx.sty}
+  }
+%    \end{macrocode}
+%
 % \subsection{\pkg{xcolor}}
 %
 %  \pkg{xcolor} is not incompatible, but the new \pkg{hyperref} driver makes use of
 %  \pkg{l3color} to set the colors. It is therefore necessary to patch \pkg{xcolor}, so
 %  that colors defined with its \cs{definecolor} command are known to \pkg{l3color} and
 %  so \pkg{hyperref}. This only supports the color model from l3color. Colors defined
-%  with the models |cmy|, |tHsb| and |named| are silently ignored.
+%  with the models |cmy| and |tHsb| are silently ignored.
+%
+%  The |named| model is mapped to \cs{color_set:nn}.
 %
 %    \begin{macrocode}
 \@ifundefined{color_set:nn}{
