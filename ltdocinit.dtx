@@ -189,18 +189,19 @@
 %    \end{macrocode}
 % The wanted backend must be detected first, we read the init key and then
 % force the loading by either loading l3pdf (+ expl3) or only expl3.
+% The backend contains now management command, so the boolean should true first.
 %    \begin{macrocode}
         \keys_set_groups:nnn { document / metadata} {init}{ #1 }
         %should be loaded after the backend is set, and only if not in the kernel
+        \bool_gset_true:N \g_@@_active_bool
         \cs_if_free:NTF \pdf_uncompress:
          {\RequirePackage{l3pdf}}{\RequirePackage{expl3}}
 %    \end{macrocode}
-% Now we load the extra backend code and set the boolean to true
+% Now we load the extra backend code
 %    \begin{macrocode}
         \ExplSyntaxOn\makeatletter
           \file_input:n {l3backend-testphase-\c_sys_backend_str.def}
         \ExplSyntaxOff\makeatother
-        \bool_gset_true:N \g_@@_active_bool
 %    \end{macrocode}
 % set the default language, process the rest of the keys,
 % and setup the generic driver
