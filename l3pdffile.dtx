@@ -70,7 +70,7 @@
 % Case 1 (Links) are created with the \cs{pdfannot} commands.
 % This module handles the two other cases. Actually from the view
 % of the PDF format they are quite similar: Case 2 is case 3 without the stream
-% object and without the /EF entry in the /FileSpec dictionary (this points to the
+% object and without the /EF entry in the /Filespec dictionary (this points to the
 % stream object of the file). Not embedding the file makes the PDF smaller. But it is
 % also less portable: the files can only be found if they are in the right location
 % relative to the PDF. The normal case is to embed the file.
@@ -78,7 +78,7 @@
 % The tasks to embed and reference such a file are
 % \begin{enumerate}
 % \item Embed the file in a stream.
-% \item Create a FileSpec dictionary which references the stream object in the /EF
+% \item Create a Filespec dictionary which references the stream object in the /EF
 % dictionary:
 % \begin{verbatim}
 %  <<
@@ -94,7 +94,7 @@
 % and name it \texttt{blub.tex}. The second name is then what the user will see
 % in the attachment list or in the properties of an annotation.
 %
-%\item Reference the FileSpec dictionary so that the user can access the file.
+%\item Reference the Filespec dictionary so that the user can access the file.
 %   This can be done in various way:
 %   \begin{enumerate}
 %      \item With an annotation (/Subtype/FileAttachment). This is done by
@@ -104,7 +104,7 @@
 % \medskip
 %             \begin{tabular}{lll}
 %             key      & value type  & notes\\\hline
-%             /FS       & object reference &(FileSpec dictionary)\\
+%             /FS       & object reference &(Filespec dictionary)\\
 %             /Name     & name        & /Graph, /PushPin, /Paperclip, /Tag\\
 %             /Contents & text string & optional but recommended\\
 %             /F        & integer     & Flags\\
@@ -137,7 +137,7 @@
 %        /AF /NamedAF BDC
 %        /Properties <</NamedAF [12 0 R]
 %        \end{verbatim}
-%        The related |/FileSpec| dictionary should contain an
+%        The related |/Filespec| dictionary should contain an
 %        |/AFRelationship| key in this case (but it doesn't harm to add it by
 %        default anyway). The values of this key is describe in table~\ref{tab:AFrel}.
 %
@@ -183,7 +183,7 @@
 % \cs{pdf_object_new:nn}/\cs{pdf_object_write:nn} or primitive commands
 % to create objects.
 % The object number should be stored for the reference
-% in the |/FileSpec| dictionary.
+% in the |/Filespec| dictionary.
 %
 % \begin{verbatim}
 % \pdf_object_unnamed_write:nx {fstream}
@@ -215,12 +215,12 @@
 % see the pdf reference.
 % \end{itemize}
 %
-% \subsubsection{Task 2: Creating the \texttt{/FileSpec} dictionary}
-% The |/FileSpec| dictionary is a simple dictionary object, and can also
+% \subsubsection{Task 2: Creating the \texttt{/Filespec} dictionary}
+% The |/Filespec| dictionary is a simple dictionary object, and can also
 % be created in various ways. If it refers to an embedded file it should
 % reference it in the |/EF| key.
 %
-% \subsubsection{Task 3: Referencing the \texttt{/FileSpec} dictionary}
+% \subsubsection{Task 3: Referencing the \texttt{/Filespec} dictionary}
 %
 % Using the dictionary reference in annotations and |/AF| keys is unproblematic.
 %
@@ -233,9 +233,9 @@
 % |\pdfmanagement_add:nnx{Catalog/Names}{EmbeddedFiles}{|\meta{objref}|}|
 %
 % \subsection{Commands and tools of these module}
-% \begin{function}{file, file/Params, file/streamParams,file/FileSpec}
+% \begin{function}{file, file/Params, file/streamParams,file/Filespec}
 % The module predefines and uses a number of local dictionaries for the
-% components of the stream and the |/FileSpec| object. These dictionaries are
+% components of the stream and the |/Filespec| object. These dictionaries are
 % then used by the \cs{pdffile_embed_XX}.
 % The content of these dictionaries can be changed by users with the commands
 % from the \pkg{l3pdfdict} module, but it should be done only locally
@@ -252,8 +252,8 @@
 % l\_pdffile/Params& ModDate  & |(\file_timestamp:n {\l_pdffile_source_name_str})|\\
 % l\_pdffile/Params& CheckSum & |(\file_mdfive_hash:n{\l_pdffile_source_name_str})|\\
 % l\_pdffile/streamParams&    &  a /ModDate entry with year/month/date  (used with \cs{pdffile_embed_stream:nnn})\\
-% l\_pdffile/FileSpec & Type  & /FileSpec\\
-% l\_pdffile/FileSpec & AFRelationship &Unspecified
+% l\_pdffile/Filespec & Type  & /Filespec\\
+% l\_pdffile/Filespec & AFRelationship &Unspecified
 % \end{tabular}
 % \end{table}
 % \begin{function}{\pdffile_embed_file:nnn}
@@ -261,12 +261,12 @@
 %     \cs{pdffile_embed_file:nnn} \Arg{source filename} \Arg{target filename} \Arg{object name }
 %   \end{syntax}
 %   This commands embeds the file \meta{source filename} in the PDF,
-%   and creates a |/FileSpec| dictionary object named \meta{object name}.
+%   and creates a |/Filespec| dictionary object named \meta{object name}.
 %   The object name must be unique.
 %   The command uses the content of the local
-%   dictionaries |l_pdffile|, |l_pdffile/Params| and |l_pdffile/FileSpec|
+%   dictionaries |l_pdffile|, |l_pdffile/Params| and |l_pdffile/Filespec|
 %   to setup the dictionary entries of the stream object and the
-%   |/FileSpec| dictionary. The |/F| and |/UF| entry are filled
+%   |/Filespec| dictionary. The |/F| and |/UF| entry are filled
 %   with \meta{target filename}.
 %
 %   It is an error if both \meta{target filename} and \meta{source filename}
@@ -274,7 +274,7 @@
 %
 %   If \meta{target filename} is empty \meta{source filename} is used instead.
 %
-%   If \meta{source filename} is empty, only a |/FileSpec| dictionary is
+%   If \meta{source filename} is empty, only a |/Filespec| dictionary is
 %   created.
 %
 %   If the |l_pdffile| dictionary doesn't  contain a
@@ -303,11 +303,11 @@
 %     \cs{pdffile_embed_stream:nnn} \Arg{content} \Arg{target filename} \Arg{object name }
 %   \end{syntax}
 %   This commands embeds the \meta{content} in the PDF in a stream objects and
-%   creates a |/FileSpec| dictionary object named \meta{object name}.
+%   creates a |/Filespec| dictionary object named \meta{object name}.
 %   \meta{content} is wrapped in a \cs{exp_not:n}.
 %   The object name must be unique. The command uses the content of the local
-%   dictionaries |l_pdffile|, |l_pdffile/streamParams| and |l_pdffile/FileSpec|
-%   to setup the dictionary entries of the stream object and the /FileSpec dictionary.
+%   dictionaries |l_pdffile|, |l_pdffile/streamParams| and |l_pdffile/Filespec|
+%   to setup the dictionary entries of the stream object and the /Filespec dictionary.
 %   The /F and /UF entry are filled with \meta{target filename}.
 %   If \meta{target filename} is empty the fix name \texttt{stream.txt}
 %   is used instead.
@@ -353,12 +353,12 @@
 % \begin{verbatim}
 % \group_begin:
 % %set the relationship:
-% \pdfdict_put:nnn  {l_pdffile/FileSpec} {AFRelationship}{/Source}
+% \pdfdict_put:nnn  {l_pdffile/Filespec} {AFRelationship}{/Source}
 % %set the description key. The text must first be converted:
 % \pdf_string_from_unicode:nnN {utf16/string}
 %    {this~is~an~odd~description~with~öäü}
 %    \l_tmpa_str
-% \pdfdict_put:nnx  {l_pdffile/FileSpec} {Desc}{\l_tmpa_str}
+% \pdfdict_put:nnx  {l_pdffile/Filespec} {Desc}{\l_tmpa_str}
 % %embeds testinput.txt and calls it grüße.txt
 % \pdffile_embed_file:nnn {testinput.txt}{grüße.txt}{file:example1}
 % %reference it in the panel
@@ -402,7 +402,7 @@
 
 \msg_new:nnn { pdffile } { target-name-missing }
   {
-    a~target~name~for~the~/FileSpec~dictionary~is~missing.
+    a~target~name~for~the~/Filespec~dictionary~is~missing.
   }
 
 \msg_new:nnn { pdffile } { object-exists }
@@ -492,10 +492,10 @@
                   \int_use:N\c_sys_day_int
                )
              }
-\pdfdict_new:n { l_pdffile/FileSpec }
-\pdfdict_put:nnn { l_pdffile/FileSpec }
-  {Type} { /FileSpec }
-\pdfdict_put:nnn { l_pdffile/FileSpec }
+\pdfdict_new:n { l_pdffile/Filespec }
+\pdfdict_put:nnn { l_pdffile/Filespec }
+  {Type} { /Filespec }
+\pdfdict_put:nnn { l_pdffile/Filespec }
   {AFRelationship} { /Unspecified }
 
 %    \end{macrocode}
@@ -621,11 +621,11 @@
         \pdf_object_new:nn   { #1 } {dict}
         \group_begin:
           \@@_filename_convert_to_print:nN  { #2 } \l_@@_tmpa_str
-          \pdfdict_put:nnx {l_pdffile/FileSpec}{F} { \l_@@_tmpa_str }
-          \pdfdict_put:nnx {l_pdffile/FileSpec}{UF}{ \l_@@_tmpa_str }
+          \pdfdict_put:nnx {l_pdffile/Filespec}{F} { \l_@@_tmpa_str }
+          \pdfdict_put:nnx {l_pdffile/Filespec}{UF}{ \l_@@_tmpa_str }
           \pdf_object_write:nx { #1 }
             {
-              \pdfdict_use:n { l_pdffile/FileSpec}
+              \pdfdict_use:n { l_pdffile/Filespec}
               \tl_if_empty:nF { #3 }
                 {
                   /EF <</F~#3 /UF~#3>>

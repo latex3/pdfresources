@@ -15,30 +15,30 @@ grüße
 \section{Testing embedding and attaching files}
 \ExplSyntaxOn
 \group_begin:
-\pdfdict_put:nnn  {l_pdffile/FileSpec} {AFRelationship}{/Source}
+\pdfdict_put:nnn  {l_pdffile/Filespec} {AFRelationship}{/Source}
 \pdf_string_from_unicode:nnN {utf16/string} {this~is~something~odd~with~öäü}\l_tmpa_str
-\pdfdict_put:nnx  {l_pdffile/FileSpec} {Desc}{\l_tmpa_str}
+\pdfdict_put:nnx  {l_pdffile/Filespec} {Desc}{\l_tmpa_str}
 \pdfdict_put:nnx  {l_pdffile/Params} {ModDate}{(D:20200422135851Z)}
 \pdffile_embed_file:nnn {testinput.txt}{grüße.txt}{example1}
 \group_end:
 
 
 \group_begin:
-\pdfdict_put:nnn  {l_pdffile/FileSpec} {AFRelationship}{/Source}
+\pdfdict_put:nnn  {l_pdffile/Filespec} {AFRelationship}{/Source}
 \pdf_string_from_unicode:nnN {utf16/string} {this~is~something~odd~with~öäü}\l_tmpa_str
-\pdfdict_put:nnx  {l_pdffile/FileSpec} {Desc}{\l_tmpa_str}
+\pdfdict_put:nnx  {l_pdffile/Filespec} {Desc}{\l_tmpa_str}
 \pdfdict_put:nnx  {l_pdffile/Params} {ModDate}{(D:20200422155851+02'00')}
 \pdffile_embed_file:nnn {grüße.txt}{echtegrüße.txt}{example2}
 \group_end:
 
 \group_begin:
-\pdfdict_put:nnn  {l_pdffile/FileSpec} {AFRelationship}{/Source}
-\pdfdict_put:nnn  {l_pdffile/FileSpec} {Desc}{(this~is~a~eps)}
+\pdfdict_put:nnn  {l_pdffile/Filespec} {AFRelationship}{/Source}
+\pdfdict_put:nnn  {l_pdffile/Filespec} {Desc}{(this~is~a~eps)}
 \pdfdict_put:nnx  {l_pdffile/Params} {ModDate}{(D:20200422135851Z)}
 \pdffile_embed_file:nnn {testinput.txt}{Some~txt~file}{example3}
 
-\pdfdict_put:nnn  {l_pdffile/FileSpec} {AFRelationship}{/Data}
-\pdfdict_put:nnn  {l_pdffile/FileSpec} {Desc}{(this~is~a~text~file)}
+\pdfdict_put:nnn  {l_pdffile/Filespec} {AFRelationship}{/Data}
+\pdfdict_put:nnn  {l_pdffile/Filespec} {Desc}{(this~is~a~text~file)}
 \pdffile_embed_stream:nnn {stream content} {Some~stream} {example4}
 
 
