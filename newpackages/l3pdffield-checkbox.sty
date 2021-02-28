@@ -1,0 +1,363 @@
+% !Mode:: "TeX:DE:UTF-8:Main"
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesExplPackage{l3pdffield-checkbox}{2021-02-28}{v0.2}{form field checkbox%
+
+% values from hyperref:
+%\def\DefaultOptionsofCheckBox{print}
+%\def\DefaultHeightofCheckBox{\normalbaselineskip}
+%\def\DefaultWidthofCheckBox{\normalbaselineskip}
+
+\bitset_new:Nn \l__pdffield_Ff_bitset
+ {
+    ReadOnly          = 0,
+    Required          = 1,
+    NoExport          = 2,
+    Multiline         = 12,%Tx
+    Password          = 13,
+    NoToggleToOff     = 14,%Btn, radio button
+    Radio             = 15,%Btn: Radio:    15=1, 16=0
+    Pushbutton        = 16,%Btn: Checkbox: 15=0, 16=0
+                           %Btn: Pushbutton: 16=1
+    Combo             = 17,%Ch: Combo=1 List=0
+    Edit              = 18,%Ch, Combo=1 -> + edit field
+    Sort              = 19,%Ch, not relevant for view...
+    FileSelect        = 20,%Tx
+    MultiSelect       = 21,%Ch
+    DoNotSpellCheck   = 22,%Tx, Ch (if Combo + Edit set)
+    DoNotScroll       = 23,%Tx
+    Comb              = 24,%Tx, requires MaxLen in dict
+    RadiosInUnison    = 25,%Btn Radio
+    RichText          = 25,%Tx
+    CommitOnSelChange = 26
+  }
+%
+%\pdf_flag_new:nn {annot/Field/submit} %name is wrong ...
+%  {
+%    Include/Exclude       = 0,
+%    IncludeNoValueFields  = 1,
+%    ExportFormat          = 2,
+%    GetMethod             = 3, % if ExportFormat=0 -> =0 to
+%    SubmitCoordinates     = 4, % if ExportFormat=0 -> =0 to
+%    XFDF                  = 5,
+%    IncludeAppendSaves    = 6,
+%    IncludeAnnotations    = 7,
+%    SubmitPDF             = 8,
+%    CanonicalFormat       = 9,
+%    ExclNonUserAnnots     = 10,
+%    ExclFKey              = 11,
+%    EmbedForm             = 12
+%  }
+%
+
+\cs_generate_variant:Nn \pdfxform_wd:n {e}
+\cs_generate_variant:Nn \pdfxform_ht:n {e}
+\cs_generate_variant:Nn \pdfxform_dp:n {e}
+\cs_generate_variant:Nn \pdfxform_ref:n{e}
+
+\pdfdict_new:n {l_pdffield/checkbox/Field}
+\pdfdict_new:n {l_pdffield/checkbox/Annot}
+
+
+\tl_new:N \g__pdffield_normal_off_default_tl
+\tl_new:N \g__pdffield_normal_yes_default_tl
+
+\tl_set:Nn \g__pdffield_normal_off_default_tl
+  {
+    checkbox/Off/dflt
+  }
+\tl_set:Nn \g__pdffield_normal_yes_default_tl
+  {
+    checkbox/Yes/dflt
+  }
+
+% # local variables
+\dim_new:N \l__pdffield_field_ht_dim
+\dim_new:N \l__pdffield_field_wd_dim
+\dim_new:N \l__pdffield_field_dp_dim
+\int_new:N \l__pdffield_field_flags_int
+
+% # l3keys variables
+
+\tl_new:N \l__pdffield_normal_off_tl
+\tl_new:N \l__pdffield_normal_yes_tl
+
+\keys_define:nn { pdffield / checkbox }
+ {
+   checked .choice: ,
+   checked / false .code:n =
+     {
+       \pdfdict_put:nnn {l_pdffield/checkbox/Field}{V}{/Off}
+       \pdfdict_put:nnn {l_pdffield/checkbox/Annot}{AS}{/Off}
+       \pdfdict_put:nnn {l_pdffield/checkbox/Annot}{DV}{/Off}
+     },
+   checked / true .code:n =
+     {
+       \pdfdict_put:nnn {l_pdffield/checkbox/Field}{V}{/Yes}
+       \pdfdict_put:nnn {l_pdffield/checkbox/Annot}{AS}{/Yes}
+       \pdfdict_put:nnn {l_pdffield/checkbox/Annot}{DV}{/Yes}
+     }
+ }
+
+
+\NewDocumentCommand \newcheckboxappearance { s  m m  }  %#2=name, #3 = content
+ {
+   \pdfxform_new:nnn {#2}{}
+     {
+      \normalsize
+      \hbox_set:Nn   \l_tmpa_box { #3 \strut }
+      \IfBooleanTF {#1}
+       {
+        \fboxsep 0pt
+        \framebox
+        [ \dim_max:nn { \box_wd:N \l_tmpa_box }{ \box_ht:N\strutbox+\box_dp:N\strutbox} ]
+        { \box_use:N \l_tmpa_box }
+       }
+       {
+        \makebox
+        [ \dim_max:nn { \box_wd:N \l_tmpa_box }{\box_ht:N\strutbox+\box_dp:N\strutbox} ]
+        { \box_use:N \l_tmpa_box }
+       }
+     }
+ }
+
+\newcheckboxappearance* {checkbox/Yes/dflt}
+  {
+    $\times$
+  }
+
+\newcheckboxappearance* {checkbox/Off/dflt}
+  {  }
+
+\usepackage{tikz,bearwear}
+\usepackage[default]{sourcesanspro}
+
+
+\newcheckboxappearance {checkbox/Off/unicode}
+ {\normalfont ☐}
+\newcheckboxappearance {checkbox/Yes/unicode}
+ {\normalfont ☑}
+
+\newcheckboxappearance {checkbox/Off/tikz}
+  {
+   \tikz[baseline]
+    \path[draw=white,fill=magenta](0,-1pt)rectangle(8pt,7pt);
+  }
+
+\newcheckboxappearance {checkbox/Yes/tikz}
+   {
+    \tikz[baseline]
+      \path[draw=white,fill=cyan](0,-1pt)rectangle(8pt,7pt);
+   }
+
+
+\newcheckboxappearance {checkbox/Off/bear}
+  {
+   \tikz[scale=0.5]\bear;
+  }
+
+\newcheckboxappearance {checkbox/Yes/bear}
+   {
+    \tikz[scale=0.5]\bear\bearwear;
+   }
+
+
+\keys_define:nn { uf }
+  {
+    normal ~ off .tl_set_x:N = \l__pdffield_normal_off_tl,
+    normal ~ off .value_required:n = true,
+    normal ~ yes .tl_set_x:N = \l__pdffield_normal_yes_tl,
+    normal ~ yes .value_required:n = true,
+  }
+
+\cs_new_protected:Nn \__pdffield_normalise_boxes:
+  {
+    \dim_set:Nn \l__pdffield_field_wd_dim
+       { \dim_max:nn { \pdfxform_wd:e {\l__pdffield_normal_off_tl} }{ \pdfxform_wd:e {\l__pdffield_normal_yes_tl} } }
+    \dim_set:Nn \l__pdffield_field_ht_dim
+      { \dim_max:nn { \pdfxform_ht:e {\l__pdffield_normal_off_tl} }{ \pdfxform_ht:e {\l__pdffield_normal_yes_tl} } }
+    \dim_set:Nn \l__pdffield_field_dp_dim
+      { \dim_max:nn { \pdfxform_dp:e {\l__pdffield_normal_off_tl} }{ \pdfxform_dp:e {\l__pdffield_normal_yes_tl} } }
+  }
+
+
+
+
+\cs_new_protected:Npn \__pdffield_checkbox_fielddict:n #1
+  {
+    %#1 should pass through some escaping!
+    \pdf_object_if_exist:nTF {pdffield/checkbox/Field/Btn/#1}
+     {
+      %needed ? later
+     }
+     {
+      \group_begin:
+      \pdf_object_new:nn {pdffield/checkbox/Field/Btn/#1}      {dict}
+      \pdf_object_new:nn {pdffield/checkbox/Field/Btn/#1/Kids} {array}
+      \seq_new:c {g__pdffield/checkbox/Field/Btn/#1/Kids_seq}
+      \hook_gput_code:nnn {shipout/lastpage}{pdf} %xetex needs this ...
+        {
+          \pdf_object_write:nx {pdffield/checkbox/Field/Btn/#1/Kids} 
+            { 
+              \seq_use:cn{g__pdffield/checkbox/Field/Btn/#1/Kids_seq}{~}            
+            }
+        }
+      \pdfdict_put:nnn {l_pdffield/checkbox/Field}{FT}{/Btn}
+      \pdfdict_put:nnn {l_pdffield/checkbox/Field}{T}{(#1)} %escaping?
+      \pdfdict_put:nnn {l_pdffield/checkbox/Field}{V}{/Off}  %should be configurable/in sync with /AS/DV
+      \pdfdict_put:nnn {l_pdffield/checkbox/Field}{DV}{/Off} %should be configurable/in sync with /AS/DV
+      \pdfdict_put:nnx {l_pdffield/checkbox/Field}{Kids}
+         {
+           \pdf_object_ref:n {pdffield/checkbox/Field/Btn/#1/Kids}
+         }
+      \bitset_set_false:Nn \l__pdffield_Ff_bitset  {Radio}
+      \bitset_set_false:Nn \l__pdffield_Ff_bitset  {Pushbutton} 
+      \bitset_set_true:Nn  \l__pdffield_Ff_bitset  {NoExport}
+      \pdfdict_put:nnx {l_pdffield/checkbox/Field}
+        {Ff}
+        {\bitset_to_arabic:N \l__pdffield_Ff_bitset }
+      \pdf_object_write:nx {pdffield/checkbox/Field/Btn/#1} { \pdfdict_use:n {l_pdffield/checkbox/Field} }
+      \pdfmanagement_add:nnx 
+        { Catalog / AcroForm } 
+        { Fields }
+        {\pdf_object_ref:n {pdffield/checkbox/Field/Btn/#1} }
+      \group_end:
+     }
+  }
+
+\cs_new_protected:Npn \__pdffield_checkbox_annot:n #1
+  {
+    \group_begin:
+     \hbox_to_wd:nn
+       { \l__pdffield_field_wd_dim  }
+       {
+        \rule
+          [-\l__pdffield_field_dp_dim]{0pt}{\dim_eval:n{\l__pdffield_field_ht_dim+\l__pdffield_field_dp_dim}}
+          \pdfannot_box:nnnnn
+           {Widget}
+           { \dim_use:N \l__pdffield_field_wd_dim }
+           { \dim_use:N \l__pdffield_field_ht_dim }
+           { \dim_use:N \l__pdffield_field_dp_dim }
+           {
+            /Parent~ \pdf_object_ref:n{pdffield/checkbox/Field/Btn/#1}
+            /AS ~ /Off
+            /AP ~
+              <<
+                /N ~
+                  << /Yes ~ \pdfxform_ref:e { \l__pdffield_normal_yes_tl}
+                     /Off ~ \pdfxform_ref:e { \l__pdffield_normal_off_tl}
+                  >>
+              >>
+           }
+         \hfill
+        }
+    \seq_gput_right:cx {g__pdffield/checkbox/Field/Btn/#1/Kids_seq}{ \pdfannot_box_ref_last:}
+    \group_end:
+  }
+% # form and field interface macros
+
+\NewDocumentCommand \checkboxfield { O{}m }
+  {
+    \group_begin:
+    \keys_set:nn { pdffield }
+      {
+        normal ~ yes = \g__pdffield_normal_yes_default_tl,
+        normal ~ off = \g__pdffield_normal_off_default_tl,
+        #1
+      }
+    \__pdffield_normalise_boxes:
+    \__pdffield_checkbox_fielddict:n {#2}
+    \__pdffield_checkbox_annot:n {#2}
+
+    \group_end:
+  }
+
+\ExplSyntaxOff
+\endinput
+
+\begin{document}\showoutput
+\begin{Form}[NeedAppearances=false]
+
+1: \checkboxfield{checkbox1}
+
+2: \checkboxfield{checkbox2}
+
+3: \checkboxfield{checkbox3}
+
+1: \checkboxfield{checkbox1}
+
+3: \checkboxfield{checkbox3}
+
+4: \checkboxfield[%
+normal off = checkbox/Off/unicode,
+normal yes = checkbox/Yes/unicode]{checkbox4}
+
+5: \checkboxfield[%
+normal off = checkbox/Off/tikz,
+normal yes = checkbox/Yes/tikz]{checkbox5}
+
+6: \checkboxfield[%
+normal off = checkbox/Off/bear,
+normal yes = checkbox/Yes/bear]{checkbox6}
+
+
+2: \checkboxfield[%
+normal off = checkbox/Off/bear,
+normal yes = checkbox/Yes/bear]{checkbox2}
+
+
+\end{Form}
+\end{document}
+
+%%%
+
+Field dict
+Ft     : /Btn /Tx /Ch /Sig
+Parent : OR
+Kids: array, other fields or annot/widget
+T: partial fieldname (test string)
+TU: alternate description (test string)
+TM: mapping name
+Q integer (variable text field)
+Ff: flags ->pdffield/checkbox/Field
+V: value            % not pushbutton
+DV: default value   % not pushbutton
+AA: Action dict ... -> see below
+Opt: array of strings, connected to kids
+     or for choices, choices
+TI integer (lists)
+I array Ch (complicated ...)
+
+/DA ( 0 0 1 rg /Ti 12 Tf ) %text field
+/MaxLen                    %text field
+
+Lock dict (Sig)
+SV dict (Sig)
+
+
+
+
+Connected widget:
+/AS default appearance from AP ( here/Yes or /Off)
+% Appearance
+%checkbox
+/AP <</N <</Yes 2 0 R /Off 3 0 R>>>>
+/C / Border /BS
+
+/OC ?
+/Structparens?
+/F flags
+
+
+AA: Submit:
+  /S   /SubmitForm
+  /F   file /URI (/F ( ftp : / / www . beatles . com / Movies / AbbeyRoad . mov )
+  /Fields array
+
+  /S /ImportData
+  /F file
+
+  /S /ResetData
+  /Fields array
+
+  /S /JavaScript
+  /JS text string or stream

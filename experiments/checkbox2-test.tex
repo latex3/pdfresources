@@ -1,0 +1,99 @@
+% !Mode:: "TeX:DE:UTF-8:Main"
+
+\RequirePackage{pdfmanagement}
+\DeclareDocumentMetadata{uncompress}
+%adapted from https://chat.stackexchange.com/transcript/message/54421537#54421537
+\documentclass{article}
+
+\pagestyle{empty}
+
+\usepackage{hyperref}
+
+\usepackage{l3pdffield-checkbox}
+\begin{document}\showoutput
+\begin{Form}[NeedAppearances=false]
+
+1: \checkboxfield{checkbox1}
+
+2: \checkboxfield{checkbox2}
+
+3: \checkboxfield{checkbox3}
+
+1: \checkboxfield{checkbox1}
+
+3: \checkboxfield{checkbox3}
+
+4: \checkboxfield[%
+normal off = checkbox/Off/unicode,
+normal yes = checkbox/Yes/unicode]{checkbox4}
+
+5: \checkboxfield[%
+normal off = checkbox/Off/tikz,
+normal yes = checkbox/Yes/tikz]{checkbox5}
+
+6: \checkboxfield[%
+normal off = checkbox/Off/bear,
+normal yes = checkbox/Yes/bear]{checkbox6}
+
+
+2: \checkboxfield[%
+normal off = checkbox/Off/bear,
+normal yes = checkbox/Yes/bear]{checkbox2}
+
+
+\end{Form}
+\end{document}
+
+%%%
+
+Field dict
+Ft     : /Btn /Tx /Ch /Sig
+Parent : OR
+Kids: array, other fields or annot/widget
+T: partial fieldname (test string)
+TU: alternate description (test string)
+TM: mapping name
+Q integer (variable text field)
+Ff: flags ->annot/Field
+V: value            % not pushbutton
+DV: default value   % not pushbutton
+AA: Action dict ... -> see below
+Opt: array of strings, connected to kids
+     or for choices, choices
+TI integer (lists)
+I array Ch (complicated ...)
+
+/DA ( 0 0 1 rg /Ti 12 Tf ) %text field
+/MaxLen                    %text field
+
+Lock dict (Sig)
+SV dict (Sig)
+
+
+
+
+Connected widget:
+/AS default appearance from AP ( here/Yes or /Off)
+% Appearance
+%checkbox
+/AP <</N <</Yes 2 0 R /Off 3 0 R>>>>
+/C / Border /BS
+
+/OC ?
+/Structparens?
+/F flags
+
+
+AA: Submit:
+  /S   /SubmitForm
+  /F   file /URI (/F ( ftp : / / www . beatles . com / Movies / AbbeyRoad . mov )
+  /Fields array
+
+  /S /ImportData
+  /F file
+
+  /S /ResetData
+  /Fields array
+
+  /S /JavaScript
+  /JS text string or stream 
