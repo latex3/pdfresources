@@ -1,6 +1,6 @@
 % !Mode:: "TeX:DE:UTF-8:Main"
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesExplPackage{l3pdffield-checkbox}{2021-02-28}{v0.2}{form field checkbox%
+\ProvidesExplPackage{l3pdffield-checkbox}{2021-02-28}{v0.2}{form field checkbox}%
 
 % values from hyperref:
 %\def\DefaultOptionsofCheckBox{print}
@@ -128,14 +128,15 @@
 \newcheckboxappearance* {checkbox/Off/dflt}
   {  }
 
-\usepackage{tikz,bearwear}
+\usepackage{tikz,bearwear,iftex}
 \usepackage[default]{sourcesanspro}
 
-
+\iftutex
 \newcheckboxappearance {checkbox/Off/unicode}
  {\normalfont ☐}
 \newcheckboxappearance {checkbox/Yes/unicode}
  {\normalfont ☑}
+\fi
 
 \newcheckboxappearance {checkbox/Off/tikz}
   {
@@ -161,7 +162,7 @@
    }
 
 
-\keys_define:nn { uf }
+\keys_define:nn { pdffield }
   {
     normal ~ off .tl_set_x:N = \l__pdffield_normal_off_tl,
     normal ~ off .value_required:n = true,
@@ -179,8 +180,12 @@
       { \dim_max:nn { \pdfxform_dp:e {\l__pdffield_normal_off_tl} }{ \pdfxform_dp:e {\l__pdffield_normal_yes_tl} } }
   }
 
-
-
+% The field dictionary is the main object. It references the 
+% actual widget annotations as kids. It is created at the first
+% checkbox with a specific name.
+%
+%
+%    \begin{macrocode}
 
 \cs_new_protected:Npn \__pdffield_checkbox_fielddict:n #1
   {
@@ -196,6 +201,7 @@
       \seq_new:c {g__pdffield/checkbox/Field/Btn/#1/Kids_seq}
       \hook_gput_code:nnn {shipout/lastpage}{pdf} %xetex needs this ...
         {
+          %\seq_show:c {g__pdffield/checkbox/Field/Btn/#1/Kids_seq}
           \pdf_object_write:nx {pdffield/checkbox/Field/Btn/#1/Kids} 
             { 
               \seq_use:cn{g__pdffield/checkbox/Field/Btn/#1/Kids_seq}{~}            
@@ -203,6 +209,8 @@
         }
       \pdfdict_put:nnn {l_pdffield/checkbox/Field}{FT}{/Btn}
       \pdfdict_put:nnn {l_pdffield/checkbox/Field}{T}{(#1)} %escaping?
+   % V,DV are names describing the appearance. With checkboxes
+   % the values /Yes and /Off are used.   
       \pdfdict_put:nnn {l_pdffield/checkbox/Field}{V}{/Off}  %should be configurable/in sync with /AS/DV
       \pdfdict_put:nnn {l_pdffield/checkbox/Field}{DV}{/Off} %should be configurable/in sync with /AS/DV
       \pdfdict_put:nnx {l_pdffield/checkbox/Field}{Kids}
@@ -233,7 +241,7 @@
         \rule
           [-\l__pdffield_field_dp_dim]{0pt}{\dim_eval:n{\l__pdffield_field_ht_dim+\l__pdffield_field_dp_dim}}
           \pdfannot_box:nnnnn
-           {Widget}
+           {widget}
            { \dim_use:N \l__pdffield_field_wd_dim }
            { \dim_use:N \l__pdffield_field_ht_dim }
            { \dim_use:N \l__pdffield_field_dp_dim }
