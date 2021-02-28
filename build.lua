@@ -30,8 +30,8 @@ else
                 "newpackages/new-bookmark.sty",
                 "newpackages/bkm-generic.def",
                 "newpackages/new-attachfile.sty",
-                "newpackages/atfi-generic.def"   
-                "newpackages/l3pdffield-checkbox"               
+                "newpackages/atfi-generic.def",   
+                "newpackages/l3pdffield-checkbox.sty"               
                 }
 end 
 
