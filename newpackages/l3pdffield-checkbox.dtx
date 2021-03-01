@@ -56,7 +56,27 @@
 %
 % \maketitle
 % \begin{documentation}
-% 
+% The implementation of form fields in hyperref is in part faulty, see for example
+% \url{https://github.com/latex3/hyperref/issues/94}. This package is a first step
+% toward the goal to review and improve the code of form fields.
+%
+% It handles \emph{only} checkboxes, other form fields like radio buttons or
+% textfields will follow later. It relies on the hyperref code
+% to initialize the form and it requires the new PDF management code.
+% The package will suppress the deprecated /NeedAppearances setting.
+%
+% So typical use will look like this
+%
+% \begin{verbatim}
+% \RequirePackage{pdfmanagement-testphase}
+% \DeclareDocumentMetadata{uncompress}
+% \documentclass{article}
+% \usepackage{hyperref}
+% \usepackage{l3pdffield-checkbox}
+% \begin{document}
+% \Form
+% \end{verbatim}
+%
 % \end{documentation}
 % \begin{implementation}
 %    \begin{macrocode}
@@ -64,6 +84,7 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesExplPackage{l3pdffield-checkbox}{0000-00-00}{v0.00a}{form field checkbox}%
 
+\HyField@NeedAppearancesfalse % suppress NeedAppearances
 % values from hyperref:
 %\def\DefaultOptionsofCheckBox{print}
 %\def\DefaultHeightofCheckBox{\normalbaselineskip}
