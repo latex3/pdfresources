@@ -77,19 +77,48 @@
 % \Form
 % \end{verbatim}
 %
+% Form fields consist of a field object and number of instances of the field:
+% A checkbox can appear on more than one page or location and if one instances
+% is checked all other instances follows and are checked too.
+%
+% All instances are widget annotations and are referenced in the Kid array of the field
+% object. This means that the code has to collect all the children and write
+% out the field object at the end of the document.
+%
+% A checkbox has two different looks: checked and unchecked. The current hyperref
+% implementation uses symbolic names for the two states and lets the PDF viewer
+% create a look from them. But this doesn't work reliably. Newer PDF versions require
+% that such a look, an \enquote{appearance}, are XObjects: such XObjects are like small
+% pictures stored in the PDF.
+%
+% The checkbox instances, the widget annotations, cover a rectangular area on
+% the page, the XObjects are fit into this rectangle. So for the best result
+% both should have the same ratio of width and height.
+% XObjects used as appearances can not be rotated, if needed one has to
+% create a new appearance.
+%
+% 
+%
 % \end{documentation}
 % \begin{implementation}
 %    \begin{macrocode}
 %<*package>
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesExplPackage{l3pdffield-checkbox}{0000-00-00}{v0.00a}{form field checkbox}%
-
+%    \end{macrocode}
+% \section{hyperref specific command}
+% hyperref sets NeedAppearances by default. As this is deprecated we disable this.
+%    \begin{macrocode}
 \HyField@NeedAppearancesfalse % suppress NeedAppearances
 % values from hyperref:
 %\def\DefaultOptionsofCheckBox{print}
 %\def\DefaultHeightofCheckBox{\normalbaselineskip}
 %\def\DefaultWidthofCheckBox{\normalbaselineskip}
-
+%    \end{macrocode}
+% \section{bitsets}
+% A bitset for the field flag Ff:
+% Not yet decided if this should public or not ...
+%    \begin{macrocode}
 \bitset_new:Nn \l__pdffield_Ff_bitset
  {
     ReadOnly          = 0,
