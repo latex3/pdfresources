@@ -1,6 +1,68 @@
-% !Mode:: "TeX:DE:UTF-8:Main"
+% \iffalse meta-comment
+%
+%% File: l3pdfpdffield-checkbox.dtx
+%
+% Copyright (C) 2021 The LaTeX Project
+%
+% It may be distributed and/or modified under the conditions of the
+% LaTeX Project Public License (LPPL), either version 1.3c of this
+% license or (at your option) any later version.  The latest version
+% of this license is in the file
+%
+%    http://www.latex-project.org/lppl.txt
+%
+% This file is part of the "LaTeX PDF management testphase bundle" (The Work in LPPL)
+% and all files in that bundle must be distributed together.
+%
+% -----------------------------------------------------------------------
+%
+% The development version of the bundle can be found at
+%
+%    https://github.com/latex3/pdfresources
+%
+% for those people who are interested.
+%
+%<*driver>
+\RequirePackage{pdfmanagement-testphase}
+\DeclareDocumentMetadata{pdfstandard=A-2b}
+\makeatletter
+\declare@file@substitution{doc.sty}{doc-v3beta.sty}
+\makeatother
+\documentclass[full]{l3doc}
+\usepackage{array,booktabs,hyperxmp}
+\hypersetup{pdfauthor=The LaTeX Project,
+ pdftitle=l3pdffield-checkbox (LaTeX PDF management testphase bundle)}
+\begin{document}
+  \DocInput{\jobname.dtx}
+\end{document}
+%</driver>
+% \fi
+% \providecommand\hook[1]{\texttt{#1}}
+% \title{^^A
+%   The \pkg{l3pdffield-checkbox} module\\ Commands to create checkbox fields   ^^A
+%   \\ \LaTeX{} PDF management testphase bundle
+% }
+%
+% \author{^^A
+%  The \LaTeX{} Project\thanks
+%    {^^A
+%      E-mail:
+%        \href{mailto:latex-team@latex-project.org}
+%          {latex-team@latex-project.org}^^A
+%    }^^A
+% }
+%
+% \date{Version 0.00a, released 0000-00-00}
+%
+% \maketitle
+% \begin{documentation}
+% 
+% \end{documentation}
+% \begin{implementation}
+%    \begin{macrocode}
+%<*package>
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesExplPackage{l3pdffield-checkbox}{2021-02-28}{v0.2}{form field checkbox}%
+\ProvidesExplPackage{l3pdffield-checkbox}{0000-00-00}{v0.00a}{form field checkbox}%
 
 % values from hyperref:
 %\def\DefaultOptionsofCheckBox{print}
@@ -180,12 +242,11 @@
       { \dim_max:nn { \pdfxform_dp:e {\l__pdffield_normal_off_tl} }{ \pdfxform_dp:e {\l__pdffield_normal_yes_tl} } }
   }
 
-% The field dictionary is the main object. It references the 
+% The field dictionary is the main object. It references the
 % actual widget annotations as kids. It is created at the first
 % checkbox with a specific name.
 %
 %
-%    \begin{macrocode}
 
 \cs_new_protected:Npn \__pdffield_checkbox_fielddict:n #1
   {
@@ -202,15 +263,15 @@
       \hook_gput_code:nnn {shipout/lastpage}{pdf} %xetex needs this ...
         {
           %\seq_show:c {g__pdffield/checkbox/Field/Btn/#1/Kids_seq}
-          \pdf_object_write:nx {pdffield/checkbox/Field/Btn/#1/Kids} 
-            { 
-              \seq_use:cn{g__pdffield/checkbox/Field/Btn/#1/Kids_seq}{~}            
+          \pdf_object_write:nx {pdffield/checkbox/Field/Btn/#1/Kids}
+            {
+              \seq_use:cn{g__pdffield/checkbox/Field/Btn/#1/Kids_seq}{~}
             }
         }
       \pdfdict_put:nnn {l_pdffield/checkbox/Field}{FT}{/Btn}
       \pdfdict_put:nnn {l_pdffield/checkbox/Field}{T}{(#1)} %escaping?
    % V,DV are names describing the appearance. With checkboxes
-   % the values /Yes and /Off are used.   
+   % the values /Yes and /Off are used.
       \pdfdict_put:nnn {l_pdffield/checkbox/Field}{V}{/Off}  %should be configurable/in sync with /AS/DV
       \pdfdict_put:nnn {l_pdffield/checkbox/Field}{DV}{/Off} %should be configurable/in sync with /AS/DV
       \pdfdict_put:nnx {l_pdffield/checkbox/Field}{Kids}
@@ -218,14 +279,14 @@
            \pdf_object_ref:n {pdffield/checkbox/Field/Btn/#1/Kids}
          }
       \bitset_set_false:Nn \l__pdffield_Ff_bitset  {Radio}
-      \bitset_set_false:Nn \l__pdffield_Ff_bitset  {Pushbutton} 
+      \bitset_set_false:Nn \l__pdffield_Ff_bitset  {Pushbutton}
       \bitset_set_true:Nn  \l__pdffield_Ff_bitset  {NoExport}
       \pdfdict_put:nnx {l_pdffield/checkbox/Field}
         {Ff}
         {\bitset_to_arabic:N \l__pdffield_Ff_bitset }
       \pdf_object_write:nx {pdffield/checkbox/Field/Btn/#1} { \pdfdict_use:n {l_pdffield/checkbox/Field} }
-      \pdfmanagement_add:nnx 
-        { Catalog / AcroForm } 
+      \pdfmanagement_add:nnx
+        { Catalog / AcroForm }
         { Fields }
         {\pdf_object_ref:n {pdffield/checkbox/Field/Btn/#1} }
       \group_end:
@@ -279,93 +340,62 @@
     \group_end:
   }
 
-\ExplSyntaxOff
-\endinput
 
-\begin{document}\showoutput
-\begin{Form}[NeedAppearances=false]
-
-1: \checkboxfield{checkbox1}
-
-2: \checkboxfield{checkbox2}
-
-3: \checkboxfield{checkbox3}
-
-1: \checkboxfield{checkbox1}
-
-3: \checkboxfield{checkbox3}
-
-4: \checkboxfield[%
-normal off = checkbox/Off/unicode,
-normal yes = checkbox/Yes/unicode]{checkbox4}
-
-5: \checkboxfield[%
-normal off = checkbox/Off/tikz,
-normal yes = checkbox/Yes/tikz]{checkbox5}
-
-6: \checkboxfield[%
-normal off = checkbox/Off/bear,
-normal yes = checkbox/Yes/bear]{checkbox6}
-
-
-2: \checkboxfield[%
-normal off = checkbox/Off/bear,
-normal yes = checkbox/Yes/bear]{checkbox2}
-
-
-\end{Form}
-\end{document}
-
-%%%
-
-Field dict
-Ft     : /Btn /Tx /Ch /Sig
-Parent : OR
-Kids: array, other fields or annot/widget
-T: partial fieldname (test string)
-TU: alternate description (test string)
-TM: mapping name
-Q integer (variable text field)
-Ff: flags ->pdffield/checkbox/Field
-V: value            % not pushbutton
-DV: default value   % not pushbutton
-AA: Action dict ... -> see below
-Opt: array of strings, connected to kids
-     or for choices, choices
-TI integer (lists)
-I array Ch (complicated ...)
-
-/DA ( 0 0 1 rg /Ti 12 Tf ) %text field
-/MaxLen                    %text field
-
-Lock dict (Sig)
-SV dict (Sig)
-
-
-
-
-Connected widget:
-/AS default appearance from AP ( here/Yes or /Off)
-% Appearance
-%checkbox
-/AP <</N <</Yes 2 0 R /Off 3 0 R>>>>
-/C / Border /BS
-
-/OC ?
-/Structparens?
-/F flags
-
-
-AA: Submit:
-  /S   /SubmitForm
-  /F   file /URI (/F ( ftp : / / www . beatles . com / Movies / AbbeyRoad . mov )
-  /Fields array
-
-  /S /ImportData
-  /F file
-
-  /S /ResetData
-  /Fields array
-
-  /S /JavaScript
-  /JS text string or stream
+%
+%
+%%%%
+%
+%Field dict
+%Ft     : /Btn /Tx /Ch /Sig
+%Parent : OR
+%Kids: array, other fields or annot/widget
+%T: partial fieldname (test string)
+%TU: alternate description (test string)
+%TM: mapping name
+%Q integer (variable text field)
+%Ff: flags ->pdffield/checkbox/Field
+%V: value            % not pushbutton
+%DV: default value   % not pushbutton
+%AA: Action dict ... -> see below
+%Opt: array of strings, connected to kids
+%     or for choices, choices
+%TI integer (lists)
+%I array Ch (complicated ...)
+%
+%/DA ( 0 0 1 rg /Ti 12 Tf ) %text field
+%/MaxLen                    %text field
+%
+%Lock dict (Sig)
+%SV dict (Sig)
+%
+%
+%
+%
+%Connected widget:
+%/AS default appearance from AP ( here/Yes or /Off)
+%% Appearance
+%%checkbox
+%/AP <</N <</Yes 2 0 R /Off 3 0 R>>>>
+%/C / Border /BS
+%
+%/OC ?
+%/Structparens?
+%/F flags
+%
+%
+%AA: Submit:
+%  /S   /SubmitForm
+%  /F   file /URI (/F ( ftp : / / www . beatles . com / Movies / AbbeyRoad . mov )
+%  /Fields array
+%
+%  /S /ImportData
+%  /F file
+%
+%  /S /ResetData
+%  /Fields array
+%
+%  /S /JavaScript
+%  /JS text string or stream
+%</package>
+%    \end{macrocode}
+%\end{implementation}

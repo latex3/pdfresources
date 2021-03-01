@@ -10,9 +10,72 @@
 \usepackage{hyperref}
 
 \usepackage{l3pdffield-checkbox}
+
+\newcheckboxappearance* {checkbox/Yes/depth}
+  {
+    xxxxxxxxxxxxxxx
+  }
+
+\newcheckboxappearance* {checkbox/Off/depth}
+  {  }
+\usepackage{pdflscape,iftex}  
+
 \begin{document}%\showoutput
 \Form[NeedAppearances=false]
+\ExplSyntaxOn
+%\bitset_set_true:Nn  \l__pdffield_Ff_bitset  {NoRotate}
+%\bitset_set_true:Nn  \l_pdfannot_F_bitset  {NoRotate}
+%\pdfannot_dict_put:nnn{widget}
+%%\pdfdict_put:nnn{l__pdfannot/widget}
+%{F}{\bitset_to_arabic:N \l_pdfannot_F_bitset}
 
+\ExplSyntaxOff
+\rotatebox{45}{form\checkboxfield[%
+normal off = checkbox/Off/bear,
+normal yes = checkbox/Yes/bear]{checkbox10}}
+
+\newpage
+%\begin{landscape} 
+
+form\checkboxfield[%
+normal off = checkbox/Off/bear,
+normal yes = checkbox/Yes/bear]{checkbox10}
+
+\hspace*{5cm}
+\ExplSyntaxOn
+\pdfmanagement_add:nnn{ThisPage}{Rotate}{90}
+\bool_gset_true:N\g__pdf_landscape_bool
+\ExplSyntaxOff
+depth\checkboxfield[%
+normal off = checkbox/Off/bear,
+normal yes = checkbox/Yes/bear]{checkbox11}
+
+%\end{landscape}
+
+\begin{landscape}
+
+
+
+form\checkboxfield[%
+normal off = checkbox/Off/bear,
+normal yes = checkbox/Yes/bear]{checkbox10}
+
+\hspace*{5cm}
+\ExplSyntaxOn
+%\pdfmanagement_add:nnn{ThisPage}{Rotate}{90}
+
+\pdfxform_use:n{checkbox/Yes/bear}
+
+\rotatebox{45}{\pdfxform_use:n{checkbox/Yes/bear}}
+
+T\bool_gset_true:N\g__pdf_landscape_bool
+\ExplSyntaxOff
+depth\checkboxfield[%
+normal off = checkbox/Off/bear,
+normal yes = checkbox/Yes/bear]{checkbox11}
+
+\end{landscape}
+\end{document}
 1: \checkboxfield{checkbox1}
 
    \checkboxfield{checkbox1}
@@ -43,6 +106,12 @@ normal yes = checkbox/Yes/bear]{checkbox6}
 2: \checkboxfield[%
 normal off = checkbox/Off/bear,
 normal yes = checkbox/Yes/bear]{checkbox2}
+
+
+
+depth\checkboxfield[%
+normal off = checkbox/Off/depth,
+normal yes = checkbox/Yes/depth]{checkbox7}
 
 
 \end{document}

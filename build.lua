@@ -31,7 +31,7 @@ else
                 "newpackages/bkm-generic.def",
                 "newpackages/new-attachfile.sty",
                 "newpackages/atfi-generic.def",   
-                "newpackages/l3pdffield-checkbox.sty"               
+                "newpackages/l3pdffield-checkbox.dtx"               
                 }
 end 
 
