@@ -303,11 +303,11 @@
 % \begin{function}[added = 2021-03-02]
 %   { \pdfannot_widget_box:nnnn }
 %   \begin{syntax}
-%     \cs{pdfannot_widget:nnnn}  \Arg{width} \Arg{height} \Arg{depth} \Arg{annot spec}
+%     \cs{pdfannot_widget:nnnn}  \Arg{width} \Arg{height} \Arg{depth}
 %   \end{syntax}
 %   This creates an \texttt{/Type/Annot} object with the given dimensions.
 %   It will then insert the attribute dictionary of the widget
-%   additionally to the manually given \meta{annot spec}.
+%   as \meta{annot spec}.
 %   The hooks \texttt{pdfannot/widget/before} and \texttt{pdfannot/widget/after}
 %   are executed before and after the widget.
 % \end{function}
@@ -410,16 +410,15 @@
  \hook_new_pair:nn
    {pdfannot/widget/begin}
    {pdfannot/widget/end}
-\cs_new_protected:Npn \pdfannot_widget_box:nnnn #1 #2 #3 #4
+\cs_new_protected:Npn \pdfannot_widget_box:nnn #1 #2 #3 
   {
     \hook_use:n { pdfannot/widget/before}
     \exp_args:Nx
     \__pdf_backend_annotation:nnnn {#1}{#2}{#3}
       {
         \pdfdict_use:n { l_@@/widget}
-        #4
       }
-    \hook_use:n { pdfannot/widget/after}  
+    \hook_use:n { pdfannot/widget/after}
     \bool_gset_false:N\g_@@_use_lastlink_bool
   }
 %    \end{macrocode}
