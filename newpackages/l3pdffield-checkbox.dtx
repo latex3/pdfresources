@@ -56,16 +56,16 @@
 %
 % \maketitle
 % \begin{documentation}
-% The implementation of form fields in hyperref is in part faulty, see for example
+% The implementation of form fields in hyperref has some bugs, see for example
 % \url{https://github.com/latex3/hyperref/issues/94}. This package is a first step
-% toward the goal to review and improve the code of form fields.
+% towards the goal to review and improve the code of form fields.
 %
-% It handles \emph{only} checkboxes, other form fields like radio buttons or
-% textfields will follow later. It relies on the hyperref code
+% It handles for now \emph{only} checkboxes, other form fields like radio buttons or
+% text fields will follow later. It relies on the hyperref code
 % to initialize the form and it requires the new PDF management code.
 % The package will suppress the deprecated /NeedAppearances setting.
 %
-% So typical use will look like this
+% So a typical use will look like this
 %
 % \begin{verbatim}
 % \RequirePackage{pdfmanagement-testphase}
@@ -77,28 +77,107 @@
 % \Form
 % \end{verbatim}
 %
+% \section{Some background}
 % Form fields consist of a field object and number of instances of the field:
 % A checkbox can appear on more than one page or location and if one instances
 % is checked all other instances follows and are checked too.
 %
-% All instances are widget annotations and are referenced in the Kid array of the field
-% object. This means that the code has to collect all the children and write
+% All instances are in this case widget annotations and are referenced in the Kid array of the field
+% object\footnote{Fields can actually build a tree: between the root field and
+% widget annotations there can be more fields. The last one before the widget is
+% the \emph{terminal} field, but unless a sensible
+% use case comes up, I will assume that the widget annotations are direct children of
+% the root and that the root field is the terminal field.}.
+% This means that the code has to collect all the children and write
 % out the field object at the end of the document.
+%
+% If a field has only one children the content of the field dictionary and the
+% widget annotation dictionary can be merged---some examples in the PDF reference
+% show such merged dictionaries---but the code here keeps them separate, at the end
+% this is clearer.
+%
+% All the root field objects must be referenced in the AcroForm dictionary in the
+% Fields entry. This can be done with
+%
+% \begin{verbatim}
+% \pdfmanagement_add:nnx{Catalog/AcroForm}{Fields}{<obj ref>}
+% \end{verbatim}
 %
 % A checkbox has two different looks: checked and unchecked. The current hyperref
 % implementation uses symbolic names for the two states and lets the PDF viewer
-% create a look from them. But this doesn't work reliably. Newer PDF versions require
-% that such a look, an \enquote{appearance}, are XObjects: such XObjects are like small
-% pictures stored in the PDF.
+% create a look from them. But this doesn't work reliably. Also newer PDF versions
+% require that such a look, an \enquote{appearance}, are given as form XObjects:
+% such form XObjects are like small pictures stored in the PDF, they can be
+% created with the commands of the \pkg{l3pdfxform} package.
 %
-% The checkbox instances, the widget annotations, cover a rectangular area on
-% the page, the XObjects are fit into this rectangle. So for the best result
+% The checkbox instances---the widget annotations---cover a rectangular area on
+% the page, the XObjects are squeezed into this rectangle. So for the best result
 % both should have the same ratio of width and height.
 % XObjects used as appearances can not be rotated, if needed one has to
 % create a new appearance.
 %
-% 
+% \subsection{The Field dictionary}
 %
+% The field dictionary shall or can have the following entries
+%
+% \begin{description}
+% \item[FT] required for terminal fields (here for the root field),
+%  the value is always \texttt{Btn}, so this entry is set by the code.
+% \item[Parents] currently irrelevant as we don't have a field hierarchy.
+% \item[Kids] an array. Contains references to the children, in our case to
+% the widget annotations. The array is build by the code.
+%
+% \item[T] required, the name, a (unique) text string without a period.
+%  This field is a mandatory argument which must be given by the user.
+% The value should be passed through a suitable string conversion and periods should
+% be removed.
+%
+% \item[TU,TM] optional, alternative names for user messages (TU) and export (TM).
+% As these fields are optional they should be set by some key-val option.
+%
+% \item[Ff] A bitset, two flags must be unset for a checkbox (Radio and Pushbotton),
+% for the rest we need a keyval interface.
+%
+% \item[V] describes the initial value, for checkboxes is should be either |/Yes|
+%   or |/Off|. The initial value will be |/Yes|, keys are need to set both the local
+%   and the default value.
+%
+% \item[DV] optional, the default value after a reset. Should be her like |V| be either
+% |/Yes| or |/Off|.
+%
+% \item[AA] An action dictionary. For this we need a special command to setup such
+% dictionaries, so that they then can be used in various places.
+%
+% \end{description}
+%
+% \subsection{The widget annotation dictionary}
+%
+% \begin{description}
+% \item[Type] Value: |/Annot|, set automatically
+% \item[Subtype] Value: |/Widget| if we use the command from l3pdfannot which use
+% the |l__pdfannot/widget| dictionary this is added automatically.
+% Then one has to fill the rest of the entries with |\pdfannot_dict_put:nnn{widget}...|
+% \item[Parent] The reference to the field, automatically added.
+% \item[Rect] the size, calculated from the box size
+% \item[Contents] a text string, not really need but an optional key should allow to
+% set it,
+% \item[AP] the appearance dictionary. It should look like this
+%  |/AP <</N <</Yes 17 0 R/Off 15 0 R>>>>|. I need to test if it makes sense here to
+%  have a |/R| and |/D| entry too. The objects refer to suitable xforms.
+% \item[AS] should be either |/Yes| or |/Off|, and sensibly by default be
+%  the same as the V entry in the field dictionary. If they differ the AS entry wins.
+%
+% \item[A] Action, this must be checked.
+% \item[AA] additional actions. This must be checked too.
+%
+% \item[Border, C, OC, AF, BM, Lang, P, NM, M, F, BS, H]: These are not specifically
+% needed for checkbox. An interface to add something to the used annot dictionary
+% is needed (or already there), but probably no special key-val support for now.
+%
+% \item[MK] this is what hyperref uses to set the appearance, but I
+%  explicitly leave it out and use |AP|.
+%
+% \end{description}
 % \end{documentation}
 % \begin{implementation}
 %    \begin{macrocode}
@@ -119,7 +198,7 @@
 % A bitset for the field flag Ff:
 % Not yet decided if this should public or not ...
 %    \begin{macrocode}
-\bitset_new:Nn \l__pdffield_Ff_bitset
+\bitset_new:Nn \l_pdffield_Ff_bitset
  {
     ReadOnly          = 0,
     Required          = 1,
@@ -166,8 +245,12 @@
 \cs_generate_variant:Nn \pdfxform_dp:n {e}
 \cs_generate_variant:Nn \pdfxform_ref:n{e}
 
-\pdfdict_new:n {l_pdffield/checkbox/Field}
-\pdfdict_new:n {l_pdffield/checkbox/Annot}
+%    \end{macrocode}
+% Like in the l3pdfannot module, we hide the dictionaries
+% and will offer an interface if needed.
+%    \begin{macrocode}
+\pdfdict_new:n {l__pdffield/checkbox/Field}
+\pdfdict_new:n {l__pdffield/checkbox/Annot}
 
 
 \tl_new:N \g__pdffield_normal_off_default_tl
@@ -328,12 +411,12 @@
          {
            \pdf_object_ref:n {pdffield/checkbox/Field/Btn/#1/Kids}
          }
-      \bitset_set_false:Nn \l__pdffield_Ff_bitset  {Radio}
-      \bitset_set_false:Nn \l__pdffield_Ff_bitset  {Pushbutton}
-      \bitset_set_true:Nn  \l__pdffield_Ff_bitset  {NoExport}
+      \bitset_set_false:Nn \l_pdffield_Ff_bitset  {Radio}
+      \bitset_set_false:Nn \l_pdffield_Ff_bitset  {Pushbutton}
+      %\bitset_set_true:Nn  \l_pdffield_Ff_bitset  {NoExport} %?
       \pdfdict_put:nnx {l_pdffield/checkbox/Field}
         {Ff}
-        {\bitset_to_arabic:N \l__pdffield_Ff_bitset }
+        {\bitset_to_arabic:N \l_pdffield_Ff_bitset }
       \pdf_object_write:nx {pdffield/checkbox/Field/Btn/#1} { \pdfdict_use:n {l_pdffield/checkbox/Field} }
       \pdfmanagement_add:nnx
         { Catalog / AcroForm }
@@ -351,8 +434,7 @@
        {
         \rule
           [-\l__pdffield_field_dp_dim]{0pt}{\dim_eval:n{\l__pdffield_field_ht_dim+\l__pdffield_field_dp_dim}}
-          \pdfannot_box:nnnnn
-           {widget}
+          \pdfannot_widget_box:nnnn
            { \dim_use:N \l__pdffield_field_wd_dim }
            { \dim_use:N \l__pdffield_field_ht_dim }
            { \dim_use:N \l__pdffield_field_dp_dim }
