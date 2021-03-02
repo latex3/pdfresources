@@ -291,6 +291,26 @@
 %  |Print|, |NoZoom|, |NoRotate|, |NoView|, |ReadOnly|, |Locked|,  |ToggleNoView|,
 %  |LockedContents| which correspond to the names used in the PDF references.
 % \end{variable}
+% \subsection{Widget annotations}
+% Widget annotations are quite important for form fields, as they are used
+% to build the actually instance of such fields.
+%
+% As they can contain meaningful content hooks are probably needed to allow tagging
+% and other manipulations, so like with link special commands are provided.
+% Widget are normally in a box and line and page breaks are not relevant, so
+% the command is offered as box command.
+%
+% \begin{function}[added = 2021-03-02]
+%   { \pdfannot_widget_box:nnnn }
+%   \begin{syntax}
+%     \cs{pdfannot_widget:nnnn}  \Arg{width} \Arg{height} \Arg{depth} \Arg{annot spec}
+%   \end{syntax}
+%   This creates an \texttt{/Type/Annot} object with the given dimensions.
+%   It will then insert the attribute dictionary of the widget
+%   additionally to the manually given \meta{annot spec}.
+%   The hooks \texttt{pdfannot/widget/before} and \texttt{pdfannot/widget/after}
+%   are executed before and after the widget.
+% \end{function}
 % \end{documentation}
 %
 % \begin{implementation}
@@ -384,6 +404,24 @@
 %    \begin{macrocode}
  \pdfdict_new:n { l_@@/widget }
  \pdfdict_put:nnn { l_@@/widget }{ Subtype }{ /Widget }
+ \hook_new_pair:nn
+   {pdfannot/widget/before}
+   {pdfannot/widget/after}
+ \hook_new_pair:nn
+   {pdfannot/widget/begin}
+   {pdfannot/widget/end}
+\cs_new_protected:Npn \pdfannot_widget_box:nnnn #1 #2 #3 #4
+  {
+    \hook_use:n { pdfannot/widget/before}
+    \exp_args:Nx
+    \__pdf_backend_annotation:nnnn {#1}{#2}{#3}
+      {
+        \pdfdict_use:n { l_@@/widget}
+        #4
+      }
+    \hook_use:n { pdfannot/widget/after}  
+    \bool_gset_false:N\g_@@_use_lastlink_bool
+  }
 %    \end{macrocode}
 %
 % \subsection{Annotations, subtype Link}\label{sec:links}
