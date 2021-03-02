@@ -10,6 +10,8 @@
 \usepackage{hyperref}
 
 \usepackage{l3pdffield-checkbox}
+\usepackage{tikz,bearwear,iftex}
+\usepackage[default]{sourcesanspro}
 
 \newcheckboxappearance* {checkbox/Yes/depth}
   {
@@ -18,10 +20,46 @@
 
 \newcheckboxappearance* {checkbox/Off/depth}
   {  }
-\usepackage{pdflscape,iftex}  
+  
+ \iftutex
+\newcheckboxappearance {checkbox/Off/unicode}
+ {\normalfont ☐}
+\newcheckboxappearance {checkbox/Yes/unicode}
+ {\normalfont ☑}
+\fi
+
+\newcheckboxappearance {checkbox/Off/tikz}
+  {
+   \tikz[baseline]
+    \path[draw=white,fill=magenta](0,-1pt)rectangle(8pt,7pt);
+  }
+
+\newcheckboxappearance {checkbox/Yes/tikz}
+   {
+    \tikz[baseline]
+      \path[draw=white,fill=cyan](0,-1pt)rectangle(8pt,7pt);
+   }
+
+
+\newcheckboxappearance {checkbox/Off/bear}
+  {
+   \tikz[scale=0.5]\bear;
+  }
+
+\newcheckboxappearance {checkbox/Yes/bear}
+   {
+    \tikz[scale=0.5]\bear\bearwear;
+   }
+ 
+\usepackage{pdflscape,iftex}
 
 \begin{document}%\showoutput
 \Form[NeedAppearances=false]
+
+1: \checkboxfield{checkbox1}
+
+   \checkboxfield{checkbox1}
+
 \ExplSyntaxOn
 %\bitset_set_true:Nn  \l__pdffield_Ff_bitset  {NoRotate}
 %\bitset_set_true:Nn  \l_pdfannot_F_bitset  {NoRotate}
@@ -35,7 +73,7 @@ normal off = checkbox/Off/bear,
 normal yes = checkbox/Yes/bear]{checkbox10}}
 
 \newpage
-%\begin{landscape} 
+%\begin{landscape}
 
 form\checkboxfield[%
 normal off = checkbox/Off/bear,

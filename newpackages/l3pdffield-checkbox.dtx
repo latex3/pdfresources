@@ -182,6 +182,7 @@
 % \begin{implementation}
 %    \begin{macrocode}
 %<*package>
+%<@@=pdffield>
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesExplPackage{l3pdffield-checkbox}{0000-00-00}{v0.00a}{form field checkbox}%
 %    \end{macrocode}
@@ -194,6 +195,28 @@
 %\def\DefaultHeightofCheckBox{\normalbaselineskip}
 %\def\DefaultWidthofCheckBox{\normalbaselineskip}
 %    \end{macrocode}
+% \section{local variables}
+%    \begin{macrocode}
+\str_new:N \l_@@_tmpa_str
+\str_new:N \l_@@_field_str
+%    \end{macrocode}
+% \section{Variants}
+%    \begin{macrocode}
+\cs_generate_variant:Nn \pdfxform_wd:n {e}
+\cs_generate_variant:Nn \pdfxform_ht:n {e}
+\cs_generate_variant:Nn \pdfxform_dp:n {e}
+\cs_generate_variant:Nn \pdfxform_ref:n{e}
+%    \end{macrocode}
+%
+% \section{messages}
+%    \begin{macrocode}
+\msg_new:nnn {pdffield}{no-period}
+  {
+    The~field~name~`#1`~contains~a~period. \\
+    This~is~not~allowed. `
+  }
+%    \end{macrocode}
+
 % \section{bitsets}
 % A bitset for the field flag Ff:
 % Not yet decided if this should public or not ...
@@ -221,48 +244,135 @@
     RichText          = 25,%Tx
     CommitOnSelChange = 26
   }
+%    \end{macrocode}
+% \section{The field dictionary}
+% The field dictionary is the main object. It references the
+% actual widget annotations as kids. It is created at the first
+% checkbox with a specific name.
 %
-%\pdf_flag_new:nn {annot/Field/submit} %name is wrong ...
-%  {
-%    Include/Exclude       = 0,
-%    IncludeNoValueFields  = 1,
-%    ExportFormat          = 2,
-%    GetMethod             = 3, % if ExportFormat=0 -> =0 to
-%    SubmitCoordinates     = 4, % if ExportFormat=0 -> =0 to
-%    XFDF                  = 5,
-%    IncludeAppendSaves    = 6,
-%    IncludeAnnotations    = 7,
-%    SubmitPDF             = 8,
-%    CanonicalFormat       = 9,
-%    ExclNonUserAnnots     = 10,
-%    ExclFKey              = 11,
-%    EmbedForm             = 12
-%  }
+% We need check if the name contains a dot. But we will do this in an external command
+% to avoid to have it twice. Here we assume that the name is already converted and safe.
 %
+% We also assume that values that can be changed by the user are set outside
+% in the dictionary.
+% If the field object already exists nothing is done.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_checkbox_field_dict:n #1
+  {
+    \pdf_object_if_exist:nF {pdffield/checkbox/Field/Btn/#1}
+     {
+      \group_begin:
+      \pdf_object_new:nn {@@_checkbox/Field/Btn/#1}      {dict}
+      \pdf_object_new:nn {@@_checkbox/Field/Btn/#1/Kids} {array}
+      \seq_new:c {g_@@_checkbox/Field/Btn/#1/Kids_seq}
+      \hook_gput_code:nnn {shipout/lastpage}{pdffield} %xetex needs this ...
+        {
+          \pdf_object_write:nx {@@_checkbox/Field/Btn/#1/Kids}
+            {
+              \seq_use:cn{g_@@_checkbox/Field/Btn/#1/Kids_seq}{~}
+            }
+        }
+      \pdfdict_put:nnn {l_@@/checkbox/Field}{FT}{/Btn}
+      \pdfdict_put:nnn {l_@@/checkbox/Field}{T}{#1}
+   % V,DV are names describing the appearance. With checkboxes
+   % the values /Yes and /Off are used.
+   % this values are taken from the outside:
+   %   \pdfdict_put:nnn {l_@@/checkbox/Field}{V}{/Off}  %should be configurable/in sync with /AS/DV
+   %   \pdfdict_put:nnn {l_@@/checkbox/Field}{DV}{/Off} %should be configurable/in sync with /AS/DV
+      \pdfdict_put:nnx {l_@@/checkbox/Field}{Kids}
+         {
+           \pdf_object_ref:n {@@_checkbox/Field/Btn/#1/Kids}
+         }
+      \bitset_set_false:Nn \l_pdffield_Ff_bitset  {Radio}
+      \bitset_set_false:Nn \l_pdffield_Ff_bitset  {Pushbutton}
+      %\bitset_set_true:Nn  \l_pdffield_Ff_bitset  {NoExport} %?
+      \pdfdict_put:nnx {l_@@/checkbox/Field}
+        {Ff}
+        {\bitset_to_arabic:N \l_pdffield_Ff_bitset }
+      \pdf_object_write:nx {@@_checkbox/Field/Btn/#1} { \pdfdict_use:n {l_@@/checkbox/Field} }
+      \pdfmanagement_add:nnx
+        { Catalog / AcroForm }
+        { Fields }
+        {\pdf_object_ref:n {@@_checkbox/Field/Btn/#1} }
+      \group_end:
+     }
+  }
 
-\cs_generate_variant:Nn \pdfxform_wd:n {e}
-\cs_generate_variant:Nn \pdfxform_ht:n {e}
-\cs_generate_variant:Nn \pdfxform_dp:n {e}
-\cs_generate_variant:Nn \pdfxform_ref:n{e}
+%    \end{macrocode}
+% \section{The annot dictionary}
+% We assume that the annotation should really occupy space on the page.
+% We also assume that keys like AP, AS are added before through keys to
+% the dictionary.
+%
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_checkbox_annot:nnnn #1 #2 #3 #4 %wd, ht, dp, name
+  {
+    \group_begin:
+     %\pdfdict_set_eq:nn
+     \pdfannot_dict_put:nnx {widget}{Parent}{\pdf_object_ref:n{@@_checkbox/Field/Btn/#4}}
+     \hbox_to_wd:nn
+       { #1  }
+       {
+        \rule [-#3]{0pt}{\dim_eval:n{#2+#3} }
+          \pdfannot_widget_box:nnn
+           { #1 }
+           { #2 }
+           { #3 }
+         \hfill
+        }
+    \seq_gput_right:cx {g_@@_checkbox/Field/Btn/#1/Kids_seq}{ \pdfannot_box_ref_last:}
+    \group_end:
+  }
 
 %    \end{macrocode}
 % Like in the l3pdfannot module, we hide the dictionaries
 % and will offer an interface if needed.
 %    \begin{macrocode}
-\pdfdict_new:n {l__pdffield/checkbox/Field}
-\pdfdict_new:n {l__pdffield/checkbox/Annot}
+\pdfdict_new:n {l_@@/checkbox/Field}
+\pdfdict_new:n {l_@@/checkbox/Annot}
+%    \end{macrocode}
+% The appearance dictionaries. We don't try to to force
+% a size or content here.
+%    \begin{macrocode}
+\cs_new_protected:Npn \pdffield_store_appearance:nn #1 #2
+  {
+     \pdfxform_new:nnn {@@_#1}{}{#2}
+  }
 
+\cs_new_protected:Nn \@@_store_default_appearances:
+  {
+     \pdffield_store_appearance:nn {checkbox/default/Yes}
+       {
+         \normalsize
+         \hbox_set:Nn   \l_tmpa_box { \texttimes \strut }
+         \fboxsep 0pt
+         \framebox
+           [ \dim_max:nn { \box_wd:N \l_tmpa_box }{ \box_ht:N\strutbox+\box_dp:N\strutbox} ]
+           { \box_use:N \l_tmpa_box }
+       }
+     \pdffield_store_appearance:nn {checkbox/default/Off}
+       {
+         \normalsize
+         \hbox_set:Nn   \l_tmpa_box { \phantom{\texttimes} \strut }
+         \fboxsep 0pt
+         \framebox
+           [ \dim_max:nn { \box_wd:N \l_tmpa_box }{ \box_ht:N\strutbox+\box_dp:N\strutbox} ]
+           { \box_use:N \l_tmpa_box }
+       }
+  }
+
+\@@_store_default_appearances:
 
 \tl_new:N \g__pdffield_normal_off_default_tl
 \tl_new:N \g__pdffield_normal_yes_default_tl
 
 \tl_set:Nn \g__pdffield_normal_off_default_tl
   {
-    checkbox/Off/dflt
+    @@_checkbox/default/Off
   }
 \tl_set:Nn \g__pdffield_normal_yes_default_tl
   {
-    checkbox/Yes/dflt
+    @@_checkbox/default/Yes
   }
 
 % # local variables
@@ -281,18 +391,39 @@
    checked .choice: ,
    checked / false .code:n =
      {
-       \pdfdict_put:nnn {l_pdffield/checkbox/Field}{V}{/Off}
-       \pdfdict_put:nnn {l_pdffield/checkbox/Annot}{AS}{/Off}
-       \pdfdict_put:nnn {l_pdffield/checkbox/Annot}{DV}{/Off}
+       \pdfdict_put:nnn {l_@@/checkbox/Field}{V}{/Off}
+       \pdfdict_put:nnn {l_@@/checkbox/Annot}{AS}{/Off}
+       \pdfdict_put:nnn {l_@@/checkbox/Annot}{DV}{/Off}
      },
    checked / true .code:n =
      {
-       \pdfdict_put:nnn {l_pdffield/checkbox/Field}{V}{/Yes}
-       \pdfdict_put:nnn {l_pdffield/checkbox/Annot}{AS}{/Yes}
-       \pdfdict_put:nnn {l_pdffield/checkbox/Annot}{DV}{/Yes}
-     }
+       \pdfdict_put:nnn {l_@@/checkbox/Field}{V}{/Yes}
+       \pdfdict_put:nnn {l_@@/checkbox/Annot}{AS}{/Yes}
+       \pdfdict_put:nnn {l_@@/checkbox/Annot}{DV}{/Yes}
+     },
+   checked .initial:n = false
  }
+\keys_define:nn { pdffield / checkbox }
+  {
+    appearance .code:n = %value is a name of an appearance
+      {
+        \pdfannot_dict_put:nnx {widget}{AP}
+          {
+            <<
+              /N ~
+                << /Yes ~ \pdfxform_ref:n { @@_#1/Yes}
+                   /Off ~ \pdfxform_ref:n { @@_#1/Off}
+                >>
+            >>
+         }
+      },
+    appearance .initial:n = checkbox/default,
 
+    normal ~ off .tl_set_x:N = \l__pdffield_normal_off_tl,
+    normal ~ off .value_required:n = true,
+    normal ~ yes .tl_set_x:N = \l__pdffield_normal_yes_tl,
+    normal ~ yes .value_required:n = true,
+  }
 
 \NewDocumentCommand \newcheckboxappearance { s  m m  }  %#2=name, #3 = content
  {
@@ -304,8 +435,8 @@
        {
         \fboxsep 0pt
         \framebox
-        [ \dim_max:nn { \box_wd:N \l_tmpa_box }{ \box_ht:N\strutbox+\box_dp:N\strutbox} ]
-        { \box_use:N \l_tmpa_box }
+         [ \dim_max:nn { \box_wd:N \l_tmpa_box }{ \box_ht:N\strutbox+\box_dp:N\strutbox} ]
+         { \box_use:N \l_tmpa_box }
        }
        {
         \makebox
@@ -315,55 +446,10 @@
      }
  }
 
-\newcheckboxappearance* {checkbox/Yes/dflt}
-  {
-    $\times$
-  }
-
-\newcheckboxappearance* {checkbox/Off/dflt}
-  {  }
-
-\usepackage{tikz,bearwear,iftex}
-\usepackage[default]{sourcesanspro}
-
-\iftutex
-\newcheckboxappearance {checkbox/Off/unicode}
- {\normalfont ☐}
-\newcheckboxappearance {checkbox/Yes/unicode}
- {\normalfont ☑}
-\fi
-
-\newcheckboxappearance {checkbox/Off/tikz}
-  {
-   \tikz[baseline]
-    \path[draw=white,fill=magenta](0,-1pt)rectangle(8pt,7pt);
-  }
-
-\newcheckboxappearance {checkbox/Yes/tikz}
-   {
-    \tikz[baseline]
-      \path[draw=white,fill=cyan](0,-1pt)rectangle(8pt,7pt);
-   }
 
 
-\newcheckboxappearance {checkbox/Off/bear}
-  {
-   \tikz[scale=0.5]\bear;
-  }
-
-\newcheckboxappearance {checkbox/Yes/bear}
-   {
-    \tikz[scale=0.5]\bear\bearwear;
-   }
 
 
-\keys_define:nn { pdffield }
-  {
-    normal ~ off .tl_set_x:N = \l__pdffield_normal_off_tl,
-    normal ~ off .value_required:n = true,
-    normal ~ yes .tl_set_x:N = \l__pdffield_normal_yes_tl,
-    normal ~ yes .value_required:n = true,
-  }
 
 \cs_new_protected:Nn \__pdffield_normalise_boxes:
   {
@@ -375,104 +461,40 @@
       { \dim_max:nn { \pdfxform_dp:e {\l__pdffield_normal_off_tl} }{ \pdfxform_dp:e {\l__pdffield_normal_yes_tl} } }
   }
 
-% The field dictionary is the main object. It references the
-% actual widget annotations as kids. It is created at the first
-% checkbox with a specific name.
-%
-%
 
-\cs_new_protected:Npn \__pdffield_checkbox_fielddict:n #1
-  {
-    %#1 should pass through some escaping!
-    \pdf_object_if_exist:nTF {pdffield/checkbox/Field/Btn/#1}
-     {
-      %needed ? later
-     }
-     {
-      \group_begin:
-      \pdf_object_new:nn {pdffield/checkbox/Field/Btn/#1}      {dict}
-      \pdf_object_new:nn {pdffield/checkbox/Field/Btn/#1/Kids} {array}
-      \seq_new:c {g__pdffield/checkbox/Field/Btn/#1/Kids_seq}
-      \hook_gput_code:nnn {shipout/lastpage}{pdf} %xetex needs this ...
-        {
-          %\seq_show:c {g__pdffield/checkbox/Field/Btn/#1/Kids_seq}
-          \pdf_object_write:nx {pdffield/checkbox/Field/Btn/#1/Kids}
-            {
-              \seq_use:cn{g__pdffield/checkbox/Field/Btn/#1/Kids_seq}{~}
-            }
-        }
-      \pdfdict_put:nnn {l_pdffield/checkbox/Field}{FT}{/Btn}
-      \pdfdict_put:nnn {l_pdffield/checkbox/Field}{T}{(#1)} %escaping?
-   % V,DV are names describing the appearance. With checkboxes
-   % the values /Yes and /Off are used.
-      \pdfdict_put:nnn {l_pdffield/checkbox/Field}{V}{/Off}  %should be configurable/in sync with /AS/DV
-      \pdfdict_put:nnn {l_pdffield/checkbox/Field}{DV}{/Off} %should be configurable/in sync with /AS/DV
-      \pdfdict_put:nnx {l_pdffield/checkbox/Field}{Kids}
-         {
-           \pdf_object_ref:n {pdffield/checkbox/Field/Btn/#1/Kids}
-         }
-      \bitset_set_false:Nn \l_pdffield_Ff_bitset  {Radio}
-      \bitset_set_false:Nn \l_pdffield_Ff_bitset  {Pushbutton}
-      %\bitset_set_true:Nn  \l_pdffield_Ff_bitset  {NoExport} %?
-      \pdfdict_put:nnx {l_pdffield/checkbox/Field}
-        {Ff}
-        {\bitset_to_arabic:N \l_pdffield_Ff_bitset }
-      \pdf_object_write:nx {pdffield/checkbox/Field/Btn/#1} { \pdfdict_use:n {l_pdffield/checkbox/Field} }
-      \pdfmanagement_add:nnx
-        { Catalog / AcroForm }
-        { Fields }
-        {\pdf_object_ref:n {pdffield/checkbox/Field/Btn/#1} }
-      \group_end:
-     }
-  }
 
-\cs_new_protected:Npn \__pdffield_checkbox_annot:n #1
-  {
-    \group_begin:
-     \hbox_to_wd:nn
-       { \l__pdffield_field_wd_dim  }
-       {
-        \rule
-          [-\l__pdffield_field_dp_dim]{0pt}{\dim_eval:n{\l__pdffield_field_ht_dim+\l__pdffield_field_dp_dim}}
-          \pdfannot_widget_box:nnnn
-           { \dim_use:N \l__pdffield_field_wd_dim }
-           { \dim_use:N \l__pdffield_field_ht_dim }
-           { \dim_use:N \l__pdffield_field_dp_dim }
-           {
-            /Parent~ \pdf_object_ref:n{pdffield/checkbox/Field/Btn/#1}
-            /AS ~ /Off
-            /AP ~
-              <<
-                /N ~
-                  << /Yes ~ \pdfxform_ref:e { \l__pdffield_normal_yes_tl}
-                     /Off ~ \pdfxform_ref:e { \l__pdffield_normal_off_tl}
-                  >>
-              >>
-           }
-         \hfill
-        }
-    \seq_gput_right:cx {g__pdffield/checkbox/Field/Btn/#1/Kids_seq}{ \pdfannot_box_ref_last:}
-    \group_end:
-  }
+
 % # form and field interface macros
 
 \NewDocumentCommand \checkboxfield { O{}m }
   {
     \group_begin:
-    \keys_set:nn { pdffield }
+    \keys_set:nn { pdffield / checkbox }
       {
         normal ~ yes = \g__pdffield_normal_yes_default_tl,
         normal ~ off = \g__pdffield_normal_off_default_tl,
         #1
       }
     \__pdffield_normalise_boxes:
-    \__pdffield_checkbox_fielddict:n {#2}
-    \__pdffield_checkbox_annot:n {#2}
+    \__pdffield_checkbox_field_dict:n {#2}
+    \__pdffield_checkbox_annot:nnnn{1cm}{1cm}{0pt} {#2}
 
     \group_end:
   }
 
-
+%     \begin{macrocode}
+%\cs_new_protected:Npn \@@_checkbox_field_dict:n #1
+%  {
+%    \str_if_in:nnTF {#1}{.}
+%      {
+%        \msg_error:nnn {pdffield}{no-period}{#1}
+%      }
+%      {
+%        \pdf_string_from_unicode:nnN {utf8/string}{#1}\l_@@_field_str
+%        \exp_args:No \@@_checkbox_field_dict_aux:n { \l_@@_field_str }
+%      }
+%  }
+%    \end{macrocode}
 %
 %
 %%%%
@@ -528,6 +550,23 @@
 %
 %  /S /JavaScript
 %  /JS text string or stream
+%  %\pdf_flag_new:nn {annot/Field/submit} %name is wrong ...
+%  {
+%    Include/Exclude       = 0,
+%    IncludeNoValueFields  = 1,
+%    ExportFormat          = 2,
+%    GetMethod             = 3, % if ExportFormat=0 -> =0 to
+%    SubmitCoordinates     = 4, % if ExportFormat=0 -> =0 to
+%    XFDF                  = 5,
+%    IncludeAppendSaves    = 6,
+%    IncludeAnnotations    = 7,
+%    SubmitPDF             = 8,
+%    CanonicalFormat       = 9,
+%    ExclNonUserAnnots     = 10,
+%    ExclFKey              = 11,
+%    EmbedForm             = 12
+%  }
+%
 %</package>
 %    \end{macrocode}
 %\end{implementation}
