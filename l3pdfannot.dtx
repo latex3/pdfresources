@@ -86,6 +86,32 @@
 %   \end{syntax}
 %   This retrieves the object reference of the last box annotation created.
 % \end{function}
+% \subsection{Dictionary for the annotation spec}
+%
+% \meta{annot spec} in the above command can be given in two ways. One way is
+% to enter the needed dictionary keys and values directly:
+% \begin{verbatim}
+%  \pdfannot_box:nnnn{1cm}{1cm}{0cm}{/Subtype/Link /Border[0~0~1]}
+% \end{verbatim}
+%
+% A second method is to make use of the dictionary commands provided by \pkg{l3pdfdict}:
+%
+% \begin{verbatim}
+% \pdfdict_new:n  {l_my_annot}
+% \pdfdict_put:nnn{l_my_annot}{Subtype}{/Link}
+% \pdfdict_put:nnn{l_my_annot}{Border}{[0~0~1]}
+% \pdfannot_box:nnnx{1cm}{1cm}{0cm}{\pdfdict_use:n{l_my_annot}}
+% \end{verbatim}
+%
+% The second method is clearly slower and more to type. But it has the advantage
+% that using such a dictionary makes it easy to add, remove and change entries.
+% It also avoids the potential problem that a key is added twice with different
+% values. This allows to create user interfaces to change settings and
+% also makes it easy to extend the interfaces in case some new setting
+% should be included. For these reasons both the PDF management itself,
+% but also the specific annotation commands in the following section
+% all make use of such dictionaries.
+%
 % \subsection{Link annotations}
 % Link annotations are special cases of annotations. In the PDF they are identified
 % by an |/Subtype/Link| entry in the dictionary.
@@ -141,16 +167,22 @@
 %   \begin{syntax}
 %     \cs{pdfannot_link:nnn} \Arg{type} \Arg{user action spec} \Arg{link text}
 %   \end{syntax}
-%  This creates a link around the \meta{link text} with the specified
+%  This creates a link around the \meta{link text}.
+%  \texttt{/Subtype/Link} is added automatically through the dictionary.
 %  \meta{user action spec}\footnote{The wording follows the pdftex documentation}.
-%  \texttt{/Subtype/Link} is added automatically.
+%  is provided as a fast method to add dictionary contents,
+%  but it should be noted that no provision is taken to avoid clashes with
+%  values added through the dictionary. If needed clashing entries should be
+%  removed from the dictionary first. Normally the argument is not needed, all
+%  entries can be added through the dictionary too.
 %  \meta{type} should be one of \texttt{URI}, \texttt{GoToR},
 %  \texttt{Launch}, \texttt{GoTo} or \texttt{Named}. The |GoTo| variant does
 %  \emph{not} complain if the destination name is not known like
 %  \cs{pdfannot_link_goto_begin:nw}.
 %  The attributes stored in the local dictionary
 %  \texttt{link/}\meta{type} are inserted as
-%  \emph{attr spec} and the code in the begin and end hook
+%  \emph{attr spec} before \meta{user action spec}.
+%  The code in the begin and end hook
 %  \texttt{pdfannot/link/\meta{type}/before}
 %  and \texttt{pdfannot/link/\meta{type}/after}
 %  is executed  before and after the link (outside the link command)
@@ -182,10 +214,14 @@
 %     \cs{pdfannot_link_begin:nnw} \Arg{type} \Arg{user action spec} \meta{content}
 %     \cs{pdfannot_link_end:n} \Arg{type}
 %   \end{syntax}
-%  This creates a link around the \meta{content} with the specified
-%  \meta{user action spec} (e.g. an /A dictionary with an URI) or
-%  \meta{destination} (a name as defined with the
-%  first argument of \cs{pdf_destination:nn}).
+%  This creates a link like the previous command.
+%  \texttt{/Subtype/Link} is added automatically through the dictionary.
+%  \meta{user action spec}\footnote{The wording follows the pdftex documentation}.
+%  is provided as a fast method to add dictionary contents,
+%  but it should be noted that no provision is taken to avoid clashes with
+%  values added through the dictionary. If needed clashing entries should be
+%  removed from the dictionary first. Normally the argument is not needed, all
+%  entries can be added through the dictionary too.
 %  \texttt{/Subtype/Link} is added automatically.
 %  In contrast to \cs{pdfannot_link:nnn} this function
 %  does not absorb the argument when finding the \meta{content}, and so can
