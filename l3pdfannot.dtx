@@ -77,19 +77,7 @@
 %   This creates an \texttt{/Type/Annot} object with the given dimensions.
 %   It doesn't use hooks or dictionaries.
 % \end{function}
-% \begin{function}[added = 2020-03-30]
-%   { \pdfannot_box:nnnnn }
-%   \begin{syntax}
-%     \cs{pdfannot_box:nnnnn} \Arg{type} \Arg{width} \Arg{height} \Arg{depth} \Arg{annot spec}
-%   \end{syntax}
-%   This creates an \texttt{/Type/Annot} object with the given dimensions.
-%   \meta{type} should be currently one of |link/URI|, |link/GoToR|,
-%  |link/Launch|, |link/GoTo| or |link/Named| or
-%  |widget|, it will then insert the attribute dictionary of this type
-%   additionally to the manually given \meta{annot spec}.
-%   The attribute dictionaries can be filled with commands described below.
-%   Hooks are not used.
-% \end{function}
+%
 % \begin{function}[added = 2019-09-05]
 %   { \pdfannot_box_ref_last: }
 %   \begin{syntax}
@@ -362,19 +350,6 @@
     \__pdf_backend_annotation_last:
   }
 
-\cs_new_protected:Npn \pdfannot_box:nnnnn #1 #2 #3 #4 #5
-  {
-    \exp_args:Nx
-    \__pdf_backend_annotation:nnnn {#2}{#3}{#4}
-      {
-        \pdfdict_if_exist:nT { l_@@/#1 }
-          {
-            \pdfdict_use:n { l_@@/#1}
-          }
-        #5
-      }
-    \bool_gset_false:N\g_@@_use_lastlink_bool
-  }
 %    \end{macrocode}
 % \subsection{Annotations, subtype Widget}\label{pdf:annot:widget}
 % Currently no code is provided here.
