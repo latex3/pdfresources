@@ -70,7 +70,7 @@
 % \subsection{General annotation commands}
 %
 % \begin{function}[added = 2019-09-05, updated = 2020-04-14]
-%   { \pdfannot_box:nnnn }
+%   { \pdfannot_box:nnnn,\pdfannot_box:nnnx }
 %   \begin{syntax}
 %     \cs{pdfannot_box:nnnn} \Arg{width} \Arg{height} \Arg{depth} \Arg{annot spec}
 %   \end{syntax}
@@ -348,20 +348,21 @@
 %  type or not type? Syntax for type?
 %  should there be a version without type?
 % \end{NOTE}
-
+% \begin{macro}{\pdfannot_box:nnnn,\pdfannot_box:nnnx,\pdfannot_box_ref_last:}
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdfannot_box:nnnn #1 #2 #3 #4
   {
     \__pdf_backend_annotation:nnnn {#1}{#2}{#3}{#4}
     \bool_gset_false:N\g_@@_use_lastlink_bool
   }
-
+\cs_generate_variant:Nn \pdfannot_box:nnnn {nnnx}
 \cs_new:Npn \pdfannot_box_ref_last:
   {
     \__pdf_backend_annotation_last:
   }
 
 %    \end{macrocode}
+% \end{macro}
 % \subsection{Annotations, subtype Widget}\label{pdf:annot:widget}
 % Currently no code is provided here.
 % The local dictionary \texttt{l_@@/Widget} is a skeleton
