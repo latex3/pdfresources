@@ -415,6 +415,7 @@
 \seq_map_inline:Nn \c_pdfannot_link_types_seq
   {
     \pdfdict_new:n { l_@@/link/#1 }
+    \pdfdict_put:nnn { l_@@/link/#1 }{ Subtype }{ /Link }
     \hook_new_pair:nn
       {pdfannot/link/#1/before}
       {pdfannot/link/#1/after}
@@ -442,7 +443,6 @@
           }
       }
       {
-        /Subtype/Link
         #2 %exp_not?
       }
     \bool_gset_true:N \g_@@_use_lastlink_bool
