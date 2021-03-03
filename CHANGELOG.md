@@ -9,10 +9,15 @@ this project uses date-based 'snapshot' version identifiers.
 
 ### Added
 -  \pdfannot_widget_box:nnnn 
+- \pdfannot_dict_use:n
 
 ### Changed
 -
 
+### Removed
+- \pdfannot_box:nnnnn: Concept to mix manual specs and dictionaries is wrong.
+  This can lead to duplicate entries in the dictionaries.
+  
 ### Fixed
 - Wrong default setting of \g_@@_active_bool (issue #13)
 - l3pdffile: Wrong casing: FileSpec -> Filespec   

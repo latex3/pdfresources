@@ -70,26 +70,15 @@
 % \subsection{General annotation commands}
 %
 % \begin{function}[added = 2019-09-05, updated = 2020-04-14]
-%   { \pdfannot_box:nnnn }
+%   { \pdfannot_box:nnnn,\pdfannot_box:nnnx }
 %   \begin{syntax}
 %     \cs{pdfannot_box:nnnn} \Arg{width} \Arg{height} \Arg{depth} \Arg{annot spec}
 %   \end{syntax}
 %   This creates an \texttt{/Type/Annot} object with the given dimensions.
-%   It doesn't use hooks or dictionaries.
+%   It doesn't use hooks or dictionaries. The annotation doesn't occupy space but
+%   as it is a whatsit it can affect spacing.
 % \end{function}
-% \begin{function}[added = 2020-03-30]
-%   { \pdfannot_box:nnnnn }
-%   \begin{syntax}
-%     \cs{pdfannot_box:nnnnn} \Arg{type} \Arg{width} \Arg{height} \Arg{depth} \Arg{annot spec}
-%   \end{syntax}
-%   This creates an \texttt{/Type/Annot} object with the given dimensions.
-%   \meta{type} should be currently one of |link/URI|, |link/GoToR|,
-%  |link/Launch|, |link/GoTo| or |link/Named| or
-%  |widget|, it will then insert the attribute dictionary of this type
-%   additionally to the manually given \meta{annot spec}.
-%   The attribute dictionaries can be filled with commands described below.
-%   Hooks are not used.
-% \end{function}
+%
 % \begin{function}[added = 2019-09-05]
 %   { \pdfannot_box_ref_last: }
 %   \begin{syntax}
@@ -97,6 +86,32 @@
 %   \end{syntax}
 %   This retrieves the object reference of the last box annotation created.
 % \end{function}
+% \subsection{Dictionary for the annotation spec}
+%
+% \meta{annot spec} in the above command can be given in two ways. One way is
+% to enter the needed dictionary keys and values directly:
+% \begin{verbatim}
+%  \pdfannot_box:nnnn{1cm}{1cm}{0cm}{/Subtype/Link /Border[0~0~1]}
+% \end{verbatim}
+%
+% A second method is to make use of the dictionary commands provided by \pkg{l3pdfdict}:
+%
+% \begin{verbatim}
+% \pdfdict_new:n  {l_my_annot}
+% \pdfdict_put:nnn{l_my_annot}{Subtype}{/Link}
+% \pdfdict_put:nnn{l_my_annot}{Border}{[0~0~1]}
+% \pdfannot_box:nnnx{1cm}{1cm}{0cm}{\pdfdict_use:n{l_my_annot}}
+% \end{verbatim}
+%
+% The second method is clearly slower and more to type. But it has the advantage
+% that using such a dictionary makes it easy to add, remove and change entries.
+% It also avoids the potential problem that a key is added twice with different
+% values. This allows to create user interfaces to change settings and
+% also makes it easy to extend the interfaces in case some new setting
+% should be included. For these reasons both the PDF management itself,
+% but also the specific annotation commands in the following section
+% all make use of such dictionaries.
+%
 % \subsection{Link annotations}
 % Link annotations are special cases of annotations. In the PDF they are identified
 % by an |/Subtype/Link| entry in the dictionary.
@@ -152,16 +167,22 @@
 %   \begin{syntax}
 %     \cs{pdfannot_link:nnn} \Arg{type} \Arg{user action spec} \Arg{link text}
 %   \end{syntax}
-%  This creates a link around the \meta{link text} with the specified
+%  This creates a link around the \meta{link text}.
+%  \texttt{/Subtype/Link} is added automatically through the dictionary.
 %  \meta{user action spec}\footnote{The wording follows the pdftex documentation}.
-%  \texttt{/Subtype/Link} is added automatically.
+%  is provided as a fast method to add dictionary contents,
+%  but it should be noted that no provision is taken to avoid clashes with
+%  values added through the dictionary. If needed clashing entries should be
+%  removed from the dictionary first. Normally the argument is not needed, all
+%  entries can be added through the dictionary too.
 %  \meta{type} should be one of \texttt{URI}, \texttt{GoToR},
 %  \texttt{Launch}, \texttt{GoTo} or \texttt{Named}. The |GoTo| variant does
 %  \emph{not} complain if the destination name is not known like
 %  \cs{pdfannot_link_goto_begin:nw}.
 %  The attributes stored in the local dictionary
 %  \texttt{link/}\meta{type} are inserted as
-%  \emph{attr spec} and the code in the begin and end hook
+%  \emph{attr spec} before \meta{user action spec}.
+%  The code in the begin and end hook
 %  \texttt{pdfannot/link/\meta{type}/before}
 %  and \texttt{pdfannot/link/\meta{type}/after}
 %  is executed  before and after the link (outside the link command)
@@ -193,10 +214,14 @@
 %     \cs{pdfannot_link_begin:nnw} \Arg{type} \Arg{user action spec} \meta{content}
 %     \cs{pdfannot_link_end:n} \Arg{type}
 %   \end{syntax}
-%  This creates a link around the \meta{content} with the specified
-%  \meta{user action spec} (e.g. an /A dictionary with an URI) or
-%  \meta{destination} (a name as defined with the
-%  first argument of \cs{pdf_destination:nn}).
+%  This creates a link like the previous command.
+%  \texttt{/Subtype/Link} is added automatically through the dictionary.
+%  \meta{user action spec}\footnote{The wording follows the pdftex documentation}.
+%  is provided as a fast method to add dictionary contents,
+%  but it should be noted that no provision is taken to avoid clashes with
+%  values added through the dictionary. If needed clashing entries should be
+%  removed from the dictionary first. Normally the argument is not needed, all
+%  entries can be added through the dictionary too.
 %  \texttt{/Subtype/Link} is added automatically.
 %  In contrast to \cs{pdfannot_link:nnn} this function
 %  does not absorb the argument when finding the \meta{content}, and so can
@@ -276,6 +301,17 @@
 %  \meta{dictionary name} should be currently one of \texttt{link/URI},
 %   \texttt{link/URI}, \texttt{link/GoToR}, \texttt{link/Launch},
 %   \texttt{link/GoTo}, \texttt{link/Named}.
+% \end{function}
+%
+% \begin{function}[EXP,added = 2021-03-03]
+%   { \pdfannot_dict_use:n  }
+%   \begin{syntax}
+%     \cs{pdfannot_dict_use:n} \Arg{dictionary name}
+%   \end{syntax}
+%   This outputs the property list of the dictionary as a list of
+%   |/key value| pairs.
+%   This can be used e.g. when writing a dictionary object with
+%   \cs{pdf_object_write:nx}
 % \end{function}
 %
 % \begin{variable}[added = 2020-12-28]{\l_pdfannot_F_bitset}
@@ -369,33 +405,21 @@
 %  type or not type? Syntax for type?
 %  should there be a version without type?
 % \end{NOTE}
-
+% \begin{macro}{\pdfannot_box:nnnn,\pdfannot_box:nnnx,\pdfannot_box_ref_last:}
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdfannot_box:nnnn #1 #2 #3 #4
   {
     \__pdf_backend_annotation:nnnn {#1}{#2}{#3}{#4}
     \bool_gset_false:N\g_@@_use_lastlink_bool
   }
-
+\cs_generate_variant:Nn \pdfannot_box:nnnn {nnnx}
 \cs_new:Npn \pdfannot_box_ref_last:
   {
     \__pdf_backend_annotation_last:
   }
 
-\cs_new_protected:Npn \pdfannot_box:nnnnn #1 #2 #3 #4 #5
-  {
-    \exp_args:Nx
-    \__pdf_backend_annotation:nnnn {#2}{#3}{#4}
-      {
-        \pdfdict_if_exist:nT { l_@@/#1 }
-          {
-            \pdfdict_use:n { l_@@/#1}
-          }
-        #5
-      }
-    \bool_gset_false:N\g_@@_use_lastlink_bool
-  }
 %    \end{macrocode}
+% \end{macro}
 % \subsection{Annotations, subtype Widget}\label{pdf:annot:widget}
 % Currently no code is provided here.
 % The local dictionary \texttt{l_@@/Widget} is a skeleton
@@ -464,6 +488,7 @@
 \seq_map_inline:Nn \c_pdfannot_link_types_seq
   {
     \pdfdict_new:n { l_@@/link/#1 }
+    \pdfdict_put:nnn { l_@@/link/#1 }{ Subtype }{ /Link }
     \hook_new_pair:nn
       {pdfannot/link/#1/before}
       {pdfannot/link/#1/after}
@@ -491,7 +516,6 @@
           }
       }
       {
-        /Subtype/Link
         #2 %exp_not?
       }
     \bool_gset_true:N \g_@@_use_lastlink_bool
@@ -541,7 +565,8 @@
 %     \begin{macrocode}
 \cs_new_protected:Npn \pdfannot_link_goto_begin:nw #1 %#1 destination
   {
-    \hook_use:n { pdfannot/link/GoTo/before}
+    \pdfdict_remove:nn { l_@@/link/GoTo} {Subtype}
+    \hook_use:n { pdfannot/link/GoTo/before} %the backend add it too
     \mode_leave_vertical:
     \exp_args:Nxx %xetex needs expansion
     \__pdf_backend_link_begin_goto:nnw
@@ -550,6 +575,7 @@
       }
       { #1 }
      \bool_gset_true:N \g_@@_use_lastlink_bool
+    \pdfdict_put:nnn { l_@@/link/GoTo} {Subtype}{GoTo}
      \hook_use:n { pdfannot/link/GoTo/begin}
   }
 
@@ -593,6 +619,7 @@
 %     \pdfannot_dict_put:nnx,
 %     \pdfannot_dict_remove:nn,
 %     \pdfannot_dict_show:n
+%     \pdfannot_dict_use:n
 %   }
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdfannot_dict_put:nnn #1 #2 #3
@@ -611,6 +638,11 @@
 \cs_new_protected:Npn \pdfannot_dict_show:n #1
   {
     \pdfdict_show:n { l_@@/#1 }
+  }
+
+\cs_new:Npn \pdfannot_dict_use:n #1
+  {
+    \pdfdict_use:n { l_@@/#1 }
   }
 %</package>
 %    \end{macrocode}
