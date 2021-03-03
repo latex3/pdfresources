@@ -528,7 +528,8 @@
 %     \begin{macrocode}
 \cs_new_protected:Npn \pdfannot_link_goto_begin:nw #1 %#1 destination
   {
-    \hook_use:n { pdfannot/link/GoTo/before}
+    \pdfdict_remove:nn { l_@@/link/GoTo} {Subtype}
+    \hook_use:n { pdfannot/link/GoTo/before} %the backend add it too
     \mode_leave_vertical:
     \exp_args:Nxx %xetex needs expansion
     \__pdf_backend_link_begin_goto:nnw
@@ -537,6 +538,7 @@
       }
       { #1 }
      \bool_gset_true:N \g_@@_use_lastlink_bool
+    \pdfdict_put:nnn { l_@@/link/GoTo} {Subtype}{GoTo}
      \hook_use:n { pdfannot/link/GoTo/begin}
   }
 
