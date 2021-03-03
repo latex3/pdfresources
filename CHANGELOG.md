@@ -8,7 +8,7 @@ this project uses date-based 'snapshot' version identifiers.
 ## [Unreleased]
 
 ### Added
--
+- \pdfannot_dict_use:n
 
 ### Changed
 -
