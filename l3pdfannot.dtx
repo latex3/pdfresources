@@ -266,6 +266,17 @@
 %   \texttt{link/GoTo}, \texttt{link/Named}.
 % \end{function}
 %
+% \begin{function}[EXP,added = 2021-03-03]
+%   { \pdfannot_dict_use:n  }
+%   \begin{syntax}
+%     \cs{pdfannot_dict_use:n} \Arg{dictionary name}
+%   \end{syntax}
+%   This outputs the property list of the dictionary as a list of
+%   |/key value| pairs.
+%   This can be used e.g. when writing a dictionary object with
+%   \cs{pdf_object_write:nx}
+% \end{function}
+%
 % \begin{variable}[added = 2020-12-28]{\l_pdfannot_F_bitset}
 %  This is a bitset variable, with the named index names suitable for the
 %  /F flag in an annotation.
@@ -531,6 +542,7 @@
 %     \pdfannot_dict_put:nnx,
 %     \pdfannot_dict_remove:nn,
 %     \pdfannot_dict_show:n
+%     \pdfannot_dict_use:n
 %   }
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdfannot_dict_put:nnn #1 #2 #3
@@ -549,6 +561,11 @@
 \cs_new_protected:Npn \pdfannot_dict_show:n #1
   {
     \pdfdict_show:n { l_@@/#1 }
+  }
+
+\cs_new:Npn \pdfannot_dict_use:n #1
+  {
+    \pdfdict_use:n { l_@@/#1 }
   }
 %</package>
 %    \end{macrocode}
