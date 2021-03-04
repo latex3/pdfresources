@@ -235,8 +235,9 @@
 % \section{bitsets}
 % A bitset for the field flag Ff:
 % Not yet decided if this should public or not ...
+% and an internal copy of the annot bitset.
 %    \begin{macrocode}
-\bitset_new:Nn \l_pdffield_Ff_bitset
+\bitset_new:Nn \l_@@_Ff_bitset
  {
     ReadOnly          = 0,
     Required          = 1,
@@ -258,6 +259,20 @@
     RadiosInUnison    = 25,%Btn Radio
     RichText          = 25,%Tx
     CommitOnSelChange = 26
+  }
+
+\bitset_new:Nn \l_@@_F_bitset
+  {
+    Invisible      = 1,
+    Hidden         = 2,
+    Print          = 3,
+    NoZoom         = 4,
+    NoRotate       = 5,
+    NoView         = 6,
+    ReadOnly       = 7,
+    Locked         = 8,
+    ToggleNoView   = 9,
+    LockedContents = 10
   }
 %    \end{macrocode}
 % \section{The field dictionary}
@@ -305,11 +320,11 @@
          {
            \pdf_object_ref:n {@@_checkbox/field/#1/Kids}
          }
-      \bitset_set_false:Nn \l_pdffield_Ff_bitset  {Radio}
-      \bitset_set_false:Nn \l_pdffield_Ff_bitset  {Pushbutton}
+      \bitset_set_false:Nn \l_@@_Ff_bitset  {Radio}
+      \bitset_set_false:Nn \l_@@_Ff_bitset  {Pushbutton}
       \pdfdict_put:nnx {l_@@/checkbox/field}
         {Ff}
-        {\bitset_to_arabic:N \l_pdffield_Ff_bitset }
+        {\bitset_to_arabic:N \l_@@_Ff_bitset }
       \pdf_object_write:nx {@@_checkbox/field/#1} { \pdfdict_use:n {l_@@/checkbox/field} }
       \pdfmanagement_add:nnx
         { Catalog / AcroForm }
@@ -341,6 +356,15 @@
 % as it actually uses an internal name of another module.
 %    \begin{macrocode}
     \pdfdict_put:nnx {l_@@/checkbox/annot}{AP}{<<\pdfdict_use:n{l_@@/checkbox/annot/AP}>>}
+    \pdfmeta_standard_verify:nF
+      {annot_flags}
+      {
+        \bitset_set_true:Nn  \l_@@_F_bitset {Print}
+        \bitset_set_false:Nn \l_@@_F_bitset {Hidden}
+        \bitset_set_false:Nn \l_@@_F_bitset {Invisible}
+        \bitset_set_false:Nn \l_@@_F_bitset {NoView}
+      }
+    \pdfdict_put:nnx {l_@@/checkbox/annot}{F}{ \bitset_to_arabic:N \l_@@_F_bitset }
     \pdfdict_set_eq:nn {l__pdfannot/widget}{l_@@/checkbox/annot}
     \pdfannot_dict_put:nnx {widget}{Parent}{\pdf_object_ref:n{@@_checkbox/field/#1}}
     \mode_leave_vertical:
@@ -491,6 +515,42 @@
    ,checked .default:n = {true}
    ,checked .initial:n = {false}
  }
+%    \end{macrocode}
+% Flags. We don't add lots of individual keys but mapped the key names directly
+%    \begin{macrocode}
+\keys_define:nn { pdffield / checkbox }
+  {
+    ,setfieldflags .code:n =
+      {
+          \clist_map_inline:nn {#1}
+           {
+             \bitset_set_true:Nn \l_@@_Ff_bitset {##1}
+           }
+      }
+    ,setfieldflags .groups:n = {field}
+    ,unsetfieldflags .code:n =
+      {
+          \clist_map_inline:nn {#1}
+           {
+             \bitset_set_false:Nn \l_@@_Ff_bitset {##1}
+           }
+      }
+    ,unsetfieldflags .groups:n = {field}
+    ,setannotflags .code:n =
+      {
+          \clist_map_inline:nn {#1}
+           {
+             \bitset_set_true:Nn \l_@@_F_bitset {##1}
+           }
+      }
+    ,unsetannotflags .code:n =
+      {
+          \clist_map_inline:nn {#1}
+           {
+             \bitset_set_false:Nn \l_@@_F_bitset {##1}
+           }
+      }
+  }
 
 \keys_define:nn { pdffield / checkbox }
   {
