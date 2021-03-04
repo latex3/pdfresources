@@ -364,6 +364,17 @@
         \bitset_set_false:Nn \l_@@_F_bitset {Invisible}
         \bitset_set_false:Nn \l_@@_F_bitset {NoView}
       }
+    \pdfdict_if_empty:nF{l_@@/checkbox/annot/AA}
+      {
+        \pdfmeta_standard_verify:nT
+         {annot_widget_no_AA}
+         {
+            \pdfdict_put:nnx
+              {l_@@/checkbox/annot}
+              {AA}
+              {\pdfdict_use:n {l_@@/checkbox/annot/AA}}
+         }
+      }
     \pdfdict_put:nnx {l_@@/checkbox/annot}{F}{ \bitset_to_arabic:N \l_@@_F_bitset }
     \pdfdict_set_eq:nn {l__pdfannot/widget}{l_@@/checkbox/annot}
     \pdfannot_dict_put:nnx {widget}{Parent}{\pdf_object_ref:n{@@_checkbox/field/#1}}
@@ -566,12 +577,45 @@
           }
       },
     appearance .initial:n = checkbox/default,
-
-    normal ~ off .tl_set_x:N = \l__pdffield_normal_off_tl,
-    normal ~ off .value_required:n = true,
-    normal ~ yes .tl_set_x:N = \l__pdffield_normal_yes_tl,
-    normal ~ yes .value_required:n = true,
   }
+
+%    \end{macrocode}
+%
+%  Keys for the AA dictionary. They all trigger javascript option.
+%    \begin{macrocode}
+\pdfdict_new:n {l_@@/checkbox/annot/AA}
+\pdfdict_new:n {l_@@/checkbox/field/AA}
+
+\cs_new_protected:Npn \@@_define_AAaction_key:nnn #1 #2 #3 %#1 key, #2 pdf, #3 dict
+  {
+    \keys_define:nn { pdffield / checkbox }
+      {
+         #1 .code:n =
+           {
+             \pdf_string_from_unicode:nnN {utf8/string}{##1}\l_@@_tmpa_str
+             \tl_if_empty:nTF
+               {
+                 \pdfdict_remove:nn {l_@@/checkbox/#3/AA}{#2}
+               }
+               {
+                 \pdfdict_put:nnx {l_@@/checkbox/#3/AA}
+                  {#2}
+                  {<</S/JavaScript/JS\l_@@_tmpa_str>>}
+               }
+           }
+        #1 .groups = {#3}
+      }
+  }
+\@@_define_AAaction_key:nn {keystroke}{K}{field}
+\@@_define_AAaction_key:nn {format}   {F}{field}
+\@@_define_AAaction_key:nn {validate} {V}{field}
+\@@_define_AAaction_key:nn {calculate}{C}{field}
+\@@_define_AAaction_key:nn {onfocus}  {Fo}{annot}
+\@@_define_AAaction_key:nn {onblur}   {Bl}{annot}
+\@@_define_AAaction_key:nn {onmousedown}{D}{annot}
+\@@_define_AAaction_key:nn {onmouseup}{U}{annot}
+\@@_define_AAaction_key:nn {onenter}  {E}{annot}
+\@@_define_AAaction_key:nn {onexit}   {X}{annot}
 
 
 
