@@ -55,9 +55,14 @@
 
 \begin{document}%\showoutput
 %\Form[NeedAppearances=false]
+\ExplSyntaxOn
+\keys_set:nn{pdffield/checkbox}{width=1cm}
+\ExplSyntaxOff
+1: \checkboxfield[altname=blub]{checkbox1}
 
-1: \checkboxfield{checkbox1}
+1: \checkboxfield[checked,width=3cm,height=2cm,depth=1cm,altname=zzz]{checkbox1}
 
+\checkboxfield[checked,width=3cm,height=2cm,depth=1cm]{checkbox1}
 1: \checkboxfield[checked]{checkbox2}
 \end{document}
    \checkboxfield{checkbox1}

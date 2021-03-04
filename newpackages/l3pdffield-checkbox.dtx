@@ -183,6 +183,8 @@
 % \item[MK] this is what hyperref uses to set the appearance, but I
 %  explicitly leave it out and use |AP|.
 %
+% \item[Q] (alignment), used by hyperref but not relevant as we don't have variable
+% text here.
 % \end{description}
 % \end{documentation}
 % \begin{implementation}
@@ -203,8 +205,10 @@
 %    \end{macrocode}
 % \section{local variables}
 %    \begin{macrocode}
+\str_new:N\l_@@_field_name_str
 \str_new:N \l_@@_tmpa_str
 \str_new:N \l_@@_name_tmpa_str
+\tl_new:N \l_@@_keys_tmpa_tl
 %    \end{macrocode}
 % \section{Variants}
 %    \begin{macrocode}
@@ -220,6 +224,11 @@
   {
     The~field~name~`#1`~contains~a~period. \\
     This~is~not~allowed. `
+  }
+\msg_new:nnn {pdffield}{field-keys-ignored}
+  {
+    The~field~`#1`~is~already~initialized\\
+    The~field~keys~`#2`~are~ignored.
   }
 %    \end{macrocode}
 
@@ -274,10 +283,8 @@
 % \meta{name} should be a PDF text string without period. It identifies the
 % field.
 %    \begin{macrocode}
-\cs_new_protected:Npn \@@_checkbox_field_add:n #1
+\cs_new_protected:Npn \@@_checkbox_field_new:n #1
   {
-    \pdf_object_if_exist:nF {@@_checkbox/field/#1}
-     {
       \group_begin:
       \pdf_object_new:nn {@@_checkbox/field/#1}      {dict}
       \pdf_object_new:nn {@@_checkbox/field/#1/Kids} {array}
@@ -309,7 +316,6 @@
         { Fields }
         {\pdf_object_ref:n {@@_checkbox/field/#1} }
       \group_end:
-     }
   }
 
 %    \end{macrocode}
@@ -399,33 +405,73 @@
 \cs_new_protected:Npn \@@_checkbox_add:nn #1 #2 %#1: keys, #2 name
   {
     \group_begin:
-    \keys_set:nn {pdffield / checkbox } {#1}
+    \keys_set_filter:nnnN {pdffield / checkbox }{field}{#1}\l_@@_keys_tmpa_tl
     \str_if_in:nnT {#2}{.}
       {
         \msg_error:nnn {pdffield}{no-period}{#2}
       }
-    \pdf_string_from_unicode:nnN {utf8/string-raw}{#2}\l_@@_name_tmpa_str
-    \exp_args:No
-      \@@_checkbox_field_add:n {\l_@@_name_tmpa_str}
+    \pdf_string_from_unicode:nnN {utf8/string-raw}{#2}\l_@@_field_name_str
+    \exp_args:Nx
+      \pdf_object_if_exist:nTF {@@_checkbox/field/\l_@@_field_name_str}
+       {
+          \tl_if_empty:NF \l_@@_keys_tmpa_tl
+           {
+             \msg_warning:nnxx {pdffield}{field-keys-ignored}{#2}{\l_@@_keys_tmpa_tl}
+           }
+       }
+       {
+         \keys_set:nV { pdffield/checkbox } \l_@@_keys_tmpa_tl
+         \exp_args:No
+         \@@_checkbox_field_new:n {\l_@@_field_name_str}
+       }
     \exp_args:No
       \@@_checkbox_annot_add:nnnn
-        {\l_@@_name_tmpa_str}
-        {\l_@@_annot_ht_dim}
-        {\l_@@_annot_wd_dim}
-        {\l_@@_annot_dp_dim}
+        {\l_@@_field_name_str}
+        {\l_@@_annot_wd_tl }
+        {\l_@@_annot_ht_tl }
+        {\l_@@_annot_dp_tl }
     \group_end:
   }
-
-
-\dim_new:N \l_@@_annot_ht_dim
-\dim_set:Nn \l_@@_annot_ht_dim {1cm}
-\dim_new:N \l_@@_annot_wd_dim
-\dim_set:Nn \l_@@_annot_wd_dim {1cm}
-\dim_new:N \l_@@_annot_dp_dim
-
 %    \end{macrocode}
 % \section{Keys}
-% At first a key to decide if the Box is checked or not
+% The size of the checkbox
+%    \begin{macrocode}
+
+\tl_new:N \l_@@_annot_ht_tl
+\tl_new:N \l_@@_annot_wd_tl
+\tl_new:N \l_@@_annot_dp_tl
+
+\keys_define:nn { pdffield / checkbox }
+  {
+    ,width  .tl_set:N = \l_@@_annot_wd_tl
+    ,height .tl_set:N = \l_@@_annot_ht_tl
+    ,depth  .tl_set:N = \l_@@_annot_dp_tl
+    ,width  .initial:n = \normalbaselineskip
+    ,height .initial:n = \normalbaselineskip
+    ,depth  .initial:n = 0pt
+  }
+%    \end{macrocode}
+% The names. The main name is an argument.
+% The other names can only be set when the field is created.
+%    \begin{macrocode}
+\keys_define:nn { pdffield / checkbox }
+  {
+    ,altname .code:n =
+      {
+        \pdf_string_from_unicode:nnN {utf8/string}{#1}\l_@@_name_tmpa_str
+        \pdfdict_put:nnx { l_@@/checkbox/field }{TU}{\l_@@_name_tmpa_str}
+      }
+    ,altname .groups:n = {field}
+    ,mappingname .code:n =
+      {
+        \pdf_string_from_unicode:nnN {utf8/string}{#1}\l_@@_name_tmpa_str
+        \pdfdict_put:nnx { l_@@/checkbox/field }{TM}{\l_@@_name_tmpa_str}
+      }
+    ,mappingname .groups:n = {field}
+  }
+%    \end{macrocode}
+
+% A key to decide if the Box is initially checked or not
 %    \begin{macrocode}
 \keys_define:nn { pdffield / checkbox }
  {
