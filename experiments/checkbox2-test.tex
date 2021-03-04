@@ -10,54 +10,54 @@
 \usepackage{hyperref}
 
 \usepackage{l3pdffield-checkbox}
-\usepackage{tikz,bearwear,iftex}
-\usepackage[default]{sourcesanspro}
-
-\newcheckboxappearance* {checkbox/Yes/depth}
-  {
-    xxxxxxxxxxxxxxx
-  }
-
-\newcheckboxappearance* {checkbox/Off/depth}
-  {  }
-  
- \iftutex
-\newcheckboxappearance {checkbox/Off/unicode}
- {\normalfont ☐}
-\newcheckboxappearance {checkbox/Yes/unicode}
- {\normalfont ☑}
-\fi
-
-\newcheckboxappearance {checkbox/Off/tikz}
-  {
-   \tikz[baseline]
-    \path[draw=white,fill=magenta](0,-1pt)rectangle(8pt,7pt);
-  }
-
-\newcheckboxappearance {checkbox/Yes/tikz}
-   {
-    \tikz[baseline]
-      \path[draw=white,fill=cyan](0,-1pt)rectangle(8pt,7pt);
-   }
-
-
-\newcheckboxappearance {checkbox/Off/bear}
-  {
-   \tikz[scale=0.5]\bear;
-  }
-
-\newcheckboxappearance {checkbox/Yes/bear}
-   {
-    \tikz[scale=0.5]\bear\bearwear;
-   }
- 
-\usepackage{pdflscape,iftex}
+%\usepackage{tikz,bearwear,iftex}
+%\usepackage[default]{sourcesanspro}
+%
+%\newcheckboxappearance* {checkbox/Yes/depth}
+%  {
+%    xxxxxxxxxxxxxxx
+%  }
+%
+%\newcheckboxappearance* {checkbox/Off/depth}
+%  {  }
+%
+% \iftutex
+%\newcheckboxappearance {checkbox/Off/unicode}
+% {\normalfont ☐}
+%\newcheckboxappearance {checkbox/Yes/unicode}
+% {\normalfont ☑}
+%\fi
+%
+%\newcheckboxappearance {checkbox/Off/tikz}
+%  {
+%   \tikz[baseline]
+%    \path[draw=white,fill=magenta](0,-1pt)rectangle(8pt,7pt);
+%  }
+%
+%\newcheckboxappearance {checkbox/Yes/tikz}
+%   {
+%    \tikz[baseline]
+%      \path[draw=white,fill=cyan](0,-1pt)rectangle(8pt,7pt);
+%   }
+%
+%
+%\newcheckboxappearance {checkbox/Off/bear}
+%  {
+%   \tikz[scale=0.5]\bear;
+%  }
+%
+%\newcheckboxappearance {checkbox/Yes/bear}
+%   {
+%    \tikz[scale=0.5]\bear\bearwear;
+%   }
+%
+%\usepackage{pdflscape,iftex}
 
 \begin{document}%\showoutput
 \Form[NeedAppearances=false]
 
 1: \checkboxfield{checkbox1}
-
+\end{document}
    \checkboxfield{checkbox1}
 
 \ExplSyntaxOn

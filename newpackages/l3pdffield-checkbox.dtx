@@ -116,7 +116,7 @@
 % XObjects used as appearances can not be rotated, if needed one has to
 % create a new appearance.
 %
-% \subsection{The Field dictionary}
+% \subsection{The field dictionary}
 %
 % The field dictionary shall or can have the following entries
 %
@@ -249,8 +249,13 @@
 % The field dictionary is the main object. It references the
 % actual widget annotations as kids. It is created at the first
 % checkbox with a specific name.
-%
-% We need check if the name contains a dot. But we will do this in an external command
+% To be able to set values from the outside it will use a
+% dictionary which can be filled by key-val.
+%    \begin{macrocode}
+\pdfdict_new:n   {l_@@/checkbox/field}
+\pdfdict_put:nnn {l_@@/checkbox/field}{FT}{/Btn}
+%    \end{macrocode}
+% We need to check if the name contains a dot. But we will do this in an external command
 % to avoid to have it twice. Here we assume that the name is already converted and safe.
 %
 % We also assume that values that can be changed by the user are set outside
@@ -259,41 +264,40 @@
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_checkbox_field_dict:n #1
   {
-    \pdf_object_if_exist:nF {pdffield/checkbox/Field/Btn/#1}
+    \pdf_object_if_exist:nF {@@_checkbox/field/Btn/#1}
      {
       \group_begin:
-      \pdf_object_new:nn {@@_checkbox/Field/Btn/#1}      {dict}
-      \pdf_object_new:nn {@@_checkbox/Field/Btn/#1/Kids} {array}
-      \seq_new:c {g_@@_checkbox/Field/Btn/#1/Kids_seq}
+      \pdf_object_new:nn {@@_checkbox/field/Btn/#1}      {dict}
+      \pdf_object_new:nn {@@_checkbox/field/Btn/#1/Kids} {array}
+      \seq_new:c {g_@@_checkbox/field/Btn/#1/Kids_seq}
       \hook_gput_code:nnn {shipout/lastpage}{pdffield} %xetex needs this ...
         {
-          \pdf_object_write:nx {@@_checkbox/Field/Btn/#1/Kids}
+          \pdf_object_write:nx {@@_checkbox/field/Btn/#1/Kids}
             {
-              \seq_use:cn{g_@@_checkbox/Field/Btn/#1/Kids_seq}{~}
+              \seq_use:cn{g_@@_checkbox/field/Btn/#1/Kids_seq}{~}
             }
         }
-      \pdfdict_put:nnn {l_@@/checkbox/Field}{FT}{/Btn}
-      \pdfdict_put:nnn {l_@@/checkbox/Field}{T}{#1}
+      \pdfdict_put:nnn {l_@@/checkbox/field}{T}{(#1)}
    % V,DV are names describing the appearance. With checkboxes
    % the values /Yes and /Off are used.
    % this values are taken from the outside:
-   %   \pdfdict_put:nnn {l_@@/checkbox/Field}{V}{/Off}  %should be configurable/in sync with /AS/DV
-   %   \pdfdict_put:nnn {l_@@/checkbox/Field}{DV}{/Off} %should be configurable/in sync with /AS/DV
-      \pdfdict_put:nnx {l_@@/checkbox/Field}{Kids}
+   %   \pdfdict_put:nnn {l_@@/checkbox/field}{V}{/Off}  %should be configurable/in sync with /AS/DV
+   %   \pdfdict_put:nnn {l_@@/checkbox/field}{DV}{/Off} %should be configurable/in sync with /AS/DV
+      \pdfdict_put:nnx {l_@@/checkbox/field}{Kids}
          {
-           \pdf_object_ref:n {@@_checkbox/Field/Btn/#1/Kids}
+           \pdf_object_ref:n {@@_checkbox/field/Btn/#1/Kids}
          }
       \bitset_set_false:Nn \l_pdffield_Ff_bitset  {Radio}
       \bitset_set_false:Nn \l_pdffield_Ff_bitset  {Pushbutton}
       %\bitset_set_true:Nn  \l_pdffield_Ff_bitset  {NoExport} %?
-      \pdfdict_put:nnx {l_@@/checkbox/Field}
+      \pdfdict_put:nnx {l_@@/checkbox/field}
         {Ff}
         {\bitset_to_arabic:N \l_pdffield_Ff_bitset }
-      \pdf_object_write:nx {@@_checkbox/Field/Btn/#1} { \pdfdict_use:n {l_@@/checkbox/Field} }
+      \pdf_object_write:nx {@@_checkbox/field/Btn/#1} { \pdfdict_use:n {l_@@/checkbox/field} }
       \pdfmanagement_add:nnx
         { Catalog / AcroForm }
         { Fields }
-        {\pdf_object_ref:n {@@_checkbox/Field/Btn/#1} }
+        {\pdf_object_ref:n {@@_checkbox/field/Btn/#1} }
       \group_end:
      }
   }
@@ -303,13 +307,18 @@
 % We assume that the annotation should really occupy space on the page.
 % We also assume that keys like AP, AS are added before through keys to
 % the dictionary.
+% We use a local dictionary which is copied into |l__pdfannot/widget| in the code.
+%    \begin{macrocode}
+\pdfdict_new:n   {l_@@/checkbox/annot}
+\pdfdict_put:nnn {l_@@/checkbox/annot}{Subtype}{/Widget}
+%    \end{macrocode}
 %
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_checkbox_annot:nnnn #1 #2 #3 #4 %wd, ht, dp, name
   {
     \group_begin:
-     %\pdfdict_set_eq:nn
-     \pdfannot_dict_put:nnx {widget}{Parent}{\pdf_object_ref:n{@@_checkbox/Field/Btn/#4}}
+     \pdfdict_set_eq:nn {l__pdfannot/widget}{l_@@/checkbox/annot}
+     \pdfannot_dict_put:nnx {widget}{Parent}{\pdf_object_ref:n{@@_checkbox/field/Btn/#4}}
      \hbox_to_wd:nn
        { #1  }
        {
@@ -320,17 +329,12 @@
            { #3 }
          \hfill
         }
-    \seq_gput_right:cx {g_@@_checkbox/Field/Btn/#1/Kids_seq}{ \pdfannot_box_ref_last:}
+    \seq_gput_right:cx {g_@@_checkbox/field/Btn/#4/Kids_seq}{ \pdfannot_box_ref_last:}
     \group_end:
   }
 
 %    \end{macrocode}
-% Like in the l3pdfannot module, we hide the dictionaries
-% and will offer an interface if needed.
-%    \begin{macrocode}
-\pdfdict_new:n {l_@@/checkbox/Field}
-\pdfdict_new:n {l_@@/checkbox/Annot}
-%    \end{macrocode}
+
 % The appearance dictionaries. We don't try to to force
 % a size or content here.
 %    \begin{macrocode}
@@ -391,15 +395,15 @@
    checked .choice: ,
    checked / false .code:n =
      {
-       \pdfdict_put:nnn {l_@@/checkbox/Field}{V}{/Off}
-       \pdfdict_put:nnn {l_@@/checkbox/Annot}{AS}{/Off}
-       \pdfdict_put:nnn {l_@@/checkbox/Annot}{DV}{/Off}
+       \pdfdict_put:nnn {l_@@/checkbox/field}{V}{/Off}
+       \pdfdict_put:nnn {l_@@/checkbox/annot}{AS}{/Off}
+       \pdfdict_put:nnn {l_@@/checkbox/annot}{DV}{/Off}
      },
    checked / true .code:n =
      {
-       \pdfdict_put:nnn {l_@@/checkbox/Field}{V}{/Yes}
-       \pdfdict_put:nnn {l_@@/checkbox/Annot}{AS}{/Yes}
-       \pdfdict_put:nnn {l_@@/checkbox/Annot}{DV}{/Yes}
+       \pdfdict_put:nnn {l_@@/checkbox/field}{V}{/Yes}
+       \pdfdict_put:nnn {l_@@/checkbox/annot}{AS}{/Yes}
+       \pdfdict_put:nnn {l_@@/checkbox/annot}{DV}{/Yes}
      },
    checked .initial:n = false
  }
@@ -407,7 +411,7 @@
   {
     appearance .code:n = %value is a name of an appearance
       {
-        \pdfannot_dict_put:nnx {widget}{AP}
+        \pdfdict_put:nnn {l_@@/checkbox/annot}{AP}
           {
             <<
               /N ~
@@ -507,7 +511,7 @@
 %TU: alternate description (test string)
 %TM: mapping name
 %Q integer (variable text field)
-%Ff: flags ->pdffield/checkbox/Field
+%Ff: flags ->pdffield/checkbox/field
 %V: value            % not pushbutton
 %DV: default value   % not pushbutton
 %AA: Action dict ... -> see below
@@ -550,7 +554,7 @@
 %
 %  /S /JavaScript
 %  /JS text string or stream
-%  %\pdf_flag_new:nn {annot/Field/submit} %name is wrong ...
+%  %\pdf_flag_new:nn {annot/field/submit} %name is wrong ...
 %  {
 %    Include/Exclude       = 0,
 %    IncludeNoValueFields  = 1,
