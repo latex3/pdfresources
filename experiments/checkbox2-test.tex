@@ -47,8 +47,8 @@
    
 \newlength\bearheight  
 \newlength\bearwidth
-\settoheight\bearheight{\tikz\bear;}
-\settoheight\bearwidth{\tikz\bear;}
+\settoheight\bearheight{\tikz\bear;} \showthe\bearheight
+\settowidth\bearwidth{\tikz\bear;}  \showthe\bearwidth
   
 \iftutex
 \RequirePackage{fontspec}
@@ -91,16 +91,16 @@ width=\bearwidth,height=\bearheight]
  {On: bear with shirt, Off: bear, click: panda/cat (depending on the state) }
  
 \CheckBox[name=bear,appearance=checkbox/unicode]
- {On: {\fontspec{SourceSansPro-Regular.otf}☑}, Off: {\fontspec{SourceSansPro-Regular.otf}☐}, in sync with the first and last bear } 
- 
+ {On: {\fontspec{SourceSansPro-Regular.otf}☑}, Off: {\fontspec{SourceSansPro-Regular.otf}☐}, in sync with the first and last bear }
+
 \CheckBox[name=bear,appearance=checkbox/bear,width=40pt,height=15pt]
  {squeezed bear}
- 
- 
+
+
 \CheckBox[name=javascript,width=40pt,height=40pt,onenter={app.alert('Hello');}]
  {on enter: warning dialog (in pdf viewer with javascript)}
- 
-\end{document} 
+
+\end{document}
 \ExplSyntaxOn
 
 \pdffield_checkbox:n {name=checkbox/default}

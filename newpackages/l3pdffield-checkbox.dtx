@@ -24,12 +24,13 @@
 %
 %<*driver>
 \RequirePackage{pdfmanagement-testphase}
-\DeclareDocumentMetadata{pdfstandard=A-2b}
+\DeclareDocumentMetadata{}
 \makeatletter
 \declare@file@substitution{doc.sty}{doc-v3beta.sty}
 \makeatother
 \documentclass[full]{l3doc}
-\usepackage{array,booktabs,hyperxmp}
+\usepackage{array,booktabs}
+\usepackage{l3pdffield-checkbox-testphase,bearwear}
 \hypersetup{pdfauthor=The LaTeX Project,
  pdftitle=l3pdffield-checkbox (LaTeX PDF management testphase bundle)}
 \begin{document}
@@ -43,6 +44,16 @@
 %   printtype= \textit{checkbox key}
 %    ]{Checkboxkey}{checkboxkey}
 % \providecommand\hook[1]{\texttt{#1}}
+% \ExplSyntaxOn
+% \pdffield_store_appearance:nn {bear/Yes}
+%  {
+%    \tikz\bear\bearwear[shirt=red,body~deco={\node[font=\tiny\bfseries,white]~at~(beartummy){Yes};}];
+%  }
+% \pdffield_store_appearance:nn {bear/Off}
+%  {
+%   \tikz\bear\bearwear[body~deco={\node[font=\tiny\bfseries,white]~at~(beartummy){Off};}];
+%  }
+% \ExplSyntaxOff
 % \title{^^A
 %   The \pkg{l3pdffield-checkbox} module\\ Commands to create checkbox fields   ^^A
 %   \\ \LaTeX{} PDF management testphase bundle
@@ -61,17 +72,37 @@
 %
 % \maketitle
 % \begin{documentation}
+% \section{\pkg{l3pdffield-checkbox} Documentation}
 % The implementation of form fields in hyperref has some bugs, see for example
 % \url{https://github.com/latex3/hyperref/issues/94}. This package is a first step
 % towards the goal to review and improve the code of form fields.
+%
+% Like the \pkg{pdfmanagement-testphase} package itself it is a temporary package:
+% the definite home of the code is not yet decided.
 %
 % It handles for now \emph{only} checkboxes, other form fields like radio buttons or
 % text fields will follow later. As no fonts are used, it doesn't
 % relies on the hyperref code
 % to initialize the form, but it can be used with hyperref.
-% It requires the new PDF management code.
-% If hyperref is loaded before
-% the package will suppress the deprecated |/NeedAppearances| setting.
+%
+% The code requires the new PDF management.
+%
+% Click me: \ExplSyntaxOn\pdffield_checkbox:n{name=bear,appearance=bear,width=23pt,height=30pt,depth=10pt}\ExplSyntaxOff
+%
+% \bigskip
+%
+% Please keep in mind
+% \begin{itemize}
+% \item Not every PDF viewer supports checkboxes.
+% \item The handling can depend on settings in the PDF viewer. In adobe reader for
+% example I had to disable an option to avoid that it tries to create an appearance
+% it self
+% \item Standards like pdf/A disable form fields too (as you typically can't change the PDF.
+% \end{itemize}
+%
+% If \pkg{hyperref} is loaded before
+% the package will suppress the deprecated |/NeedAppearances| setting. If \pkg{hyperref}
+% is loaded later you should do it in the \cs{Form} options.
 %
 % So a typical use together with hyperref could look like this
 %
@@ -80,18 +111,19 @@
 % \DeclareDocumentMetadata{uncompress}
 % \documentclass{article}
 % \usepackage{hyperref}
-% \usepackage{l3pdffield-checkbox}
+% \usepackage{l3pdffield-checkbox-testphase}
 % \begin{document}
 % \Form
 % \end{verbatim}
-% \section{Commands}
+% \subsection{Commands}
 % \begin{function}{\pdffield_checkbox:n}
 % \begin{syntax}
 %  \cs{pdffield_checkbox:n}\Arg{key val list}
 % \end{syntax}
 % This creates a checkbox to check and uncheck. The list of allowed keys is described below.
 % Typically the \meta{key val list} should at least set the name. Checkboxes with the same
-% name belong to the same field and are checked and unchecked together.
+% name belong to the same field and are checked and unchecked together. The default appearance
+% is a quadratic frame with a \cs{texttimes} in it for the checked case.
 % \end{function}
 %
 %\begin{function}{\pdffield_setup:nn}
@@ -113,7 +145,7 @@
 % \meta{content} is arbitrary content. The dimensions should fit to the planed size of the
 % checkbox.%
 % \end{function}
-% \section{Keys}
+% \subsection{Keys}
 %
 % The new checkbox commands accepts following keys:
 %
@@ -133,19 +165,19 @@
 % |width| and |height| use \cs{normalbaselineskip}, the |depth| is zero.
 %
 % \DescribeCheckboxkey{appearance} This key sets the normal appearance. It takes as value a
-% \meta{name} and expects that the two appearances \meta{name}|/Yes| and \meta{name|/Off|
+% \meta{name} and expects that the two appearances \meta{name}|/Yes| and \meta{name}|/Off|
 % has been created with the command described below. The initial value is |checkbox/default|
 % and shows a \cs{texttimes}.
 %
 % \DescribeCheckboxkey{rollover-appearance} This key sets the rollover appearance (when the
 % mouse hovers over the checkbox). It takes as value a
-% \meta{name} and expects that the two appearances \meta{name}|/Yes| and \meta{name|/Off|
+% \meta{name} and expects that the two appearances \meta{name}|/Yes| and \meta{name}|/Off|
 % has been created with the command described below. Initially this is not set.
 % An empty value removes the entry.
 %
 % \DescribeCheckboxkey{down-appearance} This key sets the down appearance (when the
 % mouse clicks). It takes as value a
-% \meta{name} and expects that the two appearances \meta{name}|/Yes| and \meta{name|/Off|
+% \meta{name} and expects that the two appearances \meta{name}|/Yes| and \meta{name}|/Off|
 % has been created with the command described below. Initially this is not set.
 % An empty value removes the entry.
 %
@@ -168,14 +200,17 @@
 % Check the PDF reference to decide which one to set or unset.
 %
 % \begin{checkboxkey}{keystroke,format,validate,calculate}
-% These keys add the |/K, |/F, |/V|, |/C| key to  |/AA| dictionary of the field object.
-% Their value should be javascript code. The |/AA| dictionary is suppress if a pdf/A standard is set.
+% These keys add the |/K, |/F, |/V|, |/C| key to the |/AA| dictionary of the field object.
+% Their value should be javascript code. The |/AA| dictionary is suppressed
+% if a pdf/A standard is set. These keys are probably not of much used with a checkbox.
 % \end{checkboxkey}
 %
+% \vspace{2\baselineskip}
 % \begin{checkboxkey}{onfocus,onblur,onmousedown,onmouseup,onenter,onexit}
-% These keys adds the |/F, |/Bl, |/D|, |/U|, |E| and |X| key to  |/AA| dictionary of the widget
-% annotation (the checkbox instance) object.
-% Their value should be javascript code. The |/AA| dictionary is suppress if a pdf/A standard is set.
+% These keys adds the |/F, |/Bl, |/D|, |/U|, |E| and |X| key to the |/AA| dictionary
+% of the widget  annotation (the checkbox instance) object.
+% Their value should be javascript code. The |/AA| dictionary
+% is suppressed if a pdf/A standard is set.
 %
 % For example
 % \begin{verbatim}
@@ -183,11 +218,11 @@
 % \end{verbatim}
 % \end{checkboxkey}
 %
-% \section{Using with hyperref}
-% The \cs{CheckBox} command from hyperref also add a label, something that the
-% command here don't do. A redefinition like this should allow to it together
-% with the commands of this module. Be aware that the behaviour will not be identical!
-% Not every setting and key from hyperref has been copied.
+% \subsection{Using with hyperref}
+% The \cs{CheckBox} command from hyperref also prints a label, something that the
+% command here don't do. A redefinition like the following should allow to \cs{CheckBox}
+% to use the commands of this module. Be aware that the behaviour will not be identical!
+% Not every setting and key from \pkg{hyperref} has been copied.
 %
 % \begin{verbatim}
 % \ExplSyntaxOn\makeatletter
@@ -195,7 +230,7 @@
 % \ExplSyntaxOff\makeatother
 % \end{verbatim}
 %
-% \section{Some background}
+% \subsection{Some background}
 % Form fields consist of a field object and number of instances of the field:
 % A checkbox can appear on more than one page or location and if one instance
 % is checked all other instances follows and are checked too.
@@ -237,7 +272,7 @@
 % XObjects used as appearances can not be rotated, if needed one has to
 % create a new appearance.
 %
-% \subsection{The field dictionary}
+% \subsubsection{The field dictionary}
 %
 % The field dictionary shall or can have the following entries
 %
@@ -271,7 +306,7 @@
 %
 % \end{description}
 %
-% \subsection{The widget annotation dictionary}
+% \subsubsection{The widget annotation dictionary}
 %
 % \begin{description}
 % \item[Type] Value: |/Annot|, set automatically
@@ -302,14 +337,16 @@
 % text here.
 % \end{description}
 % \end{documentation}
+%
 % \begin{implementation}
+% \section{\pkg{l3pdffield-checkbox} Implementation}
 %    \begin{macrocode}
 %<*package>
 %<@@=pdffield>
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesExplPackage{l3pdffield-checkbox}{0000-00-00}{v0.00a}{form field checkbox}%
 %    \end{macrocode}
-% \section{hyperref specific command}
+% \subsection{hyperref specific command}
 % hyperref sets NeedAppearances by default. As this is deprecated we disable this.
 %    \begin{macrocode}
 \csname HyField@NeedAppearancesfalse\endcsname % suppress NeedAppearances
@@ -318,22 +355,15 @@
 %\def\DefaultHeightofCheckBox{\normalbaselineskip}
 %\def\DefaultWidthofCheckBox{\normalbaselineskip}
 %    \end{macrocode}
-% \section{local variables}
+% \subsection{local variables}
 %    \begin{macrocode}
 \str_new:N \l_@@_field_name_str
 \str_new:N \l_@@_tmpa_str
 \str_new:N \l_@@_name_tmpa_str
 \tl_new:N \l_@@_keys_tmpa_tl
 %    \end{macrocode}
-% \section{Variants}
-%    \begin{macrocode}
-\cs_generate_variant:Nn \pdfxform_wd:n {e}
-\cs_generate_variant:Nn \pdfxform_ht:n {e}
-\cs_generate_variant:Nn \pdfxform_dp:n {e}
-\cs_generate_variant:Nn \pdfxform_ref:n{e}
-%    \end{macrocode}
 %
-% \section{messages}
+% \subsection{messages}
 %    \begin{macrocode}
 \msg_new:nnn {pdffield}{no-period}
   {
@@ -356,9 +386,8 @@
   }
 %    \end{macrocode}
 
-% \section{bitsets}
-% A bitset for the field flag Ff:
-% Not yet decided if this should public or not ...
+% \subsection{bitsets}
+% A bitset for the field flag Ff
 % and an internal copy of the annot bitset.
 %    \begin{macrocode}
 \bitset_new:Nn \l_@@_Ff_bitset
@@ -399,7 +428,7 @@
     LockedContents = 10
   }
 %    \end{macrocode}
-% \section{The field dictionary}
+% \subsection{The field dictionary}
 % The field dictionary is the main object. It references the
 % actual widget annotations as kids. It is created at the first
 % checkbox with a specific name.
@@ -470,7 +499,7 @@
 
 %    \end{macrocode}
 % \end{macro}
-% \section{The annot dictionary}
+% \subsection{The annot dictionary}
 % We assume that the annotation should really occupy space on the page and
 % leave vertical mode.
 % We also assume that keys like AP, AS are added before through keys to
@@ -481,6 +510,7 @@
 \pdfdict_put:nnn {l_@@/checkbox/annot}{Subtype}{/Widget}
 %    \end{macrocode}
 %
+% \begin{macro}{\@@_checkbox_annot_add:nnnn}
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_checkbox_annot_add:nnnn #1 #2 #3 #4 %name, wd, ht, dp,
   {
@@ -529,12 +559,16 @@
   }
 
 %    \end{macrocode}
-% \section{Appearances}
+% \end{macro}
+% \subsection{Appearances}
 % We don't try to force a size or content here.
 % The default appearances are a cross (\cs{texttimes}),
-% TODO check if this is a sensible default and works for most fonts ...
 % Every appearance should have two versions and follow the naming
 % checkbox/\meta{name}/Yes and checkbox/\meta{name}/Off.
+% TODO check if one delay the creation to a sensible place
+% (and don't forget that the appearance key sets an initial
+% value)
+%  \begin{macro}{\pdffield_store_appearance:nn,\@@_store_default_appearances:}
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdffield_store_appearance:nn #1 #2
   {
@@ -563,13 +597,14 @@
 
 \@@_store_default_appearances:
 %    \end{macrocode}
-%
+% \end{macro}
 % We define a dictionary for the AP content, so that we can add R and D too
 %    \begin{macrocode}
 \pdfdict_new:n   {l_@@/checkbox/annot/AP}
 %    \end{macrocode}
 %
-% \section{Assembling the checkbox}
+% \subsection{Assembling the checkbox}
+% \begin{macro}{\@@_checkbox_add:n}
 %    \begin{macrocode}
 
 \cs_new_protected:Npn \@@_checkbox_add:n #1
@@ -606,10 +641,11 @@
     \group_end:
   }
 %    \end{macrocode}
-% \section{Keys}
+% \end{macro}
+% \subsection{Keys}
 % The size of the checkbox
+%
 %    \begin{macrocode}
-
 \tl_new:N \l_@@_annot_ht_tl
 \tl_new:N \l_@@_annot_wd_tl
 \tl_new:N \l_@@_annot_dp_tl
@@ -796,6 +832,7 @@
 %    \end{macrocode}
 %
 %  Keys for the AA dictionary. They all trigger javascript option.
+%  \begin{macro}{\@@_define_AAaction_key:nnn}
 %    \begin{macrocode}
 \pdfdict_new:n {l_@@/checkbox/annot/AA}
 \pdfdict_new:n {l_@@/checkbox/field/AA}
@@ -831,7 +868,9 @@
 \@@_define_AAaction_key:nnn {onenter}  {E}{annot}
 \@@_define_AAaction_key:nnn {onexit}   {X}{annot}
 %    \end{macrocode}
-% \section{user commands}
+% \end{macro}
+% \subsection{user commands}
+% \begin{macro}{\pdffield_checkbox:n,\pdffield_setup:nn}
 %    \begin{macrocode}
 \cs_set_eq:NN \pdffield_checkbox:n \@@_checkbox_add:n
 
@@ -839,11 +878,9 @@
  {
    \keys_set:n {pdffield / #1 } {#2}
  }
-%    \end{macrocode}
-%
-
 %</package>
 %    \end{macrocode}
+% \end{macro}
 %\end{implementation}
 
 \endinput%
