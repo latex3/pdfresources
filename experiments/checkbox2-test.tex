@@ -2,63 +2,154 @@
 
 \RequirePackage{pdfmanagement-testphase}
 \DeclareDocumentMetadata{uncompress}
-%adapted from https://chat.stackexchange.com/transcript/message/54421537#54421537
+
 \documentclass{article}
 
-\pagestyle{empty}
-
-%\usepackage{hyperref}
-
+\usepackage{hyperref}
 \usepackage{l3pdffield-checkbox}
-%\usepackage{tikz,bearwear,iftex}
-%\usepackage[default]{sourcesanspro}
-%
-%\newcheckboxappearance* {checkbox/Yes/depth}
-%  {
-%    xxxxxxxxxxxxxxx
-%  }
-%
-%\newcheckboxappearance* {checkbox/Off/depth}
-%  {  }
-%
-% \iftutex
-%\newcheckboxappearance {checkbox/Off/unicode}
-% {\normalfont ☐}
-%\newcheckboxappearance {checkbox/Yes/unicode}
-% {\normalfont ☑}
-%\fi
-%
-%\newcheckboxappearance {checkbox/Off/tikz}
-%  {
-%   \tikz[baseline]
-%    \path[draw=white,fill=magenta](0,-1pt)rectangle(8pt,7pt);
-%  }
-%
-%\newcheckboxappearance {checkbox/Yes/tikz}
-%   {
-%    \tikz[baseline]
-%      \path[draw=white,fill=cyan](0,-1pt)rectangle(8pt,7pt);
-%   }
-%
-%
-%\newcheckboxappearance {checkbox/Off/bear}
-%  {
-%   \tikz[scale=0.5]\bear;
-%  }
-%
-%\newcheckboxappearance {checkbox/Yes/bear}
-%   {
-%    \tikz[scale=0.5]\bear\bearwear;
-%   }
-%
-%\usepackage{pdflscape,iftex}
+\usepackage{bearwear,tikzducks,tikzlings,iftex}
 
-\begin{document}%\showoutput
-%\Form[NeedAppearances=false]
 \ExplSyntaxOn
-\keys_set:nn{pdffield/checkbox}{width=1cm}
+\pdffield_store_appearance:nn {checkbox/bear/Yes}
+ {
+   \tikz\bear\bearwear;   
+ }
+\pdffield_store_appearance:nn {checkbox/bear/Off}
+ {
+   \tikz\bear;
+ }
+ 
+\pdffield_store_appearance:nn {checkbox/duck/Yes}
+ {
+   \tikz\duck[body=brown];
+ }
+\pdffield_store_appearance:nn {checkbox/duck/Off}
+ {
+   \tikz\duck;
+ }
+ 
+\pdffield_store_appearance:nn {checkbox/panda/Yes}
+ {
+   \tikz\panda;
+ }
+\pdffield_store_appearance:nn {checkbox/panda/Off}
+ {
+   \tikz\cat;
+ } 
+\pdffield_store_appearance:nn {checkbox/mix/Yes}
+ {
+   \tikz\duck[body=brown];
+ }
+\pdffield_store_appearance:nn {checkbox/mix/Off}
+ {
+   \tikz\bear;
+ }
+   
+\newlength\bearheight  
+\newlength\bearwidth
+\settoheight\bearheight{\tikz\bear;}
+\settoheight\bearwidth{\tikz\bear;}
+  
+\iftutex
+\RequirePackage{fontspec}
+\pdffield_store_appearance:nn {checkbox/unicode/Off}
+ {
+   {{\fontspec{SourceSansPro-Regular.otf}☐}}
+ }
+\pdffield_store_appearance:nn {checkbox/unicode/Yes}
+ {
+   {{\fontspec{SourceSansPro-Regular.otf}☑}}
+ }
+\fi 
 \ExplSyntaxOff
-1: \checkboxfield[altname=blub]{checkbox1}
+
+\ExplSyntaxOn\makeatletter
+\def\@CheckBox[#1]#2{\LayoutCheckField{#2}{\pdffield_checkbox:n {#1}}}
+\ExplSyntaxOff\makeatother
+
+\def\LayoutCheckField#1#2{\parbox[b]{5cm}{#1}\quad #2}
+\begin{document}%\showoutput
+\parskip\baselineskip
+\Form
+
+\CheckBox[name=default]
+ {On: frame with \texttimes, Off: empty frame }
+
+
+\CheckBox[name=bear,appearance=checkbox/bear,width=\bearwidth,height=\bearheight]
+ {On: bear with shirt, Off: bear }
+
+
+\CheckBox[name=bearR,appearance=checkbox/bear,
+rollover-appearance=checkbox/duck,
+width=\bearwidth,height=\bearheight]
+ {On: bear with shirt, Off: bear, rollover: yellow/brown duck (depending on the state) }
+ 
+\CheckBox[name=bearD,appearance=checkbox/bear,
+down-appearance=checkbox/panda,
+width=\bearwidth,height=\bearheight]
+ {On: bear with shirt, Off: bear, click: panda/cat (depending on the state) }
+ 
+\CheckBox[name=bear,appearance=checkbox/unicode]
+ {On: {\fontspec{SourceSansPro-Regular.otf}☑}, Off: {\fontspec{SourceSansPro-Regular.otf}☐}, in sync with the first and last bear } 
+ 
+\CheckBox[name=bear,appearance=checkbox/bear,width=40pt,height=15pt]
+ {squeezed bear}
+ 
+ 
+\CheckBox[name=javascript,width=40pt,height=40pt,onenter={app.alert('Hello');}]
+ {on enter: warning dialog (in pdf viewer with javascript)}
+ 
+\end{document} 
+\ExplSyntaxOn
+
+\pdffield_checkbox:n {name=checkbox/default}
+
+\pdffield_checkbox:n {name=bear,appearance=checkbox/bear,width=\bearwidth,height=\bearheight}
+
+\pdffield_checkbox:n {name=bear,appearance=checkbox/bear,rollover-appearance=checkbox/duck,down-appearance=checkbox/default,checked=true}
+
+\pdffield_checkbox:n {name=duck,appearance=checkbox/ducks}
+
+\par
+cooked~\pdffield_checkbox:n {name=duckcooked,appearance=checkbox/duck,checked=true} or~uncooked? \pdffield_checkbox:n {name=duckcooked,appearance=checkbox/duck,checked=false}
+
+\par
+\pdffield_checkbox:n {name=mix,appearance=checkbox/mix}
+\ExplSyntaxOff
+
+\end{document}
+\keys_set:nn{pdffield/checkbox}{width=1cm}
+% # form and field interface macros
+
+\NewDocumentCommand \checkboxfield { O{}m }
+  {
+    \@@_checkbox_add:n{name=#2,#1}
+  }
+  
+
+\NewDocumentCommand \newcheckboxappearance { s  m m  }  %#2=name, #3 = content
+ {
+   \pdfxform_new:nnn {#2}{}
+     {
+      \normalsize
+      \hbox_set:Nn   \l_tmpa_box { #3 \strut }
+      \IfBooleanTF {#1}
+       {
+        \fboxsep 0pt
+        \framebox
+         [ \dim_max:nn { \box_wd:N \l_tmpa_box }{ \box_ht:N\strutbox+\box_dp:N\strutbox} ]
+         { \box_use:N \l_tmpa_box }
+       }
+       {
+        \makebox
+        [ \dim_max:nn { \box_wd:N \l_tmpa_box }{\box_ht:N\strutbox+\box_dp:N\strutbox} ]
+        { \box_use:N \l_tmpa_box }
+       }
+     }
+ }  
+\ExplSyntaxOff
+1: \checkboxfield[altname=blub,keystroke={app.alert('Hello');}]{checkbox1}
 
 1: \checkboxfield[checked,width=3cm,height=2cm,depth=1cm,altname=zzz]{checkbox1}
 

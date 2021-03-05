@@ -37,6 +37,11 @@
 \end{document}
 %</driver>
 % \fi
+% \NewDocElement[
+%   idxgroup=checkbox keys,
+%   idxtype = {checkbox key},
+%   printtype= \textit{checkbox key}
+%    ]{Checkboxkey}{checkboxkey}
 % \providecommand\hook[1]{\texttt{#1}}
 % \title{^^A
 %   The \pkg{l3pdffield-checkbox} module\\ Commands to create checkbox fields   ^^A
@@ -78,6 +83,116 @@
 % \usepackage{l3pdffield-checkbox}
 % \begin{document}
 % \Form
+% \end{verbatim}
+% \section{Commands}
+% \begin{function}{\pdffield_checkbox:n}
+% \begin{syntax}
+%  \cs{pdffield_checkbox:n}\Arg{key val list}
+% \end{syntax}
+% This creates a checkbox to check and uncheck. The list of allowed keys is described below.
+% Typically the \meta{key val list} should at least set the name. Checkboxes with the same
+% name belong to the same field and are checked and unchecked together.
+% \end{function}
+%
+%\begin{function}{\pdffield_setup:nn}
+% \begin{syntax}
+%  \cs{pdffield_setup:nn}\Arg{field type}\Arg{key val list}
+% \end{syntax}
+% This allows to setup up values for following fields. \Arg{field type}
+% should be a field, currently the only allowed value is |checkbox|.
+% \end{function}
+%
+%\begin{function}{\pdffield_store_appearance:nn}
+% \begin{syntax}
+%  \cs{pdffield_store_appearance:nn}\Arg{name/state}\Arg{content}
+% \end{syntax}
+% This is a small wrapper around \cs{pdfxform_new:nn} and store appearances for the fields.
+% \meta{state} should be for checkboxes either |Yes| or |Off| (and typically
+% you should define both). \meta{name} is the name
+% that is used in the |appearance| key, |checkbox/default| is predefined and so can't be used.
+% \meta{content} is arbitrary content. The dimensions should fit to the planed size of the
+% checkbox.%
+% \end{function}
+% \section{Keys}
+%
+% The new checkbox commands accepts following keys:
+%
+% \DescribeCheckboxkey{name} This sets the (internal) name of the field. It shouldn't contain
+% a period, be not empty and sensibly consist of simple chars. Checkboxes instances
+% with the same name belong to the same field and are checked and unchecked together.
+%
+% \DescribeCheckboxkey{altname} This sets an alternative name for user interaction.
+% This name can only be set at the first checkbox instance, when the field is initialized.
+% \DescribeCheckboxkey{mappingname} This sets an alternative name for export.
+% This name can only be set at the first checkbox instance, when the field is initialized.
+%
+% \DescribeCheckboxkey{width}
+% \DescribeCheckboxkey{height}
+% \DescribeCheckboxkey{depth} These keys allow to set the dimensions of checkbox instance.
+% The value should be a command that expands to a dimension expression. By default
+% |width| and |height| use \cs{normalbaselineskip}, the |depth| is zero.
+%
+% \DescribeCheckboxkey{appearance} This key sets the normal appearance. It takes as value a
+% \meta{name} and expects that the two appearances \meta{name}|/Yes| and \meta{name|/Off|
+% has been created with the command described below. The initial value is |checkbox/default|
+% and shows a \cs{texttimes}.
+%
+% \DescribeCheckboxkey{rollover-appearance} This key sets the rollover appearance (when the
+% mouse hovers over the checkbox). It takes as value a
+% \meta{name} and expects that the two appearances \meta{name}|/Yes| and \meta{name|/Off|
+% has been created with the command described below. Initially this is not set.
+% An empty value removes the entry.
+%
+% \DescribeCheckboxkey{down-appearance} This key sets the down appearance (when the
+% mouse clicks). It takes as value a
+% \meta{name} and expects that the two appearances \meta{name}|/Yes| and \meta{name|/Off|
+% has been created with the command described below. Initially this is not set.
+% An empty value removes the entry.
+%
+% \DescribeCheckboxkey{checked} This is a boolean key which allows to set if the
+% checkbox should be initially checked or not. It sets the |/V| and |/DV| key of the field
+% and the |/AS| key of the annotation instance. It is possible to use different
+% values for different instances, if one wants to confuse the user.
+%
+% \DescribeCheckboxkey{setfieldflags}
+% \DescribeCheckboxkey{unsetfieldflags}
+% These keys allow to set or unset the field flags.  They expect a comma lists of
+% flag names. Allowed names |ReadOnly|, |Required|,
+% |NoExport|, |Multiline|, |Password|,    |NoToggleToOff|, |Radio|, |Pushbotton|,
+% |Combo|, |Edit|,   |Sort|, |FileSelect|,  |MultiSelect|, |DoNotSpellCheck|,
+% |DoNotScroll|, |Comb|,  |RadiosInUnison|, |RichText|, |CommitOnSelChange|.
+%
+% From these |Radio|, |Pushbotton| are set automatically automatically by the code
+% as this is required for a checkbox. Not every one from the rest makes sense for
+% checkboxes but the same key will be used for other fields too.
+% Check the PDF reference to decide which one to set or unset.
+%
+% \begin{checkboxkey}{keystroke,format,validate,calculate}
+% These keys add the |/K, |/F, |/V|, |/C| key to  |/AA| dictionary of the field object.
+% Their value should be javascript code. The |/AA| dictionary is suppress if a pdf/A standard is set.
+% \end{checkboxkey}
+%
+% \begin{checkboxkey}{onfocus,onblur,onmousedown,onmouseup,onenter,onexit}
+% These keys adds the |/F, |/Bl, |/D|, |/U|, |E| and |X| key to  |/AA| dictionary of the widget
+% annotation (the checkbox instance) object.
+% Their value should be javascript code. The |/AA| dictionary is suppress if a pdf/A standard is set.
+%
+% For example
+% \begin{verbatim}
+%    onenter={app.alert('Hello');}
+% \end{verbatim}
+% \end{checkboxkey}
+%
+% \section{Using with hyperref}
+% The \cs{CheckBox} command from hyperref also add a label, something that the
+% command here don't do. A redefinition like this should allow to it together
+% with the commands of this module. Be aware that the behaviour will not be identical!
+% Not every setting and key from hyperref has been copied.
+%
+% \begin{verbatim}
+% \ExplSyntaxOn\makeatletter
+% \def\@CheckBox[#1]#2{\LayoutCheckField{#2}{\pdffield_checkbox:n {name=#2,#1}}}
+% \ExplSyntaxOff\makeatother
 % \end{verbatim}
 %
 % \section{Some background}
@@ -205,7 +320,7 @@
 %    \end{macrocode}
 % \section{local variables}
 %    \begin{macrocode}
-\str_new:N\l_@@_field_name_str
+\str_new:N \l_@@_field_name_str
 \str_new:N \l_@@_tmpa_str
 \str_new:N \l_@@_name_tmpa_str
 \tl_new:N \l_@@_keys_tmpa_tl
@@ -224,6 +339,15 @@
   {
     The~field~name~`#1`~contains~a~period. \\
     This~is~not~allowed. `
+  }
+\msg_new:nnn {pdffield}{empty-name}
+  {
+    The~field~name~is~empty. \\
+    This~is~not~allowed. `
+  }
+\msg_new:nnn {pdffield}{appearance-missing}
+  {
+    The~appearance~`#1`~is~missing~for~the~#2~appearance.
   }
 \msg_new:nnn {pdffield}{field-keys-ignored}
   {
@@ -325,6 +449,17 @@
       \pdfdict_put:nnx {l_@@/checkbox/field}
         {Ff}
         {\bitset_to_arabic:N \l_@@_Ff_bitset }
+      \pdfdict_if_empty:nF{l_@@/checkbox/field/AA}
+        {
+          \pdfmeta_standard_verify:nT
+            {annot_widget_no_AA}
+            {
+              \pdfdict_put:nnx
+                {l_@@/checkbox/field}
+                {AA}
+                {<<\pdfdict_use:n {l_@@/checkbox/field/AA}>>}
+            }
+        }
       \pdf_object_write:nx {@@_checkbox/field/#1} { \pdfdict_use:n {l_@@/checkbox/field} }
       \pdfmanagement_add:nnx
         { Catalog / AcroForm }
@@ -372,7 +507,7 @@
             \pdfdict_put:nnx
               {l_@@/checkbox/annot}
               {AA}
-              {\pdfdict_use:n {l_@@/checkbox/annot/AA}}
+              {<<\pdfdict_use:n {l_@@/checkbox/annot/AA}>>}
          }
       }
     \pdfdict_put:nnx {l_@@/checkbox/annot}{F}{ \bitset_to_arabic:N \l_@@_F_bitset }
@@ -426,10 +561,10 @@
        }
   }
 
-\AddToHook{begindocument/end}{\@@_store_default_appearances:}
+\@@_store_default_appearances:
 %    \end{macrocode}
 %
-% We define a dictionary for the AP content, so that we can R and D if needed too
+% We define a dictionary for the AP content, so that we can add R and D too
 %    \begin{macrocode}
 \pdfdict_new:n   {l_@@/checkbox/annot/AP}
 %    \end{macrocode}
@@ -437,21 +572,24 @@
 % \section{Assembling the checkbox}
 %    \begin{macrocode}
 
-\cs_new_protected:Npn \@@_checkbox_add:nn #1 #2 %#1: keys, #2 name
+\cs_new_protected:Npn \@@_checkbox_add:n #1
   {
     \group_begin:
     \keys_set_filter:nnnN {pdffield / checkbox }{field}{#1}\l_@@_keys_tmpa_tl
-    \str_if_in:nnT {#2}{.}
+    \str_if_empty:NT \l_@@_field_name_str
       {
-        \msg_error:nnn {pdffield}{no-period}{#2}
+        \msg_error:nn {pdffield}{empty-name}
       }
-    \pdf_string_from_unicode:nnN {utf8/string-raw}{#2}\l_@@_field_name_str
     \exp_args:Nx
       \pdf_object_if_exist:nTF {@@_checkbox/field/\l_@@_field_name_str}
        {
           \tl_if_empty:NF \l_@@_keys_tmpa_tl
            {
-             \msg_warning:nnxx {pdffield}{field-keys-ignored}{#2}{\l_@@_keys_tmpa_tl}
+             \msg_warning:nnxx
+               {pdffield}
+               {field-keys-ignored}
+               {\l_@@_field_name_str}
+               {\l_@@_keys_tmpa_tl}
            }
        }
        {
@@ -486,11 +624,27 @@
     ,depth  .initial:n = 0pt
   }
 %    \end{macrocode}
-% The names. The main name is an argument.
-% The other names can only be set when the field is created.
+% The names. The main name should not be empty, it is added to the dictionary
+% when the field is created. A new name means a new field.
+% The other names can only be set when the field is created,
+% so we put them in the field group.
 %    \begin{macrocode}
 \keys_define:nn { pdffield / checkbox }
   {
+    ,name .code:n =
+      {
+        \pdf_string_from_unicode:nnN {utf8/string-raw}{#1}\l_@@_field_name_str
+        \str_if_in:NnT \l_@@_field_name_str {.}
+          {
+            \msg_error:nnx {pdffield}{no-period}{\l_@@_field_name_str}
+          }
+        \str_if_empty:NT\l_@@_field_name_str
+          {
+            \msg_error:nn {pdffield}{empty-name}
+          }
+      }
+    ,name .value_required:n = true
+    ,name .initial:n = checkbox
     ,altname .code:n =
       {
         \pdf_string_from_unicode:nnN {utf8/string}{#1}\l_@@_name_tmpa_str
@@ -567,18 +721,78 @@
   {
     appearance .code:n = %value is a name of an appearance
       {
-        \pdfdict_put:nnn {l_@@/checkbox/annot/AP}
-          {N}
+        \pdfxform_if_exist:nTF {  @@_#1/Yes }
           {
-             <<
-                /Yes ~ \pdfxform_ref:n { @@_#1/Yes}
-                /Off ~ \pdfxform_ref:n { @@_#1/Off}
-             >>
+            \pdfdict_put:nnn {l_@@/checkbox/annot/AP}
+              {N}
+              {
+                 <<
+                    /Yes ~ \pdfxform_ref:n { @@_#1/Yes}
+                    /Off ~ \pdfxform_ref:n { @@_#1/Off}
+                 >>
+              }
+          }
+          {
+            \msg_error:nnnn{pdffield}{appearance-missing}{#1}{normal}
           }
       },
     appearance .initial:n = checkbox/default,
   }
 
+\keys_define:nn { pdffield / checkbox }
+  {
+    rollover-appearance .code:n = %value is a name of an appearance
+      {
+       \tl_if_empty:nTF {#1}
+         {
+           \pdfdict_remove:nn {l_@@/checkbox/annot/AP} {R}
+         }
+         {
+           \pdfxform_if_exist:nTF {  @@_#1/Yes }
+             {
+               \pdfdict_put:nnn {l_@@/checkbox/annot/AP}
+                 {R}
+                 {
+                    <<
+                       /Yes ~ \pdfxform_ref:n { @@_#1/Yes}
+                       /Off ~ \pdfxform_ref:n { @@_#1/Off}
+                    >>
+                 }
+              }
+              {
+                \msg_warning:nnnn{pdffield}{appearance-missing}{#1}{rollover}
+              }
+
+         }
+      },
+  }
+
+\keys_define:nn { pdffield / checkbox }
+  {
+    down-appearance .code:n = %value is a name of an appearance
+      {
+       \tl_if_empty:nTF {#1}
+         {
+           \pdfdict_remove:nn {l_@@/checkbox/annot/AP} {D}
+         }
+         {
+           \pdfxform_if_exist:nTF {  @@_#1/Yes }
+            {
+              \pdfdict_put:nnn {l_@@/checkbox/annot/AP}
+                {D}
+                {
+                   <<
+                      /Yes ~ \pdfxform_ref:n { @@_#1/Yes}
+                      /Off ~ \pdfxform_ref:n { @@_#1/Off}
+                   >>
+                }
+            }
+            {
+              \msg_warning:nnnn{pdffield}{appearance-missing}{#1}{down}
+            }
+         }
+      },
+  }
 %    \end{macrocode}
 %
 %  Keys for the AA dictionary. They all trigger javascript option.
@@ -593,7 +807,7 @@
          #1 .code:n =
            {
              \pdf_string_from_unicode:nnN {utf8/string}{##1}\l_@@_tmpa_str
-             \tl_if_empty:nTF
+             \str_if_empty:NTF \l_@@_tmpa_str
                {
                  \pdfdict_remove:nn {l_@@/checkbox/#3/AA}{#2}
                }
@@ -602,96 +816,37 @@
                   {#2}
                   {<</S/JavaScript/JS\l_@@_tmpa_str>>}
                }
-           }
-        #1 .groups = {#3}
+           },
+        #1 .groups:n = {#3}
       }
   }
-\@@_define_AAaction_key:nn {keystroke}{K}{field}
-\@@_define_AAaction_key:nn {format}   {F}{field}
-\@@_define_AAaction_key:nn {validate} {V}{field}
-\@@_define_AAaction_key:nn {calculate}{C}{field}
-\@@_define_AAaction_key:nn {onfocus}  {Fo}{annot}
-\@@_define_AAaction_key:nn {onblur}   {Bl}{annot}
-\@@_define_AAaction_key:nn {onmousedown}{D}{annot}
-\@@_define_AAaction_key:nn {onmouseup}{U}{annot}
-\@@_define_AAaction_key:nn {onenter}  {E}{annot}
-\@@_define_AAaction_key:nn {onexit}   {X}{annot}
+\@@_define_AAaction_key:nnn {keystroke}{K}{field}
+\@@_define_AAaction_key:nnn {format}   {F}{field}
+\@@_define_AAaction_key:nnn {validate} {V}{field}
+\@@_define_AAaction_key:nnn {calculate}{C}{field}
+\@@_define_AAaction_key:nnn {onfocus}  {Fo}{annot}
+\@@_define_AAaction_key:nnn {onblur}   {Bl}{annot}
+\@@_define_AAaction_key:nnn {onmousedown}{D}{annot}
+\@@_define_AAaction_key:nnn {onmouseup}{U}{annot}
+\@@_define_AAaction_key:nnn {onenter}  {E}{annot}
+\@@_define_AAaction_key:nnn {onexit}   {X}{annot}
+%    \end{macrocode}
+% \section{user commands}
+%    \begin{macrocode}
+\cs_set_eq:NN \pdffield_checkbox:n \@@_checkbox_add:n
 
-
-
-\NewDocumentCommand \newcheckboxappearance { s  m m  }  %#2=name, #3 = content
+\cs_new_protected:Npn \pdffield_setup:nn #1 #2
  {
-   \pdfxform_new:nnn {#2}{}
-     {
-      \normalsize
-      \hbox_set:Nn   \l_tmpa_box { #3 \strut }
-      \IfBooleanTF {#1}
-       {
-        \fboxsep 0pt
-        \framebox
-         [ \dim_max:nn { \box_wd:N \l_tmpa_box }{ \box_ht:N\strutbox+\box_dp:N\strutbox} ]
-         { \box_use:N \l_tmpa_box }
-       }
-       {
-        \makebox
-        [ \dim_max:nn { \box_wd:N \l_tmpa_box }{\box_ht:N\strutbox+\box_dp:N\strutbox} ]
-        { \box_use:N \l_tmpa_box }
-       }
-     }
+   \keys_set:n {pdffield / #1 } {#2}
  }
-
-
-
-
-
-
-\cs_new_protected:Nn \__pdffield_normalise_boxes:
-  {
-    \dim_set:Nn \l__pdffield_field_wd_dim
-       { \dim_max:nn { \pdfxform_wd:e {\l__pdffield_normal_off_tl} }{ \pdfxform_wd:e {\l__pdffield_normal_yes_tl} } }
-    \dim_set:Nn \l__pdffield_field_ht_dim
-      { \dim_max:nn { \pdfxform_ht:e {\l__pdffield_normal_off_tl} }{ \pdfxform_ht:e {\l__pdffield_normal_yes_tl} } }
-    \dim_set:Nn \l__pdffield_field_dp_dim
-      { \dim_max:nn { \pdfxform_dp:e {\l__pdffield_normal_off_tl} }{ \pdfxform_dp:e {\l__pdffield_normal_yes_tl} } }
-  }
-
-
-
-
-% # form and field interface macros
-
-\NewDocumentCommand \checkboxfield { O{}m }
-  {
-    \@@_checkbox_add:nn{#1}{#2}
- %   \group_begin:
-%    \keys_set:nn { pdffield / checkbox }
-%      {
-%        normal ~ yes = \g__pdffield_normal_yes_default_tl,
-%        normal ~ off = \g__pdffield_normal_off_default_tl,
-%        #1
-%      }
-%    \__pdffield_normalise_boxes:
-%    \__pdffield_checkbox_field_add:n {#2}
-%    \__pdffield_checkbox_annot_add:nnnn{1cm}{1cm}{0pt} {#2}
-%
-%    \group_end:
-  }
-
-%     \begin{macrocode}
-%\cs_new_protected:Npn \@@_checkbox_field_add:n #1
-%  {
-%    \str_if_in:nnTF {#1}{.}
-%      {
-%        \msg_error:nnn {pdffield}{no-period}{#1}
-%      }
-%      {
-%        \pdf_string_from_unicode:nnN {utf8/string}{#1}\l_@@_name_tmpa_str
-%        \exp_args:No \@@_checkbox_field_dict_aux:n { \l_@@_name_tmpa_str }
-%      }
-%  }
 %    \end{macrocode}
 %
-%
+
+%</package>
+%    \end{macrocode}
+%\end{implementation}
+
+\endinput%
 %%%%
 %
 %Field dict
@@ -761,7 +916,4 @@
 %    ExclFKey              = 11,
 %    EmbedForm             = 12
 %  }
-%
-%</package>
-%    \end{macrocode}
-%\end{implementation}
+% source: %adapted from https://chat.stackexchange.com/transcript/message/54421537#54421537
