@@ -30,9 +30,9 @@
 \makeatother
 \documentclass[full]{l3doc}
 \usepackage{array,booktabs}
-\usepackage{l3pdffield-checkbox-testphase,bearwear}
+\usepackage{l3pdffield-testphase,bearwear}
 \hypersetup{pdfauthor=The LaTeX Project,
- pdftitle=l3pdffield-checkbox (LaTeX PDF management testphase bundle)}
+ pdftitle=l3pdffield (LaTeX PDF management testphase bundle)}
 \begin{document}
   \DocInput{\jobname.dtx}
 \end{document}
@@ -55,7 +55,7 @@
 %  }
 % \ExplSyntaxOff
 % \title{^^A
-%   The \pkg{l3pdffield-checkbox} module\\ Commands to create checkbox fields   ^^A
+%   The \pkg{l3pdffield} module\\ Commands to create form fields   ^^A
 %   \\ \LaTeX{} PDF management testphase bundle
 % }
 %
@@ -68,11 +68,11 @@
 %    }^^A
 % }
 %
-% \date{Version 0.00a, released 0000-00-00}
+% \date{Version 0.95b, released 2021-03-07}
 %
 % \maketitle
 % \begin{documentation}
-% \section{\pkg{l3pdffield-checkbox} Documentation}
+% \section{\pkg{l3pdffield} Introduction}
 % The implementation of form fields in hyperref has some bugs, see for example
 % \url{https://github.com/latex3/hyperref/issues/94}. This package is a first step
 % towards the goal to review and improve the code of form fields.
@@ -80,23 +80,20 @@
 % Like the \pkg{pdfmanagement-testphase} package itself it is a temporary package:
 % the definite home of the code is not yet decided.
 %
-% It handles for now \emph{only} checkboxes, other form fields like radio buttons or
-% text fields will follow later. As no fonts are used, it doesn't
-% relies on the hyperref code
+% It handles for now \emph{only} checkboxes, other form fields like pushbutton,
+% radio buttons or text fields will follow later. As currently no fonts are used,
+% it doesn't relies on the hyperref code
 % to initialize the form, but it can be used with hyperref.
 %
 % The code requires the new PDF management.
 %
-% Click me: \ExplSyntaxOn\pdffield_checkbox:n{name=bear,appearance=bear,width=23pt,height=30pt,depth=10pt}\ExplSyntaxOff
-%
-% \bigskip
 %
 % Please keep in mind
 % \begin{itemize}
 % \item Not every PDF viewer supports checkboxes.
 % \item The handling can depend on settings in the PDF viewer. In adobe reader for
 % example I had to disable an option to avoid that it tries to create an appearance
-% it self
+% itself
 % \item Standards like pdf/A disable form fields too (as you typically can't change the PDF.
 % \end{itemize}
 %
@@ -111,10 +108,15 @@
 % \DeclareDocumentMetadata{uncompress}
 % \documentclass{article}
 % \usepackage{hyperref}
-% \usepackage{l3pdffield-checkbox-testphase}
+% \usepackage{l3pdffield-testphase}
 % \begin{document}
 % \Form
 % \end{verbatim}
+% \section{Step 1: Checkboxes}
+% Click me:
+% \ExplSyntaxOn\pdffield_checkbox:n{name=bear,appearance=bear,width=23pt,height=30pt,depth=10pt}\ExplSyntaxOff
+%
+% \bigskip
 % \subsection{Commands}
 % \begin{function}{\pdffield_checkbox:n}
 % \begin{syntax}
