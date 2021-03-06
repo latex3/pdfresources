@@ -1822,12 +1822,13 @@
          \cs_set_eq:NN \% \c_percent_str
          \Hy@safe@activestrue
          \mode_leave_vertical:
+         \pdfannot_dict_put:nnx {link/URI}{A}{<<\pdfdict_use:n {l_hyp/annot/A/URI}>>}
          \pdfannot_link:nxn { URI }
            {
-             /A
-               <<
-                 \pdfdict_use:n {l_hyp/annot/A/URI}
-               >>
+     %        /A
+%               <<
+%                 \pdfdict_use:n {l_hyp/annot/A/URI}
+%               >>
            }
            {
              #1
@@ -1877,12 +1878,13 @@
             \pdfdict_put:nno{l_hyp/annot/A/Next}{Next}{\Hy@href@nextactionraw}
           }
         \mode_leave_vertical:
+        \pdfannot_dict_put:nnx {link/GoToR}{A}{<<\pdfdict_use:n {l_hyp/annot/A/GoToR}>>}
         \pdfannot_link:nxn %expansion??
           { GoToR }
           {
-            /A<<
-              \pdfdict_use:n {l_hyp/annot/A/GoToR}
-            >>
+  %          /A<<
+%              \pdfdict_use:n {l_hyp/annot/A/GoToR}
+%            >>
           }
           {
             #1\Hy@xspace@end
@@ -1935,13 +1937,14 @@
               \pdfdict_put:nno{l_hyp/annot/A/Next}{Next}{\Hy@href@nextactionraw}
             }
           \mode_leave_vertical:
+          \pdfannot_dict_put:nnx {link/Launch}{A}{<<\pdfdict_use:n {l_hyp/annot/A/Launch}>>}
           \pdfannot_link:nxn
             { Launch }
             {
-              /A
-              <<
-                \pdfdict_use:n {l_hyp/annot/A/Launch}
-              >>
+  %            /A
+%              <<
+%                \pdfdict_use:n {l_hyp/annot/A/Launch}
+%              >>
             }
             {
               #2\Hy@xspace@end
@@ -1986,12 +1989,13 @@
                  \str_remove_once:Nn \Hy@href@nextactionraw {/Next}
                  \pdfdict_put:nno{l_hyp/annot/A/Next}{Next}{\Hy@href@nextactionraw}
                }
+             \pdfannot_dict_put:nnx {link/Named}{A}{<<\pdfdict_use:n {l_hyp/annot/A/Named}>>}
              \pdfannot_link:nxn { Named }
               {
-                /A
-                  <<
-                    \pdfdict_use:n { l_hyp/annot/A/Named }
-                  >>
+%                /A
+%                  <<
+%                    \pdfdict_use:n { l_hyp/annot/A/Named }
+%                  >>
               }
               {
                 #2
