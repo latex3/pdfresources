@@ -7,6 +7,8 @@ this project uses date-based 'snapshot' version identifiers.
 
 ## [Unreleased]
 
+## [2021-03-07]
+
 ### Added
 - \pdfannot_widget_box:nnnn 
 - \pdfannot_dict_use:n
