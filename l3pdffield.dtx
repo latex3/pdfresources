@@ -85,7 +85,10 @@
 % it doesn't relies on the hyperref code
 % to initialize the form, but it can be used with hyperref.
 %
-% The code requires the new PDF management.
+% The code requires the new PDF management. The code makes use of
+% \pkg{l3pdfxform} to create the Xobjects. This code doesn't support yet the
+% the dvips backend.
+%
 %
 %
 % Please keep in mind
@@ -94,7 +97,7 @@
 % \item The handling can depend on settings in the PDF viewer. In adobe reader for
 % example I had to disable an option to avoid that it tries to create an appearance
 % itself
-% \item Standards like pdf/A disable form fields too (as you typically can't change the PDF.
+% \item Standards like pdf/A disable form fields too (as you typically can't change the PDF).
 % \end{itemize}
 %
 % If \pkg{hyperref} is loaded before
