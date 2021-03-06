@@ -9,7 +9,8 @@ this project uses date-based 'snapshot' version identifiers.
 
 ### Added
 -  \pdfannot_widget_box:nnnn 
-- \pdfannot_dict_use:n
+-  \pdfannot_dict_use:n
+-  module l3pdffield for form fields. Currently it only supports checkboxes.
 
 ### Changed
 -
