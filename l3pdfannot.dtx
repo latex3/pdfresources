@@ -109,7 +109,7 @@
 % values. This allows to create user interfaces to change settings and
 % also makes it easy to extend the interfaces in case some new setting
 % should be included. For these reasons both the PDF management itself,
-% but also the specific annotation commands in the following section
+% but also the specific annotation commands in the following sections
 % all make use of such dictionaries.
 %
 % \subsection{Link annotations}
@@ -327,6 +327,27 @@
 %  |Print|, |NoZoom|, |NoRotate|, |NoView|, |ReadOnly|, |Locked|,  |ToggleNoView|,
 %  |LockedContents| which correspond to the names used in the PDF references.
 % \end{variable}
+% \subsection{Widget annotations}
+% Widget annotations are quite important for form fields, as they are used
+% to build the actually instance of such fields.
+%
+% As they can contain meaningful content hooks are probably needed to allow tagging
+% and other manipulations, so like with link special commands are provided.
+% Widget are normally in a box and line and page breaks are not relevant, so
+% the command is offered as box command.
+%
+% \begin{function}[added = 2021-03-02]
+%   { \pdfannot_widget_box:nnn }
+%   \begin{syntax}
+%     \cs{pdfannot_widget_box:nnn}  \Arg{width} \Arg{height} \Arg{depth}
+%   \end{syntax}
+%   This creates an \texttt{/Type/Annot} object with the given dimensions.
+%   The annotation doesn't occupy space.
+%   It will insert the attribute dictionary of the widget type (which
+%   is prefilled with  \texttt{/Subtype/Widget}).
+%   The hooks \texttt{pdfannot/widget/before} and \texttt{pdfannot/widget/after}
+%   are executed before and after the widget.
+% \end{function}
 % \end{documentation}
 %
 % \begin{implementation}
@@ -401,13 +422,29 @@
 %    \end{macrocode}
 % \end{macro}
 % \subsection{Annotations, subtype Widget}\label{pdf:annot:widget}
-% Currently no code is provided here.
-% The local dictionary \texttt{l_@@/Widget} is a skeleton
-% dictionary for this subtype. It currently contains as only entry
+% Widgets are typically boxes, so we provide a box command.
+% A local dictionary \texttt{l_@@/Widget} is used.
+% It contains like the other dictionaries
 % the subtype setting (the /Type is added by the backend).
 %    \begin{macrocode}
- \pdfdict_new:n { l_@@/widget }
+ \pdfdict_new:n   { l_@@/widget }
  \pdfdict_put:nnn { l_@@/widget }{ Subtype }{ /Widget }
+ \hook_new_pair:nn
+   {pdfannot/widget/before}
+   {pdfannot/widget/after}
+ \hook_new_pair:nn
+   {pdfannot/widget/begin}
+   {pdfannot/widget/end}
+\cs_new_protected:Npn \pdfannot_widget_box:nnn #1 #2 #3
+  {
+    \hook_use:n { pdfannot/widget/before }
+    \pdfannot_box:nnnx {#1}{#2}{#3}
+      {
+        \pdfdict_use:n { l_@@/widget}
+      }
+    \hook_use:n { pdfannot/widget/after }
+    \bool_gset_false:N\g_@@_use_lastlink_bool
+  }
 %    \end{macrocode}
 %
 % \subsection{Annotations, subtype Link}\label{sec:links}
