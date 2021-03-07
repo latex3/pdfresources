@@ -6,7 +6,7 @@
 bundle  = ""
 module  = "pdfmanagement-testphase"
 
-
+typesetexe="pdflatex-dev"
 installfiles = {"*.sty","*.cls","*.def","*.lua","*.ltx"}
 
 if options["target"] == "ctan" then
