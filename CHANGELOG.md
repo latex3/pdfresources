@@ -7,6 +7,9 @@ this project uses date-based 'snapshot' version identifiers.
 
 ## [Unreleased]
 
+### Fixed
+- \pdffield-setup:nn
+
 ## [2021-03-07]
 
 ### Added
