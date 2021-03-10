@@ -204,7 +204,7 @@
     % the commands to add page resources
     \def\pgf@sys@addpdfresource@extgs@plain##1
       {
-        \exp_after:wN %for transparent which passes a command
+        %\exp_after:wN %for transparent which passes a command
           \@@_patch_pgfextgs:w ##1\q_stop
       }
     \def\pgf@sys@addpdfresource@patterns@plain##1
@@ -226,11 +226,13 @@
     \tl_set:Nn #2 {#4}
   }
 
+\cs_generate_variant:Nn \tl_trim_spaces:n{V}
 \cs_new:Npn \@@_patch_pgfextgs:w  #1/#2<<#3>>#4\q_stop
   {
+    \tl_set:Nx\l_tmpa_tl{#2}
     \exp_args:Nne
       \__pdf_backend_PageResources_gput:nnn
-        {ExtGState}{\tl_trim_spaces:n{#2}}{<<#3>>}
+        {ExtGState}{\tl_trim_spaces:V\l_tmpa_tl}{<<#3 #4>>}
   }
 \cs_new:Npn \@@_patch_pgfpatterns:w  #1/#2\space#3\q_stop
   {
