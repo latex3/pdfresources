@@ -227,11 +227,11 @@
   }
 
 \cs_generate_variant:Nn \tl_trim_spaces:n{V}
+\cs_generate_variant:Nn \__pdf_backend_PageResources_gput:nnn {nex}
 \cs_new:Npn \@@_patch_pgfextgs:w  #1/#2<<#3>>#4\q_stop
   {
     \tl_set:Nx\l_tmpa_tl{#2}
-    \exp_args:Nne
-      \__pdf_backend_PageResources_gput:nnn
+      \__pdf_backend_PageResources_gput:nex
         {ExtGState}{\tl_trim_spaces:V\l_tmpa_tl}{<<#3 #4>>}
   }
 \cs_new:Npn \@@_patch_pgfpatterns:w  #1/#2\space#3\q_stop
