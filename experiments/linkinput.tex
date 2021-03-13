@@ -1,0 +1,270 @@
+% !Mode:: "TeX:DE:UTF-8:Main"
+\RequirePackage{pdfmanagement-testphase}
+\DeclareDocumentMetadata{uncompress}
+\RequirePackage{expl3}
+\ExplSyntaxOn
+\pdf_uncompress:
+\ExplSyntaxOff
+\documentclass{article}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+\newcommand\cs[1]{\texttt{\textbackslash #1}}
+\begin{document}
+
+\section{Some background about URL's with hyperref}
+
+hyperref has three commands related to URL: \cs{url},
+\cs{nolinkurl} and \cs{href}. The first two take one argument,
+while the last has two, the url and some free text.
+
+
+\cs{url} and \cs{href} create link annotations. \cs{url} creates always an URI 
+type, \cs{href} create URI, GoToR and Launch depending on the structure of the argument.
+
+\cs{href} has to create a (in the PDF) valid url or file name from its first argument.
+\cs{url} has to create a (in the PDF) valid url from its first argument and has to print 
+the url. \cs{nolinkurl} only prints the url.
+
+For the printing \cs{url} and \cs{nolinkurl} rely on the url package and its \cs{Url} command.
+
+(Expandable) commands are expanded and special chars can also be input by commands but beside this
+no conversion is done: for all input hyperref basically assumes that the input is a valid percent encoded url or
+a valid file name.
+
+%\begingroup
+%\makeatletter
+%\def\url@#1{\hyper@linkurl{§#1}{xxxx#1}}
+%\url{www.blub.de}
+%\endgroup
+%\ExplSyntaxOn\makeatletter
+%\begingroup
+%%\let\protect\@unexpandable@protect
+%\def\blub{abc}
+%\__hyp_text_pdfstring:noN
+%           { §x\blub xx}
+%           { \l__hyp_text_enc_uri_print_tl }
+%           \l__hyp_uri_tmpa_tl
+% \tl_show:N \l__hyp_uri_tmpa_tl
+%\ExplSyntaxOff
+%\endgroup
+%\end{document}
+
+\section{string}
+
+\ExplSyntaxOn
+\str_set:Nx\l_tmpa_str{file://www.abcstring.de\c_percent_str \c_hash_str 123}
+\expandafter\href\expandafter{\l_tmpa_str}{blub}
+\ExplSyntaxOff
+\section{splits}
+
+\begin{verbatim}
+href creates different link types.
+
+If there is a colon :
+  -> if prefix = file: GoToR
+  -> if prefix = run:  Launch
+  -> if prefix empty:  GoToR
+  -> rest: URI
+
+If there is no colon:
+  if there is a dot:
+    -> extension: pdf  GoToR
+    -> else URI
+  if there is no dot: GoToR
+
+url creates always URI
+
+See
+  -> \@hyper@readexternallink
+  -> \@hyper@linkfile
+\end{verbatim}  
+
+\url{run://runuri}{xxx}
+
+\href{:emptyprefixGoToR}{xxx}
+
+\href{file:fileprefixGoToR}{xxx}
+
+\href{run:runprefixLaunch}{xxx}
+
+\href{blub:blubprefixURI}{xxx}
+
+\href{nocolonnodotGoToR}{xxx}
+
+\href{colonURI.dot}{xxx}
+
+\href{colonGoToR.pdf}{xxx}
+
+%\end{document}
+
+
+\section{parentheses}
+These are correctly escaped
+% URI(https://www.xyz.de\(blub\))
+\href{https://www.xyz.de(blub)}{xxx}
+\url{https://www.xyz.de(blub)}
+
+\href{https://www.xyz.de(blub}{xxx}
+\url{https://www.xyz.de(blub}
+
+%\end{document}
+
+
+\section{linebreaks}
+
+% gives https://www.xyz\040zzz.de
+\href{https://www.xyz
+ zzzlinebreak.de}{xxx}
+\url{https://www.xyz
+zzzlinebreak.de}
+
+% ok
+\href{https://www.xyz%
+zzzlinebreak.de}{xxx}
+\url{https://www.xyz%
+zzzlinebreak.de}
+
+%\end{document}
+
+\section{tilde}
+%\makeatletter \def\hyper@tilde{X}\makeatother
+\href{https://www.xyz.de~blub}{xxx}
+\url{https://www.xyz.de~blub}
+
+\href{https://www.xyz.de\~blub}{xxx}
+\url{https://www.xyz.de\~blub}
+
+\makeatletter
+\href{https://www.xyz.de\textasciitilde blub}{xxx}
+\url{https://www.xyz.de\textasciitilde blub}
+\makeatother
+%\end{document}
+
+
+\section{space}
+Print output is wrong, uri in pdf too (but this works with pdfmanagement).
+\href{https://www.xyz.de blub}{xxx}
+\url{https://www.xyz.de blub}
+
+\href{https://www.xyz.de\space blub}{xxx}
+\url{https://www.xyz.de\space blub}
+
+\parbox{5cm}{\url{https://www.xyz.de\space blub}}
+
+%\end{document}
+\section{percentchar}
+The percent is not escaped, but in pdfmanagement it is!!
+\href{https://www.xyz.de%blub}{xxx}
+\href{https://www.xyz.de\%blub}{xxx}
+\url{https://www.xyz.de%blub}
+\url{https://www.xyz.de\%blub}
+
+\makeatletter
+\href{https://www.xyz.de\@percentchar blub}{xxx}
+\url{https://www.xyz.de\@percentchar blub}
+\parbox{3cm}{\url{https://www.xyz.de\@percentchar blub}}
+
+
+\makeatother
+\section{non ascii}
+Is expanded to commands
+\href{https://www.xyz.deöxxx}{xxx}
+\url{https://www.xyz.deöxxx}
+
+%loops
+%\href{https://www.xyz.de§xxx}{xxx}
+%\url{https://www.xyz.de§xxx}
+
+Works more or less but is nonsense and errors with
+pdfmanagement. 
+\fontencoding{T1}\selectfont
+\href{https://www.xyz.deöxxx}{xxx}
+\url{https://www.xyz.deöxxx}
+
+% expanded to \\T1\\ss\040
+\href{https://www.xyz.deßxxx}{xxx}
+\url{https://www.xyz.deßxxx}
+
+
+%\section{simple command}
+\def\blub{abc}
+\href{https://www.xyz.de\blub xxx}{xxx}
+\url{https://www.xyz.de\blub xxx}
+
+
+%\section{backslash}
+In pdf it is doubled! \verb+\textbackslash+ loops.
+\href{https://www.xyz.de\\blub}{xxx}
+\url{https://www.xyz.de\\blub}
+%\href{https://www.xyz.de\textbackslash blub}{xxx}
+%\url{https://www.xyz.de\textbackslash blub}
+
+\makeatletter
+\href{https://www.xyz.de\@backslashchar blub}{xxx}
+\url{https://www.xyz.de\@backslashchar blub}
+
+\makeatother
+
+
+\section{Tilde}
+
+\href{https://www.xyztilde.de~blub}{xxx}
+\href{https://www.xyzcmdtilde.de\~blub}{xxx}
+\url{https://www.xyztilde.de~blub}
+\url{https://www.xyzcmdtilde.de\~blub}
+\href{https://www.xyztexttilde.de\textasciitilde blub}{xxx}
+\url{https://www.xyztexttilde.de\textasciitilde blub}
+
+\makeatletter
+\href{https://www.xyzhypertilde.de\hyper@tilde blub}{xxx}
+\url{https://www.xyzhypertilde.de\hyper@tilde blub}
+
+\makeatother
+
+
+
+\section{Math shift}
+only direct input works
+\href{https://www.xyzmathshift.de$blub}{xxx}
+\url{https://www.xyzmathshift.de$lub}
+
+
+
+\section{Ambersand}
+
+\href{https://www.xyz.de&blub}{xxx}
+\href{https://www.xyz.de\&blub}{xxx}
+\url{https://www.xyz.de&blub}
+\url{https://www.xyz.de\&blub}
+
+
+
+\section{underscore}
+
+\href{https://www.xyz.de_blub}{xxx}
+\href{https://www.xyz.de\_blub}{xxx}
+\url{https://www.xyz.de_blub}
+\url{https://www.xyz.de\_blub}
+
+\href{https://www.xyz.de\textunderscore blub}{xxx}
+\url{https://www.xyz.de\textunderscore blub}
+
+
+
+
+
+\section{hash}
+
+\href{https://www.xyz.de#blub}{xxx}
+\href{https://www.xyz.de\#blub}{xxx}
+\url{https://www.xyz.de#blub}
+\url{https://www.xyz.de\#blub}
+
+\makeatletter
+\href{https://www.xyz.de\hyper@hash blub}{xxx}
+\url{https://www.xyz.de\hyper@hash blub}
+\makeatother
+
+
+
+\end{document} 
