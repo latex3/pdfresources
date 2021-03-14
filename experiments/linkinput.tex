@@ -9,8 +9,33 @@
 \usepackage[T1]{fontenc}
 \usepackage{hyperref}
 \newcommand\cs[1]{\texttt{\textbackslash #1}}
+
+\makeatletter
+
+
+\ExplSyntaxOn
+
+\ExplSyntaxOff
+
+\makeatother
 \begin{document}
 
+%\href[encode]{www.öäü%§(.de}{blblbl}
+%
+%%\hypersetup{encode}
+%
+%%\href{www.öäü§(.de}{seöäüß}
+%
+%\href[encode=false]{www.abc%25(xxx.de}{seöäüß}
+
+\href[encode]{www.%.de}{abc}   %-> www.%25.de
+\href{www.%.de}{abc}           %-> www.%.de
+\href[encode]{www.grüße.de}{abc} %-> www.gr%C3%BC%C3%9Fe.de
+% \href{www.grüße.de}{abc} % error
+\href[encode]{grüße}{abc} %-> (gr\303\274\303\237e.pdf)
+
+\href{filexxx}{seöäüß}
+\end{document}
 \section{Some background about URL's with hyperref}
 
 hyperref has three commands related to URL: \cs{url},
@@ -18,18 +43,21 @@ hyperref has three commands related to URL: \cs{url},
 while the last has two, the url and some free text.
 
 
-\cs{url} and \cs{href} create link annotations. \cs{url} creates always an URI 
+\cs{url} and \cs{href} create link annotations. \cs{url} creates always an URI
 type, \cs{href} create URI, GoToR and Launch depending on the structure of the argument.
 
 \cs{href} has to create a (in the PDF) valid url or file name from its first argument.
-\cs{url} has to create a (in the PDF) valid url from its first argument and has to print 
-the url. \cs{nolinkurl} only prints the url.
+\cs{url} has to create a (in the PDF) valid url from its only argument and has to print
+this argument as url. \cs{nolinkurl} only prints the url.
 
 For the printing \cs{url} and \cs{nolinkurl} rely on the url package and its \cs{Url} command.
 
-(Expandable) commands are expanded and special chars can also be input by commands but beside this
-no conversion is done: for all input hyperref basically assumes that the input is a valid percent encoded url or
-a valid file name.
+(Expandable) commands are expanded and special chars can also be input by commands but beside this no conversion is done: for all input hyperref basically assumes that the input is already a valid percent encoded url or a valid file name.
+
+
+\href{https://www.abc(blub).de}{xxx}
+\end{document}
+
 
 %\begingroup
 %\makeatletter
@@ -77,7 +105,7 @@ url creates always URI
 See
   -> \@hyper@readexternallink
   -> \@hyper@linkfile
-\end{verbatim}  
+\end{verbatim}
 
 \url{run://runuri}{xxx}
 
@@ -168,22 +196,24 @@ The percent is not escaped, but in pdfmanagement it is!!
 \makeatother
 \section{non ascii}
 Is expanded to commands
-\href{https://www.xyz.deöxxx}{xxx}
-\url{https://www.xyz.deöxxx}
+%\href{https://www.xyz.deöxxx}{xxx}
+%\href{filewithnonasciiöäüxxx}{xxx}
+%\url{https://www.xyz.deöxxx}
 
 %loops
 %\href{https://www.xyz.de§xxx}{xxx}
 %\url{https://www.xyz.de§xxx}
 
 Works more or less but is nonsense and errors with
-pdfmanagement. 
+pdfmanagement.
 \fontencoding{T1}\selectfont
-\href{https://www.xyz.deöxxx}{xxx}
-\url{https://www.xyz.deöxxx}
+\href{filewithnonasciiöäüxxx}{xxx}
+%\href{https://www.xyz.deöxxx}{xxx}
+%\url{https://www.xyz.deöxxx}
 
 % expanded to \\T1\\ss\040
-\href{https://www.xyz.deßxxx}{xxx}
-\url{https://www.xyz.deßxxx}
+%\href{https://www.xyz.deßxxx}{xxx}
+%\url{https://www.xyz.deßxxx}
 
 
 %\section{simple command}
@@ -257,6 +287,7 @@ only direct input works
 
 \href{https://www.xyz.de#blub}{xxx}
 \href{https://www.xyz.de\#blub}{xxx}
+\href{filehash#blub}{xxx}
 \url{https://www.xyz.de#blub}
 \url{https://www.xyz.de\#blub}
 
