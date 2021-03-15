@@ -50,46 +50,42 @@ this argument as url. \cs{nolinkurl} only prints the url.
 
 For the printing \cs{url} and \cs{nolinkurl} rely on the url package and its \cs{Url} command.
 
-(Expandable) commands are expanded and special chars can also be input by commands but 
-beside this no conversion is done: for all input hyperref basically assumes that 
+(Expandable) commands are expanded and special chars can also be input by commands but
+beside this no conversion is done: for all input hyperref basically assumes that
 the input is already a valid percent encoded url or a valid file name. hyperref also
 doesn't extend or add protocols.
 
 As nowadays everyone is used to copy and paste links with all sorts of unicode into a browser and
-they work the hyperref input is clearly rather restricted. 
+they work the hyperref input is clearly rather restricted.
 
 
 With \cs{href} it is possible to extend the input methods and to allow unicode input which is then
-percent encoded by the code. 
+percent encoded by the code.
 
 But extending the \emph{print} options for \cs{url} and \cs{nolinkurl}
-is hard to impossible in pdf\LaTeX{} due to the way the url package works. 
+is hard to impossible in pdf\LaTeX{} due to the way the url package works.
 Some chars can be added with the help of \cs{UrlSpecial} (at the cost of warnings)
 but it doesn't work for every input and documenting and explaining all the edge cases is no joy.
 
 \subsection{Links to files}
 
-When a file is linked with \cs{href} than normally it is added as URI link. The exceptions are PDF's, 
+When a file is linked with \cs{href} than normally it is added as URI link. The exceptions are PDF's,
 for them PDF has the special type GoToR which allows also to link to a destination or a special page.
 
-The rules here are 
+The rules here are
 \begin{itemize}
 \item GoToR links to PDF's with ascii names in the same folder or relative pathes normally works.
 \item URI links to PDF's with ascii names in the same folder or relative pathes normally works.
 \item Everything else works only sometimes in some PDF viewer.
 \end{itemize}
 
-\href{pdfa-test.pdf}{test-ascii}
+So better stick to  asciinames.
 
-\ExplSyntaxOn
-\tl_set:Nn \l__hyp_text_enc_file_print_tl {utf8/URI}
-\ExplSyntaxOff
-\href[urlencode]{grüßpdf.pdf}{test utf8/URI}
+\hrefpdf[destination=blub]{pdfa-test.pdf}{test-ascii}
 
-\ExplSyntaxOn
-\tl_set:Nn \l__hyp_text_enc_file_print_tl {utf8/string}
-\ExplSyntaxOff
-\href[urlencode]{grüßpdf.pdf}{test utf8/string}
+\hrefpdf[format=utf8/URI]{grüßpdf.pdf}{test utf8/URI}
+
+\hrefpdf[format=utf8/string]{grüßpdf.pdf}{test utf8/string}
 
 
 \ExplSyntaxOn

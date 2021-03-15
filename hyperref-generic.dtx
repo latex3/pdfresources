@@ -1087,7 +1087,7 @@
 \keys_define:nn { hyp / href }
   {
     ,urlencode  .bool_set:N =  \l_@@_href_url_encode_bool
-    ,fileencode .choices:nn =
+    ,format .choices:nn =
       {utf8/string,utf8/URI,utf16/string,utf16/hex}
       { \tl_set:Nn \l_@@_text_enc_file_print_tl {#1} }
     ,protocol  .tl_set:N   =  \l_@@_href_url_protocol_tl
@@ -1106,10 +1106,14 @@
     ,run-parameter .tl_set:N = \l_@@_href_run_parameter_tl
     ,nextactionraw .code:n =
      { %perhaps some safety match later, see hyperref code
-       \tl_if_empty:nF
+       \tl_if_empty:nTF
+         {
+           \pdfdict_remove:nn{l_hyp/annot/A}{Next}
+         }
          {
            \pdfdict_put:nnn{l_hyp/annot/A}{Next}{#1}
            \tl_set:Nn \Hy@href@nextactionraw {/Next~#1}
+           \keys_set:nn {hyp / setup }{ pdfnewwindow = true}
          }
      }
   }
@@ -1982,11 +1986,17 @@
           { #3 }
           { \l_@@_text_enc_dest_print_tl }
           \l_@@_dest_name_tmpa_tl
-        \Hy@MakeRemoteAction
+        %\Hy@MakeRemoteAction
         \tl_if_blank:eTF {#3}
           {
             \pdfdict_put:nnx {l_hyp/annot/A/GoToR}{D}
-              {[\l_@@_href_pdf_page_tl /\l_@@_dest_pdfremotestartview_tl]}
+              {
+               [
+                 \int_eval:n
+                  { \int_max:nn {0}{ 0\l_@@_href_pdf_page_tl - 1 }}
+                 /\l_@@_dest_pdfremotestartview_tl
+               ]
+              }
           }
           {
             \pdfdict_put:nno {l_hyp/annot/A/GoToR}{D}{\l_@@_dest_name_tmpa_tl}
