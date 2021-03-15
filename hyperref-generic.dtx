@@ -1066,35 +1066,114 @@
     }
   }
 %    \end{macrocode}
-% Allow non-ascii in href.
-% This needs an explicit option, as the encoding method must be changed.
+% Allow non-ascii in href, and add more href versions.
+% We add a few new keys:
+% |urlencode| to force percent encoding (\cs{hrefurl}, \cs{href})
+% |protocol | to add a protocol (\cs{hrefurl},
+% \cs{href} doesn't work here as it needs the colon for the split and the guessing.)
+% |destination| to add a destination (\cs{hrefpdf})
 %
 %    \begin{macrocode}
-\newif\ifHy@urlencode
-\define@key{href}{urlencode}[true]
+
+\bool_new:N \l_@@_href_url_encode_bool
+\bool_new:N \l_@@_href_url_ismap_bool
+\tl_new:N   \l_@@_href_url_protocol_tl
+\tl_new:N   \l_@@_href_pdf_destination_tl
+\tl_new:N   \l_@@_href_run_parameter_tl
+
+
+
+\keys_define:nn { hyp / href }
   {
-    \Hy@boolkey{urlencode}{#1}
+    ,urlencode  .bool_set:N =  \l_@@_href_url_encode_bool
+    ,fileencode .choices:nn =
+      {utf8/string,utf8/URI,utf16/string,utf16/hex}
+      { \tl_set:Nn \l_@@_text_enc_file_print_tl {#1} }
+    ,protocol  .tl_set:N   =  \l_@@_href_url_protocol_tl
+    ,destination .tl_set:N = \l_@@_href_pdf_destination_tl
+    ,pdfremotestartview .code:n =
+      {
+        \keys_set:nn { hyp / setup }
+          { pdfremotestartview = #1 }
+      }
+    ,ismap  .bool_set:N  = \l_@@_href_url_ismap_bool
+    ,run-parameter .tl_set:N = \l_@@_href_run_parameter_tl
   }
-\DeclareRobustCommand*{\href}[1][]{%
-  \begingroup
-  \setkeys{href}{#1}
-  \ifHy@urlencode
-   \let\protect\@unexpandable@protect
-   \tl_set:Nn \l__hyp_text_enc_uri_print_tl {utf8/URI}
-  \else
-   \tl_set:Nn \l__hyp_text_enc_uri_print_tl {utf8/string}
-  \fi
-  \@ifnextchar\bgroup\Hy@href{\hyper@normalise\href@}%
-}
 
 \keys_define:nn { hyp / setup }
   {
-    ,urlencode .choice:
-    ,urlencode / true .code:n = { \Hy@urlencodetrue }
-    ,urlencode / false .code:n = { \Hy@urlencodefalse }
-    ,urlencode .default:n = {true}
-    ,urlencode .initial:n = {false}
+    ,href / urlencode .bool_set:N =  \l_@@_href_url_encode_bool
+    ,href / urlencode .default:n = {true}
+    ,href / urlencode .initial:n = {false}
+    ,href / protocol  .tl_set:N = \l_@@_url_protocol_tl
+    ,href / destination .tl_set:N = \l_@@_href_pdf_destination_tl
   }
+
+
+
+\DeclareRobustCommand*{\href}[1][]{%
+  \begingroup
+  \keys_set:nn { hyp / href } {#1}
+  \bool_if:NTF \l_@@_href_url_encode_bool
+    {
+      \let\protect\@unexpandable@protect
+      \tl_set:Nn \l__hyp_text_enc_uri_print_tl {utf8/URI}
+    }
+    {
+      \tl_set:Nn \l__hyp_text_enc_uri_print_tl {utf8/string}
+    }
+  \@ifnextchar\bgroup\Hy@href{\hyper@normalise\href@}%
+}
+
+
+\DeclareRobustCommand*{\hrefurl}[1][]{
+  \group_begin:
+  \keys_set:nn { hyp / href } {#1}
+  \bool_if:NTF \l_@@_href_url_encode_bool
+    {
+      \let\protect\@unexpandable@protect
+      \tl_set:Nn \l__hyp_text_enc_uri_print_tl {utf8/URI}
+    }
+    {
+      \tl_set:Nn \l__hyp_text_enc_uri_print_tl {utf8/string}
+    }
+  \hyper@normalise\@@_href_url_aux:nn}
+
+\cs_new_protected:Npn \@@_href_url_aux:nn #1 #2
+  {
+    \exp_args:Nno\hyper@linkurl{#2}{\l__hyp_url_protocol_tl#1}
+    \group_end:
+  }
+
+
+\DeclareRobustCommand*{\hrefpdf}[1][]
+ {
+  \begingroup
+  \keys_set:nn { hyp / href } {#1}
+  \let\protect\@unexpandable@protect
+  \hyper@normalise\@@_href_pdf_aux:nn
+ }
+
+\cs_new_protected:Npn \@@_href_pdf_aux:nn #1 #2
+  {
+    \exp_args:Nnno\hyper@linkfile{#2}{#1}{\l_@@_href_pdf_destination_tl}\endgroup
+  }
+
+\DeclareRobustCommand*{\hrefrun}[1][]
+ {
+  \group_begin:
+  \keys_set:nn { hyp / href } {#1}
+  \let\protect\@unexpandable@protect
+  \hyper@normalise\@@_href_run_aux:nn
+ }
+
+\cs_new_protected:Npn \@@_href_run_aux:nn #1 #2
+  {
+    \exp_args:Nnno\hyper@linklaunch{#2}{#1}{\l_@@_href_run_parameter_tl}
+    \group_end:
+  }
+
+
 %    \end{macrocode}
 % \section{Compability commands}
 % \subsection{Metadata}
@@ -1839,9 +1918,10 @@
            { \l_@@_text_enc_uri_print_tl }
            \l_@@_uri_tmpa_tl
          \pdfdict_put:nno{l_hyp/annot/A/URI}{URI}{\l_@@_uri_tmpa_tl}
-         \ifHy@href@ismap
+         \bool_if:NT \l_@@_href_url_ismap_bool
+           {
             \pdfdict_put:nnn{l_hyp/annot/A/URI}{IsMap}{true}
-         \fi
+           }
          \tl_if_empty:NF \Hy@href@nextactionraw
            {
              \str_remove_once:Nn \Hy@href@nextactionraw {/Next}
