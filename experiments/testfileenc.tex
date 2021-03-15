@@ -1,0 +1,42 @@
+% !Mode:: "TeX:DE:UTF-8:Main"
+\RequirePackage{pdfmanagement-testphase}
+\DeclareDocumentMetadata{uncompress}
+
+\documentclass{article}
+\usepackage{hyperref}
+\begin{document}
+\parskip1cm
+
+%\ExplSyntaxOn
+%\tl_set:Nn \l__hyp_text_enc_file_print_tl {utf8/string}
+%\ExplSyntaxOff
+%\href{test_~abc.pdf}{test ascii utf8/string}
+
+
+\ExplSyntaxOn
+\tl_set:Nn \l__hyp_text_enc_file_print_tl {utf8/URI}
+\ExplSyntaxOff
+\href[urlencode]{grüßpdf.pdf}{test utf8/URI}
+
+\ExplSyntaxOn
+\tl_set:Nn \l__hyp_text_enc_file_print_tl {utf8/string}
+\ExplSyntaxOff
+\href[urlencode]{grüßpdf.pdf}{test utf8/string}
+
+
+\ExplSyntaxOn
+\tl_set:Nn \l__hyp_text_enc_file_print_tl {utf16/string}
+\ExplSyntaxOff
+\href[urlencode]{grüßpdf.pdf}{test utf16/string}
+
+
+\ExplSyntaxOn
+\tl_set:Nn \l__hyp_text_enc_file_print_tl {utf16/hex}
+\ExplSyntaxOff
+\href[urlencode]{grüßpdf.pdf}{test utf16/hex}
+
+
+\hrefurl[urlencode]{grüßpdf.pdf}{test as URI}
+
+
+\end{document}
