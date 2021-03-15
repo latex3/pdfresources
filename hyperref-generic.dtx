@@ -1070,15 +1070,15 @@
 % This needs an explicit option, as the encoding method must be changed.
 %
 %    \begin{macrocode}
-\newif\ifHy@encode
-\define@key{href}{encode}[true]
+\newif\ifHy@urlencode
+\define@key{href}{urlencode}[true]
   {
-    \Hy@boolkey{encode}{#1}
+    \Hy@boolkey{urlencode}{#1}
   }
 \DeclareRobustCommand*{\href}[1][]{%
   \begingroup
   \setkeys{href}{#1}
-  \ifHy@encode
+  \ifHy@urlencode
    \let\protect\@unexpandable@protect
    \tl_set:Nn \l__hyp_text_enc_uri_print_tl {utf8/URI}
   \else
@@ -1089,11 +1089,11 @@
 
 \keys_define:nn { hyp / setup }
   {
-    ,encode .choice:
-    ,encode / true .code:n = { \Hy@encodetrue }
-    ,encode / false .code:n = { \Hy@encodefalse }
-    ,encode .default:n = {true}
-    ,encode .initial:n = {false}
+    ,urlencode .choice:
+    ,urlencode / true .code:n = { \Hy@urlencodetrue }
+    ,urlencode / false .code:n = { \Hy@urlencodefalse }
+    ,urlencode .default:n = {true}
+    ,urlencode .initial:n = {false}
   }
 %    \end{macrocode}
 % \section{Compability commands}
