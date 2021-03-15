@@ -1079,6 +1079,7 @@
 \bool_new:N \l_@@_href_url_ismap_bool
 \tl_new:N   \l_@@_href_url_protocol_tl
 \tl_new:N   \l_@@_href_pdf_destination_tl
+\tl_new:N   \l_@@_href_pdf_page_tl
 \tl_new:N   \l_@@_href_run_parameter_tl
 
 
@@ -1096,8 +1097,21 @@
         \keys_set:nn { hyp / setup }
           { pdfremotestartview = #1 }
       }
+    ,page .code:n =
+      {
+       \tl_set:Nn \l_@@_href_pdf_page_tl {#1}
+       \tl_set:Nn \Hy@href@page {#1}
+      }
     ,ismap  .bool_set:N  = \l_@@_href_url_ismap_bool
     ,run-parameter .tl_set:N = \l_@@_href_run_parameter_tl
+    ,nextactionraw .code:n =
+     { %perhaps some safety match later, see hyperref code
+       \tl_if_empty:nF
+         {
+           \pdfdict_put:nnn{l_hyp/annot/A}{Next}{#1}
+           \tl_set:Nn \Hy@href@nextactionraw {/Next~#1}
+         }
+     }
   }
 
 \keys_define:nn { hyp / setup }
@@ -1922,11 +1936,6 @@
            {
             \pdfdict_put:nnn{l_hyp/annot/A/URI}{IsMap}{true}
            }
-         \tl_if_empty:NF \Hy@href@nextactionraw
-           {
-             \str_remove_once:Nn \Hy@href@nextactionraw {/Next}
-             \pdfdict_put:nno{l_hyp/annot/A/Next}{\Hy@href@nextactionraw}
-           }
          \cs_set_eq:NN \# \c_hash_str
          \cs_set_eq:NN \% \c_percent_str
          \Hy@safe@activestrue
@@ -1977,15 +1986,10 @@
         \tl_if_blank:eTF {#3}
           {
             \pdfdict_put:nnx {l_hyp/annot/A/GoToR}{D}
-              {[\Hy@href@page/\l_@@_dest_pdfremotestartview_tl]}
+              {[\l_@@_href_pdf_page_tl /\l_@@_dest_pdfremotestartview_tl]}
           }
           {
             \pdfdict_put:nno {l_hyp/annot/A/GoToR}{D}{\l_@@_dest_name_tmpa_tl}
-          }
-        \tl_if_empty:NF \Hy@href@nextactionraw
-          {
-            \str_remove_once:Nn \Hy@href@nextactionraw {/Next}
-            \pdfdict_put:nno{l_hyp/annot/A/Next}{Next}{\Hy@href@nextactionraw}
           }
         \mode_leave_vertical:
         \pdfannot_dict_put:nnx {link/GoToR}{A}{<<\pdfdict_use:n {l_hyp/annot/A/GoToR}>>}
@@ -2042,11 +2046,6 @@
               \pdfdict_put:nnx {l_hyp/annot/A/Launch}{Win}
                 {<</P \l_@@_para_tmpa_tl /F \l_@@_filename_tmpa_tl >>}
             }
-          \tl_if_empty:NF \Hy@href@nextactionraw
-            {
-              \str_remove_once:Nn \Hy@href@nextactionraw {/Next}
-              \pdfdict_put:nno{l_hyp/annot/A/Next}{Next}{\Hy@href@nextactionraw}
-            }
           \mode_leave_vertical:
           \pdfannot_dict_put:nnx {link/Launch}{A}{<<\pdfdict_use:n {l_hyp/annot/A/Launch}>>}
           \pdfannot_link:nxn
@@ -2096,11 +2095,6 @@
              \mode_leave_vertical:
              \pdfdict_put:nnx {l_hyp/annot/A/Named}{N}
                {\pdf_name_from_unicode_e:n{#1}}
-             \tl_if_empty:NF \Hy@href@nextactionraw
-               {
-                 \str_remove_once:Nn \Hy@href@nextactionraw {/Next}
-                 \pdfdict_put:nno{l_hyp/annot/A/Next}{Next}{\Hy@href@nextactionraw}
-               }
              \pdfannot_dict_put:nnx {link/Named}{A}{<<\pdfdict_use:n {l_hyp/annot/A/Named}>>}
              \pdfannot_link:nxn { Named }
               {
