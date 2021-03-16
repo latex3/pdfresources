@@ -989,6 +989,7 @@
 % \section{Variants}
 %    \begin{macrocode}
 \cs_generate_variant:Nn\pdf_destination:nn {nf}
+\cs_generate_variant:Nn\pdf_object_ref:n {e}
 %    \end{macrocode}
 % \section{Overwriting/providing commands from hyperref}
 %  hyperref checks driver version, we need to suppress this during the development
@@ -1116,6 +1117,12 @@
            \keys_set:nn {hyp / setup }{ pdfnewwindow = true}
          }
      }
+    ,afrelationship .code:n =
+      {
+        \pdfdict_put:nnx
+          { l_pdffile/Filespec}{AFRelationship}{ \pdf_name_from_unicode_e:n {#1}}
+      }
+
   }
 
 \keys_define:nn { hyp / setup }
@@ -1970,23 +1977,31 @@
 \pdfdict_put:nnn {l_hyp/annot/A/GoToR}{Type}{/Action}
 \pdfdict_put:nnn {l_hyp/annot/A/GoToR}{S}{/GoToR}
 
+
 \cs_new_protected:Npn \hyper@linkfile #1 #2 #3 % link text, filename, destname
   {
    \bool_if:NTF \l_@@_annot_GoToR_bool
      {
         \group_begin:
-        \tl_set:Nn \l_@@_filename_tmpa_tl { #2 }
-        \Hy@CleanupFile \l_@@_filename_tmpa_tl
-        \@@_text_pdfstring:ooN
-          { \l_@@_filename_tmpa_tl }
-          { \l_@@_text_enc_file_print_tl }
-          \l_@@_filename_tmpa_tl
-        \pdfdict_put:nno {l_hyp/annot/A/GoToR}{F}{\l_@@_filename_tmpa_tl}
+        \tl_set:Nx \l_@@_filename_tmpa_tl { \text_expand:n { #2 } }
+        \exp_args:Nx
+          \pdf_object_if_exist:nF { @@_file_\tl_to_str:N \l_@@_filename_tmpa_tl }
+            {
+              \pdfdict_put:nnx { l_pdffile/Filespec}{Subtype}{\pdf_name_from_unicode_e:n {application/pdf}}
+              \exp_args:Nnox
+              \pdffile_embed_file:nnn
+                {}
+                {\l_@@_filename_tmpa_tl }
+                {@@_file_\tl_to_str:N \l_@@_filename_tmpa_tl }
+            }
+        \pdfdict_put:nnx
+           {l_hyp/annot/A/GoToR}
+           {F}
+           {\pdf_object_ref:e {@@_file_\tl_to_str:N \l_@@_filename_tmpa_tl}}
         \@@_text_pdfstring:nnN
           { #3 }
           { \l_@@_text_enc_dest_print_tl }
           \l_@@_dest_name_tmpa_tl
-        %\Hy@MakeRemoteAction
         \tl_if_blank:eTF {#3}
           {
             \pdfdict_put:nnx {l_hyp/annot/A/GoToR}{D}
@@ -2006,9 +2021,6 @@
         \pdfannot_link:nxn %expansion??
           { GoToR }
           {
-  %          /A<<
-%              \pdfdict_use:n {l_hyp/annot/A/GoToR}
-%            >>
           }
           {
            \let\protect\relax
