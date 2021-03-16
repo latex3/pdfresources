@@ -2040,7 +2040,8 @@
             \pdfdict_put:nno {l_hyp/annot/A/GoToR}{D}{\l_@@_dest_name_tmpa_tl}
           }
         \mode_leave_vertical:
-        \pdfannot_dict_put:nnx {link/GoToR}{A}{<<\pdfdict_use:n {l_hyp/annot/A/GoToR}>>}
+        \pdf_object_unnamed_write:nx{dict}{\pdfdict_use:n {l_hyp/annot/A/GoToR}}
+        \pdfannot_dict_put:nnx {link/GoToR}{A}{\pdf_object_ref_last:}
         \pdfannot_link:nxn %expansion??
           { GoToR }
           {
