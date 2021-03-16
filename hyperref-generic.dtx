@@ -1082,15 +1082,13 @@
 \tl_new:N   \l_@@_href_pdf_destination_tl
 \tl_new:N   \l_@@_href_pdf_page_tl
 \tl_new:N   \l_@@_href_run_parameter_tl
-
+\cs_new_protected:Npn \@@_href_url_format {\begingroup\Url}
 
 
 \keys_define:nn { hyp / href }
   {
     ,urlencode  .bool_set:N =  \l_@@_href_url_encode_bool
-    ,format .choices:nn =
-      {utf8/string,utf8/URI,utf16/string,utf16/hex}
-      { \tl_set:Nn \l_@@_text_enc_file_print_tl {#1} }
+    ,format     .code:n = { \cs_set_eq:NN \@@_href_url_format #1 },
     ,protocol  .tl_set:N   =  \l_@@_href_url_protocol_tl
     ,destination .tl_set:N = \l_@@_href_pdf_destination_tl
     ,pdfremotestartview .code:n =
@@ -1128,10 +1126,11 @@
 \keys_define:nn { hyp / setup }
   {
     ,href / urlencode .bool_set:N =  \l_@@_href_url_encode_bool
-    ,href / urlencode .default:n = {true}
-    ,href / urlencode .initial:n = {false}
-    ,href / protocol  .tl_set:N = \l_@@_url_protocol_tl
+    ,href / urlencode .default:n  = {true}
+    ,href / urlencode .initial:n  = {false}
+    ,href / protocol  .tl_set:N   =   \l_@@_href_url_protocol_tl
     ,href / destination .tl_set:N = \l_@@_href_pdf_destination_tl
+    ,href / format  .code:n = { \cs_set_eq:NN \@@_href_url_format #1 }
   }
 
 
@@ -1139,9 +1138,9 @@
 \DeclareRobustCommand*{\href}[1][]{%
   \begingroup
   \keys_set:nn { hyp / href } {#1}
+  \let\protect\@unexpandable@protect
   \bool_if:NTF \l_@@_href_url_encode_bool
     {
-      \let\protect\@unexpandable@protect
       \tl_set:Nn \l__hyp_text_enc_uri_print_tl {utf8/URI}
     }
     {
@@ -1154,9 +1153,9 @@
 \DeclareRobustCommand*{\hrefurl}[1][]{
   \group_begin:
   \keys_set:nn { hyp / href } {#1}
+  \let\protect\@unexpandable@protect
   \bool_if:NTF \l_@@_href_url_encode_bool
     {
-      \let\protect\@unexpandable@protect
       \tl_set:Nn \l__hyp_text_enc_uri_print_tl {utf8/URI}
     }
     {
@@ -1166,7 +1165,7 @@
 
 \cs_new_protected:Npn \@@_href_url_aux:nn #1 #2
   {
-    \exp_args:Nno\hyper@linkurl{#2}{\l__hyp_url_protocol_tl#1}
+    \exp_args:Nno\hyper@linkurl{#2}{\l_@@_href_url_protocol_tl#1}
     \group_end:
   }
 
@@ -1198,7 +1197,34 @@
     \group_end:
   }
 
+\DeclareRobustCommand*{\url}[1][]
+  {
+   \group_begin:
+   \keys_set:nn {hyp / href } {#1}
+   \let\protect \@unexpandable@protect
+    \bool_if:NTF \l_@@_href_url_encode_bool
+    {
+      \tl_set:Nn \l__hyp_text_enc_uri_print_tl {utf8/URI}
+    }
+    {
+      \tl_set:Nn \l__hyp_text_enc_uri_print_tl {utf8/string}
+    }
+   \hyper@normalise\@@_href_url_aux:n
+  }
 
+\cs_new_protected:Npn \@@_href_url_aux:n #1
+ {
+   \exp_args:Nno
+     \hyper@linkurl{\@@_href_url_format {#1}}
+     {\l_@@_href_url_protocol_tl#1}
+   \group_end:
+ }
+
+
+\NewExpandableDocumentCommand\@@_secondoftwowithopt:wnn {omm}{#3}
+\pdfstringdefDisableCommands{\let\hrefurl\@@_secondoftwowithopt:wnn}
+\pdfstringdefDisableCommands{\let\hrefpdf\@@_secondoftwowithopt:wnn}
+\pdfstringdefDisableCommands{\let\hrefrun\@@_secondoftwowithopt:wnn}
 %    \end{macrocode}
 % \section{Compability commands}
 % \subsection{Metadata}
@@ -1901,7 +1927,8 @@
         \__hyp_link_goto_end:
         \group_end:
         \Hy@VerboseLinkStop
-      }{#3}
+      }
+      {{\let\protect\relax#3}}
   }
 
 \cs_new_protected:Npn \hyper@linkstart #1 #2 %#1 context, #2=destination name
@@ -1954,10 +1981,6 @@
          \pdfannot_dict_put:nnx {link/URI}{A}{<<\pdfdict_use:n {l_hyp/annot/A/URI}>>}
          \pdfannot_link:nxn { URI }
            {
-     %        /A
-%               <<
-%                 \pdfdict_use:n {l_hyp/annot/A/URI}
-%               >>
            }
            {
              \let\protect\relax
@@ -1967,7 +1990,7 @@
            }
          \group_end:
       }
-      {#1}
+      {{\let\protect\relax#1}}
   }
 
 %    \end{macrocode}
@@ -2029,7 +2052,7 @@
           }
         \group_end:
      }
-     {#1}
+     {{\let\protect\relax#1}}
   }
 %    \end{macrocode}
 %
@@ -2085,7 +2108,7 @@
             }
         \group_end:
       }
-      {#2}
+      {{\let\protect\relax#2}}
   }
 %    \end{macrocode}
 % The actually command used by hyperref is \cs{@hyper@launch} which uses a delimited
@@ -2137,7 +2160,7 @@
            }
         \group_end:
       }
-      {#2}
+      {{\let\protect\relax#2}}
   }
 
 %    \end{macrocode}
