@@ -9,7 +9,7 @@
 \usepackage[T1]{fontenc}
 \usepackage{hyperref}
 \newcommand\cs[1]{\texttt{\textbackslash #1}}
-
+\providecommand\pkg[1]{\texttt{#1}}
 \makeatletter
 {\catcode`\%=12 \gdef\hyper@space{%20}}
  \let\hyperspace\hyper@space
@@ -18,22 +18,6 @@
 \begin{document}
 
 
-%\href[encode]{www.öäü%§(.de}{blblbl}
-%
-%%\hypersetup{encode}
-%
-%%\href{www.öäü§(.de}{seöäüß}
-%
-%\href[encode=false]{www.abc%25(xxx.de}{seöäüß}
-
-%\href[encode]{www.%.de}{abc}   %-> www.%25.de
-%\href{www.%.de}{abc}           %-> www.%.de
-%\href[encode]{www.grüße.de}{abc} %-> www.gr%C3%BC%C3%9Fe.de
-%% \href{www.grüße.de}{abc} % error
-%\href[encode]{grüße}{abc} %-> (gr\303\274\303\237e.pdf)
-%
-%\href{filexxx}{seöäüß}
-%\end{document}
 \section{Some background about URL's and file references with hyperref}
 
 hyperref has three commands related to URL and file references: \cs{url},
@@ -56,7 +40,7 @@ the input is already a valid percent encoded url or a valid file name. hyperref 
 doesn't extend or add protocols.
 
 As nowadays everyone is used to copy and paste links with all sorts of unicode into a browser and
-they work the hyperref input is clearly rather restricted.
+they work the \pkg{hyperref} input is clearly rather restricted.
 
 
 With \cs{href} it is possible to extend the input methods and to allow unicode input which is then
@@ -67,72 +51,78 @@ is hard to impossible in pdf\LaTeX{} due to the way the url package works.
 Some chars can be added with the help of \cs{UrlSpecial} (at the cost of warnings)
 but it doesn't work for every input and documenting and explaining all the edge cases is no joy.
 
-\subsection{Links to files}
+\section{Links to files}
 
-When a file is linked with \cs{href} than normally it is added as URI link. The exceptions are PDF's,
+When a file is linked with \cs{href} than normally it is added as URI link. The exceptions are PDF's:
 for them PDF has the special type GoToR which allows also to link to a destination or a special page.
 
-The rules here are
+After a number of tests with various PDF viewer established that non-ascii files names don't
+work at all with a simple file name specification GoToR links now use a full
+filespec dictionary. This works better, but still no every PDF viewer support this correctly. 
+on various system. 
+
+The following can be used to test viewers. It assumes that a \texttt{test.pdf},
+a \texttt{grüßpdf.pdf} and a \texttt{grüße.txt} are in the current folder. 
+
+\hrefpdf{test.pdf}{test-ascii}
+
+\hrefpdf{grüßpdf.pdf}{test grüßpdf.pdf}
+
+\hrefurl[urlencode]{grüße.txt}{test grüße.txt} 
+
+
+\section{Splits}
+
+\cs{href} tries to be clever and to detect from the argument
+if a url or a file link or a launch command should be created. 
+
+The rules are not trivial, and they make the code complicated.
+This detection also makes it more difficult to handle special cases
+like non-ascii input for the link types. 
+
+For this reason three new commands have been create:
+
 \begin{itemize}
-\item GoToR links to PDF's with ascii names in the same folder or relative pathes normally works.
-\item URI links to PDF's with ascii names in the same folder or relative pathes normally works.
-\item Everything else works only sometimes in some PDF viewer.
+\item \cs{hrefurl} for standard urls (and non-pdf files)
+\item \cs{hrefpdf} for references to pdf files
+\item \cs{hreflaunch} for launch links
 \end{itemize}
 
-So better stick to  asciinames.
+The new commands don't use prefixes like \cs{href}. 
+Their argument should be the real content.
 
-\hrefpdf[destination=blub]{pdfa-test.pdf}{test-ascii}
+All commands have an option argument for keyval syntax. 
+It accepts the following keys. Not all keys make sense for all keys, but they don't
+error, they are silently ignored. 
 
-\hrefpdf[format=utf8/URI]{grüßpdf.pdf}{test utf8/URI}
-
-\hrefpdf[format=utf8/string]{grüßpdf.pdf}{test utf8/string}
-
-
-\ExplSyntaxOn
-\tl_set:Nn \l__hyp_text_enc_file_print_tl {utf16/string}
-\ExplSyntaxOff
-\href[urlencode]{grüßpdf.pdf}{test utf16/string}
-
-
-\ExplSyntaxOn
-\tl_set:Nn \l__hyp_text_enc_file_print_tl {utf16/hex}
-\ExplSyntaxOff
-\href[urlencode]{grüßpdf.pdf}{test utf16/hex}
-
-
-\hrefurl[urlencode]{grüßpdf.pdf}{test as URI}
-
-\href[urlencode]{grüße.txt}{test} %URI, WORKS
-
-\href{https://www.abc(blub).de}{xxx}
-\end{document}
+\begin{tabular}{llp{6cm}}
+key & applicable commands  & note\\\hline
+urlencode & \cs{hrefurl}   & if set the code will convert the argument to percent encoding. This allows non-ascii input.\\
+protocol &  \cs{hrefurl}, \cs{url} & This sets a prefix/protocol that is added to the url, see below. \\
+format   & \cs{url}   & a command used to format the printed text. It replaces the standard \cs{Url}. This can improve non-ascii
+typesetting at the cost of losing the special line breaking\\ 
+destination &  \cs{href}, \cs{hrefpdf} & A destination name in the PDF\\
+page & \cs{href}, \cs{hrefpdf}        & destination page, default: 1\\
+pdfremotestartview &\cs{href}, \cs{hrefpdf} & start view, default: Fit\\
+ismap & \cs{href}, \cs{hrefurl}       & see PDF reference\\
+afrelationship &  \cs{href}, \cs{hrefpdf} & Changes the /AFRelationship key of the filespec dictionary. The value should be a PDF name without the starting slash.\\
+run-parameter & \cs{hreflaunch} & run parameter (see the PDF reference)\\
+nextactionraw & various & puts a /Next entry in the action dictionary (see the PDF reference)\\
+\end{tabular}
 
 
-%\begingroup
-%\makeatletter
-%\def\url@#1{\hyper@linkurl{§#1}{xxxx#1}}
-%\url{www.blub.de}
-%\endgroup
-%\ExplSyntaxOn\makeatletter
-%\begingroup
-%%\let\protect\@unexpandable@protect
-%\def\blub{abc}
-%\__hyp_text_pdfstring:noN
-%           { §x\blub xx}
-%           { \l__hyp_text_enc_uri_print_tl }
-%           \l__hyp_uri_tmpa_tl
-% \tl_show:N \l__hyp_uri_tmpa_tl
-%\ExplSyntaxOff
-%\endgroup
-%\end{document}
+The first four keys can be set also in \cs{hypersetup} for all following commands in 
+the current group through the keys 
+\texttt{href/urlencode}, \texttt{href/protocol}, \texttt{href/destination}, \texttt{href/format}.
 
-\section{string}
+It is possible to define own url commands with specific options e.g. with 
 
-\ExplSyntaxOn
-\str_set:Nx\l_tmpa_str{file://www.abcstring.de\c_percent_str \c_hash_str 123}
-\expandafter\href\expandafter{\l_tmpa_str}{blub}
-\ExplSyntaxOff
-\section{splits}
+\begin{verbatim}
+\NewDocumentCommand\myurl{O{}}{\url[protocol=https://,format=\textsc,#1]}
+\end{verbatim}
+
+
+
 
 \begin{verbatim}
 href creates different link types.
@@ -172,9 +162,14 @@ See
 
 \href{colonGoToR.pdf}{xxx}
 
-%\end{document}
+\end{document}
 
+\section{String}
 
+\ExplSyntaxOn
+\str_set:Nx\l_tmpa_str{file://www.abcstring.de\c_percent_str \c_hash_str 123}
+\expandafter\href\expandafter{\l_tmpa_str}{blub}
+\ExplSyntaxOff
 \section{parentheses}
 These are correctly escaped
 % URI(https://www.xyz.de\(blub\))
