@@ -204,8 +204,7 @@
 %     }
 %    { link text}
 %  \end{verbatim}
-%  Or if some other package or code need access to the action too, through
-%  a dictionary:
+%  Or through  a dictionary:
 %  \begin{verbatim}
 %    \pdfdict_new:n   {l_my_action_dict}
 %    \pdfdict_put:nnn {l_my_action_dict}{Type}{/Action}
@@ -217,9 +216,30 @@
 %
 %    \pdfannot_link:nxn { URI }
 %     {
-%       \pdfdict_use:n{l_my_action_dict}
+%       /A <<\pdfdict_use:n{l_my_action_dict}>>
 %     }
 %     { link text }
+%    \end{verbatim}
+%
+% Or if you want to exclude the possibility of a duplicated /A entry
+% (if the action is already in the link/GoTo dictionary e.g. if you can expect
+% other packages to add a dictionary). An alternative is to ensure that
+% no /A is there by removing it explicitly.
+%
+%  \begin{verbatim}
+%    \pdfdict_new:n   {l_my_action_dict}
+%    \pdfdict_put:nnn {l_my_action_dict}{Type}{/Action}
+%    \pdfdict_put:nnn {l_my_action_dict}{S}{/URI}
+%    \pdfdict_put:nnn {l_my_action_dict}{URI}{(https://www.latex-project.org)}
+%
+%´
+%    \pdfannot_dict_put:nnn
+%      {link/URI} { C } {[1~0~0]} %red border
+%      
+%    \group_begin:
+%    \pdfannot_dict_put:nnx {link/GoTo}{A}{<<\pdfdict_use:n{l_my_action_dict}>>}
+%    \pdfannot_link:nnn { URI }{}{ link text }
+%    \group_end:
 %    \end{verbatim}
 %
 %
