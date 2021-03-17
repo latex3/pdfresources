@@ -144,6 +144,22 @@
     \directlua { require("l3backend-testphase.lua") }
 %</luatex>
 %    \end{macrocode}
+% \subsection{Converting unicode strings to a pdfname}
+% dvips needs a special function here, so we add this as backend function.
+%    \begin{macrocode}
+%<*pdftex|luatex|dvipdfmx|xdvipdfmx|dvisvgm>
+\cs_new:Npn \__kernel_pdf_name_from_unicode_e:n #1
+  {
+    / \str_convert_pdfname:e { \text_expand:n { #1 } }
+  }
+%</pdftex|luatex|dvipdfmx|xdvipdfmx|dvisvgm>
+%<*dvips>
+\cs_new:Npn \__kernel_pdf_name_from_unicode_e:n #1
+  {
+    ~ ( \text_expand:n { #1 } ) ~ cvn
+  }
+%</dvips>
+%    \end{macrocode}
 % \subsection{Hooks}
 % \subsubsection{Add the \enquote{end run} hooks}
 % Here we add the end run hook to suitable

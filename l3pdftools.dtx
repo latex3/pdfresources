@@ -68,13 +68,20 @@
 %   \cs{pdf_name_from_unicode_e:n}  \Arg{content}
 %  \end{syntax}
 %  This converts \meta{content} to a format suitable for a PDF Name.
-%  It will first expand the content with \cs{text_expand:n} and
+%  The output depends on the backend: For almost all backends
+%  it will first expand the content with \cs{text_expand:n} and
 %  then escape it in the way needed in a PDF Name with
 %  \cs{str_convert_pdfname:e}, and at last prepend a slash before.
 %  Typically such names use only ascii,
 %  but non-ascii is supported, but should be utf8 encoded. For example\\
 %  |\pdf_name_from_unicode_e:n {A~B\c_percent_str C\c_hash_str D€}}|\\
 %   will    output |/A#20B#25C#23D#E2#82#AC|.
+%
+%  With dvips it will expand the content with \cs{text_expand:n} and then wrap it
+%  in a |cvn| operation (\enquote{convert to name}).
+%  So the example above will output |(A B%C#D€) cvn| to
+%  the postscript. The content should not contain unbalanced parentheses with dvips.
+%
 % \end{function}
 % \begin{function}[added=2020-07-04]
 %   {\pdf_string_from_unicode:nnN}
@@ -224,7 +231,7 @@
 
 \cs_new:Npn \pdf_name_from_unicode_e:n #1
   {
-    / \str_convert_pdfname:e { \text_expand:n { #1 } }
+    \__kernel_pdf_name_from_unicode_e:n { #1 }
   }
 
 \cs_generate_variant:Nn \pdf_name_from_unicode_e:n {V}

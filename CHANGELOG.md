@@ -10,6 +10,17 @@ this project uses date-based 'snapshot' version identifiers.
 ### Fixed
 - \pdffield-setup:nn
 
+### Changed
+- \pdf_name_from_unicode_e:n: use cvn operator with dvips
+- \url: it has an optional argument and protocol, formatting command and encoding
+  can be changed.
+- \hyper@linkfile (GoToR links) now use a filespec dictionary. This improves the
+  support for non-ascii files names.   
+
+### Added
+- \hrefurl, \hrefrun, \hrefpdf for better support of non-ascii input and 
+  default options, see the hyperref-generic documentation. 
+
 ## [2021-03-07]
 
 ### Added
