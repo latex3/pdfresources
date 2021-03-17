@@ -163,7 +163,8 @@
 %  \texttt{Launch}, \texttt{GoTo} or \texttt{Named}. The dictionary can be changed
 %  by the commands \cs{pdfannot_dict_put:nnn} and friends described below.
 % \end{variable}
-% \begin{function}[added = 2020-03-12, updated = 2020-12-06]{ \pdfannot_link:nnn }
+% \begin{function}[added = 2020-03-12, updated = 2020-12-06]
+%    { \pdfannot_link:nnn,\pdfannot_link:nxn }
 %   \begin{syntax}
 %     \cs{pdfannot_link:nnn} \Arg{type} \Arg{user action spec} \Arg{link text}
 %   \end{syntax}
@@ -191,20 +192,54 @@
 %  text. None of the hooks introduce a group.
 %  \meta{type} should normally be identical to the value of the |/S| key
 %  in the action dictionary.
-%  As example
+%  As example either with a direct action
 %  \begin{verbatim}
+%  \pdfannot_link:nnn { URI }
+%     {
+%       /A<<
+%         /Type/Action
+%         /S/URI
+%         /URI(https://www.latex-project.org)
+%       >>
+%     }
+%    { link text}
+%  \end{verbatim}
+%  Or through  a dictionary:
+%  \begin{verbatim}
+%    \pdfdict_new:n   {l_my_action_dict}
+%    \pdfdict_put:nnn {l_my_action_dict}{Type}{/Action}
+%    \pdfdict_put:nnn {l_my_action_dict}{S}{/URI}
+%    \pdfdict_put:nnn {l_my_action_dict}{URI}{(https://www.latex-project.org)}
+%
 %    \pdfannot_dict_put:nnn
 %      {link/URI} { C } {[1~0~0]} %red border
-%    \pdfannot_link:nnn { URI }
+%
+%    \pdfannot_link:nxn { URI }
 %     {
-%       /A
-%         <<
-%           /Type/Action
-%           /S/URI
-%           /URI(https://www.latex-project.org)
-%         >>
+%       /A <<\pdfdict_use:n{l_my_action_dict}>>
 %     }
 %     { link text }
+%    \end{verbatim}
+%
+% Or if you want to exclude the possibility of a duplicated /A entry
+% (if the action is already in the link/GoTo dictionary e.g. if you can expect
+% other packages to add a dictionary). An alternative is to ensure that
+% no /A is there by removing it explicitly.
+%
+%  \begin{verbatim}
+%    \pdfdict_new:n   {l_my_action_dict}
+%    \pdfdict_put:nnn {l_my_action_dict}{Type}{/Action}
+%    \pdfdict_put:nnn {l_my_action_dict}{S}{/URI}
+%    \pdfdict_put:nnn {l_my_action_dict}{URI}{(https://www.latex-project.org)}
+%
+%´
+%    \pdfannot_dict_put:nnn
+%      {link/URI} { C } {[1~0~0]} %red border
+%      
+%    \group_begin:
+%    \pdfannot_dict_put:nnx {link/GoTo}{A}{<<\pdfdict_use:n{l_my_action_dict}>>}
+%    \pdfannot_link:nnn { URI }{}{ link text }
+%    \group_end:
 %    \end{verbatim}
 %
 %
