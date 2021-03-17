@@ -14,27 +14,27 @@ installfiles = {"*.sty","*.cls","*.def","*.lua","*.ltx"}
 if options["target"] == "ctan" then
   sourcefiles =  {"*.dtx","*.ins",
                 "l3ref-tmp.sty",
-                "firstaid/transparent-ltx.sty",          
-                "firstaid/hyperxmp-patches-tmp-ltx.sty",                
+                "firstaid/transparent-ltx.sty",
+                "firstaid/hyperxmp-patches-tmp-ltx.sty",
                 "firstaid/pdflscape-ltx.sty",
-                "firstaid/xcolor-patches-tmp-ltx.sty",                
+                "firstaid/xcolor-patches-tmp-ltx.sty",
                 "firstaid/color-ltx.sty",
                  }
 else
  sourcefiles =  {"*.dtx","*.ins",
                 "l3ref-tmp.sty",
-                "firstaid/transparent-ltx.sty",          
-                "firstaid/hyperxmp-patches-tmp-ltx.sty",                
+                "firstaid/transparent-ltx.sty",
+                "firstaid/hyperxmp-patches-tmp-ltx.sty",
                 "firstaid/pdflscape-ltx.sty",
-                "firstaid/xcolor-patches-tmp-ltx.sty",  
+                "firstaid/xcolor-patches-tmp-ltx.sty",
                 "firstaid/color-ltx.sty",
-                "support/pdfmanagement-regressiontest.sty",              
+                "support/pdfmanagement-regressiontest.sty",
                 "newpackages/new-bookmark.sty",
                 "newpackages/bkm-generic.def",
                 "newpackages/new-attachfile.sty",
-                "newpackages/atfi-generic.def",   
+                "newpackages/atfi-generic.def",
                 }
-end 
+end
 
 checkruns = 3
 
@@ -43,7 +43,7 @@ checkruns = 3
   print("TL2020 or later")
 
   specialformats = specialformats or {}
-  specialformats["latex"] = specialformats["latex"] or 
+  specialformats["latex"] = specialformats["latex"] or
    {
     luatex     = {binary="luahbtex",format = "lualatex-dev"},
     pdftex     = {format = "pdflatex-dev"},
@@ -52,7 +52,7 @@ checkruns = 3
     }
 
 -- to try without dev-format
---   specialformats["latex"] = specialformats["latex"] or 
+--   specialformats["latex"] = specialformats["latex"] or
 --    {
 --     luatex     = {binary="luahbtex",format = "lualatex"},
 --     pdftex     = {format = "pdflatex"},
@@ -67,7 +67,7 @@ checkengines = {"luatex","pdftex","xetex"}
 checkconfigs = {"build",
                 "config-noxetex",
                 "config-luatex",
-                "config-dvips" 
+                "config-dvips"
                 }
 
 -- tagging
@@ -79,28 +79,37 @@ tagfiles = {
 
 function update_tag (file,content,tagname,tagdate)
  tagdate = string.gsub (packagedate,"-", "/")
- if string.match (file, "%.dty$" ) then
+ if string.match (file, "l3backend%-testphase.dtx" ) then
   content = string.gsub (content,
-                         "\\ProvidesExplPackage {(.-)} {.-} {.-}",
-                         "\\ProvidesExplPackage {%1} {" .. tagdate.."} {"..packageversion .. "}")
+                          "{%d%d%d%d%-%d%d%-%d%d}",
+                          "{".. packagedate .. "}")
   content = string.gsub (content,
-                         "\\ProvidesExplFile {(.-)} {.-} {.-}",
-                         "\\ProvidesExplFile {%1} {" .. tagdate.."} {"..packageversion .. "}")
+                         "date{Version %d%.%d+%a, released %d%d%d%d%-%d%d%-%d%d",
+                         "date{Version "..packageversion..", released ".. packagedate)
+  return content
+  elseif string.match (file, "%.dtx$" ) then
+   content = string.gsub (content,
+                         "\\ProvidesExplPackage{(.-)}{.-}{.-}",
+                         "\\ProvidesExplPackage{%1}{" .. packagedate.."}{"..packageversion .. "}")
+    content = string.gsub (content,
+                         "\\ProvidesExplFile{(.-)}{.-}{.-}",
+                         "\\ProvidesExplFile{%1}{" .. packagedate.."}{"..packageversion .. "}")
+
   content = string.gsub (content,
-                         '(version%s*=%s*")%d%.%d+(",%s*--TAGVERSION)',
-                         "%1"..packageversion.."%2")
+                          "\\ProvidesFile{(.-)}%[%d%d%d%d%-%d%d%-%d%d v%d%.%d+%a",
+                          "\\ProvidesFile{%1}["..packagedate.." v"..packageversion)
   content = string.gsub (content,
-                         '(date%s*=%s*")%d%d%d%d%-%d%d%-%d%d(",%s*--TAGDATE)',
-                         "%1"..packagedate.."%2")
+                         "date{Version %d%.%d+%a, released %d%d%d%d%-%d%d%-%d%d",
+                         "date{Version "..packageversion..", released ".. packagedate)
   return content
   elseif string.match (file, "%.sty$" ) then
    content = string.gsub (content,
-                          "\\ProvidesPackage{(.-)}%[%d%d%d%d%-%d%d%-%d%d %d%.%d+%a",
-                          "\\ProvidesPackage{%1}%["..packagedate.." "..packageversion)
-  content = string.gsub (content,
-                         "\\ProvidesExplPackage{(.-)} {.-} {.-}",
-                         "\\ProvidesExplPackage{%1} {" .. packagedate.."} {"..packageversion .. "}")
-  return content  
+                          "\\ProvidesPackage{(.-)}%[%d%d%d%d%-%d%d%-%d%d v%d%.%d+%a",
+                          "\\ProvidesPackage{%1}["..packagedate.." v"..packageversion)
+   content = string.gsub (content,
+                         "\\ProvidesExplPackage{(.-)}{.-}{.-}",
+                         "\\ProvidesExplPackage{%1}{" .. packagedate.."}{"..packageversion .. "}")
+  return content
  elseif string.match (file, "^README.md$") then
    content = string.gsub (content,
                          "Version: %d%.%d+%a, %d%d%d%d%-%d%d%-%d%d",
