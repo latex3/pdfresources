@@ -1,4 +1,6 @@
 #!/usr/bin/env texlua
+packageversion="0.95c"
+packagedate="2021-03-17"
 
 -- Build script for "LaTeX PDF management testphase bundle" bundle
 
@@ -68,3 +70,42 @@ checkconfigs = {"build",
                 "config-dvips" 
                 }
 
+-- tagging
+tagfiles = {
+            "*dtx",
+            "firstaid/*.sty",
+            "README.md"
+           }
+
+function update_tag (file,content,tagname,tagdate)
+ tagdate = string.gsub (packagedate,"-", "/")
+ if string.match (file, "%.dty$" ) then
+  content = string.gsub (content,
+                         "\\ProvidesExplPackage {(.-)} {.-} {.-}",
+                         "\\ProvidesExplPackage {%1} {" .. tagdate.."} {"..packageversion .. "}")
+  content = string.gsub (content,
+                         "\\ProvidesExplFile {(.-)} {.-} {.-}",
+                         "\\ProvidesExplFile {%1} {" .. tagdate.."} {"..packageversion .. "}")
+  content = string.gsub (content,
+                         '(version%s*=%s*")%d%.%d+(",%s*--TAGVERSION)',
+                         "%1"..packageversion.."%2")
+  content = string.gsub (content,
+                         '(date%s*=%s*")%d%d%d%d%-%d%d%-%d%d(",%s*--TAGDATE)',
+                         "%1"..packagedate.."%2")
+  return content
+  elseif string.match (file, "%.sty$" ) then
+   content = string.gsub (content,
+                          "\\ProvidesPackage{(.-)}%[%d%d%d%d%-%d%d%-%d%d %d%.%d+%a",
+                          "\\ProvidesPackage{%1}%["..packagedate.." "..packageversion)
+  content = string.gsub (content,
+                         "\\ProvidesExplPackage{(.-)} {.-} {.-}",
+                         "\\ProvidesExplPackage{%1} {" .. packagedate.."} {"..packageversion .. "}")
+  return content  
+ elseif string.match (file, "^README.md$") then
+   content = string.gsub (content,
+                         "Version: %d%.%d+%a, %d%d%d%d%-%d%d%-%d%d",
+                         "Version: " .. packageversion .. ", " .. packagedate )
+   return content
+ end
+ return content
+ end
