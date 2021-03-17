@@ -12,9 +12,10 @@ this project uses date-based 'snapshot' version identifiers.
 
 ### Changed
 - \pdf_name_from_unicode_e:n: use cvn operator with dvips
-- \url: it has an optional argument and protocol, formatting command and encoding
-  can be changed.
-- \hyper@linkfile (GoToR links) now use a filespec dictionary. This improves the
+- \url: it has an optional argument through which protocol, formatting command and encoding
+  can be changed
+- \href can use the url arguments too.  
+- \hyper@linkfile (GoToR links) now uses a filespec dictionary. This improves the
   support for non-ascii files names.   
 
 ### Added

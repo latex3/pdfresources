@@ -173,7 +173,7 @@ See
 \hrefurl{\ltmpastr}{blub}
 \hrefpdf{\ltmpastr}{blub}
 \ExplSyntaxOff
-\end{document}
+
 
 \section{parentheses}
 These are correctly escaped
@@ -201,7 +201,6 @@ zzzlinebreak.de}{xxx}
 \url{https://www.xyz%
 zzzlinebreak.de}
 
-%\end{document}
 
 \section{tilde}
 %\makeatletter \def\hyper@tilde{X}\makeatother
@@ -215,7 +214,7 @@ zzzlinebreak.de}
 \href{https://www.xyz.de\textasciitilde blub}{xxx}
 \url{https://www.xyz.de\textasciitilde blub}
 \makeatother
-%\end{document}
+
 
 
 \section{space}
@@ -223,30 +222,34 @@ Print output is wrong, uri in pdf too (but this works with pdfmanagement).
 \href{https://www.xyz.de blub}{xxx}
 \url{https://www.xyz.de blub}
 
-\href{https://www.xyz.de\space blub}{xxx}
-\url{https://www.xyz.de\space blub}
+\href[urlencode]{https://www.xyz.de blub}{xxx}
+\url[urlencode]{https://www.xyz.de blub}
+
+\hrefurl[urlencode]{https://www.spacehrefurl.de blub}{xxx}
 
 \parbox{5cm}{\url{https://www.xyz.de\space blub}}
 
-%\end{document}
+
 \section{percentchar}
 The percent is not escaped, but in pdfmanagement it is!!
-\href{https://www.xyz.de%blub}{xxx}
-\href{https://www.xyz.de\%blub}{xxx}
-\url{https://www.xyz.de%blub}
-\url{https://www.xyz.de\%blub}
+\href{https://www.testpercent.de%blub}{xxx}
+\href{https://www.testpercentcmd.de\%blub}{xxx}
+\url{https://www.testpercent.de%blub}
+\url{https://www.testpercentcmd.de\%blub}
+\hrefurl{https://www.testpercent.de%blub}{xxx}
+\hrefurl{https://www.testpercentcmd.de\%blub}{xxx}
+
 
 \makeatletter
 \href{https://www.xyz.de\@percentchar blub}{xxx}
 \url{https://www.xyz.de\@percentchar blub}
 \parbox{3cm}{\url{https://www.xyz.de\@percentchar blub}}
-
-
 \makeatother
+
 \section{non ascii}
 Is expanded to commands
-%\href{https://www.xyz.deöxxx}{xxx}
-%\href{filewithnonasciiöäüxxx}{xxx}
+\href[urlencode]{https://www.nonascii.deöxxx}{xxx}
+\href{filewithnonasciiöäüxxx}{xxx}
 %\url{https://www.xyz.deöxxx}
 
 %loops
