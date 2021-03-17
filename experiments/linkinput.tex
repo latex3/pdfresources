@@ -58,49 +58,49 @@ for them PDF has the special type GoToR which allows also to link to a destinati
 
 After a number of tests with various PDF viewer established that non-ascii files names don't
 work at all with a simple file name specification GoToR links now use a full
-filespec dictionary. This works better, but still no every PDF viewer support this correctly. 
-on various system. 
+filespec dictionary. This works better, but still no every PDF viewer support this correctly.
+on various system.
 
 The following can be used to test viewers. It assumes that a \texttt{test.pdf},
-a \texttt{grüßpdf.pdf} and a \texttt{grüße.txt} are in the current folder. 
+a \texttt{grüßpdf.pdf} and a \texttt{grüße.txt} are in the current folder.
 
 \hrefpdf{test.pdf}{test-ascii}
 
 \hrefpdf{grüßpdf.pdf}{test grüßpdf.pdf}
 
-\hrefurl[urlencode]{grüße.txt}{test grüße.txt} 
+\hrefurl[urlencode]{grüße.txt}{test grüße.txt}
 
 
 \section{Splits}
 
 \cs{href} tries to be clever and to detect from the argument
-if a url or a file link or a launch command should be created. 
+if a url or a file link or a launch command should be created.
 
 The rules are not trivial, and they make the code complicated.
 This detection also makes it more difficult to handle special cases
-like non-ascii input for the link types. 
+like non-ascii input for the link types.
 
 For this reason three new commands have been create:
 
 \begin{itemize}
 \item \cs{hrefurl} for standard urls (and non-pdf files)
 \item \cs{hrefpdf} for references to pdf files
-\item \cs{hreflaunch} for launch links
+\item \cs{hrefrun} for launch links
 \end{itemize}
 
-The new commands don't use prefixes like \cs{href}. 
+The new commands don't use prefixes like \cs{href}.
 Their argument should be the real content.
 
-All commands have an option argument for keyval syntax. 
+All commands have an option argument for keyval syntax.
 It accepts the following keys. Not all keys make sense for all keys, but they don't
-error, they are silently ignored. 
+error, they are silently ignored.
 
 \begin{tabular}{llp{6cm}}
 key & applicable commands  & note\\\hline
 urlencode & \cs{hrefurl}   & if set the code will convert the argument to percent encoding. This allows non-ascii input.\\
 protocol &  \cs{hrefurl}, \cs{url} & This sets a prefix/protocol that is added to the url, see below. \\
 format   & \cs{url}   & a command used to format the printed text. It replaces the standard \cs{Url}. This can improve non-ascii
-typesetting at the cost of losing the special line breaking\\ 
+typesetting at the cost of losing the special line breaking.\\
 destination &  \cs{href}, \cs{hrefpdf} & A destination name in the PDF\\
 page & \cs{href}, \cs{hrefpdf}        & destination page, default: 1\\
 pdfremotestartview &\cs{href}, \cs{hrefpdf} & start view, default: Fit\\
@@ -111,11 +111,11 @@ nextactionraw & various & puts a /Next entry in the action dictionary (see the P
 \end{tabular}
 
 
-The first four keys can be set also in \cs{hypersetup} for all following commands in 
-the current group through the keys 
+The first four keys can be set also in \cs{hypersetup} for all following commands in
+the current group through the keys
 \texttt{href/urlencode}, \texttt{href/protocol}, \texttt{href/destination}, \texttt{href/format}.
 
-It is possible to define own url commands with specific options e.g. with 
+It is possible to define own url commands with specific options e.g. with
 
 \begin{verbatim}
 \NewDocumentCommand\myurl{O{}}{\url[protocol=https://,format=\textsc,#1]}
@@ -162,14 +162,19 @@ See
 
 \href{colonGoToR.pdf}{xxx}
 
-\end{document}
 
 \section{String}
 
-\ExplSyntaxOn
-\str_set:Nx\l_tmpa_str{file://www.abcstring.de\c_percent_str \c_hash_str 123}
-\expandafter\href\expandafter{\l_tmpa_str}{blub}
+\def\blub{file://www.teststrings.de}
+\href{\blub}{aaa}
+\ExplSyntaxOn %no underscores in command names ...
+\str_set:Nx\ltmpastr{file\c_colon_str//www.teststrings.de\c_percent_str \c_hash_str 123}
+\href{\ltmpastr}{blub}
+\hrefurl{\ltmpastr}{blub}
+\hrefpdf{\ltmpastr}{blub}
 \ExplSyntaxOff
+\end{document}
+
 \section{parentheses}
 These are correctly escaped
 % URI(https://www.xyz.de\(blub\))
