@@ -2732,19 +2732,9 @@
 %   These are the keys for ocgcolors. We try to disable it
 %   for pdf version below 1.5
 %    \begin{macrocode}
-\pdf_version_compare:NnTF < {1.5}
-  {
-    \keys_define:nn { hyp / setup }
-      {
-        ,_ocgcolorlinks .code:n =
-          {
-            \msg_warning:nnxx
-              { hyp }
-              { ignore-deprecated-or-unknown-option-in-pdf-version }
-              { ocgcolorlinks } { \pdf_version_major:.\pdf_version_minor: }
-          }
-      }
-  }
+\bool_lazy_or:nnTF
+  { \pdf_version_compare_p:Nn > {1.4} }
+  { \str_if_eq_p:ee{\pdf_version_major:}{-1} }
   {
      \keys_define:nn { hyp / setup }
        {
@@ -2758,6 +2748,18 @@
             }
          ,_ocgcolorlinks .default:n = true
        }
+  }
+  {
+    \keys_define:nn { hyp / setup }
+      {
+        ,_ocgcolorlinks .code:n =
+          {
+            \msg_warning:nnxx
+              { hyp }
+              { ignore-deprecated-or-unknown-option-in-pdf-version }
+              { ocgcolorlinks } { \pdf_version_major:.\pdf_version_minor: }
+          }
+      }
   }
 
 \keys_define:nn { hyp / setup }
@@ -2779,7 +2781,15 @@
 
 \seq_map_inline:Nn \c_@@_annot_types_seq
   {
-    \pdf_version_compare:NnTF < {1.5}
+    \bool_lazy_or:nnTF
+      { \pdf_version_compare_p:Nn > {1.4} }
+      { \str_if_eq_p:ee{\pdf_version_major:}{-1} }
+      {
+        \keys_define:nn { hyp / setup }
+          {
+            ,ocgcolor#1 .bool_set:c = { l_hyp_annot_ocgcolor#1_bool }
+          }
+      }
       {
         \keys_define:nn { hyp / setup }
           {
@@ -2791,12 +2801,6 @@
                   { ocgcolor#1 }
                   { \pdf_version_major:.\pdf_version_minor: }
               }
-          }
-      }
-      {
-        \keys_define:nn { hyp / setup }
-          {
-            ,ocgcolor#1 .bool_set:c = { l_hyp_annot_ocgcolor#1_bool }
           }
       }
   }
