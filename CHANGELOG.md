@@ -9,6 +9,7 @@ this project uses date-based 'snapshot' version identifiers.
 
 ### Fixed
 - \pdffield-setup:nn
+- ocgcolorlinks test for dvips (pdf version is not available)
 
 ### Changed
 - \pdf_name_from_unicode_e:n: use cvn operator with dvips
