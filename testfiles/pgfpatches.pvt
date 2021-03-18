@@ -1,0 +1,31 @@
+\PassOptionsToPackage{enable-debug,check-declarations}{expl3}
+\RequirePackage{pdfmanagement-testphase}
+\DeclareDocumentMetadata {  }
+\RequirePackage{pdfmanagement-regressiontest}
+
+\documentclass{article}
+\usepackage{tikz}
+\usetikzlibrary{patterns}
+\usepackage[]{hyperref}
+\hypersetup{ocgcolorlinks}
+\begin{document}
+bbbb
+
+\begin{tikzpicture}
+  \node[thick,pattern={north east lines}] {};
+\end{tikzpicture}
+
+\begin{tikzpicture}
+  \node[thick,pattern={checkerboard light gray}] {};
+\end{tikzpicture}
+
+\tikz\fill[red,opacity=0.5] (0,0) rectangle (1,1);
+
+\newpage
+
+\begin{tikzpicture}
+  \node[thick,pattern={crosshatch dots light steel blue}] {xxxxxx};
+\end{tikzpicture}
+
+
+\end{document} 
