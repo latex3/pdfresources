@@ -1307,6 +1307,7 @@
 
 \DeclareRobustCommand*{\url}[1][]
   {
+   \mode_leave_vertical:
    \group_begin:
    \keys_set:nn {hyp / href } {#1}
    \let\protect \@unexpandable@protect
