@@ -4,23 +4,41 @@
 \@ifundefined{color_set:nn}{\RequirePackage{l3color}}{}
 
 \ExplSyntaxOn
-\cs_gset_protected:Npn \@expl@xcolor@set@@nnn #1 #2 #3
+% #1 is the color name
+% #2:  model or models
+% #3: value: either numbers or a color name
+% #4 is the type: named or ps
+\cs_gset_protected:Npn \@expl@xcolor@set@@nnnn #1 #2 #3 #4
     {
-      \cs_if_exist:cTF { __color_parse_model_ #2 :w }
-       {
-         \color_set:nnn {#1}{#2}{#3}
-       }
-       {
-         \tl_if_eq:nnTF{#2}{named}
-          {
-            \color_set:nn{#1}{#3}
-          }
-          {
-            %this is for multi models, it will break if there is model
-            %l3 doesn't know, but the case is rare, so accept it for now.
-            \color_set:nnn{#1}{#2}{#3}
-          }
-       }
+      \str_case:nnF {#4}
+        {
+          % we ignore the ps  type for now.
+          {ps}{}
+          {named}
+            {
+               \cs_if_exist:cT { __color_parse_model_ #2 :w }
+                 {
+                    \color_set:nnn {#1}{#2}{#3}
+                 }
+            }
+        }
+        {
+          \cs_if_exist:cTF { __color_parse_model_ #2 :w }
+           {
+             \color_set:nnn {#1}{#2}{#3}
+           }
+           {
+             \tl_if_eq:nnTF{#2}{named}%this the model not the type!
+               {
+                 \color_set:nn{#1}{#3}
+               }
+               {
+                 %this is for multi models, it will break if there is model
+                 %l3 doesn't know, but the case is rare, so accept it for now.
+                 \color_set:nnn{#1}{#2}{#3}
+               }
+           }
+        }
     }
  \cs_generate_variant:Nn \color_set:nn {ne}
  \cs_new_protected:Npn \@expl@xcolor@set@@ne #1 #2
@@ -58,7 +76,7 @@
 
 %\pretocmd{\XC@definec@lor}{\@expl@color@set@@nnn{#2}{#4}{#5}}{}{\fail}
 \def\XC@definec@lor[#1]#2[#3]#4#5%
- {\@expl@xcolor@set@@nnn{#2}{#4}{#5}%
+ {\@expl@xcolor@set@@nnnn{#2}{#4}{#5}{#1}%
   \begingroup
   \XC@sdef\@@cls{#1}\XC@edef\@@nam{#2}\edef\colornameprefix{#3}%
   \XC@logdef\@@nam

@@ -1,0 +1,49 @@
+\RequirePackage{pdfmanagement-testphase}
+\DeclareDocumentMetadata{}
+\RequirePackage{pdfmanagement-regressiontest}
+\documentclass{article}
+
+\usepackage[dvipsnames]{xcolor}
+
+\definecolor{testrgb}{rgb}{0.5,0.5,0.6}
+\definecolor{testRGB}{RGB}{100,100,100}
+\definecolor{testcmyk}{cmyk}{0.5,0.5,0.6,0.4}
+\definecolor{anteater}{named}{testcmyk}
+\definecolor{duck}{named}{GreenYellow}
+
+\definecolor[ps]{PS}{gray}{tx@Dict begin Rand end}
+\begin{document}
+abc
+\START
+\ExplSyntaxOn
+\TEST{show~rgb}
+ {
+   \color_show:n{testrgb}
+ }
+\TEST{show~RGB}
+ {
+   \color_show:n{testRGB}
+ }
+
+\TEST{show~cmyk}
+ {
+   \color_show:n{testcmyk}
+ }
+
+\TEST{show~named~copy~cmyk}
+ {
+   \color_show:n{anteater}
+ }
+
+\TEST{show~named~dvipsnam.def}
+ {
+   \color_show:n{duck}
+ }
+ 
+\TEST{show~ps}
+ {
+   \color_show:n{PS}
+ } 
+\ExplSyntaxOff
+
+\end{document} 
