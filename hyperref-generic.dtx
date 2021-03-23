@@ -1357,9 +1357,9 @@
 \color_set:nn  {hyp/color/citeborder}{hyp/color/cite!60!white}
 \keys_define:nn { hyp / setup }
   {
-    ,citecolor .code:n = {\@@_color_set:nn {hyp/color/cite}{#1}}
+    ,citecolor .code:n = {\@@_color_set:ne {hyp/color/cite}{#1}}
     ,citebordercolor
-      .code:n = {\@@_color_set:nn {hyp/color/citeborder}{#1}}
+      .code:n = {\@@_color_set:ne {hyp/color/citeborder}{#1}}
   }
 \hook_gput_code:nnn { hyp/link/cite }{hyp/cite}
   {
