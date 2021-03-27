@@ -1,0 +1,265 @@
+% !Mode:: "TeX:DE:UTF-8:Main"
+
+\RequirePackage{pdfmanagement-testphase}
+\DeclareDocumentMetadata{pdfversion=1.7,lang=en-UK,uncompress}
+
+\documentclass{article}
+\usepackage{l3pdffield-testphase}
+\ExplSyntaxOn
+\pdfdict_new:n   {l__pdffield/text/field}
+\pdfdict_put:nnn {l__pdffield/text/field}{FT}{/Tx}
+
+\cs_new_protected:Npn \__pdffield_text_field_new:n #1
+  {
+      \group_begin:
+      \pdf_object_new:nn {__pdffield_text/field/#1}      {dict}
+      \pdf_object_new:nn {__pdffield_text/field/#1/Kids} {array}
+      \seq_new:c {g__pdffield_text/field/#1/Kids_seq}
+      \hook_gput_code:nnn {shipout/lastpage}{pdffield} %xetex needs this ...
+        {
+          \pdf_object_write:nx {__pdffield_text/field/#1/Kids}
+            {
+              \seq_use:cn{g__pdffield_text/field/#1/Kids_seq}{~}
+            }
+        }
+      \pdfdict_put:nnn {l__pdffield/text/field}{T}{(#1)}
+     % V,DV ??
+     %DA?
+      \pdfdict_put:nnx {l__pdffield/text/field}{V}{(blub?)}
+      \pdfdict_put:nnx {l__pdffield/text/field}{DA}{(/F\__pdffield_fontname:\c_space_tl 10\c_space_tl Tf~1~0~0~rg)}
+      \pdfdict_put:nnx {l__pdffield/text/field}
+         {Kids}
+         {
+           \pdf_object_ref:n {__pdffield_text/field/#1/Kids}
+         }
+      \pdfdict_put:nnx {l__pdffield/text/field}
+        {Ff}
+        {\bitset_to_arabic:N \l__pdffield_Ff_bitset }
+      \pdfdict_if_empty:nF{l__pdffield/text/field/AA}
+        {
+          \pdfmeta_standard_verify:nT
+            {annot_widget_no_AA}
+            {
+              \pdfdict_put:nnx
+                {l__pdffield/text/field}
+                {AA}
+                {<<\pdfdict_use:n {l__pdffield/text/field/AA}>>}
+            }
+        }
+      \pdf_object_write:nx {__pdffield_text/field/#1} { \pdfdict_use:n {l__pdffield/text/field} }
+      \pdfmanagement_add:nnx
+        { Catalog / AcroForm }
+        { Fields }
+        {\pdf_object_ref:n {__pdffield_text/field/#1} }
+      \group_end:
+  }
+
+\pdfdict_new:n   {l__pdffield/text/annot}
+\pdfdict_put:nnn {l__pdffield/text/annot}{Subtype}{/Widget}
+\pdfdict_new:n   {l__pdffield/text/annot/AP}
+
+\pdffield_store_appearance:nn {text/default}
+ { {\color_select:n{green}\rule{4cm}{1cm}} }
+
+\cs_new_protected:Npn \__pdffield_text_annot_add:nnnn #1 #2 #3 #4 %name, wd, ht, dp,
+  {
+    \group_begin:
+    \pdfdict_put:nnx {l__pdffield/text/annot}{AP}{<<\pdfdict_use:n{l__pdffield/text/annot/AP}>>}
+    \pdfmeta_standard_verify:nF
+      {annot_flags}
+      {
+        \bitset_set_true:Nn  \l__pdffield_F_bitset {Print}
+        \bitset_set_false:Nn \l__pdffield_F_bitset {Hidden}
+        \bitset_set_false:Nn \l__pdffield_F_bitset {Invisible}
+        \bitset_set_false:Nn \l__pdffield_F_bitset {NoView}
+      }
+    \pdfdict_if_empty:nF{l__pdffield/text/annot/AA}
+      {
+        \pdfmeta_standard_verify:nT
+         {annot_widget_no_AA}
+         {
+            \pdfdict_put:nnx
+              {l__pdffield/text/annot}
+              {AA}
+              {<<\pdfdict_use:n {l__pdffield/text/annot/AA}>>}
+         }
+      }
+    \pdfdict_put:nnx {l__pdffield/text/annot}{F}{ \bitset_to_arabic:N \l__pdffield_F_bitset }
+    \pdfdict_set_eq:nn {l__pdfannot/widget}{l__pdffield/text/annot}
+    \pdfannot_dict_put:nnx {widget}{Parent}{\pdf_object_ref:n{__pdffield_text/field/#1}}
+    \mode_leave_vertical:
+    \hbox_to_wd:nn
+      { #2  }
+      {
+        \rule [-#4]{0pt}{\dim_eval:n{#3+#4} }
+        \pdfannot_widget_box:nnn
+           { #2 }
+           { #3 }
+           { #4 }
+         \hfill
+      }
+    \seq_gput_right:cx {g__pdffield_text/field/#1/Kids_seq}{ \pdfannot_box_ref_last:}
+    \group_end:
+  }
+
+\keys_define:nn { pdffield / text }
+  {
+    ,name .code:n =
+      {
+        \pdf_string_from_unicode:nnN {utf8/string-raw}{#1}\l__pdffield_field_name_str
+        \str_if_in:NnT \l__pdffield_field_name_str {.}
+          {
+            \msg_error:nnx {pdffield}{no-period}{\l__pdffield_field_name_str}
+          }
+        \str_if_empty:NT\l__pdffield_field_name_str
+          {
+            \msg_error:nn {pdffield}{empty-name}
+          }
+      }
+    ,name .value_required:n = true
+    ,name .initial:n = text
+    ,altname .code:n =
+      {
+        \pdf_string_from_unicode:nnN {utf8/string}{#1}\l__pdffield_name_tmpa_str
+        \pdfdict_put:nnx { l__pdffield/text/field }{TU}{\l__pdffield_name_tmpa_str}
+      }
+    ,altname .groups:n = {field}
+    ,mappingname .code:n =
+      {
+        \pdf_string_from_unicode:nnN {utf8/string}{#1}\l__pdffield_name_tmpa_str
+        \pdfdict_put:nnx { l__pdffield/text/field }{TM}{\l__pdffield_name_tmpa_str}
+      }
+    ,mappingname .groups:n = {field}
+  }
+
+\keys_define:nn { pdffield / text }
+  {
+    appearance .code:n = %value is a name of an appearance
+      {
+        \pdfxform_if_exist:nTF {  __pdffield_#1 }
+          {
+            \pdfdict_put:nnn {l__pdffield/text/annot/AP}
+              {N}
+              {
+                 \pdfxform_ref:n { __pdffield_#1}
+              }
+          }
+          {
+            \msg_error:nnnn{pdffield}{appearance-missing}{#1}{normal}
+          }
+      },
+    appearance .initial:n = text/default,
+  }
+
+\keys_define:nn { pdffield / text }
+  {
+    ,width  .tl_set:N = \l__pdffield_annot_wd_tl
+    ,height .tl_set:N = \l__pdffield_annot_ht_tl
+    ,depth  .tl_set:N = \l__pdffield_annot_dp_tl
+    ,width  .initial:n = \normalbaselineskip
+    ,height .initial:n = \normalbaselineskip
+    ,depth  .initial:n = 0pt
+  }
+\cs_new_protected:Npn \__pdffield_text_add:n #1
+  {
+    \group_begin:
+    \keys_set_filter:nnnN {pdffield / text }{field}{#1}\l__pdffield_keys_tmpa_tl
+    \str_if_empty:NT \l__pdffield_field_name_str
+      {
+        \msg_error:nn {pdffield}{empty-name}
+      }
+    \exp_args:Nx
+      \pdf_object_if_exist:nTF {__pdffield_text/field/\l__pdffield_field_name_str}
+       {
+          \tl_if_empty:NF \l__pdffield_keys_tmpa_tl
+           {
+             \msg_warning:nnxx
+               {pdffield}
+               {field-keys-ignored}
+               {\l__pdffield_field_name_str}
+               {\l__pdffield_keys_tmpa_tl}
+           }
+       }
+       {
+         \keys_set:nV { pdffield/text } \l__pdffield_keys_tmpa_tl
+         \exp_args:No
+         \__pdffield_text_field_new:n {\l__pdffield_field_name_str}
+       }
+    \exp_args:No
+      \__pdffield_text_annot_add:nnnn
+        {\l__pdffield_field_name_str}
+        {\l__pdffield_annot_wd_tl }
+        {\l__pdffield_annot_ht_tl }
+        {\l__pdffield_annot_dp_tl }
+    \group_end:
+  }
+  
+\sys_if_engine_luatex:TF
+ {
+  \cs_new:Nn \__pdffield_fontname:  {\pdffeedback~fontname\font }
+  \cs_new:Nn \__pdffield_fontobjnum:  {\pdffeedback~fontobjnum\font }
+ }
+ {
+  \cs_new:Nn \__pdffield_fontname:  {\pdffontname\font }
+  \cs_new:Nn \__pdffield_fontobjnum:  {\pdffontobjnum\font }
+ }
+\ExplSyntaxOff
+\usepackage{iftex}
+\iftutex
+\usepackage{fontspec}
+%\iftutex
+\setmainfont{Times New Roman} %works
+%\setsansfont{comicsansms} %works
+%\setsansfont{comicsansms}
+%\setmainfont{calibri} % doesn't work /CIDFontType2
+%\setsansfont{dejavusans} % doesn't work /CIDFontType2 texlive
+\setsansfont{NotoSans}
+\fi
+%\usepackage{helvet}
+%\usepackage{times}
+%\setmainfont{bahnschrift}
+%\pdfvariable omitcidset=1
+%\setmainfont{lmroman10-regular.otf} %replaced by arial CIDFontType0 
+\begin{document}
+
+\ExplSyntaxOn
+%\sffamily
+
+
+%\sffamily
+\pdfmanagement_add:nnx{Catalog/AcroForm}{DA}{(/F\__pdffield_fontname:\c_space_tl 10\c_space_tl Tf~1~0~0~rg)}
+\pdfmanagement_add:nxx{Catalog/AcroForm/DR/Font}{F\__pdffield_fontname:}{\__pdffield_fontobjnum:\c_space_tl0 \c_space_tl R}
+%\sffamily
+\font\test=phvr8r\test
+\pdfmanagement_add:nxx{Catalog/AcroForm/DR/Font}{F\__pdffield_fontname:}{\__pdffield_fontobjnum:\c_space_tl0 \c_space_tl R}
+
+
+\par 
+%\sffamily 
+zzz \__pdffield_text_add:n {name=blub2,width=4cm,height=15pt}
+
+\par
+\rmfamily
+zzz\__pdffield_text_add:n {name=blub1,width=4cm,height=15pt}
+
+%\sffamily
+%\newsavebox\textbox
+%\sbox\textbox{\makebox[0pt]{}}
+\AddToHook{shipout/background}{%
+ %\put(0,30){\sffamily\int_step_inline:nnn{33}{255}{\char#1\relax\c_space_tl}}
+ \put(0,30){\rmfamily\int_step_inline:nnn{33}{255}{\char#1\relax\c_space_tl}}
+ }
+
+%zzzabcblub? \char164
+%%\int_step_inline:nnn{32}{163}{\tiny\char#1\relax\c_space_tl}
+%\int_step_inline:nnn{33}{255}{\char#1\relax\c_space_tl}
+%\par\rmfamily
+%zzzabc
+%\int_step_inline:nnn{33}{255}{\tiny\char#1\c_space_tl}
+%\int_step_inline:nnn{33}{255}{\char#1\c_space_tl}
+
+\ExplSyntaxOff
+
+ablubc?BLUB €
+\sffamily blub?
+\end{document}
