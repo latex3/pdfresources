@@ -8,7 +8,7 @@
 \ExplSyntaxOn
 \pdfdict_new:n   {l__pdffield/text/field}
 \pdfdict_put:nnn {l__pdffield/text/field}{FT}{/Tx}
-%\bitset_set_true:Nn \l__pdffield_Ff_bitset  {RichText}
+
 \cs_new_protected:Npn \__pdffield_text_field_new:n #1
   {
       \group_begin:
@@ -23,10 +23,15 @@
             }
         }
       \pdfdict_put:nnn {l__pdffield/text/field}{T}{(#1)}
-     % V,DV ??
-     %DA?
+      % V,DV ??
+      %DA?
       \pdfdict_put:nnx {l__pdffield/text/field}{V}{(blub?)}
-      \pdfdict_put:nnx {l__pdffield/text/field}{DA}{(/F\__pdffield_fontname:\c_space_tl 10\c_space_tl Tf~1~0~1~rg ~1~0~1~RG)}
+      \pdfdict_put:nnx {l__pdffield/text/field}{DV}{(blub?)}
+      \pdfdict_put:nnx {l__pdffield/text/field}{DA}{(%/F\__pdffield_fontname:
+       /MyBlub
+       \c_space_tl 10\c_space_tl 
+       Tf~%
+      \l_pdffield_text_color_tl)}
       \pdfdict_put:nnx {l__pdffield/text/field}
          {Kids}
          {
@@ -63,7 +68,7 @@
 \pdffield_store_appearance:nn {text/rollover}
  { {\color_select:n{blue}\rule{4cm}{1cm}} }
 \pdffield_store_appearance:nn {text/down}
- { {\color_select:n{yellow}\rule{4cm}{1cm}} } 
+ { {\color_select:n{yellow}\rule{4cm}{1cm}} }
 \cs_new_protected:Npn \__pdffield_text_annot_add:nnnn #1 #2 #3 #4 %name, wd, ht, dp,
   {
     \group_begin:
@@ -135,6 +140,8 @@
     ,mappingname .groups:n = {field}
   }
 
+\tl_new:N \l_pdffield_text_color_tl
+
 \keys_define:nn { pdffield / text }
   {
     appearance .code:n = %value is a name of an appearance
@@ -156,7 +163,13 @@
     align / left   .code:n = \pdfdict_put:nnn { l__pdffield/text/field }{Q}{0},
     align / center .code:n = \pdfdict_put:nnn { l__pdffield/text/field }{Q}{1},
     align / right  .code:n = \pdfdict_put:nnn { l__pdffield/text/field }{Q}{2},
-    align .initial:n = left
+    align .initial:n = left,
+    color .code:n = 
+       { 
+         \color_export:nnN {#1}{ space-sep-rgb} \l_pdffield_text_color_tl
+         \tl_put_right:Nn \l_pdffield_text_color_tl{~rg}
+       },
+    color .initial:n = black    
   }
 
 
@@ -234,28 +247,40 @@
 \begin{document}
 
 \ExplSyntaxOn
+\pdf_object_unnamed_write:nn {dict}
+ {
+    /Type /Font
+    /Subtype /Type1
+    /BaseFont /Helvetica
+   % /Encoding /WinAnsiEncoding     
+ } 
+ 
+\pdfmanagement_add:nxx{Catalog/AcroForm/DR/Font}{MyBlub}{\pdf_object_ref_last:}
+
 %\sffamily
 \bitset_set_true:Nn  \l__pdffield_F_bitset {Print}
 %\pdfdict_put:nnn {l__pdffield/text/annot}{Border}{[1~1~1]}
 %\pdfdict_put:nnn {l__pdffield/text/annot}{C}{[1~0~0]}
 
 %\sffamily
-\pdfmanagement_add:nnx{Catalog/AcroForm}{DA}{(/F\__pdffield_fontname:\c_space_tl 10\c_space_tl Tf~1~0~0~rg)}
-\pdfmanagement_add:nxx{Catalog/AcroForm/DR/Font}{F\__pdffield_fontname:}{\__pdffield_fontobjnum:\c_space_tl0 \c_space_tl R}
+%\pdfmanagement_add:nnx{Catalog/AcroForm}{DA}{(/F\__pdffield_fontname:\c_space_tl 10\c_space_tl Tf~1~0~0~rg)}
+\pdfmanagement_add:nnx{Catalog/AcroForm}{DA}{(/MyBlub\c_space_tl 10\c_space_tl Tf~1~0~0~rg)}
+%\pdfmanagement_add:nxx{Catalog/AcroForm/DR/Font}{F\__pdffield_fontname:}{\__pdffield_fontobjnum:\c_space_tl0 \c_space_tl R}
 %\sffamily
 %\font\test=phvr8r\test
-\pdfmanagement_add:nxx{Catalog/AcroForm/DR/Font}{F\__pdffield_fontname:}{\__pdffield_fontobjnum:\c_space_tl0 \c_space_tl R}
+%\pdfmanagement_add:nxx{Catalog/AcroForm/DR/Font}{F\__pdffield_fontname:}{\__pdffield_fontobjnum:\c_space_tl0 \c_space_tl R}
 
+\__pdffield_text_add:n {name=blub2,width=4cm,height=15pt,align=center}
 
 \par
 %\sffamily
-zzz \__pdffield_text_add:n {name=blub2,width=4cm,height=15pt,align=center}
+zzz \__pdffield_text_add:n {name=blub2,width=4cm,height=15pt,align=center,color=green}
 
 \par
 \rmfamily
 \pdfdict_put:nnn {l__pdffield/text/annot}{MK}{<</BC[1~0~0]/BG[1~1~1]>>}
 \pdfdict_put:nnn {l__pdffield/text/annot}{BS}{<</W~1 /S/S>>}
-zzz\__pdffield_text_add:n {name=blub1,width=4cm,height=15pt}
+zzz\__pdffield_text_add:n {name=blub1,width=4cm,height=15pt,color=red}
 
 %\sffamily
 %\newsavebox\textbox
