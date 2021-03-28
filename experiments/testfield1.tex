@@ -8,7 +8,7 @@
 \ExplSyntaxOn
 \pdfdict_new:n   {l__pdffield/text/field}
 \pdfdict_put:nnn {l__pdffield/text/field}{FT}{/Tx}
-
+%\bitset_set_true:Nn \l__pdffield_Ff_bitset  {RichText}
 \cs_new_protected:Npn \__pdffield_text_field_new:n #1
   {
       \group_begin:
@@ -26,7 +26,7 @@
      % V,DV ??
      %DA?
       \pdfdict_put:nnx {l__pdffield/text/field}{V}{(blub?)}
-      \pdfdict_put:nnx {l__pdffield/text/field}{DA}{(/F\__pdffield_fontname:\c_space_tl 10\c_space_tl Tf~1~0~0~rg)}
+      \pdfdict_put:nnx {l__pdffield/text/field}{DA}{(/F\__pdffield_fontname:\c_space_tl 10\c_space_tl Tf~1~0~1~rg ~1~0~1~RG)}
       \pdfdict_put:nnx {l__pdffield/text/field}
          {Kids}
          {
@@ -60,11 +60,14 @@
 
 \pdffield_store_appearance:nn {text/default}
  { {\color_select:n{green}\rule{4cm}{1cm}} }
-
+\pdffield_store_appearance:nn {text/rollover}
+ { {\color_select:n{blue}\rule{4cm}{1cm}} }
+\pdffield_store_appearance:nn {text/down}
+ { {\color_select:n{yellow}\rule{4cm}{1cm}} } 
 \cs_new_protected:Npn \__pdffield_text_annot_add:nnnn #1 #2 #3 #4 %name, wd, ht, dp,
   {
     \group_begin:
-    \pdfdict_put:nnx {l__pdffield/text/annot}{AP}{<<\pdfdict_use:n{l__pdffield/text/annot/AP}>>}
+    %\pdfdict_put:nnx {l__pdffield/text/annot}{AP}{<<\pdfdict_use:n{l__pdffield/text/annot/AP}>>}
     \pdfmeta_standard_verify:nF
       {annot_flags}
       {
@@ -149,7 +152,15 @@
           }
       },
     appearance .initial:n = text/default,
+    align .choice:,
+    align / left   .code:n = \pdfdict_put:nnn { l__pdffield/text/field }{Q}{0},
+    align / center .code:n = \pdfdict_put:nnn { l__pdffield/text/field }{Q}{1},
+    align / right  .code:n = \pdfdict_put:nnn { l__pdffield/text/field }{Q}{2},
+    align .initial:n = left
   }
+
+
+%down and rollover seems not to be used ...
 
 \keys_define:nn { pdffield / text }
   {
@@ -193,7 +204,7 @@
         {\l__pdffield_annot_dp_tl }
     \group_end:
   }
-  
+
 \sys_if_engine_luatex:TF
  {
   \cs_new:Nn \__pdffield_fontname:  {\pdffeedback~fontname\font }
@@ -210,36 +221,40 @@
 %\iftutex
 \setmainfont{Times New Roman} %works
 %\setsansfont{comicsansms} %works
-%\setsansfont{comicsansms}
+\setsansfont{comicsansms}
 %\setmainfont{calibri} % doesn't work /CIDFontType2
 %\setsansfont{dejavusans} % doesn't work /CIDFontType2 texlive
-\setsansfont{NotoSans}
+%\setsansfont{NotoSans}
 \fi
 %\usepackage{helvet}
 %\usepackage{times}
 %\setmainfont{bahnschrift}
 %\pdfvariable omitcidset=1
-%\setmainfont{lmroman10-regular.otf} %replaced by arial CIDFontType0 
+%\setmainfont{lmroman10-regular.otf} %replaced by arial CIDFontType0
 \begin{document}
 
 \ExplSyntaxOn
 %\sffamily
-
+\bitset_set_true:Nn  \l__pdffield_F_bitset {Print}
+%\pdfdict_put:nnn {l__pdffield/text/annot}{Border}{[1~1~1]}
+%\pdfdict_put:nnn {l__pdffield/text/annot}{C}{[1~0~0]}
 
 %\sffamily
 \pdfmanagement_add:nnx{Catalog/AcroForm}{DA}{(/F\__pdffield_fontname:\c_space_tl 10\c_space_tl Tf~1~0~0~rg)}
 \pdfmanagement_add:nxx{Catalog/AcroForm/DR/Font}{F\__pdffield_fontname:}{\__pdffield_fontobjnum:\c_space_tl0 \c_space_tl R}
 %\sffamily
-\font\test=phvr8r\test
+%\font\test=phvr8r\test
 \pdfmanagement_add:nxx{Catalog/AcroForm/DR/Font}{F\__pdffield_fontname:}{\__pdffield_fontobjnum:\c_space_tl0 \c_space_tl R}
 
 
-\par 
-%\sffamily 
-zzz \__pdffield_text_add:n {name=blub2,width=4cm,height=15pt}
+\par
+%\sffamily
+zzz \__pdffield_text_add:n {name=blub2,width=4cm,height=15pt,align=center}
 
 \par
 \rmfamily
+\pdfdict_put:nnn {l__pdffield/text/annot}{MK}{<</BC[1~0~0]/BG[1~1~1]>>}
+\pdfdict_put:nnn {l__pdffield/text/annot}{BS}{<</W~1 /S/S>>}
 zzz\__pdffield_text_add:n {name=blub1,width=4cm,height=15pt}
 
 %\sffamily
