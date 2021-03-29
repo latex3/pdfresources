@@ -5,35 +5,42 @@
 
 \documentclass{article}
 \usepackage{l3pdffield-testphase}
+\usepackage{hyperref}
+
 \ExplSyntaxOn
 \pdfdict_new:n   {l__pdffield/text/field}
 \pdfdict_put:nnn {l__pdffield/text/field}{FT}{/Tx}
+\pdfdict_new:n   {l__pdffield/text/field/AA}
 
 \cs_new_protected:Npn \__pdffield_text_field_new:n #1
   {
-      \group_begin:
-      \pdf_object_new:nn {__pdffield_text/field/#1}      {dict}
-      \pdf_object_new:nn {__pdffield_text/field/#1/Kids} {array}
-      \seq_new:c {g__pdffield_text/field/#1/Kids_seq}
-      \hook_gput_code:nnn {shipout/lastpage}{pdffield} %xetex needs this ...
-        {
-          \pdf_object_write:nx {__pdffield_text/field/#1/Kids}
-            {
+    \group_begin:
+    \pdf_object_new:nn {__pdffield_text/field/#1}      {dict}
+    \pdf_object_new:nn {__pdffield_text/field/#1/Kids} {array}
+    \seq_new:c {g__pdffield_text/field/#1/Kids_seq}
+    \hook_gput_code:nnn {shipout/lastpage}{pdffield} %xetex needs this ...
+       {
+         \pdf_object_write:nx {__pdffield_text/field/#1/Kids}
+           {
               \seq_use:cn{g__pdffield_text/field/#1/Kids_seq}{~}
-            }
-        }
-      \pdfdict_put:nnn {l__pdffield/text/field}{T}{(#1)}
-      % V,DV ??
-      %DA?
-      \pdfdict_put:nnx {l__pdffield/text/field}{V}{(blub?)}
-      %\pdfdict_put:nnx {l__pdffield/text/field}{DA}{(/F\__pdffield_fontname:\c_space_tl 10\c_space_tl Tf~1~0~0~rg)}
-      \pdfdict_put:nnx {l__pdffield/text/field}{DV}{(blub?)}
-      \pdfdict_put:nnx {l__pdffield/text/field}{DA}{(%/F\__pdffield_fontname:
-       %/MyBlub
-       /F\__pdffield_fontname:
-       \c_space_tl 10\c_space_tl
-       Tf~%
-      \l_pdffield_text_color_tl)}
+           }
+       }
+    \pdfdict_put:nnn {l__pdffield/text/field}{T}{(#1)}
+    % V,DV are set from the outside.
+    \pdfdict_put:nnx {l__pdffield/text/field}{DA}
+       {
+         (
+           \pdf_name_from_unicode_e:n{\l__pdffield_text_fontname_tl}
+           \c_space_tl 
+           \dim_to_decimal_in_bp:n{\l__pdffield_text_fontsize_dim}
+           \c_space_tl 
+           Tf
+           \c_space_tl 
+           \l__pdffield_text_color_tl
+           \c_space_tl 
+           \l__pdffield_text_DAextra_tl
+         )
+       }
       \pdfdict_put:nnx {l__pdffield/text/field}
          {Kids}
          {
@@ -64,13 +71,11 @@
 \pdfdict_new:n   {l__pdffield/text/annot}
 \pdfdict_put:nnn {l__pdffield/text/annot}{Subtype}{/Widget}
 \pdfdict_new:n   {l__pdffield/text/annot/AP}
+\pdfdict_new:n   {l__pdffield/text/annot/AA}
 
 \pdffield_store_appearance:nn {text/default}
- { {\color_select:n{green}\rule{4cm}{1cm}} }
-\pdffield_store_appearance:nn {text/rollover}
- { {\color_select:n{blue}\rule{4cm}{1cm}} }
-\pdffield_store_appearance:nn {text/down}
- { {\color_select:n{yellow}\rule{4cm}{1cm}} }
+ { { \color_select:n{black!5!white}\rule{\paperwidth}{\paperheight} } }
+
 \cs_new_protected:Npn \__pdffield_text_annot_add:nnnn #1 #2 #3 #4 %name, wd, ht, dp,
   {
     \group_begin:
@@ -112,6 +117,11 @@
     \group_end:
   }
 
+\tl_new:N  \l__pdffield_text_fontname_tl
+\tl_new:N  \l__pdffield_text_DAextra_tl
+\dim_new:N \l__pdffield_text_fontsize_dim
+\tl_new:N  \l__pdffield_text_color_tl
+
 \keys_define:nn { pdffield / text }
   {
     ,name .code:n =
@@ -140,9 +150,25 @@
         \pdfdict_put:nnx { l__pdffield/text/field }{TM}{\l__pdffield_name_tmpa_str}
       }
     ,mappingname .groups:n = {field}
+    ,value .code:n  = 
+       {
+         \pdf_string_from_unicode:nnN {utf8/string}{#1}\l__pdffield_name_tmpa_str
+         \pdfdict_put:nnx { l__pdffield/text/field }{V}{\l__pdffield_name_tmpa_str}
+       }   
+    ,default .code:n  =
+       {
+         \pdf_string_from_unicode:nnN {utf8/string}{#1}\l__pdffield_name_tmpa_str
+         \pdfdict_put:nnx { l__pdffield/text/field }{DV}{\l__pdffield_name_tmpa_str}
+       }
+    ,font .tl_set:N = \l__pdffield_text_fontname_tl
+    ,font .initial:n = {Helv}
+    ,fontsize .dim_set:N = \l__pdffield_text_fontsize_dim
+    ,fontsize .initial:n = {10bp} 
+    %not really useful, seems to affect only the value, not the input ...
+    ,DAextra .tl_set:N = \l__pdffield_text_DAextra_tl  
   }
 
-\tl_new:N \l_pdffield_text_color_tl
+
 
 \keys_define:nn { pdffield / text }
   {
@@ -168,8 +194,8 @@
     align .initial:n = left,
     color .code:n =
        {
-         \color_export:nnN {#1}{ space-sep-rgb} \l_pdffield_text_color_tl
-         \tl_put_right:Nn \l_pdffield_text_color_tl{~rg}
+         \color_export:nnN {#1}{ space-sep-rgb} \l__pdffield_text_color_tl
+         \tl_put_right:Nn \l__pdffield_text_color_tl{~rg}
        },
     color .initial:n = black
   }
@@ -227,8 +253,6 @@
  }
  {
   \usepackage[T1]{fontenc}
-  %\pdfmapline{=t1-yvtb~VenturisADF-Bold~ <<comic.ttf}
-  \pdfmapline{=t1-yvtb~VenturisADF-Bold~<<comic.ttf}
   \cs_new:Nn \__pdffield_fontname:  {\pdffontname\font }
   \cs_new:Nn \__pdffield_fontobjnum:  {\pdffontobjnum\font }
  }
@@ -239,12 +263,12 @@
 %\iftutex
 \setmainfont{Times New Roman} %works
 %\setsansfont{comicsansms} %works
-%\setsansfont{comicsansms}
+\setsansfont{comicsansms}
 %\setsansfont{arial}
 %\setmainfont{calibri} % doesn't work /CIDFontType2
 %\setsansfont{dejavusans} % doesn't work /CIDFontType2 texlive
 %\setsansfont{NotoSans}
-\setsansfont{dejavuserif}
+%\setsansfont{dejavuserif}
 \fi
 %\usepackage{helvet}
 %\usepackage{times}
@@ -252,20 +276,12 @@
 %\pdfvariable omitcidset=1
 %\setmainfont{lmroman10-regular.otf} %replaced by arial CIDFontType0
 \begin{document}
-
+\Form
 \ExplSyntaxOn
-\pdf_object_unnamed_write:nn {dict}
- {
-    /Type /Font
-    /Subtype /Type1
-    /BaseFont /Helvetica
-   % /Encoding /WinAnsiEncoding
- }
-
 %\pdfmanagement_add:nxx{Catalog/AcroForm/DR/Font}{MyBlub}{\pdf_object_ref_last:}
-
 %\sffamily
 \bitset_set_true:Nn  \l__pdffield_F_bitset {Print}
+
 %\pdfdict_put:nnn {l__pdffield/text/annot}{Border}{[1~1~1]}
 %\pdfdict_put:nnn {l__pdffield/text/annot}{C}{[1~0~0]}
 
@@ -276,14 +292,17 @@
 %\sffamily
 %\font\test=phvr8r\test
 %\pdfmanagement_add:nxx{Catalog/AcroForm/DR/Font}{F\__pdffield_fontname:}{\__pdffield_fontobjnum:\c_space_tl0 \c_space_tl R}
-\pdfmanagement_add:nxx{Catalog/AcroForm/DR/Font}{F\__pdffield_fontname:}{\__pdffield_fontobjnum:\c_space_tl0 \c_space_tl R}
-\__pdffield_text_add:n {name=blub3,width=4cm,height=15pt,align=center}
+\pdfmanagement_add:nxx{Catalog/AcroForm/DR/Font}
+  {F\__pdffield_fontname:}{\__pdffield_fontobjnum:\c_space_tl0 \c_space_tl R}
+xxxxx \__pdffield_text_add:n {name=blub3,width=4cm,height=1.35\ht\strutbox,depth=\dp\strutbox,align=left,value=Blub,
+  }
 
 \par
 \sffamily
-\pdfmanagement_add:nnx{Catalog/AcroForm}{DA}{(/F\__pdffield_fontname:\c_space_tl 10\c_space_tl Tf~1~0~0~rg)}
-\pdfmanagement_add:nxx{Catalog/AcroForm/DR/Font}{F\__pdffield_fontname:}{\__pdffield_fontobjnum:\c_space_tl0 \c_space_tl R}
-zzz \__pdffield_text_add:n {name=blub2,width=4cm,height=15pt}
+%\pdfmanagement_add:nnx{Catalog/AcroForm}{DA}{(/F\__pdffield_fontname:\c_space_tl 10\c_space_tl Tf~1~0~0~rg)}
+\pdfmanagement_add:nxx{Catalog/AcroForm/DR/Font}
+  {F\__pdffield_fontname:}{\__pdffield_fontobjnum:\c_space_tl0 \c_space_tl R}
+zzz \__pdffield_text_add:n {font=F\__pdffield_fontname:,name=blub2,width=4cm,height=15pt}
 
 %\par
 %\rmfamily
