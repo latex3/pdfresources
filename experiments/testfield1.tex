@@ -26,7 +26,7 @@
      % V,DV ??
      %DA?
       \pdfdict_put:nnx {l__pdffield/text/field}{V}{(blub?)}
-      \pdfdict_put:nnx {l__pdffield/text/field}{DA}{(/F\__pdffield_fontname:\c_space_tl 10\c_space_tl Tf~1~0~0~rg)}
+      %\pdfdict_put:nnx {l__pdffield/text/field}{DA}{(/F\__pdffield_fontname:\c_space_tl 10\c_space_tl Tf~1~0~0~rg)}
       \pdfdict_put:nnx {l__pdffield/text/field}
          {Kids}
          {
@@ -193,13 +193,16 @@
         {\l__pdffield_annot_dp_tl }
     \group_end:
   }
-  
+
 \sys_if_engine_luatex:TF
  {
   \cs_new:Nn \__pdffield_fontname:  {\pdffeedback~fontname\font }
   \cs_new:Nn \__pdffield_fontobjnum:  {\pdffeedback~fontobjnum\font }
  }
  {
+  \usepackage[T1]{fontenc} 
+  %\pdfmapline{=t1-yvtb~VenturisADF-Bold~ <<comic.ttf}
+  \pdfmapline{=t1-yvtb~VenturisADF-Bold~<<comic.ttf} 
   \cs_new:Nn \__pdffield_fontname:  {\pdffontname\font }
   \cs_new:Nn \__pdffield_fontobjnum:  {\pdffontobjnum\font }
  }
@@ -210,16 +213,16 @@
 %\iftutex
 \setmainfont{Times New Roman} %works
 %\setsansfont{comicsansms} %works
-%\setsansfont{comicsansms}
+\setsansfont{comicsansms}
 %\setmainfont{calibri} % doesn't work /CIDFontType2
 %\setsansfont{dejavusans} % doesn't work /CIDFontType2 texlive
-\setsansfont{NotoSans}
+%\setsansfont{NotoSans}
 \fi
 %\usepackage{helvet}
 %\usepackage{times}
 %\setmainfont{bahnschrift}
 %\pdfvariable omitcidset=1
-%\setmainfont{lmroman10-regular.otf} %replaced by arial CIDFontType0 
+%\setmainfont{lmroman10-regular.otf} %replaced by arial CIDFontType0
 \begin{document}
 
 \ExplSyntaxOn
@@ -227,16 +230,17 @@
 
 
 %\sffamily
-\pdfmanagement_add:nnx{Catalog/AcroForm}{DA}{(/F\__pdffield_fontname:\c_space_tl 10\c_space_tl Tf~1~0~0~rg)}
-\pdfmanagement_add:nxx{Catalog/AcroForm/DR/Font}{F\__pdffield_fontname:}{\__pdffield_fontobjnum:\c_space_tl0 \c_space_tl R}
+%\pdfmanagement_add:nnx{Catalog/AcroForm}{DA}{(/F\__pdffield_fontname:\c_space_tl 10\c_space_tl Tf~1~0~0~rg)}
+%\pdfmanagement_add:nxx{Catalog/AcroForm/DR/Font}{F\__pdffield_fontname:}{\__pdffield_fontobjnum:\c_space_tl0 \c_space_tl R}
+%%\sffamily
+%{\font\test=t1-yvtb \test a
+%\pdfmanagement_add:nxx{Catalog/AcroForm/DR/Font}{F\__pdffield_fontname:}{\__pdffield_fontobjnum:\c_space_tl0 \c_space_tl R}}
+
+
+\par
 %\sffamily
-\font\test=phvr8r\test
-\pdfmanagement_add:nxx{Catalog/AcroForm/DR/Font}{F\__pdffield_fontname:}{\__pdffield_fontobjnum:\c_space_tl0 \c_space_tl R}
-
-
-\par 
-%\sffamily 
-zzz \__pdffield_text_add:n {name=blub2,width=4cm,height=15pt}
+{\font\test=t1-yvtb \test
+zzz \__pdffield_text_add:n {name=blub2,width=4cm,height=15pt}}
 
 \par
 \rmfamily
