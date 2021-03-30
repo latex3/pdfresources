@@ -31,13 +31,13 @@
        {
          (
            \pdf_name_from_unicode_e:n{\l__pdffield_text_fontname_tl}
-           \c_space_tl 
+           \c_space_tl
            \dim_to_decimal_in_bp:n{\l__pdffield_text_fontsize_dim}
-           \c_space_tl 
+           \c_space_tl
            Tf
-           \c_space_tl 
+           \c_space_tl
            \l__pdffield_text_color_tl
-           \c_space_tl 
+           \c_space_tl
            \l__pdffield_text_DAextra_tl
          )
        }
@@ -150,26 +150,25 @@
         \pdfdict_put:nnx { l__pdffield/text/field }{TM}{\l__pdffield_name_tmpa_str}
       }
     ,mappingname .groups:n = {field}
-    ,value .code:n  = 
+    ,value .code:n  =
        {
          \pdf_string_from_unicode:nnN {utf8/string}{#1}\l__pdffield_name_tmpa_str
          \pdfdict_put:nnx { l__pdffield/text/field }{V}{\l__pdffield_name_tmpa_str}
-       }   
+       }
     ,default .code:n  =
        {
          \pdf_string_from_unicode:nnN {utf8/string}{#1}\l__pdffield_name_tmpa_str
          \pdfdict_put:nnx { l__pdffield/text/field }{DV}{\l__pdffield_name_tmpa_str}
        }
-    ,font .tl_set:N = \l__pdffield_text_fontname_tl
-    ,font .initial:n = {Helv}
+    ,font .tl_set:N      = \l__pdffield_text_fontname_tl
+    ,font .initial:n     = {Helv}
     ,fontsize .dim_set:N = \l__pdffield_text_fontsize_dim
-    ,fontsize .initial:n = {10bp} 
+    ,fontsize .initial:n = {10bp}
     %not really useful, seems to affect only the value, not the input ...
-    ,DAextra .tl_set:N = \l__pdffield_text_DAextra_tl  
+    ,DAextra .tl_set:N = \l__pdffield_text_DAextra_tl
   }
 
-
-
+%down and rollover seems not to be used ...
 \keys_define:nn { pdffield / text }
   {
     appearance .code:n = %value is a name of an appearance
@@ -201,7 +200,6 @@
   }
 
 
-%down and rollover seems not to be used ...
 
 \keys_define:nn { pdffield / text }
   {
@@ -209,8 +207,8 @@
     ,height .tl_set:N = \l__pdffield_annot_ht_tl
     ,depth  .tl_set:N = \l__pdffield_annot_dp_tl
     ,width  .initial:n = \normalbaselineskip
-    ,height .initial:n = \normalbaselineskip
-    ,depth  .initial:n = 0pt
+    ,height .initial:n = 0.7\normalbaselineskip
+    ,depth  .initial:n = 0.3\normalbaselineskip
   }
 \cs_new_protected:Npn \__pdffield_text_add:n #1
   {
@@ -261,10 +259,12 @@
 \iftutex
 \usepackage{fontspec}
 %\iftutex
-\setmainfont{Times New Roman} %works
+%\setmainfont{Mukta} %marathi, worked, 
+ \setmainfont{Noto Sans CJK TC} %breaks, adobe crash, browser doesn't show the glyphs.
 %\setsansfont{comicsansms} %works
 \setsansfont{comicsansms}
 %\setsansfont{arial}
+%\setsansfont{texgyreheros}
 %\setmainfont{calibri} % doesn't work /CIDFontType2
 %\setsansfont{dejavusans} % doesn't work /CIDFontType2 texlive
 %\setsansfont{NotoSans}
@@ -276,8 +276,23 @@
 %\pdfvariable omitcidset=1
 %\setmainfont{lmroman10-regular.otf} %replaced by arial CIDFontType0
 \begin{document}
-\Form
+% include chars : \pdfextension includechars (initialize the font too)
+% pdf.includechar(<fontid>, <Unicode codepoint>) 
+% for chinese check cid 
+
+些障礙ا
+
+\sffamily
+öäß
+\end{document}
 \ExplSyntaxOn
+
+
+
+
+\smash{\__pdffield_text_add:n {name=default,height=\baselineskip}}
+
+
 %\pdfmanagement_add:nxx{Catalog/AcroForm/DR/Font}{MyBlub}{\pdf_object_ref_last:}
 %\sffamily
 \bitset_set_true:Nn  \l__pdffield_F_bitset {Print}
@@ -288,21 +303,35 @@
 %\sffamily
 %\pdfmanagement_add:nnx{Catalog/AcroForm}{DA}{(/F\__pdffield_fontname:\c_space_tl 10\c_space_tl Tf~1~0~0~rg)}
 %\pdfmanagement_add:nnx{Catalog/AcroForm}{DA}{(/MyBlub\c_space_tl 10\c_space_tl Tf~1~0~0~rg)}
-%\pdfmanagement_add:nxx{Catalog/AcroForm/DR/Font}{F\__pdffield_fontname:}{\__pdffield_fontobjnum:\c_space_tl0 \c_space_tl R}
-%\sffamily
+\pdfmanagement_add:nxx{Catalog/AcroForm/DR/Font}{F\__pdffield_fontname:}{\__pdffield_fontobjnum:\c_space_tl0 \c_space_tl R}
+%%\sffamily
 %\font\test=phvr8r\test
 %\pdfmanagement_add:nxx{Catalog/AcroForm/DR/Font}{F\__pdffield_fontname:}{\__pdffield_fontobjnum:\c_space_tl0 \c_space_tl R}
 \pdfmanagement_add:nxx{Catalog/AcroForm/DR/Font}
   {F\__pdffield_fontname:}{\__pdffield_fontobjnum:\c_space_tl0 \c_space_tl R}
-xxxxx \__pdffield_text_add:n {name=blub3,width=4cm,height=1.35\ht\strutbox,depth=\dp\strutbox,align=left,value=Blub,
+aR 
+    \__pdffield_text_add:n {font=F\__pdffield_fontname:, name=blub3,width=4cm,height=1.35\ht\strutbox,depth=\dp\strutbox,align=left,value=Blub,
   }
+  
+  
+
+\int_step_inline:nnn{30}{255}
+{
+   \directlua{pdf.includechar(font.current(),"0x\int_to_hex:n{#1}")}
+}   
+\sffamily
+
+%\int_step_inline:nnn{30}{255}
+%{
+%   \directlua{pdf.includechar(font.current(),"0x\int_to_hex:n{#1}")}
+%}
 
 \par
-\sffamily
-%\pdfmanagement_add:nnx{Catalog/AcroForm}{DA}{(/F\__pdffield_fontname:\c_space_tl 10\c_space_tl Tf~1~0~0~rg)}
-\pdfmanagement_add:nxx{Catalog/AcroForm/DR/Font}
-  {F\__pdffield_fontname:}{\__pdffield_fontobjnum:\c_space_tl0 \c_space_tl R}
-zzz \__pdffield_text_add:n {font=F\__pdffield_fontname:,name=blub2,width=4cm,height=15pt}
+%\sffamily
+%%\pdfmanagement_add:nnx{Catalog/AcroForm}{DA}{(/F\__pdffield_fontname:\c_space_tl 10\c_space_tl Tf~1~0~0~rg)}
+%\pdfmanagement_add:nxx{Catalog/AcroForm/DR/Font}
+%  {F\__pdffield_fontname:}{\__pdffield_fontobjnum:\c_space_tl0 \c_space_tl R}
+%zzz \__pdffield_text_add:n {font=F\__pdffield_fontname:,name=blub2,width=4cm,height=15pt}
 
 %\par
 %\rmfamily
@@ -314,10 +343,12 @@ zzz \__pdffield_text_add:n {font=F\__pdffield_fontname:,name=blub2,width=4cm,hei
 %\sffamily
 %\newsavebox\textbox
 %\sbox\textbox{\makebox[0pt]{}}
-\AddToHook{shipout/background}{%
- \put(0,30){\sffamily\int_step_inline:nnn{33}{255}{\char#1\relax\c_space_tl}}
- \put(0,30){\rmfamily\int_step_inline:nnn{33}{255}{\char#1\relax\c_space_tl}}
- }
+%\AddToHook{shipout/background}{%
+% \put(0,30){\sffamily\int_step_inline:nnn{33}{255}{\char#1\relax\c_space_tl}}
+% \put(0,30){\rmfamily\int_step_inline:nnn{33}{255}{\char#1\relax\c_space_tl}}
+% %\put(0,30){\rmfamily\int_step_inline:nnn{2304}{2417}{\char#1\relax\c_space_tl}} %marathi
+% %\put(0,30){\rmfamily\int_step_inline:nnn{20000}{39000}{\char#1\relax\c_space_tl}} %marathi
+% }
 
 %zzzabcblub? \char164
 %%\int_step_inline:nnn{32}{163}{\tiny\char#1\relax\c_space_tl}
@@ -328,7 +359,7 @@ zzz \__pdffield_text_add:n {font=F\__pdffield_fontname:,name=blub2,width=4cm,hei
 %\int_step_inline:nnn{33}{255}{\char#1\c_space_tl}
 
 \ExplSyntaxOff
-
-ablubc?BLUB €
-\sffamily blub?
+%
+%ablubc?BLUB €
+%\sffamily blub?
 \end{document}
