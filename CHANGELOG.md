@@ -10,7 +10,8 @@ this project uses date-based 'snapshot' version identifiers.
  - xcolor patch for [ps] type used in pstricks
  - value of citecolor wasn't expanded (errored with tcolorbox)
  - \url leaves now vmode
-
+ - handling of pdfauthor, pdftitle and pdfsubject in hyperxmp patch
+ 
 ## [2021-03-17]
 
 ### Fixed
