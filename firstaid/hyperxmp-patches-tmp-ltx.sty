@@ -103,8 +103,8 @@
       ,pdfcontacturl
       ,pdfdate
     %hyperref, needs probably special handling
-      ,pdftitle
-      ,pdfsubject
+   %   ,pdftitle   %see below
+   %   ,pdfsubject %see below
       ,pdfkeywords
       ,pdfproducer
     }
@@ -118,7 +118,12 @@
     \exp_args:NNe
     \pdfstringdef\@pdfauthor{\GetDocumentProperties{hyperref/pdfauthor}}
     \cs_set_eq:NN\hyxmp@pdfauthor\@pdfauthor
-
+    \exp_args:NNe
+    \pdfstringdef\@pdfauthor{\GetDocumentProperties{hyperref/pdfsubject}}
+    \cs_set_eq:NN\hyxmp@pdfsubject\@pdfsubject
+    \exp_args:NNe
+    \pdfstringdef\@pdftitle{\GetDocumentProperties{hyperref/pdftitle}}
+    \cs_set_eq:NN\hyxmp@pdftitle\@pdftitle
     % pdflang,
     \tl_if_exist:cF{@pdflang}{\tl_new:c{@pdflang}}
     \tl_set:cx {@pdflang}{\GetDocumentProperties{document/lang}}
