@@ -325,7 +325,8 @@
 % \subsection{Options}
 % All \cs{href} commands and \cs{url} have an option argument for keyval syntax.
 % It accepts the following keys. Not all keys make sense for all keys, but they don't
-% error, they are silently ignored.
+% error, they are silently ignored. The optional argument can currently not be used together
+% with the \cs{urldef} command.
 %
 % \begin{tabular}{llp{6cm}}
 % key & applicable commands  & note\\\hline
@@ -1329,7 +1330,20 @@
    \group_end:
  }
 
+%    \end{macrocode}
+% the \cs{urldef} command doesn't like the optional argument, so we overwrite
+% locally the \cs{url} command here:
+%    \begin{macrocode}
 
+\def\urldef#1#2{\begingroup\def\url{\hyper@normalise\url@}\setbox\z@\hbox\bgroup
+  \def\Url@HyperHook##1\endgroup{\Url@def{#1}{#2}}%
+  % Because hyperref breaks \urldef and does not define its own (Grrrr!)...
+  \def\url@##1{\egroup\endgroup\DeclareRobustCommand#1{#2{##1}}}%
+ #2}
+
+%    \end{macrocode}
+% make the new commands compatible with \cs{pdfstringdef}:
+%    \begin{macrocode}
 \NewExpandableDocumentCommand\@@_secondoftwowithopt:wnn {omm}{#3}
 \pdfstringdefDisableCommands{\let\hrefurl\@@_secondoftwowithopt:wnn}
 \pdfstringdefDisableCommands{\let\hrefpdf\@@_secondoftwowithopt:wnn}
