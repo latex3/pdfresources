@@ -76,9 +76,13 @@
 \pdffield_store_appearance:nn {text/default}
  { { \color_select:n{black!5!white}\rule{\paperwidth}{\paperheight} } }
 
+\pdffield_store_appearance:nn {text/down}
+ { { \color_select:n{red!50!white}\rule{\paperwidth}{\paperheight} } }
+
 \cs_new_protected:Npn \__pdffield_text_annot_add:nnnn #1 #2 #3 #4 %name, wd, ht, dp,
   {
     \group_begin:
+    \pdfdict_put:nnx {l__pdffield/text/annot}{MK}{<</BG [1~1~0]>>}
     \pdfdict_put:nnx {l__pdffield/text/annot}{AP}{<<\pdfdict_use:n{l__pdffield/text/annot/AP}>>}
     \pdfmeta_standard_verify:nF
       {annot_flags}
@@ -180,6 +184,16 @@
               {
                  \pdfxform_ref:n { __pdffield_#1}
               }
+            \pdfdict_put:nnn {l__pdffield/text/annot/AP}
+              {D}
+              {
+                 \pdfxform_ref:n { __pdffield_text/down}
+              }
+           \pdfdict_put:nnn {l__pdffield/text/annot/AP}
+              {R}
+              {
+                 \pdfxform_ref:n { __pdffield_text/down}
+              }
           }
           {
             \msg_error:nnnn{pdffield}{appearance-missing}{#1}{normal}
@@ -259,7 +273,7 @@
 \iftutex
 \usepackage{fontspec}
 %\iftutex
-%\setmainfont{Mukta} %marathi, worked, 
+%\setmainfont{Mukta} %marathi, worked,
  \setmainfont{Noto Sans CJK TC} %breaks, adobe crash, browser doesn't show the glyphs.
 %\setsansfont{comicsansms} %works
 \setsansfont{comicsansms}
@@ -276,23 +290,12 @@
 %\pdfvariable omitcidset=1
 %\setmainfont{lmroman10-regular.otf} %replaced by arial CIDFontType0
 \begin{document}
-% include chars : \pdfextension includechars (initialize the font too)
-% pdf.includechar(<fontid>, <Unicode codepoint>) 
-% for chinese check cid 
-
-些障礙ا
-
-\sffamily
-öäß
-\end{document}
 \ExplSyntaxOn
 
+\__pdffield_text_add:n {width=4cm,name=default,height=\baselineskip}
 
-
-
-\smash{\__pdffield_text_add:n {name=default,height=\baselineskip}}
-
-
+\ExplSyntaxOff
+\end{document}
 %\pdfmanagement_add:nxx{Catalog/AcroForm/DR/Font}{MyBlub}{\pdf_object_ref_last:}
 %\sffamily
 \bitset_set_true:Nn  \l__pdffield_F_bitset {Print}
@@ -309,16 +312,16 @@
 %\pdfmanagement_add:nxx{Catalog/AcroForm/DR/Font}{F\__pdffield_fontname:}{\__pdffield_fontobjnum:\c_space_tl0 \c_space_tl R}
 \pdfmanagement_add:nxx{Catalog/AcroForm/DR/Font}
   {F\__pdffield_fontname:}{\__pdffield_fontobjnum:\c_space_tl0 \c_space_tl R}
-aR 
+aR
     \__pdffield_text_add:n {font=F\__pdffield_fontname:, name=blub3,width=4cm,height=1.35\ht\strutbox,depth=\dp\strutbox,align=left,value=Blub,
   }
-  
-  
+
+
 
 \int_step_inline:nnn{30}{255}
 {
    \directlua{pdf.includechar(font.current(),"0x\int_to_hex:n{#1}")}
-}   
+}
 \sffamily
 
 %\int_step_inline:nnn{30}{255}
