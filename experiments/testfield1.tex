@@ -1,13 +1,32 @@
 % !Mode:: "TeX:DE:UTF-8:Main"
 
 \RequirePackage{pdfmanagement-testphase}
-\DeclareDocumentMetadata{pdfversion=1.7,lang=en-UK,uncompress}
-
+\DeclareDocumentMetadata{pdfversion=2.0,lang=en-UK,uncompress}
 \documentclass{article}
 \usepackage{l3pdffield-testphase}
 \usepackage{hyperref}
 
 \ExplSyntaxOn
+% color command, copied from hgeneric, should perhaps be defined somewhere else
+\cs_new_protected:Npn \__pdffield_color_export:nnN #1  #2  #3
+ {
+   \tl_if_head_eq_charcode:nNTF {#1}[ %]
+    {
+      \__pdffield_color_export:wnnN  #1 {#2} #3
+    }
+    {
+      \color_export:nnN {#1} {#2} #3
+    }
+ }
+
+\cs_new_protected:Npn \__pdffield_color_export:wnnN  [#1] #2 #3 #4
+  {
+     \color_export:nnnN {#1}{#2}{#3}#4
+  }
+
+\cs_generate_variant:Nn \__pdffield_color_export:nnN {xVN}
+
+
 \pdfdict_new:n   {l__pdffield/text/field}
 \pdfdict_put:nnn {l__pdffield/text/field}{FT}{/Tx}
 \pdfdict_new:n   {l__pdffield/text/field/AA}
@@ -72,6 +91,8 @@
 \pdfdict_put:nnn {l__pdffield/text/annot}{Subtype}{/Widget}
 \pdfdict_new:n   {l__pdffield/text/annot/AP}
 \pdfdict_new:n   {l__pdffield/text/annot/AA}
+\pdfdict_new:n   {l__pdffield/text/annot/MK}
+%MK has here: R (90), BG, BC (color)
 
 \pdffield_store_appearance:nn {text/default}
  { { \color_select:n{black!5!white}\rule{\paperwidth}{\paperheight} } }
@@ -82,7 +103,10 @@
 \cs_new_protected:Npn \__pdffield_text_annot_add:nnnn #1 #2 #3 #4 %name, wd, ht, dp,
   {
     \group_begin:
-    \pdfdict_put:nnx {l__pdffield/text/annot}{MK}{<</BG [1~1~0]>>}
+    \pdfdict_if_empty:nF { l__pdffield/text/annot/MK }
+      {
+        \pdfdict_put:nnx {l__pdffield/text/annot}{MK}{<<\pdfdict_use:n{l__pdffield/text/annot/MK}>>}
+      }
     \pdfdict_put:nnx {l__pdffield/text/annot}{AP}{<<\pdfdict_use:n{l__pdffield/text/annot/AP}>>}
     \pdfmeta_standard_verify:nF
       {annot_flags}
@@ -172,7 +196,7 @@
     ,DAextra .tl_set:N = \l__pdffield_text_DAextra_tl
   }
 
-%down and rollover seems not to be used ...
+
 \keys_define:nn { pdffield / text }
   {
     appearance .code:n = %value is a name of an appearance
@@ -184,22 +208,52 @@
               {
                  \pdfxform_ref:n { __pdffield_#1}
               }
-            \pdfdict_put:nnn {l__pdffield/text/annot/AP}
-              {D}
-              {
-                 \pdfxform_ref:n { __pdffield_text/down}
-              }
-           \pdfdict_put:nnn {l__pdffield/text/annot/AP}
-              {R}
-              {
-                 \pdfxform_ref:n { __pdffield_text/down}
-              }
           }
           {
             \msg_error:nnnn{pdffield}{appearance-missing}{#1}{normal}
           }
       },
     appearance .initial:n = text/default,
+    rollover-appearance .code:n = %value is a name of an appearance
+      {
+       \tl_if_empty:nTF {#1}
+         {
+           \pdfdict_remove:nn {l__pdffield/text/annot/AP} {R}
+         }
+         {
+           \pdfxform_if_exist:nTF {  __pdffield_#1 }
+             {
+               \pdfdict_put:nnn {l__pdffield/text/annot/AP}
+                 {R}
+                 {
+                    \pdfxform_ref:n { __pdffield_#1}
+                 }
+              }
+              {
+                \msg_warning:nnnn{pdffield}{appearance-missing}{#1}{rollover}
+              }
+         }
+      }, 
+    down-appearance .code:n = %value is a name of an appearance
+      {
+       \tl_if_empty:nTF {#1}
+         {
+           \pdfdict_remove:nn {l__pdffield/text/annot/AP} {R}
+         }
+         {
+           \pdfxform_if_exist:nTF {  __pdffield_#1 }
+             {
+               \pdfdict_put:nnn {l__pdffield/text/annot/AP}
+                 {R}
+                 {
+                    \pdfxform_ref:n { __pdffield_#1}
+                 }
+              }
+              {
+                \msg_warning:nnnn{pdffield}{appearance-missing}{#1}{down}
+              }
+         }
+      },      
     align .choice:,
     align / left   .code:n = \pdfdict_put:nnn { l__pdffield/text/field }{Q}{0},
     align / center .code:n = \pdfdict_put:nnn { l__pdffield/text/field }{Q}{1},
@@ -210,7 +264,13 @@
          \color_export:nnN {#1}{ space-sep-rgb} \l__pdffield_text_color_tl
          \tl_put_right:Nn \l__pdffield_text_color_tl{~rg}
        },
-    color .initial:n = black
+    color .initial:n = black,
+    bordercolor .code:n = 
+      {
+         \color_export:nnN {#1}{ space-sep-rgb} \l__pdffield_tmpa_tl
+         \pdfdict_put:nnx {l__pdffield/text/annot/MK}{BC}{[\l__pdffield_tmpa_tl]}
+      },
+
   }
 
 
