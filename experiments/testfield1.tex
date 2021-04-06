@@ -7,11 +7,15 @@
 \usepackage{hyperref}
 
 \ExplSyntaxOn
+\pdf_object_new:nn {Comic}{dict}
+\pdf_object_write:nn {Comic}{
+/Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /ComicSansMS}
+
 % color command, adapted from hgeneric, should perhaps be defined somewhere else
 \str_new:N  \l_pdffield_colormodel_str
 \str_set:Nn \l_pdffield_colormodel_str {rgb}
 
-\cs_new_protected:Npn \__pdffield_color_export:nN #1  #2  
+\cs_new_protected:Npn \__pdffield_color_export:nN #1  #2
  {
    \tl_if_head_eq_charcode:nNTF {#1}[ %]
     {
@@ -23,7 +27,7 @@
     }
  }
 
-\cs_new_protected:Npn \__pdffield_color_export:wnN  [#1] #2 #3 
+\cs_new_protected:Npn \__pdffield_color_export:wnN  [#1] #2 #3
   {
      \exp_args:Nnnx
      \color_export:nnnN {#1}{#2}{space-sep-\l_pdffield_colormodel_str}#3
@@ -270,8 +274,8 @@
          \str_case:Vn \l_pdffield_colormodel_str
            {
              {rgb} {\tl_put_right:Nn \l__pdffield_text_color_tl{~rg}}
-             {cmyk}{\tl_put_right:Nn \l__pdffield_text_color_tl{~k}} 
-           }         
+             {cmyk}{\tl_put_right:Nn \l__pdffield_text_color_tl{~k}}
+           }
        },
     color .initial:n = black,
     bordercolor .code:n =
@@ -288,7 +292,7 @@
       {
          \__pdffield_color_export:nN {#1} \l__pdffield_tmpa_tl
          \pdfdict_put:nnx {l__pdffield/text/annot/MK}{BG}{[\l__pdffield_tmpa_tl]}
-      },     
+      },
   }
 
 
@@ -302,6 +306,49 @@
     ,height .initial:n = 0.7\normalbaselineskip
     ,depth  .initial:n = 0.3\normalbaselineskip
   }
+  
+\keys_define:nn { pdffield / text }
+  {
+    maxlen .code:n = 
+     {
+       \int_compare:nNnTF {#1} < {1}
+        {\pdfdict_remove:nn { l__pdffield/text/field }{MaxLen}}
+        {\pdfdict_put:nnn { l__pdffield/text/field }{MaxLen}{#1}},
+     }  
+  }  
+\keys_define:nn { pdffield / text }
+  {
+    ,setfieldflags .code:n =
+      {
+          \clist_map_inline:nn {#1}
+           {
+             \bitset_set_true:Nn \l__pdffield_Ff_bitset {##1}
+           }
+      }
+    ,setfieldflags .groups:n = {field}
+    ,unsetfieldflags .code:n =
+      {
+          \clist_map_inline:nn {#1}
+           {
+             \bitset_set_false:Nn \l__pdffield_Ff_bitset {##1}
+           }
+      }
+    ,unsetfieldflags .groups:n = {field}
+    ,setannotflags .code:n =
+      {
+          \clist_map_inline:nn {#1}
+           {
+             \bitset_set_true:Nn \l__pdffield_F_bitset {##1}
+           }
+      }
+    ,unsetannotflags .code:n =
+      {
+          \clist_map_inline:nn {#1}
+           {
+             \bitset_set_false:Nn \l__pdffield_F_bitset {##1}
+           }
+      }
+  }  
 \cs_new_protected:Npn \__pdffield_text_add:n #1
   {
     \group_begin:
@@ -338,6 +385,15 @@
 
 \sys_if_engine_luatex:TF
  {
+  \cs_new_protected:Npn \__pdffield_setup_currentfont:n #1
+    {
+      \pdfmanagement_add:nxx{Catalog/AcroForm/DR/Font}
+       {#1}{\__pdffield_fontobjnum:\c_space_tl0 \c_space_tl R}
+       \int_step_inline:nnn{30}{255}
+         {
+           \directlua{pdf.includechar(font.current(),"0x\int_to_hex:n{##1}")}
+         }
+    }
   \cs_new:Nn \__pdffield_fontname:  {\pdffeedback~fontname\font }
   \cs_new:Nn \__pdffield_fontobjnum:  {\pdffeedback~fontobjnum\font }
  }
@@ -351,8 +407,9 @@
 \iftutex
 \usepackage{fontspec}
 %\iftutex
+%\setmainfont{AdobeThai-Regular.otf}[Path={C:/Program Files (x86)/Adobe/Acrobat DC/Resource/Font/}]
 %\setmainfont{Mukta} %marathi, worked,
- \setmainfont{Noto Sans CJK TC} %breaks, adobe crash, browser doesn't show the glyphs.
+% \setmainfont{Noto Sans CJK TC} %breaks, adobe crash, browser doesn't show the glyphs.
 %\setsansfont{comicsansms} %works
 \setsansfont{comicsansms}
 %\setsansfont{arial}
@@ -369,9 +426,20 @@
 %\setmainfont{lmroman10-regular.otf} %replaced by arial CIDFontType0
 \begin{document}
 \ExplSyntaxOn
-avb \sffamily abc
+\ifluatex
+avb \sffamily abc \__pdffield_setup_currentfont:n {blub}
+\fontspec{Mukta}  \__pdffield_setup_currentfont:n {mukta}
+\int_step_inline:nnn{"800}{"A00}
+         {
+           \directlua{pdf.includechar(font.current(),"0x\int_to_hex:n{#1}")}
+         }
+ \fi        
+aaaaaa
 
-\__pdffield_text_add:n {width=4cm,name=default,height=\baselineskip}
+\__pdffield_text_add:n {setfieldflags=Multiline,width=4cm,height=3cm,name=default}
+
+\par
+\__pdffield_text_add:n {name=comb,setfieldflags={Comb,Password},maxlen=6,width=4cm,height=\baselineskip}
 
 \ExplSyntaxOff
 \end{document}
