@@ -325,7 +325,8 @@
 % \subsection{Options}
 % All \cs{href} commands and \cs{url} have an option argument for keyval syntax.
 % It accepts the following keys. Not all keys make sense for all keys, but they don't
-% error, they are silently ignored.
+% error, they are silently ignored. The optional argument can currently not be used together
+% with the \cs{urldef} command.
 %
 % \begin{tabular}{llp{6cm}}
 % key & applicable commands  & note\\\hline
@@ -1329,7 +1330,20 @@
    \group_end:
  }
 
+%    \end{macrocode}
+% the \cs{urldef} command doesn't like the optional argument, so we overwrite
+% locally the \cs{url} command here:
+%    \begin{macrocode}
 
+\def\urldef#1#2{\begingroup\def\url{\hyper@normalise\url@}\setbox\z@\hbox\bgroup
+  \def\Url@HyperHook##1\endgroup{\Url@def{#1}{#2}}%
+  % Because hyperref breaks \urldef and does not define its own (Grrrr!)...
+  \def\url@##1{\egroup\endgroup\DeclareRobustCommand#1{#2{##1}}}%
+ #2}
+
+%    \end{macrocode}
+% make the new commands compatible with \cs{pdfstringdef}:
+%    \begin{macrocode}
 \NewExpandableDocumentCommand\@@_secondoftwowithopt:wnn {omm}{#3}
 \pdfstringdefDisableCommands{\let\hrefurl\@@_secondoftwowithopt:wnn}
 \pdfstringdefDisableCommands{\let\hrefpdf\@@_secondoftwowithopt:wnn}
@@ -2278,17 +2292,16 @@
 % \section{Link decorations}
 % \subsection{Functions to export and select colors}
 % We support two input syntax: color expressions and model with values.
-% \begin{function}{\@@_color_export:nnN,\@@_colormodel_export:nnnN}
+% \begin{function}{\@@_color_export:nnN}
 %   \begin{syntax}
-%    \cs{@@_color_export:nnN} \Arg{color} \Arg{export format} \meta{tlvar}\\
-%    \cs{@@_colormodel_export:nnnN} \Arg{color model}\Arg{value} \Arg{export format} \meta{tlvar}
+%    \cs{@@_color_export:nnN} \Arg{color} \Arg{export format} \meta{tlvar}
 %   \end{syntax}
 %   This exports a color as space separated numbers as needed in in |/C|.
 %  \Arg{color} should have either the format |[model]{value}| or be a color expression.
 %  For examples: |[rgb]{1,0,.5}| or |red!50!blue|. The export format is either
 %  |space-sep-cmyk| or |space-sep-rgb|.
 % \end{function}
-%  \begin{macro}{\@@_color_export:nnN,\@@_colormodel_export:nnnN}
+%  \begin{macro}{\@@_color_export:nnN,\@@_color_export_aux:wnnN}
 %   Color keys need to parse color expressions. Two input types are supported:
 %  |color=[rgb]{1,0,.5}| and |color=red!50!blue|. The colors are exported
 %  to PDF syntax (space separated numbers).
@@ -2297,14 +2310,14 @@
  {
    \tl_if_head_eq_charcode:nNTF {#1}[ %]
     {
-      \@@_colormodel_export:wnnN  #1 {#2} #3
+      \@@_color_export_aux:wnnN  #1 {#2} #3
     }
     {
       \color_export:nnN {#1} {#2} #3
     }
  }
 
-\cs_new_protected:Npn \@@_colormodel_export:wnnN  [#1] #2 #3 #4
+\cs_new_protected:Npn \@@_color_export_aux:wnnN  [#1] #2 #3 #4
   {
      \color_export:nnnN {#1}{#2}{#3}#4
   }
@@ -2321,7 +2334,7 @@
 %  \Arg{color} should have either the format |[model]{value}| or be a color expression.
 %  For examples: |[rgb]{1,0,.5}| or |red!50!blue|
 % \end{function}
-%  \begin{macro}{\@@_color_select:n,\@@_colormodel_select_aux:wn}
+%  \begin{macro}{\@@_color_select:n,\@@_color_select_aux:wn}
 %   Color keys need to parse color expressions. Two input types are supported:
 %  |color=[rgb]{1,0,.5}| and |color=red!50!blue|.
 %    \begin{macrocode}
@@ -2329,14 +2342,14 @@
  {
    \tl_if_head_eq_charcode:nNTF {#1}[ %]
     {
-      \@@_colormodel_select_aux:wn  #1
+      \@@_color_select_aux:wn  #1
     }
     {
       \color_select:n {#1}
     }
  }
 
-\cs_new_protected:Npn \@@_colormodel_select_aux:wn  [#1] #2
+\cs_new_protected:Npn \@@_color_select_aux:wn  [#1] #2
   {
      \color_select:nn {#1}{#2}
   }
@@ -2353,7 +2366,7 @@
 %  \Arg{color} should have either the format |[model]{value}| or be a color expression.
 %  For examples: |[rgb]{1,0,.5}| or |red!50!blue|
 % \end{function}
-%  \begin{macro}{\@@_color_set:nn,\@@_colormodel_set_aux:nwn}
+%  \begin{macro}{\@@_color_set:nn,\@@_color_set_aux:nwn}
 %   Color keys need to parse color expressions. Two input types are supported:
 %  |color=[rgb]{1,0,.5}| and |color=red!50!blue|.
 %    \begin{macrocode}
@@ -2361,14 +2374,14 @@
  {
    \tl_if_head_eq_charcode:nNTF {#2}[ %]
     {
-      \@@_colormodel_set_aux:nwn  { #1 } #2
+      \@@_color_set_aux:nwn  { #1 } #2
     }
     {
       \color_set:nn {#1} {#2}
     }
  }
 
-\cs_new_protected:Npn \@@_colormodel_set_aux:nwn #1 [#2] #3
+\cs_new_protected:Npn \@@_color_set_aux:nwn #1 [#2] #3
   {
      \color_set:nnn {#1}{#2}{#3}
   }
