@@ -11,7 +11,7 @@
 \str_new:N  \l_pdffield_colormodel_str
 \str_set:Nn \l_pdffield_colormodel_str {rgb}
 
-\cs_new_protected:Npn \__pdffield_color_export:nN #1  #2  
+\cs_new_protected:Npn \__pdffield_color_export:nN #1  #2
  {
    \tl_if_head_eq_charcode:nNTF {#1}[ %]
     {
@@ -23,7 +23,7 @@
     }
  }
 
-\cs_new_protected:Npn \__pdffield_color_export:wnN  [#1] #2 #3 
+\cs_new_protected:Npn \__pdffield_color_export:wnN  [#1] #2 #3
   {
      \exp_args:Nnnx
      \color_export:nnnN {#1}{#2}{space-sep-\l_pdffield_colormodel_str}#3
@@ -270,8 +270,8 @@
          \str_case:Vn \l_pdffield_colormodel_str
            {
              {rgb} {\tl_put_right:Nn \l__pdffield_text_color_tl{~rg}}
-             {cmyk}{\tl_put_right:Nn \l__pdffield_text_color_tl{~k}} 
-           }         
+             {cmyk}{\tl_put_right:Nn \l__pdffield_text_color_tl{~k}}
+           }
        },
     color .initial:n = black,
     bordercolor .code:n =
@@ -288,7 +288,7 @@
       {
          \__pdffield_color_export:nN {#1} \l__pdffield_tmpa_tl
          \pdfdict_put:nnx {l__pdffield/text/annot/MK}{BG}{[\l__pdffield_tmpa_tl]}
-      },     
+      },
   }
 
 
@@ -370,7 +370,7 @@
 \begin{document}
 \ExplSyntaxOn
 avb \sffamily abc
-
+\bitset_set_true:Nn  \l__pdffield_Ff_bitset {DoNotScroll}
 \__pdffield_text_add:n {width=4cm,name=default,height=\baselineskip}
 
 \ExplSyntaxOff
