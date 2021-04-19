@@ -7,9 +7,9 @@
 \usepackage{hyperref}
 
 \ExplSyntaxOn
-\pdf_object_new:nn {Comic}{dict}
-\pdf_object_write:nn {Comic}{
-/Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /ComicSansMS}
+%\pdf_object_new:nn {Comic}{dict}
+%\pdf_object_write:nn {Comic}{
+%/Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /ComicSansMS}
 
 % color command, adapted from hgeneric, should perhaps be defined somewhere else
 \str_new:N  \l_pdffield_colormodel_str
@@ -294,7 +294,7 @@
          \__pdffield_color_export:nN {#1} \l__pdffield_tmpa_tl
          \pdfdict_put:nnx {l__pdffield/text/annot/MK}{BG}{[\l__pdffield_tmpa_tl]}
       },
-    rotation .code:n =    
+    rotation .code:n =
       {
          \pdfdict_put:nnx {l__pdffield/text/annot/MK}{R}{\int_eval:n{#1}}
       },
@@ -414,9 +414,9 @@
 %\iftutex
 %\setmainfont{AdobeThai-Regular.otf}[Path={C:/Program Files (x86)/Adobe/Acrobat DC/Resource/Font/}]
 %\setmainfont{Mukta} %marathi, worked,
-% \setmainfont{Noto Sans CJK TC} %breaks, adobe crash, browser doesn't show the glyphs.
+\setmainfont{Noto Sans CJK TC} %breaks, adobe crash, browser doesn't show the glyphs.
 %\setsansfont{comicsansms} %works
-\setsansfont{comicsansms}
+%\setsansfont{comicsansms}
 %\setsansfont{arial}
 %\setsansfont{texgyreheros}
 %\setmainfont{calibri} % doesn't work /CIDFontType2
@@ -431,7 +431,27 @@
 %\setmainfont{lmroman10-regular.otf} %replaced by arial CIDFontType0
 \begin{document}
 \ExplSyntaxOn
+{
+\fontspec{Mukta}  \__pdffield_setup_currentfont:n {mukta}
+मध्ये रिलीज झालेल्या
+\int_step_inline:nnn{"800}{"A00}
+         {
+           \directlua{pdf.includechar(font.current(),"0x\int_to_hex:n{#1}")}
+         }
+ 
+\__pdffield_text_add:n {width=4cm,height=0.5cm,name=default}
+}
 
+\par \__pdffield_setup_currentfont:n {chinese}
+\int_step_inline:nnn{"6000}{"6500}
+         {
+           \directlua{pdf.includechar(font.current(),"0x\int_to_hex:n{#1}")}
+         }
+提 
+\__pdffield_text_add:n {width=4cm,height=0.5cm,name=chinese}
+
+\ExplSyntaxOff
+\end{document}
 avb \sffamily abc
 \bitset_set_true:Nn  \l__pdffield_Ff_bitset {DoNotScroll}
 \__pdffield_text_add:n {width=4cm,name=default,height=\baselineskip}
