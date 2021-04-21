@@ -416,7 +416,7 @@
 %\setmainfont{Mukta} %marathi, worked,
 \setmainfont{Noto Sans CJK TC} %breaks, adobe crash, browser doesn't show the glyphs.
 %\setsansfont{comicsansms} %works
-%\setsansfont{comicsansms}
+\setsansfont{comicsansms}
 %\setsansfont{arial}
 %\setsansfont{texgyreheros}
 %\setmainfont{calibri} % doesn't work /CIDFontType2
@@ -431,23 +431,27 @@
 %\setmainfont{lmroman10-regular.otf} %replaced by arial CIDFontType0
 \begin{document}
 \ExplSyntaxOn
-{
-\fontspec{Mukta}  \__pdffield_setup_currentfont:n {mukta}
-मध्ये रिलीज झालेल्या
+{\sffamily 
+%\fontspec{Mukta}  
+dejavuSans\__pdffield_setup_currentfont:n {deja}
+%मध्ये रिलीज झालेल्या
 \int_step_inline:nnn{"800}{"A00}
          {
-           \directlua{pdf.includechar(font.current(),"0x\int_to_hex:n{#1}")}
+           %\directlua{pdf.includechar(font.current(),"0x\int_to_hex:n{#1}")}
          }
- 
-\__pdffield_text_add:n {width=4cm,height=0.5cm,name=default}
+\int_step_inline:nnn{30}{255}
+{
+   \directlua{pdf.includechar(font.current(),"0x\int_to_hex:n{#1}")}
+} 
+\__pdffield_text_add:n {width=4cm,height=0.5cm,name=default,font=deja}
 }
 
-\par \__pdffield_setup_currentfont:n {chinese}
+\par %\__pdffield_setup_currentfont:n {chinese}
 \int_step_inline:nnn{"6000}{"6500}
          {
-           \directlua{pdf.includechar(font.current(),"0x\int_to_hex:n{#1}")}
+           %\directlua{pdf.includechar(font.current(),"0x\int_to_hex:n{#1}")}
          }
-提 
+%提 
 \__pdffield_text_add:n {width=4cm,height=0.5cm,name=chinese}
 
 \ExplSyntaxOff
