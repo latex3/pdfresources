@@ -1242,10 +1242,12 @@
     ,href / format  .code:n = { \cs_set_eq:NN \@@_href_url_format #1 }
   }
 
-
+\hook_new_pair:nn{cmd/href/before}{cmd/href/after}
 
 \DeclareRobustCommand*{\href}[1][]{%
-  \begingroup
+  \mode_leave_vertical:
+  \hook_use:n{cmd/href/before}
+  \group_begin:
   \keys_set:nn { hyp / href } {#1}
   \let\protect\@unexpandable@protect
   \bool_if:NTF \l_@@_href_url_encode_bool
@@ -1258,12 +1260,27 @@
   \@ifnextchar\bgroup\Hy@href{\hyper@normalise\href@}%
 }
 
+\begingroup
+  \catcode`\$=6 %
+  \catcode`\#=12 %
+  \gdef\href@$1{\expandafter\href@split$1##\\}%
+  \gdef\href@split$1#$2#$3\\$4{%
+    \hyper@@link{$1}{$2}{$4}%
+    \endgroup
+    \hook_use:n{cmd/href/after}
+  }%
+\endgroup
 
-\DeclareRobustCommand*{\hrefurl}[1][]{
-  \group_begin:
-  \keys_set:nn { hyp / href } {#1}
-  \let\protect\@unexpandable@protect
-  \bool_if:NTF \l_@@_href_url_encode_bool
+\hook_new_pair:nn{cmd/hrefurl/before}{cmd/hrefurl/after}
+
+\DeclareRobustCommand*{\hrefurl}[1][]
+ {
+   \mode_leave_vertical:
+   \hook_use:n{cmd/href/before}
+   \group_begin:
+   \keys_set:nn { hyp / href } {#1}
+   \let\protect\@unexpandable@protect
+   \bool_if:NTF \l_@@_href_url_encode_bool
     {
       \tl_set:Nn \l__hyp_text_enc_uri_print_tl {utf8/URI}
     }
@@ -1276,12 +1293,15 @@
   {
     \exp_args:Nno\hyper@linkurl{#2}{\l_@@_href_url_protocol_tl#1}
     \group_end:
+    \hook_use:n{cmd/href/after}
   }
 
-
+\hook_new_pair:nn{cmd/hrefpdf/before}{cmd/hrefpdf/after}
 \DeclareRobustCommand*{\hrefpdf}[1][]
  {
-  \begingroup
+  \mode_leave_vertical:
+  \hook_use:n{cmd/hrefpdf/before}
+  \group_begin:
   \keys_set:nn { hyp / href } {#1}
   \let\protect\@unexpandable@protect
   \hyper@normalise\@@_href_pdf_aux:nn
@@ -1289,11 +1309,16 @@
 
 \cs_new_protected:Npn \@@_href_pdf_aux:nn #1 #2
   {
-    \exp_args:Nnno\hyper@linkfile{#2}{#1}{\l_@@_href_pdf_destination_tl}\endgroup
+    \exp_args:Nnno\hyper@linkfile{#2}{#1}{\l_@@_href_pdf_destination_tl}
+    \group_end:
+    \hook_use:n{cmd/hrefpdf/after}
   }
 
+\hook_new_pair:nn{cmd/hrefrun/before}{cmd/hrefrun/after}
 \DeclareRobustCommand*{\hrefrun}[1][]
  {
+  \mode_leave_vertical:
+  \hook_use:n{cmd/hrefrun/before}
   \group_begin:
   \keys_set:nn { hyp / href } {#1}
   \let\protect\@unexpandable@protect
@@ -1304,11 +1329,16 @@
   {
     \exp_args:Nnno\hyper@linklaunch{#2}{#1}{\l_@@_href_run_parameter_tl}
     \group_end:
+    \hook_use:n{cmd/hrefrun/after}
   }
+
+
+\hook_new_pair:nn{cmd/url/before}{cmd/url/after}
 
 \DeclareRobustCommand*{\url}[1][]
   {
    \mode_leave_vertical:
+   \hook_use:n{cmd/url/before}
    \group_begin:
    \keys_set:nn {hyp / href } {#1}
    \let\protect \@unexpandable@protect
@@ -1328,6 +1358,7 @@
      \hyper@linkurl{\@@_href_url_format {#1}}
      {\l_@@_href_url_protocol_tl#1}
    \group_end:
+   \hook_use:n{cmd/url/after}
  }
 
 %    \end{macrocode}
