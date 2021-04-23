@@ -9,9 +9,13 @@ this project uses date-based 'snapshot' version identifiers.
 ### Fixed 
  - xcolor patch for [ps] type used in pstricks
  - value of citecolor wasn't expanded (errored with tcolorbox)
- - \url leaves now vmode
+ - \url, \href, \hrefurl, \hrefrun and \hrefpdf leaves now vmode
  - handling of pdfauthor, pdftitle and pdfsubject in hyperxmp patch
  
+### Added
+ - generic command hooks have been added to \url, \href, \hrefurl,
+   \hrefrun and \hrefpdf
+      
 ## [2021-03-17]
 
 ### Fixed
