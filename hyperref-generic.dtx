@@ -1265,7 +1265,7 @@
   \catcode`\#=12 %
   \gdef\href@$1{\expandafter\href@split$1##\\}%
   \gdef\href@split$1#$2#$3\\$4{%
-    \hyper@@link{$1}{$2}{$4}%
+    \hyper@@@@link{$1}{$2}{$4}%<---@@-docstrip doubling!
     \endgroup
     \hook_use:n{cmd/href/after}
   }%
