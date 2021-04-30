@@ -43,11 +43,6 @@
 %   idxtype = {checkbox key},
 %   printtype= \textit{checkbox key}
 %    ]{Checkboxkey}{checkboxkey}
-%  \NewDocElement[
-%   idxgroup=field keys,
-%   idxtype = {field key},
-%   printtype= \textit{field key}
-%    ]{fieldkey}{fieldkey}
 % \providecommand\hook[1]{\texttt{#1}}
 % \ExplSyntaxOn
 % \pdffield_store_appearance:nn {bear/Yes}
@@ -60,7 +55,7 @@
 %  }
 % \ExplSyntaxOff
 % \title{^^A
-%   The \pkg{l3pdffield} module\\ Commands to create form fields   ^^A
+%   The \pkg{l3pdffield-checkbox} module\\ Commands to create checkbox form fields   ^^A
 %   \\ \LaTeX{} PDF management testphase bundle
 % }
 %
@@ -77,116 +72,36 @@
 %
 % \maketitle
 % \begin{documentation}
-% \section{\pkg{l3pdffield} Introduction}
-% The implementation of form fields in hyperref has some bugs, see for example
-% \url{https://github.com/latex3/hyperref/issues/94}. This package is a first step
-% towards the goal to review and improve the code of form fields.
+% \section{\pkg{l3pdffield-checkbox} Introduction}
+% This is the documentation for checkbox fields, for general information about form fields
+% check the documentation l3pdffield.
 %
-% Like the \pkg{pdfmanagement-testphase} package itself it is a temporary package:
-% the definite home of the code is not yet decided.
 %
-% It handles for now \emph{only} checkboxes, other form fields like pushbutton,
-% radio buttons or text fields will follow later. As currently no fonts are used,
-% it doesn't relies on the hyperref code
-% to initialize the form, but it can be used with hyperref.
-%
-% The code requires the new PDF management. The code makes use of
-% \pkg{l3pdfxform} to create the Xobjects. This code doesn't support yet the
-% the dvips backend.
 %
 % Please keep in mind
 % \begin{itemize}
-% \item Not every PDF viewer supports checkboxes or form fields.
+% \item Not every PDF viewer supports checkboxes.
 % \item The handling can depend on settings in the PDF viewer. In adobe reader for
 % example I had to disable an option to avoid that it tries to create an appearance
 % itself
 % \item Standards like pdf/A disable form fields too (as you typically can't change the PDF).
 % \end{itemize}
+% \section{Checkboxes}
+% Click me:
+% \ExplSyntaxOn\pdffield_checkbox:n{name=bear,appearance=bear,width=23pt,height=30pt,depth=10pt}\ExplSyntaxOff
 %
-% If \pkg{hyperref} is loaded before
-% the package will suppress the deprecated |/NeedAppearances| setting. If \pkg{hyperref}
-% is loaded later you should do it in the \cs{Form} options.
-%
-% So a typical use together with hyperref could look like this
-%
-% \begin{verbatim}
-% \RequirePackage{pdfmanagement-testphase}
-% \DeclareDocumentMetadata{uncompress}
-% \documentclass{article}
-% \usepackage{hyperref}
-% \usepackage{l3pdffield-testphase}
-% \begin{document}
-% \Form
-% \end{verbatim}
-%
-% \section{Some background}
-%
-% A document can contain arbitrary number of fields which can be organized as a tree.
-% The leaf fields in such a tree, the \emph{terminal fields} typically have a
-% widget annotation as kid which determines the look of the field. I will call such a
-% tree a \emph{fieldset}. The node are \emph{fields}, the last node the \emph{field
-% annotation}.
-%
-% A simple example would look like this
-% \begin{tikzpicture}[level 2/.style={level distance=7mm}]
-% \node[draw] {week}
-% child {node[draw] {mon}
-%         child {node[draw,dashed] {annot}}
-%       }
-% child {node[draw] {tue}
-%        child {node[draw,dashed] {annot}}
-%       }
-% child {node[draw] {wen}
-%         child {node[draw,dashed] {annot}}
-%       }
-% ;
-% \end{tikzpicture}
-%
-% In many cases a fieldset only consists of one field along with its field annotation
-% but larger sets can be needed to build more complex interactions with javascript code,
-% for example a datepicker can be built as a fieldset with various fields to represent
-% the month and year choice and to select days.
-%
-% All fields in a fieldset must have a (partial) name. The full name of the field
-% is than built from it along with the names of the parents. In the example above
-% the one field has the partial name \texttt{mon} and the full name \texttt{week.mon}.
-% Partial names shouldn't contain periods. If two fields have the same name they will
-% work in unison.
-%
-% All terminal fields should also have a type, e.g. \texttt{Btn} for a button field,
-% or \texttt{Tx} for a textfield. The type can be set for the parent and then inherited.
-% The fields in a fieldset can have different types.
-%
-% \section{Commands}
-% \begin{function}{\pdffield_field_new:nn}
+% \bigskip
+% \subsection{Commands}
+% \begin{function}{\pdffield_checkbox:n}
 % \begin{syntax}
-%  \cs{pdffield_field_new:nn}\Arg{key val list}\Arg{object name}
+%  \cs{pdffield_checkbox:n}\Arg{key val list}
 % \end{syntax}
-% This creates a new field objectcheckbox to check and uncheck. The list of allowed keys is described below.
+% This creates a checkbox to check and uncheck. The list of allowed keys is described below.
 % Typically the \meta{key val list} should at least set the name. Checkboxes with the same
 % name belong to the same field and are checked and unchecked together. The default appearance
 % is a quadratic frame with a \cs{texttimes} in it for the checked case.
 % \end{function}
 %
-%\begin{function}{\pdffield_setup:nn}
-% \begin{syntax}
-%  \cs{pdffield_setup:nn}\Arg{field type}\Arg{key val list}
-% \end{syntax}
-% This allows to setup up values for following fields. \Arg{field type}
-% should be a field, currently the only allowed value is |checkbox|.
-% \end{function}
-%
-%\begin{function}{\pdffield_store_appearance:nn}
-% \begin{syntax}
-%  \cs{pdffield_store_appearance:nn}\Arg{name/state}\Arg{content}
-% \end{syntax}
-% This is a small wrapper around \cs{pdfxform_new:nn} and store appearances for the fields.
-% \meta{state} should be for checkboxes either |Yes| or |Off| (and typically
-% you should define both). \meta{name} is the name
-% that is used in the |appearance| key, |checkbox/default| is predefined and so can't be used.
-% \meta{content} is arbitrary content. The dimensions should fit to the planed size of the
-% checkbox.%
-% \end{function}
 % \subsection{Keys}
 %
 % The new checkbox commands accepts following keys:
