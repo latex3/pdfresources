@@ -619,7 +619,6 @@
         \msg_error:nn {pdffile}{target-name-missing}
       }
       {
-        \pdf_object_new:nn   { #1 } {dict}
         \group_begin:
           \@@_filename_convert_to_print:nN  { #2 } \l_@@_tmpa_str
           \pdfdict_put:nnx {l_pdffile/Filespec}{F} { \l_@@_tmpa_str }
@@ -639,7 +638,7 @@
 
 %#1 {source filename}
 %#2 {target filename}
-%#3 { filespec object name } (will internally get a prefix!)
+%#3 { filespec object name } (will internally get a prefix! ??)
 \cs_new_protected:Npn \pdffile_embed_file:nnn #1 #2 #3
   { %               if #1 empty => only filespec
     %               if #2 empty => = #1
@@ -682,6 +681,7 @@
            }
         \tl_if_blank:nTF { #2 }
           {
+            \pdf_object_new:nn   { #3 } {dict}
             \exp_args:Nnnx
               \@@_filespec_write:nnn
                 %#1 dict, #2 target file name, #3 object ref
@@ -690,6 +690,7 @@
                 {\l_@@_embed_ref_tl}
           }
           {
+            \pdf_object_new:nn   { #3 } {dict}
             \exp_args:Nnnx
               \@@_filespec_write:nnn
                 %#1 dict, #2 target file name, #3 object ref
@@ -723,6 +724,7 @@
            { #1 }
            \l_@@_automimetype_tl
          \tl_set:Nx \l_@@_embed_ref_tl { \pdf_object_ref_last: }
+         \pdf_object_new:nn   { #3 } {dict}
          \exp_args:Nnxx
            \@@_filespec_write:nnn
              %#1 dict, #2 target file name, #3 object ref
