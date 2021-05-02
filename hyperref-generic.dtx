@@ -2666,17 +2666,17 @@
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_ocg_init:
   {
-     \pdf_object_new:nn   { l_@@_ocg_view_dict_obj }   { dict }
-     \pdf_object_new:nn   { l_@@_ocg_print_dict_obj }  { dict }
-     \pdf_object_new:nn   { l_@@_ocg_config_dict_obj } { dict }
-     \pdf_object_new:nn   { l_@@_ocg_ref_array_obj }   { array }
-        \pdf_object_write:nx { l_@@_ocg_ref_array_obj }
+     \pdf_object_new:nn   { @@/OCG/View }   { dict }
+     \pdf_object_new:nn   { @@/OCG/Print }  { dict }
+     \pdf_object_new:nn   { @@/OCG/config } { dict }
+     \pdf_object_new:nn   { @@/OCG/refarray }   { array }
+        \pdf_object_write:nx { @@/OCG/refarray }
           {
-            \pdf_object_ref:n { l_@@_ocg_view_dict_obj }
+            \pdf_object_ref:n { @@/OCG/View }
             \c_space_tl
-            \pdf_object_ref:n { l_@@_ocg_print_dict_obj }
+            \pdf_object_ref:n { @@/OCG/Print }
           }
-        \pdf_object_write:nn { l_@@_ocg_view_dict_obj }
+        \pdf_object_write:nn { @@/OCG/View }
           {
             /Type/OCG
             /Name(View)
@@ -2686,7 +2686,7 @@
               /View  <</ViewState/ON  >>~
              >>
           }
-        \pdf_object_write:nn { l_@@_ocg_print_dict_obj }
+        \pdf_object_write:nn { @@/OCG/Print }
           {
             /Type/OCG
             /Name(Print)
@@ -2696,30 +2696,30 @@
               /View  <</ViewState/OFF>>~
              >>
           }
-       \pdfmanagement_add:nnx { Catalog / OCProperties }{OCGs }{ \pdf_object_ref:n {l_@@_ocg_view_dict_obj} }
-       \pdfmanagement_add:nnx { Catalog / OCProperties }{OCGs }{ \pdf_object_ref:n {l_@@_ocg_print_dict_obj} }
-       \pdf_object_write:nx { l_@@_ocg_config_dict_obj }
+       \pdfmanagement_add:nnx { Catalog / OCProperties }{OCGs }{ \pdf_object_ref:n {@@/OCG/View} }
+       \pdfmanagement_add:nnx { Catalog / OCProperties }{OCGs }{ \pdf_object_ref:n {@@/OCG/Print} }
+       \pdf_object_write:nx { @@/OCG/config }
          {
-           /OFF[\pdf_object_ref:n { l_@@_ocg_print_dict_obj }]
+           /OFF[\pdf_object_ref:n { @@/OCG/Print }]
            /AS[
              <<
               /Event/View
-              /OCGs\c_space_tl \pdf_object_ref:n { l_@@_ocg_ref_array_obj }
+              /OCGs\c_space_tl \pdf_object_ref:n { @@/OCG/refarray }
               /Category[/View]
              >>
              <<
               /Event/Print
-              /OCGs\c_space_tl \pdf_object_ref:n { l_@@_ocg_ref_array_obj }
+              /OCGs\c_space_tl \pdf_object_ref:n { @@/OCG/refarray }
               /Category[/Print]
              >>
              <<
               /Event/Export
-              /OCGs\c_space_tl \pdf_object_ref:n { l_@@_ocg_ref_array_obj }
+              /OCGs\c_space_tl \pdf_object_ref:n { @@/OCG/refarray }
               /Category[/Print]
              >>
               ]
          }
-       \pdfmanagement_add:nnx { Catalog / OCProperties }{ D }{ \pdf_object_ref:n { l_@@_ocg_config_dict_obj} }
+       \pdfmanagement_add:nnx { Catalog / OCProperties }{ D }{ \pdf_object_ref:n { @@/OCG/config} }
        \cs_gset:Npn \@@_ocg_init: {}
   }
 %    \end{macrocode}
@@ -2749,10 +2749,10 @@
              \hbox_set_end:
                \mbox
                  {
-                   \pdf_bdcobject:nn {OC}{l_@@_ocg_print_dict_obj}
+                   \pdf_bdcobject:nn {OC}{@@/OCG/Print}
                    \hbox_overlap_right:n { \box_use:N \l_@@_tmpa_box }
                    \pdf_emc:
-                   \pdf_bdcobject:nn {OC}{l_@@_ocg_view_dict_obj}
+                   \pdf_bdcobject:nn {OC}{@@/OCG/View}
                    \group_begin:
                    \color_select:n { hyp/color/#1 }
                    \box_use_drop:N \l_@@_tmpa_box
@@ -4232,9 +4232,9 @@
              }
           }
        \pdfmanagement_add:nnx {Catalog / AcroForm/DR/Font }
-         {ZaDb} {\pdf_object_ref:n {l_@@_font_zapfdingbats_obj} }
+         {ZaDb} {\pdf_object_ref:n {@@/Font/ZaDb} }
        \pdfmanagement_add:nnx {Catalog / AcroForm/DR/Font }
-         {Helv} {\pdf_object_ref:n {l_@@_font_helvetica_obj} }
+         {Helv} {\pdf_object_ref:n {@@/Font/Helv} }
        \pdfmanagement_add:nnx {Catalog /AcroForm}
          {DA}{(/Helv~10~Tf~0~g)}
        \pdfmeta_standard_verify:nTF {form_no_NeedAppearance}
@@ -4646,10 +4646,10 @@
 \ExplSyntaxOn
 \def\Hy@FormObjects
   {
-    \pdf_object_new:nn   {l_@@_encoding_pdfdoc_obj }   { dict }
-    \pdf_object_new:nn   {l_@@_font_zapfdingbats_obj } { dict }
-    \pdf_object_new:nn   {l_@@_font_helvetica_obj }    { dict }
-    \pdf_object_write:nx {l_@@_encoding_pdfdoc_obj }
+    \pdf_object_new:nn   {@@/Encoding/pdfdoc }   { dict }
+    \pdf_object_new:nn   {@@/Font/ZaDb } { dict }
+    \pdf_object_new:nn   {@@/Font/Helv }    { dict }
+    \pdf_object_write:nx {@@/Encoding/pdfdoc }
       {
         /Type/Encoding
         /Differences[
@@ -4691,20 +4691,20 @@
           /uacute/ucircumflex/udieresis/yacute/thorn/ydieresis
          ]
       }
-    \pdf_object_write:nn {l_@@_font_zapfdingbats_obj }
+    \pdf_object_write:nn {@@/Font/ZaDb }
       {
         /Type/Font
         /Subtype/Type1
         /Name/ZaDb
         /BaseFont/ZapfDingbats
       }
-    \pdf_object_write:nx {l_@@_font_helvetica_obj }
+    \pdf_object_write:nx {@@/Font/Helv }
       {
         /Type/Font
         /Subtype/Type1
         /Name/Helv
         /BaseFont/Helvetica
-        /Encoding~\pdf_object_ref:n { l_@@_encoding_pdfdoc_obj }
+        /Encoding~\pdf_object_ref:n { @@/Encoding/pdfdoc }
       }
   \global\let\Hy@FormObjects\relax
   }
