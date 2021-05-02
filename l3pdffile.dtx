@@ -262,7 +262,8 @@
 %   \end{syntax}
 %   This commands embeds the file \meta{source filename} in the PDF,
 %   and creates a |/Filespec| dictionary object named \meta{object name}.
-%   The object name must be unique.
+%   The object name must be unique, it should start with the module name, so
+%   e.g. \texttt{module/name}.
 %   The command uses the content of the local
 %   dictionaries |l_pdffile|, |l_pdffile/Params| and |l_pdffile/Filespec|
 %   to setup the dictionary entries of the stream object and the
@@ -360,12 +361,12 @@
 %    \l_tmpa_str
 % \pdfdict_put:nnx  {l_pdffile/Filespec} {Desc}{\l_tmpa_str}
 % %embeds testinput.txt and calls it grüße.txt
-% \pdffile_embed_file:nnn {testinput.txt}{grüße.txt}{file:example1}
+% \pdffile_embed_file:nnn {testinput.txt}{grüße.txt}{mymodule/example1}
 % %reference it in the panel
 % \pdfmanagement_add:nnx
 %  {Catalog/Names}
 %  {EmbeddedFiles}
-%   {\pdf_object_ref:n{file:example1}}
+%   {\pdf_object_ref:n{mymodule/example1}}
 % \group_end:
 % \end{verbatim}
 % \end{documentation}

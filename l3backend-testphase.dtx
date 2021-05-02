@@ -590,14 +590,14 @@
  %create the backend objects:
 \clist_map_inline:Nn \c_@@_backend_PageResources_clist
   {
-    \@@_backend_object_new:nn {Page/Resources/#1} {dict}
+    \@@_backend_object_new:nn {@@/Page/Resources/#1} {dict}
     \cs_if_exist:NT \tex_directlua:D
       {
         \tex_directlua:D
           {
-            ltx.@@.object["Page/Resources/#1"]
+            ltx.@@.object["@@/Page/Resources/#1"]
             =
-            "\@@_backend_object_ref:n{Page/Resources/#1}"
+            "\@@_backend_object_ref:n{@@/Page/Resources/#1}"
           }
       }
    }
@@ -631,7 +631,7 @@
           { \__kernel_pdfdict_name:n { g_@@_Core/Page/Resources/##1} }
           {
             \@@_backend_object_write:nx
-              { Page/Resources/##1 }
+              { @@/Page/Resources/##1 }
               { \pdfdict_use:n { g_@@_Core/Page/Resources/##1} }
           }
      }
@@ -651,8 +651,8 @@
 %
 \clist_map_inline:Nn \c_@@_backend_PageResources_clist
   {
-    \@@_backend_object_new:nn   { Page/Resources/#1 } { dict }
-    \hook_gput_code:nnn{shipout/firstpage}{pdf}{\@@_backend_object_write:nn { Page/Resources/#1 } {}}
+    \@@_backend_object_new:nn   { @@/Page/Resources/#1 } { dict }
+    \hook_gput_code:nnn{shipout/firstpage}{pdf}{\@@_backend_object_write:nn { @@/Page/Resources/#1 } {}}
   }
 \cs_new_protected:Npn \@@_backend_PageResources:n #1
   {
@@ -667,7 +667,7 @@
    %objects are not filled with \pdf_object_write as this is not additive!
     \@@_backend:x
       {
-        put~\@@_backend_object_ref:n {Page/Resources/#1}<</#2~#3>>
+        put~\@@_backend_object_ref:n {@@/Page/Resources/#1}<</#2~#3>>
       }
   }
 
@@ -847,7 +847,7 @@
             \__kernel_backend_literal:x
               {
                 pdf:put~@resources~
-                  <</##1~\@@_backend_object_ref:n {Page/Resources/##1}>>
+                  <</##1~\@@_backend_object_ref:n {@@/Page/Resources/##1}>>
               }
           }
       }
@@ -1042,7 +1042,7 @@
     \prop_if_empty:cF
       { \__kernel_pdfdict_name:n { g_@@_Core/Page/Resources/#1} }
       {
-        \pdfdict_item:ne { #1 }{ \pdf_object_ref:n {Page/Resources/#1}}
+        \pdfdict_item:ne { #1 }{ \pdf_object_ref:n {@@/Page/Resources/#1}}
       }
   }
 
@@ -1243,22 +1243,22 @@
         \prop_if_empty:cF
           { \__kernel_pdfdict_name:n { g_@@_Core/Page/Resources/ExtGState } }
           {
-            /ExtGState~ \pdf_object_ref:n { Page/Resources/ExtGState }
+            /ExtGState~ \pdf_object_ref:n { @@/Page/Resources/ExtGState }
           }
         \prop_if_empty:cF
           { \__kernel_pdfdict_name:n { g_@@_Core/Page/Resources/Pattern } }
           {
-            /Pattern~ \pdf_object_ref:n { Page/Resources/Pattern }
+            /Pattern~ \pdf_object_ref:n { @@/Page/Resources/Pattern }
           }
         \prop_if_empty:cF
           { \__kernel_pdfdict_name:n { g_@@_Core/Page/Resources/Shading } }
           {
-            /Shading~ \pdf_object_ref:n { Page/Resources/Shading }
+            /Shading~ \pdf_object_ref:n { @@/Page/Resources/Shading }
           }
         \prop_if_empty:cF
           { \__kernel_pdfdict_name:n { g_@@_Core/Page/Resources/ColorSpace } }
           {
-            /ColorSpace~ \pdf_object_ref:n { Page/Resources/ColorSpace }
+            /ColorSpace~ \pdf_object_ref:n { @@/Page/Resources/ColorSpace }
           }
       }
       \l_@@_backend_tmpa_box
@@ -1323,22 +1323,22 @@
         \prop_if_empty:cF
           { \__kernel_pdfdict_name:n { g_@@_Core/Page/Resources/ExtGState } }
           {
-            /ExtGState~ \pdf_object_ref:n { Page/Resources/ExtGState }
+            /ExtGState~ \pdf_object_ref:n { @@/Page/Resources/ExtGState }
           }
         \prop_if_empty:cF
           { \__kernel_pdfdict_name:n { g_@@_Core/Page/Resources/Pattern } }
           {
-            /Pattern~ \pdf_object_ref:n { Page/Resources/Pattern }
+            /Pattern~ \pdf_object_ref:n { @@/Page/Resources/Pattern }
           }
         \prop_if_empty:cF
           { \__kernel_pdfdict_name:n { g_@@_Core/Page/Resources/Shading } }
           {
-            /Shading~ \pdf_object_ref:n { Page/Resources/Shading }
+            /Shading~ \pdf_object_ref:n { @@/Page/Resources/Shading }
           }
         \prop_if_empty:cF
           { \__kernel_pdfdict_name:n { g_@@_Core/Page/Resources/ColorSpace } }
           {
-            /ColorSpace~ \pdf_object_ref:n { Page/Resources/ColorSpace }
+            /ColorSpace~ \pdf_object_ref:n { @@/Page/Resources/ColorSpace }
           }
       }
       \l_@@_backend_tmpa_box
@@ -1414,21 +1414,21 @@
                {
                  put~ @resources ~
                    <<
-                     /ExtGState~ \pdf_object_ref:n { Page/Resources/ExtGState }
+                     /ExtGState~ \pdf_object_ref:n { @@/Page/Resources/ExtGState }
                    >>
                }
              \@@_backend:x
                {
                  put~ @resources ~
                  <<
-                   /Pattern~ \pdf_object_ref:n { Page/Resources/Pattern }
+                   /Pattern~ \pdf_object_ref:n { @@/Page/Resources/Pattern }
                  >>
                }
              \@@_backend:x
                {
                  put~ @resources ~
                  <<
-                   /Shading~ \pdf_object_ref:n { Page/Resources/Shading }
+                   /Shading~ \pdf_object_ref:n { @@/Page/Resources/Shading }
                  >>
                }
              \@@_backend:x
@@ -1436,7 +1436,7 @@
                  put~ @resources ~
                  <<
                    /ColorSpace~
-                   \pdf_object_ref:n { Page/Resources/ColorSpace }
+                   \pdf_object_ref:n { @@/Page/Resources/ColorSpace }
                  >>
                }
              \exp_args:Nx
@@ -1582,7 +1582,7 @@ local function @@_backend_PageResources_gpush (page)
  end
   for i,name in ipairs(ResourceList) do
    if ltx.@@.Page.Resources[name] then
-   token = token .. "/"..name.." "..ltx.pdf.object_ref("Page/Resources/"..name)
+   token = token .. "/"..name.." "..ltx.pdf.object_ref("@@/Page/Resources/"..name)
    end
   end
  return token
