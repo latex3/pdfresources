@@ -210,7 +210,19 @@
 % unsetFf  & list of flags &    & yes \\
 % V        & various   &        & yes \\
 % DV       & various   &        & yes
+% AA/K     & javascript
+% AA/F     & javascript
+% AA/V     & javascript
+% AA/C     & javascript
+%\end{tabular}
 %
+% The following keys are relevant only for fields with variable text:
+% \begin{tabular}{l>{\ttfamily/}llll}
+% (PDF) key  & value    & required & inheritable \\\hline
+% DA        & string    & yes   &   yes           \\
+% Q       & 0, 1 or 2   &          & yes             \\
+% DS       & string   &          &             \\
+% RV       & string or stream  &  &   \\
 % \end{tabular}
 %
 %
@@ -243,12 +255,37 @@
 % See the descriptions of individual field types for further information.
 % (Pushbutton for example don't have a value).
 %
-%
 % \DescribeFieldkey{DV} The default value, to which the field reverts
 % when a reset-form action is executed. The format of this value is the
 % same as that of \textttt{V}.
 %
+% \DescribeFieldkey{AA/K} This adds a keystroke action to the
+% additional action dictionary. The value is passed through
+% \cs{pdf_string_from_unicode:nnN}. The action is meant for text and choice fields.
+%  It is quite unclear if such action
+%  make sense for non-terminal fields.
+% \DescribeFieldkey{AA/F} This adds a format action to the
+% additional action dictionary. The value is passed through
+% \cs{pdf_string_from_unicode:nnN}. The action is meant for text and choice fields.
+% It is quite unclear if such action
+%  make sense for non-terminal fields.
+% \DescribeFieldkey{AA/V} This adds a validate action to the
+% additional action dictionary. The value is passed throught
+% \cs{pdf_string_from_unicode:nnN}. It is quite unclear if such action
+%  make sense for non-terminal fields.
+% \DescribeFieldkey{AA/C} This adds a calculate action to the
+% additional action dictionary. The value is passed throught
+% \cs{pdf_string_from_unicode:nnN}. It is quite unclear if such action
+%  make sense for non-terminal fields.
 %
+% \DescribeFieldkey{DA} This contains instructions for the text in textfields.
+% It is stored as is.
+%
+% \DescribeFieldkey{Q}  The justification of the text,
+% the allow values are 0, 1, 2 for left, centered, right.
+%
+% \DescribeFieldkey{DS} \DescribeFieldkey{RV} these both keys are currently not implemented
+% as it is unclear if there are of any use.
 % \DescribeCheckboxkey{width}
 % \DescribeCheckboxkey{height}
 % \DescribeCheckboxkey{depth} These keys allow to set the dimensions of checkbox instance.
@@ -923,6 +960,17 @@
 %\@@_setup_AAaction_key:nnn {pagevisible}  {PV}{annot}
 %\@@_setup_AAaction_key:nnn {pageinvisible}  {PI}{annot}
 
+\keys_define:nn {pdffield/field}
+  {
+     DA .code:n =
+      {
+         \pdfdict_put:nnx{ l_@@_field}{DA}{(#1)}
+      }
+    ,Q .choices:nn = {0,1,2}
+     {
+       \pdfdict_put:nnn{ l_@@_field}{Q}{#1}
+     }
+  }
 %    \end{macrocode}
 % \end{macro}
 % \subsection{user commands}
