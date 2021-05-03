@@ -517,9 +517,9 @@
 % The value is an object reference. It is sensible to declare the object
 % first. E.g.
 %  \begin{verbatim}
-%  \pdf_object_new:nn   {pkg@intent}{dict}
-%  \pdf_object_write:nn {pkg@intent}{...}
-%  \pdfmanagement_add:nnx  {Catalog} {OutputIntents}{\pdf_object_ref:n {pkg@intent}}
+%  \pdf_object_new:nn   {module/intent}{dict}
+%  \pdf_object_write:nn {module/intent}{...}
+%  \pdfmanagement_add:nnx  {Catalog} {OutputIntents}{\pdf_object_ref:n {module/intent}}
 %  \end{verbatim}
 %
 %  or
@@ -1115,15 +1115,15 @@
     \prop_if_empty:cF
      { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/AA } }
      {
-       \__pdf_backend_object_new:nn  { g_@@_/Catalog/AA_obj } { dict }
+       \__pdf_backend_object_new:nn  { @@/Catalog/AA } { dict }
        \__pdf_backend_object_write:nx
-            { g_@@_/Catalog/AA_obj }
+            { @@/Catalog/AA }
             { \pdfdict_use:n { g__pdf_Core/Catalog/AA } }
        \exp_args:Nnx
          \__pdf_backend_catalog_gput:nn
            {AA}
            {
-             \__pdf_backend_object_ref:n { g_@@_/Catalog/AA_obj }
+             \__pdf_backend_object_ref:n { @@/Catalog/AA }
            }
      }
   }
@@ -1145,67 +1145,67 @@
   {
     \seq_if_empty:cF { g_@@_/Catalog/AcroForm/Fields_seq }
       {
-        \__pdf_backend_object_new:nn  { g_@@_/Catalog/AcroForm/Fields_obj } { array }
+        \__pdf_backend_object_new:nn  { @@/Catalog/AcroForm/Fields } { array }
         \__pdf_backend_object_write:nx
-            { g_@@_/Catalog/AcroForm/Fields_obj }
+            { @@/Catalog/AcroForm/Fields }
             { \seq_use:cn { g_@@_/Catalog/AcroForm/Fields_seq } {~} }
         \exp_args:Nnnx
           \prop_gput:cnn %we have to use \prop here to avoid the handler ...
             { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/AcroForm } }
             { Fields }
-            { \__pdf_backend_object_ref:n { g_@@_/Catalog/AcroForm/Fields_obj } }
+            { \__pdf_backend_object_ref:n { @@/Catalog/AcroForm/Fields } }
       }
     \seq_if_empty:cF { g_@@_/Catalog/AcroForm/CO_seq }
       {
-        \__pdf_backend_object_new:nn  { g_@@_/Catalog/AcroForm/CO_obj } { array }
+        \__pdf_backend_object_new:nn  { @@/Catalog/AcroForm/CO } { array }
         \exp_args:Nnx
           \__pdf_backend_object_write:nn
-            { g_@@_/Catalog/AcroForm/CO_obj }
+            { @@/Catalog/AcroForm/CO }
             { \seq_use:cn { g_@@_/Catalog/AcroForm/CO_seq } {~} }
         \exp_args:Nnnx
           \prop_gput:cnn %we have to use \prop here to avoid the handler ...
             { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/AcroForm } }
             { CO }
-            { \__pdf_backend_object_ref:n { g_@@_/Catalog/AcroForm/CO_obj } }
+            { \__pdf_backend_object_ref:n { @@/Catalog/AcroForm/CO } }
       }
      \prop_if_empty:cF { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/AcroForm/DR/Font}}
        {
-         \__pdf_backend_object_new:nn { g_@@_/Catalog/AcroForm/DR/Font_obj } {dict}
+         \__pdf_backend_object_new:nn { @@/Catalog/AcroForm/DR/Font } {dict}
          \exp_args:Nnx
            \__pdf_backend_object_write:nn
-             { g_@@_/Catalog/AcroForm/DR/Font_obj }
+             { @@/Catalog/AcroForm/DR/Font }
              { \pdfdict_use:n { g__pdf_Core/Catalog/AcroForm/DR/Font } }
          \exp_args:Nnnx
            \prop_gput:cnn %we have to use \prop here to avoid the handler ...
              { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/AcroForm/DR } }
              { Font }
-             { \__pdf_backend_object_ref:n { g_@@_/Catalog/AcroForm/DR/Font_obj } }
+             { \__pdf_backend_object_ref:n { @@/Catalog/AcroForm/DR/Font } }
        }
      \prop_if_empty:cF { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/AcroForm/DR}}
        {
-         \__pdf_backend_object_new:nn { g_@@_/Catalog/AcroForm/DR_obj } {dict}
+         \__pdf_backend_object_new:nn { @@/Catalog/AcroForm/DR } {dict}
          \exp_args:Nnx
            \__pdf_backend_object_write:nn
-             { g_@@_/Catalog/AcroForm/DR_obj }
+             { @@/Catalog/AcroForm/DR }
              { \pdfdict_use:n { g__pdf_Core/Catalog/AcroForm/DR } }
          \exp_args:Nnnx
            \prop_gput:cnn %we have to use \prop here to avoid the handler ...
              { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/AcroForm } }
              { DR }
-             { \__pdf_backend_object_ref:n { g_@@_/Catalog/AcroForm/DR_obj } }
+             { \__pdf_backend_object_ref:n { @@/Catalog/AcroForm/DR } }
        }
      \prop_if_empty:cF { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/AcroForm} }
        {
-         \__pdf_backend_object_new:nn { g_@@_/Catalog/AcroForm_obj } {dict}
+         \__pdf_backend_object_new:nn { @@/Catalog/AcroForm } {dict}
          \exp_args:Nnx
            \__pdf_backend_object_write:nn
-             { g_@@_/Catalog/AcroForm_obj }
+             { @@/Catalog/AcroForm }
              { \pdfdict_use:n { g__pdf_Core/Catalog/AcroForm } }
          \exp_args:Nnnx
            \@@_handler_gput:nnn
              { Catalog }
              { AcroForm }
-             { \__pdf_backend_object_ref:n { g_@@_/Catalog/AcroForm_obj } }
+             { \__pdf_backend_object_ref:n { @@/Catalog/AcroForm } }
        }
   }
 
@@ -1221,16 +1221,16 @@
     \seq_if_empty:cF
      { g_@@_/Catalog/AF_seq }
      {
-       \__pdf_backend_object_new:nn  { g_@@_/Catalog/AF_obj } { array }
+       \__pdf_backend_object_new:nn  { @@/Catalog/AF } { array }
        \exp_args:Nnx
          \__pdf_backend_object_write:nn
-            { g_@@_/Catalog/AF_obj }
+            { @@/Catalog/AF }
             { \seq_use:cn { g_@@_/Catalog/AF_seq } {~} }
        \exp_args:Nnx
          \__pdf_backend_catalog_gput:nn
            {AF}
            {
-             \__pdf_backend_object_ref:n {g_@@_/Catalog/AF_obj}
+             \__pdf_backend_object_ref:n {@@/Catalog/AF}
            }
      }
   }
@@ -1245,16 +1245,16 @@
     \prop_if_empty:cF
      { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/MarkInfo } }
      {
-       \__pdf_backend_object_new:nn  { g_@@_/Catalog/MarkInfo_obj } { dict }
+       \__pdf_backend_object_new:nn  { @@/Catalog/MarkInfo } { dict }
        \exp_args:Nnx
          \__pdf_backend_object_write:nn
-            { g_@@_/Catalog/MarkInfo_obj }
+            { @@/Catalog/MarkInfo }
             { \pdfdict_use:n { g__pdf_Core/Catalog/MarkInfo } }
        \exp_args:Nnx
          \__pdf_backend_catalog_gput:nn
            {MarkInfo}
            {
-             \__pdf_backend_object_ref:n {g_@@_/Catalog/MarkInfo_obj}
+             \__pdf_backend_object_ref:n {@@/Catalog/MarkInfo}
            }
      }
   }
@@ -1286,10 +1286,10 @@
       >
       { 0 }
       {
-        \__pdf_backend_object_new:nn  { g_@@_/Catalog/OCProperties_obj } { dict }
+        \__pdf_backend_object_new:nn  { @@/Catalog/OCProperties } { dict }
         \seq_gpop_left:cN { g_@@_/Catalog/OCProperties/Configs_seq} \l_tmpa_tl
         \exp_args:Nnx
-          \__pdf_backend_object_write:nn {g_@@_/Catalog/OCProperties_obj}
+          \__pdf_backend_object_write:nn {@@/Catalog/OCProperties}
             {
               /OCGs~[ \seq_use:cn { g_@@_/Catalog/OCProperties/OCGs_seq } {~} ]
               /D~\l_tmpa_tl~
@@ -1302,7 +1302,7 @@
         \exp_args:Nnx
           \__pdf_backend_catalog_gput:nn
             { OCProperties }
-            { \__pdf_backend_object_ref:n {g_@@_/Catalog/OCProperties_obj} }
+            { \__pdf_backend_object_ref:n {@@/Catalog/OCProperties} }
       }
   }
 %    \end{macrocode}
@@ -1317,16 +1317,16 @@
     \seq_if_empty:cF
      { g_@@_/Catalog/OutputIntents_seq }
      {
-       \__pdf_backend_object_new:nn  { g_@@_/Catalog/OutputIntents_obj } { array }
+       \__pdf_backend_object_new:nn  { @@/Catalog/OutputIntents } { array }
        \exp_args:Nnx
          \__pdf_backend_object_write:nn
-            { g_@@_/Catalog/OutputIntents_obj }
+            { @@/Catalog/OutputIntents }
             { \seq_use:cn { g_@@_/Catalog/OutputIntents_seq } {~} }
        \exp_args:Nnx
          \__pdf_backend_catalog_gput:nn
            {OutputIntents}
            {
-             \__pdf_backend_object_ref:n {g_@@_/Catalog/OutputIntents_obj}
+             \__pdf_backend_object_ref:n {@@/Catalog/OutputIntents}
            }
      }
   }
@@ -1342,16 +1342,16 @@
     \seq_if_empty:cF
      { g_@@_/Catalog/Requirements_seq }
      {
-       \__pdf_backend_object_new:nn  { g_@@_/Catalog/Requirements_obj } { array }
+       \__pdf_backend_object_new:nn  { @@/Catalog/Requirements } { array }
        \exp_args:Nnx
          \__pdf_backend_object_write:nn
-            { g_@@_/Catalog/Requirements_obj }
+            { @@/Catalog/Requirements }
             { \seq_use:cn { g_@@_/Catalog/Requirements_seq } {~} }
        \exp_args:Nnx
          \__pdf_backend_catalog_gput:nn
            {Requirements}
            {
-             \__pdf_backend_object_ref:n { g_@@_/Catalog/Requirements_obj }
+             \__pdf_backend_object_ref:n { @@/Catalog/Requirements }
            }
      }
   }
@@ -1367,16 +1367,16 @@
     \prop_if_empty:cF
      { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/ViewerPreferences } }
      {
-       \__pdf_backend_object_new:nn  { g_@@_/Catalog/ViewerPreferences_obj } { dict }
+       \__pdf_backend_object_new:nn  { @@/Catalog/ViewerPreferences } { dict }
        \exp_args:Nnx
          \__pdf_backend_object_write:nn
-            { g_@@_/Catalog/ViewerPreferences_obj }
+            { @@/Catalog/ViewerPreferences }
             { \pdfdict_use:n { g__pdf_Core/Catalog/ViewerPreferences } }
        \exp_args:Nnx
          \__pdf_backend_catalog_gput:nn
            {ViewerPreferences}
            {
-             \__pdf_backend_object_ref:n {g_@@_/Catalog/ViewerPreferences_obj}
+             \__pdf_backend_object_ref:n {@@/Catalog/ViewerPreferences}
            }
      }
   }
