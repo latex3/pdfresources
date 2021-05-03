@@ -1,6 +1,6 @@
 % \iffalse meta-comment
 %
-%% File: l3pdfpdffield-checkbox.dtx
+%% File: l3pdffield.dtx
 %
 % Copyright (C) 2021 The LaTeX Project
 %
@@ -47,7 +47,7 @@
 %   idxgroup=field keys,
 %   idxtype = {field key},
 %   printtype= \textit{field key}
-%    ]{fieldkey}{fieldkey}
+%    ]{Fieldkey}{fieldkey}
 % \providecommand\hook[1]{\texttt{#1}}
 % \ExplSyntaxOn
 % \pdffield_store_appearance:nn {bear/Yes}
@@ -184,47 +184,70 @@
 % |c_mymodule/field/week|.
 %
 % The list of allowed keys is described below.
-% Typically the \meta{key val list} should at least set the name, fields that
-% are kids in a fieldset must set the parent key, this should point to a field
+% Typically the \meta{key val list} should at least set the name T, fields that
+% are kids in a fieldset must set the Parent key, this should point to a field
 % declared before.
 %
-% The command doesn't check if the combination of values and flags are sensible.
-% If you create a button field (Btn) and set /MaxLen (which is only known for text
+% The command is meant as a basic command to build more complex variants like
+% checkbox or textfields. For this reason it doesn't check if
+% the combination of values and flags are sensible, and it uses as key names the
+% names from the PDF reference.
+% If you create a button field (Btn) and set MaxLen (which is only known for text
 % fields), it will not complain.
 % \end{function}
 %
+% \subsection{Field Keys}
 %
-%\begin{function}{\pdffield_setup:nn}
-% \begin{syntax}
-%  \cs{pdffield_setup:nn}\Arg{field type}\Arg{key val list}
-% \end{syntax}
-% This allows to setup up values for following fields. \Arg{field type}
-% should be a field, currently the only allowed value is |checkbox|.
-% \end{function}
+% The command accepts the following keys
 %
-%\begin{function}{\pdffield_store_appearance:nn}
-% \begin{syntax}
-%  \cs{pdffield_store_appearance:nn}\Arg{name/state}\Arg{content}
-% \end{syntax}
-% This is a small wrapper around \cs{pdfxform_new:nn} and store appearances for the fields.
-% \meta{state} should be for checkboxes either |Yes| or |Off| (and typically
-% you should define both). \meta{name} is the name
-% that is used in the |appearance| key, |checkbox/default| is predefined and so can't be used.
-% \meta{content} is arbitrary content. The dimensions should fit to the planed size of the
-% checkbox.%
-% \end{function}
-% \subsection{Keys}
+% \begin{tabular}{l>{\ttfamily/}llll}
+% (PDF) key  & value    & required & inheritable \\\hline
+% T        & string   & mostly   &             \\
+% TU       & string   &          &             \\
+% TM       & string   &          &             \\
+% Ft       & name     & terminal fields & yes  \\
+% setFf    & list of flags &     & yes\\
+% unsetFf  & list of flags &    & yes \\
+% V        & various   &        & yes \\
+% DV       & various   &        & yes
 %
-% The new checkbox commands accepts following keys:
+% \end{tabular}
 %
-% \DescribeCheckboxkey{name} This sets the (internal) name of the field. It shouldn't contain
-% a period, be not empty and sensibly consist of simple chars. Checkboxes instances
-% with the same name belong to the same field and are checked and unchecked together.
 %
-% \DescribeCheckboxkey{altname} This sets an alternative name for user interaction.
-% This name can only be set at the first checkbox instance, when the field is initialized.
-% \DescribeCheckboxkey{mappingname} This sets an alternative name for export.
-% This name can only be set at the first checkbox instance, when the field is initialized.
+% \DescribeFieldkey{T} This sets the partial name of the field. It shouldn't contain
+% a period, be not empty and sensibly consist of simple ascii chars.
+% It is normally required, see above.
+%
+% \DescribeFieldkey{TU} This sets an alternative name for user interaction.
+% Unlike the name field it can use unicode.
+%
+% \DescribeFieldkey{TM} This sets an alternative name for the export.
+%
+% \DescribeFieldkey{Ft} This sets the type of the field, the value should be one of
+% \texttt{Btn} (button), \texttt{Tx} (text), \texttt{Ch} (choice),  \texttt{Sig} (signature).
+% The value is of relevance only for terminal fields, but it can be set in a parent
+% and then inherited.
+%
+% \DescribeFieldkey{setFf}\DescribeFieldkey{unsetFf}
+% This key accepts a list of flag names and then sets or unsets them, the resulting value
+% is then used with the \texttt{/Ff} key. Depending
+% on the field type some flags must be set or unset, other are optional or are ignored.
+% The full list of flags is described later. The flag name can be given
+% in PDF spelling (\texttt{RadiosInUnison})
+% and in lowercase (\texttt{radiosinunison}).
+%
+% \DescribeFieldkey{V} This sets the value of the field. It
+% format varies depending on the field type, so typically
+% commands for the various type will have to preprocess and sanitize it.
+% The value given here is expanded but then added unchanged and unverified!
+% See the descriptions of individual field types for further information.
+% (Pushbutton for example don't have a value).
+%
+%
+% \DescribeFieldkey{DV} The default value, to which the field reverts
+% when a reset-form action is executed. The format of this value is the
+% same as that of \textttt{V}.
+%
 %
 % \DescribeCheckboxkey{width}
 % \DescribeCheckboxkey{height}
@@ -427,9 +450,11 @@
 % \subsection{local variables}
 %    \begin{macrocode}
 \str_new:N \l_@@_field_name_str
+\tl_new:N \l_@@_currentfield_tl
 \str_new:N \l_@@_tmpa_str
 \str_new:N \l_@@_name_tmpa_str
 \tl_new:N  \l_@@_keys_tmpa_tl
+
 %    \end{macrocode}
 %
 % \subsection{messages}
@@ -480,7 +505,27 @@
     Comb              = 25,%Tx, requires MaxLen in dict
     RadiosInUnison    = 26,%Btn Radio
     RichText          = 26,%Tx
-    CommitOnSelChange = 27
+    CommitOnSelChange = 27,
+    readonly          = 1,
+    required          = 2,
+    noexport          = 3,
+    multiline         = 13,%Tx
+    password          = 14,
+    notoggletooff     = 15,%Btn, radio button
+    radio             = 16,%Btn: Radio:    15=1, 16=0
+    pushbutton        = 17,%Btn: Checkbox: 15=0, 16=0
+                           %Btn: Pushbutton: 16=1
+    combo             = 18,%Ch: Combo=1 List=0
+    edit              = 19,%Ch, Combo=1 -> + edit field
+    sort              = 20,%Ch, not relevant for view...
+    fileselect        = 21,%Tx
+    multiselect       = 22,%Ch
+    donotspellcheck   = 23,%Tx, Ch (if Combo + Edit set)
+    donotscroll       = 24,%Tx
+    comb              = 25,%Tx, requires MaxLen in dict
+    radiosinunison    = 26,%Btn Radio
+    richtext          = 26,%Tx
+    commitonselchange = 27
   }
 
 \bitset_new:Nn \l_@@_F_bitset
@@ -514,19 +559,21 @@
 \cs_new_protected:Npn \@@_field:nn #1 #2
   {
     \group_begin:
-    \pdf_object_new:nn {@@/field/#1}      {dict}
-    \pdf_object_new:nn {@@/field/Kids/#1} {array}
-    \seq_new:c {g_@@_field/Kids/#1_seq}
+    \pdf_object_new:nn {@@/field/#2}      {dict}
+    \pdf_object_new:nn {@@/field/Kids/#2} {array}
+    \seq_new:c {g_@@_field/Kids/#2_seq}
+    \tl_set:Nn\l_@@_currentfield_tl {#2}
     \bool_set_true:N \l_@@_root_field_bool
-    \key_set:nn {pdffield / field } {#1} %filter ..., fills l_@@/field
+    \keys_set:nn {pdffield / field } {#1} %filter ..., fills l_@@/field
     \pdfdict_put:nnx {l_@@/field}
       {Kids}
       {
-        \pdf_object_ref:n {@@/field/Kids/#1}
+        \pdf_object_ref:n {@@/field/Kids/#2}
       }
     \pdfdict_put:nnx {l_@@/field}
       {Ff}
       {\bitset_to_arabic:N \l_@@_Ff_bitset }
+    \pdfdict_show:n{l_@@/field}
     \pdfdict_if_empty:nF{l_@@/field/AA}
       {
         \pdfmeta_standard_verify:nT
@@ -540,18 +587,18 @@
       }
     \hook_gput_code:nnn {shipout/lastpage}{pdffield} %xetex needs this ...
       {
-        \pdf_object_write:nx {@@/field/Kids/#1}
+        \pdf_object_write:nx {@@/field/Kids/#2}
           {
-            \seq_use:cn{g_@@_field/Kids/#1_seq}{~}
+            \seq_use:cn{g_@@_field/Kids/#2_seq}{~}
           }
       }
-    \pdf_object_write:nx {@@/field/#1} { \pdfdict_use:n {l_@@/field} }
+    \pdf_object_write:nx {@@/field/#2} { \pdfdict_use:n {l_@@/field} }
     \bool_if:NT \l_@@_root_field_bool
      {
        \pdfmanagement_add:nnx
         { Catalog / AcroForm }
         { Fields }
-        {\pdf_object_ref:n {@@/field/#1} }
+        {\pdf_object_ref:n {@@/field/#2} }
      }
     \group_end:
   }
@@ -567,6 +614,7 @@
 %    \begin{macrocode}
 \pdfdict_new:n   {l_@@/annot}
 \pdfdict_put:nnn {l_@@/annot}{Subtype}{/Widget}
+\pdfdict_new:n   {l_@@/annot/AA}
 %    \end{macrocode}
 %
 % \begin{macro}{\@@_annot:nnnn}
@@ -649,65 +697,91 @@
 % The other names can only be set when the field is created,
 % so we put them in the field group.
 %    \begin{macrocode}
-\keys_define:nn { pdffield  }
+\keys_define:nn { pdffield /field }
   {
-    ,name .code:n =
+    ,T .code:n =
       {
         \pdf_string_from_unicode:nnN {utf8/string-raw}{#1}\l_@@_field_name_str
         \str_if_in:NnT \l_@@_field_name_str {.}
           {
             \msg_error:nnx {pdffield}{no-period}{\l_@@_field_name_str}
           }
-        \str_if_empty:NT\l_@@_field_name_str
+        \str_if_empty:NTF\l_@@_field_name_str
           {
-            \msg_error:nn {pdffield}{empty-name}
+            \pdfdict_remove:nn { l_@@/field }{T}
+          }
+          {
+            \pdfdict_put:nnx { l_@@/field }{T}{(\l_@@_field_name_str)}
           }
       }
-    ,name .value_required:n = true
-    ,name .initial:n = pdffield
-    ,altname .code:n =
+    ,T .value_required:n = true
+    ,TU .code:n =
       {
         \pdf_string_from_unicode:nnN {utf8/string}{#1}\l_@@_name_tmpa_str
         \pdfdict_put:nnx { l_@@/field }{TU}{\l_@@_name_tmpa_str}
       }
-    ,altname .groups:n = {field}
-    ,mappingname .code:n =
+    ,TU .groups:n = {field}
+    ,TM .code:n =
       {
         \pdf_string_from_unicode:nnN {utf8/string}{#1}\l_@@_name_tmpa_str
         \pdfdict_put:nnx { l_@@/field }{TM}{\l_@@_name_tmpa_str}
       }
-    ,mappingname .groups:n = {field}
+    ,TM .groups:n = {field}
+    ,Parent .code:n =
+      {
+        \pdfdict_put:nnx { l_@@/field }{Parent}
+          {\pdf_object_ref:n{@@/field/#1}}
+        \seq_gput_right:cx {g_@@_field/Kids/#1_seq}
+          { \exp_args:Ne \pdf_object_ref:n{@@/field/\l_@@_currentfield_tl}}
+      }
+    ,Ft .choices:nn =
+      { Btn, Tx, Ch, Sig }
+      {
+        \pdfdict_put:nnx { l_@@/field }{Ft}{ #1 }
+      }
+    ,V .code:n =
+     {
+       \pdfdict_put:nnx { l_@@/field }{V}{ #1 }
+     }
+    ,DV .code:n =
+     {
+       \pdfdict_put:nnx { l_@@/field }{V}{ #1 }
+     }
+
   }
 %    \end{macrocode}
 
 % Flags. We don't add lots of individual keys but map the key names directly
 %    \begin{macrocode}
-\keys_define:nn { pdffield  }
+\keys_define:nn { pdffield / field }
   {
-    ,setfieldflags .code:n =
+    ,setFf .code:n =
       {
           \clist_map_inline:nn {#1}
            {
              \bitset_set_true:Nn \l_@@_Ff_bitset {##1}
            }
       }
-    ,setfieldflags .groups:n = {field}
-    ,unsetfieldflags .code:n =
+    ,setFf .groups:n = {field}
+    ,unsetFf .code:n =
       {
           \clist_map_inline:nn {#1}
            {
              \bitset_set_false:Nn \l_@@_Ff_bitset {##1}
            }
       }
-    ,unsetfieldflags .groups:n = {field}
-    ,setannotflags .code:n =
+    ,unsetFf .groups:n = {field}
+  }
+\keys_define:nn { pdffield / annot }
+  {
+    ,setF .code:n =
       {
           \clist_map_inline:nn {#1}
            {
              \bitset_set_true:Nn \l_@@_F_bitset {##1}
            }
       }
-    ,unsetannotflags .code:n =
+    ,unsetF .code:n =
       {
           \clist_map_inline:nn {#1}
            {
@@ -797,43 +871,57 @@
 %  Keys for the AA dictionary. They all trigger javascript option.
 %  \begin{macro}{\@@_setup_AAaction_key:nnn}
 %    \begin{macrocode}
-\pdfdict_new:n {l_@@/annot/AA}
-\pdfdict_new:n {l_@@/field/AA}
 %need to remove it from the checkbox ...
-\cs_new_protected:Npn \@@_setup_AAaction_key:nnn #1 #2 #3 %#1 key, #2 pdf, #3 dict
+\cs_new_protected:Npn \@@_setup_AA_key:nn #1 #2 %#1 key, #2 dict
   {
     \keys_define:nn { pdffield  }
       {
-         #1 .code:n =
+         AA/#1 .code:n =
            {
              \pdf_string_from_unicode:nnN {utf8/string}{##1}\l_@@_tmpa_str
              \str_if_empty:NTF \l_@@_tmpa_str
                {
-                 \pdfdict_remove:nn {l_@@/#3/AA}{#2}
+                 \pdfdict_remove:nn {l_@@/#2/AA}{#1}
                }
                {
-                 \pdfdict_put:nnx {l_@@/#3/AA}
-                  {#2}
+                 \pdfdict_put:nnx {l_@@/#2/AA}
+                  {#1}
                   {<</S/JavaScript/JS\l_@@_tmpa_str>>}
                }
            },
-        #1 .groups:n = {#3}
+        AA/#1 .groups:n = {#2}
       }
   }
-\@@_setup_AAaction_key:nnn {keystroke}{K}{field}
-\@@_setup_AAaction_key:nnn {format}   {F}{field}
-\@@_setup_AAaction_key:nnn {validate} {V}{field}
-\@@_setup_AAaction_key:nnn {calculate}{C}{field}
-\@@_setup_AAaction_key:nnn {onfocus}  {Fo}{annot}
-\@@_setup_AAaction_key:nnn {onblur}   {Bl}{annot}
-\@@_setup_AAaction_key:nnn {onmousedown}{D}{annot}
-\@@_setup_AAaction_key:nnn {onmouseup}{U}{annot}
-\@@_setup_AAaction_key:nnn {onenter}  {E}{annot}
-\@@_setup_AAaction_key:nnn {onexit}   {X}{annot}
-\@@_setup_AAaction_key:nnn {pageopen}  {PO}{annot}
-\@@_setup_AAaction_key:nnn {pageclose} {PC}{annot}
-\@@_setup_AAaction_key:nnn {pagevisible}  {PV}{annot}
-\@@_setup_AAaction_key:nnn {pageinvisible}  {PI}{annot}
+
+\@@_setup_AA_key:nn {K}{field}  %keystroke
+\@@_setup_AA_key:nn {F}{field}  %format
+\@@_setup_AA_key:nn {V}{field}  %validate
+\@@_setup_AA_key:nn {C}{field}  %calculate
+\@@_setup_AA_key:nn {Fo}{annot} %{onfocus}
+\@@_setup_AA_key:nn {Bl}{annot} %{onblur}
+\@@_setup_AA_key:nn {D}{annot}  %{onmousedown}
+\@@_setup_AA_key:nn {U}{annot}  %{onmouseup}
+\@@_setup_AA_key:nn {E}{annot}  %
+\@@_setup_AA_key:nn {X}{annot}  %{onexit}
+\@@_setup_AA_key:nn {PO}{annot} %{pageopen}
+\@@_setup_AA_key:nn {PC}{annot} %{pageclose}
+\@@_setup_AA_key:nn {PV}{annot} %{pagevisible}
+\@@_setup_AA_key:nn {PI}{annot} %{pageinvisible}
+
+%\@@_setup_AAaction_key:nnn {keystroke}{K}{field}
+%\@@_setup_AAaction_key:nnn {format}   {F}{field}
+%\@@_setup_AAaction_key:nnn {validate} {V}{field}
+%\@@_setup_AAaction_key:nnn {calculate}{C}{field}
+%\@@_setup_AAaction_key:nnn {onfocus}  {Fo}{annot}
+%\@@_setup_AAaction_key:nnn {onblur}   {Bl}{annot}
+%\@@_setup_AAaction_key:nnn {onmousedown}{D}{annot}
+%\@@_setup_AAaction_key:nnn {onmouseup}{U}{annot}
+%\@@_setup_AAaction_key:nnn {onenter}  {E}{annot}
+%\@@_setup_AAaction_key:nnn {onexit}   {X}{annot}
+%\@@_setup_AAaction_key:nnn {pageopen}  {PO}{annot}
+%\@@_setup_AAaction_key:nnn {pageclose} {PC}{annot}
+%\@@_setup_AAaction_key:nnn {pagevisible}  {PV}{annot}
+%\@@_setup_AAaction_key:nnn {pageinvisible}  {PI}{annot}
 
 %    \end{macrocode}
 % \end{macro}
