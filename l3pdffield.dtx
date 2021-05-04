@@ -48,6 +48,11 @@
 %   idxtype = {field key},
 %   printtype= \textit{field key}
 %    ]{Fieldkey}{fieldkey}
+%  \NewDocElement[
+%   idxgroup=annot keys,
+%   idxtype = {annot key},
+%   printtype= \textit{annot key}
+%    ]{Annotkey}{annotkey}%
 % \providecommand\hook[1]{\texttt{#1}}
 % \ExplSyntaxOn
 % \pdffield_store_appearance:nn {bear/Yes}
@@ -339,12 +344,20 @@
 % as it is unclear if there are of any use.
 %
 %
+% \begin{function}{\pdffield_annot:n}
+% \begin{syntax}
+%  \cs{pdffield_field:nn}\Arg{key val list}
+% \end{syntax}
+% This creates a new field annotation.
 %
-% \DescribeCheckboxkey{width}
-% \DescribeCheckboxkey{height}
-% \DescribeCheckboxkey{depth} These keys allow to set the dimensions of checkbox instance.
+% \DescribeAnnotkey{width}
+% \DescribeAnnotkey{height}
+% \DescribeAnnotkey{depth} These keys allow to set the dimensions of the annotation.
 % The value should be a command that expands to a dimension expression. By default
-% |width| and |height| use \cs{normalbaselineskip}, the |depth| is zero.
+% all values are zero.
+%
+% \DescribeAnnotkey{Parent} This sets the parent. The value should be the object name of
+% an already declared field.
 %
 % \DescribeCheckboxkey{appearance} This key sets the normal appearance. It takes as value a
 % \meta{name} and expects that the two appearances \meta{name}|/Yes| and \meta{name}|/Off|
@@ -541,10 +554,11 @@
 % \subsection{local variables}
 %    \begin{macrocode}
 \str_new:N \l_@@_field_name_str
-\tl_new:N \l_@@_currentfield_tl
+\tl_new:N  \l_@@_currentfield_tl
 \str_new:N \l_@@_tmpa_str
 \str_new:N \l_@@_name_tmpa_str
 \tl_new:N  \l_@@_keys_tmpa_tl
+\tl_new:N  \l_@@_tmpa_tl
 
 %    \end{macrocode}
 %
@@ -692,7 +706,7 @@
           }
       }
     \hook_gput_code:nnn {shipout/lastpage}{pdffield} %xetex needs this ...
-      {
+      { \seq_show:c{g_@@_field/Kids/#2_seq}
         \pdf_object_write:nx {@@/field/Kids/#2}
           {
             \seq_use:cn{g_@@_field/Kids/#2_seq}{~}
@@ -717,23 +731,22 @@
 % We also assume that keys like AP, AS are added before through keys to
 % the dictionary.
 % We use a local dictionary which is copied into |l__pdfannot/widget| in the code.
+% We define a dictionary for the AP content, so that we can add R and D too
 %    \begin{macrocode}
 \pdfdict_new:n   {l_@@/annot}
 \pdfdict_put:nnn {l_@@/annot}{Subtype}{/Widget}
 \pdfdict_new:n   {l_@@/annot/AA}
+\pdfdict_new:n   {l_@@/annot/AP}
 %    \end{macrocode}
 %
-% \begin{macro}{\@@_annot:nnnn}
+% \begin{macro}{\@@_annot:n}
 %    \begin{macrocode}
-\cs_new_protected:Npn \@@_annot:nnnn #1 #2 #3 #4 %name, wd, ht, dp,
+\cs_new_protected:Npn \@@_annot:n #1 % keys
   {
     \group_begin:
-%    \end{macrocode}
-% Copy the internal dictionary to the pdfannot dictionary. This
-% perhaps need a function in l3pdfannot,
-% as it actually uses an internal name of another module.
-%    \begin{macrocode}
-    \pdfdict_put:nnx {l_@@/annot}{AP}{<<\pdfdict_use:n{l_@@/annot/AP}>>}
+    \keys_set:nn {pdffield / annot } {#1}  %preset something? dimensions?
+    \pdf_object_unnamed_write:nx {dict}{\pdfdict_use:n{l_@@/annot/AP}}
+    \pdfdict_put:nnx {l_@@/annot}{AP}{\pdf_object_ref_last:}
     \pdfmeta_standard_verify:nF
       {annot_flags}
       {
@@ -742,62 +755,98 @@
         \bitset_set_false:Nn \l_@@_F_bitset {Invisible}
         \bitset_set_false:Nn \l_@@_F_bitset {NoView}
       }
+    \pdfdict_put:nnx {l_@@/annot}{F}{ \bitset_to_arabic:N \l_@@_F_bitset }
     \pdfdict_if_empty:nF{l_@@/annot/AA}
       {
         \pdfmeta_standard_verify:nT
          {annot_widget_no_AA}
          {
+           \pdf_object_unnamed_write:nx {dict}{\pdfdict_use:n{l_@@/annot/AA}}
            \pdfdict_put:nnx
              {l_@@/annot}
              {AA}
-             {<<\pdfdict_use:n {l_@@/annot/AA}>>}
+             {\pdf_object_ref_last:}
          }
       }
-    \pdfdict_put:nnx {l_@@/annot}{F}{ \bitset_to_arabic:N \l_@@_F_bitset }
+%    \end{macrocode}
+% Copy the internal dictionary to the pdfannot dictionary. This
+% perhaps need a function in l3pdfannot,
+% as it actually uses an internal name of another module.
+%    \begin{macrocode}
     \pdfdict_set_eq:nn {l__pdfannot/widget}{l_@@/annot}
-    \pdfannot_dict_put:nnx {widget}{Parent}{\pdf_object_ref:n{@@/field/#1}}
     \mode_leave_vertical:
     \hbox_to_wd:nn
-      { #2  }
+      { \l_@@_annot_wd_dim  }
       {
-        \rule [-#4]{0pt}{\dim_eval:n{#3+#4} }
+        \rule [-\l_@@_annot_dp_dim]{0pt}{\dim_eval:n{\l_@@_annot_ht_dim+\l_@@_annot_dp_dim} }
         \pdfannot_widget_box:nnn
-           { #2 }
-           { #3 }
-           { #4 }
+           { \l_@@_annot_wd_dim }
+           { \l_@@_annot_ht_dim }
+           { \l_@@_annot_dp_dim }
          \hfill
       }
-    \seq_gput_right:cx {g_@@_field/#1/Kids_seq}{ \pdfannot_box_ref_last:}
+    \tl_if_empty:NF \l_@@_currentparent_tl
+      {
+        \seq_gput_right:cx {g_@@_field/Kids/\l_@@_currentparent_tl _seq}{ \pdfannot_box_ref_last:}
+      }
     \group_end:
   }
-
+\cs_set_eq:NN \pdffield_annot:n \@@_annot:n
 %    \end{macrocode}
 % \end{macro}
 % \subsection{Appearances}
 % TODO copy code
-% We define a dictionary for the AP content, so that we can add R and D too
-%    \begin{macrocode}
-\pdfdict_new:n   {l_@@/annot/AP}
-%    \end{macrocode}
 %
-% \subsection{Keys}
+% \subsection{Annotation keys}
 % The size of the field annotation
 %
 %    \begin{macrocode}
-\tl_new:N \l_@@_annot_ht_tl
-\tl_new:N \l_@@_annot_wd_tl
-\tl_new:N \l_@@_annot_dp_tl
+\dim_new:N \l_@@_annot_ht_dim
+\dim_new:N \l_@@_annot_wd_dim
+\dim_new:N \l_@@_annot_dp_dim
 
-\keys_define:nn { pdffield / checkbox }
+\keys_define:nn { pdffield / annot }
   {
-    ,width  .tl_set:N = \l_@@_annot_wd_tl
-    ,height .tl_set:N = \l_@@_annot_ht_tl
-    ,depth  .tl_set:N = \l_@@_annot_dp_tl
-    ,width  .initial:n = \normalbaselineskip
-    ,height .initial:n = \normalbaselineskip
+    ,width  .dim_set:N = \l_@@_annot_wd_dim
+    ,height .dim_set:N = \l_@@_annot_ht_dim
+    ,depth  .dim_set:N = \l_@@_annot_dp_dim
+    ,width  .initial:n = 0pt
+    ,height .initial:n = 0pt
     ,depth  .initial:n = 0pt
   }
 %    \end{macrocode}
+%
+%    \begin{macrocode}
+\keys_define:nn { pdffield / annot }
+ {
+   Parent .code:n =
+    {
+      \tl_set:Nn \l_@@_currentparent_tl {#1}
+      \pdfdict_put:nnx {l_@@/annot}{Parent}{\pdf_object_ref:n{@@/field/#1}}
+    }
+ }
+%    \end{macrocode}
+% Flags.
+%    \begin{macrocode}
+\keys_define:nn { pdffield / annot }
+  {
+    ,setF .code:n =
+      {
+          \clist_map_inline:nn {#1}
+           {
+             \bitset_set_true:Nn \l_@@_F_bitset {##1}
+           }
+      }
+    ,unsetF .code:n =
+      {
+          \clist_map_inline:nn {#1}
+           {
+             \bitset_set_false:Nn \l_@@_F_bitset {##1}
+           }
+      }
+  }
+%    \end{macrocode}
+% \subsection{Field keys}
 % The names. The main name should not be empty, it is added to the dictionary
 % when the field is created. A new name means a new field.
 % The other names can only be set when the field is created,
@@ -902,23 +951,7 @@
       }
     ,unsetFf .groups:n = {field}
   }
-\keys_define:nn { pdffield / annot }
-  {
-    ,setF .code:n =
-      {
-          \clist_map_inline:nn {#1}
-           {
-             \bitset_set_true:Nn \l_@@_F_bitset {##1}
-           }
-      }
-    ,unsetF .code:n =
-      {
-          \clist_map_inline:nn {#1}
-           {
-             \bitset_set_false:Nn \l_@@_F_bitset {##1}
-           }
-      }
-  }
+
 
 %\keys_define:nn { pdffield }
 %  {
@@ -1031,27 +1064,13 @@
 \@@_setup_AA_key:nn {Bl}{annot} %{onblur}
 \@@_setup_AA_key:nn {D}{annot}  %{onmousedown}
 \@@_setup_AA_key:nn {U}{annot}  %{onmouseup}
-\@@_setup_AA_key:nn {E}{annot}  %
+\@@_setup_AA_key:nn {E}{annot}  %{onenter}
 \@@_setup_AA_key:nn {X}{annot}  %{onexit}
 \@@_setup_AA_key:nn {PO}{annot} %{pageopen}
 \@@_setup_AA_key:nn {PC}{annot} %{pageclose}
 \@@_setup_AA_key:nn {PV}{annot} %{pagevisible}
 \@@_setup_AA_key:nn {PI}{annot} %{pageinvisible}
 
-%\@@_setup_AAaction_key:nnn {keystroke}{K}{field}
-%\@@_setup_AAaction_key:nnn {format}   {F}{field}
-%\@@_setup_AAaction_key:nnn {validate} {V}{field}
-%\@@_setup_AAaction_key:nnn {calculate}{C}{field}
-%\@@_setup_AAaction_key:nnn {onfocus}  {Fo}{annot}
-%\@@_setup_AAaction_key:nnn {onblur}   {Bl}{annot}
-%\@@_setup_AAaction_key:nnn {onmousedown}{D}{annot}
-%\@@_setup_AAaction_key:nnn {onmouseup}{U}{annot}
-%\@@_setup_AAaction_key:nnn {onenter}  {E}{annot}
-%\@@_setup_AAaction_key:nnn {onexit}   {X}{annot}
-%\@@_setup_AAaction_key:nnn {pageopen}  {PO}{annot}
-%\@@_setup_AAaction_key:nnn {pageclose} {PC}{annot}
-%\@@_setup_AAaction_key:nnn {pagevisible}  {PV}{annot}
-%\@@_setup_AAaction_key:nnn {pageinvisible}  {PI}{annot}
 
 \keys_define:nn {pdffield/field}
   {
