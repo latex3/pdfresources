@@ -131,10 +131,10 @@
 %
 % \section{Some background}
 %
-% A document can contain arbitrary number of fields which can be organized in trees.
+% A document can contain a arbitrary number of fields which can be organized in trees.
 % The leaf fields in such a tree, the \emph{terminal fields} typically have
-% widget annotations as kids which are then the actual instances of the field,
-% determine the look and allow to interact with the field. I will call such a
+% widget annotations as kids which are then the actual, visual instances of the field,
+% and allow to interact with the field. I will call such a
 % tree a \emph{fieldset}, nodes \emph{fields} and the widget annotation
 % \emph{field annotations}.
 %
@@ -163,7 +163,7 @@
 %
 % Fields in a fieldset should have a name, for example |wen| or |week| in the example
 % above. This name is the \emph{partial name} of the field, the \emph{full name}
-% is than built from it along with the names of the parents. In the example above
+% is than built from it by adding the names of the parents. In the example above
 % the partial name is \texttt{mon} and the full name \texttt{week.mon}.
 % Partial names shouldn't contain periods. If two fields have the same name they will
 % work in unison: if you enter text in one field, the text appears also in the other, such
@@ -176,17 +176,36 @@
 % or \texttt{Tx} for a textfield. The type can be set for the parent and then inherited.
 % The fields in a fieldset can have different types.
 %
-% \section{Appearances}
+% \subsection{Appearances}
 %
-% An field annotation may define as many as three separate appearances: the normal appearance
-% (required), the rollover appearance and the down appearance.
+% Appearances are form XObjects, small pictures stored in the PDF which
+% can be referenced
+% in various part of the PDF. They can be created with the commands of
+% the \pkg{l3pdfxform} package.
 %
-% An appearance can be a simple xform object, but
+% An field annotation may define as many as three separate appearances:
+% the normal appearance (required), the rollover appearance and the down appearance.
+%
+% An appearance can be a simple form XObjects, but
 % in some cases the annotation can have different appearance states: a checkbox
-% can be checked or unchecked, in this case the appearances is dictionary which
+% can be checked or unchecked, in this case the appearances are dictionaries which
 % maps state names like /Yes and /Off to xform objects.
 %
+% The annotations cover a rectangular area on
+% the page and the XObjects are squeezed into this rectangle. So for the best result
+% both should have the same ratio of width and height. Simple backgrounds can
+% also be created in large size and reused for various annotations.
+% XObjects used as appearances can not be rotated, if needed one has to
+% create a new appearance.
 %
+%
+% In PDF 2.0 widget annotations must have at least one appearance (unless the size
+% of the annotation is zero) and the keys \enquote{\itshape C, IC, Border,
+% BS, BE, BM, CA, ca, H, DA, Q,
+% DS, LE, LL, LLE, and Sy shall be ignored}. But it is quite unclear if
+% PDF Viewer honor this, and if this make sense e.g. for text fields which require
+% a DA entry. It is also not clear how appearances and the entries of the MK dictionary
+% are related in a form field.
 %
 %
 % \section{Commands}
@@ -282,6 +301,11 @@
 % The full list of flags is described later. The flag name can be given
 % in PDF spelling (\texttt{RadiosInUnison}), in lowercase (\texttt{radiosinunison}),
 % and as number.
+% The list of flags are:
+% |ReadOnly|, |Required|,
+% |NoExport|, |Multiline|, |Password|,    |NoToggleToOff|, |Radio|, |Pushbotton|,
+% |Combo|, |Edit|,   |Sort|, |FileSelect|,  |MultiSelect|, |DoNotSpellCheck|,
+% |DoNotScroll|, |Comb|,  |RadiosInUnison|, |RichText|, |CommitOnSelChange|.
 %
 % \DescribeFieldkey{V} This sets the value of the field. Its
 % format varies depending on the field type, so typically
@@ -362,6 +386,10 @@
 %  \cs{pdffield_field:nn}\Arg{key val list}
 % \end{syntax}
 % This creates a new field annotation.
+% The allowed keys are described below.
+% \end{function}
+%
+% \subsection{Annot keys}
 %
 % \DescribeAnnotkey{width}
 % \DescribeAnnotkey{height}
@@ -372,148 +400,33 @@
 % \DescribeAnnotkey{Parent} This sets the parent. The value should be the object name of
 % an already declared field.
 %
+% \DescribeAnnotkey{AP} This key sets the appearance. Typically
+% it should be a object reference.
 %
-% \DescribeCheckboxkey{appearance} This key sets the normal appearance. It takes as value a
-% \meta{name} and expects that the two appearances \meta{name}|/Yes| and \meta{name}|/Off|
-% has been created with the command described below. The initial value is |checkbox/default|
-% and shows a \cs{texttimes}.
+% \DescribeAnnotkey{AS} This key sets the default appearance state. The value is a name,
+% for checkbox for example /Yes. If used it should typically have the same value
+% as the V and DV key of the field.
 %
-% \DescribeCheckboxkey{rollover-appearance} This key sets the rollover appearance (when the
-% mouse hovers over the checkbox). It takes as value a
-% \meta{name} and expects that the two appearances \meta{name}|/Yes| and \meta{name}|/Off|
-% has been created with the command described below. Initially this is not set.
-% An empty value removes the entry.
+% \DescribeAnnotkey{setF}
+% \DescribeAnnotkey{unsetF}
+% These keys allow to set or unset the annot flags.  They expect a comma lists of
+% flag names. Allowed names |Invisible|, |Hidden|,
+%  |Print|, |NoZoom|,|NoRotate|, |NoView|, |ReadOnly|, |Locked|, |ToggleNoView|,
+%  |LockedContents|, or the lowercase variants or numbers.
 %
-% \DescribeCheckboxkey{down-appearance} This key sets the down appearance (when the
-% mouse clicks). It takes as value a
-% \meta{name} and expects that the two appearances \meta{name}|/Yes| and \meta{name}|/Off|
-% has been created with the command described below. Initially this is not set.
-% An empty value removes the entry.
-%
-% \DescribeCheckboxkey{checked} This is a boolean key which allows to set if the
-% checkbox should be initially checked or not. It sets the |/V| and |/DV| key of the field
-% and the |/AS| key of the annotation instance. It is possible to use different
-% values for different instances, if one wants to confuse the user.
-%
-% \DescribeCheckboxkey{setfieldflags}
-% \DescribeCheckboxkey{unsetfieldflags}
-% These keys allow to set or unset the field flags.  They expect a comma lists of
-% flag names. Allowed names |ReadOnly|, |Required|,
-% |NoExport|, |Multiline|, |Password|,    |NoToggleToOff|, |Radio|, |Pushbotton|,
-% |Combo|, |Edit|,   |Sort|, |FileSelect|,  |MultiSelect|, |DoNotSpellCheck|,
-% |DoNotScroll|, |Comb|,  |RadiosInUnison|, |RichText|, |CommitOnSelChange|.
-%
-% From these |Radio|, |Pushbotton| are set automatically automatically by the code
-% as this is required for a checkbox. Not every one from the rest makes sense for
-% checkboxes but the same key will be used for other fields too.
-% Check the PDF reference to decide which one to set or unset.
-%
-% \begin{checkboxkey}{keystroke,format,validate,calculate}
-% These keys add the |/K, |/F, |/V|, |/C| key to the |/AA| dictionary of the field object.
-% Their value should be javascript code. The |/AA| dictionary is suppressed
-% if a pdf/A standard is set. These keys are probably not of much used with a checkbox.
-% \end{checkboxkey}
-%
-% \vspace{2\baselineskip}
-% \begin{checkboxkey}{onfocus,onblur,onmousedown,onmouseup,onenter,onexit}
-% These keys adds the |/F, |/Bl, |/D|, |/U|, |E| and |X| key to the |/AA| dictionary
-% of the widget  annotation (the checkbox instance) object.
+% \begin{annotkey}{AA/F, AA/Bl, AA/D, AA/U, AA/E, AA/X, AA/PO, AA/PC, AA/PV, AA/PI  }
+% These keys adds the |/F, |/Bl, |/D|, |/U|, |E|, |X|, |PO|, |PC|, |PV|, |PI|
+% key to the |/AA| dictionary
+% of the field annotation object.
 % Their value should be javascript code. The |/AA| dictionary
 % is suppressed if a pdf/A standard is set.
 %
 % For example
 % \begin{verbatim}
-%    onenter={app.alert('Hello');}
+%    E={app.alert('Hello');}
 % \end{verbatim}
-% \end{checkboxkey}
+% \end{annotkey}
 %
-% \subsection{Using with hyperref}
-% The \cs{CheckBox} command from hyperref also prints a label, something that the
-% command here don't do. A redefinition like the following should allow to \cs{CheckBox}
-% to use the commands of this module. Be aware that the behaviour will not be identical!
-% Not every setting and key from \pkg{hyperref} has been copied.
-%
-% \begin{verbatim}
-% \ExplSyntaxOn\makeatletter
-% \def\@CheckBox[#1]#2{\LayoutCheckField{#2}{\pdffield_checkbox:n {name=#2,#1}}}
-% \ExplSyntaxOff\makeatother
-% \end{verbatim}
-%
-% \subsection{Some background}
-% Form fields consist of a field object and number of instances of the field:
-% A checkbox can appear on more than one page or location and if one instance
-% is checked all other instances follows and are checked too.
-%
-% All instances are in this case widget annotations and are referenced in the Kid array of the field
-% object\footnote{Fields can actually build a tree: between the root field and
-% widget annotations there can be more fields. The last one before the widget is
-% the \emph{terminal} field, but unless a sensible
-% use case comes up, I will assume that the widget annotations are direct children of
-% the root and that the root field is the terminal field.}.
-% This means that the code has to collect all the children and write
-% out the field object at the end of the document.
-%
-% If a field has only one children the content of the field dictionary and the
-% widget annotation dictionary can be merged---some examples in the PDF reference
-% show such merged dictionaries---but the code here keeps them separate, at the end
-% this is clearer.
-%
-% All the root field objects must be referenced in the AcroForm dictionary in the
-% Fields entry. This can be done with
-%
-% \begin{verbatim}
-% \pdfmanagement_add:nnx{Catalog/AcroForm}{Fields}{<obj ref>}
-% \end{verbatim}
-%
-% A checkbox has two different looks: checked and unchecked. The current hyperref
-% implementation uses symbolic names for the two states and and adds some
-% values with the /MK key and lets the PDF viewer
-% create a look from them. But this doesn't work reliably. Also newer PDF versions
-% deprecate the /NeedAppearances setting and require that such a look,
-% an \enquote{appearance}, is given as form XObjects:
-% such form XObjects are like small pictures stored in the PDF and can be referenced
-% in various part of the PDF. They can be created with the commands of
-% the \pkg{l3pdfxform} package.
-%
-% The checkbox instances---the widget annotations---cover a rectangular area on
-% the page, the XObjects are squeezed into this rectangle. So for the best result
-% both should have the same ratio of width and height.
-% XObjects used as appearances can not be rotated, if needed one has to
-% create a new appearance.
-%
-% \subsubsection{The field dictionary}
-%
-% The field dictionary shall or can have the following entries
-%
-% \begin{description}
-% \item[FT] required for terminal fields (here for the root field),
-%  the value is always \texttt{Btn}, so this entry is set by the code.
-% \item[Parents] currently irrelevant as we don't have a field hierarchy.
-% \item[Kids] an array. Contains references to the children, in our case to
-% the widget annotations. The array is build by the code.
-%
-% \item[T] required, the name, a (unique) text string without a period.
-% This field is a mandatory argument which must be given by the user.
-% The value should be passed through a suitable string conversion and checked
-% if it contains a period (which is not allowed).
-%
-% \item[TU,TM] optional, alternative names for user messages (TU) and export (TM).
-% As these fields are optional they should be set by some key-val option.
-%
-% \item[Ff] A bitset, two flags must be unset for a checkbox (Radio and Pushbotton),
-% for the rest we need a keyval interface.
-%
-% \item[V] describes the initial value, for checkboxes is should be either |/Yes|
-%   or |/Off|. The initial value will be |/Yes|, keys are need to set both the local
-%   and the default value.
-%
-% \item[DV] optional, the default value after a reset. Should  like |V| be either
-% |/Yes| or |/Off|.
-%
-% \item[AA] An action dictionary. For this we need a special command to setup such
-% dictionaries, so that they then can be used in various places.
-%
-% \end{description}
 %
 % \subsubsection{The widget annotation dictionary}
 %
@@ -838,6 +751,15 @@
       \tl_set:Nn \l_@@_currentparent_tl {#1}
       \pdfdict_put:nnx {l_@@/annot}{Parent}{\pdf_object_ref:n{@@/field/#1}}
     }
+  ,AP .code:n =
+    {
+      \pdfdict_put:nnx {l_@@/annot}{AP}{#1}
+    }
+  ,AS .code:n =
+    {
+      \pdfdict_put:nnx {l_@@/annot}{AS}{#1}
+    }
+
  }
 %    \end{macrocode}
 % Flags.
@@ -966,83 +888,6 @@
     ,unsetFf .groups:n = {field}
   }
 
-
-%\keys_define:nn { pdffield }
-%  {
-%    appearance .code:n = %value is a name of an appearance
-%      {
-%        \pdfxform_if_exist:nTF {  @@_#1/Yes }
-%          {
-%            \pdfdict_put:nnn {l_@@/checkbox/annot/AP}
-%              {N}
-%              {
-%                 <<
-%                    /Yes ~ \pdfxform_ref:n { @@_#1/Yes}
-%                    /Off ~ \pdfxform_ref:n { @@_#1/Off}
-%                 >>
-%              }
-%          }
-%          {
-%            \msg_error:nnnn{pdffield}{appearance-missing}{#1}{normal}
-%          }
-%      },
-%    appearance .initial:n = checkbox/default,
-%  }
-
-%\keys_define:nn { pdffield / checkbox }
-%  {
-%    rollover-appearance .code:n = %value is a name of an appearance
-%      {
-%       \tl_if_empty:nTF {#1}
-%         {
-%           \pdfdict_remove:nn {l_@@/checkbox/annot/AP} {R}
-%         }
-%         {
-%           \pdfxform_if_exist:nTF {  @@_#1/Yes }
-%             {
-%               \pdfdict_put:nnn {l_@@/checkbox/annot/AP}
-%                 {R}
-%                 {
-%                    <<
-%                       /Yes ~ \pdfxform_ref:n { @@_#1/Yes}
-%                       /Off ~ \pdfxform_ref:n { @@_#1/Off}
-%                    >>
-%                 }
-%              }
-%              {
-%                \msg_warning:nnnn{pdffield}{appearance-missing}{#1}{rollover}
-%              }
-%
-%         }
-%      },
-%  }
-%
-%\keys_define:nn { pdffield / checkbox }
-%  {
-%    down-appearance .code:n = %value is a name of an appearance
-%      {
-%       \tl_if_empty:nTF {#1}
-%         {
-%           \pdfdict_remove:nn {l_@@/checkbox/annot/AP} {D}
-%         }
-%         {
-%           \pdfxform_if_exist:nTF {  @@_#1/Yes }
-%            {
-%              \pdfdict_put:nnn {l_@@/checkbox/annot/AP}
-%                {D}
-%                {
-%                   <<
-%                      /Yes ~ \pdfxform_ref:n { @@_#1/Yes}
-%                      /Off ~ \pdfxform_ref:n { @@_#1/Off}
-%                   >>
-%                }
-%            }
-%            {
-%              \msg_warning:nnnn{pdffield}{appearance-missing}{#1}{down}
-%            }
-%         }
-%      },
-%  }
 %    \end{macrocode}
 %
 %  Keys for the AA dictionary. They all trigger javascript option.
