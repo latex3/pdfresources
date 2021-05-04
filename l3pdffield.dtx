@@ -194,29 +194,44 @@
 % names from the PDF reference.
 % If you create a button field (Btn) and set MaxLen (which is only known for text
 % fields), it will not complain.
+%
+% Root fields (fields without Parent) are added automatically to the
+% Catalog/AcroForm dictionary with
+%
+%
+% \begin{verbatim}
+% \pdfmanagement_add:nnx{Catalog/AcroForm}{Fields}{<obj ref>}
+% \end{verbatim}
+%
 % \end{function}
 %
 % \subsection{Field Keys}
 %
-% The command accepts the following keys
+% The command accepts the following keys.
 %
-% \begin{tabular}{l>{\ttfamily/}llll}
-% (PDF) key  & value    & required & inheritable \\\hline
-% T        & string   & mostly   &             \\
-% TU       & string   &          &             \\
+% \begin{tabular}{>{\ttfamily/}lllll}
+% (PDF) key  & value    & required & inheritable &remark\\\hline
+% T          & string   & mostly   &             \\
+% TU         & string   &          &             \\
 % TM       & string   &          &             \\
 % Ft       & name     & terminal fields & yes  \\
 % setFf    & list of flags &     & yes\\
 % unsetFf  & list of flags &    & yes \\
 % V        & various   &        & yes \\
-% DV       & various   &        & yes
-% AA/K     & javascript
-% AA/F     & javascript
-% AA/V     & javascript
-% AA/C     & javascript
+% DV       & various   &        & yes \\
+% MaxLen   & integer   & with Comb   & yes             & only textfields\\
+% Lock     & object name &         &                  & signature field\\
+% SV       & object name &         &                  & signature field\\
+% Opt      & object name &         &                  & buttons and choice fields\\
+%
+% AA/K     & javascript \\
+% AA/F     & javascript\\
+% AA/V     & javascript\\
+% AA/C     & javascript\\
 %\end{tabular}
 %
 % The following keys are relevant only for fields with variable text:
+%
 % \begin{tabular}{l>{\ttfamily/}llll}
 % (PDF) key  & value    & required & inheritable \\\hline
 % DA        & string    & yes   &   yes           \\
@@ -228,12 +243,14 @@
 %
 % \DescribeFieldkey{T} This sets the partial name of the field. It shouldn't contain
 % a period, be not empty and sensibly consist of simple ascii chars.
-% It is normally required, see above.
+% It is normally required, see above. The value is passed through \cs{pdf_string_from_unicode:nnN}.
 %
 % \DescribeFieldkey{TU} This sets an alternative name for user interaction.
 % Unlike the name field it can use unicode.
+% The value is passed through \cs{pdf_string_from_unicode:nnN}
 %
 % \DescribeFieldkey{TM} This sets an alternative name for the export.
+% The value is passed through \cs{pdf_string_from_unicode:nnN}
 %
 % \DescribeFieldkey{Ft} This sets the type of the field, the value should be one of
 % \texttt{Btn} (button), \texttt{Tx} (text), \texttt{Ch} (choice),  \texttt{Sig} (signature).
@@ -245,13 +262,13 @@
 % is then used with the \texttt{/Ff} key. Depending
 % on the field type some flags must be set or unset, other are optional or are ignored.
 % The full list of flags is described later. The flag name can be given
-% in PDF spelling (\texttt{RadiosInUnison})
-% and in lowercase (\texttt{radiosinunison}).
+% in PDF spelling (\texttt{RadiosInUnison}), in lowercase (\texttt{radiosinunison}),
+% and as number.
 %
-% \DescribeFieldkey{V} This sets the value of the field. It
+% \DescribeFieldkey{V} This sets the value of the field. Its
 % format varies depending on the field type, so typically
 % commands for the various type will have to preprocess and sanitize it.
-% The value given here is expanded but then added unchanged and unverified!
+% The value given here is x-expanded and then added to the dictionary!
 % See the descriptions of individual field types for further information.
 % (Pushbutton for example don't have a value).
 %
@@ -259,33 +276,70 @@
 % when a reset-form action is executed. The format of this value is the
 % same as that of \textttt{V}.
 %
+% \DescribeFieldkey{MaxLen} Only relevant for textfields.
+% The value is an integer and describes the maximum length of the field’s text in characters.
+% Required if the |Comb| flag is used.
+%
+% \DescribeFieldkey{Lock} Only relevant for signature fields. The value is an object name
+% which should point to a dictionary that specifies a set of form fields
+% that shall be locked when this signature field is signed. The exact format of
+% the dictionary is described in the PDF reference.
+%
+% \DescribeFieldkey{SV} Only relevant for signature fields. The value is an object name
+% which should point to a seed value dictionary. The exact format of
+% the dictionary is described in the PDF reference.
+%
+% \DescribeFieldkey{Opt} Only relevant for checkboxes, radiobuttons and choice fields.
+% The value is an object name
+% which should point to a array. The exact format of
+% the array is described in the PDF reference.
+%
+% \DescribeFieldkey{TI} Only relevant for scrollable list boxes.
+% The value is an integer, the top index (the index in the Opt array
+% of the first option visible in the list). Default value: 0
+%
+% \DescribeFieldkey{I} For choice fields that allow
+% multiple selection (MultiSelect flag set). The value is an object name
+% which should point to a array. The exact format of
+% the array is described in the PDF reference
+% (I have no idea what exactly should be added there, perhaps some future test will make
+% it more understandable.)
+%
+% The following four keys are used to add javascript (\enquote{ECMAScript}) code.
+% The values are currently only passed through \cs{pdf_string_from_unicode:nnN},
+% but this perhaps will have to change. The keys will be ignored if a pdfstandard
+% is used that prohibits such actions.
+%
 % \DescribeFieldkey{AA/K} This adds a keystroke action to the
 % additional action dictionary. The value is passed through
 % \cs{pdf_string_from_unicode:nnN}. The action is meant for text and choice fields.
-%  It is quite unclear if such action
+%  It is quite unclear if such an action
 %  make sense for non-terminal fields.
 % \DescribeFieldkey{AA/F} This adds a format action to the
 % additional action dictionary. The value is passed through
 % \cs{pdf_string_from_unicode:nnN}. The action is meant for text and choice fields.
-% It is quite unclear if such action
+% It is quite unclear if such an action
 %  make sense for non-terminal fields.
 % \DescribeFieldkey{AA/V} This adds a validate action to the
-% additional action dictionary. The value is passed throught
-% \cs{pdf_string_from_unicode:nnN}. It is quite unclear if such action
+% additional action dictionary. The value is passed through
+% \cs{pdf_string_from_unicode:nnN}. It is quite unclear if such an action
 %  make sense for non-terminal fields.
 % \DescribeFieldkey{AA/C} This adds a calculate action to the
-% additional action dictionary. The value is passed throught
-% \cs{pdf_string_from_unicode:nnN}. It is quite unclear if such action
+% additional action dictionary. The value is passed through
+% \cs{pdf_string_from_unicode:nnN}. It is quite unclear if such an action
 %  make sense for non-terminal fields.
 %
-% \DescribeFieldkey{DA} This contains instructions for the text in textfields.
-% It is stored as is.
+% \DescribeFieldkey{DA} This contains instructions for the text in text fields.
+% It is stored expanded and parentheses are added around the value.
 %
 % \DescribeFieldkey{Q}  The justification of the text,
 % the allow values are 0, 1, 2 for left, centered, right.
 %
 % \DescribeFieldkey{DS} \DescribeFieldkey{RV} these both keys are currently not implemented
 % as it is unclear if there are of any use.
+%
+%
+%
 % \DescribeCheckboxkey{width}
 % \DescribeCheckboxkey{height}
 % \DescribeCheckboxkey{depth} These keys allow to set the dimensions of checkbox instance.
@@ -515,6 +569,11 @@
     The~field~`#1`~is~already~initialized\\
     The~field~keys~`#2`~are~ignored.
   }
+\msg_new:nnn {pdffield}{not-implemented}
+  {
+    Support~for~'/#1'~is~not~implemented\\
+    The~key~is~ignored.
+  }
 %    \end{macrocode}
 
 % \subsection{bitsets}
@@ -576,7 +635,17 @@
     ReadOnly       = 7,
     Locked         = 8,
     ToggleNoView   = 9,
-    LockedContents = 10
+    LockedContents = 10,
+    invisible      = 1,
+    hidden         = 2,
+    print          = 3,
+    nozoom         = 4,
+    norotate       = 5,
+    noview         = 6,
+    readonly       = 7,
+    locked         = 8,
+    togglenoview   = 9,
+    lockedcontents = 10
   }
 %    \end{macrocode}
 % \subsection{The field dictionary}
@@ -601,7 +670,7 @@
     \seq_new:c {g_@@_field/Kids/#2_seq}
     \tl_set:Nn\l_@@_currentfield_tl {#2}
     \bool_set_true:N \l_@@_root_field_bool
-    \keys_set:nn {pdffield / field } {#1} %filter ..., fills l_@@/field
+    \keys_set:nn {pdffield / field } {#1} %filter? ..., fills l_@@/field
     \pdfdict_put:nnx {l_@@/field}
       {Kids}
       {
@@ -610,16 +679,16 @@
     \pdfdict_put:nnx {l_@@/field}
       {Ff}
       {\bitset_to_arabic:N \l_@@_Ff_bitset }
-    \pdfdict_show:n{l_@@/field}
     \pdfdict_if_empty:nF{l_@@/field/AA}
       {
         \pdfmeta_standard_verify:nT
           {annot_widget_no_AA}
           {
+            \pdf_object_unnamed_write:nx {dict}{\pdfdict_use:n {l_@@/field/AA}}
             \pdfdict_put:nnx
               {l_@@/field}
               {AA}
-              {<<\pdfdict_use:n {l_@@/field/AA}>>}
+              {\pdf_object_ref_last:}
           }
       }
     \hook_gput_code:nnn {shipout/lastpage}{pdffield} %xetex needs this ...
@@ -639,7 +708,7 @@
      }
     \group_end:
   }
-
+\cs_set_eq:NN \pdffield_field:nn \@@_field:nn
 %    \end{macrocode}
 % \end{macro}
 % \subsection{The annot dictionary}
@@ -774,7 +843,7 @@
     ,Ft .choices:nn =
       { Btn, Tx, Ch, Sig }
       {
-        \pdfdict_put:nnx { l_@@/field }{Ft}{ #1 }
+        \pdfdict_put:nnn { l_@@/field }{Ft}{ #1 }
       }
     ,V .code:n =
      {
@@ -783,6 +852,30 @@
     ,DV .code:n =
      {
        \pdfdict_put:nnx { l_@@/field }{V}{ #1 }
+     }
+    ,MaxLen .code:n =
+     {
+       \pdfdict_put:nnx { l_@@/field }{MaxLen}{ #1 }
+     }
+    ,Lock .code:n =
+     {
+       \pdfdict_put:nnx { l_@@/field }{Lock}{ \pdf_object_ref:n{#1} }
+     }
+    ,SV .code:n =
+     {
+       \pdfdict_put:nnx { l_@@/field }{SV}{ \pdf_object_ref:n{#1} }
+     }
+    ,Opt .code:n =
+     {
+       \pdfdict_put:nnx { l_@@/field }{Opt}{ \pdf_object_ref:n{#1} }
+     }
+    ,TI .code:n =
+     {
+       \pdfdict_put:nnx { l_@@/field }{TI}{ #1 }
+     }
+    ,I .code:n =
+     {
+       \pdfdict_put:nnx { l_@@/field }{I}{ \pdf_object_ref:n{#1} }
      }
 
   }
@@ -911,7 +1004,7 @@
 %need to remove it from the checkbox ...
 \cs_new_protected:Npn \@@_setup_AA_key:nn #1 #2 %#1 key, #2 dict
   {
-    \keys_define:nn { pdffield  }
+    \keys_define:nn { pdffield / #2 }
       {
          AA/#1 .code:n =
            {
@@ -962,13 +1055,21 @@
 
 \keys_define:nn {pdffield/field}
   {
-     DA .code:n =
+    DA .code:n =
       {
          \pdfdict_put:nnx{ l_@@_field}{DA}{(#1)}
       }
     ,Q .choices:nn = {0,1,2}
      {
        \pdfdict_put:nnn{ l_@@_field}{Q}{#1}
+     }
+    ,DS .code:n =
+     {
+       \msg_warning:nnn {pdffield}{not-implemented}{DS}
+     }
+    ,RV .code:n =
+     {
+       \msg_warning:nnn {pdffield}{not-implemented}{RV}
      }
   }
 %    \end{macrocode}
