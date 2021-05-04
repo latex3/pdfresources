@@ -176,6 +176,19 @@
 % or \texttt{Tx} for a textfield. The type can be set for the parent and then inherited.
 % The fields in a fieldset can have different types.
 %
+% \section{Appearances}
+%
+% An field annotation may define as many as three separate appearances: the normal appearance
+% (required), the rollover appearance and the down appearance.
+%
+% An appearance can be a simple xform object, but
+% in some cases the annotation can have different appearance states: a checkbox
+% can be checked or unchecked, in this case the appearances is dictionary which
+% maps state names like /Yes and /Off to xform objects.
+%
+%
+%
+%
 % \section{Commands}
 % \begin{function}{\pdffield_field:nn}
 % \begin{syntax}
@@ -358,6 +371,7 @@
 %
 % \DescribeAnnotkey{Parent} This sets the parent. The value should be the object name of
 % an already declared field.
+%
 %
 % \DescribeCheckboxkey{appearance} This key sets the normal appearance. It takes as value a
 % \meta{name} and expects that the two appearances \meta{name}|/Yes| and \meta{name}|/Off|
