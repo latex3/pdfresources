@@ -186,7 +186,7 @@
 % can be checked or unchecked, in this case the appearances is dictionary which
 % maps state names like /Yes and /Off to xform objects.
 %
-% 
+%
 %
 %
 % \section{Commands}
@@ -739,6 +739,7 @@
 \cs_set_eq:NN \pdffield_field:nn \@@_field:nn
 %    \end{macrocode}
 % \end{macro}
+%
 % \subsection{The annot dictionary}
 % We assume that the annotation should really occupy space on the page and
 % leave vertical mode.
@@ -747,10 +748,11 @@
 % We use a local dictionary which is copied into |l__pdfannot/widget| in the code.
 % We define a dictionary for the AP content, so that we can add R and D too
 %    \begin{macrocode}
-\pdfdict_new:n   {l_@@/annot}
-\pdfdict_put:nnn {l_@@/annot}{Subtype}{/Widget}
+%\pdfdict_new:n   {l_@@/annot}
+%\pdfdict_put:nnn {l_@@/annot}{Subtype}{/Widget}
 \pdfdict_new:n   {l_@@/annot/AA}
 \pdfdict_new:n   {l_@@/annot/AP}
+\pdfdict_new:n   {l_@@/annot/MK}
 %    \end{macrocode}
 %
 % \begin{macro}{\@@_annot:n}
@@ -760,7 +762,8 @@
     \group_begin:
     \keys_set:nn {pdffield / annot } {#1}  %preset something? dimensions?
     \pdf_object_unnamed_write:nx {dict}{\pdfdict_use:n{l_@@/annot/AP}}
-    \pdfdict_put:nnx {l_@@/annot}{AP}{\pdf_object_ref_last:}
+    %\pdfdict_put:nnx {l_@@/annot}{AP}{\pdf_object_ref_last:}
+    \pdfannot_dict_put:nnx {widget}{AP}{\pdf_object_ref_last:}
     \pdfmeta_standard_verify:nF
       {annot_flags}
       {
@@ -769,15 +772,17 @@
         \bitset_set_false:Nn \l_@@_F_bitset {Invisible}
         \bitset_set_false:Nn \l_@@_F_bitset {NoView}
       }
-    \pdfdict_put:nnx {l_@@/annot}{F}{ \bitset_to_arabic:N \l_@@_F_bitset }
+    %\pdfdict_put:nnx {l_@@/annot}{F}{ \bitset_to_arabic:N \l_@@_F_bitset }
+    \pdfannot_dict_put:nnx {widget}{F}{ \bitset_to_arabic:N \l_@@_F_bitset }
     \pdfdict_if_empty:nF{l_@@/annot/AA}
       {
         \pdfmeta_standard_verify:nT
          {annot_widget_no_AA}
          {
            \pdf_object_unnamed_write:nx {dict}{\pdfdict_use:n{l_@@/annot/AA}}
-           \pdfdict_put:nnx
-             {l_@@/annot}
+           %\pdfdict_put:nnx
+           %  {l_@@/annot}
+           \pdfannot_dict_put:nnx {widget}
              {AA}
              {\pdf_object_ref_last:}
          }
@@ -787,7 +792,7 @@
 % perhaps need a function in l3pdfannot,
 % as it actually uses an internal name of another module.
 %    \begin{macrocode}
-    \pdfdict_set_eq:nn {l__pdfannot/widget}{l_@@/annot}
+    %\pdfdict_set_eq:nn {l__pdfannot/widget}{l_@@/annot}
     \mode_leave_vertical:
     \hbox_to_wd:nn
       { \l_@@_annot_wd_dim  }
