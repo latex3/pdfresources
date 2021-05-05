@@ -473,19 +473,14 @@
 % hyperref sets NeedAppearances by default. As this is deprecated we disable this.
 %    \begin{macrocode}
 \csname HyField@NeedAppearancesfalse\endcsname % suppress NeedAppearances
-% values from hyperref:
-%\def\DefaultOptionsofCheckBox{print}
-%\def\DefaultHeightofCheckBox{\normalbaselineskip}
-%\def\DefaultWidthofCheckBox{\normalbaselineskip}
 %    \end{macrocode}
+%
 % \subsection{local variables}
+%
 %    \begin{macrocode}
-\str_new:N \l_@@_field_name_str
-\tl_new:N  \l_@@_currentfield_tl
 \str_new:N \l_@@_tmpa_str
-\str_new:N \l_@@_name_tmpa_str
-\tl_new:N  \l_@@_keys_tmpa_tl
-\tl_new:N  \l_@@_tmpa_tl
+\cs_new_protected:Npn \@@_tmpa:n #1 {}
+\tl_new:N  \l_@@_currentfield_tl
 
 %    \end{macrocode}
 %
@@ -658,11 +653,9 @@
 % leave vertical mode.
 % We also assume that keys like AP, AS are added before through keys to
 % the dictionary.
-% We use a local dictionary which is copied into |l__pdfannot/widget| in the code.
 % We define a dictionary for the AP content, so that we can add R and D too
+% and the MK dictionary, so that we can setup some keys.
 %    \begin{macrocode}
-%\pdfdict_new:n   {l_@@/annot}
-%\pdfdict_put:nnn {l_@@/annot}{Subtype}{/Widget}
 \pdfdict_new:n   {l_@@/annot/AA}
 \pdfdict_new:n   {l_@@/annot/AP}
 \pdfdict_new:n   {l_@@/annot/MK}
@@ -674,9 +667,17 @@
   {
     \group_begin:
     \keys_set:nn {pdffield / annot } {#1}  %preset something? dimensions?
-    \pdf_object_unnamed_write:nx {dict}{\pdfdict_use:n{l_@@/annot/AP}}
-    %\pdfdict_put:nnx {l_@@/annot}{AP}{\pdf_object_ref_last:}
-    \pdfannot_dict_put:nnx {widget}{AP}{\pdf_object_ref_last:}
+    \pdfdict_if_empty:nTF { l_@@/annot/AP }
+      {
+       \pdf_version_compare:NnT  > {1.9}
+         {
+           %warn about empty dict?
+         }
+      }
+      {
+        \pdf_object_unnamed_write:nx {dict}{\pdfdict_use:n{l_@@/annot/AP}}
+        \pdfannot_dict_put:nnx {widget}{AP}{\pdf_object_ref_last:}
+      }
     \pdfmeta_standard_verify:nF
       {annot_flags}
       {
@@ -700,12 +701,6 @@
              {\pdf_object_ref_last:}
          }
       }
-%    \end{macrocode}
-% Copy the internal dictionary to the pdfannot dictionary. This
-% perhaps need a function in l3pdfannot,
-% as it actually uses an internal name of another module.
-%    \begin{macrocode}
-    %\pdfdict_set_eq:nn {l__pdfannot/widget}{l_@@/annot}
     \mode_leave_vertical:
     \hbox_to_wd:nn
       { \l_@@_annot_wd_dim  }
@@ -754,18 +749,35 @@
    Parent .code:n =
     {
       \tl_set:Nn \l_@@_currentparent_tl {#1}
-      \pdfdict_put:nnx {l_@@/annot}{Parent}{\pdf_object_ref:n{@@/field/#1}}
-    }
-  ,AP .code:n =
-    {
-      \pdfdict_put:nnx {l_@@/annot}{AP}{#1}
+      \pdfannot_dict_put:nnx {widget}{Parent}{\pdf_object_ref:n{@@/field/#1}}
     }
   ,AS .code:n =
     {
-      \pdfdict_put:nnx {l_@@/annot}{AS}{#1}
+      \pdfannot_dict_put:nnx {widget}{AS}{#1}
     }
-
  }
+\cs_set_protected:Npn \@@_tmpa:n #1
+  {
+   \keys_define:nn { pdffield / annot }
+     {
+       AP/#1 .code:n =
+        { \pdfdict_put:nnx {l_@@/annot/AP}{#1}{##1} }
+     }
+  }
+\clist_map_inline:nn {N,R,D}
+  { \@@_tmpa:n {#1} }
+
+\cs_set_protected:Npn \@@_tmpa:n #1
+ {
+   \keys_define:nn { pdffield / annot }
+     {
+       MK/#1 .code:n =
+        { \pdfdict_put:nnx {l_@@/annot/MK}{#1}{##1} }
+     }
+ }
+
+\clist_map_inline:nn {R,BC,BG,CA,RC,AC,I,RI,IX,IF,TP}
+  { \@@_tmpa:n {#1} }
 %    \end{macrocode}
 % Flags.
 %    \begin{macrocode}
@@ -797,30 +809,30 @@
   {
     ,T .code:n =
       {
-        \pdf_string_from_unicode:nnN {utf8/string-raw}{#1}\l_@@_field_name_str
-        \str_if_in:NnT \l_@@_field_name_str {.}
+        \pdf_string_from_unicode:nnN {utf8/string-raw}{#1}\l_@@_tmpa_str
+        \str_if_in:NnT \l_@@_name_str {.}
           {
-            \msg_error:nnx {pdffield}{no-period}{\l_@@_field_name_str}
+            \msg_error:nnx {pdffield}{no-period}{\l_@@_tmpa_str}
           }
-        \str_if_empty:NTF\l_@@_field_name_str
+        \str_if_empty:NTF\l_@@_tmpa_str
           {
             \pdfdict_remove:nn { l_@@/field }{T}
           }
           {
-            \pdfdict_put:nnx { l_@@/field }{T}{(\l_@@_field_name_str)}
+            \pdfdict_put:nnx { l_@@/field }{T}{(\l_@@_tmpa_str)}
           }
       }
     ,T .value_required:n = true
     ,TU .code:n =
       {
-        \pdf_string_from_unicode:nnN {utf8/string}{#1}\l_@@_name_tmpa_str
-        \pdfdict_put:nnx { l_@@/field }{TU}{\l_@@_name_tmpa_str}
+        \pdf_string_from_unicode:nnN {utf8/string}{#1}\l_@@_tmpa_str
+        \pdfdict_put:nnx { l_@@/field }{TU}{\l_@@_tmpa_str}
       }
     ,TU .groups:n = {field}
     ,TM .code:n =
       {
-        \pdf_string_from_unicode:nnN {utf8/string}{#1}\l_@@_name_tmpa_str
-        \pdfdict_put:nnx { l_@@/field }{TM}{\l_@@_name_tmpa_str}
+        \pdf_string_from_unicode:nnN {utf8/string}{#1}\l_@@_tmpa_str
+        \pdfdict_put:nnx { l_@@/field }{TM}{\l_@@_tmpa_str}
       }
     ,TM .groups:n = {field}
     ,Parent .code:n =
