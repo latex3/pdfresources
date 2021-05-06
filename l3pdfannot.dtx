@@ -354,9 +354,9 @@
 %  /F flag in an annotation.
 %  It can be used for example like this:
 %  \begin{verbatim}
-%  \pdfannot_dict_put:nnn {link/URI} {F}
-%     { \bitset_to_arabic:N \l_pdfannot_F_bitset }
 %  \bitset_set_true:Nn \l_pdfannot_F_bitset {Print}
+%  \pdfannot_dict_put:nnx {link/URI} {F}
+%     { \bitset_to_arabic:N \l_pdfannot_F_bitset }
 %  \end{verbatim}
 %  The known keys for the bitset are |Invisible|, |Hidden|,
 %  |Print|, |NoZoom|, |NoRotate|, |NoView|, |ReadOnly|, |Locked|,  |ToggleNoView|,
