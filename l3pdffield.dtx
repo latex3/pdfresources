@@ -681,112 +681,6 @@
 \cs_set_eq:NN \pdffield_annot:n \@@_annot:n
 %    \end{macrocode}
 % \end{macro}
-% \subsection{Appearances}
-% TODO copy code
-%
-% \subsection{Annotation keys}
-% The size of the field annotation
-%
-%    \begin{macrocode}
-\dim_new:N \l_@@_annot_ht_dim
-\dim_new:N \l_@@_annot_wd_dim
-\dim_new:N \l_@@_annot_dp_dim
-
-\keys_define:nn { pdffield / annot }
-  {
-    ,width  .dim_set:N = \l_@@_annot_wd_dim
-    ,height .dim_set:N = \l_@@_annot_ht_dim
-    ,depth  .dim_set:N = \l_@@_annot_dp_dim
-    ,width  .initial:n = 0pt
-    ,height .initial:n = 0pt
-    ,depth  .initial:n = 0pt
-  }
-%    \end{macrocode}
-%
-%    \begin{macrocode}
-\keys_define:nn { pdffield / annot }
- {
-   parent .code:n =
-    {
-      \tl_set:Nn \l_@@_currentparent_tl {#1}
-      \pdfannot_dict_put:nnx {widget}{Parent}{\pdf_object_ref:n{@@/field/#1}}
-    }
-  ,AS .code:n =
-    {
-      \pdfannot_dict_put:nnx {widget}{AS}{\pdf_name_from_unicode_e:n{#1}}
-    }
- }
-\cs_set_protected:Npn \@@_tmpa:n #1
-  {
-   \keys_define:nn { pdffield / annot }
-     {
-       AP/#1 .code:n =
-        { \pdfannot_dict_put:nnx {widget/AP}{#1}{##1} }
-     }
-  }
-\clist_map_inline:nn {N,R,D}
-  { \@@_tmpa:n {#1} }
-
-\cs_set_protected:Npn \@@_tmpa:n #1
- {
-   \keys_define:nn { pdffield / annot }
-     {
-       MK/#1 .code:n =
-        { \pdfannot_dict_put:nnx {widget/MK}{#1}{##1} }
-     }
- }
-
-\clist_map_inline:nn {R,BC,BG,CA,RC,AC,I,RI,IX,IF,TP}
-  { \@@_tmpa:n {#1} }
-%    \end{macrocode}
-% Flags.
-%    \begin{macrocode}
-\keys_define:nn { pdffield / annot }
-  {
-    ,setF .code:n =
-      {
-          \clist_map_inline:nn {#1}
-           {
-             \bitset_set_true:Nn \l_@@_F_bitset {##1}
-           }
-      }
-    ,unsetF .code:n =
-      {
-          \clist_map_inline:nn {#1}
-           {
-             \bitset_set_false:Nn \l_@@_F_bitset {##1}
-           }
-      }
-  }
-%    \end{macrocode}
-%
-% Keys for the AA dictionary. They all trigger a javascript option.
-% Fo = onfocus, Bl = onblur, D = onmousedown, U = onmouseup,
-% E = onenter, X = onexit, PO = pageopen, PC = pageclose,
-% PV = pagevisible, PI = pageinvisible
-%    \begin{macrocode}
-\cs_set_protected:Npn \@@_tmpa:n #1  %
-  {
-    \keys_define:nn { pdffield / annot }
-      {
-         AA/#1 .code:n =
-           {
-             \pdf_string_from_unicode:nnN {utf8/string}{##1}\l_@@_tmpa_str
-             \str_if_empty:NTF \l_@@_tmpa_str
-               {
-                 \pdfannot_dict_remove:nn {widget/AA}{#1}
-               }
-               {
-                 \pdfannot_dict_put:nnx {widget/AA}
-                  {#1}
-                  {<</S/JavaScript/JS\l_@@_tmpa_str>>}
-               }
-           },
-      }
-  }
-
-\clist_map_inline:nn {Fo,Bl,D,U,E,X,PO,PC,PV,PI}{\@@_tmpa:n{#1}}
-%    \end{macrocode}
 %
 % \subsection{Field keys}
 % The names. The main name should not be empty, it is added to the dictionary
@@ -945,7 +839,114 @@
   }
 %    \end{macrocode}
 % \end{macro}
-% \subsection{user commands}
+%
+% \subsection{Annotation keys}
+% The size of the field annotation
+%
+%    \begin{macrocode}
+\dim_new:N \l_@@_annot_ht_dim
+\dim_new:N \l_@@_annot_wd_dim
+\dim_new:N \l_@@_annot_dp_dim
+
+\keys_define:nn { pdffield / annot }
+  {
+    ,width  .dim_set:N = \l_@@_annot_wd_dim
+    ,height .dim_set:N = \l_@@_annot_ht_dim
+    ,depth  .dim_set:N = \l_@@_annot_dp_dim
+    ,width  .initial:n = 0pt
+    ,height .initial:n = 0pt
+    ,depth  .initial:n = 0pt
+  }
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\keys_define:nn { pdffield / annot }
+ {
+   parent .code:n =
+    {
+      \tl_set:Nn \l_@@_currentparent_tl {#1}
+      \pdfannot_dict_put:nnx {widget}{Parent}{\pdf_object_ref:n{@@/field/#1}}
+    }
+  ,AS .code:n =
+    {
+      \pdfannot_dict_put:nnx {widget}{AS}{\pdf_name_from_unicode_e:n{#1}}
+    }
+ }
+\cs_set_protected:Npn \@@_tmpa:n #1
+  {
+   \keys_define:nn { pdffield / annot }
+     {
+       AP/#1 .code:n =
+        { \pdfannot_dict_put:nnx {widget/AP}{#1}{##1} }
+     }
+  }
+\clist_map_inline:nn {N,R,D}
+  { \@@_tmpa:n {#1} }
+
+\cs_set_protected:Npn \@@_tmpa:n #1
+ {
+   \keys_define:nn { pdffield / annot }
+     {
+       MK/#1 .code:n =
+        { \pdfannot_dict_put:nnx {widget/MK}{#1}{##1} }
+     }
+ }
+
+\clist_map_inline:nn {R,BC,BG,CA,RC,AC,I,RI,IX,IF,TP}
+  { \@@_tmpa:n {#1} }
+%    \end{macrocode}
+% Flags.
+%    \begin{macrocode}
+\keys_define:nn { pdffield / annot }
+  {
+    ,setF .code:n =
+      {
+          \clist_map_inline:nn {#1}
+           {
+             \bitset_set_true:Nn \l_@@_F_bitset {##1}
+           }
+      }
+    ,unsetF .code:n =
+      {
+          \clist_map_inline:nn {#1}
+           {
+             \bitset_set_false:Nn \l_@@_F_bitset {##1}
+           }
+      }
+  }
+%    \end{macrocode}
+%
+% Keys for the AA dictionary. They all trigger a javascript option.
+% Fo = onfocus, Bl = onblur, D = onmousedown, U = onmouseup,
+% E = onenter, X = onexit, PO = pageopen, PC = pageclose,
+% PV = pagevisible, PI = pageinvisible
+%    \begin{macrocode}
+\cs_set_protected:Npn \@@_tmpa:n #1  %
+  {
+    \keys_define:nn { pdffield / annot }
+      {
+         AA/#1 .code:n =
+           {
+             \pdf_string_from_unicode:nnN {utf8/string}{##1}\l_@@_tmpa_str
+             \str_if_empty:NTF \l_@@_tmpa_str
+               {
+                 \pdfannot_dict_remove:nn {widget/AA}{#1}
+               }
+               {
+                 \pdfannot_dict_put:nnx {widget/AA}
+                  {#1}
+                  {<</S/JavaScript/JS\l_@@_tmpa_str>>}
+               }
+           },
+      }
+  }
+
+\clist_map_inline:nn {Fo,Bl,D,U,E,X,PO,PC,PV,PI}{\@@_tmpa:n{#1}}
+%    \end{macrocode}
+%
+% \subsection{User commands}
+% Some commands to setup fields will be needed, but
+% not sure yet where. 
 % \begin{macro}{\pdffield_setup:nn}
 %    \begin{macrocode}
 %
