@@ -30,7 +30,7 @@
 \makeatother
 \documentclass[full]{l3doc}
 \usepackage{array,booktabs}
-\usepackage{l3pdffield-testphase,bearwear}
+\usepackage{l3pdffield-testphase,tikz}
 \hypersetup{pdfauthor=The LaTeX Project,
  pdftitle=l3pdffield (LaTeX PDF management testphase bundle)}
 \begin{document}
@@ -54,16 +54,6 @@
 %   printtype= \textit{annot key}
 %    ]{Annotkey}{annotkey}%
 % \providecommand\hook[1]{\texttt{#1}}
-% \ExplSyntaxOn
-% \pdffield_store_appearance:nn {bear/Yes}
-%  {
-%    \tikz\bear\bearwear[shirt=red,body~deco={\node[font=\tiny\bfseries,white]~at~(beartummy){Yes};}];
-%  }
-% \pdffield_store_appearance:nn {bear/Off}
-%  {
-%   \tikz\bear\bearwear[body~deco={\node[font=\tiny\bfseries,white]~at~(beartummy){Off};}];
-%  }
-% \ExplSyntaxOff
 % \title{^^A
 %   The \pkg{l3pdffield} module\\ Commands to create form fields   ^^A
 %   \\ \LaTeX{} PDF management testphase bundle
@@ -106,7 +96,7 @@
 %
 % Please keep in mind
 % \begin{itemize}
-% \item Not every PDF viewer supports checkboxes or form fields.
+% \item Not every PDF viewer supports form fields or all types and features.
 % \item The handling can depend on settings in the PDF viewer. In adobe reader for
 % example I had to disable an option to avoid that it tries to create an appearance
 % itself
@@ -132,13 +122,14 @@
 % \section{Some background}
 %
 % A document can contain a arbitrary number of fields which can be organized in trees.
-% The leaf fields in such a tree, the \emph{terminal fields} typically have
+% The leaf fields in such a tree, the \emph{terminal fields}, typically have
 % widget annotations as kids which are then the actual, visual instances of the field,
 % and allow to interact with the field. I will call such a
 % tree a \emph{fieldset}, nodes \emph{fields} and the widget annotation
 % \emph{field annotations}.
 %
 % A simple example would look like this
+%
 %  \begin{tikzpicture}[level 2/.style={level distance=7mm},
 %  level 1/.style={sibling distance=25mm},
 %  level 2/.style={sibling distance=15mm}]
@@ -156,15 +147,16 @@
 %   ;
 %   \end{tikzpicture}
 %
-% In many cases a fieldset only consists of one field along with its field annotation(s)
-% but larger sets can be needed to build more complex interactions with javascript code,
-% for example a datepicker can be built as a fieldset with various fields to represent
+% In many cases a fieldset consists of only one field along with its field annotation(s),
+% but larger sets can be needed to build more complex interactions with javascript code.
+% For example a datepicker can be built as a fieldset with various fields to represent
 % the month and year choice and to select days.
 %
 % Fields in a fieldset should have a name, for example |wen| or |week| in the example
 % above. This name is the \emph{partial name} of the field, the \emph{full name}
-% is than built from it by adding the names of the parents. In the example above
-% the partial name is \texttt{mon} and the full name \texttt{week.mon}.
+% is than built from it by adding the names of the parents separated by periods.
+% In the example above the partial name is \texttt{mon} and the full name
+% \texttt{week.mon}.
 % Partial names shouldn't contain periods. If two fields have the same name they will
 % work in unison: if you enter text in one field, the text appears also in the other, such
 % fields must have the same type and the same value and default value entry.
@@ -178,24 +170,26 @@
 %
 % \subsection{Appearances}
 %
-% Appearances are form XObjects, small pictures stored in the PDF which
-% can be referenced
-% in various part of the PDF. They can be created with the commands of
-% the \pkg{l3pdfxform} package.
-%
 % An field annotation may define as many as three separate appearances:
 % the normal appearance (required), the rollover appearance and the down appearance.
 %
 % An appearance can be a simple form XObjects, but
-% in some cases the annotation can have different appearance states: a checkbox
-% can be checked or unchecked, in this case the appearances are dictionaries which
-% maps state names like /Yes and /Off to xform objects.
+% in some cases the annotation can have different \emph{appearance states}: a checkbox
+% for example can be checked or unchecked, in this case the appearances
+% are dictionaries which
+% maps state names like |/Yes| and |/Off| to form XObjects.
+%
+% Such form XObjects are small pictures stored in the PDF which
+% can be referenced
+% in various part of the PDF. They can be created with the commands of
+% the \pkg{l3pdfxform} package.
 %
 % The annotations cover a rectangular area on
-% the page and the XObjects are squeezed into this rectangle. So for the best result
-% both should have the same ratio of width and height. Simple backgrounds can
+% the page and the form XObjects are squeezed into this rectangle.
+% So for the best result
+% both should have the same ratio of width and height. Simple plain backgrounds can
 % also be created in large size and reused for various annotations.
-% XObjects used as appearances can not be rotated, if needed one has to
+% Form XObjects used as appearances can not be rotated, if needed one has to
 % create a new appearance.
 %
 %
@@ -217,12 +211,12 @@
 % reference the needed objects but it is not the direct object name, so
 % |pdf_object_ref:n| can not be used to access (and there will not
 % clash with object names). It is recommended to start
-% the name with a module prefix to avoid name clashes, so e.g. |c_mymodule_field1| or
-% |c_mymodule/field/week|.
+% the name with a module prefix to avoid name clashes, so e.g. |mymodule/field/1| or
+% |mymodule/field/week|.
 %
 % The list of allowed keys is described below.
-% Typically the \meta{key val list} should at least set the name T, fields that
-% are kids in a fieldset must set the Parent key, this should point to a field
+% Typically the \meta{key val list} should at least set the name |T|, fields that
+% are kids in a fieldset must set the |Parent| key, this should point to a field
 % declared before.
 %
 % The command is meant as a basic command to build more complex variants like
@@ -242,14 +236,30 @@
 %
 % \end{function}
 %
-% \subsection{Field Keys}
+% \begin{function}{\pdffield_annot:n}
+% \begin{syntax}
+%  \cs{pdffield_field:nn}\Arg{key val list}
+% \end{syntax}
+% This creates a new field annotation.
+% It is a widget annotation box created with \cs{\pdfannot_widget_box:nnn}, and
+% it is possible to add values to its dictionary
+% by using |\pdfannot_dict_put:nnn {widget}...|.
+% But to correctly setup the parent/kid relationship some additional wrapper code is needed.
+% The command also setup dictionaries to fill the |AP|, |MK| and |AA| dictionaries.
+% \end{function}
 %
-% The command accepts the following keys.
 %
+% \section{Field Keys}
+%
+% Table~\ref{\label{tab:fieldkeys}} summarize the keys which can be used.
+%
+% \begin{table}
+% \caption{Key for fields}\label{tab:fieldkeys}
 % \begin{tabular}{>{\ttfamily/}lllll}
-% (PDF) key  & value    & required & inheritable &remark\\\hline
-% T          & string   & mostly   &             \\
-% TU         & string   &          &             \\
+% key      & value      & required & inheritable &remark\\\hline
+% parent   & field name & for non-root fields &     \\
+% T        & string   & mostly   &             \\
+% TU       & string   &          &             \\
 % TM       & string   &          &             \\
 % Ft       & name     & terminal fields & yes  \\
 % setFf    & list of flags &     & yes\\
@@ -260,30 +270,29 @@
 % Lock     & object name &         &                  & signature field\\
 % SV       & object name &         &                  & signature field\\
 % Opt      & object name &         &                  & buttons and choice fields\\
-%
 % AA/K     & javascript \\
 % AA/F     & javascript\\
 % AA/V     & javascript\\
 % AA/C     & javascript\\
-%\end{tabular}
-%
-% The following keys are relevant only for fields with variable text:
-%
-% \begin{tabular}{l>{\ttfamily/}llll}
-% (PDF) key  & value    & required & inheritable \\\hline
-% DA        & string    & yes   &   yes           \\
-% Q       & 0, 1 or 2   &          & yes             \\
-% DS       & string   &          &             \\
-% RV       & string or stream  &  &   \\
+% DA        & string    & yes   &   yes    & variable text \\
+% Q       & 0, 1 or 2   &          & yes   &variable text  \\
+% DS       &    &          &         & (ignored) \\
+% RV       &  &  &        & (ignored) \\
 % \end{tabular}
+% \end{table}
 %
+% \DescribeFieldkey{parent} This declares the parent of the field. It is required if
+% the field is not the root of the fieldset. The value is the field name
+% of the parent, the parent should have been already declared.
+% It will add the reference to the parent field to the |/Parent| key, and also
+% add reference of the kid as |/Kid| in the parent field.
 %
 % \DescribeFieldkey{T} This sets the partial name of the field. It shouldn't contain
 % a period, be not empty and sensibly consist of simple ascii chars.
 % It is normally required, see above. The value is passed through \cs{pdf_string_from_unicode:nnN}.
 %
 % \DescribeFieldkey{TU} This sets an alternative name for user interaction.
-% Unlike the name field it can use unicode.
+% Unlike the name field it can use unicode or periods.
 % The value is passed through \cs{pdf_string_from_unicode:nnN}
 %
 % \DescribeFieldkey{TM} This sets an alternative name for the export.
@@ -298,9 +307,8 @@
 % This key accepts a list of flag names and then sets or unsets them, the resulting value
 % is then used with the \texttt{/Ff} key. Depending
 % on the field type some flags must be set or unset, other are optional or are ignored.
-% The full list of flags is described later. The flag name can be given
-% in PDF spelling (\texttt{RadiosInUnison}), in lowercase (\texttt{radiosinunison}),
-% and as number.
+% The flag name can be given in PDF spelling (\texttt{RadiosInUnison}),
+% in lowercase (\texttt{radiosinunison}), and as number.
 % The list of flags are:
 % |ReadOnly|, |Required|,
 % |NoExport|, |Multiline|, |Password|,    |NoToggleToOff|, |Radio|, |Pushbotton|,
@@ -312,11 +320,11 @@
 % commands for the various type will have to preprocess and sanitize it.
 % The value given here is x-expanded and then added to the dictionary!
 % See the descriptions of individual field types for further information.
-% (Pushbutton for example don't have a value).
+% (Pushbuttons for example don't have a value).
 %
 % \DescribeFieldkey{DV} The default value, to which the field reverts
 % when a reset-form action is executed. The format of this value is the
-% same as that of \textttt{V}.
+% same as that of \texttt{V}.
 %
 % \DescribeFieldkey{MaxLen} Only relevant for textfields.
 % The value is an integer and describes the maximum length of the field’s text in characters.
@@ -377,19 +385,33 @@
 % \DescribeFieldkey{Q}  The justification of the text,
 % the allow values are 0, 1, 2 for left, centered, right.
 %
-% \DescribeFieldkey{DS} \DescribeFieldkey{RV} these both keys are currently not implemented
+% \DescribeFieldkey{DS} \DescribeFieldkey{RV} These two keys are currently not implemented
 % as it is unclear if there are of any use.
 %
 %
-% \begin{function}{\pdffield_annot:n}
-% \begin{syntax}
-%  \cs{pdffield_field:nn}\Arg{key val list}
-% \end{syntax}
-% This creates a new field annotation.
-% The allowed keys are described below.
-% \end{function}
+% \section{Annot keys}
 %
-% \subsection{Annot keys}
+% Table~\ref{\label{tab:annotkeys}} summarize the keys which can be used.
+%
+% \begin{table}
+% \caption{Key for field annotations}\label{tab:annotkeys}
+% \begin{tabular}{>{\ttfamily/}lllll}
+% key      & value      & required &remark\\\hline
+% parent   & field name & yes             \\
+% width    & dim expression & (yes)  & default is 0pt \\
+% height   & dim expression & (yes)  & default is 0pt \\
+% depth   & dim expression & (yes)  & default is 0pt \\
+% AP/N    & xform or dict  & yes  (in PDF 2.0) \\
+% AP/R    & xform or dict  & yes  (in PDF 2.0) \\
+% AP/D    & xform or dict  & yes  (in PDF 2.0) \\
+% AS      & name  & yes  (in PDF 2.0) \\
+% setF    & list of flags \\
+% unsetF  & list of flags \\
+% AA/*    & javascript   & *= F, Bl, D, U, E, X, PO, PC,PV, PI\\
+% MK/*    & various      & *= R, BC, BG, CA, RC, AC, I, RI, IX, IF, TP \\
+%
+% \end{tabular}
+% \end{table}
 %
 % \DescribeAnnotkey{width}
 % \DescribeAnnotkey{height}
@@ -397,15 +419,17 @@
 % The value should be a command that expands to a dimension expression. By default
 % all values are zero.
 %
-% \DescribeAnnotkey{Parent} This sets the parent. The value should be the object name of
+% \DescribeAnnotkey{parent} This sets the parent. The value should be the object name of
 % an already declared field.
 %
 % \DescribeAnnotkey{AP/N}\DescribeAnnotkey{AP/R}\DescribeAnnotkey{AP/D}
 % This keys set the normal, rollover and down appearance. The value is either a
 % xform object or a dictionary mapping various states to an xform object.
 %
-% \DescribeAnnotkey{AS} This key sets the default appearance state. The value is a name,
-% for checkbox for example /Yes. If used it should typically have the same value
+% \DescribeAnnotkey{AS} This key sets the default appearance state.
+% The value is a name without the starting slash
+% (it is passed throught |\pdf_name_from_unicode_e:n|),
+% for checkbox for example |Yes|. If used it should typically have the same value
 % as the V and DV key of the field.
 %
 % \DescribeAnnotkey{setF}
@@ -422,43 +446,12 @@
 % Their value should be javascript code. The |/AA| dictionary
 % is suppressed if a pdf/A standard is set.
 %
-% For example
-% \begin{verbatim}
-%    E={app.alert('Hello');}
-% \end{verbatim}
+% \begin{annotkey}{MK/R,MK/BC,MK/BG,MK/CA,MK/RC,MK/AC,MK/I,MK/RI,MK/IX,MK/IF,MK/TP }
+% These keys adds the various entries in the \emph{dynamic appearance dictionary}.
+% The |MK| dictionary can also be added by using |\pdfannot_dict_put:nnn{Widget}{MK}{...}
+% but the two methods should not be mixed.
 % \end{annotkey}
 %
-%
-% \subsubsection{The widget annotation dictionary}
-%
-% \begin{description}
-% \item[Type] Value: |/Annot|, set automatically
-% \item[Subtype] Value: |/Widget| this is added automatically.
-%  We use an internal dictionary which is locally copied over the one from l3pdfannot.
-%  It can be filled with keyval options.
-% \item[Parent] The reference to the field, automatically added.
-% \item[Rect] the size, calculated from the box size
-% \item[Contents] a text string, not really needed but an optional key should allow to
-% set it,
-% \item[AP] the appearance dictionary. It should look like this
-%  |/AP <</N <</Yes 17 0 R/Off 15 0 R>>>>|. I need to test if it makes sense here to
-%  have a |/R| and |/D| entry too. The objects refer to suitable xforms.
-% \item[AS] should be either |/Yes| or |/Off|, and sensibly by default be
-%  the same as the V entry in the field dictionary. If they differ the AS entry wins.
-%
-% \item[A] Action, this must be checked.
-% \item[AA] additional actions. This must be checked too.
-%
-% \item[Border, C, OC, AF, BM, Lang, P, NM, M, F, BS, H]: These are not specifically
-% needed for checkbox. An interface to add something to the used annot dictionary
-% is needed (or already there), but probably no special key-val support for now.
-%
-% \item[MK] this is what hyperref uses to set the appearance, but I
-%  explicitly leave it out and use |AP|.
-%
-% \item[Q] (alignment), used by hyperref but not relevant as we don't have variable
-% text here.
-% \end{description}
 % \end{documentation}
 %
 % \begin{implementation}
@@ -679,6 +672,11 @@
         \pdf_object_unnamed_write:nx {dict}{\pdfdict_use:n{l_@@/annot/AP}}
         \pdfannot_dict_put:nnx {widget}{AP}{\pdf_object_ref_last:}
       }
+    \pdfdict_if_empty:nF { l_@@/annot/MK }
+      {
+        \pdf_object_unnamed_write:nx {dict}{\pdfdict_use:n{l_@@/annot/MK}}
+        \pdfannot_dict_put:nnx {widget}{MK}{\pdf_object_ref_last:}
+      }
     \pdfmeta_standard_verify:nF
       {annot_flags}
       {
@@ -747,14 +745,14 @@
 %    \begin{macrocode}
 \keys_define:nn { pdffield / annot }
  {
-   Parent .code:n =
+   parent .code:n =
     {
       \tl_set:Nn \l_@@_currentparent_tl {#1}
       \pdfannot_dict_put:nnx {widget}{Parent}{\pdf_object_ref:n{@@/field/#1}}
     }
   ,AS .code:n =
     {
-      \pdfannot_dict_put:nnx {widget}{AS}{#1}
+      \pdfannot_dict_put:nnx {widget}{AS}{\pdf_name_from_unicode_e:n{#1}}
     }
  }
 \cs_set_protected:Npn \@@_tmpa:n #1
@@ -800,6 +798,35 @@
       }
   }
 %    \end{macrocode}
+%
+% Keys for the AA dictionary. They all trigger a javascript option.
+% Fo = onfocus, Bl = onblur, D = onmousedown, U = onmouseup,
+% E = onenter, X = onexit, PO = pageopen, PC = pageclose,
+% PV = pagevisible, PI = pageinvisible
+%    \begin{macrocode}
+\cs_set_protected:Npn \@@_tmpa:n #1  %
+  {
+    \keys_define:nn { pdffield / annot }
+      {
+         AA/#1 .code:n =
+           {
+             \pdf_string_from_unicode:nnN {utf8/string}{##1}\l_@@_tmpa_str
+             \str_if_empty:NTF \l_@@_tmpa_str
+               {
+                 \pdfdict_remove:nn {l_@@/annot/AA}{#1}
+               }
+               {
+                 \pdfdict_put:nnx {l_@@/annot/AA}
+                  {#1}
+                  {<</S/JavaScript/JS\l_@@_tmpa_str>>}
+               }
+           },
+      }
+  }
+
+\clist_map_inline:nn {Fo,Bl,D,U,E,X,PO,PC,PV,PI}{\@@_tmpa:n{#1}}
+%    \end{macrocode}
+%
 % \subsection{Field keys}
 % The names. The main name should not be empty, it is added to the dictionary
 % when the field is created. A new name means a new field.
@@ -808,6 +835,13 @@
 %    \begin{macrocode}
 \keys_define:nn { pdffield /field }
   {
+    ,parent .code:n =
+      {
+        \pdfdict_put:nnx { l_@@/field }{Parent}
+          {\pdf_object_ref:n{@@/field/#1}}
+        \seq_gput_right:cx {g_@@_field/Kids/#1_seq}
+          { \exp_args:Ne \pdf_object_ref:n{@@/field/\l_@@_currentfield_tl}}
+      }
     ,T .code:n =
       {
         \pdf_string_from_unicode:nnN {utf8/string-raw}{#1}\l_@@_tmpa_str
@@ -836,13 +870,6 @@
         \pdfdict_put:nnx { l_@@/field }{TM}{\l_@@_tmpa_str}
       }
     ,TM .groups:n = {field}
-    ,Parent .code:n =
-      {
-        \pdfdict_put:nnx { l_@@/field }{Parent}
-          {\pdf_object_ref:n{@@/field/#1}}
-        \seq_gput_right:cx {g_@@_field/Kids/#1_seq}
-          { \exp_args:Ne \pdf_object_ref:n{@@/field/\l_@@_currentfield_tl}}
-      }
     ,Ft .choices:nn =
       { Btn, Tx, Ch, Sig }
       {
@@ -908,45 +935,32 @@
 
 %    \end{macrocode}
 %
-%  Keys for the AA dictionary. They all trigger javascript option.
-%  \begin{macro}{\@@_setup_AAaction_key:nnn}
+%  Keys for the AA dictionary. They all trigger a javascript option.
+%  K=keystroke, F=format, V=validate, C=calculate
 %    \begin{macrocode}
-%need to remove it from the checkbox ...
-\cs_new_protected:Npn \@@_setup_AA_key:nn #1 #2 %#1 key, #2 dict
+\cs_set_protected:Npn \@@_tmpa:n #1  %
   {
-    \keys_define:nn { pdffield / #2 }
+    \keys_define:nn { pdffield / field }
       {
          AA/#1 .code:n =
            {
              \pdf_string_from_unicode:nnN {utf8/string}{##1}\l_@@_tmpa_str
              \str_if_empty:NTF \l_@@_tmpa_str
                {
-                 \pdfdict_remove:nn {l_@@/#2/AA}{#1}
+                 \pdfdict_remove:nn {l_@@/field/AA}{#1}
                }
                {
-                 \pdfdict_put:nnx {l_@@/#2/AA}
+                 \pdfdict_put:nnx {l_@@/field/AA}
                   {#1}
                   {<</S/JavaScript/JS\l_@@_tmpa_str>>}
                }
            },
-        AA/#1 .groups:n = {#2}
       }
   }
 
-\@@_setup_AA_key:nn {K}{field}  %keystroke
-\@@_setup_AA_key:nn {F}{field}  %format
-\@@_setup_AA_key:nn {V}{field}  %validate
-\@@_setup_AA_key:nn {C}{field}  %calculate
-\@@_setup_AA_key:nn {Fo}{annot} %{onfocus}
-\@@_setup_AA_key:nn {Bl}{annot} %{onblur}
-\@@_setup_AA_key:nn {D}{annot}  %{onmousedown}
-\@@_setup_AA_key:nn {U}{annot}  %{onmouseup}
-\@@_setup_AA_key:nn {E}{annot}  %{onenter}
-\@@_setup_AA_key:nn {X}{annot}  %{onexit}
-\@@_setup_AA_key:nn {PO}{annot} %{pageopen}
-\@@_setup_AA_key:nn {PC}{annot} %{pageclose}
-\@@_setup_AA_key:nn {PV}{annot} %{pagevisible}
-\@@_setup_AA_key:nn {PI}{annot} %{pageinvisible}
+\clist_map_inline:nn {K,F,V,C}{\@@_tmpa:n{#1}}
+%    \end{macrocode}
+%
 
 
 \keys_define:nn {pdffield/field}
@@ -984,73 +998,3 @@
 %\end{implementation}
 
 \endinput%
-%%%%
-%
-%Field dict
-%Ft     : /Btn /Tx /Ch /Sig
-%Parent : OR
-%Kids: array, other fields or annot/widget
-%T: partial fieldname (test string)
-%TU: alternate description (test string)
-%TM: mapping name
-%Q integer (variable text field)
-%Ff: flags ->pdffield/checkbox/field
-%V: value            % not pushbutton
-%DV: default value   % not pushbutton
-%AA: Action dict ... -> see below
-%Opt: array of strings, connected to kids
-%     or for choices, choices
-%TI integer (lists)
-%I array Ch (complicated ...)
-%
-%/DA ( 0 0 1 rg /Ti 12 Tf ) %text field
-%/MaxLen                    %text field
-%
-%Lock dict (Sig)
-%SV dict (Sig)
-%
-%
-%
-%
-%Connected widget:
-%/AS default appearance from AP ( here/Yes or /Off)
-%% Appearance
-%%checkbox
-%/AP <</N <</Yes 2 0 R /Off 3 0 R>>>>
-%/C / Border /BS
-%
-%/OC ?
-%/Structparens?
-%/F flags
-%
-%
-%AA: Submit:
-%  /S   /SubmitForm
-%  /F   file /URI (/F ( ftp : / / www . beatles . com / Movies / AbbeyRoad . mov )
-%  /Fields array
-%
-%  /S /ImportData
-%  /F file
-%
-%  /S /ResetData
-%  /Fields array
-%
-%  /S /JavaScript
-%  /JS text string or stream
-%  %\pdf_flag_new:nn {annot/field/submit} %name is wrong ...
-%  {
-%    Include/Exclude       = 0,
-%    IncludeNoValueFields  = 1,
-%    ExportFormat          = 2,
-%    GetMethod             = 3, % if ExportFormat=0 -> =0 to
-%    SubmitCoordinates     = 4, % if ExportFormat=0 -> =0 to
-%    XFDF                  = 5,
-%    IncludeAppendSaves    = 6,
-%    IncludeAnnotations    = 7,
-%    SubmitPDF             = 8,
-%    CanonicalFormat       = 9,
-%    ExclNonUserAnnots     = 10,
-%    ExclFKey              = 11,
-%    EmbedForm             = 12
-%  }
-% source: %adapted from https://chat.stackexchange.com/transcript/message/54421537#54421537
