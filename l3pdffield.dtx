@@ -645,15 +645,6 @@
 % \subsection{The annot dictionary}
 % We assume that the annotation should really occupy space on the page and
 % leave vertical mode.
-% We also assume that keys like AP, AS are added before through keys to
-% the dictionary.
-% We define a dictionary for the AP content, so that we can add R and D too
-% and the MK dictionary, so that we can setup some keys.
-%    \begin{macrocode}
-\pdfdict_new:n   {l_@@/annot/AA}
-\pdfdict_new:n   {l_@@/annot/AP}
-\pdfdict_new:n   {l_@@/annot/MK}
-%    \end{macrocode}
 %
 % \begin{macro}{\@@_annot:n}
 %    \begin{macrocode}
@@ -661,22 +652,6 @@
   {
     \group_begin:
     \keys_set:nn {pdffield / annot } {#1}  %preset something? dimensions?
-    \pdfdict_if_empty:nTF { l_@@/annot/AP }
-      {
-       \pdf_version_compare:NnT  > {1.9}
-         {
-           %warn about empty dict?
-         }
-      }
-      {
-        \pdf_object_unnamed_write:nx {dict}{\pdfdict_use:n{l_@@/annot/AP}}
-        \pdfannot_dict_put:nnx {widget}{AP}{\pdf_object_ref_last:}
-      }
-    \pdfdict_if_empty:nF { l_@@/annot/MK }
-      {
-        \pdf_object_unnamed_write:nx {dict}{\pdfdict_use:n{l_@@/annot/MK}}
-        \pdfannot_dict_put:nnx {widget}{MK}{\pdf_object_ref_last:}
-      }
     \pdfmeta_standard_verify:nF
       {annot_flags}
       {
@@ -687,19 +662,6 @@
       }
     %\pdfdict_put:nnx {l_@@/annot}{F}{ \bitset_to_arabic:N \l_@@_F_bitset }
     \pdfannot_dict_put:nnx {widget}{F}{ \bitset_to_arabic:N \l_@@_F_bitset }
-    \pdfdict_if_empty:nF{l_@@/annot/AA}
-      {
-        \pdfmeta_standard_verify:nT
-         {annot_widget_no_AA}
-         {
-           \pdf_object_unnamed_write:nx {dict}{\pdfdict_use:n{l_@@/annot/AA}}
-           %\pdfdict_put:nnx
-           %  {l_@@/annot}
-           \pdfannot_dict_put:nnx {widget}
-             {AA}
-             {\pdf_object_ref_last:}
-         }
-      }
     \mode_leave_vertical:
     \hbox_to_wd:nn
       { \l_@@_annot_wd_dim  }
@@ -760,7 +722,7 @@
    \keys_define:nn { pdffield / annot }
      {
        AP/#1 .code:n =
-        { \pdfdict_put:nnx {l_@@/annot/AP}{#1}{##1} }
+        { \pdfannot_dict_put:nnx {widget/AP}{#1}{##1} }
      }
   }
 \clist_map_inline:nn {N,R,D}
@@ -771,7 +733,7 @@
    \keys_define:nn { pdffield / annot }
      {
        MK/#1 .code:n =
-        { \pdfdict_put:nnx {l_@@/annot/MK}{#1}{##1} }
+        { \pdfannot_dict_put:nnx {widget/MK}{#1}{##1} }
      }
  }
 
@@ -813,10 +775,10 @@
              \pdf_string_from_unicode:nnN {utf8/string}{##1}\l_@@_tmpa_str
              \str_if_empty:NTF \l_@@_tmpa_str
                {
-                 \pdfdict_remove:nn {l_@@/annot/AA}{#1}
+                 \pdfannot_dict_remove:nn {widget/AA}{#1}
                }
                {
-                 \pdfdict_put:nnx {l_@@/annot/AA}
+                 \pdfannot_dict_put:nnx {widget/AA}
                   {#1}
                   {<</S/JavaScript/JS\l_@@_tmpa_str>>}
                }
