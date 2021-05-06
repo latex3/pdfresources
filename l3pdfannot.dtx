@@ -480,12 +480,16 @@
   {
     \hook_use:n { pdfannot/widget/before }
     \group_begin:
-    \pdfdict_if_empty:nF { l_@@/widget/AA }
+    \pdfmeta_standard_verify:nT
+      {annot_widget_no_AA}
       {
-        \pdf_object_unnamed_write:nx {dict}{\pdfdict_use:n{l_@@/widget/AA}}
-        \pdfdict_put:nnx { l_@@/widget }
-             {AA}
-             {\pdf_object_ref_last:}
+        \pdfdict_if_empty:nF { l_@@/widget/AA }
+          {
+            \pdf_object_unnamed_write:nx {dict}{\pdfdict_use:n{l_@@/widget/AA}}
+            \pdfdict_put:nnx { l_@@/widget }
+              {AA}
+              {\pdf_object_ref_last:}
+          }
       }
     \pdfdict_if_empty:nF { l_@@/widget/AP }
       {
