@@ -15,6 +15,7 @@ this project uses date-based 'snapshot' version identifiers.
 ### Added
  - generic command hooks have been added to \url, \href, \hrefurl,
    \hrefrun and \hrefpdf
+ - dictionaries widget/AA, widget/AP, widget/MK and widget/BS in l3pdfannot.  
       
 ## [2021-03-17]
 
