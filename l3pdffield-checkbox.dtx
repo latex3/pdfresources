@@ -386,6 +386,7 @@
     \group_begin:
     \keys_set_known:nnN {pdffield / checkbox }
       {
+        fieldname=,
         name=checkbox,
         appearance = checkbox/default,
         #1
@@ -397,8 +398,11 @@
         ,unsetFf={Radio,Pushbutton}
         ,FT= Btn
       }
-    \pdfdict_get:nnN {l_@@/field}{T}\l_@@_tmpa_tl
-    \@@_checkbox_field:V\l_@@_tmpa_tl
+    \tl_if_empty:NT \l_@@_fieldname_tl
+      {
+        \pdfdict_get:nnN {l_@@/field}{T}\l_@@_fieldname_tl
+      }
+     \@@_checkbox_field:V\l_@@_fieldname_tl
     \@@_annot:
     \group_end:
   }
@@ -425,6 +429,7 @@
     ,name .initial:n        = checkbox
     ,altname .meta:nn       = {pdffield/field}{TU=#1}
     ,mappingname .meta:nn   = {pdffield/field}{TM=#1}
+    ,fieldname .tl_set:N    = \l_@@_fieldname_tl
   }
 %    \end{macrocode}
 

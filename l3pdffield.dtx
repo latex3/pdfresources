@@ -505,7 +505,8 @@
 \tl_new:N  \l_@@_tmpa_keys_tl
 \cs_new_protected:Npn \@@_tmpa:n #1 {}
 \cs_new_protected:Npn \@@_tmpa:nn #1 #2 {}
-\tl_new:N  \l_@@_currentparent_tl
+\tl_new:N \l_@@_currentparent_tl
+\tl_new:N \l_@@_fieldname_tl
 %    \end{macrocode}
 %
 % \subsection{messages}
@@ -659,7 +660,7 @@
           }
       }
     \hook_gput_code:nnn {shipout/lastpage}{pdffield} %xetex needs this ...
-      { 
+      {
         \pdf_object_write:nx {@@/field/Kids/#1}
           {
             \seq_use:cn{g_@@_field/Kids/#1_seq}{~}
@@ -761,7 +762,7 @@
     ,FT .choices:nn =
       { Btn, Tx, Ch, Sig }
       {
-        \pdfdict_put:nnn { l_@@/field }{FT}{ #1 }
+        \pdfdict_put:nnn { l_@@/field }{FT}{ /#1 }
       }
     ,V .code:n =
      {
