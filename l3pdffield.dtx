@@ -29,7 +29,7 @@
 \declare@file@substitution{doc.sty}{doc-v3beta.sty}
 \makeatother
 \documentclass[full]{l3doc}
-\usepackage{array,booktabs}
+\usepackage{array,booktabs,caption}
 \usepackage{l3pdffield-testphase,tikz}
 \hypersetup{pdfauthor=The LaTeX Project,
  pdftitle=l3pdffield (LaTeX PDF management testphase bundle)}
@@ -269,14 +269,16 @@
 % Table~\ref{tab:fieldkeys} summarize the keys which can be used.
 %
 % \begin{table}
-% \caption{Key for fields}\label{tab:fieldkeys}
-% \begin{tabular}{>{\ttfamily/}lllll}
-% key      & value      & required & inheritable &remark\\\hline
+% \caption{Keys for fields}\label{tab:fieldkeys}
+% \centering
+% \begin{tabular}{>{\ttfamily}lllll}
+% \toprule
+% key      & value      & required & inheritable &remark\\\midrule
 % parent   & field name & for non-root fields &     \\
 % T        & string   & mostly   &             \\
 % TU       & string   &          &             \\
 % TM       & string   &          &             \\
-% Ft       & name     & terminal fields & yes  \\
+% FT       & name     & terminal fields & yes  \\
 % setFf    & list of flags &     & yes\\
 % unsetFf  & list of flags &    & yes \\
 % V        & various   &        & yes \\
@@ -285,6 +287,8 @@
 % Lock     & object name &         &                  & signature field\\
 % SV       & object name &         &                  & signature field\\
 % Opt      & object name &         &                  & buttons and choice fields\\
+% TI       & integer    &          &                  & list fields\\
+% I        & object name&          &                  & list fields\\
 % AA/K     & javascript \\
 % AA/F     & javascript\\
 % AA/V     & javascript\\
@@ -292,7 +296,7 @@
 % DA        & string    & yes   &   yes    & variable text \\
 % Q       & 0, 1 or 2   &          & yes   &variable text  \\
 % DS       &    &          &         & (ignored) \\
-% RV       &  &  &        & (ignored) \\
+% RV       &  &  &        & (ignored) \\\bottomrule
 % \end{tabular}
 % \end{table}
 %
@@ -313,7 +317,7 @@
 % \DescribeFieldkey{TM} This sets an alternative name for the export.
 % The value is passed through \cs{pdf_string_from_unicode:nnN}
 %
-% \DescribeFieldkey{Ft} This sets the type of the field, the value should be one of
+% \DescribeFieldkey{FT} This sets the type of the field, the value should be one of
 % \texttt{Btn} (button), \texttt{Tx} (text), \texttt{Ch} (choice),  \texttt{Sig} (signature).
 % The value is of relevance only for terminal fields, but it can be set in a parent
 % and then inherited.
@@ -409,9 +413,11 @@
 % Table~\ref{tab:annotkeys} summarize the keys which can be used.
 %
 % \begin{table}
-% \caption{Key for field annotations}\label{tab:annotkeys}
-% \begin{tabular}{>{\ttfamily/}lllll}
-% key      & value      & required &remark\\\hline
+% \caption{Keys for field annotations}\label{tab:annotkeys}
+% \centering
+% \begin{tabular}{>{\ttfamily}lllll}
+% \toprule
+% key      & value      & required &remark\\\midrule
 % parent   & field name & yes             \\
 % width    & dim expression & (yes)  & default is 0pt \\
 % height   & dim expression & (yes)  & default is 0pt \\
@@ -422,8 +428,10 @@
 % AS      & name  & yes  (in PDF 2.0) \\
 % setF    & list of flags \\
 % unsetF  & list of flags \\
-% AA/*    & javascript   & *= F, Bl, D, U, E, X, PO, PC,PV, PI\\
-% MK/*    & various      & *= R, BC, BG, CA, RC, AC, I, RI, IX, IF, TP \\
+% AA/*    & javascript   & *= F, Bl, D, U, E, \\
+%         &              &    X, PO, PC,PV, PI\\
+% MK/*    & various      & *= R, BC, BG, CA, RC, \\
+%         &              &   AC, I, RI, IX, IF, TP\\ \bottomrule
 %
 % \end{tabular}
 % \end{table}
@@ -454,17 +462,18 @@
 %  |Print|, |NoZoom|,|NoRotate|, |NoView|, |ReadOnly|, |Locked|, |ToggleNoView|,
 %  |LockedContents|, or the lowercase variants or numbers.
 %
-% \begin{annotkey}{AA/F, AA/Bl, AA/D, AA/U, AA/E, AA/X, AA/PO, AA/PC, AA/PV, AA/PI  }
-% These keys adds the |/F, |/Bl, |/D|, |/U|, |E|, |X|, |PO|, |PC|, |PV|, |PI|
-% key to the |/AA| dictionary
+% \begin{annotkey}{AA/*}
+% * should be one of |F|, |Bl|, |D|, |U|, |E|, |X|, |PO|, |PC|, |PV|, |PI|.
+% These keys adds then the respective key to the |/AA| dictionary
 % of the field annotation object.
 % Their value should be javascript code. The |/AA| dictionary
 % is suppressed if a pdf/A standard is set.
 % \end{annotkey}
 %
 % \medskip
-% \begin{annotkey}{MK/R,MK/BC,MK/BG,MK/CA,MK/RC,MK/AC,MK/I,MK/RI,MK/IX,MK/IF,MK/TP }
+% \begin{annotkey}{MK/*}
 % These keys adds the various entries in the \emph{dynamic appearance dictionary}.
+% * should be one of |R|, |BC|, |BG|, |CA|, |RC|, |AC|, |I|, |RI|, |IX|, |IF|, |TP|.
 % The |MK| dictionary can also be added by using |\pdfannot_dict_put:nnn{Widget}{MK}{...}|
 % but the two methods should not be mixed.
 % \end{annotkey}
@@ -742,10 +751,10 @@
         \pdfdict_put:nnx { l_@@/field }{TM}{\l_@@_tmpa_str}
       }
     ,TM .groups:n = {field}
-    ,Ft .choices:nn =
+    ,FT .choices:nn =
       { Btn, Tx, Ch, Sig }
       {
-        \pdfdict_put:nnn { l_@@/field }{Ft}{ #1 }
+        \pdfdict_put:nnn { l_@@/field }{FT}{ #1 }
       }
     ,V .code:n =
      {
@@ -963,5 +972,3 @@
 %</package>
 %    \end{macrocode}
 %\end{implementation}
-
-\endinput%
