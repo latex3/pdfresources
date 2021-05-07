@@ -256,7 +256,7 @@
 %  \cs{pdffield_field:nn}\Arg{key val list}
 % \end{syntax}
 % This creates a new field annotation.
-% It is a widget annotation box created with \cs{\pdfannot_widget_box:nnn}, and
+% It is a widget annotation box created with \cs{pdfannot_widget_box:nnn}, and
 % it is possible to add values to its dictionary
 % by using |\pdfannot_dict_put:nnn {widget}...|.
 % But to correctly setup the parent/kid relationship some additional wrapper code is needed.
@@ -266,7 +266,7 @@
 %
 % \section{Field Keys}
 %
-% Table~\ref{\label{tab:fieldkeys}} summarize the keys which can be used.
+% Table~\ref{tab:fieldkeys} summarize the keys which can be used.
 %
 % \begin{table}
 % \caption{Key for fields}\label{tab:fieldkeys}
@@ -406,7 +406,7 @@
 %
 % \section{Annot keys}
 %
-% Table~\ref{\label{tab:annotkeys}} summarize the keys which can be used.
+% Table~\ref{tab:annotkeys} summarize the keys which can be used.
 %
 % \begin{table}
 % \caption{Key for field annotations}\label{tab:annotkeys}
@@ -460,10 +460,12 @@
 % of the field annotation object.
 % Their value should be javascript code. The |/AA| dictionary
 % is suppressed if a pdf/A standard is set.
+% \end{annotkey}
 %
+% \medskip
 % \begin{annotkey}{MK/R,MK/BC,MK/BG,MK/CA,MK/RC,MK/AC,MK/I,MK/RI,MK/IX,MK/IF,MK/TP }
 % These keys adds the various entries in the \emph{dynamic appearance dictionary}.
-% The |MK| dictionary can also be added by using |\pdfannot_dict_put:nnn{Widget}{MK}{...}
+% The |MK| dictionary can also be added by using |\pdfannot_dict_put:nnn{Widget}{MK}{...}|
 % but the two methods should not be mixed.
 % \end{annotkey}
 %
@@ -831,8 +833,7 @@
 \clist_map_inline:nn {K,F,V,C}{\@@_tmpa:n{#1}}
 %    \end{macrocode}
 %
-
-
+%    \begin{macrocode}
 \keys_define:nn {pdffield/field}
   {
     DA .code:n =
@@ -853,7 +854,6 @@
      }
   }
 %    \end{macrocode}
-% \end{macro}
 %
 % \subsection{Annotation keys}
 % The size of the field annotation
@@ -962,7 +962,6 @@
 %    \begin{macrocode}
 %</package>
 %    \end{macrocode}
-% \end{macro}
 %\end{implementation}
 
 \endinput%
