@@ -84,7 +84,8 @@
 % \item The handling can depend on settings in the PDF viewer. In adobe reader for
 % example I had to disable an option to avoid that it tries to create an appearance
 % itself
-% \item Standards like pdf/A disable form fields too (as you typically can't change the PDF).
+% \item Standards like pdf/A disable features of form fields too
+% (as you typically can't change the PDF).
 % \end{itemize}
 % \section{Checkboxes}
 % Click me:
@@ -110,8 +111,13 @@
 % a period, be not empty and sensibly consist of simple chars. Checkboxes instances
 % with the same name belong to the same field and are checked and unchecked together.
 %
+% \DescribeCheckboxkey{parent} This is only needed if the field should be part
+% of a larger fieldset. The value should be a field name of field created previously
+% with \cs{pdffield_field:nn}.
+%
 % \DescribeCheckboxkey{altname} This sets an alternative name for user interaction.
 % This name can only be set at the first checkbox instance, when the field is initialized.
+%
 % \DescribeCheckboxkey{mappingname} This sets an alternative name for export.
 % This name can only be set at the first checkbox instance, when the field is initialized.
 %
@@ -300,219 +306,56 @@
 %    \begin{macrocode}
 %<*package>
 %<@@=pdffield>
-\NeedsTeXFormat{LaTeX2e}
-\ProvidesExplPackage{l3pdffield-testphase}{2021-03-17}{0.95c}%
-  {form field checkboxes}
 %    \end{macrocode}
-% \subsection{hyperref specific command}
-% hyperref sets NeedAppearances by default. As this is deprecated we disable this.
-%    \begin{macrocode}
-\csname HyField@NeedAppearancesfalse\endcsname % suppress NeedAppearances
-% values from hyperref:
-%\def\DefaultOptionsofCheckBox{print}
-%\def\DefaultHeightofCheckBox{\normalbaselineskip}
-%\def\DefaultWidthofCheckBox{\normalbaselineskip}
-%    \end{macrocode}
-% \subsection{local variables}
-%    \begin{macrocode}
-\str_new:N \l_@@_field_name_str
-\str_new:N \l_@@_tmpa_str
-\str_new:N \l_@@_name_tmpa_str
-\tl_new:N \l_@@_keys_tmpa_tl
-%    \end{macrocode}
-%
+
+
 % \subsection{messages}
 %    \begin{macrocode}
-\msg_new:nnn {pdffield}{no-period}
-  {
-    The~field~name~`#1`~contains~a~period. \\
-    This~is~not~allowed. `
-  }
-\msg_new:nnn {pdffield}{empty-name}
-  {
-    The~field~name~is~empty. \\
-    This~is~not~allowed. `
-  }
-\msg_new:nnn {pdffield}{appearance-missing}
-  {
-    The~appearance~`#1`~is~missing~for~the~#2~appearance.
-  }
-\msg_new:nnn {pdffield}{field-keys-ignored}
-  {
-    The~field~`#1`~is~already~initialized\\
-    The~field~keys~`#2`~are~ignored.
-  }
 %    \end{macrocode}
 
-% \subsection{bitsets}
-% A bitset for the field flag Ff
-% and an internal copy of the annot bitset.
-%    \begin{macrocode}
-\bitset_new:Nn \l_@@_Ff_bitset
- {
-    ReadOnly          = 1,
-    Required          = 2,
-    NoExport          = 3,
-    Multiline         = 13,%Tx
-    Password          = 14,
-    NoToggleToOff     = 15,%Btn, radio button
-    Radio             = 16,%Btn: Radio:    15=1, 16=0
-    Pushbutton        = 17,%Btn: Checkbox: 15=0, 16=0
-                           %Btn: Pushbutton: 16=1
-    Combo             = 18,%Ch: Combo=1 List=0
-    Edit              = 19,%Ch, Combo=1 -> + edit field
-    Sort              = 20,%Ch, not relevant for view...
-    FileSelect        = 21,%Tx
-    MultiSelect       = 22,%Ch
-    DoNotSpellCheck   = 23,%Tx, Ch (if Combo + Edit set)
-    DoNotScroll       = 24,%Tx
-    Comb              = 25,%Tx, requires MaxLen in dict
-    RadiosInUnison    = 26,%Btn Radio
-    RichText          = 26,%Tx
-    CommitOnSelChange = 27
-  }
 
-\bitset_new:Nn \l_@@_F_bitset
-  {
-    Invisible      = 1,
-    Hidden         = 2,
-    Print          = 3,
-    NoZoom         = 4,
-    NoRotate       = 5,
-    NoView         = 6,
-    ReadOnly       = 7,
-    Locked         = 8,
-    ToggleNoView   = 9,
-    LockedContents = 10
-  }
-%    \end{macrocode}
 % \subsection{The field dictionary}
 % The field dictionary is the main object. It references the
 % actual widget annotations as kids. It is created at the first
 % checkbox with a specific name.
 % To be able to set values from the outside it will use a
 % dictionary which can be filled by key-val.
-%    \begin{macrocode}
-\pdfdict_new:n   {l_@@/checkbox/field}
-\pdfdict_put:nnn {l_@@/checkbox/field}{FT}{/Btn}
-%    \end{macrocode}
-% We need to check if the name contains a dot. But we will do this in an external command
-% to avoid to have it twice. Here we assume that the name is already converted and safe.
-%
-% We also assume that values that can be changed by the user are set outside
-% in the dictionary.
+
 % If the field object already exists nothing is done.
-% \begin{macro}{\@@_checkbox_field_add:n}
+% \begin{macro}{\@@_checkbox_field:n}
 % \begin{syntax}
-% \cs{@@_checkbox_field_add:n}\Arg{name}
+% \cs{@@_checkbox_field:n}\Arg{key-val}\Arg{name}
 % \end{syntax}
 % \meta{name} should be a PDF text string without period. It identifies the
 % field.
 %    \begin{macrocode}
-\cs_new_protected:Npn \@@_checkbox_field_new:n #1
+\cs_new_protected:Npn \@@_checkbox_field:nn #1
   {
-      \group_begin:
-      \pdf_object_new:nn {@@_checkbox/field/#1}      {dict}
-      \pdf_object_new:nn {@@_checkbox/field/#1/Kids} {array}
-      \seq_new:c {g_@@_checkbox/field/#1/Kids_seq}
-      \hook_gput_code:nnn {shipout/lastpage}{pdffield} %xetex needs this ...
-        {
-          \pdf_object_write:nx {@@_checkbox/field/#1/Kids}
-            {
-              \seq_use:cn{g_@@_checkbox/field/#1/Kids_seq}{~}
-            }
-        }
-      \pdfdict_put:nnn {l_@@/checkbox/field}{T}{(#1)}
-     % V,DV are names describing the appearance. With checkboxes
-     % the values /Yes and /Off are used.
-     % this values are taken from the outside
-      \pdfdict_put:nnx {l_@@/checkbox/field}
-         {Kids}
-         {
-           \pdf_object_ref:n {@@_checkbox/field/#1/Kids}
-         }
-      \bitset_set_false:Nn \l_@@_Ff_bitset  {Radio}
-      \bitset_set_false:Nn \l_@@_Ff_bitset  {Pushbutton}
-      \pdfdict_put:nnx {l_@@/checkbox/field}
-        {Ff}
-        {\bitset_to_arabic:N \l_@@_Ff_bitset }
-      \pdfdict_if_empty:nF{l_@@/checkbox/field/AA}
-        {
-          \pdfmeta_standard_verify:nT
-            {annot_widget_no_AA}
-            {
-              \pdfdict_put:nnx
-                {l_@@/checkbox/field}
-                {AA}
-                {<<\pdfdict_use:n {l_@@/checkbox/field/AA}>>}
-            }
-        }
-      \pdf_object_write:nx {@@_checkbox/field/#1} { \pdfdict_use:n {l_@@/checkbox/field} }
-      \pdfmanagement_add:nnx
-        { Catalog / AcroForm }
-        { Fields }
-        {\pdf_object_ref:n {@@_checkbox/field/#1} }
-      \group_end:
+    \group_begin:
+    \@@_field:nn
+      {
+        ,#1
+        ,unsetFf={Radio,Pushbutton}
+        ,FT= Btn
+      }
+      {#2}
+    \group_end:
   }
 
 %    \end{macrocode}
 % \end{macro}
 % \subsection{The annot dictionary}
-% We assume that the annotation should really occupy space on the page and
-% leave vertical mode.
-% We also assume that keys like AP, AS are added before through keys to
-% the dictionary.
-% We use a local dictionary which is copied into |l__pdfannot/widget| in the code.
-%    \begin{macrocode}
-\pdfdict_new:n   {l_@@/checkbox/annot}
-\pdfdict_put:nnn {l_@@/checkbox/annot}{Subtype}{/Widget}
-%    \end{macrocode}
 %
-% \begin{macro}{\@@_checkbox_annot_add:nnnn}
+% \begin{macro}{\@@_checkbox_annot:n}
 %    \begin{macrocode}
-\cs_new_protected:Npn \@@_checkbox_annot_add:nnnn #1 #2 #3 #4 %name, wd, ht, dp,
+\cs_new_protected:Npn \@@_checkbox_annot:n #1 %#1 keyval
   {
     \group_begin:
-%    \end{macrocode}
-% Copy the internal dictionary to the pdfannot dictionary. This
-% perhaps need a function in l3pdfannot,
-% as it actually uses an internal name of another module.
-%    \begin{macrocode}
-    \pdfdict_put:nnx {l_@@/checkbox/annot}{AP}{<<\pdfdict_use:n{l_@@/checkbox/annot/AP}>>}
-    \pdfmeta_standard_verify:nF
-      {annot_flags}
+    \@@_annot:n
       {
-        \bitset_set_true:Nn  \l_@@_F_bitset {Print}
-        \bitset_set_false:Nn \l_@@_F_bitset {Hidden}
-        \bitset_set_false:Nn \l_@@_F_bitset {Invisible}
-        \bitset_set_false:Nn \l_@@_F_bitset {NoView}
+        #1,
+        % handle special AP
       }
-    \pdfdict_if_empty:nF{l_@@/checkbox/annot/AA}
-      {
-        \pdfmeta_standard_verify:nT
-         {annot_widget_no_AA}
-         {
-            \pdfdict_put:nnx
-              {l_@@/checkbox/annot}
-              {AA}
-              {<<\pdfdict_use:n {l_@@/checkbox/annot/AA}>>}
-         }
-      }
-    \pdfdict_put:nnx {l_@@/checkbox/annot}{F}{ \bitset_to_arabic:N \l_@@_F_bitset }
-    \pdfdict_set_eq:nn {l__pdfannot/widget}{l_@@/checkbox/annot}
-    \pdfannot_dict_put:nnx {widget}{Parent}{\pdf_object_ref:n{@@_checkbox/field/#1}}
-    \mode_leave_vertical:
-    \hbox_to_wd:nn
-      { #2  }
-      {
-        \rule [-#4]{0pt}{\dim_eval:n{#3+#4} }
-        \pdfannot_widget_box:nnn
-           { #2 }
-           { #3 }
-           { #4 }
-         \hfill
-      }
-    \seq_gput_right:cx {g_@@_checkbox/field/#1/Kids_seq}{ \pdfannot_box_ref_last:}
     \group_end:
   }
 
@@ -562,61 +405,46 @@
 %    \end{macrocode}
 %
 % \subsection{Assembling the checkbox}
-% \begin{macro}{\@@_checkbox_add:n}
+% \begin{macro}{\@@_checkbox:n}
 %    \begin{macrocode}
-
-\cs_new_protected:Npn \@@_checkbox_add:n #1
+%initial width??
+\cs_new_protected:Npn \@@_checkbox:n #1
   {
     \group_begin:
-    \keys_set_filter:nnnN {pdffield / checkbox }{field}{#1}\l_@@_keys_tmpa_tl
+    \keys_set_filter:nnn {pdffield / checkbox }{field}{#1} %
+    \keys_set_filter:nnn {pdffield / checkbox }{annot}{#1} %
     \str_if_empty:NT \l_@@_field_name_str
       {
         \msg_error:nn {pdffield}{empty-name}
       }
     \exp_args:Nx
-      \pdf_object_if_exist:nTF {@@_checkbox/field/\l_@@_field_name_str}
+      \pdf_object_if_exist:nTF {@@/field/\l_@@_field_name_str}
        {
-          \tl_if_empty:NF \l_@@_keys_tmpa_tl
+          \tl_if_empty:NF \l_@@_field_keys_tmpa_tl
            {
              \msg_warning:nnxx
                {pdffield}
                {field-keys-ignored}
                {\l_@@_field_name_str}
-               {\l_@@_keys_tmpa_tl}
+               {\l_@@_field_keys_tmpa_tl}
            }
        }
        {
-         \keys_set:nV { pdffield/checkbox } \l_@@_keys_tmpa_tl
-         \exp_args:No
-         \@@_checkbox_field_new:n {\l_@@_field_name_str}
+         \@@_checkbox_field:V \l_@@_field_keys_tmpa_t
        }
-    \exp_args:No
-      \@@_checkbox_annot_add:nnnn
-        {\l_@@_field_name_str}
-        {\l_@@_annot_wd_tl }
-        {\l_@@_annot_ht_tl }
-        {\l_@@_annot_dp_tl }
+    \@@_checkbox_annot:V \l_@@_annot_keys_tmpa_t
     \group_end:
   }
 %    \end{macrocode}
 % \end{macro}
 % \subsection{Keys}
-% The size of the checkbox
-%
+% Most keys are inherited from the generic field and annot keys.
 %    \begin{macrocode}
-\tl_new:N \l_@@_annot_ht_tl
-\tl_new:N \l_@@_annot_wd_tl
-\tl_new:N \l_@@_annot_dp_tl
+\keys_define:nn {}
+  { pdffield/checkbox/field .inherit:n = pdffield/field }
+\keys_define:nn {}
+  { pdffield/checkbox/annot .inherit:n = pdffield/annot }
 
-\keys_define:nn { pdffield / checkbox }
-  {
-    ,width  .tl_set:N = \l_@@_annot_wd_tl
-    ,height .tl_set:N = \l_@@_annot_ht_tl
-    ,depth  .tl_set:N = \l_@@_annot_dp_tl
-    ,width  .initial:n = \normalbaselineskip
-    ,height .initial:n = \normalbaselineskip
-    ,depth  .initial:n = 0pt
-  }
 %    \end{macrocode}
 % The names. The main name should not be empty, it is added to the dictionary
 % when the field is created. A new name means a new field.
