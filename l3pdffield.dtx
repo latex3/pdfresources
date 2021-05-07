@@ -501,8 +501,10 @@
 %
 %    \begin{macrocode}
 \str_new:N \l_@@_tmpa_str
+\tl_new:N \l_@@_tmpa_tl
+\tl_new:N  \l_@@_tmpa_keys_tl
 \cs_new_protected:Npn \@@_tmpa:n #1 {}
-\tl_new:N  \l_@@_currentfield_tl
+\cs_new_protected:Npn \@@_tmpa:nn #1 #2 {}
 \tl_new:N  \l_@@_currentparent_tl
 %    \end{macrocode}
 %
@@ -615,9 +617,9 @@
 \pdfdict_new:n   {l_@@/field/AA}
 \bool_new:N \l_@@_root_field_bool
 %    \end{macrocode}
-% \begin{macro}{\@@_field:nn}
+% \begin{macro}{\@@_field:n}
 % \begin{syntax}
-% \cs{@@_field:nn}\Arg{key val list}\Arg{obj name}
+% \cs{@@_field:n}\Arg{obj name}
 % \end{syntax}
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_field:n #1
@@ -657,7 +659,7 @@
           }
       }
     \hook_gput_code:nnn {shipout/lastpage}{pdffield} %xetex needs this ...
-      { \seq_show:c{g_@@_field/Kids/#1_seq}
+      { 
         \pdf_object_write:nx {@@/field/Kids/#1}
           {
             \seq_use:cn{g_@@_field/Kids/#1_seq}{~}
@@ -679,7 +681,7 @@
 % We assume that the annotation should really occupy space on the page and
 % leave vertical mode.
 %
-% \begin{macro}{\@@_annot:n}
+% \begin{macro}{\@@_annot:}
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_annot:
   {
@@ -708,13 +710,13 @@
       {
         \seq_gput_right:cx {g_@@_field/Kids/\l_@@_currentparent_tl _seq}{ \pdfannot_box_ref_last:}
       }
-    \group_end:
   }
-\cs_new_protected:Npn \pdffield_annot:n
+\cs_new_protected:Npn \pdffield_annot:n #1
   {
     \group_begin:
     \keys_set_known:nn {pdffield / annot } {#1}  %preset something? dimensions?
     \@@_annot:
+    \group_end:
   }
 %    \end{macrocode}
 % \end{macro}
@@ -727,11 +729,11 @@
 %    \begin{macrocode}
 \keys_define:nn { pdffield /field }
   {
-    ,parent .tl_set:n = \l_@@_currentparent_tl
+    ,parent .tl_set:N = \l_@@_currentparent_tl
     ,T .code:n =
       {
         \pdf_string_from_unicode:nnN {utf8/string-raw}{#1}\l_@@_tmpa_str
-        \str_if_in:NnT \l_@@_name_str {.}
+        \str_if_in:NnT \l_@@_tmpa_str {.}
           {
             \msg_error:nnx {pdffield}{no-period}{\l_@@_tmpa_str}
           }

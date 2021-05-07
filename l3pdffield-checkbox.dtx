@@ -307,60 +307,15 @@
 %<*package>
 %<@@=pdffield>
 %    \end{macrocode}
-
-
-% \subsection{messages}
+% \subsection{Variables}
+%    \begin{macrocode}
+\bool_new:N \l_@@_checkbox_newfield_bool
+%    \end{macrocode}
+% \subsection{Messages}
 %    \begin{macrocode}
 %    \end{macrocode}
 
 
-% \subsection{The field dictionary}
-% The field dictionary is the main object. It references the
-% actual widget annotations as kids. It is created at the first
-% checkbox with a specific name.
-% To be able to set values from the outside it will use a
-% dictionary which can be filled by key-val.
-
-% If the field object already exists nothing is done.
-% \begin{macro}{\@@_checkbox_field:n}
-% \begin{syntax}
-% \cs{@@_checkbox_field:n}\Arg{key-val}\Arg{name}
-% \end{syntax}
-% \meta{name} should be a PDF text string without period. It identifies the
-% field.
-%    \begin{macrocode}
-\cs_new_protected:Npn \@@_checkbox_field:nn #1
-  {
-    \group_begin:
-    \@@_field:nn
-      {
-        ,#1
-        ,unsetFf={Radio,Pushbutton}
-        ,FT= Btn
-      }
-      {#2}
-    \group_end:
-  }
-
-%    \end{macrocode}
-% \end{macro}
-% \subsection{The annot dictionary}
-%
-% \begin{macro}{\@@_checkbox_annot:n}
-%    \begin{macrocode}
-\cs_new_protected:Npn \@@_checkbox_annot:n #1 %#1 keyval
-  {
-    \group_begin:
-    \@@_annot:n
-      {
-        #1,
-        % handle special AP
-      }
-    \group_end:
-  }
-
-%    \end{macrocode}
-% \end{macro}
 % \subsection{Appearances}
 % We don't try to force a size or content here.
 % The default appearances are a cross (\cs{texttimes}),
@@ -403,7 +358,25 @@
 %    \begin{macrocode}
 \pdfdict_new:n   {l_@@/checkbox/annot/AP}
 %    \end{macrocode}
-%
+%\subsection{Creating the field}
+% A field should be created if the name doesn't exist, or
+% if it is forced
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_checkbox_field:n #1 %name
+  {
+    \bool_if:nT
+      {
+        \l_@@_checkbox_newfield_bool
+        ||
+        ! \pdf_object_if_exist_p:n {@@/field/#1}
+      }
+      {
+        \@@_field:n { #1 }
+      }
+    \keys_set:nn {pdffield/annot}{parent=#1}
+  }
+\cs_generate_variant:Nn \@@_checkbox_field:n {V}
+%    \end{macrocode}
 % \subsection{Assembling the checkbox}
 % \begin{macro}{\@@_checkbox:n}
 %    \begin{macrocode}
@@ -411,28 +384,22 @@
 \cs_new_protected:Npn \@@_checkbox:n #1
   {
     \group_begin:
-    \keys_set_filter:nnn {pdffield / checkbox }{field}{#1} %
-    \keys_set_filter:nnn {pdffield / checkbox }{annot}{#1} %
-    \str_if_empty:NT \l_@@_field_name_str
+    \keys_set_known:nnN {pdffield / checkbox }
       {
-        \msg_error:nn {pdffield}{empty-name}
+        name=checkbox,
+        appearance = checkbox/default,
+        #1
+      }\l_@@_tmpa_keys_tl
+    \keys_set_known:nVN {pdffield / checkbox / field } \l_@@_tmpa_keys_tl \l_@@_tmpa_keys_tl
+    \keys_set_known:nVN {pdffield / checkbox / annot } \l_@@_tmpa_keys_tl \l_@@_tmpa_keys_tl
+    \keys_set:nn{pdffield/field}
+      {
+        ,unsetFf={Radio,Pushbutton}
+        ,FT= Btn
       }
-    \exp_args:Nx
-      \pdf_object_if_exist:nTF {@@/field/\l_@@_field_name_str}
-       {
-          \tl_if_empty:NF \l_@@_field_keys_tmpa_tl
-           {
-             \msg_warning:nnxx
-               {pdffield}
-               {field-keys-ignored}
-               {\l_@@_field_name_str}
-               {\l_@@_field_keys_tmpa_tl}
-           }
-       }
-       {
-         \@@_checkbox_field:V \l_@@_field_keys_tmpa_t
-       }
-    \@@_checkbox_annot:V \l_@@_annot_keys_tmpa_t
+    \pdfdict_get:nnN {l_@@/field}{T}\l_@@_tmpa_tl
+    \@@_checkbox_field:V\l_@@_tmpa_tl
+    \@@_annot:
     \group_end:
   }
 %    \end{macrocode}
@@ -451,34 +418,13 @@
 % The other names can only be set when the field is created,
 % so we put them in the field group.
 %    \begin{macrocode}
-\keys_define:nn { pdffield / checkbox }
+\keys_define:nn { pdffield / checkbox  }
   {
-    ,name .code:n =
-      {
-        \pdf_string_from_unicode:nnN {utf8/string-raw}{#1}\l_@@_field_name_str
-        \str_if_in:NnT \l_@@_field_name_str {.}
-          {
-            \msg_error:nnx {pdffield}{no-period}{\l_@@_field_name_str}
-          }
-        \str_if_empty:NT\l_@@_field_name_str
-          {
-            \msg_error:nn {pdffield}{empty-name}
-          }
-      }
+    ,name .meta:nn          = {pdffield/field}{T=#1}
     ,name .value_required:n = true
-    ,name .initial:n = checkbox
-    ,altname .code:n =
-      {
-        \pdf_string_from_unicode:nnN {utf8/string}{#1}\l_@@_name_tmpa_str
-        \pdfdict_put:nnx { l_@@/checkbox/field }{TU}{\l_@@_name_tmpa_str}
-      }
-    ,altname .groups:n = {field}
-    ,mappingname .code:n =
-      {
-        \pdf_string_from_unicode:nnN {utf8/string}{#1}\l_@@_name_tmpa_str
-        \pdfdict_put:nnx { l_@@/checkbox/field }{TM}{\l_@@_name_tmpa_str}
-      }
-    ,mappingname .groups:n = {field}
+    ,name .initial:n        = checkbox
+    ,altname .meta:nn       = {pdffield/field}{TU=#1}
+    ,mappingname .meta:nn   = {pdffield/field}{TM=#1}
   }
 %    \end{macrocode}
 
@@ -489,15 +435,13 @@
    ,checked .choice:
    ,checked / false .code:n =
      {
-       \pdfdict_put:nnn {l_@@/checkbox/field}{V}{/Off}
-       \pdfdict_put:nnn {l_@@/checkbox/annot}{AS}{/Off}
-       \pdfdict_put:nnn {l_@@/checkbox/field}{DV}{/Off}
+       \keys_set:nn {pdffield/field}{V=/Off,DV=/Off}
+       \keys_set:nn {pdffield/annot}{AS=Off}
      }
    ,checked / true .code:n =
      {
-       \pdfdict_put:nnn {l_@@/checkbox/field}{V}{/Yes}
-       \pdfdict_put:nnn {l_@@/checkbox/annot}{AS}{/Yes}
-       \pdfdict_put:nnn {l_@@/checkbox/field}{DV}{/Yes}
+       \keys_set:nn {pdffield/field}{V=/Yes,DV=/Yes}
+       \keys_set:nn {pdffield/annot}{AS=Yes}
      }
    ,checked .default:n = {true}
    ,checked .initial:n = {false}
@@ -507,36 +451,14 @@
 %    \begin{macrocode}
 \keys_define:nn { pdffield / checkbox }
   {
-    ,setfieldflags .code:n =
-      {
-          \clist_map_inline:nn {#1}
-           {
-             \bitset_set_true:Nn \l_@@_Ff_bitset {##1}
-           }
-      }
-    ,setfieldflags .groups:n = {field}
-    ,unsetfieldflags .code:n =
-      {
-          \clist_map_inline:nn {#1}
-           {
-             \bitset_set_false:Nn \l_@@_Ff_bitset {##1}
-           }
-      }
-    ,unsetfieldflags .groups:n = {field}
-    ,setannotflags .code:n =
-      {
-          \clist_map_inline:nn {#1}
-           {
-             \bitset_set_true:Nn \l_@@_F_bitset {##1}
-           }
-      }
-    ,unsetannotflags .code:n =
-      {
-          \clist_map_inline:nn {#1}
-           {
-             \bitset_set_false:Nn \l_@@_F_bitset {##1}
-           }
-      }
+    ,setfieldflags .meta:nn =
+      { pdffield/field }{setFf={#1}}
+    ,unsetfieldflags .meta:nn =
+      { pdffield/field }{setFf={#1}}
+    ,setannotflags .meta:nn =
+      { pdffield/annot }{setF={#1}}
+    ,unsetannotflags .meta:nn =
+      { pdffield/annot }{unsetF={#1}}
   }
 
 \keys_define:nn { pdffield / checkbox }
@@ -545,47 +467,43 @@
       {
         \pdfxform_if_exist:nTF {  @@_#1/Yes }
           {
-            \pdfdict_put:nnn {l_@@/checkbox/annot/AP}
-              {N}
+            \keys_set:nn{pdffield/annot}
               {
-                 <<
+               AP/N =
+                {
+                  <<
                     /Yes ~ \pdfxform_ref:n { @@_#1/Yes}
                     /Off ~ \pdfxform_ref:n { @@_#1/Off}
-                 >>
+                  >>
+                }
               }
           }
           {
             \msg_error:nnnn{pdffield}{appearance-missing}{#1}{normal}
           }
       },
-    appearance .initial:n = checkbox/default,
   }
 
 \keys_define:nn { pdffield / checkbox }
   {
     rollover-appearance .code:n = %value is a name of an appearance
       {
-       \tl_if_empty:nTF {#1}
-         {
-           \pdfdict_remove:nn {l_@@/checkbox/annot/AP} {R}
-         }
-         {
-           \pdfxform_if_exist:nTF {  @@_#1/Yes }
-             {
-               \pdfdict_put:nnn {l_@@/checkbox/annot/AP}
-                 {R}
-                 {
-                    <<
-                       /Yes ~ \pdfxform_ref:n { @@_#1/Yes}
-                       /Off ~ \pdfxform_ref:n { @@_#1/Off}
-                    >>
-                 }
-              }
+        \pdfxform_if_exist:nTF {  @@_#1/Yes }
+          {
+            \key_set:nn{pdffield/annot}
               {
-                \msg_warning:nnnn{pdffield}{appearance-missing}{#1}{rollover}
+               AP/R =
+                {
+                  <<
+                    /Yes ~ \pdfxform_ref:n { @@_#1/Yes}
+                    /Off ~ \pdfxform_ref:n { @@_#1/Off}
+                  >>
+                }
               }
-
-         }
+          }
+          {
+            \msg_error:nnnn{pdffield}{appearance-missing}{#1}{normal}
+          }
       },
   }
 
@@ -593,72 +511,63 @@
   {
     down-appearance .code:n = %value is a name of an appearance
       {
-       \tl_if_empty:nTF {#1}
-         {
-           \pdfdict_remove:nn {l_@@/checkbox/annot/AP} {D}
-         }
-         {
-           \pdfxform_if_exist:nTF {  @@_#1/Yes }
-            {
-              \pdfdict_put:nnn {l_@@/checkbox/annot/AP}
-                {D}
+        \pdfxform_if_exist:nTF {  @@_#1/Yes }
+          {
+            \key_set:nn{pdffield/annot}
+              {
+               AP/D =
                 {
-                   <<
-                      /Yes ~ \pdfxform_ref:n { @@_#1/Yes}
-                      /Off ~ \pdfxform_ref:n { @@_#1/Off}
-                   >>
+                  <<
+                    /Yes ~ \pdfxform_ref:n { @@_#1/Yes}
+                    /Off ~ \pdfxform_ref:n { @@_#1/Off}
+                  >>
                 }
-            }
-            {
-              \msg_warning:nnnn{pdffield}{appearance-missing}{#1}{down}
-            }
-         }
+              }
+          }
+          {
+            \msg_error:nnnn{pdffield}{appearance-missing}{#1}{normal}
+          }
       },
   }
 %    \end{macrocode}
 %
 %  Keys for the AA dictionary. They all trigger javascript option.
-%  \begin{macro}{\@@_define_AAaction_key:nnn}
+%
 %    \begin{macrocode}
-\pdfdict_new:n {l_@@/checkbox/annot/AA}
-\pdfdict_new:n {l_@@/checkbox/field/AA}
-
-\cs_new_protected:Npn \@@_define_AAaction_key:nnn #1 #2 #3 %#1 key, #2 pdf, #3 dict
+\cs_set_protected:Npn \@@_tmpa:nn #1 #2
   {
     \keys_define:nn { pdffield / checkbox }
       {
-         #1 .code:n =
-           {
-             \pdf_string_from_unicode:nnN {utf8/string}{##1}\l_@@_tmpa_str
-             \str_if_empty:NTF \l_@@_tmpa_str
-               {
-                 \pdfdict_remove:nn {l_@@/checkbox/#3/AA}{#2}
-               }
-               {
-                 \pdfdict_put:nnx {l_@@/checkbox/#3/AA}
-                  {#2}
-                  {<</S/JavaScript/JS\l_@@_tmpa_str>>}
-               }
-           },
-        #1 .groups:n = {#3}
+         #1 .meta:nn =
+           {pdffield/field}{#2={##1}},
       }
   }
-\@@_define_AAaction_key:nnn {keystroke}{K}{field}
-\@@_define_AAaction_key:nnn {format}   {F}{field}
-\@@_define_AAaction_key:nnn {validate} {V}{field}
-\@@_define_AAaction_key:nnn {calculate}{C}{field}
-\@@_define_AAaction_key:nnn {onfocus}  {Fo}{annot}
-\@@_define_AAaction_key:nnn {onblur}   {Bl}{annot}
-\@@_define_AAaction_key:nnn {onmousedown}{D}{annot}
-\@@_define_AAaction_key:nnn {onmouseup}{U}{annot}
-\@@_define_AAaction_key:nnn {onenter}  {E}{annot}
-\@@_define_AAaction_key:nnn {onexit}   {X}{annot}
+\@@_tmpa:nn {keystroke}{K}
+\@@_tmpa:nn {format}   {F}
+\@@_tmpa:nn {validate} {V}
+\@@_tmpa:nn {calculate}{C}
+
+\cs_set_protected:Npn \@@_tmpa:nn #1 #2
+  {
+    \keys_define:nn { pdffield / checkbox }
+      {
+         #1 .meta:nn =
+           {pdffield/annot}{#2={##1}},
+      }
+  }
+
+\@@_tmpa:nn {onfocus}  {Fo}
+\@@_tmpa:nn {onblur}   {Bl}
+\@@_tmpa:nn {onmousedown}{D}
+\@@_tmpa:nn {onmouseup}{U}
+\@@_tmpa:nn {onenter}  {E}
+\@@_tmpa:nn {onexit}   {X}
 %    \end{macrocode}
 % \end{macro}
 % \subsection{user commands}
 % \begin{macro}{\pdffield_checkbox:n,\pdffield_setup:nn}
 %    \begin{macrocode}
-\cs_set_eq:NN \pdffield_checkbox:n \@@_checkbox_add:n
+\cs_set_eq:NN \pdffield_checkbox:n \@@_checkbox:n
 
 \cs_new_protected:Npn \pdffield_setup:nn #1 #2
  {
