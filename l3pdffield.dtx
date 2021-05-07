@@ -73,21 +73,31 @@
 % \maketitle
 % \begin{documentation}
 % \section{\pkg{l3pdffield} Introduction}
-% The implementation of form fields in hyperref has some bugs, see for example
-% \url{https://github.com/latex3/hyperref/issues/94}. This package is a first step
+% The implementation of form fields in hyperref has some bugs\footnote{see for example
+% \url{https://github.com/latex3/hyperref/issues/94}}. This package is a first step
 % towards the goal to review and improve the code of form fields.
 %
 % Like the \pkg{pdfmanagement-testphase} package itself it is a temporary package:
-% the definite home of the code is not yet decided.
+% the definite home of the code is not yet decided, and during the development
+% changes in the interfaces are possible.
 %
-% It handles for now \emph{only} checkboxes, other form fields like pushbutton,
-% radio buttons or text fields will follow later. As currently no fonts are used,
-% it doesn't relies on the hyperref code
-% to initialize the form, but it can be used with hyperref.
+% The package itself is currently loaded with
+% \begin{verbatim}
+% \usepackage{l3pdffield-testphase}
+% \end{verbatim}
+%
+% The code is splitted into various submodules. \texttt{l3pdffield}
+% contains the basic commands to create a form field. The code related to field types
+% like checkboxes are in \texttt{l3pdffield-\emph{type}}, for example
+% \texttt{l3pdffield-checkbox}. Currently only checkboxes have been implemented,
+% other form fields like pushbutton,
+% radio buttons or text fields will follow later.
+% The code doesn't rely on to initialize the form,
+% but it can be used with hyperref.
 %
 % The code requires the new PDF management. The code makes use of
-% \pkg{l3pdfxform} to create the Xobjects. This code doesn't support yet the
-% the dvips backend.
+% \pkg{l3pdfxform} to create the form Xobjects of the appearances.
+% This code doesn't support yet the the dvips backend.
 %
 % The code targets PDF~2.0. This doesn't mean that it won't work in older
 % PDF versions, but it tries to implement requirements needed or recommended
@@ -99,8 +109,9 @@
 % \item Not every PDF viewer supports form fields or all types and features.
 % \item The handling can depend on settings in the PDF viewer. In adobe reader for
 % example I had to disable an option to avoid that it tries to create an appearance
-% itself
-% \item Standards like pdf/A disable form fields too (as you typically can't change the PDF).
+% itself.
+% \item Standards like pdf/A disable some features of form fields like javascript actions
+%  (as you typically can't change the PDF).
 % \end{itemize}
 %
 % If \pkg{hyperref} is loaded before
@@ -168,24 +179,27 @@
 % or \texttt{Tx} for a textfield. The type can be set for the parent and then inherited.
 % The fields in a fieldset can have different types.
 %
-% \subsection{Appearances}
+% \subsection{The look of a field: Appearances and other settings}
 %
-% An field annotation may define as many as three separate appearances:
+% The look of widget annotation of a field can be set with various keys. The keys developed over
+% time and some of them superseed older ones. There is for example the simple
+% |/Border|, the more sophisticated |/BS| (\enquote{border style dictionary}),
+% the \enquote{dynamic appearance dictionary} |MK|, with lots of keys,
+% and the appearance dictionary |/AP| which
+% may define as many as three separate appearances:
 % the normal appearance (required), the rollover appearance and the down appearance.
-%
-% An appearance can be a simple form XObjects, but
-% in some cases the annotation can have different \emph{appearance states}: a checkbox
+% Such an appearance can be a simple form XObjects%
+%   \footnote{Such form XObjects are small pictures stored in the PDF which
+%       can be referenced in various part of the PDF. They can be
+%       created with the commands of the \pkg{l3pdfxform} package.}%
+% , but in some cases the annotation can have different \emph{appearance states}:
+% a checkbox
 % for example can be checked or unchecked, in this case the appearances
 % are dictionaries which
 % maps state names like |/Yes| and |/Off| to form XObjects.
 %
-% Such form XObjects are small pictures stored in the PDF which
-% can be referenced
-% in various part of the PDF. They can be created with the commands of
-% the \pkg{l3pdfxform} package.
-%
 % The annotations cover a rectangular area on
-% the page and the form XObjects are squeezed into this rectangle.
+% the page and form XObjects appearances are squeezed into this rectangle.
 % So for the best result
 % both should have the same ratio of width and height. Simple plain backgrounds can
 % also be created in large size and reused for various annotations.
@@ -193,13 +207,14 @@
 % create a new appearance.
 %
 %
-% In PDF 2.0 widget annotations must have at least one appearance (unless the size
-% of the annotation is zero) and the keys \enquote{\itshape C, IC, Border,
+% In PDF 2.0 widget annotations must have at least a normal |/AP| appearance
+% (unless the size  of the annotation is zero) and the keys \enquote{\itshape C, IC, Border,
 % BS, BE, BM, CA, ca, H, DA, Q,
 % DS, LE, LL, LLE, and Sy shall be ignored}. But it is quite unclear if
 % PDF Viewer honor this, and if this make sense e.g. for text fields which require
 % a DA entry. It is also not clear how appearances and the entries of the MK dictionary
-% are related in a form field.
+% are related in a form field.  Tests with some PDF viewers
+% are needed here.
 %
 %
 % \section{Commands}
@@ -944,16 +959,7 @@
 \clist_map_inline:nn {Fo,Bl,D,U,E,X,PO,PC,PV,PI}{\@@_tmpa:n{#1}}
 %    \end{macrocode}
 %
-% \subsection{User commands}
-% Some commands to setup fields will be needed, but
-% not sure yet where. 
-% \begin{macro}{\pdffield_setup:nn}
 %    \begin{macrocode}
-%
-%\cs_new_protected:Npn \pdffield_setup:nn #1 #2
-% {
-%   \keys_set:nn {pdffield / #1 } {#2}
-% }
 %</package>
 %    \end{macrocode}
 % \end{macro}
