@@ -218,7 +218,7 @@
 %
 %
 % \section{Commands}
-% \begin{function}{\pdffield_field:nn}
+% \begin{function}{\pdffield_field:nn,\pdffield_field:Vn}
 % \begin{syntax}
 %  \cs{pdffield_field:nn}\Arg{key val list}\Arg{name}
 % \end{syntax}
@@ -229,10 +229,11 @@
 % the name with a module prefix to avoid name clashes, so e.g. |mymodule/field/1| or
 % |mymodule/field/week|.
 %
-% The list of allowed keys is described below.
+% The list of handled keys is described below.
 % Typically the \meta{key val list} should at least set the name |T|, fields that
-% are kids in a fieldset must set the |Parent| key, this should point to a field
-% declared before.
+% are kids in a fieldset must set the |parent| key, this should point to a field
+% declared before. There will be no error if the \meta{key val list}
+% contains unknown keys.
 %
 % The command is meant as a basic command to build more complex variants like
 % checkbox or textfields. For this reason it doesn't check if
@@ -241,7 +242,7 @@
 % If you create a button field (Btn) and set MaxLen (which is only known for text
 % fields), it will not complain.
 %
-% Root fields (fields without Parent) are added automatically to the
+% Root fields (fields without parent) are added automatically to the
 % Catalog/AcroForm dictionary with
 %
 %
@@ -251,7 +252,7 @@
 %
 % \end{function}
 %
-% \begin{function}{\pdffield_annot:n}
+% \begin{function}{\pdffield_annot:n,\pdffield_annot:V}
 % \begin{syntax}
 %  \cs{pdffield_field:nn}\Arg{key val list}
 % \end{syntax}
@@ -261,6 +262,7 @@
 % by using |\pdfannot_dict_put:nnn {widget}...|.
 % But to correctly setup the parent/kid relationship some additional wrapper code is needed.
 % The command also setup dictionaries to fill the |AP|, |MK| and |AA| dictionaries.
+% There will be no error if the \meta{key val list} contains unknown keys.
 % \end{function}
 %
 %
@@ -501,6 +503,7 @@
 \str_new:N \l_@@_tmpa_str
 \cs_new_protected:Npn \@@_tmpa:n #1 {}
 \tl_new:N  \l_@@_currentfield_tl
+\tl_new:N  \l_@@_currentparent_tl
 %    \end{macrocode}
 %
 % \subsection{messages}
@@ -617,19 +620,26 @@
 % \cs{@@_field:nn}\Arg{key val list}\Arg{obj name}
 % \end{syntax}
 %    \begin{macrocode}
-\cs_new_protected:Npn \@@_field:nn #1 #2
+\cs_new_protected:Npn \@@_field:n #1
   {
-    \group_begin:
-    \pdf_object_new:nn {@@/field/#2}      {dict}
-    \pdf_object_new:nn {@@/field/Kids/#2} {array}
-    \seq_new:c {g_@@_field/Kids/#2_seq}
-    \tl_set:Nn\l_@@_currentfield_tl {#2}
-    \bool_set_true:N \l_@@_root_field_bool
-    \keys_set:nn {pdffield / field } {#1} %filter? ..., fills l_@@/field
+    \pdf_object_new:nn {@@/field/#1}      {dict}
+    \pdf_object_new:nn {@@/field/Kids/#1} {array}
+    \tl_if_empty:NF \l_@@_currentparent_tl
+      {
+        \pdfdict_put:nnx { l_@@/field }{Parent}
+          {\pdf_object_ref:n{@@/field/\l_@@_currentparent_tl}}
+        \seq_gput_right:cx {g_@@_field/Kids/\l_@@_currentparent_tl _seq}
+          { \exp_args:Ne \pdf_object_ref:n{@@/field/#1}}
+        \pdfmanagement_add:nnx
+          { Catalog / AcroForm }
+          { Fields }
+          {\pdf_object_ref:n {@@/field/#1} }
+      }
+    \seq_new:c {g_@@_field/Kids/#1_seq}
     \pdfdict_put:nnx {l_@@/field}
       {Kids}
       {
-        \pdf_object_ref:n {@@/field/Kids/#2}
+        \pdf_object_ref:n {@@/field/Kids/#1}
       }
     \pdfdict_put:nnx {l_@@/field}
       {Ff}
@@ -647,23 +657,21 @@
           }
       }
     \hook_gput_code:nnn {shipout/lastpage}{pdffield} %xetex needs this ...
-      { \seq_show:c{g_@@_field/Kids/#2_seq}
-        \pdf_object_write:nx {@@/field/Kids/#2}
+      { \seq_show:c{g_@@_field/Kids/#1_seq}
+        \pdf_object_write:nx {@@/field/Kids/#1}
           {
-            \seq_use:cn{g_@@_field/Kids/#2_seq}{~}
+            \seq_use:cn{g_@@_field/Kids/#1_seq}{~}
           }
       }
-    \pdf_object_write:nx {@@/field/#2} { \pdfdict_use:n {l_@@/field} }
-    \bool_if:NT \l_@@_root_field_bool
-     {
-       \pdfmanagement_add:nnx
-        { Catalog / AcroForm }
-        { Fields }
-        {\pdf_object_ref:n {@@/field/#2} }
-     }
+    \pdf_object_write:nx {@@/field/#1} { \pdfdict_use:n {l_@@/field} }
+  }
+\cs_new_protected:Npn \pdffield_field:nn #1 #2
+  {
+    \group_begin:
+    \keys_set_known:nn {pdffield / field } {#1}
+    \@@_field:n {#2}
     \group_end:
   }
-\cs_set_eq:NN \pdffield_field:nn \@@_field:nn
 %    \end{macrocode}
 % \end{macro}
 %
@@ -673,10 +681,8 @@
 %
 % \begin{macro}{\@@_annot:n}
 %    \begin{macrocode}
-\cs_new_protected:Npn \@@_annot:n #1 % keys
+\cs_new_protected:Npn \@@_annot:
   {
-    \group_begin:
-    \keys_set:nn {pdffield / annot } {#1}  %preset something? dimensions?
     \pdfmeta_standard_verify:nF
       {annot_flags}
       {
@@ -704,7 +710,12 @@
       }
     \group_end:
   }
-\cs_set_eq:NN \pdffield_annot:n \@@_annot:n
+\cs_new_protected:Npn \pdffield_annot:n
+  {
+    \group_begin:
+    \keys_set_known:nn {pdffield / annot } {#1}  %preset something? dimensions?
+    \@@_annot:
+  }
 %    \end{macrocode}
 % \end{macro}
 %
@@ -716,13 +727,7 @@
 %    \begin{macrocode}
 \keys_define:nn { pdffield /field }
   {
-    ,parent .code:n =
-      {
-        \pdfdict_put:nnx { l_@@/field }{Parent}
-          {\pdf_object_ref:n{@@/field/#1}}
-        \seq_gput_right:cx {g_@@_field/Kids/#1_seq}
-          { \exp_args:Ne \pdf_object_ref:n{@@/field/\l_@@_currentfield_tl}}
-      }
+    ,parent .tl_set:n = \l_@@_currentparent_tl
     ,T .code:n =
       {
         \pdf_string_from_unicode:nnN {utf8/string-raw}{#1}\l_@@_tmpa_str
