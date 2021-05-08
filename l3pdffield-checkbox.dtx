@@ -105,13 +105,17 @@
 %
 % \subsection{Keys}
 %
-% The new checkbox commands accept all field and annot keys from l3pdffield.
+% The new checkbox commands accept almost all field and annot keys from l3pdffield.
+% A few keys are disabled or are forced to specific values.
 % A number of keys have more user friendly alias names, which roughly follow the
 % naming used in hyperref for the analog feature. Some keys have a more checkbox specific
 % behaviour or have other defaults than with the basic commands. Additionally there
 % are a small number of keys specific to a checkbox.
 %
-% All the difference are described in the following paragraphs.
+%
+% Disabled keys are |V|, |DV|, |AS|, use checked instead.
+% |FT| is ignored/overwritten.
+%
 %
 % \DescribeCheckboxkey{name}\DescribeCheckboxkey{T}
 % This sets like the |T| key for fields the partial name of the field. The value
@@ -125,19 +129,21 @@
 % is always a terminal field.
 %
 % \DescribeCheckboxkey{parent} This is only needed if the field should be part
-% of a larger fieldset. The value should be a field name of field created previously
+% of a larger fieldset. The value should be a field ID of field created previously
 % with \cs{pdffield_field:nn}.
 %
-% \DescribeCheckboxkey{altname} This sets an alternative name for user interaction.
+% \DescribeCheckboxkey{altname} This is an alias for the |TU| key and sets
+% an alternative name for user interaction.
 % This name can only be set at the first checkbox instance, when the field is initialized.
 %
-% \DescribeCheckboxkey{mappingname} This sets an alternative name for export.
+% \DescribeCheckboxkey{mappingname} This is an alias for the |TM| key and
+% sets an alternative name for export.
 % This name can only be set at the first checkbox instance, when the field is initialized.
 %
 % \DescribeCheckboxkey{width}
 % \DescribeCheckboxkey{height}
 % \DescribeCheckboxkey{depth} These keys allow to set the dimensions of checkbox instance.
-% The value should be a command that expands to a dimension expression. By default
+% The value should be a dimension expression. By default
 % |width| and |height| use \cs{normalbaselineskip}, the |depth| is zero.
 %
 % \DescribeCheckboxkey{appearance} This key sets the normal appearance. It takes as value a
@@ -162,28 +168,26 @@
 % and the |/AS| key of the annotation instance. It is possible to use different
 % values for different instances, if one wants to confuse the user.
 %
+%
 % \DescribeCheckboxkey{setfieldflags}
 % \DescribeCheckboxkey{unsetfieldflags}
-% These keys allow to set or unset the field flags.  They expect a comma lists of
-% flag names. Allowed names |ReadOnly|, |Required|,
-% |NoExport|, |Multiline|, |Password|,    |NoToggleToOff|, |Radio|, |Pushbotton|,
-% |Combo|, |Edit|,   |Sort|, |FileSelect|,  |MultiSelect|, |DoNotSpellCheck|,
-% |DoNotScroll|, |Comb|,  |RadiosInUnison|, |RichText|, |CommitOnSelChange|.
-%
-% From these |Radio|, |Pushbotton| are set automatically automatically by the code
-% as this is required for a checkbox. Not every one from the rest makes sense for
-% checkboxes but the same key will be used for other fields too.
-% Check the PDF reference to decide which one to set or unset.
+% These keys allow to set or unset the field flags. This is are alias keys for
+% |setFf| and |unsetFf|. They expect a comma lists of
+% flag names. For checkboxes only  |ReadOnly|, |Required| and |NoExport| make sense.
+% |Radio|, |Pushbotton| are set automatically automatically by the code
+% as this is required for a checkbox.
 %
 % \begin{checkboxkey}{keystroke,format,validate,calculate}
-% These keys add the |/K, |/F, |/V|, |/C| key to the |/AA| dictionary of the field object.
+% These keys are aliases for |AA/K|, |AA/F|, |AA/V|, |AA/C|.
+% They add the |/K, |/F, |/V|, |/C| key to the |/AA| dictionary of the field object.
 % Their value should be javascript code. The |/AA| dictionary is suppressed
 % if a pdf/A standard is set. These keys are probably not of much used with a checkbox.
 % \end{checkboxkey}
 %
 % \vspace{2\baselineskip}
 % \begin{checkboxkey}{onfocus,onblur,onmousedown,onmouseup,onenter,onexit}
-% These keys adds the |/F, |/Bl, |/D|, |/U|, |E| and |X| key to the |/AA| dictionary
+% These keys are aliases for the |AA/F, |AA/Bl, |AA/D|, |AA/U|, |AA/E| and |AA/X|
+% keys. They add the |/F, |/Bl, |/D|, |/U|, |E| and |X| key to the |/AA| dictionary
 % of the widget  annotation (the checkbox instance) object.
 % Their value should be javascript code. The |/AA| dictionary
 % is suppressed if a pdf/A standard is set.
@@ -196,7 +200,7 @@
 %
 % \subsection{Using with hyperref}
 % The \cs{CheckBox} command from hyperref also prints a label, something that the
-% command here don't do. A redefinition like the following should allow to \cs{CheckBox}
+% command here doesn't do. A redefinition like the following should allow \cs{CheckBox}
 % to use the commands of this module. Be aware that the behaviour will not be identical!
 % Not every setting and key from \pkg{hyperref} has been copied.
 %
@@ -207,111 +211,23 @@
 % \end{verbatim}
 %
 % \subsection{Some background}
-% Form fields consist of a field object and number of instances of the field:
-% A checkbox can appear on more than one page or location and if one instance
+% For some general background about fieldsets, fields and field annotations, please
+% check \pkg{l3pdffield}. Here are only some remarks about the special case of
+% checkboxes.
+%
+% A checkbox consist of a field along with one or more field annotations.
+% The annotations can appear on more than one page or locations and if one instance
 % is checked all other instances follows and are checked too.
 %
-% All instances are in this case widget annotations and are referenced in the Kid array of the field
-% object\footnote{Fields can actually build a tree: between the root field and
-% widget annotations there can be more fields. The last one before the widget is
-% the \emph{terminal} field, but unless a sensible
-% use case comes up, I will assume that the widget annotations are direct children of
-% the root and that the root field is the terminal field.}.
-% This means that the code has to collect all the children and write
-% out the field object at the end of the document.
-%
-% If a field has only one children the content of the field dictionary and the
-% widget annotation dictionary can be merged---some examples in the PDF reference
-% show such merged dictionaries---but the code here keeps them separate, at the end
-% this is clearer.
-%
-% All the root field objects must be referenced in the AcroForm dictionary in the
-% Fields entry. This can be done with
-%
-% \begin{verbatim}
-% \pdfmanagement_add:nnx{Catalog/AcroForm}{Fields}{<obj ref>}
-% \end{verbatim}
-%
-% A checkbox has two different looks: checked and unchecked. The current hyperref
-% implementation uses symbolic names for the two states and and adds some
+% A checkbox has two different looks: checked and unchecked. The hyperref
+% implementation uses symbolic names for the two states and adds some
 % values with the /MK key and lets the PDF viewer
-% create a look from them. But this doesn't work reliably. Also newer PDF versions
+% create a look from them. But this doesn't work reliably and is one of the reasons
+% why a reimplementation is needed. Also newer PDF versions
 % deprecate the /NeedAppearances setting and require that such a look,
-% an \enquote{appearance}, is given as form XObjects:
-% such form XObjects are like small pictures stored in the PDF and can be referenced
-% in various part of the PDF. They can be created with the commands of
-% the \pkg{l3pdfxform} package.
+% an \enquote{appearance}, is given as form XObjects.
+% So the code forces the use of two appearances. 
 %
-% The checkbox instances---the widget annotations---cover a rectangular area on
-% the page, the XObjects are squeezed into this rectangle. So for the best result
-% both should have the same ratio of width and height.
-% XObjects used as appearances can not be rotated, if needed one has to
-% create a new appearance.
-%
-% \subsubsection{The field dictionary}
-%
-% The field dictionary shall or can have the following entries
-%
-% \begin{description}
-% \item[FT] required for terminal fields (here for the root field),
-%  the value is always \texttt{Btn}, so this entry is set by the code.
-% \item[Parents] currently irrelevant as we don't have a field hierarchy.
-% \item[Kids] an array. Contains references to the children, in our case to
-% the widget annotations. The array is build by the code.
-%
-% \item[T] required, the name, a (unique) text string without a period.
-% This field is a mandatory argument which must be given by the user.
-% The value should be passed through a suitable string conversion and checked
-% if it contains a period (which is not allowed).
-%
-% \item[TU,TM] optional, alternative names for user messages (TU) and export (TM).
-% As these fields are optional they should be set by some key-val option.
-%
-% \item[Ff] A bitset, two flags must be unset for a checkbox (Radio and Pushbotton),
-% for the rest we need a keyval interface.
-%
-% \item[V] describes the initial value, for checkboxes is should be either |/Yes|
-%   or |/Off|. The initial value will be |/Yes|, keys are need to set both the local
-%   and the default value.
-%
-% \item[DV] optional, the default value after a reset. Should  like |V| be either
-% |/Yes| or |/Off|.
-%
-% \item[AA] An action dictionary. For this we need a special command to setup such
-% dictionaries, so that they then can be used in various places.
-%
-% \end{description}
-%
-% \subsubsection{The widget annotation dictionary}
-%
-% \begin{description}
-% \item[Type] Value: |/Annot|, set automatically
-% \item[Subtype] Value: |/Widget| this is added automatically.
-%  We use an internal dictionary which is locally copied over the one from l3pdfannot.
-%  It can be filled with keyval options.
-% \item[Parent] The reference to the field, automatically added.
-% \item[Rect] the size, calculated from the box size
-% \item[Contents] a text string, not really needed but an optional key should allow to
-% set it,
-% \item[AP] the appearance dictionary. It should look like this
-%  |/AP <</N <</Yes 17 0 R/Off 15 0 R>>>>|. I need to test if it makes sense here to
-%  have a |/R| and |/D| entry too. The objects refer to suitable xforms.
-% \item[AS] should be either |/Yes| or |/Off|, and sensibly by default be
-%  the same as the V entry in the field dictionary. If they differ the AS entry wins.
-%
-% \item[A] Action, this must be checked.
-% \item[AA] additional actions. This must be checked too.
-%
-% \item[Border, C, OC, AF, BM, Lang, P, NM, M, F, BS, H]: These are not specifically
-% needed for checkbox. An interface to add something to the used annot dictionary
-% is needed (or already there), but probably no special key-val support for now.
-%
-% \item[MK] this is what hyperref uses to set the appearance, but I
-%  explicitly leave it out and use |AP|.
-%
-% \item[Q] (alignment), used by hyperref but not relevant as we don't have variable
-% text here.
-% \end{description}
 % \end{documentation}
 %
 % \begin{implementation}
@@ -401,12 +317,20 @@
       {
         name=checkbox,
         appearance = checkbox/default,
-        width =\baselineskip,
-        height=\baselineskip,
+        width =\normalbaselineskip,
+        height=\normalbaselineskip,
         #1
       }\l_@@_tmpa_keys_tl
-    \keys_set_known:nVN {pdffield / checkbox / field } \l_@@_tmpa_keys_tl \l_@@_tmpa_keys_tl
-    \keys_set_known:nVN {pdffield / checkbox / annot } \l_@@_tmpa_keys_tl \l_@@_tmpa_keys_tl
+    \keys_define:nn {pdffield / field }
+     {
+       V  .undefine: , DV .undefine:
+     }
+    \keys_define:nn {pdffield / annot }
+     {
+       AS .undefine:
+     }
+    \keys_set_known:nVN {pdffield / field } \l_@@_tmpa_keys_tl \l_@@_tmpa_keys_tl
+    \keys_set_known:nVN {pdffield / annot } \l_@@_tmpa_keys_tl \l_@@_tmpa_keys_tl
     \keys_set:nn{pdffield/field}
       {
         ,unsetFf={Radio,Pushbutton}
@@ -421,18 +345,10 @@
 %    \end{macrocode}
 % \end{macro}
 % \subsection{Keys}
-% Most keys are inherited from the generic field and annot keys.
-%    \begin{macrocode}
-\keys_define:nn {}
-  { pdffield/checkbox/field .inherit:n = pdffield/field }
-\keys_define:nn {}
-  { pdffield/checkbox/annot .inherit:n = pdffield/annot }
-
-%    \end{macrocode}
-% The names. The main name should not be empty, it is added to the dictionary
-% when the field is created. A new name means a new field.
-% The other names can only be set when the field is created,
-% so we put them in the field group.
+% Most keys are inherited simply the ones from the generic field and annot keys.
+% The main name should not be empty. A new name means a new field.
+% The other names can only be set when the field is created. Perhaps some filter
+% to warn could be useful?
 %    \begin{macrocode}
 \keys_define:nn { pdffield / checkbox  }
   {

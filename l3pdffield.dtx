@@ -139,6 +139,11 @@
 % tree a \emph{fieldset}, nodes \emph{fields} and the widget annotation
 % \emph{field annotations}.
 %
+% If a field has only one child annotation the content of the field dictionary and the
+% widget annotation dictionary can be merged---some examples in the PDF reference
+% show such merged dictionaries---but the code here keeps them separate, at the end
+% this is clearer.
+%
 % A simple example would look like this
 %
 %  \begin{tikzpicture}[level 2/.style={level distance=7mm},
@@ -232,8 +237,7 @@
 % The list of handled keys is described below.
 % Typically the \meta{key val list} should at least set the name |T|, fields that
 % are kids in a fieldset must set the |parent| key, this should point to a field
-% declared before. There will be no error if the \meta{key val list}
-% contains unknown keys.
+% declared before.
 %
 % The command is meant as a basic command to build more complex variants like
 % checkbox or textfields. For this reason it doesn't check if
@@ -262,7 +266,6 @@
 % by using |\pdfannot_dict_put:nnn {widget}...|.
 % But to correctly setup the parent/kid relationship some additional wrapper code is needed.
 % The command also setup dictionaries to fill the |AP|, |MK| and |AA| dictionaries.
-% There will be no error if the \meta{key val list} contains unknown keys.
 % \end{function}
 %
 %
