@@ -220,9 +220,9 @@
 % \section{Commands}
 % \begin{function}{\pdffield_field:nn,\pdffield_field:Vn}
 % \begin{syntax}
-%  \cs{pdffield_field:nn}\Arg{key val list}\Arg{name}
+%  \cs{pdffield_field:nn}\Arg{key val list}\Arg{field ID}
 % \end{syntax}
-% This creates a new field. \meta{name} will be used to create and
+% This creates a new field. \meta{field ID} will be used to create and
 % reference the needed objects but it is not the direct object name, so
 % |pdf_object_ref:n| can not be used to access (and there will not
 % clash with object names). It is recommended to start
@@ -276,7 +276,7 @@
 % \begin{tabular}{>{\ttfamily}lllll}
 % \toprule
 % key      & value      & required & inheritable &remark\\\midrule
-% parent   & field name & for non-root fields &     \\
+% parent   & field ID & for non-root fields &     \\
 % T        & string   & mostly   &             \\
 % TU       & string   &          &             \\
 % TM       & string   &          &             \\
@@ -303,7 +303,7 @@
 % \end{table}
 %
 % \DescribeFieldkey{parent} This declares the parent of the field. It is required if
-% the field is not the root of the fieldset. The value is the field name
+% the field is not the root of the fieldset. The value is the field ID
 % of the parent, the parent should have been already declared.
 % It will add the reference to the parent field to the |/Parent| key, and also
 % add reference of the kid as |/Kid| in the parent field.
@@ -420,7 +420,7 @@
 % \begin{tabular}{>{\ttfamily}lllll}
 % \toprule
 % key      & value      & required &remark\\\midrule
-% parent   & field name & yes             \\
+% parent   & field ID & yes             \\
 % width    & dim expression & (yes)  & default is 0pt \\
 % height   & dim expression & (yes)  & default is 0pt \\
 % depth   & dim expression & (yes)  & default is 0pt \\
@@ -444,7 +444,7 @@
 % The value should be a command that expands to a dimension expression. By default
 % all values are zero.
 %
-% \DescribeAnnotkey{parent} This sets the parent. The value should be the object name of
+% \DescribeAnnotkey{parent} This sets the parent. The value should be field ID of
 % an already declared field.
 %
 % \DescribeAnnotkey{AP/N}\DescribeAnnotkey{AP/R}\DescribeAnnotkey{AP/D}
@@ -453,7 +453,7 @@
 %
 % \DescribeAnnotkey{AS} This key sets the default appearance state.
 % The value is a name without the starting slash
-% (it is passed throught |\pdf_name_from_unicode_e:n|),
+% (it is passed through |\pdf_name_from_unicode_e:n|),
 % for checkbox for example |Yes|. If used it should typically have the same value
 % as the V and DV key of the field.
 %
@@ -501,12 +501,11 @@
 %
 %    \begin{macrocode}
 \str_new:N \l_@@_tmpa_str
-\tl_new:N \l_@@_tmpa_tl
+\tl_new:N  \l_@@_tmpa_tl
 \tl_new:N  \l_@@_tmpa_keys_tl
 \cs_new_protected:Npn \@@_tmpa:n #1 {}
 \cs_new_protected:Npn \@@_tmpa:nn #1 #2 {}
 \tl_new:N \l_@@_currentparent_tl
-\tl_new:N \l_@@_fieldname_tl
 %    \end{macrocode}
 %
 % \subsection{messages}
@@ -534,6 +533,11 @@
   {
     Support~for~'/#1'~is~not~implemented\\
     The~key~is~ignored.
+  }
+\msg_new:nnn {pdffield}{parent-field-missing}
+  {
+    The~parent~field~'#1'~doesn't~exist\\
+    Create~it~with~\tl_to_str:n{\pdffield_field:nn}
   }
 %    \end{macrocode}
 
@@ -620,23 +624,32 @@
 %    \end{macrocode}
 % \begin{macro}{\@@_field:n}
 % \begin{syntax}
-% \cs{@@_field:n}\Arg{obj name}
+% \cs{@@_field:n}\Arg{field ID}
 % \end{syntax}
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_field:n #1
   {
     \pdf_object_new:nn {@@/field/#1}      {dict}
     \pdf_object_new:nn {@@/field/Kids/#1} {array}
-    \tl_if_empty:NF \l_@@_currentparent_tl
+    \tl_if_empty:NTF \l_@@_currentparent_tl
       {
-        \pdfdict_put:nnx { l_@@/field }{Parent}
-          {\pdf_object_ref:n{@@/field/\l_@@_currentparent_tl}}
-        \seq_gput_right:cx {g_@@_field/Kids/\l_@@_currentparent_tl _seq}
-          { \exp_args:Ne \pdf_object_ref:n{@@/field/#1}}
         \pdfmanagement_add:nnx
           { Catalog / AcroForm }
           { Fields }
           {\pdf_object_ref:n {@@/field/#1} }
+      }
+      {
+        \exp_args:Ne
+        \pdf_object_if_exist:nTF {@@/field/\l_@@_currentparent_tl}
+          {
+            \pdfdict_put:nnx { l_@@/field }{Parent}
+              {\exp_args:Ne \pdf_object_ref:n{@@/field/\l_@@_currentparent_tl}}
+            \seq_gput_right:cx {g_@@_field/Kids/\l_@@_currentparent_tl _seq}
+              { \exp_args:Ne \pdf_object_ref:n{@@/field/#1}}
+          }
+          {
+            \msg_error:nnx {pdffield}{parent-field-missing}{\l_@@_currentparent_tl}
+          }
       }
     \seq_new:c {g_@@_field/Kids/#1_seq}
     \pdfdict_put:nnx {l_@@/field}
@@ -671,7 +684,7 @@
 \cs_new_protected:Npn \pdffield_field:nn #1 #2
   {
     \group_begin:
-    \keys_set_known:nn {pdffield / field } {#1}
+    \keys_set:nn { pdffield / field } {#1}
     \@@_field:n {#2}
     \group_end:
   }
@@ -683,6 +696,8 @@
 % leave vertical mode.
 %
 % \begin{macro}{\@@_annot:}
+% The command doesn't add grouping, so should only be used inside a group.
+%
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_annot:
   {
@@ -694,7 +709,6 @@
         \bitset_set_false:Nn \l_@@_F_bitset {Invisible}
         \bitset_set_false:Nn \l_@@_F_bitset {NoView}
       }
-    %\pdfdict_put:nnx {l_@@/annot}{F}{ \bitset_to_arabic:N \l_@@_F_bitset }
     \pdfannot_dict_put:nnx {widget}{F}{ \bitset_to_arabic:N \l_@@_F_bitset }
     \mode_leave_vertical:
     \hbox_to_wd:nn
@@ -709,13 +723,21 @@
       }
     \tl_if_empty:NF \l_@@_currentparent_tl
       {
-        \seq_gput_right:cx {g_@@_field/Kids/\l_@@_currentparent_tl _seq}{ \pdfannot_box_ref_last:}
+        \seq_if_exist:cTF {g_@@_field/Kids/\l_@@_currentparent_tl _seq}
+         {
+           \seq_gput_right:cx
+             {g_@@_field/Kids/\l_@@_currentparent_tl _seq}
+             { \pdfannot_box_ref_last:}
+         }
+         {
+           \msg_error:nnx { pdffield}{parent-field-missing}{\l_@@_currentparent_tl}
+         }
       }
   }
 \cs_new_protected:Npn \pdffield_annot:n #1
   {
     \group_begin:
-    \keys_set_known:nn {pdffield / annot } {#1}  %preset something? dimensions?
+    \keys_set:nn {pdffield / annot } {#1}
     \@@_annot:
     \group_end:
   }
@@ -796,7 +818,6 @@
      {
        \pdfdict_put:nnx { l_@@/field }{I}{ \pdf_object_ref:n{#1} }
      }
-
   }
 %    \end{macrocode}
 
@@ -897,7 +918,13 @@
    parent .code:n =
     {
       \tl_set:Nn \l_@@_currentparent_tl {#1}
-      \pdfannot_dict_put:nnx {widget}{Parent}{\pdf_object_ref:n{@@/field/#1}}
+      \pdf_object_if_exist:nTF { @@/field/#1 }
+        {
+          \pdfannot_dict_put:nnx {widget}{Parent}{\pdf_object_ref:n{@@/field/#1}}
+        }
+        {
+          \msg_error:nnn { pdffield }{parent-field-missing}{#1}
+        }
     }
   ,AS .code:n =
     {

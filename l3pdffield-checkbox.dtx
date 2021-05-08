@@ -105,11 +105,24 @@
 %
 % \subsection{Keys}
 %
-% The new checkbox commands accepts following keys:
+% The new checkbox commands accept all field and annot keys from l3pdffield.
+% A number of keys have more user friendly alias names, which roughly follow the
+% naming used in hyperref for the analog feature. Some keys have a more checkbox specific
+% behaviour or have other defaults than with the basic commands. Additionally there
+% are a small number of keys specific to a checkbox.
 %
-% \DescribeCheckboxkey{name} This sets the (internal) name of the field. It shouldn't contain
-% a period, be not empty and sensibly consist of simple chars. Checkboxes instances
-% with the same name belong to the same field and are checked and unchecked together.
+% All the difference are described in the following paragraphs.
+%
+% \DescribeCheckboxkey{name}\DescribeCheckboxkey{T}
+% This sets like the |T| key for fields the partial name of the field. The value
+% shouldn't contain a period, be not empty and sensibly consist of simple chars.
+% Additionally the value is used to create the field ID.
+% This means that checkboxes with the same partial name are annotations
+% with all the same field as parent and are checked and unchecked together---this
+% what is typically expected. There could be an option to change the behaviour
+% but currently I can't see a sensible use case.
+% The field ID is internal as the field has a field annotation and so
+% is always a terminal field.
 %
 % \DescribeCheckboxkey{parent} This is only needed if the field should be part
 % of a larger fieldset. The value should be a field name of field created previously
@@ -386,9 +399,10 @@
     \group_begin:
     \keys_set_known:nnN {pdffield / checkbox }
       {
-        fieldname=,
         name=checkbox,
         appearance = checkbox/default,
+        width =\baselineskip,
+        height=\baselineskip,
         #1
       }\l_@@_tmpa_keys_tl
     \keys_set_known:nVN {pdffield / checkbox / field } \l_@@_tmpa_keys_tl \l_@@_tmpa_keys_tl
@@ -398,11 +412,9 @@
         ,unsetFf={Radio,Pushbutton}
         ,FT= Btn
       }
-    \tl_if_empty:NT \l_@@_fieldname_tl
-      {
-        \pdfdict_get:nnN {l_@@/field}{T}\l_@@_fieldname_tl
-      }
-     \@@_checkbox_field:V\l_@@_fieldname_tl
+    \pdfdict_get:nnN {l_@@/field}{T}\l_@@_tmpa_tl
+    \tl_put_left:Nn \l_@@_tmpa_tl {@@/checkbox/}
+    \@@_checkbox_field:V\l_@@_tmpa_tl
     \@@_annot:
     \group_end:
   }
@@ -429,7 +441,7 @@
     ,name .initial:n        = checkbox
     ,altname .meta:nn       = {pdffield/field}{TU=#1}
     ,mappingname .meta:nn   = {pdffield/field}{TM=#1}
-    ,fieldname .tl_set:N    = \l_@@_fieldname_tl
+    ,parent .tl_set:N = \l_@@_currentparent_tl
   }
 %    \end{macrocode}
 
