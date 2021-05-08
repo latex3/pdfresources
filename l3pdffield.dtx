@@ -268,10 +268,19 @@
 % The command also setup dictionaries to fill the |AP|, |MK| and |AA| dictionaries.
 % \end{function}
 %
+% \begin{function}{\pdffield_appearance:nn}
+% \begin{syntax}
+%  \cs{pdffield_appearance:nn}\Arg{name}\Arg{content}
+% \end{syntax}
+% This is a small wrapper around \cs{pdfxform_new:nnn} (which could be used too)
+% to create an appearance. To avoid name clashes \meta{name} should start with
+% a module part, e.g. |mymodule/appearance/cross|.
+% \end{function}
 %
 % \section{Field Keys}
 %
 % Table~\ref{tab:fieldkeys} summarize the keys which can be used.
+% A number of keys have two names, the second is normally the name used by hyperref.
 %
 % \begin{table}
 % \caption{Keys for fields}\label{tab:fieldkeys}
@@ -280,12 +289,14 @@
 % \toprule
 % key      & value      & required & inheritable &remark\\\midrule
 % parent   & field ID & for non-root fields &     \\
-% T        & string   & mostly   &             \\
-% TU       & string   &          &             \\
-% TM       & string   &          &             \\
+% T, name        & string   & mostly   &             \\
+% TU, altname       & string   &          &             \\
+% TM, mappingname       & string   &          &             \\
 % FT       & name     & terminal fields & yes  \\
-% setFf    & list of flags &     & yes\\
-% unsetFf  & list of flags &    & yes \\
+% setFf,    & list of flags &     & yes\\
+% setfieldflags\\
+% unsetFf,  & list of flags &    & yes \\
+% unsetfieldflags \\
 % V        & various   &        & yes \\
 % DV       & various   &        & yes \\
 % MaxLen   & integer   & with Comb   & yes             & only textfields\\
@@ -294,10 +305,10 @@
 % Opt      & object name &         &                  & buttons and choice fields\\
 % TI       & integer    &          &                  & list fields\\
 % I        & object name&          &                  & list fields\\
-% AA/K     & javascript \\
-% AA/F     & javascript\\
-% AA/V     & javascript\\
-% AA/C     & javascript\\
+% AA/K, keystroke     & javascript \\
+% AA/F, format     & javascript\\
+% AA/V, validate     & javascript\\
+% AA/C, calculate     & javascript\\
 % DA        & string    & yes   &   yes    & variable text \\
 % Q       & 0, 1 or 2   &          & yes   &variable text  \\
 % DS       &    &          &         & (ignored) \\
@@ -311,15 +322,15 @@
 % It will add the reference to the parent field to the |/Parent| key, and also
 % add reference of the kid as |/Kid| in the parent field.
 %
-% \DescribeFieldkey{T} This sets the partial name of the field. It shouldn't contain
+% \DescribeFieldkey{T}\DescribeFieldkey{name} This sets the partial name of the field. It shouldn't contain
 % a period, be not empty and sensibly consist of simple ascii chars.
 % It is normally required, see above. The value is passed through \cs{pdf_string_from_unicode:nnN}.
 %
-% \DescribeFieldkey{TU} This sets an alternative name for user interaction.
+% \DescribeFieldkey{TU}\DescribeFieldkey{altname} This sets an alternative name for user interaction.
 % Unlike the name field it can use unicode or periods.
 % The value is passed through \cs{pdf_string_from_unicode:nnN}
 %
-% \DescribeFieldkey{TM} This sets an alternative name for the export.
+% \DescribeFieldkey{TM}\DescribeFieldkey{mappingname} This sets an alternative name for the export.
 % The value is passed through \cs{pdf_string_from_unicode:nnN}
 %
 % \DescribeFieldkey{FT} This sets the type of the field, the value should be one of
@@ -327,7 +338,8 @@
 % The value is of relevance only for terminal fields, but it can be set in a parent
 % and then inherited.
 %
-% \DescribeFieldkey{setFf}\DescribeFieldkey{unsetFf}
+% \DescribeFieldkey{setFf}\DescribeFieldkey{setfieldflags}
+% \DescribeFieldkey{unsetFf}\DescribeFieldkey{setfieldflags}
 % This key accepts a list of flag names and then sets or unsets them, the resulting value
 % is then used with the \texttt{/Ff} key. Depending
 % on the field type some flags must be set or unset, other are optional or are ignored.
@@ -460,8 +472,8 @@
 % for checkbox for example |Yes|. If used it should typically have the same value
 % as the V and DV key of the field.
 %
-% \DescribeAnnotkey{setF}
-% \DescribeAnnotkey{unsetF}
+% \DescribeAnnotkey{setF}\DescribeAnnotkey{setannotflags}
+% \DescribeAnnotkey{unsetF}\DescribeAnnotkey{unsetannotflags}
 % These keys allow to set or unset the annot flags.  They expect a comma lists of
 % flag names. Allowed names |Invisible|, |Hidden|,
 %  |Print|, |NoZoom|,|NoRotate|, |NoView|, |ReadOnly|, |Locked|, |ToggleNoView|,
@@ -469,6 +481,8 @@
 %
 % \begin{annotkey}{AA/*}
 % * should be one of |F|, |Bl|, |D|, |U|, |E|, |X|, |PO|, |PC|, |PV|, |PI|.
+% Alias names for the first six keys are
+% |onfocus|, |onblur|, |onmousedown|, |onmouseup|, |onenter|,  |onexit|.
 % These keys adds then the respective key to the |/AA| dictionary
 % of the field annotation object.
 % Their value should be javascript code. The |/AA| dictionary
@@ -713,6 +727,21 @@
         \bitset_set_false:Nn \l_@@_F_bitset {NoView}
       }
     \pdfannot_dict_put:nnx {widget}{F}{ \bitset_to_arabic:N \l_@@_F_bitset }
+    \tl_if_empty:NF \l_@@_currentparent_tl
+      {
+         \exp_args:Ne
+         \pdf_object_if_exist:nTF { @@/field/\l_@@_currentparent_tl }
+           {
+             \pdfannot_dict_put:nnx {widget}{Parent}
+               {
+                 \exp_args:Ne
+                   \pdf_object_ref:n{@@/field/\l_@@_currentparent_tl}
+               }
+           }
+           {
+               \msg_error:nnn { pdffield }{parent-field-missing}{#1}
+           }
+       }
     \mode_leave_vertical:
     \hbox_to_wd:nn
       { \l_@@_annot_wd_dim  }
@@ -753,9 +782,10 @@
 % The other names can only be set when the field is created,
 % so we put them in the field group.
 %    \begin{macrocode}
-\keys_define:nn { pdffield /field }
+\keys_define:nn { pdffield  }
   {
     ,parent .tl_set:N = \l_@@_currentparent_tl
+    ,parent .groups:n = {field,annot}
     ,T .code:n =
       {
         \pdf_string_from_unicode:nnN {utf8/string-raw}{#1}\l_@@_tmpa_str
@@ -772,55 +802,73 @@
           }
       }
     ,T .value_required:n = true
+    ,T .groups:n = {field}
+    ,name .meta:n          = {T={#1}}
+    ,name .value_required:n = true
+    ,name .groups:n = {field}
+    ,TU .groups:n = {field}
     ,TU .code:n =
       {
         \pdf_string_from_unicode:nnN {utf8/string}{#1}\l_@@_tmpa_str
         \pdfdict_put:nnx { l_@@/field }{TU}{\l_@@_tmpa_str}
       }
     ,TU .groups:n = {field}
+    ,altname .meta:n      = {TU={#1}}
+    ,altname .groups:n = {field}
     ,TM .code:n =
       {
         \pdf_string_from_unicode:nnN {utf8/string}{#1}\l_@@_tmpa_str
         \pdfdict_put:nnx { l_@@/field }{TM}{\l_@@_tmpa_str}
       }
     ,TM .groups:n = {field}
+    ,mappingname .meta:n   = {TM={#1}}
+    ,mappingname .groups:n = {field}
     ,FT .choices:nn =
       { Btn, Tx, Ch, Sig }
       {
         \pdfdict_put:nnn { l_@@/field }{FT}{ /#1 }
       }
+    ,FT .groups:n = {field}
     ,V .code:n =
      {
        \pdfdict_put:nnx { l_@@/field }{V}{ #1 }
      }
+    ,V .groups:n = {field}
     ,DV .code:n =
      {
        \pdfdict_put:nnx { l_@@/field }{V}{ #1 }
      }
+    ,DV .groups:n = {field}
     ,MaxLen .code:n =
      {
        \pdfdict_put:nnx { l_@@/field }{MaxLen}{ #1 }
      }
+    ,MaxLen .groups:n = {field}
     ,Lock .code:n =
      {
        \pdfdict_put:nnx { l_@@/field }{Lock}{ \pdf_object_ref:n{#1} }
      }
+    ,Lock .groups:n = {field}
     ,SV .code:n =
      {
        \pdfdict_put:nnx { l_@@/field }{SV}{ \pdf_object_ref:n{#1} }
      }
+    ,SV .groups:n = {field}
     ,Opt .code:n =
      {
        \pdfdict_put:nnx { l_@@/field }{Opt}{ \pdf_object_ref:n{#1} }
      }
+    ,Opt .groups:n = {field}
     ,TI .code:n =
      {
        \pdfdict_put:nnx { l_@@/field }{TI}{ #1 }
      }
+    ,TI .groups:n = {field}
     ,I .code:n =
      {
        \pdfdict_put:nnx { l_@@/field }{I}{ \pdf_object_ref:n{#1} }
      }
+    ,I .groups:n = {field}
   }
 %    \end{macrocode}
 
@@ -836,6 +884,9 @@
            }
       }
     ,setFf .groups:n = {field}
+    ,setfieldflags .meta:nn =
+      { pdffield }{setFf={#1}}
+    ,setfieldflags .groups:n = {field}
     ,unsetFf .code:n =
       {
           \clist_map_inline:nn {#1}
@@ -844,6 +895,7 @@
            }
       }
     ,unsetFf .groups:n = {field}
+    ,unsetfieldflags .groups:n = {field}
   }
 
 %    \end{macrocode}
@@ -853,7 +905,7 @@
 %    \begin{macrocode}
 \cs_set_protected:Npn \@@_tmpa:n #1  %
   {
-    \keys_define:nn { pdffield / field }
+    \keys_define:nn { pdffield  }
       {
          AA/#1 .code:n =
            {
@@ -868,31 +920,52 @@
                   {<</S/JavaScript/JS\l_@@_tmpa_str>>}
                }
            },
+        AA/#1 .groups:n  = {field}
       }
   }
 
 \clist_map_inline:nn {K,F,V,C}{\@@_tmpa:n{#1}}
+
+\cs_set_protected:Npn \@@_tmpa:nn #1 #2
+  {
+    \keys_define:nn { pdffield  }
+      {
+         #1 .meta:nn =
+           { pdffield }{#2={##1}},
+        #1 .groups:n  = {field}
+      }
+  }
+\@@_tmpa:nn {keystroke}{K}
+\@@_tmpa:nn {format}   {F}
+\@@_tmpa:nn {validate} {V}
+\@@_tmpa:nn {calculate}{C}
+
+
 %    \end{macrocode}
 %
 %    \begin{macrocode}
-\keys_define:nn {pdffield/field}
+\keys_define:nn { pdffield }
   {
     DA .code:n =
       {
          \pdfdict_put:nnx{ l_@@_field}{DA}{(#1)}
       }
+    ,DA .groups:n = {field}
     ,Q .choices:nn = {0,1,2}
      {
        \pdfdict_put:nnn{ l_@@_field}{Q}{#1}
      }
+    ,Q .groups:n = {field}
     ,DS .code:n =
      {
        \msg_warning:nnn {pdffield}{not-implemented}{DS}
      }
+    ,DS .groups:n = {field}
     ,RV .code:n =
      {
        \msg_warning:nnn {pdffield}{not-implemented}{RV}
      }
+    ,RV .groups:n = {field}
   }
 %    \end{macrocode}
 %
@@ -904,7 +977,7 @@
 \dim_new:N \l_@@_annot_wd_dim
 \dim_new:N \l_@@_annot_dp_dim
 
-\keys_define:nn { pdffield / annot }
+\keys_define:nn { pdffield }
   {
     ,width  .dim_set:N = \l_@@_annot_wd_dim
     ,height .dim_set:N = \l_@@_annot_ht_dim
@@ -916,30 +989,22 @@
 %    \end{macrocode}
 %
 %    \begin{macrocode}
-\keys_define:nn { pdffield / annot }
+\keys_define:nn { pdffield }
  {
-   parent .code:n =
-    {
-      \tl_set:Nn \l_@@_currentparent_tl {#1}
-      \pdf_object_if_exist:nTF { @@/field/#1 }
-        {
-          \pdfannot_dict_put:nnx {widget}{Parent}{\pdf_object_ref:n{@@/field/#1}}
-        }
-        {
-          \msg_error:nnn { pdffield }{parent-field-missing}{#1}
-        }
-    }
+   %parent is defined in field
   ,AS .code:n =
     {
       \pdfannot_dict_put:nnx {widget}{AS}{\pdf_name_from_unicode_e:n{#1}}
     }
+  .AS .groups:n = annot
  }
 \cs_set_protected:Npn \@@_tmpa:n #1
   {
-   \keys_define:nn { pdffield / annot }
+   \keys_define:nn { pdffield }
      {
        AP/#1 .code:n =
         { \pdfannot_dict_put:nnx {widget/AP}{#1}{##1} }
+      ,AP/#1 .groups:n = annot
      }
   }
 \clist_map_inline:nn {N,R,D}
@@ -947,10 +1012,11 @@
 
 \cs_set_protected:Npn \@@_tmpa:n #1
  {
-   \keys_define:nn { pdffield / annot }
+   \keys_define:nn { pdffield  }
      {
        MK/#1 .code:n =
         { \pdfannot_dict_put:nnx {widget/MK}{#1}{##1} }
+      ,MK/#1 .groups:n = annot
      }
  }
 
@@ -959,7 +1025,7 @@
 %    \end{macrocode}
 % Flags.
 %    \begin{macrocode}
-\keys_define:nn { pdffield / annot }
+\keys_define:nn { pdffield  }
   {
     ,setF .code:n =
       {
@@ -968,6 +1034,10 @@
              \bitset_set_true:Nn \l_@@_F_bitset {##1}
            }
       }
+    ,setF .groups:n = annot
+    ,setannotflags .meta:nn =
+      { pdffield }{setF={#1}}
+    ,setannotflags .groups:n = annot
     ,unsetF .code:n =
       {
           \clist_map_inline:nn {#1}
@@ -975,7 +1045,12 @@
              \bitset_set_false:Nn \l_@@_F_bitset {##1}
            }
       }
+    ,unsetF .groups:n = annot
+    ,unsetannotflags .meta:nn =
+      { pdffield }{unsetF={#1}
+    ,unsetannotflags .groups:n = annot
   }
+
 %    \end{macrocode}
 %
 % Keys for the AA dictionary. They all trigger a javascript option.
@@ -985,7 +1060,7 @@
 %    \begin{macrocode}
 \cs_set_protected:Npn \@@_tmpa:n #1  %
   {
-    \keys_define:nn { pdffield / annot }
+    \keys_define:nn { pdffield }
       {
          AA/#1 .code:n =
            {
@@ -1000,12 +1075,51 @@
                   {<</S/JavaScript/JS\l_@@_tmpa_str>>}
                }
            },
+         ,AA/#1 .groups:n = annot
       }
   }
 
 \clist_map_inline:nn {Fo,Bl,D,U,E,X,PO,PC,PV,PI}{\@@_tmpa:n{#1}}
+
+\cs_set_protected:Npn \@@_tmpa:nn #1 #2
+  {
+    \keys_define:nn { pdffield }
+      {
+         #1 .meta:nn =
+           { pdffield }{#2={##1}},
+         #1 .groups:n = {annot}
+      }
+  }
+\@@_tmpa:nn {onfocus}  {Fo}
+\@@_tmpa:nn {onblur}   {Bl}
+\@@_tmpa:nn {onmousedown}{D}
+\@@_tmpa:nn {onmouseup}{U}
+\@@_tmpa:nn {onenter}  {E}
+\@@_tmpa:nn {onexit}   {X}
 %    \end{macrocode}
+% \subsection{Appearances}
+% \begin{macro}{\pdffield_appearance:nn}
+%    \begin{macrocode}
+\cs_new_protected:Npn \pdffield_store_appearance:nn #1 #2
+  {
+     \pdfxform_new:nnn {#1}{}{#2}
+  }
+%for compability ...
+\cs_set_eq:NN \pdffield_store_appearance:nn\pdffield_appearance:nn
+%    \end{macrocode}
+% \subsection{Setup command}
 %
+\keys_define:nn { pdffield / setup }
+  { create-style . code:n = { \@@_style_create:nn #1 } }
+
+\cs_new_protected:Npn \@@_style_create:nn #1#2
+  { \keys_define:nn { pdffield } { #1 .meta:n = {#2} } }
+
+\cs_new_protected:Npn \pdffield_setup:nn #1 #2
+ {
+
+ }
+
 %    \begin{macrocode}
 %</package>
 %    \end{macrocode}

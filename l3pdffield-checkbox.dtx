@@ -45,11 +45,11 @@
 %    ]{Checkboxkey}{checkboxkey}
 % \providecommand\hook[1]{\texttt{#1}}
 % \ExplSyntaxOn
-% \pdffield_store_appearance:nn {bear/Yes}
+% \pdffield_store_appearance:nn {pdffield/bear/Yes}
 %  {
 %    \tikz\bear\bearwear[shirt=red,body~deco={\node[font=\tiny\bfseries,white]~at~(beartummy){Yes};}];
 %  }
-% \pdffield_store_appearance:nn {bear/Off}
+% \pdffield_store_appearance:nn {pdffield/bear/Off}
 %  {
 %   \tikz\bear\bearwear[body~deco={\node[font=\tiny\bfseries,white]~at~(beartummy){Off};}];
 %  }
@@ -89,7 +89,9 @@
 % \end{itemize}
 % \section{Checkboxes}
 % Click me:
-% \ExplSyntaxOn\pdffield_checkbox:n{name=bear,appearance=bear,width=23pt,height=30pt,depth=10pt}\ExplSyntaxOff
+% \ExplSyntaxOn
+%  \pdffield_checkbox:n{name=bear,appearance=pdffield/bear,width=23pt,height=30pt,depth=10pt}
+% \ExplSyntaxOff
 %
 % \bigskip
 % \subsection{Commands}
@@ -98,9 +100,12 @@
 %  \cs{pdffield_checkbox:n}\Arg{key val list}
 % \end{syntax}
 % This creates a checkbox to check and uncheck. The list of allowed keys is described below.
-% Typically the \meta{key val list} should at least set the name. Checkboxes with the same
+% The \meta{key val list} should at least set the name, without it the default name
+% checkbox is used. Checkboxes with the same
 % name belong to the same field and are checked and unchecked together. The default appearance
 % is a quadratic frame with a \cs{texttimes} in it for the checked case.
+% The default appearance is setup at the first use and will use the font family
+% active at that time.
 % \end{function}
 %
 % \subsection{Keys}
@@ -226,7 +231,7 @@
 % why a reimplementation is needed. Also newer PDF versions
 % deprecate the /NeedAppearances setting and require that such a look,
 % an \enquote{appearance}, is given as form XObjects.
-% So the code forces the use of two appearances. 
+% So the code forces the use of two appearances.
 %
 % \end{documentation}
 %
@@ -238,31 +243,21 @@
 %    \end{macrocode}
 % \subsection{Variables}
 %    \begin{macrocode}
-\bool_new:N \l_@@_checkbox_newfield_bool
 %    \end{macrocode}
 % \subsection{Messages}
 %    \begin{macrocode}
 %    \end{macrocode}
-
-
 % \subsection{Appearances}
-% We don't try to force a size or content here.
 % The default appearances are a cross (\cs{texttimes}),
 % Every appearance should have two versions and follow the naming
-% checkbox/\meta{name}/Yes and checkbox/\meta{name}/Off.
-% TODO check if one delay the creation to a sensible place
-% (and don't forget that the appearance key sets an initial
-% value)
-%  \begin{macro}{\pdffield_store_appearance:nn,\@@_store_default_appearances:}
+% module/\meta{name}/Yes and module/\meta{name}/Off.
+%  \begin{macro}{@@/checkbox/default_appearances:}
+%  This defines the standard appearance. It is setup at the first
+%  use of a checkbox, and will adapt to the font family in use then.
 %    \begin{macrocode}
-\cs_new_protected:Npn \pdffield_store_appearance:nn #1 #2
+\cs_new_protected:cn {@@/checkbox/default_appearances:}
   {
-     \pdfxform_new:nnn {@@_#1}{}{#2}
-  }
-
-\cs_new_protected:Nn \@@_store_default_appearances:
-  {
-     \pdffield_store_appearance:nn {checkbox/default/Yes}
+     \pdffield_store_appearance:nn {pdffield/checkbox/default/Yes}
        {
          \normalsize
          \fboxsep 0pt
@@ -270,7 +265,7 @@
            [ \dim_eval:n { \box_ht:N\strutbox+\box_dp:N\strutbox } ]
            { \texttimes \strut }
        }
-     \pdffield_store_appearance:nn {checkbox/default/Off}
+     \pdffield_store_appearance:nn {pdffield/checkbox/default/Off}
        {
          \normalsize
          \fboxsep 0pt
@@ -278,60 +273,51 @@
            [ \dim_eval:n { \box_ht:N\strutbox+\box_dp:N\strutbox } ]
            { \phantom{\texttimes} \strut }
        }
+    \cs_gset_eq:cN {@@/checkbox/default_appearances:} \prg_do_nothing:
   }
-
-\@@_store_default_appearances:
 %    \end{macrocode}
 % \end{macro}
-% We define a dictionary for the AP content, so that we can add R and D too
-%    \begin{macrocode}
-\pdfdict_new:n   {l_@@/checkbox/annot/AP}
-%    \end{macrocode}
+%
 %\subsection{Creating the field}
-% A field should be created if the name doesn't exist, or
-% if it is forced
+% A field should be created if the name doesn't exist
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_checkbox_field:n #1 %name
   {
-    \bool_if:nT
-      {
-        \l_@@_checkbox_newfield_bool
-        ||
-        ! \pdf_object_if_exist_p:n {@@/field/#1}
-      }
+    \pdf_object_if_exist:nF {@@/field/@@/checkbox/#1}
       {
         \@@_field:n { #1 }
       }
-    \keys_set:nn {pdffield/annot}{parent=#1}
+    \keys_set:nn {pdffield}{parent=@@/checkbox/#1}
   }
 \cs_generate_variant:Nn \@@_checkbox_field:n {V}
 %    \end{macrocode}
+%
 % \subsection{Assembling the checkbox}
 % \begin{macro}{\@@_checkbox:n}
 %    \begin{macrocode}
-%initial width??
 \cs_new_protected:Npn \@@_checkbox:n #1
   {
     \group_begin:
-    \keys_set_known:nnN {pdffield / checkbox }
-      {
+    \use:c {@@/checkbox/default_appearances:}
+    \keys_set:nn {pdffield}
+     {
         name=checkbox,
-        appearance = checkbox/default,
-        width =\normalbaselineskip,
-        height=\normalbaselineskip,
-        #1
-      }\l_@@_tmpa_keys_tl
-    \keys_define:nn {pdffield / field }
-     {
-       V  .undefine: , DV .undefine:
+        appearance = pdffield/checkbox/default,
+        width  = \normalbaselineskip,
+        height = \normalbaselineskip,
      }
-    \keys_define:nn {pdffield / annot }
+    %\keys_set_groups:nnV {pdffield }{checkbox}\l_@@_checkbox_preset_tl  
+    \keys_set_groups:nnn {pdffield }{checkbox}{#1}
+    \keys_define:nn {pdffield  }
      {
-       AS .undefine:
+       V  .undefine: , DV .undefine: , AS .undefine:,
+       AP/N .undefine: , AP/R .undefine: , AP/D .undefine:,
      }
-    \keys_set_known:nVN {pdffield / field } \l_@@_tmpa_keys_tl \l_@@_tmpa_keys_tl
-    \keys_set_known:nVN {pdffield / annot } \l_@@_tmpa_keys_tl \l_@@_tmpa_keys_tl
-    \keys_set:nn{pdffield/field}
+    \keys_set:nn {pdffield }
+     {
+     }
+    \keys_set:nV {pdffield } \l_@@_tmpa_keys_tl
+    \keys_set:nn{ pdffield }
       {
         ,unsetFf={Radio,Pushbutton}
         ,FT= Btn
@@ -344,69 +330,44 @@
   }
 %    \end{macrocode}
 % \end{macro}
+%
 % \subsection{Keys}
 % Most keys are inherited simply the ones from the generic field and annot keys.
-% The main name should not be empty. A new name means a new field.
-% The other names can only be set when the field is created. Perhaps some filter
-% to warn could be useful?
+% A key to decide if the box is initially checked or not.
+% We stay in the same family so that we can build a style.
 %    \begin{macrocode}
-\keys_define:nn { pdffield / checkbox  }
-  {
-    ,name .meta:nn          = {pdffield/field}{T=#1}
-    ,name .value_required:n = true
-    ,name .initial:n        = checkbox
-    ,altname .meta:nn       = {pdffield/field}{TU=#1}
-    ,mappingname .meta:nn   = {pdffield/field}{TM=#1}
-    ,parent .tl_set:N = \l_@@_currentparent_tl
-  }
-%    \end{macrocode}
-
-% A key to decide if the Box is initially checked or not
-%    \begin{macrocode}
-\keys_define:nn { pdffield / checkbox }
+\keys_define:nn { pdffield  }
  {
    ,checked .choice:
    ,checked / false .code:n =
      {
-       \keys_set:nn {pdffield/field}{V=/Off,DV=/Off}
-       \keys_set:nn {pdffield/annot}{AS=Off}
+       \keys_set:nn {pdffield }{V=/Off,DV=/Off,AS=Off}
      }
    ,checked / true .code:n =
      {
-       \keys_set:nn {pdffield/field}{V=/Yes,DV=/Yes}
-       \keys_set:nn {pdffield/annot}{AS=Yes}
+       \keys_set:nn {pdffield}{V=/Yes,DV=/Yes,AS=Yes}
      }
    ,checked .default:n = {true}
    ,checked .initial:n = {false}
+   ,checked .groups:n  = {checkbox}
  }
 %    \end{macrocode}
-% Flags. We don't add lots of individual keys but mapped the key names directly
+%
 %    \begin{macrocode}
-\keys_define:nn { pdffield / checkbox }
-  {
-    ,setfieldflags .meta:nn =
-      { pdffield/field }{setFf={#1}}
-    ,unsetfieldflags .meta:nn =
-      { pdffield/field }{setFf={#1}}
-    ,setannotflags .meta:nn =
-      { pdffield/annot }{setF={#1}}
-    ,unsetannotflags .meta:nn =
-      { pdffield/annot }{unsetF={#1}}
-  }
 
-\keys_define:nn { pdffield / checkbox }
+\keys_define:nn { pdffield  }
   {
     appearance .code:n = %value is a name of an appearance
       {
-        \pdfxform_if_exist:nTF {  @@_#1/Yes }
+        \pdfxform_if_exist:nTF {  #1/Yes }
           {
-            \keys_set:nn{pdffield/annot}
+            \keys_set:nn{ pdffield }
               {
                AP/N =
                 {
                   <<
-                    /Yes ~ \pdfxform_ref:n { @@_#1/Yes}
-                    /Off ~ \pdfxform_ref:n { @@_#1/Off}
+                    /Yes ~ \pdfxform_ref:n { #1/Yes}
+                    /Off ~ \pdfxform_ref:n { #1/Off}
                   >>
                 }
               }
@@ -415,21 +376,22 @@
             \msg_error:nnnn{pdffield}{appearance-missing}{#1}{normal}
           }
       },
+    ,appearance .groups:n  = {checkbox}
   }
 
-\keys_define:nn { pdffield / checkbox }
+\keys_define:nn { pdffield  }
   {
     rollover-appearance .code:n = %value is a name of an appearance
       {
-        \pdfxform_if_exist:nTF {  @@_#1/Yes }
+        \pdfxform_if_exist:nTF {  #1/Yes }
           {
-            \key_set:nn{pdffield/annot}
+            \key_set:nn{ pdffield }
               {
                AP/R =
                 {
                   <<
-                    /Yes ~ \pdfxform_ref:n { @@_#1/Yes}
-                    /Off ~ \pdfxform_ref:n { @@_#1/Off}
+                    /Yes ~ \pdfxform_ref:n { #1/Yes}
+                    /Off ~ \pdfxform_ref:n { #1/Off}
                   >>
                 }
               }
@@ -438,21 +400,22 @@
             \msg_error:nnnn{pdffield}{appearance-missing}{#1}{normal}
           }
       },
+    ,rollover-appearance .groups:n  = {checkbox}
   }
 
-\keys_define:nn { pdffield / checkbox }
+\keys_define:nn { pdffield  }
   {
     down-appearance .code:n = %value is a name of an appearance
       {
-        \pdfxform_if_exist:nTF {  @@_#1/Yes }
+        \pdfxform_if_exist:nTF {  #1/Yes }
           {
-            \key_set:nn{pdffield/annot}
+            \key_set:nn{ pdffield }
               {
                AP/D =
                 {
                   <<
-                    /Yes ~ \pdfxform_ref:n { @@_#1/Yes}
-                    /Off ~ \pdfxform_ref:n { @@_#1/Off}
+                    /Yes ~ \pdfxform_ref:n { #1/Yes}
+                    /Off ~ \pdfxform_ref:n { #1/Off}
                   >>
                 }
               }
@@ -461,51 +424,16 @@
             \msg_error:nnnn{pdffield}{appearance-missing}{#1}{normal}
           }
       },
+    ,down-appearance .groups:n  = {checkbox}
   }
 %    \end{macrocode}
 %
-%  Keys for the AA dictionary. They all trigger javascript option.
-%
-%    \begin{macrocode}
-\cs_set_protected:Npn \@@_tmpa:nn #1 #2
-  {
-    \keys_define:nn { pdffield / checkbox }
-      {
-         #1 .meta:nn =
-           {pdffield/field}{#2={##1}},
-      }
-  }
-\@@_tmpa:nn {keystroke}{K}
-\@@_tmpa:nn {format}   {F}
-\@@_tmpa:nn {validate} {V}
-\@@_tmpa:nn {calculate}{C}
-
-\cs_set_protected:Npn \@@_tmpa:nn #1 #2
-  {
-    \keys_define:nn { pdffield / checkbox }
-      {
-         #1 .meta:nn =
-           {pdffield/annot}{#2={##1}},
-      }
-  }
-
-\@@_tmpa:nn {onfocus}  {Fo}
-\@@_tmpa:nn {onblur}   {Bl}
-\@@_tmpa:nn {onmousedown}{D}
-\@@_tmpa:nn {onmouseup}{U}
-\@@_tmpa:nn {onenter}  {E}
-\@@_tmpa:nn {onexit}   {X}
-%    \end{macrocode}
 % \end{macro}
+%
 % \subsection{user commands}
-% \begin{macro}{\pdffield_checkbox:n,\pdffield_setup:nn}
+% \begin{macro}{\pdffield_checkbox:n}
 %    \begin{macrocode}
 \cs_set_eq:NN \pdffield_checkbox:n \@@_checkbox:n
-
-\cs_new_protected:Npn \pdffield_setup:nn #1 #2
- {
-   \keys_set:nn {pdffield / #1 } {#2}
- }
 %</package>
 %    \end{macrocode}
 % \end{macro}
