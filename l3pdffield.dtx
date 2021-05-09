@@ -346,27 +346,55 @@
 % \end{tabular}
 % \end{table}
 %
-% \DescribeFieldkey{parent} This declares the parent of the field. It is required if
+% \begin{function}{parent}
+%  \begin{syntax}
+%   |parent| = \meta{field ID}\\
+%  \end{syntax}
+% This declares the parent of the field. It is required if
 % the field is not the root of the fieldset. The value is the field ID
 % of the parent, the parent should have been already declared.
 % It will add the reference to the parent field to the |/Parent| key, and also
 % add reference of the kid as |/Kid| in the parent field.
+% \end{function}
 %
-% \DescribeFieldkey{T}\DescribeFieldkey{name} This sets the partial name of the field. It shouldn't contain
+% \begin{function}{name,T}
+%  \begin{syntax}
+%   |name| = \meta{partial name}\\
+%   |T| = \meta{partial name}
+%  \end{syntax}
+% This sets the partial name of the field. It shouldn't contain
 % a period, be not empty and sensibly consist of simple ascii chars.
 % It is normally required, see above. The value is passed through \cs{pdf_string_from_unicode:nnN}.
+% \end{function}
 %
-% \DescribeFieldkey{TU}\DescribeFieldkey{altname} This sets an alternative name for user interaction.
+% \begin{function}{altname,TU}
+%  \begin{syntax}
+%   |altname| = \meta{string}\\
+%   |TU| = \meta{string}\\
+%  \end{syntax}
+% This sets an alternative name for user interaction.
 % Unlike the name field it can use unicode or periods.
 % The value is passed through \cs{pdf_string_from_unicode:nnN}
+% \end{function}
 %
-% \DescribeFieldkey{TM}\DescribeFieldkey{mappingname} This sets an alternative name for the export.
+% \begin{function}{mappingname,TM}
+%  \begin{syntax}
+%   |mappingname| = \meta{string}\\
+%   |TM| = \meta{string}\\
+%  \end{syntax}
+% This sets an alternative name for the export.
 % The value is passed through \cs{pdf_string_from_unicode:nnN}
+% \end{function}
 %
-% \DescribeFieldkey{FT} This sets the type of the field, the value should be one of
+% \begin{function}{mappingname,TM}
+%  \begin{syntax}
+%   |FT| = |Btn|\verb"|"|Tx|\verb"|"|Ch|\verb"|"|Sig|
+%  \end{syntax}
+% This sets the type of the field, the value should be one of
 % \texttt{Btn} (button), \texttt{Tx} (text), \texttt{Ch} (choice),  \texttt{Sig} (signature).
 % The value is of relevance only for terminal fields, but it can be set in a parent
 % and then inherited.
+% \end{function}
 %
 % \begin{function}{setfieldflags,setFf,unsetfieldflags,unsetFf}
 %  \begin{syntax}
@@ -389,80 +417,158 @@
 % |DoNotScroll|, |Comb|,  |RadiosInUnison|, |RichText|, |CommitOnSelChange|.
 %
 % \end{function}
-
-% \DescribeFieldkey{V} This sets the value of the field. Its
+%
+% \begin{function}{V}
+%  \begin{syntax}
+%   |V| = \meta{various}
+%  \end{syntax}
+% This sets the value of the field. Its
 % format varies depending on the field type, so typically
 % commands for the various type will have to preprocess and sanitize it.
 % The value given here is x-expanded and then added to the dictionary!
 % See the descriptions of individual field types for further information.
 % (Pushbuttons for example don't have a value).
+% \end{function}
 %
-% \DescribeFieldkey{DV} The default value, to which the field reverts
+% \begin{function}{V}
+%  \begin{syntax}
+%   |V| = \meta{various}
+%  \end{syntax}
+% The default value, to which the field reverts
 % when a reset-form action is executed. The format of this value is the
 % same as that of \texttt{V}.
+% \end{function}
 %
-% \DescribeFieldkey{MaxLen} Only relevant for textfields.
+% \begin{function}{MaxLen}
+%  \begin{syntax}
+%   |MaxLen| = \meta{integer}
+%  \end{syntax}
+% Only relevant for textfields.
 % The value is an integer and describes the maximum length of the field’s text in characters.
 % Required if the |Comb| flag is used.
+% \end{function}
 %
-% \DescribeFieldkey{Lock} Only relevant for signature fields. The value is an object name
+% \begin{function}{Lock}
+%  \begin{syntax}
+%   |MaxLen| = \meta{object name}
+%  \end{syntax}
+% Only relevant for signature fields. The value is an object name
 % which should point to a dictionary that specifies a set of form fields
 % that shall be locked when this signature field is signed. The exact format of
 % the dictionary is described in the PDF reference.
+% \end{function}
 %
-% \DescribeFieldkey{SV} Only relevant for signature fields. The value is an object name
+% \begin{function}{SV}
+%  \begin{syntax}
+%   |SV| = \meta{object name}
+%  \end{syntax}
+% Only relevant for signature fields. The value is an object name
 % which should point to a seed value dictionary. The exact format of
 % the dictionary is described in the PDF reference.
+% \end{function}
 %
-% \DescribeFieldkey{Opt} Only relevant for checkboxes, radiobuttons and choice fields.
+% \begin{function}{Opt}
+%  \begin{syntax}
+%   |Opt| = \meta{object name}
+%  \end{syntax}
+% Only relevant for checkboxes, radiobuttons and choice fields.
 % The value is an object name
 % which should point to a array. The exact format of
 % the array is described in the PDF reference.
+% \end{function}
 %
-% \DescribeFieldkey{TI} Only relevant for scrollable list boxes.
+% \begin{function}{TI}
+%  \begin{syntax}
+%   |TI| = \meta{integer}
+%  \end{syntax}
+% Only relevant for scrollable list boxes.
 % The value is an integer, the top index (the index in the Opt array
 % of the first option visible in the list). Default value: 0
+% \end{function}
 %
-% \DescribeFieldkey{I} For choice fields that allow
+% \begin{function}{I}
+%  \begin{syntax}
+%   |I| = \meta{object name}
+%  \end{syntax}
+% For choice fields that allow
 % multiple selection (MultiSelect flag set). The value is an object name
 % which should point to a array. The exact format of
 % the array is described in the PDF reference
 % (I have no idea what exactly should be added there, perhaps some future test will make
 % it more understandable.)
+% \end{function}
 %
 % The following four keys are used to add javascript (\enquote{ECMAScript}) code.
 % The values are currently only passed through \cs{pdf_string_from_unicode:nnN},
 % but this perhaps will have to change. The keys will be ignored if a pdfstandard
 % is used that prohibits such actions.
 %
-% \DescribeFieldkey{AA/K} This adds a keystroke action to the
+% \begin{function}{AA/K,keystroke}
+%  \begin{syntax}
+%   |AA/K| = \meta{string (ECMAScript)}\\
+%   |keystroke| = \meta{string (ECMAScript)}
+%  \end{syntax}
+% This adds a keystroke action to the
 % additional action dictionary. The value is passed through
 % \cs{pdf_string_from_unicode:nnN}. The action is meant for text and choice fields.
 %  It is quite unclear if such an action
 %  make sense for non-terminal fields.
-% \DescribeFieldkey{AA/F} This adds a format action to the
+%  \end{function}
+%
+% \begin{function}{AA/F,format}
+%  \begin{syntax}
+%   |AA/F| = \meta{string (ECMAScript)}\\
+%   |format| = \meta{string (ECMAScript)}
+%  \end{syntax}
+% This adds a format action to the
 % additional action dictionary. The value is passed through
 % \cs{pdf_string_from_unicode:nnN}. The action is meant for text and choice fields.
 % It is quite unclear if such an action
 %  make sense for non-terminal fields.
-% \DescribeFieldkey{AA/V} This adds a validate action to the
-% additional action dictionary. The value is passed through
-% \cs{pdf_string_from_unicode:nnN}. It is quite unclear if such an action
-%  make sense for non-terminal fields.
-% \DescribeFieldkey{AA/C} This adds a calculate action to the
-% additional action dictionary. The value is passed through
-% \cs{pdf_string_from_unicode:nnN}. It is quite unclear if such an action
-%  make sense for non-terminal fields.
+% \end{function}
 %
-% \DescribeFieldkey{DA} This contains instructions for the text in text fields.
+% \begin{function}{AA/V,validate}
+%  \begin{syntax}
+%   |AA/V| = \meta{string (ECMAScript)}\\
+%   |validate| = \meta{string (ECMAScript)}
+%  \end{syntax}
+% This adds a validate action to the
+% additional action dictionary. The value is passed through
+% \cs{pdf_string_from_unicode:nnN}. It is quite unclear if such an action
+%  make sense for non-terminal fields.
+%  \end{function}
+%
+% \begin{function}{AA/C,calculate}
+%  \begin{syntax}
+%   |AA/C| = \meta{string (ECMAScript)}\\
+%   |calculate| = \meta{string (ECMAScript)}
+%  \end{syntax}
+% This adds a calculate action to the
+% additional action dictionary. The value is passed through
+% \cs{pdf_string_from_unicode:nnN}. It is quite unclear if such an action
+%  make sense for non-terminal fields.
+% \end{function}
+%
+% \begin{function}{DA}
+%  \begin{syntax}
+%   |DA| = \meta{string}
+%  \end{syntax}
+% This contains instructions for the text in text fields.
 % It is stored expanded and parentheses are added around the value.
+% \end{function}
 %
-% \DescribeFieldkey{Q}  The justification of the text,
+% \begin{function}{Q}
+%  \begin{syntax}
+%   |Q| = |0|\verb"|"|1|\verb"|"|2|
+%  \end{syntax}
+% The justification of the text,
 % the allow values are 0, 1, 2 for left, centered, right.
+% \end{function}
 %
-% \DescribeFieldkey{DS} \DescribeFieldkey{RV} These two keys are currently not implemented
+% \begin{function}{DS,RV}
+% These two keys are currently not implemented
 % as it is unclear if there are of any use.
-%
+% \end{function}
 %
 % \section{Annot keys}
 %
@@ -492,33 +598,63 @@
 % \end{tabular}
 % \end{table}
 %
-% \DescribeAnnotkey{width}
-% \DescribeAnnotkey{height}
-% \DescribeAnnotkey{depth} These keys allow to set the dimensions of the annotation.
+% \begin{function}{width,height,depth}
+% \begin{syntax}
+% |width| = \meta{dim expression}\\
+% |height| = \meta{dim expression}\\
+% |depth| = \meta{dim expression}
+% \end{syntax}
+% These keys allow to set the dimensions of the annotation.
 % The value should be a command that expands to a dimension expression. By default
 % all values are zero.
+% \end{function}
 %
-% \DescribeAnnotkey{parent} This sets the parent. The value should be field ID of
+% \begin{function}{parent}
+%  \begin{syntax}
+%   |parent| = \meta{field ID}\\
+%  \end{syntax}
+% This sets the parent. The value should be field ID of
 % an already declared field.
+% \end{function}
 %
-% \DescribeAnnotkey{AP/N}\DescribeAnnotkey{AP/R}\DescribeAnnotkey{AP/D}
+% \begin{function}{parent}
+%  \begin{syntax}
+%   |AP/N| = \meta{xform reference} \verb"|" \meta{dictionary}\\
+%   |AP/R| = \meta{xform reference} \verb"|" \meta{dictionary}\\
+%   |AP/D| = \meta{xform reference} \verb"|" \meta{dictionary}
+%  \end{syntax}
 % This keys set the normal, rollover and down appearance. The value is either a
 % xform object or a dictionary mapping various states to an xform object.
+% \end{function}
 %
-% \DescribeAnnotkey{AS} This key sets the default appearance state.
+% \begin{function}{parent}
+%  \begin{syntax}
+%   |AS| = \meta{appearance state name}
+%  \end{syntax}
+% This key sets the default appearance state.
 % The value is a name without the starting slash
 % (it is passed through |\pdf_name_from_unicode_e:n|),
 % for checkbox for example |Yes|. If used it should typically have the same value
 % as the V and DV key of the field.
+% \end{function}
 %
-% \DescribeAnnotkey{setF}\DescribeAnnotkey{setannotflags}
-% \DescribeAnnotkey{unsetF}\DescribeAnnotkey{unsetannotflags}
+%\begin{function}{setannotflags,setF,unsetannotflags,unsetF}
+%  \begin{syntax}
+%   |setannotflags| = \meta{comma list of flags}\\
+%   |setF| = \meta{comma list of flags}\\
+%   |unsetannotflags| = |all| \verb"|" \meta{comma list of flags}\\
+%   |unsetF| = |all| \verb"|" \meta{comma list of flags}
+%  \end{syntax}
 % These keys allow to set or unset the annot flags.  They expect a comma lists of
 % flag names. Allowed names |Invisible|, |Hidden|,
 %  |Print|, |NoZoom|,|NoRotate|, |NoView|, |ReadOnly|, |Locked|, |ToggleNoView|,
 %  |LockedContents|, or the lowercase variants or numbers.
+% \end{function}
 %
-% \begin{annotkey}{AA/*}
+% \begin{function}{AA/*}
+%  \begin{syntax}
+%  |AA/*| = \meta{string (ECMAScript)}
+%  \end{syntax}
 % * should be one of |F|, |Bl|, |D|, |U|, |E|, |X|, |PO|, |PC|, |PV|, |PI|.
 % Alias names for the first six keys are
 % |onfocus|, |onblur|, |onmousedown|, |onmouseup|, |onenter|,  |onexit|.
@@ -531,16 +667,17 @@
 % \begin{verbatim}
 %    onenter={app.alert('Hello');}
 % \end{verbatim}
-
-% \end{annotkey}
+% \end{function}
 %
-% \medskip
-% \begin{annotkey}{MK/*}
+% \begin{function}{MK/*}
+%  \begin{syntax}
+%  |MK/*| = \meta{various}
+%  \end{syntax}
 % These keys adds the various entries in the \emph{dynamic appearance dictionary}.
 % * should be one of |R|, |BC|, |BG|, |CA|, |RC|, |AC|, |I|, |RI|, |IX|, |IF|, |TP|.
 % The |MK| dictionary can also be added by using |\pdfannot_dict_put:nnn{Widget}{MK}{...}|
 % but the two methods should not be mixed.
-% \end{annotkey}
+% \end{function}
 %
 % \end{documentation}
 %
@@ -1031,7 +1168,7 @@
     \keys_define:nn { pdffield  }
       {
          #1 .meta:nn =
-           { pdffield }{#2={##1}},
+           { pdffield }{AA/#2={##1}},
         #1 .groups:n  = {field}
       }
   }
@@ -1214,7 +1351,7 @@
     \keys_define:nn { pdffield }
       {
          #1 .meta:nn =
-           { pdffield }{#2={##1}},
+           { pdffield }{AA/#2={##1}},
          #1 .groups:n = {annot}
       }
   }

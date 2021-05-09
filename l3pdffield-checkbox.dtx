@@ -132,15 +132,15 @@
 %
 % \begin{function}{preset-checkbox}
 %  \begin{syntax}
-%   |preset-checkbox| = \Arg{key-val}
+%   |preset-checkbox| = \Arg{key-val-list}
 %  \end{syntax}
 % This allows to set default keys for a checkbox.
 % \end{function}
 %
 % \begin{function}{name,T}
 %  \begin{syntax}
-%   |name| = \Arg{partial name}\\
-%   |T| = \Arg{partial name}
+%   |name| = \meta{partial name}\\
+%   |T| = \meta{partial name}
 %  \end{syntax}
 % This sets like the |T| key for fields the partial name of the field. The value
 % shouldn't contain a period, be not empty and sensibly consist of simple chars.
@@ -155,7 +155,7 @@
 %
 % \begin{function}{parent}
 %  \begin{syntax}
-%   |parent| = \Arg{field ID}\\
+%   |parent| = \meta{field ID}\\
 %  \end{syntax}
 % This is only needed if the field should be part
 % of a larger fieldset. The value should be a field ID of a field created previously
@@ -164,8 +164,8 @@
 %
 % \begin{function}{altname,TU}
 %  \begin{syntax}
-%   |altname| = \Arg{string}\\
-%   |TU| = \Arg{string}\\
+%   |altname| = \meta{string}\\
+%   |TU| = \meta{string}\\
 %  \end{syntax}
 % This is sets an alternative name for user interaction.
 % This name can only be set at the first checkbox instance, when the field is initialized.
@@ -173,8 +173,8 @@
 %
 % \begin{function}{mappingname,TM}
 %  \begin{syntax}
-%   |mappingname| = \Arg{string}\\
-%   |TM| = \Arg{string}\\
+%   |mappingname| = \meta{string}\\
+%   |TM| = \meta{string}\\
 %  \end{syntax}
 % This is sets an alternative name for export.
 % This name can only be set at the first checkbox instance, when the field is initialized.
@@ -182,9 +182,9 @@
 %
 % \begin{function}{width,height,depth}
 % \begin{syntax}
-% |width| = \Arg{dim expression}\\
-% |height| = \Arg{dim expression}\\
-% |depth| = \Arg{dim expression}
+% |width| = \meta{dim expression}\\
+% |height| = \meta{dim expression}\\
+% |depth| = \meta{dim expression}
 % \end{syntax}
 % These keys allow to set the dimensions of checkbox instance.
 % The value should be a dimension expression. By default
@@ -193,9 +193,9 @@
 %
 % \begin{function}{appearance,rollover-appearance,down-appearance}
 %  \begin{syntax}
-%   |appearance| = \Arg{name}\\
-%   |rollover-appearance| = \Arg{name}\\
-%   |down-appearance| = \Arg{name}
+%   |appearance| = \meta{name}\\
+%   |rollover-appearance| = \meta{name}\\
+%   |down-appearance| = \meta{name}
 %  \end{syntax}
 % This keys sets the normal appearance, the rollover appearance (when the
 % mouse hovers over the checkbox) and the down appearance (when the
