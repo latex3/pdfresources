@@ -28,7 +28,7 @@
 \makeatletter
 \declare@file@substitution{doc.sty}{doc-v3beta.sty}
 \makeatother
-\documentclass[full]{l3doc}
+\documentclass{l3doc}
 \usepackage{array,booktabs,caption}
 \usepackage{l3pdffield-testphase,tikz}
 \hypersetup{pdfauthor=The LaTeX Project,
@@ -48,6 +48,11 @@
 %   idxtype = {field key},
 %   printtype= \textit{field key}
 %    ]{Fieldkey}{fieldkey}
+%  \NewDocElement[
+%   idxgroup=setup keys,
+%   idxtype = {setup key},
+%   printtype= \textit{setup key}
+%    ]{Fieldsetupkey}{fieldsetupkey}
 %  \NewDocElement[
 %   idxgroup=annot keys,
 %   idxtype = {annot key},
@@ -277,6 +282,29 @@
 % a module part, e.g. |mymodule/appearance/cross|.
 % \end{function}
 %
+% \begin{function}{\pdffield_setup:n}
+% \begin{syntax}
+%  \cs{pdffield_setup:n}\Arg{key-val}
+% \end{syntax}
+% This command allows to preset some field settings.
+% \end{function}
+% It knows currently two keys:
+%
+% \begin{function}{create-style}
+% \begin{syntax}
+%  |create-style| = \Arg{name}\Arg{key-val}
+% \end{syntax}
+% This defines a style which can then be used with the |style| key.
+% \Arg{key-val} can be an arbitrary collection of the  keys of the module.
+% \end{function}
+%
+% \begin{function}{preset-checkbox}
+% \begin{syntax}
+% |preset-checkbox|=\Arg{key-val}
+% \end{syntax}
+% This allows to set default keys for a checkbox.
+% \end{function}
+
 % \section{Field Keys}
 %
 % Table~\ref{tab:fieldkeys} summarize the keys which can be used.
@@ -290,6 +318,7 @@
 % \toprule
 % key      & value      & required & inheritable &remark\\\midrule
 % parent   & field ID & for non-root fields &     \\
+% style    & style name &                   & defined with |create-style| \\
 % T, name        & string   & mostly   &             \\
 % TU, altname       & string   &          &             \\
 % TM, mappingname       & string   &          &             \\
@@ -339,9 +368,14 @@
 % The value is of relevance only for terminal fields, but it can be set in a parent
 % and then inherited.
 %
-% \DescribeFieldkey{setFf}\DescribeFieldkey{setfieldflags}
-% \DescribeFieldkey{unsetFf}\DescribeFieldkey{unsetfieldflags}
-% This key accepts a list of flag names and then sets or unsets them, the resulting value
+% \begin{function}{setfieldflags,setFf,unsetfieldflags,unsetFf}
+%  \begin{syntax}
+%   |setfieldflags| = \meta{comma list of flags}\\
+%   |setFf| = \meta{comma list of flags}\\
+%   |unsetfieldflags| = |all| \verb"|" \meta{comma list of flags}\\
+%   |unsetFf| = |all| \verb"|" \meta{comma list of flags}
+%  \end{syntax}
+%  These keys accept a list of flag names and then sets or unsets them, the resulting value
 % is then used with the \texttt{/Ff} key. Depending
 % on the field type some flags must be set or unset, other are optional or are ignored.
 % The flag name can be given in PDF spelling (\texttt{RadiosInUnison}),
@@ -354,6 +388,8 @@
 % |Combo|, |Edit|,   |Sort|, |FileSelect|,  |MultiSelect|, |DoNotSpellCheck|,
 % |DoNotScroll|, |Comb|,  |RadiosInUnison|, |RichText|, |CommitOnSelChange|.
 %
+% \end{function}
+
 % \DescribeFieldkey{V} This sets the value of the field. Its
 % format varies depending on the field type, so typically
 % commands for the various type will have to preprocess and sanitize it.
@@ -490,6 +526,12 @@
 % of the field annotation object.
 % Their value should be javascript code. The |/AA| dictionary
 % is suppressed if a pdf/A standard is set.
+%
+% For example
+% \begin{verbatim}
+%    onenter={app.alert('Hello');}
+% \end{verbatim}
+
 % \end{annotkey}
 %
 % \medskip
@@ -542,12 +584,7 @@
   }
 \msg_new:nnn {pdffield}{appearance-missing}
   {
-    The~appearance~`#1`~is~missing~for~the~#2~appearance.
-  }
-\msg_new:nnn {pdffield}{field-keys-ignored}
-  {
-    The~field~`#1`~is~already~initialized\\
-    The~field~keys~`#2`~are~ignored.
+    The~appearance~definition~`#1`~is~missing~for~the~#2~appearance.
   }
 \msg_new:nnn {pdffield}{not-implemented}
   {
@@ -798,6 +835,7 @@
           }
         \str_if_empty:NTF\l_@@_tmpa_str
           {
+            \msg_warning:nn {pdffield}{empty-name}
             \pdfdict_remove:nn { l_@@/field }{T}
           }
           {
@@ -1194,23 +1232,48 @@
   {
      \pdfxform_new:nnn {#1}{}{#2}
   }
-%for compability ...
+
 \cs_set_eq:NN \pdffield_store_appearance:nn\pdffield_appearance:nn
 %    \end{macrocode}
+% \end{macro}
 % \subsection{Setup command}
 %
+%    \begin{macrocode}
 \keys_define:nn { pdffield / setup }
-  { create-style . code:n = { \@@_style_create:nn #1 } }
+  {
+    ,create-style .code:n  = { \@@_style_create:nn #1 }
+    ,preset-checkbox .code:n =
+      {
+        \keys_define:nn { pdffield }
+         {
+           @@/preset/checkbox .meta:n = {#1},
+         }
+      }
+  }
+\keys_set:nn{ pdffield / setup }{preset-checkbox={}}
 
 \cs_new_protected:Npn \@@_style_create:nn #1#2
-  { \keys_define:nn { pdffield } { #1 .meta:n = {#2} } }
+  {
+    \keys_define:nn { pdffield }
+      {
+        @@/style/#1 .meta:n = {#2},
+      }
+  }
 
-\cs_new_protected:Npn \pdffield_setup:nn #1 #2
- {
 
- }
+\cs_new_protected:Npn \pdffield_setup:n #1
+  {
+     \keys_set:nn{pdffield/setup}{#1}
+  }
 
+\keys_define:nn { pdffield }
+  {
+    style .code:n = {\keys_set:nn {pdffield}{@@/style/#1={#1}}}
+  }
+%    \end{macrocode}
 %    \begin{macrocode}
 %</package>
 %    \end{macrocode}
 %\end{implementation}
+%
+% \PrintIndex
