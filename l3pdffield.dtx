@@ -281,6 +281,7 @@
 %
 % Table~\ref{tab:fieldkeys} summarize the keys which can be used.
 % A number of keys have two names, the second is normally the name used by hyperref.
+% Where is makes sense an empty value \enquote{unsets} a key.
 %
 % \begin{table}
 % \caption{Keys for fields}\label{tab:fieldkeys}
@@ -339,12 +340,14 @@
 % and then inherited.
 %
 % \DescribeFieldkey{setFf}\DescribeFieldkey{setfieldflags}
-% \DescribeFieldkey{unsetFf}\DescribeFieldkey{setfieldflags}
+% \DescribeFieldkey{unsetFf}\DescribeFieldkey{unsetfieldflags}
 % This key accepts a list of flag names and then sets or unsets them, the resulting value
 % is then used with the \texttt{/Ff} key. Depending
 % on the field type some flags must be set or unset, other are optional or are ignored.
 % The flag name can be given in PDF spelling (\texttt{RadiosInUnison}),
-% in lowercase (\texttt{radiosinunison}), and as number.
+% in lowercase (\texttt{radiosinunison}), and as number. |unsetFf| and its
+% alias |unsetfieldflags|  know the special value |all| which clears all the fields.
+%
 % The list of flags are:
 % |ReadOnly|, |Required|,
 % |NoExport|, |Multiline|, |Password|,    |NoToggleToOff|, |Radio|, |Pushbotton|,
@@ -739,7 +742,7 @@
                }
            }
            {
-               \msg_error:nnn { pdffield }{parent-field-missing}{#1}
+               \msg_error:nnx { pdffield }{parent-field-missing}{\l_@@_currentparent_tl}
            }
        }
     \mode_leave_vertical:
@@ -809,16 +812,28 @@
     ,TU .groups:n = {field}
     ,TU .code:n =
       {
-        \pdf_string_from_unicode:nnN {utf8/string}{#1}\l_@@_tmpa_str
-        \pdfdict_put:nnx { l_@@/field }{TU}{\l_@@_tmpa_str}
+        \tl_if_empty:nTF {#1}
+          {
+            \pdfdict_remove:nn { l_@@/field }{TU}
+          }
+          {
+            \pdf_string_from_unicode:nnN {utf8/string}{#1}\l_@@_tmpa_str
+            \pdfdict_put:nnx { l_@@/field }{TU}{\l_@@_tmpa_str}
+          }
       }
     ,TU .groups:n = {field}
     ,altname .meta:n      = {TU={#1}}
     ,altname .groups:n = {field}
     ,TM .code:n =
       {
-        \pdf_string_from_unicode:nnN {utf8/string}{#1}\l_@@_tmpa_str
-        \pdfdict_put:nnx { l_@@/field }{TM}{\l_@@_tmpa_str}
+        \tl_if_empty:nTF {#1}
+          {
+            \pdfdict_remove:nn { l_@@/field }{TM}
+          }
+          {
+            \pdf_string_from_unicode:nnN {utf8/string}{#1}\l_@@_tmpa_str
+            \pdfdict_put:nnx { l_@@/field }{TM}{\l_@@_tmpa_str}
+          }
       }
     ,TM .groups:n = {field}
     ,mappingname .meta:n   = {TM={#1}}
@@ -831,50 +846,98 @@
     ,FT .groups:n = {field}
     ,V .code:n =
      {
-       \pdfdict_put:nnx { l_@@/field }{V}{ #1 }
+       \tl_if_empty:nTF {#1}
+         {
+           \pdfdict_remove:nn { l_@@/field }{V}
+         }
+         {
+           \pdfdict_put:nnx { l_@@/field }{V}{ #1 }
+         }
      }
     ,V .groups:n = {field}
     ,DV .code:n =
      {
-       \pdfdict_put:nnx { l_@@/field }{V}{ #1 }
+       \tl_if_empty:nTF {#1}
+         {
+           \pdfdict_remove:nn { l_@@/field }{DV}
+         }
+         {
+           \pdfdict_put:nnx { l_@@/field }{DV}{ #1 }
+         }
      }
     ,DV .groups:n = {field}
     ,MaxLen .code:n =
      {
-       \pdfdict_put:nnx { l_@@/field }{MaxLen}{ #1 }
-     }
+       \tl_if_empty:nTF {#1}
+         {
+           \pdfdict_remove:nn { l_@@/field }{MaxLen}
+         }
+         {
+           \pdfdict_put:nnx { l_@@/field }{MaxLen}{ #1 }
+         }
+      }
     ,MaxLen .groups:n = {field}
     ,Lock .code:n =
-     {
-       \pdfdict_put:nnx { l_@@/field }{Lock}{ \pdf_object_ref:n{#1} }
-     }
+      {
+        \tl_if_empty:nTF {#1}
+          {
+            \pdfdict_remove:nn { l_@@/field }{Lock}
+          }
+          {
+            \pdfdict_put:nnx { l_@@/field }{Lock}{ \pdf_object_ref:n{#1} }
+          }
+      }
     ,Lock .groups:n = {field}
     ,SV .code:n =
-     {
-       \pdfdict_put:nnx { l_@@/field }{SV}{ \pdf_object_ref:n{#1} }
-     }
+      {
+        \tl_if_empty:nTF {#1}
+          {
+            \pdfdict_remove:nn { l_@@/field }{SV}
+          }
+          {
+            \pdfdict_put:nnx { l_@@/field }{SV}{ \pdf_object_ref:n{#1} }
+          }
+      }
     ,SV .groups:n = {field}
     ,Opt .code:n =
-     {
-       \pdfdict_put:nnx { l_@@/field }{Opt}{ \pdf_object_ref:n{#1} }
-     }
+      {
+        \tl_if_empty:nTF {#1}
+          {
+            \pdfdict_remove:nn { l_@@/field }{Opt}
+          }
+          {
+            \pdfdict_put:nnx { l_@@/field }{Opt}{ \pdf_object_ref:n{#1} }
+          }
+      }
     ,Opt .groups:n = {field}
     ,TI .code:n =
-     {
-       \pdfdict_put:nnx { l_@@/field }{TI}{ #1 }
-     }
+      {
+        \tl_if_empty:nTF {#1}
+          {
+            \pdfdict_remove:nn { l_@@/field }{TI}
+          }
+          {
+            \pdfdict_put:nnx { l_@@/field }{TI}{ #1 }
+          }
+       }
     ,TI .groups:n = {field}
     ,I .code:n =
-     {
-       \pdfdict_put:nnx { l_@@/field }{I}{ \pdf_object_ref:n{#1} }
-     }
+      {
+        \tl_if_empty:nTF {#1}
+          {
+            \pdfdict_remove:nn { l_@@/field }{I}
+          }
+          {
+            \pdfdict_put:nnx { l_@@/field }{I}{ \pdf_object_ref:n{#1} }
+          }
+      }
     ,I .groups:n = {field}
   }
 %    \end{macrocode}
 
 % Flags. We don't add lots of individual keys but map the key names directly
 %    \begin{macrocode}
-\keys_define:nn { pdffield / field }
+\keys_define:nn { pdffield }
   {
     ,setFf .code:n =
       {
@@ -887,12 +950,11 @@
     ,setfieldflags .meta:nn =
       { pdffield }{setFf={#1}}
     ,setfieldflags .groups:n = {field}
-    ,unsetFf .code:n =
+    ,unsetFf .multichoice:
+    ,unsetFf / all .code:n = { \bitset_clear:N \l_@@_Ff_bitset}
+    ,unsetFf / unknown .code:n =
       {
-          \clist_map_inline:nn {#1}
-           {
-             \bitset_set_false:Nn \l_@@_Ff_bitset {##1}
-           }
+        \bitset_set_false:Nn \l_@@_Ff_bitset {#1}
       }
     ,unsetFf .groups:n = {field}
     ,unsetfieldflags .groups:n = {field}
@@ -909,7 +971,7 @@
       {
          AA/#1 .code:n =
            {
-             \pdf_string_from_unicode:nnN {utf8/string}{##1}\l_@@_tmpa_str
+             \pdf_string_from_unicode:nnN {utf8/string-raw}{##1}\l_@@_tmpa_str
              \str_if_empty:NTF \l_@@_tmpa_str
                {
                  \pdfdict_remove:nn {l_@@/field/AA}{#1}
@@ -917,7 +979,7 @@
                {
                  \pdfdict_put:nnx {l_@@/field/AA}
                   {#1}
-                  {<</S/JavaScript/JS\l_@@_tmpa_str>>}
+                  {<</S/JavaScript/JS(\l_@@_tmpa_str)>>}
                }
            },
         AA/#1 .groups:n  = {field}
@@ -947,14 +1009,21 @@
 \keys_define:nn { pdffield }
   {
     DA .code:n =
-      {
-         \pdfdict_put:nnx{ l_@@_field}{DA}{(#1)}
+     {
+       \tl_if_empty:nTF {#1}
+         {
+           \pdfdict_remove:nn { l_@@/field }{DA}
+         }
+         {
+           \pdfdict_put:nnx { l_@@/field }{DA}{ #1 }
+         }
       }
     ,DA .groups:n = {field}
     ,Q .choices:nn = {0,1,2}
      {
-       \pdfdict_put:nnn{ l_@@_field}{Q}{#1}
+       \pdfdict_put:nnx { l_@@/field }{Q}{ #1 }
      }
+    ,Q / .code:n = { \pdfdict_remove:nn { l_@@/field }{Q} }
     ,Q .groups:n = {field}
     ,DS .code:n =
      {
@@ -994,16 +1063,30 @@
    %parent is defined in field
   ,AS .code:n =
     {
-      \pdfannot_dict_put:nnx {widget}{AS}{\pdf_name_from_unicode_e:n{#1}}
+      \tl_if_empty:nTF {#1}
+        {
+          \pdfannot_dict_remove:nn { widget }{AS}
+        }
+        {
+          \pdfannot_dict_put:nnx {widget}{AS}{\pdf_name_from_unicode_e:n{#1}}
+        }
     }
-  .AS .groups:n = annot
+  ,AS .groups:n = annot
  }
 \cs_set_protected:Npn \@@_tmpa:n #1
   {
    \keys_define:nn { pdffield }
      {
        AP/#1 .code:n =
-        { \pdfannot_dict_put:nnx {widget/AP}{#1}{##1} }
+        {
+          \tl_if_empty:nTF {##1}
+           {
+             \pdfannot_dict_remove:nn { widget/AP }
+           }
+           {
+             \pdfannot_dict_put:nnx {widget/AP}{#1}{##1}
+           }
+        }
       ,AP/#1 .groups:n = annot
      }
   }
@@ -1015,7 +1098,15 @@
    \keys_define:nn { pdffield  }
      {
        MK/#1 .code:n =
-        { \pdfannot_dict_put:nnx {widget/MK}{#1}{##1} }
+        {
+          \tl_if_empty:nTF {##1}
+            {
+              \pdfannot_dict_remove:nn { widget/AP }
+            }
+            {
+              \pdfannot_dict_put:nnx {widget/MK}{#1}{##1}
+            }
+        }
       ,MK/#1 .groups:n = annot
      }
  }
@@ -1038,16 +1129,15 @@
     ,setannotflags .meta:nn =
       { pdffield }{setF={#1}}
     ,setannotflags .groups:n = annot
-    ,unsetF .code:n =
+    ,unsetF .multichoice:
+    ,unsetF / all .code:n = { \bitset_clear:N \l_@@_F_bitset}
+    ,unsetF / unknown .code:n =
       {
-          \clist_map_inline:nn {#1}
-           {
-             \bitset_set_false:Nn \l_@@_F_bitset {##1}
-           }
+        \bitset_set_false:Nn \l_@@_F_bitset {#1}
       }
     ,unsetF .groups:n = annot
     ,unsetannotflags .meta:nn =
-      { pdffield }{unsetF={#1}
+      { pdffield }{unsetF= {#1} }
     ,unsetannotflags .groups:n = annot
   }
 
@@ -1064,7 +1154,7 @@
       {
          AA/#1 .code:n =
            {
-             \pdf_string_from_unicode:nnN {utf8/string}{##1}\l_@@_tmpa_str
+             \pdf_string_from_unicode:nnN {utf8/string-raw}{##1}\l_@@_tmpa_str
              \str_if_empty:NTF \l_@@_tmpa_str
                {
                  \pdfannot_dict_remove:nn {widget/AA}{#1}
@@ -1072,7 +1162,7 @@
                {
                  \pdfannot_dict_put:nnx {widget/AA}
                   {#1}
-                  {<</S/JavaScript/JS\l_@@_tmpa_str>>}
+                  {<</S/JavaScript/JS(\l_@@_tmpa_str)>>}
                }
            },
          ,AA/#1 .groups:n = annot
@@ -1100,7 +1190,7 @@
 % \subsection{Appearances}
 % \begin{macro}{\pdffield_appearance:nn}
 %    \begin{macrocode}
-\cs_new_protected:Npn \pdffield_store_appearance:nn #1 #2
+\cs_new_protected:Npn \pdffield_appearance:nn #1 #2
   {
      \pdfxform_new:nnn {#1}{}{#2}
   }

@@ -45,11 +45,11 @@
 %    ]{Checkboxkey}{checkboxkey}
 % \providecommand\hook[1]{\texttt{#1}}
 % \ExplSyntaxOn
-% \pdffield_store_appearance:nn {pdffield/bear/Yes}
+% \pdffield_appearance:nn {pdffield/bear/Yes}
 %  {
 %    \tikz\bear\bearwear[shirt=red,body~deco={\node[font=\tiny\bfseries,white]~at~(beartummy){Yes};}];
 %  }
-% \pdffield_store_appearance:nn {pdffield/bear/Off}
+% \pdffield_appearance:nn {pdffield/bear/Off}
 %  {
 %   \tikz\bear\bearwear[body~deco={\node[font=\tiny\bfseries,white]~at~(beartummy){Off};}];
 %  }
@@ -118,8 +118,14 @@
 % are a small number of keys specific to a checkbox.
 %
 %
-% Disabled keys are |V|, |DV|, |AS|, use checked instead.
-% |FT| is ignored/overwritten.
+% Disabled keys are
+%  \begin{itemize}
+%  \item |V|, |DV|, |AS|: use |checked| instead.
+%  \item |AP/N|, |AP/R|, |AP/D|: checkboxes need special formated
+%  appearances, use |appearance|, |rollover-appearance| and |down-appearance| instead.
+%  \item |FT| is overwritten.
+%  \item some flags are set as needed by a checkbox.
+%  \end{itemize}
 %
 %
 % \DescribeCheckboxkey{name}\DescribeCheckboxkey{T}
@@ -257,7 +263,7 @@
 %    \begin{macrocode}
 \cs_new_protected:cn {@@/checkbox/default_appearances:}
   {
-     \pdffield_store_appearance:nn {pdffield/checkbox/default/Yes}
+     \pdffield_appearance:nn {pdffield/checkbox/default/Yes}
        {
          \normalsize
          \fboxsep 0pt
@@ -265,7 +271,7 @@
            [ \dim_eval:n { \box_ht:N\strutbox+\box_dp:N\strutbox } ]
            { \texttimes \strut }
        }
-     \pdffield_store_appearance:nn {pdffield/checkbox/default/Off}
+     \pdffield_appearance:nn {pdffield/checkbox/default/Off}
        {
          \normalsize
          \fboxsep 0pt
@@ -285,7 +291,7 @@
   {
     \pdf_object_if_exist:nF {@@/field/@@/checkbox/#1}
       {
-        \@@_field:n { #1 }
+        \@@_field:n { @@/checkbox/#1 }
       }
     \keys_set:nn {pdffield}{parent=@@/checkbox/#1}
   }
@@ -299,6 +305,9 @@
   {
     \group_begin:
     \use:c {@@/checkbox/default_appearances:}
+%    \end{macrocode}
+% Setting up the defaults.
+%    \begin{macrocode}
     \keys_set:nn {pdffield}
      {
         name=checkbox,
@@ -306,18 +315,17 @@
         width  = \normalbaselineskip,
         height = \normalbaselineskip,
      }
-    %\keys_set_groups:nnV {pdffield }{checkbox}\l_@@_checkbox_preset_tl  
-    \keys_set_groups:nnn {pdffield }{checkbox}{#1}
+%    \end{macrocode}
+% A number of keys should be undefined, to avoid that the value and
+% appearances has the wrong format.
+%    \begin{macrocode}
     \keys_define:nn {pdffield  }
      {
        V  .undefine: , DV .undefine: , AS .undefine:,
        AP/N .undefine: , AP/R .undefine: , AP/D .undefine:,
      }
-    \keys_set:nn {pdffield }
-     {
-     }
-    \keys_set:nV {pdffield } \l_@@_tmpa_keys_tl
-    \keys_set:nn{ pdffield }
+    \keys_set:nn { pdffield }{#1}
+    \keys_set:nn { pdffield }
       {
         ,unsetFf={Radio,Pushbutton}
         ,FT= Btn
@@ -341,40 +349,48 @@
    ,checked .choice:
    ,checked / false .code:n =
      {
-       \keys_set:nn {pdffield }{V=/Off,DV=/Off,AS=Off}
+       \pdfdict_put:nnx { l_@@/field }{V} { /Off }
+       \pdfdict_put:nnx { l_@@/field }{DV}{ /Off }
+       \pdfannot_dict_put:nnn {widget}{AS}{ /Off }
      }
    ,checked / true .code:n =
      {
-       \keys_set:nn {pdffield}{V=/Yes,DV=/Yes,AS=Yes}
+       \pdfdict_put:nnx { l_@@/field }{V} { /Yes }
+       \pdfdict_put:nnx { l_@@/field }{DV}{ /Yes }
+       \pdfannot_dict_put:nnn {widget}{AS}{ /Yes }
      }
    ,checked .default:n = {true}
    ,checked .initial:n = {false}
    ,checked .groups:n  = {checkbox}
  }
 %    \end{macrocode}
-%
+% The code
 %    \begin{macrocode}
-
+\cs_new_protected:Npn \@@_checkbox_appearance:nnn #1 #2 #3 %name, type, text
+  {
+    \pdfxform_if_exist:nTF {  #1/Yes }
+      {
+        \pdf_object_if_exist:nF {@@/checkbox/AP/#1}
+          {
+            \pdf_object_new:nn {@@/checkbox/AP/#1}{dict}
+            \pdf_object_write:nx
+              {@@/checkbox/AP/#1}
+              {
+                /Yes ~ \pdfxform_ref:n { #1/Yes}
+                /Off ~ \pdfxform_ref:n { #1/Off}
+              }
+          }
+        \pdfannot_dict_put:nnx {widget/AP}{#2}{\pdf_object_ref:n{@@/checkbox/AP/#1}}
+      }
+      {
+         \msg_error:nnnn{pdffield}{appearance-missing}{#1}{#3}
+      }
+   }
 \keys_define:nn { pdffield  }
   {
     appearance .code:n = %value is a name of an appearance
       {
-        \pdfxform_if_exist:nTF {  #1/Yes }
-          {
-            \keys_set:nn{ pdffield }
-              {
-               AP/N =
-                {
-                  <<
-                    /Yes ~ \pdfxform_ref:n { #1/Yes}
-                    /Off ~ \pdfxform_ref:n { #1/Off}
-                  >>
-                }
-              }
-          }
-          {
-            \msg_error:nnnn{pdffield}{appearance-missing}{#1}{normal}
-          }
+        \@@_checkbox_appearance:nnn {#1}{N}{normal}
       },
     ,appearance .groups:n  = {checkbox}
   }
@@ -383,46 +399,16 @@
   {
     rollover-appearance .code:n = %value is a name of an appearance
       {
-        \pdfxform_if_exist:nTF {  #1/Yes }
-          {
-            \key_set:nn{ pdffield }
-              {
-               AP/R =
-                {
-                  <<
-                    /Yes ~ \pdfxform_ref:n { #1/Yes}
-                    /Off ~ \pdfxform_ref:n { #1/Off}
-                  >>
-                }
-              }
-          }
-          {
-            \msg_error:nnnn{pdffield}{appearance-missing}{#1}{normal}
-          }
+        \@@_checkbox_appearance:nnn {#1}{R}{rollover}
       },
     ,rollover-appearance .groups:n  = {checkbox}
   }
 
-\keys_define:nn { pdffield  }
+\keys_define:nn { pdffield / checkbox }
   {
     down-appearance .code:n = %value is a name of an appearance
       {
-        \pdfxform_if_exist:nTF {  #1/Yes }
-          {
-            \key_set:nn{ pdffield }
-              {
-               AP/D =
-                {
-                  <<
-                    /Yes ~ \pdfxform_ref:n { #1/Yes}
-                    /Off ~ \pdfxform_ref:n { #1/Off}
-                  >>
-                }
-              }
-          }
-          {
-            \msg_error:nnnn{pdffield}{appearance-missing}{#1}{normal}
-          }
+        \@@_checkbox_appearance:nnn {#1}{D}{down}
       },
     ,down-appearance .groups:n  = {checkbox}
   }
