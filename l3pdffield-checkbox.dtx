@@ -147,10 +147,24 @@
 % Additionally the value is used to create the field ID.
 % This means that checkboxes with the same partial name are annotations
 % with the same field as parent and are checked and unchecked together---this
-% what is typically expected. There could be an option to change the behaviour
-% but currently I can't see a sensible use case.
-% The field ID is internal as the field has a field annotation and so
-% is always a terminal field.
+% what is typically expected.
+% The field ID is then internal and can not be used to
+% attach another annotation.
+% For explicit control of the field ID  use the |fieldID| key.
+% \end{function}
+%
+% \begin{function}{fieldID}
+%  \begin{syntax}
+%   |fieldID| = \meta{field ID}\\
+%  \end{syntax}
+% \emph{For experts only!}
+% This allows to give the checkbox field a specific ID. This is only useful
+% in the context of a larger fieldset or if you want to attach another annotation
+% to the field with \s{pdffield_annot:n}. If used wrongly you can
+% easily create invalid fieldset. It allows you to create to fields with the
+% same partial name, but if you want to see both
+% you need to ensure that their full names are
+% different---for example by adding some parent fields.
 % \end{function}
 %
 % \begin{function}{parent}
@@ -305,6 +319,7 @@
 \cs_generate_variant:Nn \@@_checkbox_field:n {V}
 %    \end{macrocode}
 % \subsection{Assembling the checkbox}
+
 % \begin{macro}{\@@_checkbox:n}
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_checkbox:n #1
@@ -316,6 +331,7 @@
 %    \begin{macrocode}
     \keys_set:nn {pdffield}
       {
+        fieldID=,
         name=checkbox,
         appearance = pdffield/checkbox/default,
         checked=false,
@@ -326,20 +342,24 @@
 % A number of keys should be undefined, to avoid that the value and
 % appearances has the wrong format.
 %    \begin{macrocode}
-    \keys_define:nn {pdffield  }
-     {
-       V  .undefine: , DV .undefine: , AS .undefine:,
-       AP/N .undefine: , AP/R .undefine: , AP/D .undefine:,
-     }
+    \@@_key_disable:nnn{checkbox}{V}{checked}
+    \@@_key_disable:nnn{checkbox}{DV}{checked}
+    \@@_key_disable:nnn{checkbox}{AS}{checked}
+    \@@_key_disable:nnn{checkbox}{AP/N}{appearance}
+    \@@_key_disable:nnn{checkbox}{AP/R}{rollover-appearance}
+    \@@_key_disable:nnn{checkbox}{AP/D}{down-appearance}
     \keys_set:nn { pdffield }{@@/preset/checkbox,#1}
     \keys_set:nn { pdffield }
       {
         ,unsetFf={Radio,Pushbutton}
         ,FT= Btn
       }
-    \pdfdict_get:nnN {l_@@/field}{T}\l_@@_tmpa_tl
-    \tl_put_left:Nn \l_@@_tmpa_tl {@@/checkbox/}
-    \@@_checkbox_field:V\l_@@_tmpa_tl
+    \tl_if_empty:NT\l_@@_fieldID_tl
+      {
+        \pdfdict_get:nnN {l_@@/field}{T}\l_@@_fieldID_tl
+        \tl_put_left:Nn \l_@@_fieldID_tl {@@/checkbox/}
+      }
+    \@@_checkbox_field:V\l_@@_fieldID_tl
     \@@_annot:
     \group_end:
   }
@@ -369,6 +389,13 @@
    ,checked .default:n = {true}
    ,checked .initial:n = {false}
    ,checked .groups:n  = {checkbox}
+ }
+%    \end{macrocode}
+% And a key to set a dedicated field ID
+%    \begin{macrocode}
+\keys_define:nn { pdffield }
+ {
+   fieldID .tl_set:N = \l_@@_fieldID_tl
  }
 %    \end{macrocode}
 % \begin{macro}{\@@_checkbox_appearance:nnn}

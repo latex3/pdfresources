@@ -705,6 +705,7 @@
 \cs_new_protected:Npn \@@_tmpa:n #1 {}
 \cs_new_protected:Npn \@@_tmpa:nn #1 #2 {}
 \tl_new:N \l_@@_currentparent_tl
+\tl_new:N \l_@@_fieldID_tl
 %    \end{macrocode}
 %
 % \subsection{messages}
@@ -728,6 +729,11 @@
     Support~for~'/#1'~is~not~implemented\\
     The~key~is~ignored.
   }
+\msg_new:nnn {pdffield}{key-disabled}
+  {
+    key~`#2`~is~disabled~and~ignored~in~the~`#1`~command.\\
+    Use~key~`#3`~instead.
+  }
 \msg_new:nnn {pdffield}{parent-field-missing}
   {
     The~parent~field~'#1'~doesn't~exist\\
@@ -735,6 +741,21 @@
   }
 %    \end{macrocode}
 
+% An auxiliary command to disable some keys
+% \begin{macro}{\@@_key_disable:nnn}
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_key_disable:nnn #1#2#3
+ {
+   \keys_define:nn {pdffield}
+    {
+      #2 .code:n =
+       {
+         \msg_warning:nnnnn {pdffield}{key-disabled}{#1}{#2}{#3}
+       }
+    }
+ }
+%    \end{macrocode}
+% \end{macro}
 % \subsection{bitsets}
 % A bitset for the field flag Ff
 % and an internal copy of the annot bitset.
