@@ -1269,25 +1269,66 @@
     }
   ,AS .groups:n = annot
  }
-\cs_set_protected:Npn \@@_tmpa:n #1
-  {
-   \keys_define:nn { pdffield }
+\cs_new_protected:Npn \@@_appearance_handler:nnn #1#2#3
+ {
+   \pdfxform_if_exist:nTF {  #1 }
      {
-       AP/#1 .code:n =
-        {
-          \tl_if_empty:nTF {##1}
-           {
-             \pdfannot_dict_remove:nn { widget/AP }
-           }
-           {
-             \pdfannot_dict_put:nnx {widget/AP}{#1}{##1}
-           }
-        }
-      ,AP/#1 .groups:n = annot
+       \pdfannot_dict_put:nnx {widget}{AP/#2}
+         {
+           \pdfxform_ref:n {#1}
+         }
      }
+     {
+       \msg_error:nnnn{pdffield}{appearance-missing}{#1}{#3}
+     }
+ }
+\keys_define:nn { pdffield }
+  {
+    AP/N .code:n =
+      {
+        \tl_if_empty:nTF {#1}
+          {
+            \pdfannot_dict_remove:nn { widget/AP }{N}
+          }
+          {
+            \@@_appearance_handler:nnn {#1}{N}{normal}
+          }
+        }
+   ,AP/N .groups:n = annot
+   ,appearance .meta:n = {AP/N={#1}}
   }
-\clist_map_inline:nn {N,R,D}
-  { \@@_tmpa:n {#1} }
+\keys_define:nn { pdffield }
+  {
+    AP/R .code:n =
+      {
+        \tl_if_empty:nTF {#1}
+          {
+            \pdfannot_dict_remove:nn { widget/AP }{R}
+          }
+          {
+             \@@_appearance_handler:nnn {#1}{R}{rollover}
+          }
+        }
+   ,AP/R .groups:n = annot
+   ,rollover-appearance .meta:n = {AP/R={#1}}
+  }
+\keys_define:nn { pdffield }
+  {
+    AP/D .code:n =
+      {
+        \tl_if_empty:nTF {#1}
+          {
+            \pdfannot_dict_remove:nn { widget/AP }{D}
+          }
+          {
+             \@@_appearance_handler:nnn {#1}{D}{rollover}
+          }
+        }
+   ,AP/D .groups:n = annot
+   ,down-appearance .meta:n = {AP/D={#1}}
+  }
+
+
 
 \cs_set_protected:Npn \@@_tmpa:n #1
  {

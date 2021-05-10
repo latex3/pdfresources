@@ -101,7 +101,7 @@
 % \end{syntax}
 % This creates a checkbox to check and uncheck. The list of allowed keys is described below.
 % The \meta{key val list} should at least set the name, without it the default name
-% checkbox is used. Checkboxes with the same
+% |checkbox| is used. Checkboxes with the same
 % name belong to the same field and are checked and unchecked together. The default appearance
 % is a quadratic frame with a \cs{texttimes} in it for the checked case.
 % The default appearance is setup at the first use and will use the font family
@@ -111,10 +111,9 @@
 %
 % \subsection{Keys}
 %
-% The new checkbox commands accept all field and annot keys from l3pdffield.
+% The new checkbox command accept all field and annot keys from l3pdffield.
 % A few keys are disabled or are forced to specific values.
-% A number of keys have more user friendly alias names, which roughly follow the
-% naming used in hyperref for the analog feature. Some keys have a more checkbox specific
+% Some keys have a more checkbox specific
 % behaviour or have other defaults than with the basic commands. Additionally there
 % are a small number of keys specific to a checkbox.
 %
@@ -326,6 +325,7 @@
   {
     \group_begin:
     \use:c {@@/checkbox/default_appearances:}
+    \cs_set_eq:NN\@@_appearance_handler:nnn \@@_checkbox_appearance_handler:nnn
 %    \end{macrocode}
 % Setting up the defaults.
 %    \begin{macrocode}
@@ -345,9 +345,6 @@
     \@@_key_disable:nnn{checkbox}{V}{checked}
     \@@_key_disable:nnn{checkbox}{DV}{checked}
     \@@_key_disable:nnn{checkbox}{AS}{checked}
-    \@@_key_disable:nnn{checkbox}{AP/N}{appearance}
-    \@@_key_disable:nnn{checkbox}{AP/R}{rollover-appearance}
-    \@@_key_disable:nnn{checkbox}{AP/D}{down-appearance}
     \keys_set:nn { pdffield }{@@/preset/checkbox,#1}
     \keys_set:nn { pdffield }
       {
@@ -400,7 +397,7 @@
 %    \end{macrocode}
 % \begin{macro}{\@@_checkbox_appearance:nnn}
 %    \begin{macrocode}
-\cs_new_protected:Npn \@@_checkbox_appearance:nnn #1 #2 #3 %name, type, text
+\cs_new_protected:Npn \@@_checkbox_appearance_handler:nnn #1 #2 #3 %name, type, text
   {
     \pdfxform_if_exist:nTF {  #1/Yes }
       {
@@ -420,32 +417,7 @@
          \msg_error:nnnn{pdffield}{appearance-missing}{#1}{#3}
       }
    }
-\keys_define:nn { pdffield  }
-  {
-    appearance .code:n = %value is a name of an appearance
-      {
-        \@@_checkbox_appearance:nnn {#1}{N}{normal}
-      },
-    ,appearance .groups:n  = {checkbox}
-  }
 
-\keys_define:nn { pdffield  }
-  {
-    rollover-appearance .code:n = %value is a name of an appearance
-      {
-        \@@_checkbox_appearance:nnn {#1}{R}{rollover}
-      },
-    ,rollover-appearance .groups:n  = {checkbox}
-  }
-
-\keys_define:nn { pdffield  }
-  {
-    down-appearance .code:n = %value is a name of an appearance
-      {
-        \@@_checkbox_appearance:nnn {#1}{D}{down}
-      },
-    ,down-appearance .groups:n  = {checkbox}
-  }
 %    \end{macrocode}
 %
 % \end{macro}
