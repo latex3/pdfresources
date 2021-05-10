@@ -430,13 +430,13 @@
 % (Pushbuttons for example don't have a value).
 % \end{function}
 %
-% \begin{function}{V}
+% \begin{function}{DV}
 %  \begin{syntax}
-%   |V| = \meta{various}
+%   |DV| = \meta{various}
 %  \end{syntax}
 % The default value, to which the field reverts
 % when a reset-form action is executed. The format of this value is the
-% same as that of \texttt{V}.
+% same as that of \texttt{DV}.
 % \end{function}
 %
 % \begin{function}{MaxLen}
@@ -557,12 +557,12 @@
 % It is stored expanded and parentheses are added around the value.
 % \end{function}
 %
-% \begin{function}{Q}
+% \begin{function}{Q,align}
 %  \begin{syntax}
-%   |Q| = |0|\verb"|"|1|\verb"|"|2|
+%   |Q| = |left|\verb"|"|center|\verb"|"|right|\\
+%   |align| = |left|\verb"|"|center|\verb"|"|right|
 %  \end{syntax}
-% The justification of the text,
-% the allow values are 0, 1, 2 for left, centered, right.
+% The justification of the text.
 % \end{function}
 %
 % \begin{function}{DS,RV}
@@ -573,6 +573,7 @@
 % \section{Annot keys}
 %
 % Table~\ref{tab:annotkeys} summarize the keys which can be used.
+% A number of keys have alias names which are mentioned in the descriptions.
 %
 % \begin{table}
 % \caption{Keys for field annotations}\label{tab:annotkeys}
@@ -584,9 +585,9 @@
 % width    & dim expression & (yes)  & default is 0pt \\
 % height   & dim expression & (yes)  & default is 0pt \\
 % depth   & dim expression & (yes)  & default is 0pt \\
-% AP/N    & xform or dict  & yes  (in PDF 2.0) \\
-% AP/R    & xform or dict  & yes  (in PDF 2.0) \\
-% AP/D    & xform or dict  & yes  (in PDF 2.0) \\
+% AP/N    & appearance name  & yes  (in PDF 2.0) \\
+% AP/R    & appearance name  & yes  (in PDF 2.0) \\
+% AP/D    & appearance name  & yes  (in PDF 2.0) \\
 % AS      & name  & yes  (in PDF 2.0) \\
 % setF    & list of flags \\
 % unsetF  & list of flags \\
@@ -617,17 +618,20 @@
 % an already declared field.
 % \end{function}
 %
-% \begin{function}{parent}
+% \begin{function}{AP/N,AP/R,AP/D}
 %  \begin{syntax}
-%   |AP/N| = \meta{xform reference} \verb"|" \meta{dictionary}\\
-%   |AP/R| = \meta{xform reference} \verb"|" \meta{dictionary}\\
-%   |AP/D| = \meta{xform reference} \verb"|" \meta{dictionary}
+%   |AP/N| = \meta{appearance name}\\
+%   |AP/R| = \meta{appearance name}\\
+%   |AP/D| = \meta{appearance name}
 %  \end{syntax}
-% This keys set the normal, rollover and down appearance. The value is either a
-% xform object or a dictionary mapping various states to an xform object.
+% This keys set the normal, rollover and down appearance. Alias names are
+% |appearance|, |rollover-appearance| and |down-appearance|.
+% The value is by default a simple name of an appearance/form Xobject but
+% modules like \pkg{l3pdffield-checkbox} change this to allow to add appearances for
+% various states.
 % \end{function}
 %
-% \begin{function}{parent}
+% \begin{function}{AS}
 %  \begin{syntax}
 %   |AS| = \meta{appearance state name}
 %  \end{syntax}
@@ -669,12 +673,46 @@
 % \end{verbatim}
 % \end{function}
 %
+% The following keys add values to the  \emph{dynamic appearance dictionary}
+% |MK| directory. This is only relevant for
+% annotations with dynamic content, like e.g. textfields.
+%
+% The |MK| dictionary can also be added by using |\pdfannot_dict_put:nnn{Widget}{MK}{...}|
+% but the two methods should not be mixed.
+%
+%  \begin{function}{MK/R,rotate}
+%  \begin{syntax}
+%  |MK/R| = |0| \verb"|" |90| \verb"|" |180| \verb"|" |270|\\
+%  |rotate| = |0| \verb"|" |90| \verb"|" |180| \verb"|" |270|
+%  \end{syntax}
+% These rotates the content of the annotation.
+% \end{function}
+%
+% \begin{function}{MK/BC,bordercolor}
+%  \begin{syntax}
+%  |MK/BC| = \meta{color expression} \verb"|" [\meta{model}]\Arg{values}\\
+%  |bordercolor| = \meta{color expression} \verb"|" [\meta{model}]\Arg{values}
+%  \end{syntax}
+% These colors the border. Internally currently RGB is used
+% \end{function}
+%
+% \begin{function}{MK/BG,backgroundcolor}
+%  \begin{syntax}
+%  |MK/BG| = \meta{color expression} \verb"|" [\meta{model}]\Arg{values}\\
+%  |backgroundcolor| = \meta{color expression} \verb"|" [\meta{model}]\Arg{values}
+%  \end{syntax}
+% These colors the background. Internally currently RGB is used
+% \end{function}
+%
+% The remaining key are useful for buttons only, currently no special syntax support
+% is implemented. They will be handled when the code for push buttons is developed and
+% tested.
 % \begin{function}{MK/*}
 %  \begin{syntax}
 %  |MK/*| = \meta{various}
 %  \end{syntax}
 % These keys adds the various entries in the \emph{dynamic appearance dictionary}.
-% * should be one of |R|, |BC|, |BG|, |CA|, |RC|, |AC|, |I|, |RI|, |IX|, |IF|, |TP|.
+% * should be one of  |CA|, |RC|, |AC|, |I|, |RI|, |IX|, |IF|, |TP|.
 % The |MK| dictionary can also be added by using |\pdfannot_dict_put:nnn{Widget}{MK}{...}|
 % but the two methods should not be mixed.
 % \end{function}
@@ -974,12 +1012,35 @@
 %    \end{macrocode}
 % \end{macro}
 %
+% \subsection{auxiliary command for color keys}
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_color_set:nn #1 #2
+ {
+   \tl_if_head_eq_charcode:nNTF {#2}[ %]
+    {
+      \@@_color_set_aux:nwn  { #1 } #2
+    }
+    {
+      \color_set:nn {#1} {#2}
+    }
+ }
+
+\cs_new_protected:Npn \@@_color_set_aux:nwn #1 [#2] #3
+  {
+     \color_set:nnn {#1}{#2}{#3}
+  }
+
+%    \end{macrocode}
 % \subsection{Field keys}
 % The names. The main name should not be empty, it is added to the dictionary
 % when the field is created. A new name means a new field.
 % The other names can only be set when the field is created,
 % so we put them in the field group.
 %    \begin{macrocode}
+\cs_new_protected:Npn \@@_value_handler:nN #1#2
+  {
+    \tl_set:Nn #2 {#1}
+  }
 \keys_define:nn { pdffield  }
   {
     ,parent .tl_set:N = \l_@@_currentparent_tl
@@ -1047,7 +1108,8 @@
            \pdfdict_remove:nn { l_@@/field }{V}
          }
          {
-           \pdfdict_put:nnx { l_@@/field }{V}{ #1 }
+           \@@_value_handler:nN{#1}\l_@@_tmpa_str
+           \pdfdict_put:nnx { l_@@/field }{V}{ \l_@@_tmpa_str }
          }
      }
     ,V .groups:n = {field}
@@ -1058,7 +1120,8 @@
            \pdfdict_remove:nn { l_@@/field }{DV}
          }
          {
-           \pdfdict_put:nnx { l_@@/field }{DV}{ #1 }
+           \@@_value_handler:nN{#1}\l_@@_tmpa_str
+           \pdfdict_put:nnx { l_@@/field }{DV}{ \l_@@_tmpa_str }
          }
      }
     ,DV .groups:n = {field}
@@ -1211,16 +1274,17 @@
            \pdfdict_remove:nn { l_@@/field }{DA}
          }
          {
-           \pdfdict_put:nnx { l_@@/field }{DA}{ #1 }
+           \pdfdict_put:nnx { l_@@/field }{DA}{ (#1) }
          }
       }
     ,DA .groups:n = {field}
-    ,Q .choices:nn = {0,1,2}
+    ,Q .choices:nn = {left,center,right}
      {
-       \pdfdict_put:nnx { l_@@/field }{Q}{ #1 }
+       \pdfdict_put:nnx { l_@@/field }{Q}{ \int_eval:n{\l_keys_choice_int-1} }
      }
     ,Q / .code:n = { \pdfdict_remove:nn { l_@@/field }{Q} }
     ,Q .groups:n = {field}
+    ,align .meta:n={Q=#1}
     ,DS .code:n =
      {
        \msg_warning:nnn {pdffield}{not-implemented}{DS}
@@ -1273,7 +1337,7 @@
  {
    \pdfxform_if_exist:nTF {  #1 }
      {
-       \pdfannot_dict_put:nnx {widget}{AP/#2}
+       \pdfannot_dict_put:nnx {widget/AP}{#2}
          {
            \pdfxform_ref:n {#1}
          }
@@ -1328,7 +1392,55 @@
    ,down-appearance .meta:n = {AP/D={#1}}
   }
 
+\keys_define:nn { pdffield  }
+  {
+    MK/R .choices:nn = {0,90,180,270}
+     {
+       \pdfannot_dict_put:nnx {widget/MK}{R}{#1}
+     }
+   ,MK/R / .code:n =
+     {
+        \pdfannot_dict_remove:nn { widget/MK }{R}
+     }
+   ,MK/R .groups:n = annot
+   ,rotate .meta:n = {MK/R=#1}
+  }
 
+\keys_define:nn { pdffield  }
+  {
+    MK/BC .code:n =
+     {
+       \tl_if_empty:nTF {#1}
+        {
+          \pdfannot_dict_remove:nn { widget/MK }{BC}
+        }
+        {
+          \@@_color_set:nn {@@/tmp}{#1}
+          \color_export:nnN{@@/tmp}{space-sep-rgb}\l_@@_tmpa_tl
+          \pdfannot_dict_put:nnx {widget/MK}{BC}{[\l_@@_tmpa_tl]}
+        }
+     }
+    ,MK/BC .groups:n = annot
+   ,bordercolor .meta:n = {MK/BC=#1}
+  }
+
+\keys_define:nn { pdffield  }
+  {
+    MK/BG .code:n =
+     {
+       \tl_if_empty:nTF {#1}
+        {
+          \pdfannot_dict_remove:nn { widget/MK }{BG}
+        }
+        {
+          \@@_color_set:nn {@@/tmp}{#1}
+          \color_export:nnN{@@/tmp}{space-sep-rgb}\l_@@_tmpa_tl
+          \pdfannot_dict_put:nnx {widget/MK}{BG}{[\l_@@_tmpa_tl]}
+        }
+     }
+    ,MK/BG .groups:n = annot
+   ,bordercolor .meta:n = {MK/BG=#1}
+  }
 
 \cs_set_protected:Npn \@@_tmpa:n #1
  {
@@ -1338,7 +1450,7 @@
         {
           \tl_if_empty:nTF {##1}
             {
-              \pdfannot_dict_remove:nn { widget/AP }
+              \pdfannot_dict_remove:nn { widget/AP }{#1}
             }
             {
               \pdfannot_dict_put:nnx {widget/MK}{#1}{##1}
@@ -1348,7 +1460,7 @@
      }
  }
 
-\clist_map_inline:nn {R,BC,BG,CA,RC,AC,I,RI,IX,IF,TP}
+\clist_map_inline:nn {CA,RC,AC,I,RI,IX,IF,TP}
   { \@@_tmpa:n {#1} }
 %    \end{macrocode}
 % Flags.
@@ -1448,8 +1560,16 @@
            @@/preset/checkbox .meta:n = {#1},
          }
       }
+   ,preset-textfield .code:n =
+      {
+        \keys_define:nn { pdffield }
+         {
+           @@/preset/textfield .meta:n = {#1},
+         }
+      }
   }
 \keys_set:nn{ pdffield / setup }{preset-checkbox={}}
+\keys_set:nn{ pdffield / setup }{preset-textfield={}}
 
 \cs_new_protected:Npn \@@_style_create:nn #1#2
   {

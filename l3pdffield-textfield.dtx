@@ -1,0 +1,397 @@
+% \iffalse meta-comment
+%
+%% File: l3pdfpdffield-textfield.dtx
+%
+% Copyright (C) 2021 The LaTeX Project
+%
+% It may be distributed and/or modified under the conditions of the
+% LaTeX Project Public License (LPPL), either version 1.3c of this
+% license or (at your option) any later version.  The latest version
+% of this license is in the file
+%
+%    http://www.latex-project.org/lppl.txt
+%
+% This file is part of the "LaTeX PDF management testphase bundle" (The Work in LPPL)
+% and all files in that bundle must be distributed together.
+%
+% -----------------------------------------------------------------------
+%
+% The development version of the bundle can be found at
+%
+%    https://github.com/latex3/pdfresources
+%
+% for those people who are interested.
+%
+%<*driver>
+\RequirePackage{pdfmanagement-testphase}
+\DeclareDocumentMetadata{}
+\makeatletter
+\declare@file@substitution{doc.sty}{doc-v3beta.sty}
+\makeatother
+\documentclass[full]{l3doc}
+\usepackage{array,booktabs}
+\usepackage{l3pdffield-testphase}
+\hypersetup{pdfauthor=The LaTeX Project,
+ pdftitle=l3pdffield (LaTeX PDF management testphase bundle)}
+\begin{document}
+  \DocInput{\jobname.dtx}
+\end{document}
+%</driver>
+% \fi
+% \providecommand\hook[1]{\texttt{#1}}
+% \title{^^A
+%   The \pkg{l3pdffield-textfield} module\\ Commands to create textfield form fields   ^^A
+%   \\ \LaTeX{} PDF management testphase bundle
+% }
+%
+% \author{^^A
+%  The \LaTeX{} Project\thanks
+%    {^^A
+%      E-mail:
+%        \href{mailto:latex-team@latex-project.org}
+%          {latex-team@latex-project.org}^^A
+%    }^^A
+% }
+%
+% \date{Version 0.95c, released 2021-03-17}
+%
+% \maketitle
+% \begin{documentation}
+% \section{\pkg{l3pdffield-textfield} Introduction}
+% This is the documentation for textfield fields, for general information about form fields
+% check the documentation l3pdffield.
+%
+% Textfields allows the user to input text which is then rendered by the PDF viewer and
+% often can also be saved together with the PDF.
+%
+% A typical wish here it that a font matching the document font is used
+% in textfields too.  But it is quite unclear if and how this can be done.
+% Obviously it is not possible like with a checkbox to prepare and include appearances
+% with the right look, the PDF reader has to render the text dynamically.
+% It is possible to pass with the |DA| key a font operator to the textfield,
+% but
+%
+%
+%
+%
+% Please keep in mind
+% \begin{itemize}
+% \item Not every PDF viewer supports textfields.
+% \item The font and the exact position of the chars depends on the PDF viewer.
+% \item The handling can depend on settings in the PDF viewer. In adobe reader for
+% example I had to disable an option to avoid that it tries to create an appearance
+% itself
+% \item Standards like pdf/A disable features of form fields too
+% (as you typically can't change the PDF).
+% \end{itemize}
+% \section{Textfields}
+% Input a value:
+% \ExplSyntaxOn
+%  \pdffield_textfield:n{name=test,width=4cm,height=0.7\baselineskip,depth=0.3\baselineskip}
+% \ExplSyntaxOff
+%
+% \bigskip
+% \subsection{Commands}
+% \begin{function}{\pdffield_textfield:n}
+% \begin{syntax}
+%  \cs{pdffield_textfield:n}\Arg{key val list}
+% \end{syntax}
+% This creates a textfield. The list of allowed keys is described below.
+% The \meta{key val list} should at least set the name, without it the default name
+% |textfield| is used. Textfields with the same
+% name belong to the same field and are filled together. The default appearance
+% is a light gray background.
+% The default appearance is setup at the first use.
+% \end{function}
+%
+%
+% \subsection{Keys}
+%
+% The new textfield command accept all field and annot keys from l3pdffield.
+% A few keys are disabled or are forced to specific values.
+% Some keys have a more textfield specific
+% behaviour or have other defaults than with the basic commands. Additionally there
+% are a small number of keys specific to a textfield.
+%
+%
+% Disabled keys are
+%  \begin{itemize}
+%  \item |FT| is overwritten.
+%  \item For textfields only the field flags  |ReadOnly|, |Required| |NoExport|
+%  |Multiline|, |Password|, |FileSelect|, |DoNotSpellCheck|, |DoNotScroll| and |Comb|
+%  make sense.
+%  If |Comb| is set, |Multiline|, |Password| and |FileSelect| are unset, |MaxLen| is
+%  set to 10 if it hasn't been set previously.
+%  \end{itemize}
+%
+% \begin{function}{preset-textfield}
+%  \begin{syntax}
+%   |preset-textfield| = \Arg{key-val-list}
+%  \end{syntax}
+% This allows to set default keys for a textfield.
+% \end{function}
+%
+% \begin{function}{name,T}
+%  \begin{syntax}
+%   |name| = \meta{partial name}\\
+%   |T| = \meta{partial name}
+%  \end{syntax}
+% This sets like the |T| key for fields the partial name of the field. The value
+% shouldn't contain a period, be not empty and sensibly consist of simple chars.
+% Additionally the value is used to create the field ID.
+% This means that textfield with the same partial name are annotations
+% with the same field as parent and are filled together---this
+% what is typically expected.
+% The field ID is then internal and can not be used to
+% attach another annotation.
+% For explicit control of the field ID  use the |fieldID| key.
+% \end{function}
+%
+% \begin{function}{fieldID}
+%  \begin{syntax}
+%   |fieldID| = \meta{field ID}\\
+%  \end{syntax}
+% \emph{For experts only!}
+% This allows to give the textfield a specific ID. This is only useful
+% in the context of a larger fieldset or if you want to attach another annotation
+% to the field with \s{pdffield_annot:n}. If used wrongly you can
+% easily create invalid fieldset. It allows you to create to fields with the
+% same partial name, but if you want to see both
+% you need to ensure that their full names are
+% different---for example by adding some parent fields.
+% \end{function}
+%
+% \begin{function}{parent}
+%  \begin{syntax}
+%   |parent| = \meta{field ID}\\
+%  \end{syntax}
+% This is only needed if the field should be part
+% of a larger fieldset. The value should be a field ID of a field created previously
+% with \cs{pdffield_field:nn}.
+% \end{function}
+%
+% \begin{function}{altname,TU}
+%  \begin{syntax}
+%   |altname| = \meta{string}\\
+%   |TU| = \meta{string}\\
+%  \end{syntax}
+% This is sets an alternative name for user interaction.
+% This name can only be set at the first textfield instance, when the field is initialized.
+% \end{function}
+%
+% \begin{function}{mappingname,TM}
+%  \begin{syntax}
+%   |mappingname| = \meta{string}\\
+%   |TM| = \meta{string}\\
+%  \end{syntax}
+% This is sets an alternative name for export.
+% This name can only be set at the first textfield instance, when the field is initialized.
+% \end{function}
+%
+% \begin{function}{width,height,depth}
+% \begin{syntax}
+% |width| = \meta{dim expression}\\
+% |height| = \meta{dim expression}\\
+% |depth| = \meta{dim expression}
+% \end{syntax}
+% These keys allow to set the dimensions of textfield instance.
+% The value should be a dimension expression. By default
+% |width| is 3cm, the |height| use 0.7\cs{normalbaselineskip}, the |depth| is 0.3\cs{normalbaselineskip}.
+% \end{function}
+%
+% \begin{function}{appearance,rollover-appearance,down-appearance}
+%  \begin{syntax}
+%   |appearance| = \meta{name}\\
+%   |rollover-appearance| = \meta{name}\\
+%   |down-appearance| = \meta{name}
+%  \end{syntax}
+% This keys sets the normal appearance, the rollover appearance (when the
+% mouse hovers over the textfield) and the down appearance (when the
+% mouse clicks). They expect the name of an existing form Xobject as value.
+% The initial value is |pdffield/textfield/default|
+% for the normal appearance and shows a light gray background.
+% The other appearance are not set by default (and it is quite unclear if they
+% make sense for a textfield).
+% \end{function}
+%
+%
+% \subsection{Using with hyperref}
+% The \cs{TextField} command from hyperref also prints a label, something that the
+% command here doesn't do. A redefinition like the following should allow \cs{TextField}
+% to use the commands of this module. Be aware that the behaviour will not be identical!
+% Not every setting and key from \pkg{hyperref} has been copied.
+%
+% \begin{verbatim}
+% \ExplSyntaxOn\makeatletter
+% \def\@TextField[#1]#2{\LayoutTextField{#2}{\pdffield_textfield:n {name=#2,#1}}}
+% \ExplSyntaxOff\makeatother
+% \end{verbatim}
+%
+%
+% \end{documentation}
+%
+% \begin{implementation}
+% \section{\pkg{l3pdffield-textfield} Implementation}
+%    \begin{macrocode}
+%<*package>
+%<@@=pdffield>
+%    \end{macrocode}
+% \subsection{Variables}
+%    \begin{macrocode}
+\tl_new:N  \l_@@_DA_fontcolor_tl
+\dim_new:N \l_@@_DA_fontsize_dim
+\tl_new:N  \l_@@_DA_fontname_tl
+%    \end{macrocode}
+% \subsection{Messages}
+%    \begin{macrocode}
+%    \end{macrocode}
+% \subsection{Appearances}
+% The default appearances are a cross (\cs{texttimes}),
+% Every appearance should have two versions and follow the naming
+% module/\meta{name}/Yes and module/\meta{name}/Off.
+%  \begin{macro}{@@/textfield/default_appearances:}
+%  This defines the standard appearance. It is setup at the first
+%  use of a textfield.
+%    \begin{macrocode}
+\cs_new_protected:cn {@@/textfield/default_appearance:}
+  {
+    \pdffield_appearance:nn {pdffield/textfield/default}
+     {
+       { \color_select:n{black!5!white}\rule{\paperwidth}{\paperheight} }
+     }
+    \cs_gset_eq:cN {@@/textfield/default_appearance:} \prg_do_nothing:
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+%\subsection{Creating the field}
+% A field should be created if the name doesn't exist
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_textfield_field:n #1 %name
+  {
+    \pdf_object_if_exist:nF {@@/field/@@/textfield/#1}
+      {
+        \@@_field:n { @@/textfield/#1 }
+      }
+    \keys_set:nn {pdffield}{parent=@@/textfield/#1}
+  }
+\cs_generate_variant:Nn \@@_textfield_field:n {V}
+%    \end{macrocode}
+% \subsection{Assembling the textfield}
+
+% \begin{macro}{\@@_textfield:n}
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_textfield:n #1
+  {
+    \group_begin:
+    \cs_set_eq:NN\@@_value_handler:nN \@@_textfield_value_handler:nN
+    \use:c {@@/textfield/default_appearance:}
+%    \end{macrocode}
+% Setting up the defaults.
+%    \begin{macrocode}
+    \keys_set:nn {pdffield}
+      {
+        fieldID=,
+        name=textfield,
+        appearance = pdffield/textfield/default,
+        width  = 3cm,
+        height = 0.7\normalbaselineskip,
+        depth  = 0.3\normalbaselineskip,
+        % font defaults!!
+      }
+%    \end{macrocode}
+%   \begin{macrocode}
+    \keys_set:nn { pdffield }{@@/preset/textfield,#1}
+    \int_compare:nNnT {\bitset_item:Nn \l_@@_Ff_bitset {Comb}}={1}
+      {
+        % warning if set?
+        \keys_set:nn { pdffield }
+          {
+            ,unsetFf={FileSelect,Multiline,Password}
+          }
+        \pdfdict_get:nnN {l_@@/field}{MaxLen}\l_@@_tmpa_tl
+        \quark_if_no_value:NT \l_@@_tmpa_tl
+         {
+           \keys_set:nn { pdffield}
+            {
+              MaxLen = 10 %variable
+            }
+            % warning
+         }
+      }
+    \keys_set:nn { pdffield }
+      {
+        ,FT= Tx
+        ,AS=
+        ,DA=
+           {
+              \pdf_name_from_unicode_e:n{\l_@@_DA_fontname_tl}
+              \c_space_tl
+              \dim_to_decimal_in_bp:n{\l_@@_DA_fontsize_dim}
+              \c_space_tl
+              Tf
+              \c_space_tl
+              \l_@@_DA_fontcolor_tl
+              \c_space_tl
+              %\l_@@_text_DAextra_tl
+           }
+      }
+    \tl_if_empty:NT\l_@@_fieldID_tl
+      {
+        \pdfdict_get:nnN {l_@@/field}{T}\l_@@_fieldID_tl
+        \tl_put_left:Nn \l_@@_fieldID_tl {@@/textfield/}
+      }
+
+    \@@_textfield_field:V\l_@@_fieldID_tl
+    \@@_annot:
+    \group_end:
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Keys}
+% Most keys are inherited simply the ones from the generic field and annot keys.
+% A key to decide if the box is initially checked or not.
+% We stay in the same family so that we can build a style.
+%    \begin{macrocode}
+\keys_define:nn {pdffield}
+  {
+    ,fontcolor .code:n =
+       {
+         \@@_color_set:nn {@@/tmp}{#1}
+         \color_export:nnN{@@/tmp}{space-sep-rgb}\l_@@_DA_fontcolor_tl
+         \tl_put_right:Nn \l_@@_DA_fontcolor_tl{~rg}
+       }
+    ,fontcolor .initial:n = black,
+    ,font .tl_set:N      = \l_@@_DA_fontname_tl
+    ,font .initial:n     = {Helv}
+    ,fontsize .dim_set:N = \l_@@_DA_fontsize_dim
+    ,fontsize .initial:n = {10bp}
+  }
+%    \end{macrocode}
+% And a key to set a dedicated field ID
+%    \begin{macrocode}
+\keys_define:nn { pdffield }
+ {
+   fieldID .tl_set:N = \l_@@_fieldID_tl
+ }
+%    \end{macrocode}
+%
+% \subsection{Handler}
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_textfield_value_handler:nN #1#2
+  {
+     \pdf_string_from_unicode:nnN {utf8/string}{#1}#2
+  }
+%    \end{macrocode}
+%
+% \subsection{user commands}
+% \begin{macro}{\pdffield_textfield:n}
+%    \begin{macrocode}
+\cs_set_eq:NN \pdffield_textfield:n \@@_textfield:n
+%</package>
+%    \end{macrocode}
+% \end{macro}
+%\end{implementation}
+
+\endinput%

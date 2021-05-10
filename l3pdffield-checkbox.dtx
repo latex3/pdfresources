@@ -113,16 +113,15 @@
 %
 % The new checkbox command accept all field and annot keys from l3pdffield.
 % A few keys are disabled or are forced to specific values.
-% Some keys have a more checkbox specific
-% behaviour or have other defaults than with the basic commands. Additionally there
+% The |appearance| keys have a more checkbox specific
+% behaviour, other keys have other defaults than with the basic commands.
+% Additionally there
 % are a small number of keys specific to a checkbox.
 %
 %
 % Disabled keys are
 %  \begin{itemize}
 %  \item |V|, |DV|, |AS|: use |checked| instead.
-%  \item |AP/N|, |AP/R|, |AP/D|: checkboxes need special formated
-%  appearances, use |appearance|, |rollover-appearance| and |down-appearance| instead.
 %  \item |FT| is overwritten.
 %  \item For checkboxes only the field flags  |ReadOnly|, |Required| and |NoExport| make sense.
 %  |Radio|, |Pushbotton| are set automatically automatically by the code
@@ -204,20 +203,24 @@
 % |width| and |height| use \cs{normalbaselineskip}, the |depth| is zero.
 % \end{function}
 %
-% \begin{function}{appearance,rollover-appearance,down-appearance}
+% \begin{function}{AP/N,appearance,AP/R,rollover-appearance,AP/D,down-appearance}
 %  \begin{syntax}
-%   |appearance| = \meta{name}\\
-%   |rollover-appearance| = \meta{name}\\
-%   |down-appearance| = \meta{name}
+%   |AP/N| = \meta{partial appearance name}\\
+%   |appearance| = \meta{partial appearance name}\\
+%   |AP/R| = \meta{partial appearance name}\\
+%   |rollover-appearance| = \meta{partial appearance name}\\
+%   |AP/D| = \meta{partial appearance name}\\
+%   |down-appearance| = \meta{partial appearance name}
 %  \end{syntax}
 % This keys sets the normal appearance, the rollover appearance (when the
 % mouse hovers over the checkbox) and the down appearance (when the
 % mouse clicks). They take as value a
-% \meta{name} and expects that the two appearances \meta{name}|/Yes| and \meta{name}|/Off|
-% has been created with the command described below. The initial value is |checkbox/default|
-% for the normal appearance and shows a \cs{texttimes}. The other appearance are not set by default.
+% \meta{partial appearance name} and expects that \emph{two} form Xobjects
+% \meta{partial appearance name}|/Yes| and \meta{partial appearance name}|/Off|
+% has been created. The initial value is |pdffield/checkbox/default|
+% for the normal appearance and shows a \cs{texttimes}.
+% The other appearance are not set by default.
 % \end{function}
-
 % \begin{function}{checked}
 %  \begin{syntax}
 %   |checked| = |true|\verb"|"|false|
@@ -339,8 +342,7 @@
         height = \normalbaselineskip,
       }
 %    \end{macrocode}
-% A number of keys should be undefined, to avoid that the value and
-% appearances has the wrong format.
+% Value keys should be undefined.
 %    \begin{macrocode}
     \@@_key_disable:nnn{checkbox}{V}{checked}
     \@@_key_disable:nnn{checkbox}{DV}{checked}
@@ -384,7 +386,6 @@
        \pdfannot_dict_put:nnn {widget}{AS}{ /Yes }
      }
    ,checked .default:n = {true}
-   ,checked .initial:n = {false}
    ,checked .groups:n  = {checkbox}
  }
 %    \end{macrocode}
@@ -395,7 +396,7 @@
    fieldID .tl_set:N = \l_@@_fieldID_tl
  }
 %    \end{macrocode}
-% \begin{macro}{\@@_checkbox_appearance:nnn}
+% \begin{macro}{\@@_checkbox_appearance_handler:nnn}
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_checkbox_appearance_handler:nnn #1 #2 #3 %name, type, text
   {
@@ -430,5 +431,3 @@
 %    \end{macrocode}
 % \end{macro}
 %\end{implementation}
-
-\endinput%
