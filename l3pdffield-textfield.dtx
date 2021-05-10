@@ -65,13 +65,48 @@
 % often can also be saved together with the PDF.
 %
 % A typical wish here it that a font matching the document font is used
-% in textfields too.  But it is quite unclear if and how this can be done.
+% in textfields too.  But how can be done?
 % Obviously it is not possible like with a checkbox to prepare and include appearances
 % with the right look, the PDF reader has to render the text dynamically.
-% It is possible to pass with the |DA| key a font operator to the textfield,
-% but
+
+% The PDF reference mentions only one way to pass a font setting to the text field:
+% The |DA| key can contain a font operator. The name font used there should be added
+% to the form resources with the |DR| key. But clearly the main resources to render
+% the text is not an embedded font and a PDF font operator as both is not enough
+% to garanty a sensible text support: a font operator is normally used in
+% the page stream along with glyph indices and positioning instructions, not
+% with unicode input, and typically a font is only partially embedded.
+% This means the PDF viewers and editors actually use
+% system resources. Hyperref may add a reference
+% the type1 font helvetica to the DA key, but
+% PDF viewers use actually Arial.
 %
+% A number of test with the Adobe Reader and Pro show that
+% the DA/DR info isn't ignored but used to choose a fitting
+% system font:
+% \begin{itemize}
+% \item One can change the font by simply using the font name (the examples use
+% the |font| key of this module). At least with
+% adobe one get courier with |font=courier|, times with |font=times|,
+% comic sans with |font=ComicSansMS|, DejaVu with |font=DejaVuSans|. The fonts
+% don't need to be used in the document or added as resources in the DR dictionary.
+% Some fonts work better than other: comic sans is quite unproblematic,
+% but DejaVu seems to trigger a font search first and so is slower (perhaps the.
+% \item If one fill and then save such a PDF at least adobe adds
+% the missing font resources to the PDF.
+% \end{itemize}
 %
+% This lazy font setting doesn't work with other PDF viewers.
+% In other test I had better results by actually embedding the font and adding it
+% as resource to the DR/Font dictionary. Sadly this requires lualatex, only there is
+% possible to retrieve the internal font name and font object number for a larger set
+% of fonts. With pdflatex it works only for font not using a virtual font, and xelatex
+% has no access at all. The code for lualatex looked like this
+% \begin{verbatim}
+% \pdffield_textfield:n {name=text,font=F\pdffeedback~fontname\font}
+% \pdfmanagement_add:nxx{Catalog/AcroForm/DR/Font}
+%       {F\pdffeedback~fontname\font}{\pdffeedback~fontobjnum\font \c_space_tl0 \c_space_tl R}
+% \end{verbatim}
 %
 %
 % Please keep in mind
