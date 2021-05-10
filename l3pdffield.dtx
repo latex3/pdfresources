@@ -878,7 +878,7 @@
 \cs_new_protected:Npn \pdffield_field:nn #1 #2
   {
     \group_begin:
-    \keys_set:nn { pdffield / field } {#1}
+    \keys_set:nn { pdffield } {#1}
     \@@_field:n {#2}
     \group_end:
   }
@@ -946,7 +946,7 @@
 \cs_new_protected:Npn \pdffield_annot:n #1
   {
     \group_begin:
-    \keys_set:nn {pdffield / annot } {#1}
+    \keys_set:nn { pdffield } {#1}
     \@@_annot:
     \group_end:
   }
@@ -1400,7 +1400,7 @@
 
 \cs_new_protected:Npn \pdffield_setup:n #1
   {
-     \keys_set:nn{pdffield/setup}{#1}
+     \keys_set:nn{ pdffield / setup }{#1}
   }
 
 \keys_define:nn { pdffield }
