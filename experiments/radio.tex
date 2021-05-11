@@ -1,0 +1,64 @@
+\RequirePackage{pdfmanagement-testphase}
+\DeclareDocumentMetadata{uncompress}
+%\RequirePackage{pdfmanagement-regressiontest}
+\documentclass{article}
+
+\usepackage{l3pdffield-testphase}
+\usepackage{bearwear}
+\ExplSyntaxOn
+ \pdffield_appearance:nn {pdffield/bear/Yes}
+  {
+    \tikz\bear\bearwear[shirt=red,body~deco={\node[font=\tiny\bfseries,white]~at~(beartummy){Yes};}];
+  }
+ \pdffield_appearance:nn {pdffield/bear/Off}
+  {
+   \tikz\bear\bearwear[body~deco={\node[font=\tiny\bfseries,white]~at~(beartummy){Off};}];
+  }
+
+%\pdffield_setup:n {preset-checkbox={checked,style=bear},create-style={bear}{appearance=pdffield/bear}}
+\ExplSyntaxOff
+%\usepackage{fontspec}
+%\setmainfont{segoeui}
+%\setsansfont{ComicSansMS}
+\begin{document}
+
+\ExplSyntaxOn
+%\pdffield_field:nn{name=parent,V=/Yes}{parent}
+%\pdffield_checkbox:n{name=a,parent=parent}
+%\pdffield_checkbox:n{name=b,parent=parent}
+
+%\pdffield_field:nn{name=parent}{parent}
+\tl_set:Nn \l__pdffield_radiovalue_tl{A}
+\pdffield_radio:n{name=AAAA,V=/B,AS=Off}
+\tl_set:Nn \l__pdffield_radiovalue_tl{B}
+\pdffield_radio:n{name=AAAA,AS=B}
+\tl_set:Nn \l__pdffield_radiovalue_tl{C}
+\pdffield_radio:n{name=AAAA,AS=Off}
+
+
+\tl_set:Nn \l__pdffield_radiovalue_tl{A}
+\pdffield_radio:n{name=BBB,V=/B,AS=Off,setfieldflags={
+    RadiosInUnison},unsetfieldflags={NoToggleToOff}}
+%\tl_set:Nn \l__pdffield_radiovalue_tl{B}
+\pdffield_radio:n{name=BBB,AS=A}
+%\tl_set:Nn \l__pdffield_radiovalue_tl{C}
+\pdffield_radio:n{name=BBB,AS=Off}
+
+%\pdffield_radio:n{name=B,parent=parent}
+%\pdffield_radio:n{name=C,parent=parent}
+
+aaa%\pdffield_checkbox:n{name=javascript,width=40pt,height=40pt,onenter={app.alert('Hello');}}
+%\par
+%\pdffield_textfield:n {name=text,font=F\pdffeedback~fontname\font}
+%\pdfmanagement_add:nxx{Catalog/AcroForm/DR/Font}
+%       {F\pdffeedback~fontname\font}{\pdffeedback~fontobjnum\font \c_space_tl0 \c_space_tl R}
+%
+%aaaa
+\quad
+%\pdffield_textfield:n {name=text2,font=SegoeUI}
+\quad
+%\pdffield_textfield:n {name=text3,font=courier}
+\sffamily abc
+\ExplSyntaxOff
+
+\end{document}
