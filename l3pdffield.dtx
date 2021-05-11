@@ -1210,8 +1210,8 @@
            }
       }
     ,setFf .groups:n = {field}
-    ,setfieldflags .meta:nn =
-      { pdffield }{setFf={#1}}
+    ,setfieldflags .meta:n =
+      {setFf={#1}}
     ,setfieldflags .groups:n = {field}
     ,unsetFf .multichoice:
     ,unsetFf / all .code:n = { \bitset_clear:N \l_@@_Ff_bitset}
@@ -1220,6 +1220,7 @@
         \bitset_set_false:Nn \l_@@_Ff_bitset {#1}
       }
     ,unsetFf .groups:n = {field}
+    ,unsetfieldflags .meta:n = {unsetFf={#1}}
     ,unsetfieldflags .groups:n = {field}
   }
 
