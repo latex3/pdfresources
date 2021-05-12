@@ -88,6 +88,100 @@
 %  ^^A \pdffield_radio:n{name=bear,appearance=pdffield/bear,width=23pt,height=30pt,depth=10pt}
 % \ExplSyntaxOff
 %
+% A radio button set is one field together with a number of field annotations which
+% represent the individual radio buttons.
+% Radio buttons are similar to checkboxes buttons and
+% they have like checkboxes two \enquote{states}:
+% checked and unchecked. In checkbox field two states have the
+% fix names |/Yes| and |/Off|,
+% and this means that even if there two or more annotations and so checkbox instances
+% the checkboxes are checked and unchecked together:
+%
+%  \begin{tikzpicture}[level 2/.style={level distance=7mm},
+%  level 1/.style={sibling distance=25mm},
+%  level 2/.style={sibling distance=15mm}]
+%   \node[draw] {checkbox field}
+%           child {node[draw,dashed,align=left,font=\ttfamily]
+%             {\textrm{annotation}\\ /Yes\\
+%               /Off
+%             }}
+%           child {node[draw,dashed,align=left,font=\ttfamily]
+%             {\textrm{annotation}\\ /Yes\\
+%               /Off
+%             }}
+%   ;
+%   \end{tikzpicture}
+%
+% Radio buttons typically have more than one annotation, and if one button is turned
+% on this should turn off the other. This is implemented by using different
+% states in the various annotations and by setting a flag in the field.
+% The off state should still always have the name |/Off|\footnote{%
+%  the PDF reference doesn't say anything about this, but various tests showed that
+%  one better should stick to this name, with other names the buttons disappeared.}
+%  but the on state should be the value. The field dictionary should then set
+%  in the |/V| key the start value (this doesn't necessarly mean that the button
+%  is also selected from the begin on, this can be set independantly).
+%
+%    \begin{tikzpicture}[level 2/.style={level distance=7mm},
+%  level 1/.style={sibling distance=25mm},
+%  level 2/.style={sibling distance=15mm}]
+%   \node[draw,align=left,font=\ttfamily] {\textrm{radio button field}\\/V /value1 }
+%           child {node[draw,dashed,align=left,font=\ttfamily]
+%             {\textrm{annotation}\\ /value0 \\
+%               /Off
+%             }}
+%           child {node[draw,dashed,align=left,font=\ttfamily]
+%             {\textrm{annotation}\\ /value1 \\
+%               /Off
+%             }}
+%           child {node[draw,dashed,align=left,font=\ttfamily]
+%             {\textrm{annotation}\\ /value2 \\
+%               /Off
+%             }}
+%   ;
+%   \end{tikzpicture}
+%
+% It can be awkward to have to use the values also as names of appearances states, it
+% makes it for example difficult to use unicode for the value names, so there is another
+% option by using the |/Opt| array: The numbers |/0|, |/1| point then to the
+% index position in the array.
+%
+%  \begin{tikzpicture}[level 2/.style={level distance=7mm},
+%  level 1/.style={sibling distance=25mm},
+%  level 2/.style={sibling distance=15mm}]
+%   \node[draw,align=left,font=\ttfamily] {\textrm{radio button field}\\
+%           /Opt [(value0) (value1) (value2)]
+%           /V /0 }
+%           child {node[draw,dashed,align=left,font=\ttfamily]
+%             {\textrm{annotation}\\ /0 \\
+%               /Off
+%             }}
+%           child {node[draw,dashed,align=left,font=\ttfamily]
+%             {\textrm{annotation}\\ /1 \\
+%               /Off
+%             }}
+%           child {node[draw,dashed,align=left,font=\ttfamily]
+%             {\textrm{annotation}\\ /2 \\
+%               /Off
+%             }}
+%   ;
+%   \end{tikzpicture}
+%
+% It is possible to set the start appearance for every button, so e.g. all
+% buttons could be selected when the PDF is opened. But as soon as one button is clicked
+% on you get one selected button and the other are unselected. You can't select or
+% deselect all buttons. The PDF reference mentions an flag |NoToggleToOff| but this
+% doesn't do anything, at least not in the PDF viewers I tried.
+%
+% If two radio field annotations use the same on-state name they are selected and
+% unselected together, like checkboxes with the same /Yes state. This can be used
+% to build radio groups which works \enquote{in unison}. The flag |RadiosInUnison|
+% is neither needed for this (but doesn't harm either) nor
+% does it change the behaviour, at least again not in the PDF viewers I tried.
+%
+%
+%
+%
 % \bigskip
 % \subsection{Commands}
 % \begin{function}{\pdffield_radio:n}
@@ -153,7 +247,7 @@
 % \emph{For experts only!}
 % This allows to give the checkbox field a specific ID. This is only useful
 % in the context of a larger fieldset or if you want to attach another annotation
-% to the field with \s{pdffield_annot:n}. If used wrongly you can
+% to the field with \cs{pdffield_annot:n}. If used wrongly you can
 % easily create invalid fieldset. It allows you to create to fields with the
 % same partial name, but if you want to see both
 % you need to ensure that their full names are
@@ -267,7 +361,10 @@
 %    \end{macrocode}
 % \subsection{Variables}
 %    \begin{macrocode}
-\tl_new:N\l_@@_radiovalue_tl
+\tl_new:N\l_@@_radiovalue_on_tl
+\tl_new:N\l_@@_radiovalue_off_tl
+\tl_set:Nn \l_@@_radiovalue_on_tl {Yes}
+\tl_set:Nn \l_@@_radiovalue_off_tl {Off}
 %    \end{macrocode}
 % \subsection{Messages}
 %    \begin{macrocode}
@@ -326,15 +423,17 @@
     \use:c {@@/radio/default_appearances:}
     \cs_set_eq:NN\@@_appearance_handler:nnn \@@_radio_appearance_handler:nnn
 %    \end{macrocode}
-% Setting up the defaults.
+% Setting up the defaults. The Radio flag is set at the begin to
+% allow to unset it for tests/special effects.
 %    \begin{macrocode}
     \keys_set:nn {pdffield}
       {
-        fieldID=,
-        name=radio,
-        appearance = pdffield/radio/default,
-        width  = \normalbaselineskip,
-        height = \normalbaselineskip,
+        fieldID=
+       ,name=radio
+       ,appearance = pdffield/radio/default
+       ,width  = \normalbaselineskip
+       ,height = \normalbaselineskip
+       ,setFf={Radio}
       }
 %    \end{macrocode}
 % Value keys should be undefined.??
@@ -347,7 +446,7 @@
     \keys_set:nn { pdffield }
       {
         ,unsetFf={Pushbutton}
-        ,setFf={Radio}
+        %
         ,FT= Btn
       }
     \tl_if_empty:NT\l_@@_fieldID_tl
@@ -424,7 +523,7 @@
         \pdf_object_unnamed_write:nx
           {dict}
           {
-             /\l_@@_radiovalue_tl \c_space_tl \pdfxform_ref:n  { #1/Yes}
+             /\l_@@_radiovalue_on_tl \c_space_tl   \pdfxform_ref:n  { #1/Yes}
              /Off ~ \pdfxform_ref:n { #1/Off}
           }
        \pdfannot_dict_put:nnx {widget/AP}{#2}{\pdf_object_ref_last:}

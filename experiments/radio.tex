@@ -1,3 +1,4 @@
+% !Mode:: "TeX:DE:UTF-8:Main"
 \RequirePackage{pdfmanagement-testphase}
 \DeclareDocumentMetadata{uncompress}
 %\RequirePackage{pdfmanagement-regressiontest}
@@ -23,26 +24,74 @@
 \begin{document}
 
 \ExplSyntaxOn
-%\pdffield_field:nn{name=parent,V=/Yes}{parent}
+\pdffield_field:nn{name=parent}{parent}
 %\pdffield_checkbox:n{name=a,parent=parent}
 %\pdffield_checkbox:n{name=b,parent=parent}
 
 %\pdffield_field:nn{name=parent}{parent}
-\tl_set:Nn \l__pdffield_radiovalue_tl{A}
-\pdffield_radio:n{name=AAAA,V=/B,AS=Off}
-\tl_set:Nn \l__pdffield_radiovalue_tl{B}
-\pdffield_radio:n{name=AAAA,AS=B}
-\tl_set:Nn \l__pdffield_radiovalue_tl{C}
-\pdffield_radio:n{name=AAAA,AS=Off}
+%\tl_set:Nn \l__pdffield_radiovalue_on_tl{A}
+%\pdffield_radio:n{name=AAAA,V=/B,AS=Off}
+%\tl_set:Nn \l__pdffield_radiovalue_on_tl{B}
+%\pdffield_radio:n{name=AAAA,AS=B}
+%\tl_set:Nn \l__pdffield_radiovalue_on_tl{C}
+%\pdffield_radio:n{name=AAAA,AS=Off}
+
+CC
+\tl_set:Nn \l__pdffield_radiovalue_on_tl{0}
+\tl_set:Nn \l__pdffield_radiovalue_off_tl{Off}
+\pdf_object_new:nn{opt}{array}
+\pdf_object_write:nn{opt}{(A)~(B)~(C)}
+\pdffield_radio:n{name=CC,V=/1,AS=Off,appearance=pdffield/bear,parent=parent,
+Opt=opt,%setfieldflags=radiosinunison
+}
+\tl_set:Nn \l__pdffield_radiovalue_on_tl{1}
+%\tl_set:Nn \l__pdffield_radiovalue_off_tl{Boff}
+\pdffield_radio:n{name=CC,AS=Off,appearance=pdffield/bear,bordercolor=yellow}
+\tl_set:Nn \l__pdffield_radiovalue_on_tl{2}
+%\tl_set:Nn \l__pdffield_radiovalue_off_tl{Coff}
+\pdffield_radio:n{name=CC,AS=Off}
+%\pdffield_radio:n{name=EE,AS=Off,parent=parent}
 
 
-\tl_set:Nn \l__pdffield_radiovalue_tl{A}
-\pdffield_radio:n{name=BBB,V=/B,AS=Off,setfieldflags={
-    RadiosInUnison},unsetfieldflags={NoToggleToOff}}
-%\tl_set:Nn \l__pdffield_radiovalue_tl{B}
-\pdffield_radio:n{name=BBB,AS=A}
-%\tl_set:Nn \l__pdffield_radiovalue_tl{C}
-\pdffield_radio:n{name=BBB,AS=Off}
+\newpage
+
+CC
+\tl_set:Nn \l__pdffield_radiovalue_on_tl{1}
+\tl_set:Nn \l__pdffield_radiovalue_off_tl{Off}
+%\pdf_object_new:nn{opt}{array}
+%\pdf_object_write:nn{opt}{(A)~(B)~(A)}
+\pdffield_radio:n{name=DD,V=/1,AS=1,appearance=pdffield/bear,parent=parent,
+Opt=opt,setfieldflags=radiosinunison
+}
+\tl_set:Nn \l__pdffield_radiovalue_on_tl{2}
+%\tl_set:Nn \l__pdffield_radiovalue_off_tl{Boff}
+\pdffield_radio:n{name=DD,AS=1,appearance=pdffield/bear,bordercolor=yellow}
+\tl_set:Nn \l__pdffield_radiovalue_on_tl{1}
+%\tl_set:Nn \l__pdffield_radiovalue_off_tl{Coff}
+\pdffield_radio:n{name=DD,AS=Off}
+%\pdffield_radio:n{name=EE,AS=Off,parent=parent}
+
+
+
+DD
+\tl_set:Nn \l__pdffield_radiovalue_on_tl{A}
+\tl_set:Nn \l__pdffield_radiovalue_off_tl{Off}
+\pdffield_radio:n{name=DD,V=/B,AS=Off,appearance=pdffield/bear}
+\tl_set:Nn \l__pdffield_radiovalue_on_tl{B}
+%\tl_set:Nn \l__pdffield_radiovalue_off_tl{Boff}
+\pdffield_radio:n{name=DD,AS=B,appearance=pdffield/bear,bordercolor=yellow}
+\tl_set:Nn \l__pdffield_radiovalue_on_tl{C}
+%\tl_set:Nn \l__pdffield_radiovalue_off_tl{Coff}
+\pdffield_radio:n{name=DD,AS=Off}
+
+
+%\tl_set:Nn \l__pdffield_radiovalue_on_tl{A}
+%\pdffield_radio:n{name=BBB,V=/B,AS=Off,setfieldflags={
+%    RadiosInUnison},unsetfieldflags={NoToggleToOff}}
+%%\tl_set:Nn \l__pdffield_radiovalue_tl{B}
+%\pdffield_radio:n{name=BBB,AS=A}
+%%\tl_set:Nn \l__pdffield_radiovalue_tl{C}
+%\pdffield_radio:n{name=BBB,AS=Off}
 
 %\pdffield_radio:n{name=B,parent=parent}
 %\pdffield_radio:n{name=C,parent=parent}
@@ -61,4 +110,4 @@ aaa%\pdffield_checkbox:n{name=javascript,width=40pt,height=40pt,onenter={app.ale
 \sffamily abc
 \ExplSyntaxOff
 
-\end{document}
+\end{document} 
