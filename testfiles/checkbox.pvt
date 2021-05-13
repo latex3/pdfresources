@@ -9,53 +9,53 @@
 \usepackage{bearwear,tikzducks,tikzlings,iftex}
 
 \ExplSyntaxOn
-\pdffield_store_appearance:nn {checkbox/bear/Yes}
+\pdffield_appearance:nn {pdffield/bear/Yes}
  {
    \tikz\bear\bearwear;
  }
-\pdffield_store_appearance:nn {checkbox/bear/Off}
+\pdffield_appearance:nn {pdffield/bear/Off}
  {
    \tikz\bear;
  }
 
-\pdffield_store_appearance:nn {checkbox/duck/Yes}
+\pdffield_appearance:nn {pdffield/duck/Yes}
  {
    \tikz\duck[body=brown];
  }
-\pdffield_store_appearance:nn {checkbox/duck/Off}
+\pdffield_appearance:nn {pdffield/duck/Off}
  {
    \tikz\duck;
  }
 
-\pdffield_store_appearance:nn {checkbox/panda/Yes}
+\pdffield_appearance:nn {pdffield/panda/Yes}
  {
    \tikz\panda;
  }
-\pdffield_store_appearance:nn {checkbox/panda/Off}
+\pdffield_appearance:nn {pdffield/panda/Off}
  {
    \tikz\cat;
  }
-\pdffield_store_appearance:nn {checkbox/mix/Yes}
+\pdffield_appearance:nn {pdffield/mix/Yes}
  {
    \tikz\duck[body=brown];
  }
-\pdffield_store_appearance:nn {checkbox/mix/Off}
+\pdffield_appearance:nn {pdffield/mix/Off}
  {
    \tikz\bear;
  }
 
 \newlength\bearheight
 \newlength\bearwidth
-\settoheight\bearheight{\tikz\bear;} 
-\settowidth\bearwidth{\tikz\bear;}  
+\settoheight\bearheight{\tikz\bear;}
+\settowidth\bearwidth{\tikz\bear;}
 
 \iftutex
 \RequirePackage{fontspec}
-\pdffield_store_appearance:nn {checkbox/unicode/Off}
+\pdffield_appearance:nn {pdffield/unicode/Off}
  {
    {{\fontspec{SourceSansPro-Regular.otf}☐}}
  }
-\pdffield_store_appearance:nn {checkbox/unicode/Yes}
+\pdffield_appearance:nn {pdffield/unicode/Yes}
  {
    {{\fontspec{SourceSansPro-Regular.otf}☑}}
  }
@@ -75,26 +75,26 @@
  {On: frame with \texttimes, Off: empty frame }
 
 
-\CheckBox[name=bear,appearance=checkbox/bear,width=\bearwidth,height=\bearheight]
+\CheckBox[name=bear,appearance=pdffield/bear,width=\bearwidth,height=\bearheight]
  {On: bear with shirt, Off: bear }
 
 
-\CheckBox[name=bearR,appearance=checkbox/bear,
-rollover-appearance=checkbox/duck,
+\CheckBox[name=bearR,appearance=pdffield/bear,
+rollover-appearance=pdffield/duck,
 width=\bearwidth,height=\bearheight]
  {On: bear with shirt, Off: bear, rollover: yellow/brown duck (depending on the state) }
 
-\CheckBox[name=bearD,appearance=checkbox/bear,
-down-appearance=checkbox/panda,
+\CheckBox[name=bearD,appearance=pdffield/bear,
+down-appearance=pdffield/panda,
 width=\bearwidth,height=\bearheight]
  {On: bear with shirt, Off: bear, click: panda/cat (depending on the state) }
 
 \iftutex
-\CheckBox[name=bear,appearance=checkbox/unicode]
+\CheckBox[name=bear,appearance=pdffield/unicode]
  {On: {\fontspec{SourceSansPro-Regular.otf}☑}, Off: {\fontspec{SourceSansPro-Regular.otf}☐}, in sync with the first and last bear }
 \fi
 
-\CheckBox[name=bear,appearance=checkbox/bear,width=40pt,height=15pt]
+\CheckBox[name=bear,appearance=pdffield/bear,width=40pt,height=15pt]
  {squeezed bear}
 
 

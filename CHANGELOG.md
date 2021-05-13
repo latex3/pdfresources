@@ -11,11 +11,17 @@ this project uses date-based 'snapshot' version identifiers.
  - value of citecolor wasn't expanded (errored with tcolorbox)
  - \url, \href, \hrefurl, \hrefrun and \hrefpdf leaves now vmode
  - handling of pdfauthor, pdftitle and pdfsubject in hyperxmp patch
+
+### Changes 
+ - the module for formfield and checkboxes has been in part rewritten to 
+   better fit to the new module for textfield. 
+   Keys and documentation has been extended. 
  
 ### Added
  - generic command hooks have been added to \url, \href, \hrefurl,
    \hrefrun and \hrefpdf
- - dictionaries widget/AA, widget/AP, widget/MK and widget/BS in l3pdfannot.  
+ - dictionaries widget/AA, widget/AP, widget/MK and widget/BS in l3pdfannot. 
+ - a module for textfields 
       
 ## [2021-03-17]
 

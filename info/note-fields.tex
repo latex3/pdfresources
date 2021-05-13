@@ -1,0 +1,105 @@
+ \subsubsection{The widget annotation dictionary}
+
+ \begin{description}
+ \item[Type] Value: |/Annot|, set automatically
+ \item[Subtype] Value: |/Widget| this is added automatically.
+  We use an internal dictionary which is locally copied over the one from l3pdfannot.
+  It can be filled with keyval options.
+ \item[Parent] The reference to the field, automatically added.
+ \item[Rect] the size, calculated from the box size
+ \item[Contents] a text string, not really needed but an optional key should allow to
+ set it,
+ \item[AP] the appearance dictionary. It should look like this
+  |/AP <</N <</Yes 17 0 R/Off 15 0 R>>>>|. I need to test if it makes sense here to
+  have a |/R| and |/D| entry too. The objects refer to suitable xforms.
+ \item[AS] should be either |/Yes| or |/Off|, and sensibly by default be
+  the same as the V entry in the field dictionary. If they differ the AS entry wins.
+
+ \item[A] Action, this must be checked.
+ \item[AA] additional actions. This must be checked too.
+
+ \item[Border, C, OC, AF, BM, Lang, P, NM, M, F, BS, H]: These are not specifically
+ needed for checkbox. An interface to add something to the used annot dictionary
+ is needed (or already there), but probably no special key-val support for now.
+
+ \item[MK] this is what hyperref uses to set the appearance, but I
+  explicitly leave it out and use |AP|.
+
+ \item[Q] (alignment), used by hyperref but not relevant as we don't have variable
+ text here.
+ \end{description}
+
+
+
+
+ %%%%
+%
+%Field dict
+%Ft     : /Btn /Tx /Ch /Sig
+%Parent : OR
+%Kids: array, other fields or annot/widget
+%T: partial fieldname (test string)
+%TU: alternate description (test string)
+%TM: mapping name
+%Q integer (variable text field)
+%Ff: flags ->pdffield/checkbox/field
+%V: value            % not pushbutton
+%DV: default value   % not pushbutton
+%AA: Action dict ... -> see below
+%Opt: array of strings, connected to kids
+%     or for choices, choices
+%TI integer (lists)
+%I array Ch (complicated ...)
+%
+%/DA ( 0 0 1 rg /Ti 12 Tf ) %text field
+%/MaxLen                    %text field
+%
+%Lock dict (Sig)
+%SV dict (Sig)
+%
+%
+%
+%
+%Connected widget:
+%/AS default appearance from AP ( here/Yes or /Off)
+%% Appearance
+%%checkbox
+%/AP <</N <</Yes 2 0 R /Off 3 0 R>>>>
+%/C / Border /BS
+%
+%/OC ?
+%/Structparens?
+%/F flags
+%
+%
+%AA: Submit:
+%  /S   /SubmitForm
+%  /F   file /URI (/F ( ftp : / / www . beatles . com / Movies / AbbeyRoad . mov )
+%  /Fields array
+%
+%  /S /ImportData
+%  /F file
+%
+%  /S /ResetData
+%  /Fields array
+%
+%  /S /JavaScript
+%  /JS text string or stream
+%  %\pdf_flag_new:nn {annot/field/submit} %name is wrong ...
+%  {
+%    Include/Exclude       = 0,
+%    IncludeNoValueFields  = 1,
+%    ExportFormat          = 2,
+%    GetMethod             = 3, % if ExportFormat=0 -> =0 to
+%    SubmitCoordinates     = 4, % if ExportFormat=0 -> =0 to
+%    XFDF                  = 5,
+%    IncludeAppendSaves    = 6,
+%    IncludeAnnotations    = 7,
+%    SubmitPDF             = 8,
+%    CanonicalFormat       = 9,
+%    ExclNonUserAnnots     = 10,
+%    ExclFKey              = 11,
+%    EmbedForm             = 12
+%  }
+% source: %adapted from https://chat.stackexchange.com/transcript/message/54421537#54421537 
+

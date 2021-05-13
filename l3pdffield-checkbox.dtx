@@ -1,0 +1,433 @@
+% \iffalse meta-comment
+%
+%% File: l3pdfpdffield-checkbox.dtx
+%
+% Copyright (C) 2021 The LaTeX Project
+%
+% It may be distributed and/or modified under the conditions of the
+% LaTeX Project Public License (LPPL), either version 1.3c of this
+% license or (at your option) any later version.  The latest version
+% of this license is in the file
+%
+%    http://www.latex-project.org/lppl.txt
+%
+% This file is part of the "LaTeX PDF management testphase bundle" (The Work in LPPL)
+% and all files in that bundle must be distributed together.
+%
+% -----------------------------------------------------------------------
+%
+% The development version of the bundle can be found at
+%
+%    https://github.com/latex3/pdfresources
+%
+% for those people who are interested.
+%
+%<*driver>
+\RequirePackage{pdfmanagement-testphase}
+\DeclareDocumentMetadata{}
+\makeatletter
+\declare@file@substitution{doc.sty}{doc-v3beta.sty}
+\makeatother
+\documentclass[full]{l3doc}
+\usepackage{array,booktabs}
+\usepackage{l3pdffield-testphase,bearwear}
+\hypersetup{pdfauthor=The LaTeX Project,
+ pdftitle=l3pdffield (LaTeX PDF management testphase bundle)}
+\begin{document}
+  \DocInput{\jobname.dtx}
+\end{document}
+%</driver>
+% \fi
+% \NewDocElement[
+%   idxgroup=checkbox keys,
+%   idxtype = {checkbox key},
+%   printtype= \textit{checkbox key}
+%    ]{Checkboxkey}{checkboxkey}
+% \providecommand\hook[1]{\texttt{#1}}
+% \ExplSyntaxOn
+% \pdffield_appearance:nn {pdffield/bear/Yes}
+%  {
+%    \tikz\bear\bearwear[shirt=red,body~deco={\node[font=\tiny\bfseries,white]~at~(beartummy){Yes};}];
+%  }
+% \pdffield_appearance:nn {pdffield/bear/Off}
+%  {
+%   \tikz\bear\bearwear[body~deco={\node[font=\tiny\bfseries,white]~at~(beartummy){Off};}];
+%  }
+% \ExplSyntaxOff
+% \title{^^A
+%   The \pkg{l3pdffield-checkbox} module\\ Commands to create checkbox form fields   ^^A
+%   \\ \LaTeX{} PDF management testphase bundle
+% }
+%
+% \author{^^A
+%  The \LaTeX{} Project\thanks
+%    {^^A
+%      E-mail:
+%        \href{mailto:latex-team@latex-project.org}
+%          {latex-team@latex-project.org}^^A
+%    }^^A
+% }
+%
+% \date{Version 0.95c, released 2021-03-17}
+%
+% \maketitle
+% \begin{documentation}
+% \section{\pkg{l3pdffield-checkbox} Introduction}
+% This is the documentation for checkbox fields, for general information about form fields
+% check the documentation l3pdffield.
+%
+%
+%
+% Please keep in mind
+% \begin{itemize}
+% \item Not every PDF viewer supports checkboxes.
+% \item The handling can depend on settings in the PDF viewer. In adobe reader for
+% example I had to disable an option to avoid that it tries to create an appearance
+% itself
+% \item Standards like pdf/A disable features of form fields too
+% (as you typically can't change the PDF).
+% \end{itemize}
+% \section{Checkboxes}
+% Click me:
+% \ExplSyntaxOn
+%  \pdffield_checkbox:n{name=bear,appearance=pdffield/bear,width=23pt,height=30pt,depth=10pt}
+% \ExplSyntaxOff
+%
+% \bigskip
+% \subsection{Commands}
+% \begin{function}{\pdffield_checkbox:n}
+% \begin{syntax}
+%  \cs{pdffield_checkbox:n}\Arg{key val list}
+% \end{syntax}
+% This creates a checkbox to check and uncheck. The list of allowed keys is described below.
+% The \meta{key val list} should at least set the name, without it the default name
+% |checkbox| is used. Checkboxes with the same
+% name belong to the same field and are checked and unchecked together. The default appearance
+% is a quadratic frame with a \cs{texttimes} in it for the checked case.
+% The default appearance is setup at the first use and will use the font family
+% active at that time.
+% \end{function}
+%
+%
+% \subsection{Keys}
+%
+% The new checkbox command accept all field and annot keys from l3pdffield.
+% A few keys are disabled or are forced to specific values.
+% The |appearance| keys have a more checkbox specific
+% behaviour, other keys have other defaults than with the basic commands.
+% Additionally there
+% are a small number of keys specific to a checkbox.
+%
+%
+% Disabled keys are
+%  \begin{itemize}
+%  \item |V|, |DV|, |AS|: use |checked| instead.
+%  \item |FT| is overwritten.
+%  \item For checkboxes only the field flags  |ReadOnly|, |Required| and |NoExport| make sense.
+%  |Radio|, |Pushbotton| are set automatically automatically by the code
+% as this is required for a checkbox.
+%  \end{itemize}
+%
+% \begin{function}{preset-checkbox}
+%  \begin{syntax}
+%   |preset-checkbox| = \Arg{key-val-list}
+%  \end{syntax}
+% This allows to set default keys for a checkbox.
+% \end{function}
+%
+% \begin{function}{name,T}
+%  \begin{syntax}
+%   |name| = \meta{partial name}\\
+%   |T| = \meta{partial name}
+%  \end{syntax}
+% This sets like the |T| key for fields the partial name of the field. The value
+% shouldn't contain a period, be not empty and sensibly consist of simple chars.
+% Additionally the value is used to create the field ID.
+% This means that checkboxes with the same partial name are annotations
+% with the same field as parent and are checked and unchecked together---this
+% what is typically expected.
+% The field ID is then internal and can not be used to
+% attach another annotation.
+% For explicit control of the field ID  use the |fieldID| key.
+% \end{function}
+%
+% \begin{function}{fieldID}
+%  \begin{syntax}
+%   |fieldID| = \meta{field ID}\\
+%  \end{syntax}
+% \emph{For experts only!}
+% This allows to give the checkbox field a specific ID. This is only useful
+% in the context of a larger fieldset or if you want to attach another annotation
+% to the field with \s{pdffield_annot:n}. If used wrongly you can
+% easily create invalid fieldset. It allows you to create to fields with the
+% same partial name, but if you want to see both
+% you need to ensure that their full names are
+% different---for example by adding some parent fields.
+% \end{function}
+%
+% \begin{function}{parent}
+%  \begin{syntax}
+%   |parent| = \meta{field ID}\\
+%  \end{syntax}
+% This is only needed if the field should be part
+% of a larger fieldset. The value should be a field ID of a field created previously
+% with \cs{pdffield_field:nn}.
+% \end{function}
+%
+% \begin{function}{altname,TU}
+%  \begin{syntax}
+%   |altname| = \meta{string}\\
+%   |TU| = \meta{string}\\
+%  \end{syntax}
+% This is sets an alternative name for user interaction.
+% This name can only be set at the first checkbox instance, when the field is initialized.
+% \end{function}
+%
+% \begin{function}{mappingname,TM}
+%  \begin{syntax}
+%   |mappingname| = \meta{string}\\
+%   |TM| = \meta{string}\\
+%  \end{syntax}
+% This is sets an alternative name for export.
+% This name can only be set at the first checkbox instance, when the field is initialized.
+% \end{function}
+%
+% \begin{function}{width,height,depth}
+% \begin{syntax}
+% |width| = \meta{dim expression}\\
+% |height| = \meta{dim expression}\\
+% |depth| = \meta{dim expression}
+% \end{syntax}
+% These keys allow to set the dimensions of checkbox instance.
+% The value should be a dimension expression. By default
+% |width| and |height| use \cs{normalbaselineskip}, the |depth| is zero.
+% \end{function}
+%
+% \begin{function}{AP/N,appearance,AP/R,rollover-appearance,AP/D,down-appearance}
+%  \begin{syntax}
+%   |AP/N| = \meta{partial appearance name}\\
+%   |appearance| = \meta{partial appearance name}\\
+%   |AP/R| = \meta{partial appearance name}\\
+%   |rollover-appearance| = \meta{partial appearance name}\\
+%   |AP/D| = \meta{partial appearance name}\\
+%   |down-appearance| = \meta{partial appearance name}
+%  \end{syntax}
+% This keys sets the normal appearance, the rollover appearance (when the
+% mouse hovers over the checkbox) and the down appearance (when the
+% mouse clicks). They take as value a
+% \meta{partial appearance name} and expects that \emph{two} form Xobjects
+% \meta{partial appearance name}|/Yes| and \meta{partial appearance name}|/Off|
+% has been created. The initial value is |pdffield/checkbox/default|
+% for the normal appearance and shows a \cs{texttimes}.
+% The other appearance are not set by default.
+% \end{function}
+% \begin{function}{checked}
+%  \begin{syntax}
+%   |checked| = |true|\verb"|"|false|
+%  \end{syntax}
+% This is a boolean key which allows to set if the
+% checkbox should be initially checked or not. It sets the |/V| and |/DV| key of the field
+% and the |/AS| key of the annotation instance. It is possible to use different
+% values for different instances, if one wants to confuse the user.
+% \end{function}
+%
+%
+% \subsection{Using with hyperref}
+% The \cs{CheckBox} command from hyperref also prints a label, something that the
+% command here doesn't do. A redefinition like the following should allow \cs{CheckBox}
+% to use the commands of this module. Be aware that the behaviour will not be identical!
+% Not every setting and key from \pkg{hyperref} has been copied.
+%
+% \begin{verbatim}
+% \ExplSyntaxOn\makeatletter
+% \def\@CheckBox[#1]#2{\LayoutCheckField{#2}{\pdffield_checkbox:n {name=#2,#1}}}
+% \ExplSyntaxOff\makeatother
+% \end{verbatim}
+%
+% \subsection{Some background}
+% For some general background about fieldsets, fields and field annotations, please
+% check \pkg{l3pdffield}. Here are only some remarks about the special case of
+% checkboxes.
+%
+% A checkbox consist of a field along with one or more field annotations.
+% The annotations can appear on more than one page or locations and if one instance
+% is checked all other instances follows and are checked too.
+%
+% A checkbox has two different looks: checked and unchecked. The hyperref
+% implementation uses symbolic names for the two states and adds some
+% values with the /MK key and lets the PDF viewer
+% create a look from them. But this doesn't work reliably and is one of the reasons
+% why a reimplementation is needed. Also newer PDF versions
+% deprecate the /NeedAppearances setting and require that such a look,
+% an \enquote{appearance}, is given as form XObjects.
+% So the code forces the use of two appearances.
+%
+% \end{documentation}
+%
+% \begin{implementation}
+% \section{\pkg{l3pdffield-checkbox} Implementation}
+%    \begin{macrocode}
+%<*package>
+%<@@=pdffield>
+%    \end{macrocode}
+% \subsection{Variables}
+%    \begin{macrocode}
+%    \end{macrocode}
+% \subsection{Messages}
+%    \begin{macrocode}
+%    \end{macrocode}
+% \subsection{Appearances}
+% The default appearances are a cross (\cs{texttimes}),
+% Every appearance should have two versions and follow the naming
+% module/\meta{name}/Yes and module/\meta{name}/Off.
+%  \begin{macro}{@@/checkbox/default_appearances:}
+%  This defines the standard appearance. It is setup at the first
+%  use of a checkbox, and will adapt to the font family in use then.
+%    \begin{macrocode}
+\cs_new_protected:cn {@@/checkbox/default_appearances:}
+  {
+     \pdffield_appearance:nn {pdffield/checkbox/default/Yes}
+       {
+         \normalsize
+         \fboxsep 0pt
+         \framebox
+           [ \dim_eval:n { \box_ht:N\strutbox+\box_dp:N\strutbox } ]
+           { \texttimes \strut }
+       }
+     \pdffield_appearance:nn {pdffield/checkbox/default/Off}
+       {
+         \normalsize
+         \fboxsep 0pt
+         \framebox
+           [ \dim_eval:n { \box_ht:N\strutbox+\box_dp:N\strutbox } ]
+           { \phantom{\texttimes} \strut }
+       }
+    \cs_gset_eq:cN {@@/checkbox/default_appearances:} \prg_do_nothing:
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+%\subsection{Creating the field}
+% A field should be created if the name doesn't exist
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_checkbox_field:n #1 %name
+  {
+    \pdf_object_if_exist:nF {@@/field/@@/checkbox/#1}
+      {
+        \@@_field:n { @@/checkbox/#1 }
+      }
+    \keys_set:nn {pdffield}{parent=@@/checkbox/#1}
+  }
+\cs_generate_variant:Nn \@@_checkbox_field:n {V}
+%    \end{macrocode}
+% \subsection{Assembling the checkbox}
+
+% \begin{macro}{\@@_checkbox:n}
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_checkbox:n #1
+  {
+    \group_begin:
+    \use:c {@@/checkbox/default_appearances:}
+    \cs_set_eq:NN\@@_appearance_handler:nnn \@@_checkbox_appearance_handler:nnn
+%    \end{macrocode}
+% Setting up the defaults.
+%    \begin{macrocode}
+    \keys_set:nn {pdffield}
+      {
+        fieldID=,
+        name=checkbox,
+        appearance = pdffield/checkbox/default,
+        checked=false,
+        width  = \normalbaselineskip,
+        height = \normalbaselineskip,
+      }
+%    \end{macrocode}
+% Value keys should be undefined.
+%    \begin{macrocode}
+    \@@_key_disable:nnn{checkbox}{V}{checked}
+    \@@_key_disable:nnn{checkbox}{DV}{checked}
+    \@@_key_disable:nnn{checkbox}{AS}{checked}
+    \keys_set:nn { pdffield }{@@/preset/checkbox,#1}
+    \keys_set:nn { pdffield }
+      {
+        ,unsetFf={Radio,Pushbutton}
+        ,FT= Btn
+      }
+    \tl_if_empty:NT\l_@@_fieldID_tl
+      {
+        \pdfdict_get:nnN {l_@@/field}{T}\l_@@_fieldID_tl
+        \tl_put_left:Nn \l_@@_fieldID_tl {@@/checkbox/}
+      }
+    \@@_checkbox_field:V\l_@@_fieldID_tl
+    \@@_annot:
+    \group_end:
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Keys}
+% Most keys are inherited simply the ones from the generic field and annot keys.
+% A key to decide if the box is initially checked or not.
+% We stay in the same family so that we can build a style.
+%    \begin{macrocode}
+\keys_define:nn { pdffield  }
+ {
+   ,checked .choice:
+   ,checked / false .code:n =
+     {
+       \pdfdict_put:nnx { l_@@/field }{V} { /Off }
+       \pdfdict_put:nnx { l_@@/field }{DV}{ /Off }
+       \pdfannot_dict_put:nnn {widget}{AS}{ /Off }
+     }
+   ,checked / true .code:n =
+     {
+       \pdfdict_put:nnx { l_@@/field }{V} { /Yes }
+       \pdfdict_put:nnx { l_@@/field }{DV}{ /Yes }
+       \pdfannot_dict_put:nnn {widget}{AS}{ /Yes }
+     }
+   ,checked .default:n = {true}
+   ,checked .groups:n  = {checkbox}
+ }
+%    \end{macrocode}
+% And a key to set a dedicated field ID
+%    \begin{macrocode}
+\keys_define:nn { pdffield }
+ {
+   fieldID .tl_set:N = \l_@@_fieldID_tl
+ }
+%    \end{macrocode}
+% \begin{macro}{\@@_checkbox_appearance_handler:nnn}
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_checkbox_appearance_handler:nnn #1 #2 #3 %name, type, text
+  {
+    \pdfxform_if_exist:nTF {  #1/Yes }
+      {
+        \pdf_object_if_exist:nF {@@/checkbox/AP/#1}
+          {
+            \pdf_object_new:nn {@@/checkbox/AP/#1}{dict}
+            \pdf_object_write:nx
+              {@@/checkbox/AP/#1}
+              {
+                /Yes ~ \pdfxform_ref:n { #1/Yes}
+                /Off ~ \pdfxform_ref:n { #1/Off}
+              }
+          }
+        \pdfannot_dict_put:nnx {widget/AP}{#2}{\pdf_object_ref:n{@@/checkbox/AP/#1}}
+      }
+      {
+         \msg_error:nnnn{pdffield}{appearance-missing}{#1}{#3}
+      }
+   }
+
+%    \end{macrocode}
+%
+% \end{macro}
+%
+% \subsection{user commands}
+% \begin{macro}{\pdffield_checkbox:n}
+%    \begin{macrocode}
+\cs_set_eq:NN \pdffield_checkbox:n \@@_checkbox:n
+%</package>
+%    \end{macrocode}
+% \end{macro}
+%\end{implementation}

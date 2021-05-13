@@ -1,6 +1,6 @@
 % \iffalse meta-comment
 %
-%% File: l3pdfpdffield-checkbox.dtx
+%% File: l3pdffield.dtx
 %
 % Copyright (C) 2021 The LaTeX Project
 %
@@ -28,9 +28,9 @@
 \makeatletter
 \declare@file@substitution{doc.sty}{doc-v3beta.sty}
 \makeatother
-\documentclass[full]{l3doc}
-\usepackage{array,booktabs}
-\usepackage{l3pdffield-testphase,bearwear}
+\documentclass{l3doc}
+\usepackage{array,booktabs,caption}
+\usepackage{l3pdffield-testphase,tikz}
 \hypersetup{pdfauthor=The LaTeX Project,
  pdftitle=l3pdffield (LaTeX PDF management testphase bundle)}
 \begin{document}
@@ -43,17 +43,22 @@
 %   idxtype = {checkbox key},
 %   printtype= \textit{checkbox key}
 %    ]{Checkboxkey}{checkboxkey}
+%  \NewDocElement[
+%   idxgroup=field keys,
+%   idxtype = {field key},
+%   printtype= \textit{field key}
+%    ]{Fieldkey}{fieldkey}
+%  \NewDocElement[
+%   idxgroup=setup keys,
+%   idxtype = {setup key},
+%   printtype= \textit{setup key}
+%    ]{Fieldsetupkey}{fieldsetupkey}
+%  \NewDocElement[
+%   idxgroup=annot keys,
+%   idxtype = {annot key},
+%   printtype= \textit{annot key}
+%    ]{Annotkey}{annotkey}%
 % \providecommand\hook[1]{\texttt{#1}}
-% \ExplSyntaxOn
-% \pdffield_store_appearance:nn {bear/Yes}
-%  {
-%    \tikz\bear\bearwear[shirt=red,body~deco={\node[font=\tiny\bfseries,white]~at~(beartummy){Yes};}];
-%  }
-% \pdffield_store_appearance:nn {bear/Off}
-%  {
-%   \tikz\bear\bearwear[body~deco={\node[font=\tiny\bfseries,white]~at~(beartummy){Off};}];
-%  }
-% \ExplSyntaxOff
 % \title{^^A
 %   The \pkg{l3pdffield} module\\ Commands to create form fields   ^^A
 %   \\ \LaTeX{} PDF management testphase bundle
@@ -73,31 +78,45 @@
 % \maketitle
 % \begin{documentation}
 % \section{\pkg{l3pdffield} Introduction}
-% The implementation of form fields in hyperref has some bugs, see for example
-% \url{https://github.com/latex3/hyperref/issues/94}. This package is a first step
+% The implementation of form fields in hyperref has some bugs\footnote{see for example
+% \url{https://github.com/latex3/hyperref/issues/94}}. This package is a first step
 % towards the goal to review and improve the code of form fields.
 %
 % Like the \pkg{pdfmanagement-testphase} package itself it is a temporary package:
-% the definite home of the code is not yet decided.
+% the definite home of the code is not yet decided, and during the development
+% changes in the interfaces are possible.
 %
-% It handles for now \emph{only} checkboxes, other form fields like pushbutton,
-% radio buttons or text fields will follow later. As currently no fonts are used,
-% it doesn't relies on the hyperref code
-% to initialize the form, but it can be used with hyperref.
+% The package itself is currently loaded with
+% \begin{verbatim}
+% \usepackage{l3pdffield-testphase}
+% \end{verbatim}
+%
+% The code is splitted into various submodules. \texttt{l3pdffield}
+% contains the basic commands to create a form field. The code related to field types
+% like checkboxes are in \texttt{l3pdffield-\emph{type}}, for example
+% \texttt{l3pdffield-checkbox}. Currently only checkboxes have been implemented,
+% other form fields like pushbutton,
+% radio buttons or text fields will follow later.
+% The code doesn't rely on to initialize the form,
+% but it can be used with hyperref.
 %
 % The code requires the new PDF management. The code makes use of
-% \pkg{l3pdfxform} to create the Xobjects. This code doesn't support yet the
-% the dvips backend.
+% \pkg{l3pdfxform} to create the form Xobjects of the appearances.
+% This code doesn't support yet the the dvips backend.
 %
-%
+% The code targets PDF~2.0. This doesn't mean that it won't work in older
+% PDF versions, but it tries to implement requirements needed or recommended
+% for 2.0; most importantly appearances are used by default everywhere and it
+% deprecates |/NeedAppearances|.
 %
 % Please keep in mind
 % \begin{itemize}
-% \item Not every PDF viewer supports checkboxes.
+% \item Not every PDF viewer supports form fields or all types and features.
 % \item The handling can depend on settings in the PDF viewer. In adobe reader for
 % example I had to disable an option to avoid that it tries to create an appearance
-% itself
-% \item Standards like pdf/A disable form fields too (as you typically can't change the PDF).
+% itself.
+% \item Standards like pdf/A disable some features of form fields like javascript actions
+%  (as you typically can't change the PDF).
 % \end{itemize}
 %
 % If \pkg{hyperref} is loaded before
@@ -115,105 +134,536 @@
 % \begin{document}
 % \Form
 % \end{verbatim}
-% \section{Step 1: Checkboxes}
-% Click me:
-% \ExplSyntaxOn\pdffield_checkbox:n{name=bear,appearance=bear,width=23pt,height=30pt,depth=10pt}\ExplSyntaxOff
 %
-% \bigskip
-% \subsection{Commands}
-% \begin{function}{\pdffield_checkbox:n}
+% \section{Some background}
+%
+% A document can contain a arbitrary number of fields which can be organized in trees.
+% The leaf fields in such a tree, the \emph{terminal fields}, typically have
+% widget annotations as kids which are then the actual, visual instances of the field,
+% and allow to interact with the field. I will call such a
+% tree a \emph{fieldset}, nodes \emph{fields} and the widget annotation
+% \emph{field annotations}.
+%
+% If a field has only one child annotation the content of the field dictionary and the
+% widget annotation dictionary can be merged---some examples in the PDF reference
+% show such merged dictionaries---but the code here keeps them separate, at the end
+% this is clearer.
+%
+% A simple example would look like this
+%
+%  \begin{tikzpicture}[level 2/.style={level distance=7mm},
+%  level 1/.style={sibling distance=25mm},
+%  level 2/.style={sibling distance=15mm}]
+%   \node[draw] {week}
+%   child {node[draw] {mon}
+%           child {node[draw,dashed] {annot}}
+%         }
+%   child {node[draw] {tue}
+%          child {node[draw,dashed] {annot}}
+%         }
+%   child {node[draw] {wen}
+%           child {node[draw,dashed] {annot}}
+%           child {node[draw,dashed] {annot}}
+%         }
+%   ;
+%   \end{tikzpicture}
+%
+% In many cases a fieldset consists of only one field along with its field annotation(s),
+% but larger sets can be needed to build more complex interactions with javascript code.
+% For example a datepicker can be built as a fieldset with various fields to represent
+% the month and year choice and to select days.
+%
+% Fields in a fieldset should have a name, for example |wen| or |week| in the example
+% above. This name is the \emph{partial name} of the field, the \emph{full name}
+% is than built from it by adding the names of the parents separated by periods.
+% In the example above the partial name is \texttt{mon} and the full name
+% \texttt{week.mon}.
+% Partial names shouldn't contain periods. If two fields have the same name they will
+% work in unison: if you enter text in one field, the text appears also in the other, such
+% fields must have the same type and the same value and default value entry.
+% If a field has no name it is considered to be a simple widget annotation and so
+% only another representation of its parent.
+%
+%
+% All terminal fields should also have a type, e.g. \texttt{Btn} for a button field,
+% or \texttt{Tx} for a textfield. The type can be set for the parent and then inherited.
+% The fields in a fieldset can have different types.
+%
+% \subsection{The look of a field: Appearances and other settings}
+%
+% The look of widget annotation of a field can be set with various keys. The keys developed over
+% time and some of them superseed older ones. There is for example the simple
+% |/Border|, the more sophisticated |/BS| (\enquote{border style dictionary}),
+% the \enquote{dynamic appearance dictionary} |MK|, with lots of keys,
+% and the appearance dictionary |/AP| which
+% may define as many as three separate appearances:
+% the normal appearance (required), the rollover appearance and the down appearance.
+% Such an appearance can be a simple form XObjects%
+%   \footnote{Such form XObjects are small pictures stored in the PDF which
+%       can be referenced in various part of the PDF. They can be
+%       created with the commands of the \pkg{l3pdfxform} package.}%
+% , but in some cases the annotation can have different \emph{appearance states}:
+% a checkbox
+% for example can be checked or unchecked, in this case the appearances
+% are dictionaries which
+% maps state names like |/Yes| and |/Off| to form XObjects.
+%
+% The annotations cover a rectangular area on
+% the page and form XObjects appearances are squeezed into this rectangle.
+% So for the best result
+% both should have the same ratio of width and height. Simple plain backgrounds can
+% also be created in large size and reused for various annotations.
+% Form XObjects used as appearances can not be rotated, if needed one has to
+% create a new appearance.
+%
+%
+% In PDF 2.0 widget annotations must have at least a normal |/AP| appearance
+% (unless the size  of the annotation is zero) and the keys \enquote{\itshape C, IC, Border,
+% BS, BE, BM, CA, ca, H, DA, Q,
+% DS, LE, LL, LLE, and Sy shall be ignored}. But it is quite unclear if
+% PDF Viewer honor this, and if this make sense e.g. for text fields which require
+% a DA entry. It is also not clear how appearances and the entries of the MK dictionary
+% are related in a form field.  Tests with some PDF viewers
+% are needed here.
+%
+%
+% \section{Commands}
+% \begin{function}{\pdffield_field:nn,\pdffield_field:Vn}
 % \begin{syntax}
-%  \cs{pdffield_checkbox:n}\Arg{key val list}
+%  \cs{pdffield_field:nn}\Arg{key val list}\Arg{field ID}
 % \end{syntax}
-% This creates a checkbox to check and uncheck. The list of allowed keys is described below.
-% Typically the \meta{key val list} should at least set the name. Checkboxes with the same
-% name belong to the same field and are checked and unchecked together. The default appearance
-% is a quadratic frame with a \cs{texttimes} in it for the checked case.
+% This creates a new field. \meta{field ID} will be used to create and
+% reference the needed objects but it is not the direct object name, so
+% |pdf_object_ref:n| can not be used to access (and there will not
+% clash with object names). It is recommended to start
+% the name with a module prefix to avoid name clashes, so e.g. |mymodule/field/1| or
+% |mymodule/field/week|.
+%
+% The list of handled keys is described below.
+% Typically the \meta{key val list} should at least set the name |T|, fields that
+% are kids in a fieldset must set the |parent| key, this should point to a field
+% declared before.
+%
+% The command is meant as a basic command to build more complex variants like
+% checkbox or textfields. For this reason it doesn't check if
+% the combination of values and flags are sensible, and it uses as key names the
+% names from the PDF reference.
+% If you create a button field (Btn) and set MaxLen (which is only known for text
+% fields), it will not complain.
+%
+% Root fields (fields without parent) are added automatically to the
+% Catalog/AcroForm dictionary with
+%
+%
+% \begin{verbatim}
+% \pdfmanagement_add:nnx{Catalog/AcroForm}{Fields}{<obj ref>}
+% \end{verbatim}
+%
 % \end{function}
 %
-%\begin{function}{\pdffield_setup:nn}
+% \begin{function}{\pdffield_annot:n,\pdffield_annot:V}
 % \begin{syntax}
-%  \cs{pdffield_setup:nn}\Arg{field type}\Arg{key val list}
+%  \cs{pdffield_field:nn}\Arg{key val list}
 % \end{syntax}
-% This allows to setup up values for following fields. \Arg{field type}
-% should be a field, currently the only allowed value is |checkbox|.
+% This creates a new field annotation.
+% It is a widget annotation box created with \cs{pdfannot_widget_box:nnn}, and
+% it is possible to add values to its dictionary
+% by using |\pdfannot_dict_put:nnn {widget}...|.
+% But to correctly setup the parent/kid relationship some additional wrapper code is needed.
+% The command also setup dictionaries to fill the |AP|, |MK| and |AA| dictionaries.
 % \end{function}
 %
-%\begin{function}{\pdffield_store_appearance:nn}
+% \begin{function}{\pdffield_appearance:nn}
 % \begin{syntax}
-%  \cs{pdffield_store_appearance:nn}\Arg{name/state}\Arg{content}
+%  \cs{pdffield_appearance:nn}\Arg{name}\Arg{content}
 % \end{syntax}
-% This is a small wrapper around \cs{pdfxform_new:nn} and store appearances for the fields.
-% \meta{state} should be for checkboxes either |Yes| or |Off| (and typically
-% you should define both). \meta{name} is the name
-% that is used in the |appearance| key, |checkbox/default| is predefined and so can't be used.
-% \meta{content} is arbitrary content. The dimensions should fit to the planed size of the
-% checkbox.%
+% This is a small wrapper around \cs{pdfxform_new:nnn} (which could be used too)
+% to create an appearance. To avoid name clashes \meta{name} should start with
+% a module part, e.g. |mymodule/appearance/cross|.
 % \end{function}
-% \subsection{Keys}
 %
-% The new checkbox commands accepts following keys:
+% \begin{function}{\pdffield_setup:n}
+% \begin{syntax}
+%  \cs{pdffield_setup:n}\Arg{key-val}
+% \end{syntax}
+% This command allows to preset some field settings.
+% \end{function}
+% It knows currently two keys:
 %
-% \DescribeCheckboxkey{name} This sets the (internal) name of the field. It shouldn't contain
-% a period, be not empty and sensibly consist of simple chars. Checkboxes instances
-% with the same name belong to the same field and are checked and unchecked together.
+% \begin{function}{create-style}
+% \begin{syntax}
+%  |create-style| = \Arg{name}\Arg{key-val}
+% \end{syntax}
+% This defines a style which can then be used with the |style| key.
+% \Arg{key-val} can be an arbitrary collection of the  keys of the module.
+% \end{function}
 %
-% \DescribeCheckboxkey{altname} This sets an alternative name for user interaction.
-% This name can only be set at the first checkbox instance, when the field is initialized.
-% \DescribeCheckboxkey{mappingname} This sets an alternative name for export.
-% This name can only be set at the first checkbox instance, when the field is initialized.
+% \begin{function}{preset-checkbox}
+% \begin{syntax}
+% |preset-checkbox|=\Arg{key-val}
+% \end{syntax}
+% This allows to set default keys for a checkbox.
+% \end{function}
+
+% \section{Field Keys}
 %
-% \DescribeCheckboxkey{width}
-% \DescribeCheckboxkey{height}
-% \DescribeCheckboxkey{depth} These keys allow to set the dimensions of checkbox instance.
-% The value should be a command that expands to a dimension expression. By default
-% |width| and |height| use \cs{normalbaselineskip}, the |depth| is zero.
+% Table~\ref{tab:fieldkeys} summarize the keys which can be used.
+% A number of keys have two names, the second is normally the name used by hyperref.
+% Where is makes sense an empty value \enquote{unsets} a key.
 %
-% \DescribeCheckboxkey{appearance} This key sets the normal appearance. It takes as value a
-% \meta{name} and expects that the two appearances \meta{name}|/Yes| and \meta{name}|/Off|
-% has been created with the command described below. The initial value is |checkbox/default|
-% and shows a \cs{texttimes}.
+% \begin{table}
+% \caption{Keys for fields}\label{tab:fieldkeys}
+% \centering
+% \begin{tabular}{>{\ttfamily}lllll}
+% \toprule
+% key      & value      & required & inheritable &remark\\\midrule
+% parent   & field ID & for non-root fields &     \\
+% style    & style name &                   & defined with |create-style| \\
+% T, name        & string   & mostly   &             \\
+% TU, altname       & string   &          &             \\
+% TM, mappingname       & string   &          &             \\
+% FT       & name     & terminal fields & yes  \\
+% setFf,    & list of flags &     & yes\\
+% setfieldflags\\
+% unsetFf,  & list of flags &    & yes \\
+% unsetfieldflags \\
+% V        & various   &        & yes \\
+% DV       & various   &        & yes \\
+% MaxLen   & integer   & with Comb   & yes             & only textfields\\
+% Lock     & object name &         &                  & signature field\\
+% SV       & object name &         &                  & signature field\\
+% Opt      & object name &         &                  & buttons and choice fields\\
+% TI       & integer    &          &                  & list fields\\
+% I        & object name&          &                  & list fields\\
+% AA/K, keystroke     & javascript \\
+% AA/F, format     & javascript\\
+% AA/V, validate     & javascript\\
+% AA/C, calculate     & javascript\\
+% DA        & string    & yes   &   yes    & variable text \\
+% Q       & 0, 1 or 2   &          & yes   &variable text  \\
+% DS       &    &          &         & (ignored) \\
+% RV       &  &  &        & (ignored) \\\bottomrule
+% \end{tabular}
+% \end{table}
 %
-% \DescribeCheckboxkey{rollover-appearance} This key sets the rollover appearance (when the
-% mouse hovers over the checkbox). It takes as value a
-% \meta{name} and expects that the two appearances \meta{name}|/Yes| and \meta{name}|/Off|
-% has been created with the command described below. Initially this is not set.
-% An empty value removes the entry.
+% \begin{function}{parent}
+%  \begin{syntax}
+%   |parent| = \meta{field ID}\\
+%  \end{syntax}
+% This declares the parent of the field. It is required if
+% the field is not the root of the fieldset. The value is the field ID
+% of the parent, the parent should have been already declared.
+% It will add the reference to the parent field to the |/Parent| key, and also
+% add reference of the kid as |/Kid| in the parent field.
+% \end{function}
 %
-% \DescribeCheckboxkey{down-appearance} This key sets the down appearance (when the
-% mouse clicks). It takes as value a
-% \meta{name} and expects that the two appearances \meta{name}|/Yes| and \meta{name}|/Off|
-% has been created with the command described below. Initially this is not set.
-% An empty value removes the entry.
+% \begin{function}{name,T}
+%  \begin{syntax}
+%   |name| = \meta{partial name}\\
+%   |T| = \meta{partial name}
+%  \end{syntax}
+% This sets the partial name of the field. It shouldn't contain
+% a period, be not empty and sensibly consist of simple ascii chars.
+% It is normally required, see above. The value is passed through \cs{pdf_string_from_unicode:nnN}.
+% \end{function}
 %
-% \DescribeCheckboxkey{checked} This is a boolean key which allows to set if the
-% checkbox should be initially checked or not. It sets the |/V| and |/DV| key of the field
-% and the |/AS| key of the annotation instance. It is possible to use different
-% values for different instances, if one wants to confuse the user.
+% \begin{function}{altname,TU}
+%  \begin{syntax}
+%   |altname| = \meta{string}\\
+%   |TU| = \meta{string}\\
+%  \end{syntax}
+% This sets an alternative name for user interaction.
+% Unlike the name field it can use unicode or periods.
+% The value is passed through \cs{pdf_string_from_unicode:nnN}
+% \end{function}
 %
-% \DescribeCheckboxkey{setfieldflags}
-% \DescribeCheckboxkey{unsetfieldflags}
-% These keys allow to set or unset the field flags.  They expect a comma lists of
-% flag names. Allowed names |ReadOnly|, |Required|,
+% \begin{function}{mappingname,TM}
+%  \begin{syntax}
+%   |mappingname| = \meta{string}\\
+%   |TM| = \meta{string}\\
+%  \end{syntax}
+% This sets an alternative name for the export.
+% The value is passed through \cs{pdf_string_from_unicode:nnN}
+% \end{function}
+%
+% \begin{function}{mappingname,TM}
+%  \begin{syntax}
+%   |FT| = |Btn|\verb"|"|Tx|\verb"|"|Ch|\verb"|"|Sig|
+%  \end{syntax}
+% This sets the type of the field, the value should be one of
+% \texttt{Btn} (button), \texttt{Tx} (text), \texttt{Ch} (choice),  \texttt{Sig} (signature).
+% The value is of relevance only for terminal fields, but it can be set in a parent
+% and then inherited.
+% \end{function}
+%
+% \begin{function}{setfieldflags,setFf,unsetfieldflags,unsetFf}
+%  \begin{syntax}
+%   |setfieldflags| = \meta{comma list of flags}\\
+%   |setFf| = \meta{comma list of flags}\\
+%   |unsetfieldflags| = |all| \verb"|" \meta{comma list of flags}\\
+%   |unsetFf| = |all| \verb"|" \meta{comma list of flags}
+%  \end{syntax}
+%  These keys accept a list of flag names and then sets or unsets them, the resulting value
+% is then used with the \texttt{/Ff} key. Depending
+% on the field type some flags must be set or unset, other are optional or are ignored.
+% The flag name can be given in PDF spelling (\texttt{RadiosInUnison}),
+% in lowercase (\texttt{radiosinunison}), and as number. |unsetFf| and its
+% alias |unsetfieldflags|  know the special value |all| which clears all the fields.
+%
+% The list of flags are:
+% |ReadOnly|, |Required|,
 % |NoExport|, |Multiline|, |Password|,    |NoToggleToOff|, |Radio|, |Pushbotton|,
 % |Combo|, |Edit|,   |Sort|, |FileSelect|,  |MultiSelect|, |DoNotSpellCheck|,
 % |DoNotScroll|, |Comb|,  |RadiosInUnison|, |RichText|, |CommitOnSelChange|.
 %
-% From these |Radio|, |Pushbotton| are set automatically automatically by the code
-% as this is required for a checkbox. Not every one from the rest makes sense for
-% checkboxes but the same key will be used for other fields too.
-% Check the PDF reference to decide which one to set or unset.
+% \end{function}
 %
-% \begin{checkboxkey}{keystroke,format,validate,calculate}
-% These keys add the |/K, |/F, |/V|, |/C| key to the |/AA| dictionary of the field object.
-% Their value should be javascript code. The |/AA| dictionary is suppressed
-% if a pdf/A standard is set. These keys are probably not of much used with a checkbox.
-% \end{checkboxkey}
+% \begin{function}{V}
+%  \begin{syntax}
+%   |V| = \meta{various}
+%  \end{syntax}
+% This sets the value of the field. Its
+% format varies depending on the field type, so typically
+% commands for the various type will have to preprocess and sanitize it.
+% The value given here is x-expanded and then added to the dictionary!
+% See the descriptions of individual field types for further information.
+% (Pushbuttons for example don't have a value).
+% \end{function}
 %
-% \vspace{2\baselineskip}
-% \begin{checkboxkey}{onfocus,onblur,onmousedown,onmouseup,onenter,onexit}
-% These keys adds the |/F, |/Bl, |/D|, |/U|, |E| and |X| key to the |/AA| dictionary
-% of the widget  annotation (the checkbox instance) object.
+% \begin{function}{DV}
+%  \begin{syntax}
+%   |DV| = \meta{various}
+%  \end{syntax}
+% The default value, to which the field reverts
+% when a reset-form action is executed. The format of this value is the
+% same as that of \texttt{DV}.
+% \end{function}
+%
+% \begin{function}{MaxLen}
+%  \begin{syntax}
+%   |MaxLen| = \meta{integer}
+%  \end{syntax}
+% Only relevant for textfields.
+% The value is an integer and describes the maximum length of the field’s text in characters.
+% Required if the |Comb| flag is used.
+% \end{function}
+%
+% \begin{function}{Lock}
+%  \begin{syntax}
+%   |MaxLen| = \meta{object name}
+%  \end{syntax}
+% Only relevant for signature fields. The value is an object name
+% which should point to a dictionary that specifies a set of form fields
+% that shall be locked when this signature field is signed. The exact format of
+% the dictionary is described in the PDF reference.
+% \end{function}
+%
+% \begin{function}{SV}
+%  \begin{syntax}
+%   |SV| = \meta{object name}
+%  \end{syntax}
+% Only relevant for signature fields. The value is an object name
+% which should point to a seed value dictionary. The exact format of
+% the dictionary is described in the PDF reference.
+% \end{function}
+%
+% \begin{function}{Opt}
+%  \begin{syntax}
+%   |Opt| = \meta{object name}
+%  \end{syntax}
+% Only relevant for checkboxes, radiobuttons and choice fields.
+% The value is an object name
+% which should point to a array. The exact format of
+% the array is described in the PDF reference.
+% \end{function}
+%
+% \begin{function}{TI}
+%  \begin{syntax}
+%   |TI| = \meta{integer}
+%  \end{syntax}
+% Only relevant for scrollable list boxes.
+% The value is an integer, the top index (the index in the Opt array
+% of the first option visible in the list). Default value: 0
+% \end{function}
+%
+% \begin{function}{I}
+%  \begin{syntax}
+%   |I| = \meta{object name}
+%  \end{syntax}
+% For choice fields that allow
+% multiple selection (MultiSelect flag set). The value is an object name
+% which should point to a array. The exact format of
+% the array is described in the PDF reference
+% (I have no idea what exactly should be added there, perhaps some future test will make
+% it more understandable.)
+% \end{function}
+%
+% The following four keys are used to add javascript (\enquote{ECMAScript}) code.
+% The values are currently only passed through \cs{pdf_string_from_unicode:nnN},
+% but this perhaps will have to change. The keys will be ignored if a pdfstandard
+% is used that prohibits such actions.
+%
+% \begin{function}{AA/K,keystroke}
+%  \begin{syntax}
+%   |AA/K| = \meta{string (ECMAScript)}\\
+%   |keystroke| = \meta{string (ECMAScript)}
+%  \end{syntax}
+% This adds a keystroke action to the
+% additional action dictionary. The value is passed through
+% \cs{pdf_string_from_unicode:nnN}. The action is meant for text and choice fields.
+%  It is quite unclear if such an action
+%  make sense for non-terminal fields.
+%  \end{function}
+%
+% \begin{function}{AA/F,format}
+%  \begin{syntax}
+%   |AA/F| = \meta{string (ECMAScript)}\\
+%   |format| = \meta{string (ECMAScript)}
+%  \end{syntax}
+% This adds a format action to the
+% additional action dictionary. The value is passed through
+% \cs{pdf_string_from_unicode:nnN}. The action is meant for text and choice fields.
+% It is quite unclear if such an action
+%  make sense for non-terminal fields.
+% \end{function}
+%
+% \begin{function}{AA/V,validate}
+%  \begin{syntax}
+%   |AA/V| = \meta{string (ECMAScript)}\\
+%   |validate| = \meta{string (ECMAScript)}
+%  \end{syntax}
+% This adds a validate action to the
+% additional action dictionary. The value is passed through
+% \cs{pdf_string_from_unicode:nnN}. It is quite unclear if such an action
+%  make sense for non-terminal fields.
+%  \end{function}
+%
+% \begin{function}{AA/C,calculate}
+%  \begin{syntax}
+%   |AA/C| = \meta{string (ECMAScript)}\\
+%   |calculate| = \meta{string (ECMAScript)}
+%  \end{syntax}
+% This adds a calculate action to the
+% additional action dictionary. The value is passed through
+% \cs{pdf_string_from_unicode:nnN}. It is quite unclear if such an action
+%  make sense for non-terminal fields.
+% \end{function}
+%
+% \begin{function}{DA}
+%  \begin{syntax}
+%   |DA| = \meta{string}
+%  \end{syntax}
+% This contains instructions for the text in text fields.
+% It is stored expanded and parentheses are added around the value.
+% \end{function}
+%
+% \begin{function}{Q,align}
+%  \begin{syntax}
+%   |Q| = |left|\verb"|"|center|\verb"|"|right|\\
+%   |align| = |left|\verb"|"|center|\verb"|"|right|
+%  \end{syntax}
+% The justification of the text.
+% \end{function}
+%
+% \begin{function}{DS,RV}
+% These two keys are currently not implemented
+% as it is unclear if there are of any use.
+% \end{function}
+%
+% \section{Annot keys}
+%
+% Table~\ref{tab:annotkeys} summarize the keys which can be used.
+% A number of keys have alias names which are mentioned in the descriptions.
+%
+% \begin{table}
+% \caption{Keys for field annotations}\label{tab:annotkeys}
+% \centering
+% \begin{tabular}{>{\ttfamily}lllll}
+% \toprule
+% key      & value      & required &remark\\\midrule
+% parent   & field ID & yes             \\
+% width    & dim expression & (yes)  & default is 0pt \\
+% height   & dim expression & (yes)  & default is 0pt \\
+% depth   & dim expression & (yes)  & default is 0pt \\
+% AP/N    & appearance name  & yes  (in PDF 2.0) \\
+% AP/R    & appearance name  & yes  (in PDF 2.0) \\
+% AP/D    & appearance name  & yes  (in PDF 2.0) \\
+% AS      & name  & yes  (in PDF 2.0) \\
+% setF    & list of flags \\
+% unsetF  & list of flags \\
+% AA/*    & javascript   & *= F, Bl, D, U, E, \\
+%         &              &    X, PO, PC,PV, PI\\
+% MK/*    & various      & *= R, BC, BG, CA, RC, \\
+%         &              &   AC, I, RI, IX, IF, TP\\ \bottomrule
+%
+% \end{tabular}
+% \end{table}
+%
+% \begin{function}{width,height,depth}
+% \begin{syntax}
+% |width| = \meta{dim expression}\\
+% |height| = \meta{dim expression}\\
+% |depth| = \meta{dim expression}
+% \end{syntax}
+% These keys allow to set the dimensions of the annotation.
+% The value should be a command that expands to a dimension expression. By default
+% all values are zero.
+% \end{function}
+%
+% \begin{function}{parent}
+%  \begin{syntax}
+%   |parent| = \meta{field ID}\\
+%  \end{syntax}
+% This sets the parent. The value should be field ID of
+% an already declared field.
+% \end{function}
+%
+% \begin{function}{AP/N,AP/R,AP/D}
+%  \begin{syntax}
+%   |AP/N| = \meta{appearance name}\\
+%   |AP/R| = \meta{appearance name}\\
+%   |AP/D| = \meta{appearance name}
+%  \end{syntax}
+% This keys set the normal, rollover and down appearance. Alias names are
+% |appearance|, |rollover-appearance| and |down-appearance|.
+% The value is by default a simple name of an appearance/form Xobject but
+% modules like \pkg{l3pdffield-checkbox} change this to allow to add appearances for
+% various states.
+% \end{function}
+%
+% \begin{function}{AS}
+%  \begin{syntax}
+%   |AS| = \meta{appearance state name}
+%  \end{syntax}
+% This key sets the default appearance state.
+% The value is a name without the starting slash
+% (it is passed through |\pdf_name_from_unicode_e:n|),
+% for checkbox for example |Yes|. If used it should typically have the same value
+% as the V and DV key of the field.
+% \end{function}
+%
+%\begin{function}{setannotflags,setF,unsetannotflags,unsetF}
+%  \begin{syntax}
+%   |setannotflags| = \meta{comma list of flags}\\
+%   |setF| = \meta{comma list of flags}\\
+%   |unsetannotflags| = |all| \verb"|" \meta{comma list of flags}\\
+%   |unsetF| = |all| \verb"|" \meta{comma list of flags}
+%  \end{syntax}
+% These keys allow to set or unset the annot flags.  They expect a comma lists of
+% flag names. Allowed names |Invisible|, |Hidden|,
+%  |Print|, |NoZoom|,|NoRotate|, |NoView|, |ReadOnly|, |Locked|, |ToggleNoView|,
+%  |LockedContents|, or the lowercase variants or numbers.
+% \end{function}
+%
+% \begin{function}{AA/*}
+%  \begin{syntax}
+%  |AA/*| = \meta{string (ECMAScript)}
+%  \end{syntax}
+% * should be one of |F|, |Bl|, |D|, |U|, |E|, |X|, |PO|, |PC|, |PV|, |PI|.
+% Alias names for the first six keys are
+% |onfocus|, |onblur|, |onmousedown|, |onmouseup|, |onenter|,  |onexit|.
+% These keys adds then the respective key to the |/AA| dictionary
+% of the field annotation object.
 % Their value should be javascript code. The |/AA| dictionary
 % is suppressed if a pdf/A standard is set.
 %
@@ -221,152 +671,83 @@
 % \begin{verbatim}
 %    onenter={app.alert('Hello');}
 % \end{verbatim}
-% \end{checkboxkey}
+% \end{function}
 %
-% \subsection{Using with hyperref}
-% The \cs{CheckBox} command from hyperref also prints a label, something that the
-% command here don't do. A redefinition like the following should allow to \cs{CheckBox}
-% to use the commands of this module. Be aware that the behaviour will not be identical!
-% Not every setting and key from \pkg{hyperref} has been copied.
+% The following keys add values to the  \emph{dynamic appearance dictionary}
+% |MK| directory. This is only relevant for
+% annotations with dynamic content, like e.g. textfields.
 %
-% \begin{verbatim}
-% \ExplSyntaxOn\makeatletter
-% \def\@CheckBox[#1]#2{\LayoutCheckField{#2}{\pdffield_checkbox:n {name=#2,#1}}}
-% \ExplSyntaxOff\makeatother
-% \end{verbatim}
+% The |MK| dictionary can also be added by using |\pdfannot_dict_put:nnn{Widget}{MK}{...}|
+% but the two methods should not be mixed.
 %
-% \subsection{Some background}
-% Form fields consist of a field object and number of instances of the field:
-% A checkbox can appear on more than one page or location and if one instance
-% is checked all other instances follows and are checked too.
+%  \begin{function}{MK/R,rotate}
+%  \begin{syntax}
+%  |MK/R| = |0| \verb"|" |90| \verb"|" |180| \verb"|" |270|\\
+%  |rotate| = |0| \verb"|" |90| \verb"|" |180| \verb"|" |270|
+%  \end{syntax}
+% These rotates the content of the annotation.
+% \end{function}
 %
-% All instances are in this case widget annotations and are referenced in the Kid array of the field
-% object\footnote{Fields can actually build a tree: between the root field and
-% widget annotations there can be more fields. The last one before the widget is
-% the \emph{terminal} field, but unless a sensible
-% use case comes up, I will assume that the widget annotations are direct children of
-% the root and that the root field is the terminal field.}.
-% This means that the code has to collect all the children and write
-% out the field object at the end of the document.
+% \begin{function}{MK/BC,bordercolor}
+%  \begin{syntax}
+%  |MK/BC| = \meta{color expression} \verb"|" [\meta{model}]\Arg{values}\\
+%  |bordercolor| = \meta{color expression} \verb"|" [\meta{model}]\Arg{values}
+%  \end{syntax}
+% These colors the border. Internally currently RGB is used.
+% The colors used in
+% \meta{color expression} must be known to the \pkg{l3color} commands.
+% \end{function}
 %
-% If a field has only one children the content of the field dictionary and the
-% widget annotation dictionary can be merged---some examples in the PDF reference
-% show such merged dictionaries---but the code here keeps them separate, at the end
-% this is clearer.
+% \begin{function}{MK/BG,backgroundcolor}
+%  \begin{syntax}
+%  |MK/BG| = \meta{color expression} \verb"|" [\meta{model}]\Arg{values}\\
+%  |backgroundcolor| = \meta{color expression} \verb"|" [\meta{model}]\Arg{values}
+%  \end{syntax}
+% These colors the background. Internally currently RGB is used.
+% The colors used in
+% \meta{color expression} must be known to the \pkg{l3color} commands.
+% \end{function}
 %
-% All the root field objects must be referenced in the AcroForm dictionary in the
-% Fields entry. This can be done with
+% The remaining key are useful for buttons only, currently no special syntax support
+% is implemented. They will be handled when the code for push buttons is developed and
+% tested.
+% \begin{function}{MK/*}
+%  \begin{syntax}
+%  |MK/*| = \meta{various}
+%  \end{syntax}
+% These keys adds the various entries in the \emph{dynamic appearance dictionary}.
+% * should be one of  |CA|, |RC|, |AC|, |I|, |RI|, |IX|, |IF|, |TP|.
+% The |MK| dictionary can also be added by using |\pdfannot_dict_put:nnn{Widget}{MK}{...}|
+% but the two methods should not be mixed.
+% \end{function}
 %
-% \begin{verbatim}
-% \pdfmanagement_add:nnx{Catalog/AcroForm}{Fields}{<obj ref>}
-% \end{verbatim}
-%
-% A checkbox has two different looks: checked and unchecked. The current hyperref
-% implementation uses symbolic names for the two states and and adds some
-% values with the /MK key and lets the PDF viewer
-% create a look from them. But this doesn't work reliably. Also newer PDF versions
-% deprecate the /NeedAppearances setting and require that such a look,
-% an \enquote{appearance}, is given as form XObjects:
-% such form XObjects are like small pictures stored in the PDF and can be referenced
-% in various part of the PDF. They can be created with the commands of
-% the \pkg{l3pdfxform} package.
-%
-% The checkbox instances---the widget annotations---cover a rectangular area on
-% the page, the XObjects are squeezed into this rectangle. So for the best result
-% both should have the same ratio of width and height.
-% XObjects used as appearances can not be rotated, if needed one has to
-% create a new appearance.
-%
-% \subsubsection{The field dictionary}
-%
-% The field dictionary shall or can have the following entries
-%
-% \begin{description}
-% \item[FT] required for terminal fields (here for the root field),
-%  the value is always \texttt{Btn}, so this entry is set by the code.
-% \item[Parents] currently irrelevant as we don't have a field hierarchy.
-% \item[Kids] an array. Contains references to the children, in our case to
-% the widget annotations. The array is build by the code.
-%
-% \item[T] required, the name, a (unique) text string without a period.
-% This field is a mandatory argument which must be given by the user.
-% The value should be passed through a suitable string conversion and checked
-% if it contains a period (which is not allowed).
-%
-% \item[TU,TM] optional, alternative names for user messages (TU) and export (TM).
-% As these fields are optional they should be set by some key-val option.
-%
-% \item[Ff] A bitset, two flags must be unset for a checkbox (Radio and Pushbotton),
-% for the rest we need a keyval interface.
-%
-% \item[V] describes the initial value, for checkboxes is should be either |/Yes|
-%   or |/Off|. The initial value will be |/Yes|, keys are need to set both the local
-%   and the default value.
-%
-% \item[DV] optional, the default value after a reset. Should  like |V| be either
-% |/Yes| or |/Off|.
-%
-% \item[AA] An action dictionary. For this we need a special command to setup such
-% dictionaries, so that they then can be used in various places.
-%
-% \end{description}
-%
-% \subsubsection{The widget annotation dictionary}
-%
-% \begin{description}
-% \item[Type] Value: |/Annot|, set automatically
-% \item[Subtype] Value: |/Widget| this is added automatically.
-%  We use an internal dictionary which is locally copied over the one from l3pdfannot.
-%  It can be filled with keyval options.
-% \item[Parent] The reference to the field, automatically added.
-% \item[Rect] the size, calculated from the box size
-% \item[Contents] a text string, not really needed but an optional key should allow to
-% set it,
-% \item[AP] the appearance dictionary. It should look like this
-%  |/AP <</N <</Yes 17 0 R/Off 15 0 R>>>>|. I need to test if it makes sense here to
-%  have a |/R| and |/D| entry too. The objects refer to suitable xforms.
-% \item[AS] should be either |/Yes| or |/Off|, and sensibly by default be
-%  the same as the V entry in the field dictionary. If they differ the AS entry wins.
-%
-% \item[A] Action, this must be checked.
-% \item[AA] additional actions. This must be checked too.
-%
-% \item[Border, C, OC, AF, BM, Lang, P, NM, M, F, BS, H]: These are not specifically
-% needed for checkbox. An interface to add something to the used annot dictionary
-% is needed (or already there), but probably no special key-val support for now.
-%
-% \item[MK] this is what hyperref uses to set the appearance, but I
-%  explicitly leave it out and use |AP|.
-%
-% \item[Q] (alignment), used by hyperref but not relevant as we don't have variable
-% text here.
-% \end{description}
 % \end{documentation}
 %
 % \begin{implementation}
-% \section{\pkg{l3pdffield-checkbox} Implementation}
+% \section{\pkg{l3pdffield} Implementation}
 %    \begin{macrocode}
 %<*package>
 %<@@=pdffield>
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesExplPackage{l3pdffield-testphase}{2021-03-17}{0.95c}%
-  {form field checkboxes}
+  {form fields}
 %    \end{macrocode}
 % \subsection{hyperref specific command}
 % hyperref sets NeedAppearances by default. As this is deprecated we disable this.
 %    \begin{macrocode}
 \csname HyField@NeedAppearancesfalse\endcsname % suppress NeedAppearances
-% values from hyperref:
-%\def\DefaultOptionsofCheckBox{print}
-%\def\DefaultHeightofCheckBox{\normalbaselineskip}
-%\def\DefaultWidthofCheckBox{\normalbaselineskip}
 %    \end{macrocode}
+%
 % \subsection{local variables}
+%
 %    \begin{macrocode}
-\str_new:N \l_@@_field_name_str
 \str_new:N \l_@@_tmpa_str
-\str_new:N \l_@@_name_tmpa_str
-\tl_new:N \l_@@_keys_tmpa_tl
+\tl_new:N  \l_@@_tmpa_tl
+\tl_new:N  \l_@@_tmpa_keys_tl
+\cs_new_protected:Npn \@@_tmpa:n #1 {}
+\cs_new_protected:Npn \@@_tmpa:nn #1 #2 {}
+\tl_new:N \l_@@_currentparent_tl
+\tl_new:N \l_@@_fieldID_tl
 %    \end{macrocode}
 %
 % \subsection{messages}
@@ -383,15 +764,40 @@
   }
 \msg_new:nnn {pdffield}{appearance-missing}
   {
-    The~appearance~`#1`~is~missing~for~the~#2~appearance.
+    The~appearance~definition~`#1`~is~missing~for~the~#2~appearance.
   }
-\msg_new:nnn {pdffield}{field-keys-ignored}
+\msg_new:nnn {pdffield}{not-implemented}
   {
-    The~field~`#1`~is~already~initialized\\
-    The~field~keys~`#2`~are~ignored.
+    Support~for~'/#1'~is~not~implemented\\
+    The~key~is~ignored.
+  }
+\msg_new:nnn {pdffield}{key-disabled}
+  {
+    key~`#2`~is~disabled~and~ignored~in~the~`#1`~command.\\
+    Use~key~`#3`~instead.
+  }
+\msg_new:nnn {pdffield}{parent-field-missing}
+  {
+    The~parent~field~'#1'~doesn't~exist\\
+    Create~it~with~\tl_to_str:n{\pdffield_field:nn}
   }
 %    \end{macrocode}
 
+% An auxiliary command to disable some keys
+% \begin{macro}{\@@_key_disable:nnn}
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_key_disable:nnn #1#2#3
+ {
+   \keys_define:nn {pdffield}
+    {
+      #2 .code:n =
+       {
+         \msg_warning:nnnnn {pdffield}{key-disabled}{#1}{#2}{#3}
+       }
+    }
+ }
+%    \end{macrocode}
+% \end{macro}
 % \subsection{bitsets}
 % A bitset for the field flag Ff
 % and an internal copy of the annot bitset.
@@ -417,7 +823,27 @@
     Comb              = 25,%Tx, requires MaxLen in dict
     RadiosInUnison    = 26,%Btn Radio
     RichText          = 26,%Tx
-    CommitOnSelChange = 27
+    CommitOnSelChange = 27,
+    readonly          = 1,
+    required          = 2,
+    noexport          = 3,
+    multiline         = 13,%Tx
+    password          = 14,
+    notoggletooff     = 15,%Btn, radio button
+    radio             = 16,%Btn: Radio:    15=1, 16=0
+    pushbutton        = 17,%Btn: Checkbox: 15=0, 16=0
+                           %Btn: Pushbutton: 16=1
+    combo             = 18,%Ch: Combo=1 List=0
+    edit              = 19,%Ch, Combo=1 -> + edit field
+    sort              = 20,%Ch, not relevant for view...
+    fileselect        = 21,%Tx
+    multiselect       = 22,%Ch
+    donotspellcheck   = 23,%Tx, Ch (if Combo + Edit set)
+    donotscroll       = 24,%Tx
+    comb              = 25,%Tx, requires MaxLen in dict
+    radiosinunison    = 26,%Btn Radio
+    richtext          = 26,%Tx
+    commitonselchange = 27
   }
 
 \bitset_new:Nn \l_@@_F_bitset
@@ -431,102 +857,107 @@
     ReadOnly       = 7,
     Locked         = 8,
     ToggleNoView   = 9,
-    LockedContents = 10
+    LockedContents = 10,
+    invisible      = 1,
+    hidden         = 2,
+    print          = 3,
+    nozoom         = 4,
+    norotate       = 5,
+    noview         = 6,
+    readonly       = 7,
+    locked         = 8,
+    togglenoview   = 9,
+    lockedcontents = 10
   }
 %    \end{macrocode}
 % \subsection{The field dictionary}
-% The field dictionary is the main object. It references the
-% actual widget annotations as kids. It is created at the first
-% checkbox with a specific name.
+% The field dictionary is the main object.
 % To be able to set values from the outside it will use a
 % dictionary which can be filled by key-val.
 %    \begin{macrocode}
-\pdfdict_new:n   {l_@@/checkbox/field}
-\pdfdict_put:nnn {l_@@/checkbox/field}{FT}{/Btn}
+\pdfdict_new:n   {l_@@/field}
+\pdfdict_new:n   {l_@@/field/AA}
+\bool_new:N \l_@@_root_field_bool
 %    \end{macrocode}
-% We need to check if the name contains a dot. But we will do this in an external command
-% to avoid to have it twice. Here we assume that the name is already converted and safe.
-%
-% We also assume that values that can be changed by the user are set outside
-% in the dictionary.
-% If the field object already exists nothing is done.
-% \begin{macro}{\@@_checkbox_field_add:n}
+% \begin{macro}{\@@_field:n}
 % \begin{syntax}
-% \cs{@@_checkbox_field_add:n}\Arg{name}
+% \cs{@@_field:n}\Arg{field ID}
 % \end{syntax}
-% \meta{name} should be a PDF text string without period. It identifies the
-% field.
 %    \begin{macrocode}
-\cs_new_protected:Npn \@@_checkbox_field_new:n #1
+\cs_new_protected:Npn \@@_field:n #1
   {
-      \group_begin:
-      \pdf_object_new:nn {@@_checkbox/field/#1}      {dict}
-      \pdf_object_new:nn {@@_checkbox/field/#1/Kids} {array}
-      \seq_new:c {g_@@_checkbox/field/#1/Kids_seq}
-      \hook_gput_code:nnn {shipout/lastpage}{pdffield} %xetex needs this ...
-        {
-          \pdf_object_write:nx {@@_checkbox/field/#1/Kids}
-            {
-              \seq_use:cn{g_@@_checkbox/field/#1/Kids_seq}{~}
-            }
-        }
-      \pdfdict_put:nnn {l_@@/checkbox/field}{T}{(#1)}
-     % V,DV are names describing the appearance. With checkboxes
-     % the values /Yes and /Off are used.
-     % this values are taken from the outside
-      \pdfdict_put:nnx {l_@@/checkbox/field}
-         {Kids}
-         {
-           \pdf_object_ref:n {@@_checkbox/field/#1/Kids}
-         }
-      \bitset_set_false:Nn \l_@@_Ff_bitset  {Radio}
-      \bitset_set_false:Nn \l_@@_Ff_bitset  {Pushbutton}
-      \pdfdict_put:nnx {l_@@/checkbox/field}
-        {Ff}
-        {\bitset_to_arabic:N \l_@@_Ff_bitset }
-      \pdfdict_if_empty:nF{l_@@/checkbox/field/AA}
-        {
-          \pdfmeta_standard_verify:nT
-            {annot_widget_no_AA}
-            {
-              \pdfdict_put:nnx
-                {l_@@/checkbox/field}
-                {AA}
-                {<<\pdfdict_use:n {l_@@/checkbox/field/AA}>>}
-            }
-        }
-      \pdf_object_write:nx {@@_checkbox/field/#1} { \pdfdict_use:n {l_@@/checkbox/field} }
-      \pdfmanagement_add:nnx
-        { Catalog / AcroForm }
-        { Fields }
-        {\pdf_object_ref:n {@@_checkbox/field/#1} }
-      \group_end:
+    \pdf_object_new:nn {@@/field/#1}      {dict}
+    \pdf_object_new:nn {@@/field/Kids/#1} {array}
+    \tl_if_empty:NTF \l_@@_currentparent_tl
+      {
+        \pdfmanagement_add:nnx
+          { Catalog / AcroForm }
+          { Fields }
+          {\pdf_object_ref:n {@@/field/#1} }
+      }
+      {
+        \exp_args:Ne
+        \pdf_object_if_exist:nTF {@@/field/\l_@@_currentparent_tl}
+          {
+            \pdfdict_put:nnx { l_@@/field }{Parent}
+              {\exp_args:Ne \pdf_object_ref:n{@@/field/\l_@@_currentparent_tl}}
+            \seq_gput_right:cx {g_@@_field/Kids/\l_@@_currentparent_tl _seq}
+              { \exp_args:Ne \pdf_object_ref:n{@@/field/#1}}
+          }
+          {
+            \msg_error:nnx {pdffield}{parent-field-missing}{\l_@@_currentparent_tl}
+          }
+      }
+    \seq_new:c {g_@@_field/Kids/#1_seq}
+    \pdfdict_put:nnx {l_@@/field}
+      {Kids}
+      {
+        \pdf_object_ref:n {@@/field/Kids/#1}
+      }
+    \pdfdict_put:nnx {l_@@/field}
+      {Ff}
+      {\bitset_to_arabic:N \l_@@_Ff_bitset }
+    \pdfdict_if_empty:nF{l_@@/field/AA}
+      {
+        \pdfmeta_standard_verify:nT
+          {annot_widget_no_AA}
+          {
+            \pdf_object_unnamed_write:nx {dict}{\pdfdict_use:n {l_@@/field/AA}}
+            \pdfdict_put:nnx
+              {l_@@/field}
+              {AA}
+              {\pdf_object_ref_last:}
+          }
+      }
+    \hook_gput_code:nnn {shipout/lastpage}{pdffield} %xetex needs this ...
+      {
+        \pdf_object_write:nx {@@/field/Kids/#1}
+          {
+            \seq_use:cn{g_@@_field/Kids/#1_seq}{~}
+          }
+      }
+    \pdf_object_write:nx {@@/field/#1} { \pdfdict_use:n {l_@@/field} }
   }
-
+\cs_new_protected:Npn \pdffield_field:nn #1 #2
+  {
+    \group_begin:
+    \keys_set:nn { pdffield } {#1}
+    \@@_field:n {#2}
+    \group_end:
+  }
 %    \end{macrocode}
 % \end{macro}
+%
 % \subsection{The annot dictionary}
 % We assume that the annotation should really occupy space on the page and
 % leave vertical mode.
-% We also assume that keys like AP, AS are added before through keys to
-% the dictionary.
-% We use a local dictionary which is copied into |l__pdfannot/widget| in the code.
-%    \begin{macrocode}
-\pdfdict_new:n   {l_@@/checkbox/annot}
-\pdfdict_put:nnn {l_@@/checkbox/annot}{Subtype}{/Widget}
-%    \end{macrocode}
 %
-% \begin{macro}{\@@_checkbox_annot_add:nnnn}
+% \begin{macro}{\@@_annot:}
+% The command doesn't add grouping, so should only be used inside a group.
+%
 %    \begin{macrocode}
-\cs_new_protected:Npn \@@_checkbox_annot_add:nnnn #1 #2 #3 #4 %name, wd, ht, dp,
+\cs_new_protected:Npn \@@_annot:
   {
-    \group_begin:
-%    \end{macrocode}
-% Copy the internal dictionary to the pdfannot dictionary. This
-% perhaps need a function in l3pdfannot,
-% as it actually uses an internal name of another module.
-%    \begin{macrocode}
-    \pdfdict_put:nnx {l_@@/checkbox/annot}{AP}{<<\pdfdict_use:n{l_@@/checkbox/annot/AP}>>}
     \pdfmeta_standard_verify:nF
       {annot_flags}
       {
@@ -535,428 +966,638 @@
         \bitset_set_false:Nn \l_@@_F_bitset {Invisible}
         \bitset_set_false:Nn \l_@@_F_bitset {NoView}
       }
-    \pdfdict_if_empty:nF{l_@@/checkbox/annot/AA}
+    \pdfannot_dict_put:nnx {widget}{F}{ \bitset_to_arabic:N \l_@@_F_bitset }
+    \tl_if_empty:NF \l_@@_currentparent_tl
       {
-        \pdfmeta_standard_verify:nT
-         {annot_widget_no_AA}
-         {
-            \pdfdict_put:nnx
-              {l_@@/checkbox/annot}
-              {AA}
-              {<<\pdfdict_use:n {l_@@/checkbox/annot/AA}>>}
-         }
-      }
-    \pdfdict_put:nnx {l_@@/checkbox/annot}{F}{ \bitset_to_arabic:N \l_@@_F_bitset }
-    \pdfdict_set_eq:nn {l__pdfannot/widget}{l_@@/checkbox/annot}
-    \pdfannot_dict_put:nnx {widget}{Parent}{\pdf_object_ref:n{@@_checkbox/field/#1}}
-    \mode_leave_vertical:
-    \hbox_to_wd:nn
-      { #2  }
-      {
-        \rule [-#4]{0pt}{\dim_eval:n{#3+#4} }
-        \pdfannot_widget_box:nnn
-           { #2 }
-           { #3 }
-           { #4 }
-         \hfill
-      }
-    \seq_gput_right:cx {g_@@_checkbox/field/#1/Kids_seq}{ \pdfannot_box_ref_last:}
-    \group_end:
-  }
-
-%    \end{macrocode}
-% \end{macro}
-% \subsection{Appearances}
-% We don't try to force a size or content here.
-% The default appearances are a cross (\cs{texttimes}),
-% Every appearance should have two versions and follow the naming
-% checkbox/\meta{name}/Yes and checkbox/\meta{name}/Off.
-% TODO check if one delay the creation to a sensible place
-% (and don't forget that the appearance key sets an initial
-% value)
-%  \begin{macro}{\pdffield_store_appearance:nn,\@@_store_default_appearances:}
-%    \begin{macrocode}
-\cs_new_protected:Npn \pdffield_store_appearance:nn #1 #2
-  {
-     \pdfxform_new:nnn {@@_#1}{}{#2}
-  }
-
-\cs_new_protected:Nn \@@_store_default_appearances:
-  {
-     \pdffield_store_appearance:nn {checkbox/default/Yes}
-       {
-         \normalsize
-         \fboxsep 0pt
-         \framebox
-           [ \dim_eval:n { \box_ht:N\strutbox+\box_dp:N\strutbox } ]
-           { \texttimes \strut }
-       }
-     \pdffield_store_appearance:nn {checkbox/default/Off}
-       {
-         \normalsize
-         \fboxsep 0pt
-         \framebox
-           [ \dim_eval:n { \box_ht:N\strutbox+\box_dp:N\strutbox } ]
-           { \phantom{\texttimes} \strut }
-       }
-  }
-
-\@@_store_default_appearances:
-%    \end{macrocode}
-% \end{macro}
-% We define a dictionary for the AP content, so that we can add R and D too
-%    \begin{macrocode}
-\pdfdict_new:n   {l_@@/checkbox/annot/AP}
-%    \end{macrocode}
-%
-% \subsection{Assembling the checkbox}
-% \begin{macro}{\@@_checkbox_add:n}
-%    \begin{macrocode}
-
-\cs_new_protected:Npn \@@_checkbox_add:n #1
-  {
-    \group_begin:
-    \keys_set_filter:nnnN {pdffield / checkbox }{field}{#1}\l_@@_keys_tmpa_tl
-    \str_if_empty:NT \l_@@_field_name_str
-      {
-        \msg_error:nn {pdffield}{empty-name}
-      }
-    \exp_args:Nx
-      \pdf_object_if_exist:nTF {@@_checkbox/field/\l_@@_field_name_str}
-       {
-          \tl_if_empty:NF \l_@@_keys_tmpa_tl
+         \exp_args:Ne
+         \pdf_object_if_exist:nTF { @@/field/\l_@@_currentparent_tl }
            {
-             \msg_warning:nnxx
-               {pdffield}
-               {field-keys-ignored}
-               {\l_@@_field_name_str}
-               {\l_@@_keys_tmpa_tl}
+             \pdfannot_dict_put:nnx {widget}{Parent}
+               {
+                 \exp_args:Ne
+                   \pdf_object_ref:n{@@/field/\l_@@_currentparent_tl}
+               }
+           }
+           {
+               \msg_error:nnx { pdffield }{parent-field-missing}{\l_@@_currentparent_tl}
            }
        }
-       {
-         \keys_set:nV { pdffield/checkbox } \l_@@_keys_tmpa_tl
-         \exp_args:No
-         \@@_checkbox_field_new:n {\l_@@_field_name_str}
-       }
-    \exp_args:No
-      \@@_checkbox_annot_add:nnnn
-        {\l_@@_field_name_str}
-        {\l_@@_annot_wd_tl }
-        {\l_@@_annot_ht_tl }
-        {\l_@@_annot_dp_tl }
+    \mode_leave_vertical:
+    \hbox_to_wd:nn
+      { \l_@@_annot_wd_dim  }
+      {
+        \rule [-\l_@@_annot_dp_dim]{0pt}{\dim_eval:n{\l_@@_annot_ht_dim+\l_@@_annot_dp_dim} }
+        \pdfannot_widget_box:nnn
+           { \l_@@_annot_wd_dim }
+           { \l_@@_annot_ht_dim }
+           { \l_@@_annot_dp_dim }
+         \hfill
+      }
+    \tl_if_empty:NF \l_@@_currentparent_tl
+      {
+        \seq_if_exist:cTF {g_@@_field/Kids/\l_@@_currentparent_tl _seq}
+         {
+           \seq_gput_right:cx
+             {g_@@_field/Kids/\l_@@_currentparent_tl _seq}
+             { \pdfannot_box_ref_last:}
+         }
+         {
+           \msg_error:nnx { pdffield}{parent-field-missing}{\l_@@_currentparent_tl}
+         }
+      }
+  }
+\cs_new_protected:Npn \pdffield_annot:n #1
+  {
+    \group_begin:
+    \keys_set:nn { pdffield } {#1}
+    \@@_annot:
     \group_end:
   }
 %    \end{macrocode}
 % \end{macro}
-% \subsection{Keys}
-% The size of the checkbox
 %
+% \subsection{auxiliary command for color keys}
 %    \begin{macrocode}
-\tl_new:N \l_@@_annot_ht_tl
-\tl_new:N \l_@@_annot_wd_tl
-\tl_new:N \l_@@_annot_dp_tl
+\cs_new_protected:Npn \@@_color_set:nn #1 #2
+ {
+   \tl_if_head_eq_charcode:nNTF {#2}[ %]
+    {
+      \@@_color_set_aux:nwn  { #1 } #2
+    }
+    {
+      \color_set:nn {#1} {#2}
+    }
+ }
 
-\keys_define:nn { pdffield / checkbox }
+\cs_new_protected:Npn \@@_color_set_aux:nwn #1 [#2] #3
   {
-    ,width  .tl_set:N = \l_@@_annot_wd_tl
-    ,height .tl_set:N = \l_@@_annot_ht_tl
-    ,depth  .tl_set:N = \l_@@_annot_dp_tl
-    ,width  .initial:n = \normalbaselineskip
-    ,height .initial:n = \normalbaselineskip
-    ,depth  .initial:n = 0pt
+     \color_set:nnn {#1}{#2}{#3}
   }
+
 %    \end{macrocode}
+% \subsection{Field keys}
 % The names. The main name should not be empty, it is added to the dictionary
 % when the field is created. A new name means a new field.
 % The other names can only be set when the field is created,
 % so we put them in the field group.
 %    \begin{macrocode}
-\keys_define:nn { pdffield / checkbox }
+\cs_new_protected:Npn \@@_value_handler:nN #1#2
   {
-    ,name .code:n =
+    \tl_set:Nn #2 {#1}
+  }
+\keys_define:nn { pdffield  }
+  {
+    ,parent .tl_set:N = \l_@@_currentparent_tl
+    ,parent .groups:n = {field,annot}
+    ,T .code:n =
       {
-        \pdf_string_from_unicode:nnN {utf8/string-raw}{#1}\l_@@_field_name_str
-        \str_if_in:NnT \l_@@_field_name_str {.}
+        \pdf_string_from_unicode:nnN {utf8/string-raw}{#1}\l_@@_tmpa_str
+        \str_if_in:NnT \l_@@_tmpa_str {.}
           {
-            \msg_error:nnx {pdffield}{no-period}{\l_@@_field_name_str}
+            \msg_error:nnx {pdffield}{no-period}{\l_@@_tmpa_str}
           }
-        \str_if_empty:NT\l_@@_field_name_str
+        \str_if_empty:NTF\l_@@_tmpa_str
           {
-            \msg_error:nn {pdffield}{empty-name}
+            \msg_warning:nn {pdffield}{empty-name}
+            \pdfdict_remove:nn { l_@@/field }{T}
+          }
+          {
+            \pdfdict_put:nnx { l_@@/field }{T}{(\l_@@_tmpa_str)}
           }
       }
+    ,T .value_required:n = true
+    ,T .groups:n = {field}
+    ,name .meta:n          = {T={#1}}
     ,name .value_required:n = true
-    ,name .initial:n = checkbox
-    ,altname .code:n =
+    ,name .groups:n = {field}
+    ,TU .groups:n = {field}
+    ,TU .code:n =
       {
-        \pdf_string_from_unicode:nnN {utf8/string}{#1}\l_@@_name_tmpa_str
-        \pdfdict_put:nnx { l_@@/checkbox/field }{TU}{\l_@@_name_tmpa_str}
+        \tl_if_empty:nTF {#1}
+          {
+            \pdfdict_remove:nn { l_@@/field }{TU}
+          }
+          {
+            \pdf_string_from_unicode:nnN {utf8/string}{#1}\l_@@_tmpa_str
+            \pdfdict_put:nnx { l_@@/field }{TU}{\l_@@_tmpa_str}
+          }
       }
+    ,TU .groups:n = {field}
+    ,altname .meta:n      = {TU={#1}}
     ,altname .groups:n = {field}
-    ,mappingname .code:n =
+    ,TM .code:n =
       {
-        \pdf_string_from_unicode:nnN {utf8/string}{#1}\l_@@_name_tmpa_str
-        \pdfdict_put:nnx { l_@@/checkbox/field }{TM}{\l_@@_name_tmpa_str}
+        \tl_if_empty:nTF {#1}
+          {
+            \pdfdict_remove:nn { l_@@/field }{TM}
+          }
+          {
+            \pdf_string_from_unicode:nnN {utf8/string}{#1}\l_@@_tmpa_str
+            \pdfdict_put:nnx { l_@@/field }{TM}{\l_@@_tmpa_str}
+          }
       }
+    ,TM .groups:n = {field}
+    ,mappingname .meta:n   = {TM={#1}}
     ,mappingname .groups:n = {field}
+    ,FT .choices:nn =
+      { Btn, Tx, Ch, Sig }
+      {
+        \pdfdict_put:nnn { l_@@/field }{FT}{ /#1 }
+      }
+    ,FT .groups:n = {field}
+    ,V .code:n =
+     {
+       \tl_if_empty:nTF {#1}
+         {
+           \pdfdict_remove:nn { l_@@/field }{V}
+         }
+         {
+           \@@_value_handler:nN{#1}\l_@@_tmpa_str
+           \pdfdict_put:nnx { l_@@/field }{V}{ \l_@@_tmpa_str }
+         }
+     }
+    ,V .groups:n = {field}
+    ,DV .code:n =
+     {
+       \tl_if_empty:nTF {#1}
+         {
+           \pdfdict_remove:nn { l_@@/field }{DV}
+         }
+         {
+           \@@_value_handler:nN{#1}\l_@@_tmpa_str
+           \pdfdict_put:nnx { l_@@/field }{DV}{ \l_@@_tmpa_str }
+         }
+     }
+    ,DV .groups:n = {field}
+    ,MaxLen .code:n =
+     {
+       \tl_if_empty:nTF {#1}
+         {
+           \pdfdict_remove:nn { l_@@/field }{MaxLen}
+         }
+         {
+           \pdfdict_put:nnx { l_@@/field }{MaxLen}{ #1 }
+         }
+      }
+    ,MaxLen .groups:n = {field}
+    ,Lock .code:n =
+      {
+        \tl_if_empty:nTF {#1}
+          {
+            \pdfdict_remove:nn { l_@@/field }{Lock}
+          }
+          {
+            \pdfdict_put:nnx { l_@@/field }{Lock}{ \pdf_object_ref:n{#1} }
+          }
+      }
+    ,Lock .groups:n = {field}
+    ,SV .code:n =
+      {
+        \tl_if_empty:nTF {#1}
+          {
+            \pdfdict_remove:nn { l_@@/field }{SV}
+          }
+          {
+            \pdfdict_put:nnx { l_@@/field }{SV}{ \pdf_object_ref:n{#1} }
+          }
+      }
+    ,SV .groups:n = {field}
+    ,Opt .code:n =
+      {
+        \tl_if_empty:nTF {#1}
+          {
+            \pdfdict_remove:nn { l_@@/field }{Opt}
+          }
+          {
+            \pdfdict_put:nnx { l_@@/field }{Opt}{ \pdf_object_ref:n{#1} }
+          }
+      }
+    ,Opt .groups:n = {field}
+    ,TI .code:n =
+      {
+        \tl_if_empty:nTF {#1}
+          {
+            \pdfdict_remove:nn { l_@@/field }{TI}
+          }
+          {
+            \pdfdict_put:nnx { l_@@/field }{TI}{ #1 }
+          }
+       }
+    ,TI .groups:n = {field}
+    ,I .code:n =
+      {
+        \tl_if_empty:nTF {#1}
+          {
+            \pdfdict_remove:nn { l_@@/field }{I}
+          }
+          {
+            \pdfdict_put:nnx { l_@@/field }{I}{ \pdf_object_ref:n{#1} }
+          }
+      }
+    ,I .groups:n = {field}
   }
 %    \end{macrocode}
 
-% A key to decide if the Box is initially checked or not
+% Flags. We don't add lots of individual keys but map the key names directly
 %    \begin{macrocode}
-\keys_define:nn { pdffield / checkbox }
- {
-   ,checked .choice:
-   ,checked / false .code:n =
-     {
-       \pdfdict_put:nnn {l_@@/checkbox/field}{V}{/Off}
-       \pdfdict_put:nnn {l_@@/checkbox/annot}{AS}{/Off}
-       \pdfdict_put:nnn {l_@@/checkbox/field}{DV}{/Off}
-     }
-   ,checked / true .code:n =
-     {
-       \pdfdict_put:nnn {l_@@/checkbox/field}{V}{/Yes}
-       \pdfdict_put:nnn {l_@@/checkbox/annot}{AS}{/Yes}
-       \pdfdict_put:nnn {l_@@/checkbox/field}{DV}{/Yes}
-     }
-   ,checked .default:n = {true}
-   ,checked .initial:n = {false}
- }
-%    \end{macrocode}
-% Flags. We don't add lots of individual keys but mapped the key names directly
-%    \begin{macrocode}
-\keys_define:nn { pdffield / checkbox }
+\keys_define:nn { pdffield }
   {
-    ,setfieldflags .code:n =
+    ,setFf .code:n =
       {
           \clist_map_inline:nn {#1}
            {
              \bitset_set_true:Nn \l_@@_Ff_bitset {##1}
            }
       }
+    ,setFf .groups:n = {field}
+    ,setfieldflags .meta:n =
+      {setFf={#1}}
     ,setfieldflags .groups:n = {field}
-    ,unsetfieldflags .code:n =
+    ,unsetFf .multichoice:
+    ,unsetFf / all .code:n = { \bitset_clear:N \l_@@_Ff_bitset}
+    ,unsetFf / unknown .code:n =
       {
-          \clist_map_inline:nn {#1}
-           {
-             \bitset_set_false:Nn \l_@@_Ff_bitset {##1}
-           }
+        \bitset_set_false:Nn \l_@@_Ff_bitset {#1}
       }
+    ,unsetFf .groups:n = {field}
+    ,unsetfieldflags .meta:n = {unsetFf={#1}}
     ,unsetfieldflags .groups:n = {field}
-    ,setannotflags .code:n =
+  }
+
+%    \end{macrocode}
+%
+%  Keys for the AA dictionary. They all trigger a javascript option.
+%  K=keystroke, F=format, V=validate, C=calculate
+%    \begin{macrocode}
+\cs_set_protected:Npn \@@_tmpa:n #1  %
+  {
+    \keys_define:nn { pdffield  }
+      {
+         AA/#1 .code:n =
+           {
+             \pdf_string_from_unicode:nnN {utf8/string-raw}{##1}\l_@@_tmpa_str
+             \str_if_empty:NTF \l_@@_tmpa_str
+               {
+                 \pdfdict_remove:nn {l_@@/field/AA}{#1}
+               }
+               {
+                 \pdfdict_put:nnx {l_@@/field/AA}
+                  {#1}
+                  {<</S/JavaScript/JS(\l_@@_tmpa_str)>>}
+               }
+           },
+        AA/#1 .groups:n  = {field}
+      }
+  }
+
+\clist_map_inline:nn {K,F,V,C}{\@@_tmpa:n{#1}}
+
+\cs_set_protected:Npn \@@_tmpa:nn #1 #2
+  {
+    \keys_define:nn { pdffield  }
+      {
+         #1 .meta:nn =
+           { pdffield }{AA/#2={##1}},
+        #1 .groups:n  = {field}
+      }
+  }
+\@@_tmpa:nn {keystroke}{K}
+\@@_tmpa:nn {format}   {F}
+\@@_tmpa:nn {validate} {V}
+\@@_tmpa:nn {calculate}{C}
+
+
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\keys_define:nn { pdffield }
+  {
+    DA .code:n =
+     {
+       \tl_if_empty:nTF {#1}
+         {
+           \pdfdict_remove:nn { l_@@/field }{DA}
+         }
+         {
+           \pdfdict_put:nnx { l_@@/field }{DA}{ (#1) }
+         }
+      }
+    ,DA .groups:n = {field}
+    ,Q .choices:nn = {left,center,right}
+     {
+       \pdfdict_put:nnx { l_@@/field }{Q}{ \int_eval:n{\l_keys_choice_int-1} }
+     }
+    ,Q / .code:n = { \pdfdict_remove:nn { l_@@/field }{Q} }
+    ,Q .groups:n = {field}
+    ,align .meta:n={Q=#1}
+    ,DS .code:n =
+     {
+       \msg_warning:nnn {pdffield}{not-implemented}{DS}
+     }
+    ,DS .groups:n = {field}
+    ,RV .code:n =
+     {
+       \msg_warning:nnn {pdffield}{not-implemented}{RV}
+     }
+    ,RV .groups:n = {field}
+  }
+%    \end{macrocode}
+%
+% \subsection{Annotation keys}
+% The size of the field annotation
+%
+%    \begin{macrocode}
+\dim_new:N \l_@@_annot_ht_dim
+\dim_new:N \l_@@_annot_wd_dim
+\dim_new:N \l_@@_annot_dp_dim
+
+\keys_define:nn { pdffield }
+  {
+    ,width  .dim_set:N = \l_@@_annot_wd_dim
+    ,height .dim_set:N = \l_@@_annot_ht_dim
+    ,depth  .dim_set:N = \l_@@_annot_dp_dim
+    ,width  .initial:n = 0pt
+    ,height .initial:n = 0pt
+    ,depth  .initial:n = 0pt
+  }
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\keys_define:nn { pdffield }
+ {
+   %parent is defined in field
+  ,AS .code:n =
+    {
+      \tl_if_empty:nTF {#1}
+        {
+          \pdfannot_dict_remove:nn { widget }{AS}
+        }
+        {
+          \pdfannot_dict_put:nnx {widget}{AS}{\pdf_name_from_unicode_e:n{#1}}
+        }
+    }
+  ,AS .groups:n = annot
+ }
+\cs_new_protected:Npn \@@_appearance_handler:nnn #1#2#3
+ {
+   \pdfxform_if_exist:nTF {  #1 }
+     {
+       \pdfannot_dict_put:nnx {widget/AP}{#2}
+         {
+           \pdfxform_ref:n {#1}
+         }
+     }
+     {
+       \msg_error:nnnn{pdffield}{appearance-missing}{#1}{#3}
+     }
+ }
+\keys_define:nn { pdffield }
+  {
+    AP/N .code:n =
+      {
+        \tl_if_empty:nTF {#1}
+          {
+            \pdfannot_dict_remove:nn { widget/AP }{N}
+          }
+          {
+            \@@_appearance_handler:nnn {#1}{N}{normal}
+          }
+        }
+   ,AP/N .groups:n = annot
+   ,appearance .meta:n = {AP/N={#1}}
+  }
+\keys_define:nn { pdffield }
+  {
+    AP/R .code:n =
+      {
+        \tl_if_empty:nTF {#1}
+          {
+            \pdfannot_dict_remove:nn { widget/AP }{R}
+          }
+          {
+             \@@_appearance_handler:nnn {#1}{R}{rollover}
+          }
+        }
+   ,AP/R .groups:n = annot
+   ,rollover-appearance .meta:n = {AP/R={#1}}
+  }
+\keys_define:nn { pdffield }
+  {
+    AP/D .code:n =
+      {
+        \tl_if_empty:nTF {#1}
+          {
+            \pdfannot_dict_remove:nn { widget/AP }{D}
+          }
+          {
+             \@@_appearance_handler:nnn {#1}{D}{rollover}
+          }
+        }
+   ,AP/D .groups:n = annot
+   ,down-appearance .meta:n = {AP/D={#1}}
+  }
+
+\keys_define:nn { pdffield  }
+  {
+    MK/R .choices:nn = {0,90,180,270}
+     {
+       \pdfannot_dict_put:nnx {widget/MK}{R}{#1}
+     }
+   ,MK/R / .code:n =
+     {
+        \pdfannot_dict_remove:nn { widget/MK }{R}
+     }
+   ,MK/R .groups:n = annot
+   ,rotate .meta:n = {MK/R=#1}
+  }
+
+\keys_define:nn { pdffield  }
+  {
+    MK/BC .code:n =
+     {
+       \tl_if_empty:nTF {#1}
+        {
+          \pdfannot_dict_remove:nn { widget/MK }{BC}
+        }
+        {
+          \@@_color_set:nn {@@/tmp}{#1}
+          \color_export:nnN{@@/tmp}{space-sep-rgb}\l_@@_tmpa_tl
+          \pdfannot_dict_put:nnx {widget/MK}{BC}{[\l_@@_tmpa_tl]}
+        }
+     }
+    ,MK/BC .groups:n = annot
+   ,bordercolor .meta:n = {MK/BC=#1}
+  }
+
+\keys_define:nn { pdffield  }
+  {
+    MK/BG .code:n =
+     {
+       \tl_if_empty:nTF {#1}
+        {
+          \pdfannot_dict_remove:nn { widget/MK }{BG}
+        }
+        {
+          \@@_color_set:nn {@@/tmp}{#1}
+          \color_export:nnN{@@/tmp}{space-sep-rgb}\l_@@_tmpa_tl
+          \pdfannot_dict_put:nnx {widget/MK}{BG}{[\l_@@_tmpa_tl]}
+        }
+     }
+    ,MK/BG .groups:n = annot
+   ,bordercolor .meta:n = {MK/BG=#1}
+  }
+
+\cs_set_protected:Npn \@@_tmpa:n #1
+ {
+   \keys_define:nn { pdffield  }
+     {
+       MK/#1 .code:n =
+        {
+          \tl_if_empty:nTF {##1}
+            {
+              \pdfannot_dict_remove:nn { widget/AP }{#1}
+            }
+            {
+              \pdfannot_dict_put:nnx {widget/MK}{#1}{##1}
+            }
+        }
+      ,MK/#1 .groups:n = annot
+     }
+ }
+
+\clist_map_inline:nn {CA,RC,AC,I,RI,IX,IF,TP}
+  { \@@_tmpa:n {#1} }
+%    \end{macrocode}
+% Flags.
+%    \begin{macrocode}
+\keys_define:nn { pdffield  }
+  {
+    ,setF .code:n =
       {
           \clist_map_inline:nn {#1}
            {
              \bitset_set_true:Nn \l_@@_F_bitset {##1}
            }
       }
-    ,unsetannotflags .code:n =
+    ,setF .groups:n = annot
+    ,setannotflags .meta:nn =
+      { pdffield }{setF={#1}}
+    ,setannotflags .groups:n = annot
+    ,unsetF .multichoice:
+    ,unsetF / all .code:n = { \bitset_clear:N \l_@@_F_bitset}
+    ,unsetF / unknown .code:n =
       {
-          \clist_map_inline:nn {#1}
-           {
-             \bitset_set_false:Nn \l_@@_F_bitset {##1}
-           }
+        \bitset_set_false:Nn \l_@@_F_bitset {#1}
       }
+    ,unsetF .groups:n = annot
+    ,unsetannotflags .meta:nn =
+      { pdffield }{unsetF= {#1} }
+    ,unsetannotflags .groups:n = annot
   }
 
-\keys_define:nn { pdffield / checkbox }
-  {
-    appearance .code:n = %value is a name of an appearance
-      {
-        \pdfxform_if_exist:nTF {  @@_#1/Yes }
-          {
-            \pdfdict_put:nnn {l_@@/checkbox/annot/AP}
-              {N}
-              {
-                 <<
-                    /Yes ~ \pdfxform_ref:n { @@_#1/Yes}
-                    /Off ~ \pdfxform_ref:n { @@_#1/Off}
-                 >>
-              }
-          }
-          {
-            \msg_error:nnnn{pdffield}{appearance-missing}{#1}{normal}
-          }
-      },
-    appearance .initial:n = checkbox/default,
-  }
-
-\keys_define:nn { pdffield / checkbox }
-  {
-    rollover-appearance .code:n = %value is a name of an appearance
-      {
-       \tl_if_empty:nTF {#1}
-         {
-           \pdfdict_remove:nn {l_@@/checkbox/annot/AP} {R}
-         }
-         {
-           \pdfxform_if_exist:nTF {  @@_#1/Yes }
-             {
-               \pdfdict_put:nnn {l_@@/checkbox/annot/AP}
-                 {R}
-                 {
-                    <<
-                       /Yes ~ \pdfxform_ref:n { @@_#1/Yes}
-                       /Off ~ \pdfxform_ref:n { @@_#1/Off}
-                    >>
-                 }
-              }
-              {
-                \msg_warning:nnnn{pdffield}{appearance-missing}{#1}{rollover}
-              }
-
-         }
-      },
-  }
-
-\keys_define:nn { pdffield / checkbox }
-  {
-    down-appearance .code:n = %value is a name of an appearance
-      {
-       \tl_if_empty:nTF {#1}
-         {
-           \pdfdict_remove:nn {l_@@/checkbox/annot/AP} {D}
-         }
-         {
-           \pdfxform_if_exist:nTF {  @@_#1/Yes }
-            {
-              \pdfdict_put:nnn {l_@@/checkbox/annot/AP}
-                {D}
-                {
-                   <<
-                      /Yes ~ \pdfxform_ref:n { @@_#1/Yes}
-                      /Off ~ \pdfxform_ref:n { @@_#1/Off}
-                   >>
-                }
-            }
-            {
-              \msg_warning:nnnn{pdffield}{appearance-missing}{#1}{down}
-            }
-         }
-      },
-  }
 %    \end{macrocode}
 %
-%  Keys for the AA dictionary. They all trigger javascript option.
-%  \begin{macro}{\@@_define_AAaction_key:nnn}
+% Keys for the AA dictionary. They all trigger a javascript option.
+% Fo = onfocus, Bl = onblur, D = onmousedown, U = onmouseup,
+% E = onenter, X = onexit, PO = pageopen, PC = pageclose,
+% PV = pagevisible, PI = pageinvisible
 %    \begin{macrocode}
-\pdfdict_new:n {l_@@/checkbox/annot/AA}
-\pdfdict_new:n {l_@@/checkbox/field/AA}
-
-\cs_new_protected:Npn \@@_define_AAaction_key:nnn #1 #2 #3 %#1 key, #2 pdf, #3 dict
+\cs_set_protected:Npn \@@_tmpa:n #1  %
   {
-    \keys_define:nn { pdffield / checkbox }
+    \keys_define:nn { pdffield }
       {
-         #1 .code:n =
+         AA/#1 .code:n =
            {
-             \pdf_string_from_unicode:nnN {utf8/string}{##1}\l_@@_tmpa_str
+             \pdf_string_from_unicode:nnN {utf8/string-raw}{##1}\l_@@_tmpa_str
              \str_if_empty:NTF \l_@@_tmpa_str
                {
-                 \pdfdict_remove:nn {l_@@/checkbox/#3/AA}{#2}
+                 \pdfannot_dict_remove:nn {widget/AA}{#1}
                }
                {
-                 \pdfdict_put:nnx {l_@@/checkbox/#3/AA}
-                  {#2}
-                  {<</S/JavaScript/JS\l_@@_tmpa_str>>}
+                 \pdfannot_dict_put:nnx {widget/AA}
+                  {#1}
+                  {<</S/JavaScript/JS(\l_@@_tmpa_str)>>}
                }
            },
-        #1 .groups:n = {#3}
+         ,AA/#1 .groups:n = annot
       }
   }
-\@@_define_AAaction_key:nnn {keystroke}{K}{field}
-\@@_define_AAaction_key:nnn {format}   {F}{field}
-\@@_define_AAaction_key:nnn {validate} {V}{field}
-\@@_define_AAaction_key:nnn {calculate}{C}{field}
-\@@_define_AAaction_key:nnn {onfocus}  {Fo}{annot}
-\@@_define_AAaction_key:nnn {onblur}   {Bl}{annot}
-\@@_define_AAaction_key:nnn {onmousedown}{D}{annot}
-\@@_define_AAaction_key:nnn {onmouseup}{U}{annot}
-\@@_define_AAaction_key:nnn {onenter}  {E}{annot}
-\@@_define_AAaction_key:nnn {onexit}   {X}{annot}
+
+\clist_map_inline:nn {Fo,Bl,D,U,E,X,PO,PC,PV,PI}{\@@_tmpa:n{#1}}
+
+\cs_set_protected:Npn \@@_tmpa:nn #1 #2
+  {
+    \keys_define:nn { pdffield }
+      {
+         #1 .meta:nn =
+           { pdffield }{AA/#2={##1}},
+         #1 .groups:n = {annot}
+      }
+  }
+\@@_tmpa:nn {onfocus}  {Fo}
+\@@_tmpa:nn {onblur}   {Bl}
+\@@_tmpa:nn {onmousedown}{D}
+\@@_tmpa:nn {onmouseup}{U}
+\@@_tmpa:nn {onenter}  {E}
+\@@_tmpa:nn {onexit}   {X}
+%    \end{macrocode}
+% \subsection{Appearances}
+% \begin{macro}{\pdffield_appearance:nn}
+%    \begin{macrocode}
+\cs_new_protected:Npn \pdffield_appearance:nn #1 #2
+  {
+     \pdfxform_new:nnn {#1}{}{#2}
+  }
+
+\cs_set_eq:NN \pdffield_store_appearance:nn\pdffield_appearance:nn
 %    \end{macrocode}
 % \end{macro}
-% \subsection{user commands}
-% \begin{macro}{\pdffield_checkbox:n,\pdffield_setup:nn}
+% \subsection{Setup command}
+%
 %    \begin{macrocode}
-\cs_set_eq:NN \pdffield_checkbox:n \@@_checkbox_add:n
+\keys_define:nn { pdffield / setup }
+  {
+    ,create-style .code:n  = { \@@_style_create:nn #1 }
+    ,preset-checkbox .code:n =
+      {
+        \keys_define:nn { pdffield }
+         {
+           @@/preset/checkbox .meta:n = {#1},
+         }
+      }
+   ,preset-textfield .code:n =
+      {
+        \keys_define:nn { pdffield }
+         {
+           @@/preset/textfield .meta:n = {#1},
+         }
+      }
+  }
+\keys_set:nn{ pdffield / setup }{preset-checkbox={}}
+\keys_set:nn{ pdffield / setup }{preset-textfield={}}
 
-\cs_new_protected:Npn \pdffield_setup:nn #1 #2
- {
-   \keys_set:nn {pdffield / #1 } {#2}
- }
+\cs_new_protected:Npn \@@_style_create:nn #1#2
+  {
+    \keys_define:nn { pdffield }
+      {
+        @@/style/#1 .meta:n = {#2},
+      }
+  }
+
+
+\cs_new_protected:Npn \pdffield_setup:n #1
+  {
+     \keys_set:nn{ pdffield / setup }{#1}
+  }
+
+\keys_define:nn { pdffield }
+  {
+    style .code:n = {\keys_set:nn {pdffield}{@@/style/#1={#1}}}
+  }
+%    \end{macrocode}
+%    \begin{macrocode}
 %</package>
 %    \end{macrocode}
-% \end{macro}
 %\end{implementation}
-
-\endinput%
-%%%%
 %
-%Field dict
-%Ft     : /Btn /Tx /Ch /Sig
-%Parent : OR
-%Kids: array, other fields or annot/widget
-%T: partial fieldname (test string)
-%TU: alternate description (test string)
-%TM: mapping name
-%Q integer (variable text field)
-%Ff: flags ->pdffield/checkbox/field
-%V: value            % not pushbutton
-%DV: default value   % not pushbutton
-%AA: Action dict ... -> see below
-%Opt: array of strings, connected to kids
-%     or for choices, choices
-%TI integer (lists)
-%I array Ch (complicated ...)
-%
-%/DA ( 0 0 1 rg /Ti 12 Tf ) %text field
-%/MaxLen                    %text field
-%
-%Lock dict (Sig)
-%SV dict (Sig)
-%
-%
-%
-%
-%Connected widget:
-%/AS default appearance from AP ( here/Yes or /Off)
-%% Appearance
-%%checkbox
-%/AP <</N <</Yes 2 0 R /Off 3 0 R>>>>
-%/C / Border /BS
-%
-%/OC ?
-%/Structparens?
-%/F flags
-%
-%
-%AA: Submit:
-%  /S   /SubmitForm
-%  /F   file /URI (/F ( ftp : / / www . beatles . com / Movies / AbbeyRoad . mov )
-%  /Fields array
-%
-%  /S /ImportData
-%  /F file
-%
-%  /S /ResetData
-%  /Fields array
-%
-%  /S /JavaScript
-%  /JS text string or stream
-%  %\pdf_flag_new:nn {annot/field/submit} %name is wrong ...
-%  {
-%    Include/Exclude       = 0,
-%    IncludeNoValueFields  = 1,
-%    ExportFormat          = 2,
-%    GetMethod             = 3, % if ExportFormat=0 -> =0 to
-%    SubmitCoordinates     = 4, % if ExportFormat=0 -> =0 to
-%    XFDF                  = 5,
-%    IncludeAppendSaves    = 6,
-%    IncludeAnnotations    = 7,
-%    SubmitPDF             = 8,
-%    CanonicalFormat       = 9,
-%    ExclNonUserAnnots     = 10,
-%    ExclFKey              = 11,
-%    EmbedForm             = 12
-%  }
-% source: %adapted from https://chat.stackexchange.com/transcript/message/54421537#54421537
+% \PrintIndex
