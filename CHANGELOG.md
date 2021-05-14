@@ -5,7 +5,7 @@ first release 0.95a, 2021-02-23 will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 this project uses date-based 'snapshot' version identifiers.
 
-## [Unreleased]
+## [2021-05-14
 ### Fixed 
  - xcolor patch for [ps] type used in pstricks
  - value of citecolor wasn't expanded (errored with tcolorbox)
@@ -19,7 +19,7 @@ this project uses date-based 'snapshot' version identifiers.
  
 ### Added
  - generic command hooks have been added to \url, \href, \hrefurl,
-   \hrefrun and \hrefpdf
+   \hrefrun and \hrefpdf. Their use require a latex 2021-06-01.
  - dictionaries widget/AA, widget/AP, widget/MK and widget/BS in l3pdfannot. 
  - a module for textfields 
       
