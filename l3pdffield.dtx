@@ -676,6 +676,8 @@
 % The following keys add values to the  \emph{dynamic appearance dictionary}
 % |MK| directory. This is only relevant for
 % annotations with dynamic content, like e.g. textfields.
+% The settings can also affect checkboxes and radio buttons if the (deprecated)
+% |NeedAppearances| is set to true.
 %
 % The |MK| dictionary can also be added by using |\pdfannot_dict_put:nnn{Widget}{MK}{...}|
 % but the two methods should not be mixed.
@@ -708,6 +710,20 @@
 % \meta{color expression} must be known to the \pkg{l3color} commands.
 % \end{function}
 %
+% \begin{function}{MK/CA,caption}
+%  \begin{syntax}
+%  |MK/CA| = \meta{string}\\
+%  |caption| = \meta{string}
+%  \end{syntax}
+% This sets a text for the caption. \meta{string} is passed through \cs{pdf_string_from_unicode:nnN}
+% and parentheses are added automatically. The font used seems to depend on
+% the whims of the PDF reader: At least for checkboxes adobe reader quite insists to
+% always use a symbol font and not a text font. It also shows always
+% only one symbol, regardless how much one put in the string.
+% hyperref uses the key names |checkboxsymbol| and
+% |radiosymbol| for this setting.
+% \end{function}
+%
 % The remaining key are useful for buttons only, currently no special syntax support
 % is implemented. They will be handled when the code for push buttons is developed and
 % tested.
@@ -716,7 +732,7 @@
 %  |MK/*| = \meta{various}
 %  \end{syntax}
 % These keys adds the various entries in the \emph{dynamic appearance dictionary}.
-% * should be one of  |CA|, |RC|, |AC|, |I|, |RI|, |IX|, |IF|, |TP|.
+% * should be one of  |RC|, |AC|, |I|, |RI|, |IX|, |IF|, |TP|.
 % The |MK| dictionary can also be added by using |\pdfannot_dict_put:nnn{Widget}{MK}{...}|
 % but the two methods should not be mixed.
 % \end{function}
@@ -1447,6 +1463,24 @@
    ,bordercolor .meta:n = {MK/BG=#1}
   }
 
+
+\keys_define:nn { pdffield  }
+  {
+    MK/CA .code:n =
+     {
+       \tl_if_empty:nTF {#1}
+        {
+          \pdfannot_dict_remove:nn { widget/MK }{CA}
+        }
+        {
+          \pdf_string_from_unicode:nnN {utf8/string}{#1}\l_@@_tmpa_str
+          \pdfannot_dict_put:nnx {widget/MK}{CA}{\l_@@_tmpa_str}
+        }
+     }
+    ,MK/CA .groups:n = annot
+   ,caption .meta:n = {MK/CA=#1}
+  }
+
 \cs_set_protected:Npn \@@_tmpa:n #1
  {
    \keys_define:nn { pdffield  }
@@ -1465,7 +1499,7 @@
      }
  }
 
-\clist_map_inline:nn {CA,RC,AC,I,RI,IX,IF,TP}
+\clist_map_inline:nn {RC,AC,I,RI,IX,IF,TP}
   { \@@_tmpa:n {#1} }
 %    \end{macrocode}
 % Flags.
