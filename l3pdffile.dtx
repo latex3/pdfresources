@@ -31,7 +31,7 @@
 \documentclass[full]{l3doc}
 \usepackage{array,booktabs,hyperxmp}
 \hypersetup{pdfauthor=The LaTeX Project,pdftitle=l3pdffile (LaTeX PDF management testphase bundle)}
-
+\usepackage{caption}
 \providecommand\potentialclash{\noindent\llap{\dbend\ }}
 \begin{document}
   \DocInput{\jobname.dtx}
@@ -245,13 +245,14 @@
 % \end{function}
 % \begin{table}
 % \caption{Preset values in the file dictionaries\label{tab:filedict}}
-% \begin{tabular}{lll}
+% \hspace*{-3cm}\begin{tabular}{lll}
 % dictionary & key      & value \\\hline
 % l\_pdffile       & Type     & /EmbeddedFile\\
 % l\_pdffile/Params& Size     & |\file_size:n{\l_pdffile_source_name_str}|\\
 % l\_pdffile/Params& ModDate  & |(\file_timestamp:n {\l_pdffile_source_name_str})|\\
 % l\_pdffile/Params& CheckSum & |(\file_mdfive_hash:n{\l_pdffile_source_name_str})|\\
-% l\_pdffile/streamParams&    &  a /ModDate entry with year/month/date  (used with \cs{pdffile_embed_stream:nnn})\\
+% l\_pdffile/streamParams&    &  a /ModDate entry with year/month/date \\
+%                        &    & (used with \cs{pdffile_embed_stream:nnn})\\
 % l\_pdffile/Filespec & Type  & /Filespec\\
 % l\_pdffile/Filespec & AFRelationship &Unspecified
 % \end{tabular}
@@ -322,6 +323,28 @@
 %   viewer can restrict access to known file types.
 %
 %   The stream should not be too long, at least PS imposes a size limit for strings.
+% \end{function}
+%
+% \begin{function}{\pdffile_filespec:nnn,\pdffile_filespec:nnx}
+%   \begin{syntax}
+%     \cs{ pdffile_filespec:nnn }\Arg{object name}\Arg{file name}{stream object reference}
+%   \end{syntax}
+%  The previous commands are fine if stream and filespec dictionary can be created together.
+%  But there are cases where the |filespec| dictionary should be referenced when the
+%  stream object doesn't exist yet. For example in the |AF| key of a structure at
+%  the begin of an environment where the stream is created from the body.
+%
+%  This command allows to write a filespec dictionary alone and reference a previously
+%  created stream.
+%
+%  \begin{verbatim}
+%  \pdf_object_new:nn{module/filespec/A}{dict} % a new filespec object
+%  \pdf_object_ref:n {module/filespec/A}       % a reference
+%  \pdf_object_unnamed_write:nn { stream }{ {...}{content} } %writing the stream
+%  % filling and writing the filespec dictionary:
+%  \pdffile_filespec:nnn {module/filespec/A}{A.xml}{\pdf_object_ref_last:}
+%  \end{verbatim}
+%
 % \end{function}
 %
 %  \begin{variable}{\g_pdffile_mimetypes_prop}
@@ -636,7 +659,8 @@
       }
   }
 
-
+\cs_set_eq:NN \pdffile_filespec:nnn \@@_filespec_write:nnn
+\cs_generate_variant:Nn \pdffile_filespec:nnn {nnx}
 %#1 {source filename}
 %#2 {target filename}
 %#3 { filespec object name } (will internally get a prefix! ??)
