@@ -4219,6 +4219,7 @@
             \seq_sort:Nn \l_@@_tmpa_seq
               {
                 \int_compare:nNnTF { \pdf@strcmp{##1}{##2} } > { 0 }
+                %\str_compare:nNnTF {##1} > {##2}
                   { \sort_return_swapped: }
                   { \sort_return_same: }
               }
