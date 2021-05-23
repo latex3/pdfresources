@@ -1,0 +1,611 @@
+% \iffalse meta-comment
+%
+%% File: l3pdfpdffield-radiobutton.dtx
+%
+% Copyright (C) 2021 The LaTeX Project
+%
+% It may be distributed and/or modified under the conditions of the
+% LaTeX Project Public License (LPPL), either version 1.3c of this
+% license or (at your option) any later version.  The latest version
+% of this license is in the file
+%
+%    http://www.latex-project.org/lppl.txt
+%
+% This file is part of the "LaTeX PDF management testphase bundle" (The Work in LPPL)
+% and all files in that bundle must be distributed together.
+%
+% -----------------------------------------------------------------------
+%
+% The development version of the bundle can be found at
+%
+%    https://github.com/latex3/pdfresources
+%
+% for those people who are interested.
+%
+%<*driver>
+\RequirePackage{pdfmanagement-testphase}
+\DeclareDocumentMetadata{}
+\makeatletter
+\declare@file@substitution{doc.sty}{doc-v3beta.sty}
+\makeatother
+\documentclass[full]{l3doc}
+\usepackage{array,booktabs}
+\usepackage{l3pdffield-testphase,bearwear}
+\hypersetup{pdfauthor=The LaTeX Project,
+ pdftitle=l3pdffield (LaTeX PDF management testphase bundle)}
+\begin{document}
+  \DocInput{\jobname.dtx}
+\end{document}
+%</driver>
+% \fi
+% \providecommand\hook[1]{\texttt{#1}}
+% \ExplSyntaxOn
+% \pdffield_appearance:nn {pdffield/bear/Yes}
+%  {
+%    \tikz\bear\bearwear[shirt=red,body~deco={\node[font=\tiny\bfseries,white]~at~(beartummy){Yes};}];
+%  }
+% \pdffield_appearance:nn {pdffield/bear/Off}
+%  {
+%   \tikz\bear\bearwear[body~deco={\node[font=\tiny\bfseries,white]~at~(beartummy){Off};}];
+%  }
+% \ExplSyntaxOff
+% \title{^^A
+%   The \pkg{l3pdffield-radiobutton} module\\ Commands to create radio form fields   ^^A
+%   \\ \LaTeX{} PDF management testphase bundle
+% }
+%
+% \author{^^A
+%  The \LaTeX{} Project\thanks
+%    {^^A
+%      E-mail:
+%        \href{mailto:latex-team@latex-project.org}
+%          {latex-team@latex-project.org}^^A
+%    }^^A
+% }
+%
+% \date{Version 0.95c, released 2021-03-17}
+%
+% \maketitle
+% \begin{documentation}
+% \section{\pkg{l3pdffield-radiobutton} Introduction}
+% This is the documentation for radio buttons fields, for general information about form fields
+% check the documentation l3pdffield.
+%
+%
+%
+% Please keep in mind
+% \begin{itemize}
+% \item Not every PDF viewer supports radio buttons.
+% \item The handling can depend on settings in the PDF viewer. In adobe reader for
+% example I had to disable an option to avoid that it tries to create an appearance
+% itself
+% \item Standards like pdf/A disable features of form fields too
+% (as you typically can't change the PDF).
+% \end{itemize}
+% \section{Radio buttons}
+% Click me:
+% \ExplSyntaxOn
+%  ^^A \pdffield_radio:n{name=bear,appearance=pdffield/bear,width=23pt,height=30pt,depth=10pt}
+% \ExplSyntaxOff
+%
+% Radio buttons are similar to checkboxes and
+% they have like checkboxes two \enquote{states}:
+% checked and unchecked.
+%
+% The difference is that checkboxes are either \enquote{clones} which
+% are checked and unchecked together,
+% or are independent of each other. Radio buttons on the other side build groups
+% where checking one of the buttons uncheck all other buttons.
+% The elements of a such a radio button group are annotations of one field which
+% has a flag set which make it into a radio button group.
+%
+% In a checkbox field the two states have the
+% fix names |/Yes| and |/Off|.
+%
+%  \begin{tikzpicture}[level 2/.style={level distance=7mm},
+%  level 1/.style={sibling distance=25mm},
+%  level 2/.style={sibling distance=15mm}]
+%   \node[draw] {checkbox field}
+%           child {node[draw,dashed,align=left,font=\ttfamily]
+%             {\textrm{annotation}\\ /Yes\\
+%               /Off
+%             }}
+%           child {node[draw,dashed,align=left,font=\ttfamily]
+%             {\textrm{annotation}\\ /Yes\\
+%               /Off
+%             }}
+%   ;
+%   \end{tikzpicture}
+%
+% In radio buttons
+% the off state should still always have the name |/Off|\footnote{%
+% the PDF reference doesn't say anything about this, but various tests showed that
+% one better should stick to this name, with other names the buttons disappeared.}
+% but the on state should be the value. The field dictionary should then set
+% in the |/V| key the start value (this doesn't necessarly mean that the button
+% is also selected from the begin on, this can be set independantly).
+%
+%    \begin{tikzpicture}[level 2/.style={level distance=7mm},
+%  level 1/.style={sibling distance=25mm},
+%  level 2/.style={sibling distance=15mm}]
+%   \node[draw,align=left,font=\ttfamily] {\textrm{radio button field}\\/V /value1 }
+%           child {node[draw,dashed,align=left,font=\ttfamily]
+%             {\textrm{annotation}\\ /value0 \\
+%               /Off
+%             }}
+%           child {node[draw,dashed,align=left,font=\ttfamily]
+%             {\textrm{annotation}\\ /value1 \\
+%               /Off
+%             }}
+%           child {node[draw,dashed,align=left,font=\ttfamily]
+%             {\textrm{annotation}\\ /value2 \\
+%               /Off
+%             }}
+%   ;
+%   \end{tikzpicture}
+%
+% It can be awkward to have to use the values also as names of appearances states, it
+% makes it for example difficult to use unicode for the value names, so there is another
+% option: One can set up an |/Opt| array which contains the values as strings,
+% and used \enquote{named numbers} as appearance state name: The numbers
+% |/0|, |/1| point then to the index position in the array.
+%
+%  \begin{tikzpicture}[level 2/.style={level distance=7mm},
+%  level 1/.style={sibling distance=25mm},
+%  level 2/.style={sibling distance=15mm}]
+%   \node[draw,align=left,font=\ttfamily] {\textrm{radio button field}\\
+%           /Opt [(value0) (value1) (value2)]
+%           /V /0 }
+%           child {node[draw,dashed,align=left,font=\ttfamily]
+%             {\textrm{annotation}\\ /0 \\
+%               /Off
+%             }}
+%           child {node[draw,dashed,align=left,font=\ttfamily]
+%             {\textrm{annotation}\\ /1 \\
+%               /Off
+%             }}
+%           child {node[draw,dashed,align=left,font=\ttfamily]
+%             {\textrm{annotation}\\ /2 \\
+%               /Off
+%             }}
+%   ;
+%   \end{tikzpicture}
+%
+% This method is clearly more flexible, and so it is used in this module.
+%
+% As radio buttons build a group of buttons, there is more interaction going on,
+% and more values have to be set. Also the first command, which initializes the field,
+% has to set the default value of the group.
+%
+% This means a typical setup should do something like this
+%
+% \begin{verbatim}
+% \pdffield_radio:n
+%   {
+%     group   = A,         %required, can also be given as name=A or T=A
+%     label   = button1,   %required,  on-state of this button
+%     default = button4    %default of the group, if not given label (button1) is used
+%                          %should refer to an existing button!
+%                          %It will set the V and the DV key
+%                          %button4 will be checked
+%   }
+% \pdffield_radio:n
+%   {
+%     group   = A,        %required, can also be given as name=A or T=A
+%     label   = button2   %required,  label/export value of this button
+%   }
+% \pdffield_radio:n
+%   {
+%     group   = A,        %required, can also be given as name=A or T=A
+%     label   = button3,  %required,  label/export value of this button
+%   }
+% \pdffield_radio:n
+%   {
+%     group   = A,        %required, can also be given as name=A or T=A
+%     label   = button4   %required,  label/export value of this button
+%   }
+% \end{verbatim}
+%
+%
+% It is theoretically possible to control the start appearance state for every
+% button so e.g. all
+% buttons could have the \enquote{selected} state when the PDF is opened.
+% But as soon as one button is clicked
+% on you get one selected button and the other are unselected. You can't select or
+% deselect all buttons. The PDF reference mentions an flag |NoToggleToOff| but this
+% doesn't do anything, at least not in the PDF viewers I tried. For this
+% reason this function is currently not supported.
+%
+% If two radio field annotations use the same |label| value they are selected and
+% unselected together, like checkboxes with the same /Yes state. This can be used
+% to build radio groups which works \enquote{in unison}. The flag |RadiosInUnison|
+% is neither needed for this (but doesn't harm either) nor
+% does it change the behaviour, at least again not in the PDF viewers I tried.
+%
+%
+%
+%
+% \bigskip
+% \subsection{Commands}
+% \begin{function}{\pdffield_radio:n}
+% \begin{syntax}
+%  \cs{pdffield_radio:n}\Arg{key val list}
+% \end{syntax}
+% This creates a checkbox to check and uncheck. The list of allowed keys is described below.
+% The \meta{key val list} should at least set the name, without it the default name
+% |checkbox| is used. Checkboxes with the same
+% name belong to the same field and are checked and unchecked together. The default appearance
+% is a quadratic frame with a \cs{texttimes} in it for the checked case.
+% The default appearance is setup at the first use and will use the font family
+% active at that time.
+% \end{function}
+%
+%
+% \subsection{Keys}
+%
+% The new checkbox command accept all field and annot keys from l3pdffield.
+% A few keys are disabled or are forced to specific values.
+% The |appearance| keys have a more checkbox specific
+% behaviour, other keys have other defaults than with the basic commands.
+% Additionally there
+% are a small number of keys specific to a checkbox.
+%
+%
+% Disabled keys are
+%  \begin{itemize}
+%  \item |V|, |DV|, |AS|: use |checked| instead.
+%  \item |FT| is overwritten.
+%  \item For checkboxes only the field flags  |ReadOnly|, |Required| and |NoExport| make sense.
+%  |Radio|, |Pushbotton| are set automatically automatically by the code
+% as this is required for a checkbox.
+%  \end{itemize}
+%
+% \begin{function}{preset-checkbox}
+%  \begin{syntax}
+%   |preset-checkbox| = \Arg{key-val-list}
+%  \end{syntax}
+% This allows to set default keys for a checkbox.
+% \end{function}
+%
+% \begin{function}{name,T}
+%  \begin{syntax}
+%   |name| = \meta{partial name}\\
+%   |T| = \meta{partial name}
+%  \end{syntax}
+% This sets like the |T| key for fields the partial name of the field. The value
+% shouldn't contain a period, be not empty and sensibly consist of simple chars.
+% Additionally the value is used to create the field ID.
+% This means that checkboxes with the same partial name are annotations
+% with the same field as parent and are checked and unchecked together---this
+% what is typically expected.
+% The field ID is then internal and can not be used to
+% attach another annotation.
+% For explicit control of the field ID  use the |fieldID| key.
+% \end{function}
+%
+% \begin{function}{fieldID}
+%  \begin{syntax}
+%   |fieldID| = \meta{field ID}\\
+%  \end{syntax}
+% \emph{For experts only!}
+% This allows to give the checkbox field a specific ID. This is only useful
+% in the context of a larger fieldset or if you want to attach another annotation
+% to the field with \cs{pdffield_annot:n}. If used wrongly you can
+% easily create invalid fieldset. It allows you to create to fields with the
+% same partial name, but if you want to see both
+% you need to ensure that their full names are
+% different---for example by adding some parent fields.
+% \end{function}
+%
+% \begin{function}{parent}
+%  \begin{syntax}
+%   |parent| = \meta{field ID}\\
+%  \end{syntax}
+% This is only needed if the field should be part
+% of a larger fieldset. The value should be a field ID of a field created previously
+% with \cs{pdffield_field:nn}.
+% \end{function}
+%
+% \begin{function}{altname,TU}
+%  \begin{syntax}
+%   |altname| = \meta{string}\\
+%   |TU| = \meta{string}\\
+%  \end{syntax}
+% This is sets an alternative name for user interaction.
+% This name can only be set at the first checkbox instance, when the field is initialized.
+% \end{function}
+%
+% \begin{function}{mappingname,TM}
+%  \begin{syntax}
+%   |mappingname| = \meta{string}\\
+%   |TM| = \meta{string}\\
+%  \end{syntax}
+% This is sets an alternative name for export.
+% This name can only be set at the first checkbox instance, when the field is initialized.
+% \end{function}
+%
+% \begin{function}{width,height,depth}
+% \begin{syntax}
+% |width| = \meta{dim expression}\\
+% |height| = \meta{dim expression}\\
+% |depth| = \meta{dim expression}
+% \end{syntax}
+% These keys allow to set the dimensions of checkbox instance.
+% The value should be a dimension expression. By default
+% |width| and |height| use \cs{normalbaselineskip}, the |depth| is zero.
+% \end{function}
+%
+% \begin{function}{AP/N,appearance,AP/R,rollover-appearance,AP/D,down-appearance}
+%  \begin{syntax}
+%   |AP/N| = \meta{partial appearance name}\\
+%   |appearance| = \meta{partial appearance name}\\
+%   |AP/R| = \meta{partial appearance name}\\
+%   |rollover-appearance| = \meta{partial appearance name}\\
+%   |AP/D| = \meta{partial appearance name}\\
+%   |down-appearance| = \meta{partial appearance name}
+%  \end{syntax}
+% This keys sets the normal appearance, the rollover appearance (when the
+% mouse hovers over the checkbox) and the down appearance (when the
+% mouse clicks). They take as value a
+% \meta{partial appearance name} and expects that \emph{two} form Xobjects
+% \meta{partial appearance name}|/Yes| and \meta{partial appearance name}|/Off|
+% has been created. The initial value is |pdffield/checkbox/default|
+% for the normal appearance and shows a \cs{texttimes}.
+% The other appearance are not set by default.
+% \end{function}
+% \begin{function}{checked}
+%  \begin{syntax}
+%   |checked| = |true|\verb"|"|false|
+%  \end{syntax}
+% This is a boolean key which allows to set if the
+% checkbox should be initially checked or not. It sets the |/V| and |/DV| key of the field
+% and the |/AS| key of the annotation instance. It is possible to use different
+% values for different instances, if one wants to confuse the user.
+% \end{function}
+%
+%
+% \subsection{Using with hyperref}
+% The \cs{CheckBox} command from hyperref also prints a label, something that the
+% command here doesn't do. A redefinition like the following should allow \cs{CheckBox}
+% to use the commands of this module. Be aware that the behaviour will not be identical!
+% Not every setting and key from \pkg{hyperref} has been copied.
+%
+% \begin{verbatim}
+% \ExplSyntaxOn\makeatletter
+% \def\@CheckBox[#1]#2{\LayoutCheckField{#2}{\pdffield_checkbox:n {name=#2,#1}}}
+% \ExplSyntaxOff\makeatother
+% \end{verbatim}
+%
+% \subsection{Some background}
+% For some general background about fieldsets, fields and field annotations, please
+% check \pkg{l3pdffield}. Here are only some remarks about the special case of
+% checkboxes.
+%
+% A checkbox consist of a field along with one or more field annotations.
+% The annotations can appear on more than one page or locations and if one instance
+% is checked all other instances follows and are checked too.
+%
+% A checkbox has two different looks: checked and unchecked. The hyperref
+% implementation uses symbolic names for the two states and adds some
+% values with the /MK key and lets the PDF viewer
+% create a look from them. But this doesn't work reliably and is one of the reasons
+% why a reimplementation is needed. Also newer PDF versions
+% deprecate the /NeedAppearances setting and require that such a look,
+% an \enquote{appearance}, is given as form XObjects.
+% So the code forces the use of two appearances.
+%
+% \end{documentation}
+%
+% \begin{implementation}
+% \section{\pkg{l3pdffield-radiobutton} Implementation}
+%    \begin{macrocode}
+%<*package>
+%<@@=pdffield>
+%    \end{macrocode}
+% \subsection{Variables}
+%    \begin{macrocode}
+\tl_new:N  \l_@@_radio_onstate_tl
+\tl_new:N  \l_@@_radio_default_tl
+\int_new:N \l_@@_radio_onstate_num_int
+
+%    \end{macrocode}
+% \subsection{Messages}
+%    \begin{macrocode}
+%    \end{macrocode}
+% \subsection{Appearances}
+% The default appearances are a circle with button in it.
+% Every appearance should have two versions and follow the naming
+% module/\meta{name}/Yes and module/\meta{name}/Off.
+%  \begin{macro}{@@/radio/default_appearances:}
+%  This defines the standard appearance. It is setup at the first
+%  use of a radiobutton.
+%    \begin{macrocode}
+\cs_new_protected:cn {@@/radio/default_appearances:}
+  {
+     \pdffield_appearance:nn {pdffield/radio/default/Yes}
+       {
+         \normalsize
+         \usefont{TS1}{cmr}{m}{n}
+         \rule[\dimexpr-\fontchardp\font79-0.5pt]{0pt}{\dimexpr\fontcharwd\font79+1pt}
+         \kern0.5pt
+         \char79
+         \rlap{\kern-0.5\fontcharwd\font 79  \kern-0.5\fontcharwd\font 136 \char136}
+         \kern0.5pt
+       }
+     \pdffield_appearance:nn {pdffield/radio/default/Off}
+       {
+         \normalsize
+         \usefont{TS1}{cmr}{m}{n}
+         \rule[\dimexpr-\fontchardp\font79-0.5pt]{0pt}{\dimexpr\fontcharwd\font79+1pt}
+         \kern0.5pt
+         \char79
+         \kern0.5pt
+      }
+    \cs_gset_eq:cN {@@/radio/default_appearances:} \prg_do_nothing:
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+%\subsection{Creating the field}
+% A field should be created if the name doesn't exist
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_radio_field:n #1 %name
+  {
+    \pdf_object_if_exist:nF {@@/field/@@/radio/#1}
+      {
+%    \end{macrocode}
+% We need an object and a seq for the Opt array.
+% The object is written at the end of the document.
+%    \begin{macrocode}
+        \pdf_object_new:nn {@@/field/@@/radio-Opt/#1}{array}
+        \pdfdict_put:nnx { l_@@/field }{Opt} { \pdf_object_ref:n {@@/field/@@/radio-Opt/#1} }
+        \seq_new:c { g_@@_radio_opt_#1_seq }
+        \hook_gput_code:nnn {shipout/lastpage}{pdffield/radio}
+          {
+            \pdf_object_write:nx
+              {@@/field/@@/radio-Opt/#1}
+              {\seq_use:cn {g_@@_radio_opt_#1_seq}{~}}
+          }
+%    \end{macrocode}
+% The default value is always the first in the array.
+% If a default has been set, it is added to the left
+% of the seq.
+%    \begin{macrocode}
+        \tl_if_eq:NnF \l_@@_radio_default_tl{()}
+         {
+           \seq_gput_left:cV { g_@@_radio_opt_#1_seq }\l_@@_radio_default_tl
+         }
+        \pdfdict_put:nnx { l_@@/field }{V}  { /0 }
+        %\pdfdict_put:nnx { l_@@/field }{DV} { /0 }
+%    \end{macrocode}
+% now we create the field and set it as parent for the following annotation.
+%    \begin{macrocode}
+        \@@_field:n { @@/radio/#1 }
+      }
+    \keys_set:nn {pdffield}{parent=@@/radio/#1}
+  }
+\cs_generate_variant:Nn \@@_radio_field:n {V}
+%    \end{macrocode}
+% \subsection{Assembling the radio}
+
+% \begin{macro}{\@@_radio:n}
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_radio:n #1
+  {
+    \group_begin:
+    \use:c {@@/radio/default_appearances:}
+    \cs_set_eq:NN\@@_appearance_handler:nnn \@@_radio_appearance_handler:nnn
+%    \end{macrocode}
+% Setting up the defaults. To setup the appearance we need the
+% Opt array, so at first the non-annot-keys are set and the
+% field is created.
+%   \begin{macrocode}
+    \keys_set_filter:nnn {pdffield}{annot}
+      {
+         fieldID=
+        ,name=radio
+        ,width  = \normalbaselineskip
+        ,height = \normalbaselineskip
+        ,#1
+      }
+    \keys_set:nn { pdffield }
+      {
+        ,unsetFf={Pushbutton}
+        ,setFf={Radio}
+        ,FT= Btn
+      }
+   \tl_if_empty:NT\l_@@_fieldID_tl
+      {
+        \pdfdict_get:nnN {l_@@/field}{T}\l_@@_fieldID_tl
+        \tl_put_left:Nn \l_@@_fieldID_tl {@@/radio/}
+      }
+    \@@_radio_field:V\l_@@_fieldID_tl
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+    \seq_if_in:cVF { g_@@_radio_opt_ \l_@@_fieldID_tl _seq }\l_@@_radio_onstate_tl
+      {
+        \seq_gput_right:cV { g_@@_radio_opt_ \l_@@_fieldID_tl _seq }\l_@@_radio_onstate_tl
+      }
+    \int_zero:N \l_@@_radio_onstate_num_int
+    \exp_args:Nc
+    \seq_map_inline:Nn { g_@@_radio_opt_ \l_@@_fieldID_tl _seq }
+     {
+       \str_if_eq:nVTF { ##1 } \l_@@_radio_onstate_tl
+        {
+          \seq_map_break:
+        }
+        {
+          \int_incr:N \l_@@_radio_onstate_num_int
+        }
+     }
+    \keys_set_groups:nnn { pdffield }{annot}
+     {
+       ,appearance = pdffield/radio/default
+       ,#1
+     }
+   \int_compare:nNnTF { \l_@@_radio_onstate_num_int } = 0
+     { \pdfannot_dict_put:nnx {widget}{AS}{/0} }
+     { \pdfannot_dict_put:nnx {widget}{AS}{/Off} }
+    \@@_annot:
+    \group_end:
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Keys}
+% Most keys are inherited simply the ones from the generic field and annot keys.
+% The label keys sets the export value. default the button which is checked on.
+% It is in the annot group, so that it can be set after the label.
+%    \begin{macrocode}
+\keys_define:nn { pdffield }
+ {
+   label .code:n =
+    {
+      \pdf_string_from_unicode:nnN {utf8/string}{#1}\l_@@_radio_onstate_tl
+    }
+   ,default .code:n =
+    {
+      \pdf_string_from_unicode:nnN {utf8/string}{#1}\l_@@_radio_default_tl
+    }
+ }
+%    \end{macrocode}
+% And a key to set a dedicated field ID
+%    \begin{macrocode}
+\keys_define:nn { pdffield }
+ {
+   fieldID .tl_set:N = \l_@@_fieldID_tl
+ }
+%    \end{macrocode}
+% \begin{macro}{\@@_radio_appearance_handler:nnn}
+%    \begin{macrocode}
+
+\cs_new_protected:Npn \@@_radio_appearance_handler:nnn #1 #2 #3 %name, type, text
+  {
+    \pdfxform_if_exist:nTF {  #1 / Yes }
+      {
+        \pdf_object_unnamed_write:nx
+          {dict}
+          {
+             /\int_use:N \l_@@_radio_onstate_num_int \c_space_tl   \pdfxform_ref:n  { #1/Yes}
+             /Off ~ \pdfxform_ref:n { #1/Off}
+          }
+       \pdfannot_dict_put:nnx {widget/AP}{#2}{\pdf_object_ref_last:}
+      }
+      {
+         \msg_error:nnnn{pdffield}{appearance-missing}{#1}{#3}
+      }
+   }
+
+%    \end{macrocode}
+%
+% \end{macro}
+%
+% \subsection{user commands}
+% \begin{macro}{\pdffield_radio:n}
+%    \begin{macrocode}
+\cs_set_eq:NN \pdffield_radio:n \@@_radio:n
+%</package>
+%    \end{macrocode}
+% \end{macro}
+%\end{implementation}
