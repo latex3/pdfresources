@@ -183,8 +183,8 @@
 % \pdffield_radio:n
 %   {
 %     group   = A,         %required, can also be given as name=A or T=A
-%     label   = button1,   %required,  on-state of this button
-%     default = button4    %default of the group, if not given label (button1) is used
+%     radiobutton   = button1,   %required,  on-state of this button
+%     default = button4    %default of the group, if not given radiobutton (button1) is used
 %                          %should refer to an existing button!
 %                          %It will set the V and the DV key
 %                          %button4 will be checked
@@ -192,31 +192,30 @@
 % \pdffield_radio:n
 %   {
 %     group   = A,        %required, can also be given as name=A or T=A
-%     label   = button2   %required,  label/export value of this button
+%     radiobutton   = button2   %required,  export value of this button
 %   }
 % \pdffield_radio:n
 %   {
 %     group   = A,        %required, can also be given as name=A or T=A
-%     label   = button3,  %required,  label/export value of this button
+%     radiobutton   = button3,  %required,  radiobutton/export value of this button
 %   }
 % \pdffield_radio:n
 %   {
 %     group   = A,        %required, can also be given as name=A or T=A
-%     label   = button4   %required,  label/export value of this button
+%     radiobutton   = button4   %required,  radiobutton/export value of this button
 %   }
 % \end{verbatim}
 %
 %
 % It is theoretically possible to control the start appearance state for every
-% button so e.g. all
-% buttons could have the \enquote{selected} state when the PDF is opened.
+% button so e.g. all buttons could have the \enquote{selected} state when the PDF is opened.
 % But as soon as one button is clicked
-% on you get one selected button and the other are unselected. You can't select or
+% you get one selected button and the other are unselected. You can't select or
 % deselect all buttons. The PDF reference mentions an flag |NoToggleToOff| but this
 % doesn't do anything, at least not in the PDF viewers I tried. For this
 % reason this function is currently not supported.
 %
-% If two radio field annotations use the same |label| value they are selected and
+% If two radio field annotations use the same |radiobutton| value they are selected and
 % unselected together, like checkboxes with the same /Yes state. This can be used
 % to build radio groups which works \enquote{in unison}. The flag |RadiosInUnison|
 % is neither needed for this (but doesn't harm either) nor
@@ -231,40 +230,45 @@
 % \begin{syntax}
 %  \cs{pdffield_radio:n}\Arg{key val list}
 % \end{syntax}
-% This creates a checkbox to check and uncheck. The list of allowed keys is described below.
+% This creates a radio button to check and uncheck. The list of allowed keys is described below.
 % The \meta{key val list} should at least set the name, without it the default name
-% |checkbox| is used. Checkboxes with the same
-% name belong to the same field and are checked and unchecked together. The default appearance
-% is a quadratic frame with a \cs{texttimes} in it for the checked case.
-% The default appearance is setup at the first use and will use the font family
-% active at that time.
+% |radio| is used. Radiobuttons with the same
+% name belong to the same field and if checked, the others are unchecked.
+% The default appearance
+% is a circle frame with a black bullet in it for the checked case.
+% The default appearance is setup at the first use. It dimension are quadratic.
+%
+% The first radio button setups the field and should also set the button which
+% is selected when the PDF is opened.
 % \end{function}
 %
 %
 % \subsection{Keys}
 %
-% The new checkbox command accept all field and annot keys from l3pdffield.
+% The new radio command accept all field and annot keys from l3pdffield.
 % A few keys are disabled or are forced to specific values.
-% The |appearance| keys have a more checkbox specific
+% The |appearance| keys have a more radio specific
 % behaviour, other keys have other defaults than with the basic commands.
 % Additionally there
-% are a small number of keys specific to a checkbox.
+% are a small number of keys specific to a radio button.
 %
 %
 % Disabled keys are
 %  \begin{itemize}
-%  \item |V|, |DV|, |AS|: use |checked| instead.
+%  \item |V|, |DV|, |AS|: they are set by the other keys.
 %  \item |FT| is overwritten.
-%  \item For checkboxes only the field flags  |ReadOnly|, |Required| and |NoExport| make sense.
-%  |Radio|, |Pushbotton| are set automatically automatically by the code
-% as this is required for a checkbox.
+%  \item For radio buttons only the field flags  |ReadOnly|, |Required|, |NoExport|,
+%  |NoToggleToOff] and |RadiosInUnison| make sense. The last two are as mentioned
+%  above probably useless.
+%  |Radio| is set automatically automatically by the code
+% as this is required for a radio button set.
 %  \end{itemize}
 %
-% \begin{function}{preset-checkbox}
+% \begin{function}{preset-radio}
 %  \begin{syntax}
-%   |preset-checkbox| = \Arg{key-val-list}
+%   |preset-radio| = \Arg{key-val-list}
 %  \end{syntax}
-% This allows to set default keys for a checkbox.
+% This allows to set default keys for a radio button.
 % \end{function}
 %
 % \begin{function}{name,T}
@@ -272,12 +276,11 @@
 %   |name| = \meta{partial name}\\
 %   |T| = \meta{partial name}
 %  \end{syntax}
-% This sets like the |T| key for fields the partial name of the field. The value
+% Both keys set the partial name of the field. The value
 % shouldn't contain a period, be not empty and sensibly consist of simple chars.
 % Additionally the value is used to create the field ID.
-% This means that checkboxes with the same partial name are annotations
-% with the same field as parent and are checked and unchecked together---this
-% what is typically expected.
+% This means that radio buttons with the same partial name are annotations
+% with the same field as parent and so build a radio button group.
 % The field ID is then internal and can not be used to
 % attach another annotation.
 % For explicit control of the field ID  use the |fieldID| key.
@@ -288,7 +291,7 @@
 %   |fieldID| = \meta{field ID}\\
 %  \end{syntax}
 % \emph{For experts only!}
-% This allows to give the checkbox field a specific ID. This is only useful
+% This allows to give the radio field a specific ID. This is only useful
 % in the context of a larger fieldset or if you want to attach another annotation
 % to the field with \cs{pdffield_annot:n}. If used wrongly you can
 % easily create invalid fieldset. It allows you to create to fields with the
@@ -306,23 +309,14 @@
 % with \cs{pdffield_field:nn}.
 % \end{function}
 %
-% \begin{function}{altname,TU}
+% \begin{function}{button} %???????name????????
 %  \begin{syntax}
-%   |altname| = \meta{string}\\
-%   |TU| = \meta{string}\\
+%   |button| = \meta{string}\\
 %  \end{syntax}
-% This is sets an alternative name for user interaction.
-% This name can only be set at the first checkbox instance, when the field is initialized.
+% This set the name/export value of the single button. buttons with the same
+% value are set in unison. The string can use unicode.
 % \end{function}
 %
-% \begin{function}{mappingname,TM}
-%  \begin{syntax}
-%   |mappingname| = \meta{string}\\
-%   |TM| = \meta{string}\\
-%  \end{syntax}
-% This is sets an alternative name for export.
-% This name can only be set at the first checkbox instance, when the field is initialized.
-% \end{function}
 %
 % \begin{function}{width,height,depth}
 % \begin{syntax}
@@ -330,7 +324,7 @@
 % |height| = \meta{dim expression}\\
 % |depth| = \meta{dim expression}
 % \end{syntax}
-% These keys allow to set the dimensions of checkbox instance.
+% These keys allow to set the dimensions of radio button.
 % The value should be a dimension expression. By default
 % |width| and |height| use \cs{normalbaselineskip}, the |depth| is zero.
 % \end{function}
@@ -401,13 +395,14 @@
 %    \begin{macrocode}
 %<*package>
 %<@@=pdffield>
+\RequirePackage{l3draw}
 %    \end{macrocode}
 % \subsection{Variables}
 %    \begin{macrocode}
-\tl_new:N  \l_@@_radio_onstate_tl
+\tl_new:N  \l_@@_radio_button_tl
 \tl_new:N  \l_@@_radio_default_tl
-\int_new:N \l_@@_radio_onstate_num_int
-
+\int_new:N \l_@@_radio_button_num_int
+\tl_new:N  \l_@@_radio_appearance_code_tl
 %    \end{macrocode}
 % \subsection{Messages}
 %    \begin{macrocode}
@@ -422,24 +417,44 @@
 %    \begin{macrocode}
 \cs_new_protected:cn {@@/radio/default_appearances:}
   {
-     \pdffield_appearance:nn {pdffield/radio/default/Yes}
+    \pdffield_appearance:nn {pdffield/radio/default/Yes}
        {
          \normalsize
-         \usefont{TS1}{cmr}{m}{n}
-         \rule[\dimexpr-\fontchardp\font79-0.5pt]{0pt}{\dimexpr\fontcharwd\font79+1pt}
-         \kern0.5pt
-         \char79
-         \rlap{\kern-0.5\fontcharwd\font 79  \kern-0.5\fontcharwd\font 136 \char136}
-         \kern0.5pt
+         \draw_begin:
+         \draw_path_circle:nn {0pt,0pt}{0.5\normalbaselineskip}
+         \draw_path_use_clear:n { stroke }
+         \draw_path_circle:nn {0pt,0pt}{0.2\normalbaselineskip}
+         \draw_path_use_clear:n { fill }
+         \draw_end:
        }
      \pdffield_appearance:nn {pdffield/radio/default/Off}
        {
          \normalsize
-         \usefont{TS1}{cmr}{m}{n}
-         \rule[\dimexpr-\fontchardp\font79-0.5pt]{0pt}{\dimexpr\fontcharwd\font79+1pt}
-         \kern0.5pt
-         \char79
-         \kern0.5pt
+         \draw_begin:
+         \draw_path_circle:nn {0pt,0pt}{0.5\normalbaselineskip}
+         \draw_path_use_clear:n { stroke }
+         \draw_end:
+      }
+
+    \pdffield_appearance:nn {pdffield/radio/defaultdown/Yes}
+       {
+         \normalsize
+         \draw_begin:
+         \draw_path_circle:nn {0pt,0pt}{0.5\normalbaselineskip}
+         \draw_path_use_clear:n { stroke }
+         \draw_path_circle:nn {0pt,0pt}{0.25\normalbaselineskip}
+         \draw_path_use_clear:n { fill }
+         \draw_end:
+       }
+     \pdffield_appearance:nn {pdffield/radio/defaultdown/Off}
+       {
+         \normalsize
+         \draw_begin:
+         \draw_path_circle:nn {0pt,0pt}{0.5\normalbaselineskip}
+         \draw_path_use_clear:n { stroke }
+         \draw_path_circle:nn {0pt,0pt}{0.25\normalbaselineskip}
+         \draw_path_use_clear:n { fill }
+         \draw_end:
       }
     \cs_gset_eq:cN {@@/radio/default_appearances:} \prg_do_nothing:
   }
@@ -476,7 +491,7 @@
            \seq_gput_left:cV { g_@@_radio_opt_#1_seq }\l_@@_radio_default_tl
          }
         \pdfdict_put:nnx { l_@@/field }{V}  { /0 }
-        %\pdfdict_put:nnx { l_@@/field }{DV} { /0 }
+        \pdfdict_put:nnx { l_@@/field }{DV} { /0 }
 %    \end{macrocode}
 % now we create the field and set it as parent for the following annotation.
 %    \begin{macrocode}
@@ -487,66 +502,80 @@
 \cs_generate_variant:Nn \@@_radio_field:n {V}
 %    \end{macrocode}
 % \subsection{Assembling the radio}
-
+% we use two arguments to separate name, label, default from the rest.
 % \begin{macro}{\@@_radio:n}
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_radio:n #1
   {
     \group_begin:
-    \use:c {@@/radio/default_appearances:}
     \cs_set_eq:NN\@@_appearance_handler:nnn \@@_radio_appearance_handler:nnn
 %    \end{macrocode}
 % Setting up the defaults. To setup the appearance we need the
-% Opt array, so at first the non-annot-keys are set and the
-% field is created.
+% Opt array, so the appearance handler only stores the code
 %   \begin{macrocode}
-    \keys_set_filter:nnn {pdffield}{annot}
+    \tl_set:Nn\l_@@_radio_appearance_code_tl{}
+    \keys_set:nn {pdffield}
       {
          fieldID=
         ,name=radio
         ,width  = \normalbaselineskip
         ,height = \normalbaselineskip
+        ,@@/preset/radio
         ,#1
-      }
-    \keys_set:nn { pdffield }
-      {
         ,unsetFf={Pushbutton}
         ,setFf={Radio}
         ,FT= Btn
       }
+%    \end{macrocode}
+% If the fieldID has not been set explicitly, we use the name/T key
+%    \begin{macrocode}
    \tl_if_empty:NT\l_@@_fieldID_tl
       {
         \pdfdict_get:nnN {l_@@/field}{T}\l_@@_fieldID_tl
         \tl_put_left:Nn \l_@@_fieldID_tl {@@/radio/}
       }
+%    \end{macrocode}
+% Now we build the field
+%    \begin{macrocode}
     \@@_radio_field:V\l_@@_fieldID_tl
 %    \end{macrocode}
-%
+%  Retrieve the number for the label
 %    \begin{macrocode}
-    \seq_if_in:cVF { g_@@_radio_opt_ \l_@@_fieldID_tl _seq }\l_@@_radio_onstate_tl
+    \seq_if_in:cVF { g_@@_radio_opt_ \l_@@_fieldID_tl _seq }\l_@@_radio_button_tl
       {
-        \seq_gput_right:cV { g_@@_radio_opt_ \l_@@_fieldID_tl _seq }\l_@@_radio_onstate_tl
+        \seq_gput_right:cV { g_@@_radio_opt_ \l_@@_fieldID_tl _seq }\l_@@_radio_button_tl
       }
-    \int_zero:N \l_@@_radio_onstate_num_int
+    \int_zero:N \l_@@_radio_button_num_int
     \exp_args:Nc
     \seq_map_inline:Nn { g_@@_radio_opt_ \l_@@_fieldID_tl _seq }
      {
-       \str_if_eq:nVTF { ##1 } \l_@@_radio_onstate_tl
+       \str_if_eq:nVTF { ##1 } \l_@@_radio_button_tl
         {
           \seq_map_break:
         }
         {
-          \int_incr:N \l_@@_radio_onstate_num_int
+          \int_incr:N \l_@@_radio_button_num_int
         }
      }
-    \keys_set_groups:nnn { pdffield }{annot}
-     {
-       ,appearance = pdffield/radio/default
-       ,#1
-     }
-   \int_compare:nNnTF { \l_@@_radio_onstate_num_int } = 0
+%    \end{macrocode}
+% Annotations with the default value are set to on, the rest to off
+%    \begin{macrocode}
+   \int_compare:nNnTF { \l_@@_radio_button_num_int } = 0
      { \pdfannot_dict_put:nnx {widget}{AS}{/0} }
      { \pdfannot_dict_put:nnx {widget}{AS}{/Off} }
+%    \end{macrocode}
+% Now we set the appearances, if no key has been use we take the default.
+%    \begin{macrocode}
+    \tl_if_empty:NT\l_@@_radio_appearance_code_tl
+      {
+        \use:c {@@/radio/default_appearances:}
+        \keys_set:nn {pdffield}
+          {
+            appearance      = pdffield/radio/default,
+            down-appearance = pdffield/radio/default,
+          }
+      }
+    \l_@@_radio_appearance_code_tl
     \@@_annot:
     \group_end:
   }
@@ -560,11 +589,12 @@
 %    \begin{macrocode}
 \keys_define:nn { pdffield }
  {
-   label .code:n =
+    ,radiogroup .meta:n = {T=#1}
+    ,radiobutton .code:n =
     {
-      \pdf_string_from_unicode:nnN {utf8/string}{#1}\l_@@_radio_onstate_tl
+      \pdf_string_from_unicode:nnN {utf8/string}{#1}\l_@@_radio_button_tl
     }
-   ,default .code:n =
+    ,radiodefault .code:n =
     {
       \pdf_string_from_unicode:nnN {utf8/string}{#1}\l_@@_radio_default_tl
     }
@@ -578,23 +608,29 @@
  }
 %    \end{macrocode}
 % \begin{macro}{\@@_radio_appearance_handler:nnn}
+% The handler for the appearances stores only the code
+% as it must be executed rather late.
 %    \begin{macrocode}
 
 \cs_new_protected:Npn \@@_radio_appearance_handler:nnn #1 #2 #3 %name, type, text
   {
-    \pdfxform_if_exist:nTF {  #1 / Yes }
+    \tl_put_right:Nn \l_@@_radio_appearance_code_tl
       {
-        \pdf_object_unnamed_write:nx
-          {dict}
-          {
-             /\int_use:N \l_@@_radio_onstate_num_int \c_space_tl   \pdfxform_ref:n  { #1/Yes}
-             /Off ~ \pdfxform_ref:n { #1/Off}
-          }
-       \pdfannot_dict_put:nnx {widget/AP}{#2}{\pdf_object_ref_last:}
-      }
-      {
-         \msg_error:nnnn{pdffield}{appearance-missing}{#1}{#3}
-      }
+         \pdfxform_if_exist:nTF {  #1 / Yes }
+           {
+             \pdf_object_unnamed_write:nx
+               {dict}
+               {
+                  /\int_use:N \l_@@_radio_button_num_int
+                   \c_space_tl   \pdfxform_ref:n  { #1/Yes}
+                  /Off ~ \pdfxform_ref:n { #1/Off}
+               }
+            \pdfannot_dict_put:nnx {widget/AP}{#2}{\pdf_object_ref_last:}
+           }
+           {
+              \msg_error:nnnn{pdffield}{appearance-missing}{#1}{#3}
+           }
+       }
    }
 
 %    \end{macrocode}

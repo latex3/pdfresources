@@ -295,7 +295,7 @@
 %  |create-style| = \Arg{name}\Arg{key-val}
 % \end{syntax}
 % This defines a style which can then be used with the |style| key.
-% \Arg{key-val} can be an arbitrary collection of the  keys of the module.
+% \Arg{key-val} can be an arbitrary collection of the keys of the module.
 % \end{function}
 %
 % \begin{function}{preset-checkbox}
@@ -304,7 +304,20 @@
 % \end{syntax}
 % This allows to set default keys for a checkbox.
 % \end{function}
-
+%
+% \begin{function}{preset-radio}
+% \begin{syntax}
+% |preset-radio|=\Arg{key-val}
+% \end{syntax}
+% This allows to set default keys for a radio button.
+% \end{function}
+%
+% \begin{function}{preset-textfield}
+% \begin{syntax}
+% |preset-textfield|=\Arg{key-val}
+% \end{syntax}
+% This allows to set default keys for a text field.
+% \end{function}
 % \section{Field Keys}
 %
 % Table~\ref{tab:fieldkeys} summarize the keys which can be used.
@@ -1381,7 +1394,7 @@
         }
    ,AP/N .groups:n = annot
    ,appearance .meta:n = {AP/N={#1}}
-   ,appearance .groups:n = annot 
+   ,appearance .groups:n = annot
   }
 \keys_define:nn { pdffield }
   {
@@ -1600,6 +1613,13 @@
         \keys_define:nn { pdffield }
          {
            @@/preset/checkbox .meta:n = {#1},
+         }
+      }
+    ,preset-radio .code:n =
+      {
+        \keys_define:nn { pdffield }
+         {
+           @@/preset/radio .meta:n = {#1},
          }
       }
    ,preset-textfield .code:n =
