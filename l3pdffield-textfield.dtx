@@ -393,7 +393,7 @@
 \cs_new_protected:Npn \@@_textfield:n #1
   {
     \group_begin:
-    \cs_set_eq:NN\@@_value_handler:nN \@@_textfield_value_handler:nN
+    \cs_set_eq:NN\@@_V_handler:nN \@@_textfield_V_handler:nN
     \use:c {@@/textfield/default_appearance:}
 %    \end{macrocode}
 % Setting up the defaults.
@@ -492,12 +492,22 @@
 %
 % \subsection{Handler}
 %    \begin{macrocode}
-\cs_new_protected:Npn \@@_textfield_value_handler:nN #1#2
+\cs_new_protected:Npn \@@_textfield_V_handler:nN #1#2
   {
      \pdf_string_from_unicode:nnN {utf8/string}{#1}#2
   }
 %    \end{macrocode}
 %
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_textfield_value_handler:n #1
+  {
+    \keys_set:nn{pdffield}{V={#1}
+  }
+\cs_new_protected:Npn \@@_textfield_default_handler:n #1
+  {
+    \keys_set:nn{pdffield}{DV={#1}
+  }
+%    \end{macrocode}
 % \subsection{user commands}
 % \begin{macro}{\pdffield_textfield:n}
 %    \begin{macrocode}

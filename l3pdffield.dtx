@@ -325,6 +325,18 @@
 % \end{syntax}
 % This allows to set default keys for a text field.
 % \end{function}
+%
+% \section{Special keys}
+%
+% \begin{function}{value,default}
+% \begin{syntax}
+% |value|  =\Arg{value}\\
+% |default|=\Arg{value}
+% \end{syntax}
+% These two keys pass the value to a handler which can be redefined.
+% Their exact behaviour depends on field type. Please check their documentation.
+% \end{function}
+%
 % \section{Field Keys}
 %
 % Table~\ref{tab:fieldkeys} summarize the keys which can be used.
@@ -337,7 +349,7 @@
 % \begin{tabular}{>{\ttfamily}lllll}
 % \toprule
 % key      & value      & required & inheritable &remark\\\midrule
-% parent   & field ID & for non-root fields &     \\
+% parent   & field ID   & for non-root fields &     \\
 % style    & style name &                   & defined with |create-style| \\
 % T, name        & string   & mostly   &             \\
 % TU, altname       & string   &          &             \\
@@ -810,6 +822,7 @@
 % ,\msg_new:nnn
 % ,\msg_warning:nn
 % ,\msg_warning:nnn
+% ,\msg_info:nnn
 % ,\msg_warning:nnnnn
 % ,\NeedsTeXFormat
 % ,\pdf_name_from_unicode_e:n
@@ -932,6 +945,10 @@
   {
     The~parent~field~'#1'~doesn't~exist\\
     Create~it~with~\tl_to_str:n{\pdffield_field:nn}
+  }
+\msg_new:nnn {pdffield}{key-ignored}
+  {
+    key~`#1`~has~no~function~and~is~ignored
   }
 %    \end{macrocode}
 
@@ -1195,12 +1212,12 @@
 % when the field is created. A new name means a new field.
 % The other names can only be set when the field is created,
 % so we put them in the field group.
-%  \begin{macro}{\@@_value_handler:nN}
+%  \begin{macro}{\@@_V_handler:nN}
 %  Values (V and DV) need different handling in the various field types. So
 %  it uses a handler which can be redefined locally. By default it simply stores
 %  the value in a tl var.
 %    \begin{macrocode}
-\cs_new_protected:Npn \@@_value_handler:nN #1#2
+\cs_new_protected:Npn \@@_V_handler:nN #1#2
   {
     \tl_set:Nn #2 {#1}
   }
@@ -1294,7 +1311,7 @@
            \pdfdict_remove:nn { l_@@/field }{V}
          }
          {
-           \@@_value_handler:nN{#1}\l_@@_tmpa_str
+           \@@_V_handler:nN{#1}\l_@@_tmpa_str
            \pdfdict_put:nnx { l_@@/field }{V}{ \l_@@_tmpa_str }
          }
      }
@@ -1306,7 +1323,7 @@
            \pdfdict_remove:nn { l_@@/field }{DV}
          }
          {
-           \@@_value_handler:nN{#1}\l_@@_tmpa_str
+           \@@_V_handler:nN{#1}\l_@@_tmpa_str
            \pdfdict_put:nnx { l_@@/field }{DV}{ \l_@@_tmpa_str }
          }
      }
@@ -1853,6 +1870,24 @@
 \keys_define:nn { pdffield }
   {
     style .code:n = {\keys_set:nn {pdffield}{@@/style/#1={#1}}}
+  }
+%    \end{macrocode}
+% \end{macro}
+% \section{Value keys}
+% \begin{macro}{value,default,\@@_value_handler:n,\@@_default_handler:n}
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_value_handler:n #1
+  {
+    \msg_info:nnn {pdffield}{key-ignored}{value}
+  }
+\cs_new_protected:Npn \@@_default_handler:n #1
+  {
+    \msg_info:nnn {pdffield}{key-ignored}{default}
+  }
+\keys_define:nn {pdffield}
+  {
+     value   .code:n = { \@@_value_handler:n {#1} }
+    ,default .code:n = { \@@_default_handler:n {#1}}
   }
 %    \end{macrocode}
 % \end{macro}
