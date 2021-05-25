@@ -183,8 +183,8 @@
 % \pdffield_radio:n
 %   {
 %     group   = A,         %required, can also be given as name=A or T=A
-%     radiobutton   = button1,   %required,  on-state of this button
-%     default = button4    %default of the group, if not given radiobutton (button1) is used
+%     choice   = button1,   %required,  on-state of this button
+%     default = button4    %default of the group, if not given choice (button1) is used
 %                          %should refer to an existing button!
 %                          %It will set the V and the DV key
 %                          %button4 will be checked
@@ -192,17 +192,17 @@
 % \pdffield_radio:n
 %   {
 %     group   = A,        %required, can also be given as name=A or T=A
-%     radiobutton   = button2   %required,  export value of this button
+%     choice   = button2   %required,  export value of this button
 %   }
 % \pdffield_radio:n
 %   {
 %     group   = A,        %required, can also be given as name=A or T=A
-%     radiobutton   = button3,  %required,  radiobutton/export value of this button
+%     choice   = button3,  %required,  choice/export value of this button
 %   }
 % \pdffield_radio:n
 %   {
 %     group   = A,        %required, can also be given as name=A or T=A
-%     radiobutton   = button4   %required,  radiobutton/export value of this button
+%     choice   = button4   %required,  choice/export value of this button
 %   }
 % \end{verbatim}
 %
@@ -215,7 +215,7 @@
 % doesn't do anything, at least not in the PDF viewers I tried. For this
 % reason this function is currently not supported.
 %
-% If two radio field annotations use the same |radiobutton| value they are selected and
+% If two radio field annotations use the same |choice| value they are selected and
 % unselected together, like checkboxes with the same /Yes state. This can be used
 % to build radio groups which works \enquote{in unison}. The flag |RadiosInUnison|
 % is neither needed for this (but doesn't harm either) nor
@@ -590,7 +590,7 @@
 \keys_define:nn { pdffield }
  {
     ,radiogroup .meta:n = {T=#1}
-    ,radiobutton .code:n =
+    ,choice .code:n =
     {
       \pdf_string_from_unicode:nnN {utf8/string}{#1}\l_@@_radio_button_tl
     }
