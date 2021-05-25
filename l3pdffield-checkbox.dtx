@@ -235,6 +235,13 @@
 % values for different instances, if one wants to confuse the user.
 % \end{function}
 %
+% \begin{function}{value,default}
+%  \begin{syntax}
+%   |value| = |Yes|\verb"|"|Off|\\
+%   |default| = |Yes|\verb"|"|Off|\\
+%  \end{syntax}
+% With checkboxes this two key are simply an alternative input for |checked|.
+% \end{function}
 %
 % \subsection{Using with hyperref}
 % The \cs{CheckBox} command from hyperref also prints a label, something that the
@@ -432,6 +439,8 @@
     \group_begin:
     \use:c {@@/checkbox/default_appearances:}
     \cs_set_eq:NN\@@_appearance_handler:nnn \@@_checkbox_appearance_handler:nnn
+    \cs_set_eq:NN\@@_value_handler:n   \@@_checkbox_value_handler:n
+    \cs_set_eq:NN\@@_default_handler:n \@@_checkbox_default_handler:n
 %    \end{macrocode}
 % Setting up the defaults.
 %    \begin{macrocode}
@@ -493,13 +502,41 @@
    ,checked .default:n = {true}
    ,checked .groups:n  = {checkbox}
  }
+\keys_define:nn { pdffield  }
+ {
+   ,__value .choice:
+   ,__value / Off .code:n =
+     {
+       \pdfdict_put:nnx { l_@@/field }{V} { /Off }
+       \pdfdict_put:nnx { l_@@/field }{DV}{ /Off }
+       \pdfannot_dict_put:nnn {widget}{AS}{ /Off }
+     }
+   ,__value / Yes .code:n =
+     {
+       \pdfdict_put:nnx { l_@@/field }{V} { /Yes }
+       \pdfdict_put:nnx { l_@@/field }{DV}{ /Yes }
+       \pdfannot_dict_put:nnn {widget}{AS}{ /Yes }
+     }
+ }
 %    \end{macrocode}
 % \end{macro}
-%
+% \begin{macro}{\@@_checkbox_value_handler:n,\@@_checkbox_default_handler:n}
+% |value| and |default| do the same as checked.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_checkbox_value_handler:n #1
+  {
+    \keys_set:nn{pdffield}{__value={#1}}
+  }
+\cs_new_protected:Npn \@@_checkbox_default_handler:n #1
+  {
+    \keys_set:nn{pdffield}{__value={#1}}
+  }
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\@@_checkbox_appearance_handler:nnn}
 % Appearances must create a dictionary, so we define a special handler.
 % \Arg{name} is the xform name without the /Yes, /Off, \Arg{type} is N, R, or D,
-% \Arg{text} is a word for the error message. 
+% \Arg{text} is a word for the error message.
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_checkbox_appearance_handler:nnn #1 #2 #3 %name, type, text
   {
