@@ -246,6 +246,7 @@
 % with \cs{pdffield_field:nn}.
 % \end{function}
 %
+%
 % \begin{function}{altname,TU}
 %  \begin{syntax}
 %   |altname| = \meta{string}\\
@@ -289,6 +290,25 @@
 % for the normal appearance and shows a light gray background.
 % The other appearance are not set by default (and it is quite unclear if they
 % make sense for a textfield).
+% \end{function}
+%
+% \begin{function}{V,value}
+%  \begin{syntax}
+%   |V| = \meta{text}\\
+%   |value| = \meta{text}
+%  \end{syntax}
+% This sets the start text in the field. The keys have an effect only at the first
+% instance of the textfield, when the field is initialized.
+% \end{function}
+%
+% \begin{function}{DV,default}
+%  \begin{syntax}
+%   |DV| = \meta{text}\\
+%   |default| = \meta{text}
+%  \end{syntax}
+% This sets the text which is shown if the form is reset.
+% The keys have an effect only at the first
+% instance of the textfield, when the field is initialized.
 % \end{function}
 %
 % \begin{function}{fontcolor}
