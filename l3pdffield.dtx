@@ -298,6 +298,13 @@
 % \Arg{key-val} can be an arbitrary collection of the keys of the module.
 % \end{function}
 %
+% \begin{function}{create-style}
+% \begin{syntax}
+%  |style| = \Arg{style}
+% \end{syntax}
+% This uses a style define with the previous |create-style|.
+% \end{function}
+% 
 % \begin{function}{preset-checkbox}
 % \begin{syntax}
 % |preset-checkbox|=\Arg{key-val}
@@ -631,17 +638,21 @@
 % an already declared field.
 % \end{function}
 %
-% \begin{function}{AP/N,AP/R,AP/D}
+% \begin{function}{AP/N,appearance,AP/R,rollover-appearance,AP/D,down-appearance}
 %  \begin{syntax}
 %   |AP/N| = \meta{appearance name}\\
-%   |AP/R| = \meta{appearance name}\\
-%   |AP/D| = \meta{appearance name}
+%   |appearance| = \meta{appearance name}\\
+%   |AP/R| = \meta{rollover appearance name}\\
+%   |rollover-appearance| = \meta{rollover appearance name}\\
+%   |AP/D| = \meta{down appearance name}\\
+%   |down appearance| = \meta{down appearance name}\\
 %  \end{syntax}
-% This keys set the normal, rollover and down appearance. Alias names are
-% |appearance|, |rollover-appearance| and |down-appearance|.
+% This keys set the normal, rollover and down appearance. The names
+% |appearance|, |rollover-appearance| and |down-appearance| are aliases.
 % The value is by default a simple name of an appearance/form Xobject but
 % modules like \pkg{l3pdffield-checkbox} change this to allow to add appearances for
-% various states.
+% various states. So check the documentation for the various field types for the
+% exact format of the value.
 % \end{function}
 %
 % \begin{function}{AS}
@@ -649,7 +660,7 @@
 %   |AS| = \meta{appearance state name}
 %  \end{syntax}
 % This key sets the default appearance state.
-% The value is a name without the starting slash
+% The value is a name \emph{without} the starting slash
 % (it is passed through |\pdf_name_from_unicode_e:n|),
 % for checkbox for example |Yes|. If used it should typically have the same value
 % as the V and DV key of the field.
@@ -753,6 +764,94 @@
 % \end{documentation}
 %
 % \begin{implementation}
+% \DoNotIndex
+%  {
+%   \\
+% ,\bitset_clear:N
+% ,\bitset_new:Nn
+% ,\bitset_set_false:Nn
+% ,\bitset_set_true:Nn
+% ,\bitset_to_arabic:N
+% ,\bool_new:N
+% ,\clist_map_inline:nn
+% ,\color_export:nnN
+% ,\color_set:nn
+% ,\color_set:nnn
+% ,\cs_new_protected:Npn
+% ,\cs_set_eq:NN
+% ,\cs_set_protected:Npn
+% ,\csname
+% ,\dim_eval:n
+% ,\dim_new:N
+% ,\endcsname
+% ,\exp_args:Ne
+% ,\group_begin:
+% ,\group_end:
+% ,\hbox_to_wd:nn
+% ,\hfill
+% ,\hook_gput_code:nnn
+% ,\int_eval:n
+% ,\l_keys_choice_int
+% ,\keys_define:nn
+% ,\keys_set:nn
+% ,\mode_leave_vertical:
+% ,\msg_error:nnnn
+% ,\msg_error:nnx
+% ,\msg_new:nnn
+% ,\msg_warning:nn
+% ,\msg_warning:nnn
+% ,\msg_warning:nnnnn
+% ,\NeedsTeXFormat
+% ,\pdf_name_from_unicode_e:n
+% ,\pdf_object_if_exist:nTF
+% ,\pdf_object_new:nn
+% ,\pdf_object_ref:n
+% ,\pdf_object_ref_last:
+% ,\pdf_object_unnamed_write:nx
+% ,\pdf_object_write:nx
+% ,\pdf_string_from_unicode:nnN
+% ,\pdfannot_box_ref_last:
+% ,\pdfannot_dict_put:nnn
+% ,\pdfannot_dict_put:nnx
+% ,\pdfannot_dict_remove:nn
+% ,\pdfannot_widget_box:nnn
+% ,\pdfdict_if_empty:nTF
+% ,\pdfdict_if_empty:nF
+% ,\pdfdict_new:n
+% ,\pdfdict_put:nnn
+% ,\pdfdict_put:nnx
+% ,\pdfdict_remove:nn
+% ,\pdfdict_use:n
+% ,\pdfmanagement_add:nnn
+% ,\pdfmanagement_add:nnx
+% ,\pdfmeta_standard_verify:nTF
+% ,\pdfmeta_standard_verify:nT
+% ,\pdfmeta_standard_verify:nF
+% ,\pdfxform_if_exist:nTF
+% ,\pdfxform_new:nnn
+% ,\pdfxform_ref:n
+% ,\ProvidesExplPackage
+% ,\rule
+% ,\seq_gput_right:Nn
+% ,\seq_gput_right:cx
+% ,\seq_if_exist:NTF
+% ,\seq_if_exist:cTF
+% ,\seq_new:N
+% ,\seq_new:c
+% ,\seq_use:Nn
+% ,\seq_use:cn
+% ,\str_if_empty:NTF
+% ,\str_if_in:NnTF
+% ,\str_if_in:NnT
+% ,\str_new:N
+% ,\tl_if_empty:NTF
+% ,\tl_if_empty:NF
+% ,\tl_if_empty:nTF
+% ,\tl_if_head_eq_charcode:nNTF
+% ,\tl_new:N
+% ,\tl_set:Nn
+% ,\tl_to_str:n
+%   }
 % \section{\pkg{l3pdffield} Implementation}
 %    \begin{macrocode}
 %<*package>
@@ -769,16 +868,30 @@
 %
 % \subsection{local variables}
 %
+% \begin{variable}
+%  {
+%      \l_@@_tmpa_str
+%     ,\l_@@_tmpa_tl
+%     ,\l_@@_tmpa_keys_tl
+%     ,\l_@@_currentparent_tl
+%     ,\l_@@_fieldID_tl
+%  }
+% Some tmp variables, and a variable for the current parent and the
+% current fieldID.
 %    \begin{macrocode}
 \str_new:N \l_@@_tmpa_str
 \tl_new:N  \l_@@_tmpa_tl
 \tl_new:N  \l_@@_tmpa_keys_tl
+\tl_new:N  \l_@@_currentparent_tl
+\tl_new:N  \l_@@_fieldID_tl
+%    \end{macrocode}
+% \end{variable}
+%
+%    \begin{macrocode}
 \cs_new_protected:Npn \@@_tmpa:n #1 {}
 \cs_new_protected:Npn \@@_tmpa:nn #1 #2 {}
-\tl_new:N \l_@@_currentparent_tl
-\tl_new:N \l_@@_fieldID_tl
 %    \end{macrocode}
-%
+
 % \subsection{messages}
 %    \begin{macrocode}
 \msg_new:nnn {pdffield}{no-period}
@@ -828,8 +941,8 @@
 %    \end{macrocode}
 % \end{macro}
 % \subsection{bitsets}
-% A bitset for the field flag Ff
-% and an internal copy of the annot bitset.
+% \begin{macro}{\l_@@_Ff_bitset,\l_@@_F_bitset}
+% The field and the annot bitset.
 %    \begin{macrocode}
 \bitset_new:Nn \l_@@_Ff_bitset
  {
@@ -899,6 +1012,7 @@
     lockedcontents = 10
   }
 %    \end{macrocode}
+% \end{macro}
 % \subsection{The field dictionary}
 % The field dictionary is the main object.
 % To be able to set values from the outside it will use a
@@ -906,9 +1020,8 @@
 %    \begin{macrocode}
 \pdfdict_new:n   {l_@@/field}
 \pdfdict_new:n   {l_@@/field/AA}
-\bool_new:N \l_@@_root_field_bool
 %    \end{macrocode}
-% \begin{macro}{\@@_field:n}
+% \begin{macro}{\@@_field:n,\pdffield_field:nn}
 % \begin{syntax}
 % \cs{@@_field:n}\Arg{field ID}
 % \end{syntax}
@@ -967,6 +1080,7 @@
       }
     \pdf_object_write:nx {@@/field/#1} { \pdfdict_use:n {l_@@/field} }
   }
+
 \cs_new_protected:Npn \pdffield_field:nn #1 #2
   {
     \group_begin:
@@ -981,7 +1095,7 @@
 % We assume that the annotation should really occupy space on the page and
 % leave vertical mode.
 %
-% \begin{macro}{\@@_annot:}
+% \begin{macro}{\@@_annot:,\pdffield_annot:n}
 % The command doesn't add grouping, so should only be used inside a group.
 %
 %    \begin{macrocode}
@@ -1046,6 +1160,7 @@
 % \end{macro}
 %
 % \subsection{auxiliary command for color keys}
+% \begin{macro}{\@@_color_set:nn }
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_color_set:nn #1 #2
  {
@@ -1064,16 +1179,25 @@
   }
 
 %    \end{macrocode}
+% \end{macro}
 % \subsection{Field keys}
 % The names. The main name should not be empty, it is added to the dictionary
 % when the field is created. A new name means a new field.
 % The other names can only be set when the field is created,
 % so we put them in the field group.
+%  \begin{macro}{\@@_value_handler:nN}
+%  Values (V and DV) need different handling in the various field types. So
+%  it uses a handler which can be redefined locally. By default it simply stores
+%  the value in a tl var.
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_value_handler:nN #1#2
   {
     \tl_set:Nn #2 {#1}
   }
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{parent,T,name,TU,altname,TM,mappingname}
+%    \begin{macrocode}
 \keys_define:nn { pdffield  }
   {
     ,parent .tl_set:N = \l_@@_currentparent_tl
@@ -1128,6 +1252,13 @@
     ,TM .groups:n = {field}
     ,mappingname .meta:n   = {TM={#1}}
     ,mappingname .groups:n = {field}
+    }
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{FT,V,DV,MaxLen,Lock,SV,Opt,TI,I}
+%    \begin{macrocode}
+\keys_define:nn{pdffield}
+  {
     ,FT .choices:nn =
       { Btn, Tx, Ch, Sig }
       {
@@ -1226,8 +1357,9 @@
     ,I .groups:n = {field}
   }
 %    \end{macrocode}
-
+% \end{macro}
 % Flags. We don't add lots of individual keys but map the key names directly
+% \begin{macro}{setFf,setfieldflags,unsetFf,unsetfieldflags}
 %    \begin{macrocode}
 \keys_define:nn { pdffield }
   {
@@ -1254,7 +1386,12 @@
   }
 
 %    \end{macrocode}
-%
+% \end{macro}
+% \begin{macro}
+%  {
+%    AA/K,keystroke,AA/F,format,
+%    AA/V,validate,AA/C,calculate
+%  }
 %  Keys for the AA dictionary. They all trigger a javascript option.
 %  K=keystroke, F=format, V=validate, C=calculate
 %    \begin{macrocode}
@@ -1297,7 +1434,9 @@
 
 
 %    \end{macrocode}
-%
+% \end{macro}
+% \begin{macro}{DA,Q,align,DS,RV}
+% The following keys are related to textfield and their format.
 %    \begin{macrocode}
 \keys_define:nn { pdffield }
   {
@@ -1331,15 +1470,24 @@
     ,RV .groups:n = {field}
   }
 %    \end{macrocode}
-%
+% \end{macro}
 % \subsection{Annotation keys}
 % The size of the field annotation
-%
+% \begin{variable}
+%  {
+%    \l_@@_annot_ht_dim,
+%    \l_@@_annot_wd_dim,
+%    \l_@@_annot_dp_dim
+%  }
 %    \begin{macrocode}
 \dim_new:N \l_@@_annot_ht_dim
 \dim_new:N \l_@@_annot_wd_dim
 \dim_new:N \l_@@_annot_dp_dim
-
+%    \end{macrocode}
+% \end{variable}
+% \begin{macro}{width,height,depth}
+% The size of the field annotation.
+%    \begin{macrocode}
 \keys_define:nn { pdffield }
   {
     ,width  .dim_set:N = \l_@@_annot_wd_dim
@@ -1350,7 +1498,28 @@
     ,depth  .initial:n = 0pt
   }
 %    \end{macrocode}
-%
+% \end{macro}
+% \begin{macro}{\@@_appearance_handler:nnn}
+% Appearances have to be handled in various ways, so we use a handler, that
+% the field types can redefine if needed.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_appearance_handler:nnn #1#2#3
+ {
+   \pdfxform_if_exist:nTF {  #1 }
+     {
+       \pdfannot_dict_put:nnx {widget/AP}{#2}
+         {
+           \pdfxform_ref:n {#1}
+         }
+     }
+     {
+       \msg_error:nnnn{pdffield}{appearance-missing}{#1}{#3}
+     }
+ }
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{AS,AP/N,appearance,AP/R,rollover-appearance,AP/D,down-appearance}
+% The key for the default appearance and the various types.
 %    \begin{macrocode}
 \keys_define:nn { pdffield }
  {
@@ -1366,19 +1535,6 @@
         }
     }
   ,AS .groups:n = annot
- }
-\cs_new_protected:Npn \@@_appearance_handler:nnn #1#2#3
- {
-   \pdfxform_if_exist:nTF {  #1 }
-     {
-       \pdfannot_dict_put:nnx {widget/AP}{#2}
-         {
-           \pdfxform_ref:n {#1}
-         }
-     }
-     {
-       \msg_error:nnnn{pdffield}{appearance-missing}{#1}{#3}
-     }
  }
 \keys_define:nn { pdffield }
   {
@@ -1428,7 +1584,11 @@
    ,down-appearance .meta:n = {AP/D={#1}}
    ,down-appearance .groups:n = annot
   }
-
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{MK/R,rotate,MK/BC,bordercolor,MK/BG,backgroundcolor,MK/CA,caption}
+% This are the keys for the dynamic appearance. A number are not handled yet fully.
+%    \begin{macrocode}
 \keys_define:nn { pdffield  }
   {
     MK/R .choices:nn = {0,90,180,270}
@@ -1476,7 +1636,7 @@
         }
      }
     ,MK/BG .groups:n = annot
-   ,bordercolor .meta:n = {MK/BG=#1}
+   ,backgroundcolor .meta:n = {MK/BG=#1}
   }
 
 
@@ -1496,6 +1656,11 @@
     ,MK/CA .groups:n = annot
    ,caption .meta:n = {MK/CA=#1}
   }
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{MK/RC,MK/AC,MK/I,MK/RI,MK/IX,MK/IF,MK/TP}
+% These keys are currently not full documentated. It is unclear if they are usefull.
+%    \begin{macrocode}
 
 \cs_set_protected:Npn \@@_tmpa:n #1
  {
@@ -1518,7 +1683,10 @@
 \clist_map_inline:nn {RC,AC,I,RI,IX,IF,TP}
   { \@@_tmpa:n {#1} }
 %    \end{macrocode}
+% \end{macro}
+%
 % Flags.
+%  \begin{macro}{setF,setannotflags,unsetF,unsetannotflags}
 %    \begin{macrocode}
 \keys_define:nn { pdffield  }
   {
@@ -1546,11 +1714,17 @@
   }
 
 %    \end{macrocode}
-%
+% \end{macro}
 % Keys for the AA dictionary. They all trigger a javascript option.
 % Fo = onfocus, Bl = onblur, D = onmousedown, U = onmouseup,
 % E = onenter, X = onexit, PO = pageopen, PC = pageclose,
 % PV = pagevisible, PI = pageinvisible
+% \begin{macro}
+%  {
+%    AA/Fo,onfocus, AA/Bl,onblur, AA/D,onmousedown, AA/U,onmouseup,
+%    AA/E,onenter, AA/X,onexit, AA/PO,pageopen, AA/PC,pageclose,
+%    AA/PV,pagevisible, AA/PI,pageinvisible
+%  }
 %    \begin{macrocode}
 \cs_set_protected:Npn \@@_tmpa:n #1  %
   {
@@ -1591,8 +1765,9 @@
 \@@_tmpa:nn {onenter}  {E}
 \@@_tmpa:nn {onexit}   {X}
 %    \end{macrocode}
+% \end{macro}
 % \subsection{Appearances}
-% \begin{macro}{\pdffield_appearance:nn}
+% \begin{macro}{\pdffield_appearance:nn,\pdffield_store_appearance:nn}
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdffield_appearance:nn #1 #2
   {
@@ -1603,7 +1778,7 @@
 %    \end{macrocode}
 % \end{macro}
 % \subsection{Setup command}
-%
+% \begin{macro}{create-style,preset-checkbox,preset-radio,preset-textfield}
 %    \begin{macrocode}
 \keys_define:nn { pdffield / setup }
   {
@@ -1632,7 +1807,10 @@
   }
 \keys_set:nn{ pdffield / setup }{preset-checkbox={}}
 \keys_set:nn{ pdffield / setup }{preset-textfield={}}
-
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\@@_style_create:nn}
+%    \begin{macrocode}
 \cs_new_protected:Npn \@@_style_create:nn #1#2
   {
     \keys_define:nn { pdffield }
@@ -1641,7 +1819,10 @@
       }
   }
 
-
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\pdffield_setup:n,style}
+%    \begin{macrocode}
 \cs_new_protected:Npn \pdffield_setup:n #1
   {
      \keys_set:nn{ pdffield / setup }{#1}
@@ -1652,6 +1833,7 @@
     style .code:n = {\keys_set:nn {pdffield}{@@/style/#1={#1}}}
   }
 %    \end{macrocode}
+% \end{macro}
 %    \begin{macrocode}
 %</package>
 %    \end{macrocode}
