@@ -304,7 +304,7 @@
 % \end{syntax}
 % This uses a style define with the previous |create-style|.
 % \end{function}
-% 
+%
 % \begin{function}{preset-checkbox}
 % \begin{syntax}
 % |preset-checkbox|=\Arg{key-val}
@@ -590,6 +590,16 @@
 % as it is unclear if there are of any use.
 % \end{function}
 %
+% \begin{function}{fieldID}
+%  \begin{syntax}
+%   |fieldID| = \meta{field ID}\\
+%  \end{syntax}
+% \emph{For experts only!}
+% This stores \meta{field ID} in an internal variable.
+% The variable is not used by the basic commands,
+% but by the commands to create the various field types.
+% Check their documentation for use cases.
+% \end{function}
 % \section{Annot keys}
 %
 % Table~\ref{tab:annotkeys} summarize the keys which can be used.
@@ -1255,6 +1265,18 @@
     }
 %    \end{macrocode}
 % \end{macro}
+%
+% \begin{macro}{fieldID}
+% For some field types we need a fieldID.
+%
+%    \begin{macrocode}
+\keys_define:nn { pdffield }
+ {
+   fieldID .tl_set:N = \l_@@_fieldID_tl
+ }
+%    \end{macrocode}
+% \end{macro}
+%
 % \begin{macro}{FT,V,DV,MaxLen,Lock,SV,Opt,TI,I}
 %    \begin{macrocode}
 \keys_define:nn{pdffield}

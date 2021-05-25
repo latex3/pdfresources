@@ -116,14 +116,17 @@
 % The |appearance| keys have a more checkbox specific
 % behaviour, other keys have other defaults than with the basic commands.
 % Additionally there
-% are a small number of keys specific to a checkbox.
+% are a small number of keys specific  to a checkbox.
+% For convenience a number of important keys are documented here too, even if
+% they are already in the document from l3pdffield.
 %
 %
 % Disabled keys are
 %  \begin{itemize}
 %  \item |V|, |DV|, |AS|: use |checked| instead.
 %  \item |FT| is overwritten.
-%  \item For checkboxes only the field flags  |ReadOnly|, |Required| and |NoExport| make sense.
+%  \item For checkboxes only the field flags  |ReadOnly|, |Required| and |NoExport|
+%   make sense.
 %  |Radio|, |Pushbotton| are set automatically automatically by the code
 % as this is required for a checkbox.
 %  \end{itemize}
@@ -140,7 +143,7 @@
 %   |name| = \meta{partial name}\\
 %   |T| = \meta{partial name}
 %  \end{syntax}
-% This sets like the |T| key for fields the partial name of the field. The value
+% This sets the partial name of the field. The value
 % shouldn't contain a period, be not empty and sensibly consist of simple chars.
 % Additionally the value is used to create the field ID.
 % This means that checkboxes with the same partial name are annotations
@@ -219,8 +222,9 @@
 % \meta{partial appearance name}|/Yes| and \meta{partial appearance name}|/Off|
 % has been created. The initial value is |pdffield/checkbox/default|
 % for the normal appearance and shows a \cs{texttimes}.
-% The other appearance are not set by default.
+% The other appearances are not set by default.
 % \end{function}
+%
 % \begin{function}{checked}
 %  \begin{syntax}
 %   |checked| = |true|\verb"|"|false|
@@ -265,26 +269,123 @@
 % \end{documentation}
 %
 % \begin{implementation}
+% \DoNotIndex
+%  {\\
+% ,\bitset_clear:N
+% ,\bitset_new:Nn
+% ,\bitset_set_false:Nn
+% ,\bitset_set_true:Nn
+% ,\bitset_to_arabic:N
+% ,\bool_new:N
+% ,\box_dp:N
+% ,\box_ht:N
+% ,\clist_map_inline:nn
+% ,\color_export:nnN
+% ,\color_set:nn
+% ,\color_set:nnn
+% ,\cs_new_protected:Npn
+% ,\cs_new_protected:cpn
+% ,\cs_set_eq:NN
+% ,\cs_gset_eq:cN
+% ,\cs_set_protected:Npn
+% ,\cs_generate_variant:Nn
+% ,\cs_gset_eq:NN
+% ,\csname
+% ,\dim_eval:n
+% ,\dim_new:N
+% ,\endcsname
+% ,\exp_args:Ne
+% ,\fboxsep
+% ,\group_begin:
+% ,\group_end:
+% ,\hbox_to_wd:nn
+% ,\hfill
+% ,\hook_gput_code:nnn
+% ,\int_eval:n
+% ,\l_keys_choice_int
+% ,\keys_define:nn
+% ,\keys_set:nn
+% ,\mode_leave_vertical:
+% ,\msg_error:nnn
+% ,\msg_error:nnnn
+% ,\msg_new:nnn
+% ,\msg_warning:nn
+% ,\msg_warning:nnn
+% ,\msg_warning:nnnnn
+% ,\NeedsTeXFormat
+% ,\normalsize
+% ,\pdf_name_from_unicode_e:n
+% ,\pdf_object_if_exist:nTF
+% ,\pdf_object_if_exist:nF
+% ,\pdf_object_new:nn
+% ,\pdf_object_ref:n
+% ,\pdf_object_ref_last:
+% ,\pdf_object_unnamed_write:nn
+% ,\pdf_object_write:nn
+% ,\pdf_string_from_unicode:nnN
+% ,\pdfannot_box_ref_last:
+% ,\pdfannot_dict_put:nnn
+% ,\pdfannot_dict_remove:nn
+% ,\pdfannot_widget_box:nnn
+% ,\pdfdict_if_empty:nTF
+% ,\pdfdict_get:nnN
+% ,\pdfdict_new:n
+% ,\pdfdict_put:nnn
+% ,\pdfdict_remove:nn
+% ,\pdfdict_use:n
+% ,\pdfmanagement_add:nnn
+% ,\pdfmeta_standard_verify:nTF
+% ,\pdfxform_if_exist:nTF
+% ,\pdfxform_new:nnn
+% ,\pdfxform_ref:n
+% ,\phantom
+% ,\prg_do_nothing:
+% ,\ProvidesExplPackage
+% ,\rule
+% ,\seq_gput_right:Nn
+% ,\seq_if_exist:NTF
+% ,\seq_new:N
+% ,\seq_use:Nn
+% ,\str_if_empty:NTF
+% ,\str_if_in:NnTF
+% ,\str_new:N
+% ,\strut
+% ,\strutbox
+% ,\tl_if_empty:NTF
+% ,\tl_if_empty:NT
+% ,\tl_if_empty:NF
+% ,\tl_put_left:Nn
+% ,\tl_if_empty:nTF
+% ,\tl_if_head_eq_charcode:nNTF
+% ,\tl_new:N
+% ,\tl_set:Nn
+% ,\tl_to_str:n
+% ,\use:c
+%   }
 % \section{\pkg{l3pdffield-checkbox} Implementation}
 %    \begin{macrocode}
 %<*package>
 %<@@=pdffield>
 %    \end{macrocode}
 % \subsection{Variables}
-%    \begin{macrocode}
-%    \end{macrocode}
+% There are no specific variables.
 % \subsection{Messages}
-%    \begin{macrocode}
-%    \end{macrocode}
+% There are no specific messages.
 % \subsection{Appearances}
-% The default appearances are a cross (\cs{texttimes}),
-% Every appearance should have two versions and follow the naming
+% The default appearances are a quadratic frame with cross (\cs{texttimes}) if
+% checked.
+% User appearances should have two versions and follow the naming
 % module/\meta{name}/Yes and module/\meta{name}/Off.
-%  \begin{macro}{@@/checkbox/default_appearances:}
+%  \begin{macro}
+%   {
+%    @@/checkbox/default_appearances:,
+%    pdffield/checkbox/default/Yes,
+%    pdffield/checkbox/default/Off
+%   }
 %  This defines the standard appearance. It is setup at the first
 %  use of a checkbox, and will adapt to the font family in use then.
 %    \begin{macrocode}
-\cs_new_protected:cn {@@/checkbox/default_appearances:}
+\cs_new_protected:cpn {@@/checkbox/default_appearances:}
   {
      \pdffield_appearance:nn {pdffield/checkbox/default/Yes}
        {
@@ -309,6 +410,7 @@
 %
 %\subsection{Creating the field}
 % A field should be created if the name doesn't exist
+%  \begin{macro}{ \@@_checkbox_field:n }
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_checkbox_field:n #1 %name
   {
@@ -320,8 +422,9 @@
   }
 \cs_generate_variant:Nn \@@_checkbox_field:n {V}
 %    \end{macrocode}
+% \end{macro}
 % \subsection{Assembling the checkbox}
-
+%
 % \begin{macro}{\@@_checkbox:n}
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_checkbox:n #1
@@ -369,6 +472,8 @@
 % Most keys are inherited simply the ones from the generic field and annot keys.
 % A key to decide if the box is initially checked or not.
 % We stay in the same family so that we can build a style.
+%  \begin{macro}{checked}
+%  This is a key specific for checkbox, it sets both field and annotation keys.
 %    \begin{macrocode}
 \keys_define:nn { pdffield  }
  {
@@ -389,14 +494,12 @@
    ,checked .groups:n  = {checkbox}
  }
 %    \end{macrocode}
-% And a key to set a dedicated field ID
-%    \begin{macrocode}
-\keys_define:nn { pdffield }
- {
-   fieldID .tl_set:N = \l_@@_fieldID_tl
- }
-%    \end{macrocode}
+% \end{macro}
+%
 % \begin{macro}{\@@_checkbox_appearance_handler:nnn}
+% Appearances must create a dictionary, so we define a special handler.
+% \Arg{name} is the xform name without the /Yes, /Off, \Arg{type} is N, R, or D,
+% \Arg{text} is a word for the error message. 
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_checkbox_appearance_handler:nnn #1 #2 #3 %name, type, text
   {
@@ -431,3 +534,5 @@
 %    \end{macrocode}
 % \end{macro}
 %\end{implementation}
+
+% \PrintIndex
