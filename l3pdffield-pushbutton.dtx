@@ -1,0 +1,487 @@
+% \iffalse meta-comment
+%
+%% File: l3pdfpdffield-pushbutton.dtx
+%
+% Copyright (C) 2021 The LaTeX Project
+%
+% It may be distributed and/or modified under the conditions of the
+% LaTeX Project Public License (LPPL), either version 1.3c of this
+% license or (at your option) any later version.  The latest version
+% of this license is in the file
+%
+%    http://www.latex-project.org/lppl.txt
+%
+% This file is part of the "LaTeX PDF management testphase bundle" (The Work in LPPL)
+% and all files in that bundle must be distributed together.
+%
+% -----------------------------------------------------------------------
+%
+% The development version of the bundle can be found at
+%
+%    https://github.com/latex3/pdfresources
+%
+% for those people who are interested.
+%
+%<*driver>
+\RequirePackage{pdfmanagement-testphase}
+\DeclareDocumentMetadata{}
+\makeatletter
+\declare@file@substitution{doc.sty}{doc-v3beta.sty}
+\makeatother
+\documentclass[full]{l3doc}
+\usepackage{array,booktabs}
+\usepackage{l3pdffield-testphase,bearwear}
+\hypersetup{pdfauthor=The LaTeX Project,
+ pdftitle=l3pdffield (LaTeX PDF management testphase bundle)}
+\begin{document}
+  \DocInput{\jobname.dtx}
+\end{document}
+%</driver>
+% \fi
+% \providecommand\hook[1]{\texttt{#1}}
+% \ExplSyntaxOn
+% \pdffield_appearance:nn {pdffield/bear/Yes}
+%  {
+%    \tikz\bear\bearwear[shirt=red,body~deco={\node[font=\tiny\bfseries,white]~at~(beartummy){Yes};}];
+%  }
+% \pdffield_appearance:nn {pdffield/bear/Off}
+%  {
+%   \tikz\bear\bearwear[body~deco={\node[font=\tiny\bfseries,white]~at~(beartummy){Off};}];
+%  }
+% \ExplSyntaxOff
+% \title{^^A
+%   The \pkg{l3pdffield-pushbutton} module\\ Commands to create pushbutton form fields   ^^A
+%   \\ \LaTeX{} PDF management testphase bundle
+% }
+%
+% \author{^^A
+%  The \LaTeX{} Project\thanks
+%    {^^A
+%      E-mail:
+%        \href{mailto:latex-team@latex-project.org}
+%          {latex-team@latex-project.org}^^A
+%    }^^A
+% }
+%
+% \date{Version 0.95d, released 2021-05-14}
+%
+% \maketitle
+% \begin{documentation}
+% \section{\pkg{l3pdffield-pushbutton} Introduction}
+% This is the documentation for pushbutton fields, for general information about form fields
+% check the documentation l3pdffield.
+%
+%
+%
+% Please keep in mind
+% \begin{itemize}
+% \item Not every PDF viewer supports pushbuttons.
+% \item The handling can depend on settings in the PDF viewer. In adobe reader for
+% example I had to disable an option to avoid that it tries to create an appearance
+% itself
+% \item Standards like pdf/A disable features of form fields too
+% (as you typically can't change the PDF).
+% \end{itemize}
+% \section{Pushbuttons}
+% Click me:
+% \ExplSyntaxOn
+%  \pdffield_push:n{name=bear,appearance=pdffield/bear,width=23pt,height=30pt,depth=10pt}
+% \ExplSyntaxOff
+%
+% \bigskip
+% \subsection{Commands}
+% \begin{function}{\pdffield_push:n}
+% \begin{syntax}
+%  \cs{pdffield_push:n}\Arg{key val list}
+% \end{syntax}
+% This creates a pushbutton. Unlike radio buttons and checkboxes pushbuttons
+% don't change their state, instead the purpose is to trigger an action. Important
+% options are Submit and Reset. They will be setup in another module.
+% The list of allowed keys is described below.
+% The \meta{key val list} should at least set the name, without it the default name
+% |pushbutton| is used. The default appearance
+% is a rectangular frame with a text in it. Down and rollover use a different color.
+% The default appearance is setup at the first use and will use the font family
+% active at that time for the text.
+% \end{function}
+%
+%
+% \subsection{Keys}
+%
+% The new pushbutton command accept all field and annot keys from l3pdffield.
+% A few keys are disabled or are forced to specific values.
+% The |appearance| keys have a more pushbutton specific
+% behaviour, other keys have other defaults than with the basic commands.
+% Additionally there
+% are a small number of keys specific  to a pushbutton.
+% For convenience a number of important keys are documented here too, even if
+% they are already in the document from l3pdffield.
+%
+%
+% Disabled keys are
+%  \begin{itemize}
+%  \item |V|, |DV|. As a pushbutton has no permanent state,
+%  the keys should not be used.
+%  \item |FT| is overwritten.
+%  \item For pushbuttons only the field flags  |ReadOnly|, |Required| and |NoExport|
+%   make sense.
+%  |Pushbotton| are set automatically automatically by the code
+% as this is required for a pushbutton.
+%  \end{itemize}
+%
+% \begin{function}{preset-push}
+%  \begin{syntax}
+%   |preset-push| = \Arg{key-val-list}
+%  \end{syntax}
+% This allows to set default keys for a pushbutton.
+% \end{function}
+%
+% \begin{function}{name,T}
+%  \begin{syntax}
+%   |name| = \meta{partial name}\\
+%   |T| = \meta{partial name}
+%  \end{syntax}
+% This sets the partial name of the field. The value
+% shouldn't contain a period, be not empty and sensibly consist of simple chars.
+% Additionally the value is used to create the field ID.
+% This means that pushbuttons with the same partial name are annotations
+% with the same field as parent.
+% The field ID is then internal and can not be used to
+% attach another annotation.
+% For explicit control of the field ID  use the |fieldID| key.
+% \end{function}
+%
+% \begin{function}{fieldID}
+%  \begin{syntax}
+%   |fieldID| = \meta{field ID}\\
+%  \end{syntax}
+% \emph{For experts only!}
+% This allows to give the pushbutton field a specific ID. This is only useful
+% in the context of a larger fieldset or if you want to attach another annotation
+% to the field with \cs{pdffield_annot:n}. If used wrongly you can
+% easily create invalid fieldset. It allows you to create to fields with the
+% same partial name, but if you want to see both
+% you need to ensure that their full names are
+% different---for example by adding some parent fields.
+% \end{function}
+%
+% \begin{function}{parent}
+%  \begin{syntax}
+%   |parent| = \meta{field ID}\\
+%  \end{syntax}
+% This is only needed if the field should be part
+% of a larger fieldset. The value should be a field ID of a field created previously
+% with \cs{pdffield_field:nn}.
+% \end{function}
+%
+% \begin{function}{altname,TU}
+%  \begin{syntax}
+%   |altname| = \meta{string}\\
+%   |TU| = \meta{string}\\
+%  \end{syntax}
+% This is sets an alternative name for user interaction.
+% This name can only be set at the first pushbutton instance, when the field is initialized.
+% \end{function}
+%
+% \begin{function}{mappingname,TM}
+%  \begin{syntax}
+%   |mappingname| = \meta{string}\\
+%   |TM| = \meta{string}\\
+%  \end{syntax}
+% This is sets an alternative name for export.
+% This name can only be set at the first pushbutton instance, when the field is initialized.
+% \end{function}
+%
+% \begin{function}{width,height,depth}
+% \begin{syntax}
+% |width| = \meta{dim expression}\\
+% |height| = \meta{dim expression}\\
+% |depth| = \meta{dim expression}
+% \end{syntax}
+% These keys allow to set the dimensions of the pushbutton instance.
+% The value should be a dimension expression. By default
+% |width| and |height| use \cs{normalbaselineskip}, the |depth| is zero.
+% \end{function}
+%
+% \begin{function}{AP/N,appearance,AP/R,rollover-appearance,AP/D,down-appearance}
+%  \begin{syntax}
+%   |AP/N| = \meta{appearance name}\\
+%   |appearance| = \meta{appearance name}\\
+%   |AP/R| = \meta{appearance name}\\
+%   |rollover-appearance| = \meta{appearance name}\\
+%   |AP/D| = \meta{appearance name}\\
+%   |down-appearance| = \meta{appearance name}
+%  \end{syntax}
+% This keys sets the normal appearance, the rollover appearance (when the
+% mouse hovers over the pushbutton) and the down appearance (when the
+% mouse clicks). They take as value a
+% \meta{appearance name} and expects that one form Xobjects
+% with this name has been created before. The initial value are
+% |pdffield/pushbutton/defaultN|, |pdffield/pushbutton/defaultD|,
+% |pdffield/pushbutton/defaultR|.
+% \end{function}
+%
+% \begin{function}{value}
+%  \begin{syntax}
+%   |value| = text???.....\\
+%  \end{syntax}
+% \ldots ...
+% \end{function}
+
+% \begin{function}{action}
+%  \begin{syntax}
+%   |action| = .....\\
+%  \end{syntax}
+% \ldots ...
+% \end{function}
+%
+% \subsection{Using with hyperref}
+% The \cs{Pushbutton} command from hyperref ?????
+%
+% \begin{verbatim}
+% \ExplSyntaxOn\makeatletter
+% \def\@CheckBox[#1]#2{\LayoutCheckField{#2}{\pdffield_checkbox:n {name=#2,#1}}}
+% \ExplSyntaxOff\makeatother
+% \end{verbatim}
+%
+% \subsection{Some background}
+% For some general background about fieldsets, fields and field annotations, please
+% check \pkg{l3pdffield}. Here are only some remarks about the special case of
+% checkboxes.
+%
+% A checkbox consist of a field along with one or more field annotations.
+% ??????
+% The annotations can appear on more than one page or locations and if one instance
+% is checked all other instances follows and are checked too.
+%
+%
+% \end{documentation}
+%
+% \begin{implementation}
+% \DoNotIndex
+%  {\\
+% ,\bitset_clear:N
+% ,\bitset_new:Nn
+% ,\bitset_set_false:Nn
+% ,\bitset_set_true:Nn
+% ,\bitset_to_arabic:N
+% ,\bool_new:N
+% ,\box_dp:N
+% ,\box_ht:N
+% ,\clist_map_inline:nn
+% ,\color_export:nnN
+% ,\color_set:nn
+% ,\color_set:nnn
+% ,\cs_new_protected:Npn
+% ,\cs_new_protected:cpn
+% ,\cs_set_eq:NN
+% ,\cs_gset_eq:cN
+% ,\cs_set_protected:Npn
+% ,\cs_generate_variant:Nn
+% ,\cs_gset_eq:NN
+% ,\csname
+% ,\dim_eval:n
+% ,\dim_new:N
+% ,\endcsname
+% ,\exp_args:Ne
+% ,\fboxsep
+% ,\group_begin:
+% ,\group_end:
+% ,\hbox_to_wd:nn
+% ,\hfill
+% ,\hook_gput_code:nnn
+% ,\int_eval:n
+% ,\l_keys_choice_int
+% ,\keys_define:nn
+% ,\keys_set:nn
+% ,\mode_leave_vertical:
+% ,\msg_error:nnn
+% ,\msg_error:nnnn
+% ,\msg_new:nnn
+% ,\msg_warning:nn
+% ,\msg_warning:nnn
+% ,\msg_warning:nnnnn
+% ,\NeedsTeXFormat
+% ,\normalsize
+% ,\pdf_name_from_unicode_e:n
+% ,\pdf_object_if_exist:nTF
+% ,\pdf_object_if_exist:nF
+% ,\pdf_object_new:nn
+% ,\pdf_object_ref:n
+% ,\pdf_object_ref_last:
+% ,\pdf_object_unnamed_write:nn
+% ,\pdf_object_write:nn
+% ,\pdf_string_from_unicode:nnN
+% ,\pdfannot_box_ref_last:
+% ,\pdfannot_dict_put:nnn
+% ,\pdfannot_dict_remove:nn
+% ,\pdfannot_widget_box:nnn
+% ,\pdfdict_if_empty:nTF
+% ,\pdfdict_get:nnN
+% ,\pdfdict_new:n
+% ,\pdfdict_put:nnn
+% ,\pdfdict_remove:nn
+% ,\pdfdict_use:n
+% ,\pdfmanagement_add:nnn
+% ,\pdfmeta_standard_verify:nTF
+% ,\pdfxform_if_exist:nTF
+% ,\pdfxform_new:nnn
+% ,\pdfxform_ref:n
+% ,\phantom
+% ,\prg_do_nothing:
+% ,\ProvidesExplPackage
+% ,\rule
+% ,\seq_gput_right:Nn
+% ,\seq_if_exist:NTF
+% ,\seq_new:N
+% ,\seq_use:Nn
+% ,\str_if_empty:NTF
+% ,\str_if_in:NnTF
+% ,\str_new:N
+% ,\strut
+% ,\strutbox
+% ,\tl_if_empty:NTF
+% ,\tl_if_empty:NT
+% ,\tl_if_empty:NF
+% ,\tl_put_left:Nn
+% ,\tl_if_empty:nTF
+% ,\tl_if_head_eq_charcode:nNTF
+% ,\tl_new:N
+% ,\tl_set:Nn
+% ,\tl_to_str:n
+% ,\use:c
+%   }
+% \section{\pkg{l3pdffield-pushbutton} Implementation}
+%    \begin{macrocode}
+%<*package>
+%<@@=pdffield>
+%    \end{macrocode}
+% \subsection{Variables}
+% There are no specific variables.
+% \subsection{Messages}
+% There are no specific messages.
+% \subsection{Appearances}
+% The default appearances are a rectangular frame with some text.
+%
+%  \begin{macro}
+%   {
+%    @@/pushbutton/default_appearances:,
+%    pdffield/pushbutton/defaultN,
+%    pdffield/pushbutton/defaultR,
+%    pdffield/pushbutton/defaultD,
+%   }
+%  This defines the standard appearance. It is setup at the first
+%  use of a pushbutton, and will adapt to the font family in use then.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_pushbutton_default_appearances:n #1 % text
+  {
+     \pdffield_appearance:nn {pdffield/pushbutton/defaultN}
+       {
+         \normalsize
+         \fboxsep 0pt
+         \framebox
+           [ \dim_eval:n { \box_ht:N\strutbox+\box_dp:N\strutbox } ]
+           { \texttimes \strut }
+       }
+      \pdffield_appearance:nn {pdffield/pushbutton/defaultR}
+       {
+         \normalsize
+         \fboxsep 0pt
+         \framebox
+           [ \dim_eval:n { \box_ht:N\strutbox+\box_dp:N\strutbox } ]
+           { \phantom{\texttimes} \strut }
+       }
+
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+%\subsection{Creating the field}
+% A field should be created if the name doesn't exist
+%  \begin{macro}{ \@@_pushbutton_field:n }
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_pushbutton_field:n #1 %name
+  {
+    \pdf_object_if_exist:nF {@@/field/@@/pushbutton/#1}
+      {
+        \@@_field:n { @@/pushbutton/#1 }
+      }
+    \keys_set:nn {pdffield}{parent=@@/pushbutton/#1}
+  }
+\cs_generate_variant:Nn \@@_pushbutton_field:n {V}
+%    \end{macrocode}
+% \end{macro}
+% \subsection{Assembling the Pushbutton}
+%
+% \begin{macro}{\@@_pushbutton:n}
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_pushbutton:n #1
+  {
+    \group_begin:
+    \@@_pushputton_default_appearances:n {TEXT}
+  %  \cs_set_eq:NN\@@_appearance_handler:nnn \@@_checkbox_appearance_handler:nnn
+  %  \cs_set_eq:NN\@@_value_handler:n   \@@_checkbox_value_handler:n
+  %  \cs_set_eq:NN\@@_default_handler:n \@@_checkbox_default_handler:n
+%    \end{macrocode}
+% Setting up the defaults.
+%    \begin{macrocode}
+    \keys_set:nn {pdffield}
+      {
+        fieldID=,
+        name=pushbutton,
+        appearance = pdffield/checkbox/default,
+        width  = 3cm,
+        height = \normalbaselineskip,
+      }
+%    \end{macrocode}
+% Value keys should be undefined.
+%    \begin{macrocode}
+    \keys_set:nn { pdffield }{@@/preset/pushbutton,#1}
+    \keys_set:nn { pdffield }
+      {
+        ,V=
+        ,DV=
+        ,setFf={Pushbutton}
+        ,FT= Btn
+      }
+    \tl_if_empty:NT\l_@@_fieldID_tl
+      {
+        \pdfdict_get:nnN {l_@@/field}{T}\l_@@_fieldID_tl
+        \tl_put_left:Nn \l_@@_fieldID_tl {@@/pushbutton/}
+      }
+    \@@_pushbutton_field:V\l_@@_fieldID_tl
+    \@@_annot:
+    \group_end:
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Keys}
+% Most keys are inherited simply the ones from the generic field and annot keys.
+% A key to decide if the box is initially checked or not.
+% We stay in the same family so that we can build a style.
+%  \begin{macro}{}
+%    \begin{macrocode}
+\keys_define:nn { pdffield  }
+ {
+ }
+
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\@@_pushbutton_value_handler:n,\@@_pushbutton_default_handler:n}
+% ??? probably unusuable
+% |value| and |default| do the same as checked.
+%    \begin{macrocode}
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{user commands}
+% \begin{macro}{\pdffield_pushbutton:n}
+%    \begin{macrocode}
+\cs_set_eq:NN \pdffield_pushbutton:n \@@_pushbutton:n
+%</package>
+%    \end{macrocode}
+% \end{macro}
+%\end{implementation}
+
+% \PrintIndex
