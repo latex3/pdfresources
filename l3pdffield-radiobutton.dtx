@@ -30,7 +30,7 @@
 \makeatother
 \documentclass[full]{l3doc}
 \usepackage{array,booktabs}
-\usepackage{l3pdffield-testphase,bearwear}
+\usepackage{l3pdffield-testphase,bearwear,tikzlings,tikzducks}
 \hypersetup{pdfauthor=The LaTeX Project,
  pdftitle=l3pdffield (LaTeX PDF management testphase bundle)}
 \begin{document}
@@ -40,14 +40,38 @@
 % \fi
 % \providecommand\hook[1]{\texttt{#1}}
 % \ExplSyntaxOn
+% \box_new:N\l_pdffield_bear_box
+% \box_new:N\l_pdffield_hippo_box
+% \box_new:N\l_pdffield_duck_box
+% \hbox_set:Nn \l_pdffield_bear_box  {\tikz\bear\bearwear[shirt=red,body~deco={\node[font=\tiny\bfseries,white]~at~(beartummy){Yes};}];}
+% \hbox_set:Nn \l_pdffield_hippo_box {\vphantom{\tikz\bear;}\tikz\hippo;}
+% \hbox_set:Nn \l_pdffield_duck_box  {\vphantom{\tikz\bear;}\tikz\duck;}
+%
+%
 % \pdffield_appearance:nn {pdffield/bear/Yes}
 %  {
-%    \tikz\bear\bearwear[shirt=red,body~deco={\node[font=\tiny\bfseries,white]~at~(beartummy){Yes};}];
+%    \fbox{\box_use:N \l_pdffield_bear_box}
 %  }
 % \pdffield_appearance:nn {pdffield/bear/Off}
 %  {
-%   \tikz\bear\bearwear[body~deco={\node[font=\tiny\bfseries,white]~at~(beartummy){Off};}];
+%    \fbox{\phantom{\box_use:N \l_pdffield_bear_box}}
 %  }
+% \pdffield_appearance:nn {pdffield/hippo/Yes}
+%  {
+%    \fbox{\box_use:N \l_pdffield_hippo_box}
+%  }
+% \pdffield_appearance:nn {pdffield/hippo/Off}
+%  {
+%    \fbox{\phantom{\box_use:N \l_pdffield_hippo_box}}
+%  }%
+% \pdffield_appearance:nn {pdffield/duck/Yes}
+%  {
+%    \fbox{\box_use:N \l_pdffield_duck_box}
+%  }
+% \pdffield_appearance:nn {pdffield/duck/Off}
+%  {
+%    \fbox{\phantom{\box_use:N \l_pdffield_duck_box}}
+%  }%
 % \ExplSyntaxOff
 % \title{^^A
 %   The \pkg{l3pdffield-radiobutton} module\\ Commands to create radio form fields   ^^A
@@ -72,16 +96,21 @@
 % check the documentation l3pdffield.
 %
 % \begin{center}
+%  Choose your favorite
+%  
+%  \medskip
 % \ExplSyntaxOn
-% \pdffield_radio:n{name=A,value=A,default=B}\quad
-% \pdffield_radio:n{name=A,value=B}\quad
-% \pdffield_radio:n{name=A,value=C}\par\medskip
-% \pdffield_radio:n{name=A,value=A}\quad
-% \pdffield_radio:n{name=A,value=B}\quad
-% \pdffield_radio:n{name=A,value=C}\par
+% \begin{tabular}{ccc}
+% \pdffield_radio:n{name=A,value=Bär,default=B,appearance=pdffield/bear,width=\box_wd:N\l_pdffield_bear_box,height=\box_ht:N\l_pdffield_bear_box}&
+% \pdffield_radio:n{name=A,value=Sieglinde,appearance=pdffield/hippo,width=\box_wd:N\l_pdffield_hippo_box,height=\box_ht:N\l_pdffield_hippo_box}&
+% \pdffield_radio:n{name=A,value=Duck,appearance=pdffield/duck,width=\box_wd:N\l_pdffield_duck_box,height=\box_ht:N\l_pdffield_duck_box}\\[1ex]
+% \pdffield_radio:n{name=A,value=Bär}&
+% \pdffield_radio:n{name=A,value=Sieglinde}&
+% \pdffield_radio:n{name=A,value=Duck}
+% \end{tabular}
 % \ExplSyntaxOff
 % \end{center}
-% 
+%
 % Please keep in mind
 % \begin{itemize}
 % \item Not every PDF viewer supports radio buttons.
