@@ -187,6 +187,7 @@
 % Disabled keys are
 %  \begin{itemize}
 %  \item |FT| is overwritten.
+%  \item |AS| is cleared.
 %  \item |DA| is overwritten.
 %  Locally use |fontcolor|, |fontsize| and |font| instead.
 %  Globally you can set the |DA| key in the catalog with for example
@@ -199,6 +200,10 @@
 %  If |Comb| is set, |Multiline|, |Password| and |FileSelect| are unset, |MaxLen| is
 %  set to 10 if it hasn't been set previously.
 %  \end{itemize}
+%
+% The keys |value| and |default| are mapped to |V| and |DV| for this field type, see
+% below.
+%
 %
 % \begin{function}{preset-textfield}
 %  \begin{syntax}
@@ -472,35 +477,39 @@
 %<@@=pdffield>
 %    \end{macrocode}
 % \subsection{Variables}
+% \begin{variable}
+%  {
+%    \l_@@_DA_fontcolor_tl, \l_@@_DA_fontsize_dim, \l_@@_DA_fontname_tl
+%  }
+%  Variables for the font setup in the DA key.
 %    \begin{macrocode}
 \tl_new:N  \l_@@_DA_fontcolor_tl
 \dim_new:N \l_@@_DA_fontsize_dim
 \tl_new:N  \l_@@_DA_fontname_tl
 %    \end{macrocode}
-% \subsection{Messages}
-%    \begin{macrocode}
-%    \end{macrocode}
+% \end{variable}
+%
 % \subsection{Appearances}
-% The default appearances are a cross (\cs{texttimes}),
-% Every appearance should have two versions and follow the naming
-% module/\meta{name}/Yes and module/\meta{name}/Off.
-%  \begin{macro}{\@@_textfield_default_appearances:}
+% The default appearance is a light gray background.
+%
+%  \begin{macro}{\@@_textfield_default_appearance:}
 %  This defines the standard appearance. It is setup at the first
 %  use of a textfield.
 %    \begin{macrocode}
-\cs_new_protected:Npn {\@@_textfield_default_appearances:}
+\cs_new_protected:Npn {\@@_textfield_default_appearance:}
   {
     \pdffield_appearance:nn {pdffield/textfield/default}
      {
        { \color_select:n{black!5!white}\rule{\paperwidth}{\paperheight} }
      }
-    \cs_gset_eq:NN \@@_textfield_default_appearances: \prg_do_nothing:
+    \cs_gset_eq:NN \@@_textfield_default_appearance: \prg_do_nothing:
   }
 %    \end{macrocode}
 % \end{macro}
 %
 %\subsection{Creating the field}
-% A field should be created if the name doesn't exist
+% \begin{macro}{\@@_textfield_field:n}
+% A field should be created only if the name doesn't exist
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_textfield_field:n #1 %name
   {
@@ -512,17 +521,22 @@
   }
 \cs_generate_variant:Nn \@@_textfield_field:n {V}
 %    \end{macrocode}
+% \end{macro}
+%
 % \subsection{Assembling the textfield}
-
+%
 % \begin{macro}{\@@_textfield:n}
+% At first we map the handler and setup the appearance.
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_textfield:n #1
   {
     \group_begin:
     \cs_set_eq:NN\@@_V_handler:nN \@@_textfield_V_handler:nN
-    \@@_textfield_default_appearances:
+    \cs_set_eq:NN\@@_value_handler:n \@@_textfield_value_handler:n
+    \cs_set_eq:NN\@@_default_handler:n \@@_textfield_default_handler:n
+    \@@_textfield_default_appearance:
 %    \end{macrocode}
-% Setting up the defaults.
+% Setting up the defaults and processing the keys.
 %    \begin{macrocode}
     \keys_set:nn {pdffield}
       {
@@ -535,9 +549,10 @@
          depth  =   \fp_eval:n {0.3*\f@size} pt,
         % font defaults!!
       }
-%    \end{macrocode}
-%   \begin{macrocode}
     \keys_set:nn { pdffield }{@@/preset/textfield,#1}
+%    \end{macrocode}
+%  We need to check if Comb is used and setup some flags in this case.
+%    \begin{macrocode}
     \int_compare:nNnT {\bitset_item:Nn \l_@@_Ff_bitset {Comb}}={1}
       {
         % warning if set?
@@ -555,6 +570,9 @@
             % warning
          }
       }
+%    \end{macrocode}
+%  Now the postprocessing.
+%    \begin{macrocode}
     \keys_set:nn { pdffield }
       {
         ,FT= Tx
@@ -572,12 +590,14 @@
               %\l_@@_text_DAextra_tl
            }
       }
+%    \end{macrocode}
+%  If no field ID exists, we get it from the T key.
+%    \begin{macrocode}
     \tl_if_empty:NT\l_@@_fieldID_tl
       {
         \pdfdict_get:nnN {l_@@/field}{T}\l_@@_fieldID_tl
         \tl_put_left:Nn \l_@@_fieldID_tl {@@/textfield/}
       }
-
     \@@_textfield_field:V\l_@@_fieldID_tl
     \@@_annot:
     \group_end:
@@ -589,6 +609,7 @@
 % Most keys are inherited simply the ones from the generic field and annot keys.
 % A key to decide if the box is initially checked or not.
 % We stay in the same family so that we can build a style.
+% \begin{macro}{fontcolor,fontsize,font}
 %    \begin{macrocode}
 \keys_define:nn {pdffield}
   {
@@ -608,22 +629,20 @@
     ,fontsize .groups:n = {textfield}
   }
 %    \end{macrocode}
-% And a key to set a dedicated field ID
-%    \begin{macrocode}
-\keys_define:nn { pdffield }
- {
-   fieldID .tl_set:N = \l_@@_fieldID_tl
- }
-%    \end{macrocode}
+% \end{macro}
 %
 % \subsection{Handler}
+% \begin{macro}{\@@_textfield_V_handler:nN}
+% The handler for V/DV, it creates a string.
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_textfield_V_handler:nN #1#2
   {
      \pdf_string_from_unicode:nnN {utf8/string}{#1}#2
   }
 %    \end{macrocode}
-%
+% \end{macro}
+% \begin{macro}{\@@_textfield_value_handler:n,\@@_textfield_default_handler:n}
+% The handler for value and default. They simply map to V,DV here.
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_textfield_value_handler:n #1
   {
@@ -634,7 +653,8 @@
     \keys_set:nn{pdffield}{DV={#1}}
   }
 %    \end{macrocode}
-% \subsection{user commands}
+% \end{macro}
+% \subsection{User command}
 % \begin{macro}{\pdffield_textfield:n}
 %    \begin{macrocode}
 \cs_set_eq:NN \pdffield_textfield:n \@@_textfield:n
