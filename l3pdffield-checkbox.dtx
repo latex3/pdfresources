@@ -385,14 +385,14 @@
 % module/\meta{name}/Yes and module/\meta{name}/Off.
 %  \begin{macro}
 %   {
-%    @@/checkbox/default_appearances:,
+%    \@@_checkbox_default_appearances:,
 %    pdffield/checkbox/default/Yes,
 %    pdffield/checkbox/default/Off
 %   }
 %  This defines the standard appearance. It is setup at the first
 %  use of a checkbox, and will adapt to the font family in use then.
 %    \begin{macrocode}
-\cs_new_protected:cpn {@@/checkbox/default_appearances:}
+\cs_new_protected:Npn \@@_checkbox_default_appearances:
   {
      \pdffield_appearance:nn {pdffield/checkbox/default/Yes}
        {
@@ -410,7 +410,7 @@
            [ \dim_eval:n { \box_ht:N\strutbox+\box_dp:N\strutbox } ]
            { \phantom{\texttimes} \strut }
        }
-    \cs_gset_eq:cN {@@/checkbox/default_appearances:} \prg_do_nothing:
+    \cs_gset_eq:NN \@@_checkbox_default_appearances: \prg_do_nothing:
   }
 %    \end{macrocode}
 % \end{macro}
@@ -437,7 +437,7 @@
 \cs_new_protected:Npn \@@_checkbox:n #1
   {
     \group_begin:
-    \use:c {@@/checkbox/default_appearances:}
+    \@@_checkbox_default_appearances:
     \cs_set_eq:NN\@@_appearance_handler:nnn \@@_checkbox_appearance_handler:nnn
     \cs_set_eq:NN\@@_value_handler:n   \@@_checkbox_value_handler:n
     \cs_set_eq:NN\@@_default_handler:n \@@_checkbox_default_handler:n
