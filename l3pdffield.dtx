@@ -1843,10 +1843,18 @@
            @@/preset/textfield .meta:n = {#1},
          }
       }
+   ,preset-pushbutton .code:n =
+      {
+        \keys_define:nn { pdffield }
+         {
+           @@/preset/pushbutton .meta:n = {#1},
+         }
+      }
   }
 \keys_set:nn{ pdffield / setup }{preset-checkbox={}}
 \keys_set:nn{ pdffield / setup }{preset-textfield={}}
 \keys_set:nn{ pdffield / setup }{preset-radio={}}
+\keys_set:nn{ pdffield / setup }{preset-pushbutton={}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\@@_style_create:nn}

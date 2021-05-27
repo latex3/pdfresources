@@ -95,8 +95,9 @@
 %  \cs{pdffield_push:n}\Arg{key val list}
 % \end{syntax}
 % This creates a pushbutton. Unlike radio buttons and checkboxes pushbuttons
-% don't change their state, instead the purpose is to trigger an action. Important
-% options are Submit and Reset. They will be setup in another module.
+% don't change their state, instead their purpose is to trigger an action. Important
+% options are for example Submit and Reset. Interfaces for such action
+% will be setup in another module.
 % The list of allowed keys is described below.
 % The \meta{key val list} should at least set the name, without it the default name
 % |pushbutton| is used. The default appearance
@@ -365,7 +366,7 @@
 %
 %  \begin{macro}
 %   {
-%    @@/pushbutton/default_appearances:,
+%    \@@_pushbutton_default_appearances:n,
 %    pdffield/pushbutton/defaultN,
 %    pdffield/pushbutton/defaultR,
 %    pdffield/pushbutton/defaultD,
@@ -384,6 +385,14 @@
            { \texttimes \strut }
        }
       \pdffield_appearance:nn {pdffield/pushbutton/defaultR}
+       {
+         \normalsize
+         \fboxsep 0pt
+         \framebox
+           [ \dim_eval:n { \box_ht:N\strutbox+\box_dp:N\strutbox } ]
+           { \phantom{\texttimes} \strut }
+       }
+    \pdffield_appearance:nn {pdffield/pushbutton/defaultD}
        {
          \normalsize
          \fboxsep 0pt
@@ -418,7 +427,7 @@
 \cs_new_protected:Npn \@@_pushbutton:n #1
   {
     \group_begin:
-    \@@_pushputton_default_appearances:n {TEXT}
+    \@@_pushbutton_default_appearances:n {TEXT}
   %  \cs_set_eq:NN\@@_appearance_handler:nnn \@@_checkbox_appearance_handler:nnn
   %  \cs_set_eq:NN\@@_value_handler:n   \@@_checkbox_value_handler:n
   %  \cs_set_eq:NN\@@_default_handler:n \@@_checkbox_default_handler:n
@@ -429,7 +438,7 @@
       {
         fieldID=,
         name=pushbutton,
-        appearance = pdffield/checkbox/default,
+        appearance = pdffield/pushbutton/defaultN,
         width  = 3cm,
         height = \normalbaselineskip,
       }
