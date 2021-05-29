@@ -375,32 +375,21 @@
 %  use of a pushbutton, and will adapt to the font family in use then.
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_pushbutton_default_appearances:n #1 % text
-  {
+  { \dim_show:N\l_@@_annot_wd_dim \dim_show:N\l_@@_annot_ht_dim
      \pdffield_appearance:nn {pdffield/pushbutton/defaultN}
        {
-         \normalsize
-         \fboxsep 0pt
-         \framebox
-           [ \dim_eval:n { \box_ht:N\strutbox+\box_dp:N\strutbox } ]
-           { \texttimes \strut }
+         { \color_select:n{black!5!white}\rule{3cm}{0.5cm}
+           \llap{\makebox[3cm]{\color_select:n{black}PUSH}}}
        }
       \pdffield_appearance:nn {pdffield/pushbutton/defaultR}
        {
-         \normalsize
-         \fboxsep 0pt
-         \framebox
-           [ \dim_eval:n { \box_ht:N\strutbox+\box_dp:N\strutbox } ]
-           { \phantom{\texttimes} \strut }
+         { \color_select:n{yellow!50!white}\rule{\paperwidth}{\paperheight} }
        }
-    \pdffield_appearance:nn {pdffield/pushbutton/defaultD}
+     \pdffield_appearance:nn {pdffield/pushbutton/defaultD}
        {
-         \normalsize
-         \fboxsep 0pt
-         \framebox
-           [ \dim_eval:n { \box_ht:N\strutbox+\box_dp:N\strutbox } ]
-           { \phantom{\texttimes} \strut }
+         { \color_select:n{blue}\rule{\paperwidth}{\paperheight} }
        }
-
+     \cs_gset_eq:NN \@@_pushbutton_default_appearances:n  \prg_do_nothing:
   }
 %    \end{macrocode}
 % \end{macro}
@@ -439,6 +428,8 @@
         fieldID=,
         name=pushbutton,
         appearance = pdffield/pushbutton/defaultN,
+        down-appearance = pdffield/pushbutton/defaultD,
+        rollover-appearance = pdffield/pushbutton/defaultR,
         width  = 3cm,
         height = \normalbaselineskip,
       }

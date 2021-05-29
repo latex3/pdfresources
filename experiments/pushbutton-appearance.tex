@@ -1,0 +1,99 @@
+\documentclass[]{article}
+\usepackage{l3draw}
+\begin{document}
+abc
+\ExplSyntaxOn
+
+\dim_new:N\l_my_ht_dim
+\dim_set:Nn\l_my_ht_dim {1.3\baselineskip}
+\dim_new:N\l_my_wd_dim
+\dim_set:Nn\l_my_wd_dim {2cm}
+\dim_new:N\l_my_linewidth_dim
+\dim_set:Nn\l_my_linewidth_dim {0.6pt}
+\color_set:nn {normalcolor}{.}
+\color_set:nn {border}{black!95!white}
+\color_set:nn {bordertop}{yellow!5!white}
+\color_set:nn {borderbot}{black!50!white}
+\color_set:nn {fill}{black!20!white}
+
+         \draw_begin:
+         \draw_linewidth:n {\l_my_linewidth_dim}
+         \draw_path_rectangle_corners:nn
+            {0.5\l_my_linewidth_dim,0.5\l_my_linewidth_dim}
+            {\l_my_wd_dim-0.5\l_my_linewidth_dim,\l_my_ht_dim-0.5\l_my_linewidth_dim}
+         \color_fill:n {border}
+         \draw_path_use_clear:n { fill }
+         \draw_path_rectangle_corners:nn
+            {2\l_my_linewidth_dim,2\l_my_linewidth_dim}
+            {\l_my_wd_dim-2\l_my_linewidth_dim,\l_my_ht_dim-2\l_my_linewidth_dim}
+         \color_fill:n {bordertop}
+         \draw_path_use_clear:n { fill }
+         \draw_path_moveto:n {2\l_my_linewidth_dim,2\l_my_linewidth_dim}
+         \draw_path_lineto:n
+           {5\l_my_linewidth_dim,5\l_my_linewidth_dim}
+         \draw_path_lineto:n
+           {\l_my_wd_dim-5\l_my_linewidth_dim,\l_my_ht_dim-5\l_my_linewidth_dim}
+         \draw_path_lineto:n
+           {\l_my_wd_dim-2\l_my_linewidth_dim,\l_my_ht_dim-2\l_my_linewidth_dim}
+         \draw_path_lineto:n {\l_my_wd_dim-2\l_my_linewidth_dim,2\l_my_linewidth_dim}
+         \draw_path_close:
+         \color_fill:n {borderbot}
+         \draw_path_use_clear:n { fill }
+         \draw_path_rectangle_corners:nn
+           {1.5\l_my_linewidth_dim,1.5\l_my_linewidth_dim}
+           {\l_my_wd_dim-1.5\l_my_linewidth_dim,\l_my_ht_dim-1.5\l_my_linewidth_dim}
+         \color_stroke:n {border}
+         \draw_path_use_clear:n { stroke }
+         \draw_path_rectangle_corners:nn
+           {4\l_my_linewidth_dim,4\l_my_linewidth_dim}
+           {\l_my_wd_dim-4\l_my_linewidth_dim,\l_my_ht_dim-4\l_my_linewidth_dim}
+           \color_fill:n {fill}
+          \draw_path_use_clear:n { fill }
+          \color_fill:n {normalcolor}
+          \draw_transform_shift:n {0.5 \l_my_wd_dim, 0.3\l_my_ht_dim}
+          \hbox_set:Nn \l_tmpa_box { \makebox[0pt]{\sffamily\bfseries Reset} }
+          \draw_box_use:N \l_tmpa_box
+         \draw_end:
+
+         \draw_begin:
+         \draw_linewidth:n {\l_my_linewidth_dim}
+         \draw_path_rectangle_corners:nn
+            {0.5\l_my_linewidth_dim,0.5\l_my_linewidth_dim}
+            {\l_my_wd_dim-0.5\l_my_linewidth_dim,\l_my_ht_dim-0.5\l_my_linewidth_dim}
+         \color_fill:n {border}
+         \draw_path_use_clear:n { fill }
+         \draw_path_rectangle_corners:nn
+            {2\l_my_linewidth_dim,2\l_my_linewidth_dim}
+            {\l_my_wd_dim-2\l_my_linewidth_dim,\l_my_ht_dim-2\l_my_linewidth_dim}
+         \color_fill:n {borderbot}
+         \draw_path_use_clear:n { fill }
+         \draw_path_moveto:n {2\l_my_linewidth_dim,2\l_my_linewidth_dim}
+         \draw_path_lineto:n
+           {5\l_my_linewidth_dim,5\l_my_linewidth_dim}
+         \draw_path_lineto:n
+           {\l_my_wd_dim-5\l_my_linewidth_dim,\l_my_ht_dim-5\l_my_linewidth_dim}
+         \draw_path_lineto:n
+           {\l_my_wd_dim-2\l_my_linewidth_dim,\l_my_ht_dim-2\l_my_linewidth_dim}
+         \draw_path_lineto:n {\l_my_wd_dim-2\l_my_linewidth_dim,2\l_my_linewidth_dim}
+         \draw_path_close:
+         \color_fill:n {bordertop}
+         \draw_path_use_clear:n { fill }
+         \draw_path_rectangle_corners:nn
+           {1.5\l_my_linewidth_dim,1.5\l_my_linewidth_dim}
+           {\l_my_wd_dim-1.5\l_my_linewidth_dim,\l_my_ht_dim-1.5\l_my_linewidth_dim}
+         \color_stroke:n {border}
+         \draw_path_use_clear:n { stroke }
+         \draw_path_rectangle_corners:nn
+           {4\l_my_linewidth_dim,4\l_my_linewidth_dim}
+           {\l_my_wd_dim-4\l_my_linewidth_dim,\l_my_ht_dim-4\l_my_linewidth_dim}
+           \color_fill:n {fill}
+          \draw_path_use_clear:n { fill }
+          \color_fill:n {normalcolor}
+          \draw_transform_shift:n {0.5 \l_my_wd_dim, 0.3\l_my_ht_dim}
+          \hbox_set:Nn \l_tmpa_box { \makebox[0pt]{\sffamily\bfseries XXXX} }
+          \draw_box_use:N \l_tmpa_box
+
+         \draw_end:
+\ExplSyntaxOff
+
+\end{document}
