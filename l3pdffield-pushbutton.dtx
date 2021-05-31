@@ -82,7 +82,10 @@
 % Click me:
 % \ExplSyntaxOn
 %  \group_begin:
-%  \pdfannot_dict_put:nnn{widget}{A}{<</S/JavaScript /JS (app.alert('Hello!',3,0);)>>}
+%  \tl_set:Nn\l_tmpa_tl{app.alert('Hello!~I\'m~Bär!',3,0);}
+%  \regex_replace_once:nnN{ä}{\x5Cu00E4}\l_tmpa_tl{}
+%  \pdf_object_unnamed_write:nx{stream}{{}{\exp_not:o{\l_tmpa_tl}}}
+%  \pdfannot_dict_put:nnx{widget}{A}{<</S/JavaScript /JS~\pdf_object_ref_last:>>}
 %  \pdffield_pushbutton:n{name=bear,appearance=pdffield/bear,width=23pt,height=30pt,depth=10pt}
 %  \group_end:
 % \ExplSyntaxOff
@@ -121,6 +124,17 @@
 % The \meta{key val list} should at least set the name, without it the default name
 % |pushbutton| is used.
 %
+% \subsection{The look of the button}
+% Pushbuttons have no value. PDF compensates this by giving much more options to setup
+% the appearance. Beside the standard |AP| key there are number of settings in the
+% dynamic appearance dictionary |MK|. Sadly it is quite unclear how all this settings
+% interact (or should interact), and PDF viewers don't honor all of them. I was for
+% example not able to get the down appearance to show off.
+%
+% By default the putton will draw (with l3draw) a button and place the caption and
+% rollover-caption on it. The caption will honor the surrounding font, fontsize and
+% the color, and will be placed on the baseline as described by the height and depth
+% keys.
 %
 % The default appearance
 % is a rectangular frame with a text in it. Down and rollover use a different color.
