@@ -109,17 +109,22 @@
 % \group_begin:
 % \pdfannot_dict_put:nnn {widget}{A}{<</S/Named /N/LastPage>>}
 % \sffamily\bfseries
-% \pdffield_pushbutton:n {name=my/go,width=4cm,caption=go~to~last~page}
+% \pdffield_pushbutton:n
+%   {name=my/go,
+%    width=4cm,
+%    caption=go~to~last~page,
+%    rollover-caption=click~me!}
 % \group_end:
 % \end{verbatim}
-%
+% \begin{center}
 % \ExplSyntaxOn
 % \group_begin:
 % \pdfannot_dict_put:nnn {widget}{A}{<</S/Named /N/LastPage>>}
-% \sffamily\bfseries\pdffield_pushbutton:n {name=my/go,width=4cm,caption=GO~TO~LAST~PAGE}
+% \sffamily\bfseries\pdffield_pushbutton:n
+%   {name=my/go,width=4cm,caption=GO~TO~LAST~PAGE,rollover-caption=click~me!}
 % \group_end:
 % \ExplSyntaxOff
-%
+% \end{center}
 % The list of allowed keys is described below.
 % The \meta{key val list} should at least set the name, without it the default name
 % |pushbutton| is used.
