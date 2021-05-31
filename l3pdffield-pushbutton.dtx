@@ -29,7 +29,7 @@
 \declare@file@substitution{doc.sty}{doc-v3beta.sty}
 \makeatother
 \documentclass[full]{l3doc}
-\usepackage{array,booktabs}
+\usepackage{array,booktabs,siunitx}
 \usepackage{l3pdffield-testphase,bearwear}
 \hypersetup{pdfauthor=The LaTeX Project,
  pdftitle=l3pdffield (LaTeX PDF management testphase bundle)}
@@ -128,6 +128,7 @@
 % The list of allowed keys is described below.
 % The \meta{key val list} should at least set the name, without it the default name
 % |pushbutton| is used.
+% \end{function}
 %
 % \subsection{The look of the button}
 % Pushbuttons have no value. PDF compensates this by giving much more options to setup
@@ -136,16 +137,11 @@
 % interact (or should interact), and PDF viewers don't honor all of them. I was for
 % example not able to get the down appearance to show off.
 %
-% By default the putton will draw (with l3draw) a button and place the caption and
+% By default the code will draw (with l3draw) a button and place the caption and
 % rollover-caption on it. The caption will honor the surrounding font, fontsize and
 % the color, and will be placed on the baseline as described by the height and depth
 % keys.
 %
-% The default appearance
-% is a rectangular frame with a text in it. Down and rollover use a different color.
-% The default appearance is setup at the first use and will use the font family
-% active at that time for the text.
-% \end{function}
 %
 %
 % \subsection{Keys}
@@ -159,7 +155,6 @@
 % For convenience a number of important keys are documented here too, even if
 % they are already in the document from l3pdffield.
 %
-%
 % Disabled keys are
 %  \begin{itemize}
 %  \item |V|, |DV|. As a pushbutton has no permanent state,
@@ -167,13 +162,13 @@
 %  \item |FT| is overwritten.
 %  \item For pushbuttons only the field flags  |ReadOnly|, |Required| and |NoExport|
 %   make sense.
-%  |Pushbotton| are set automatically automatically by the code
+%  |Pushbutton| is set automatically by the code
 % as this is required for a pushbutton.
 %  \end{itemize}
 %
-% \begin{function}{preset-push}
+% \begin{function}{preset-pushbutton}
 %  \begin{syntax}
-%   |preset-push| = \Arg{key-val-list}
+%   |preset-pushbutton| = \Arg{key-val-list}
 %  \end{syntax}
 % This allows to set default keys for a pushbutton.
 % \end{function}
@@ -242,7 +237,8 @@
 % \end{syntax}
 % These keys allow to set the dimensions of the pushbutton instance.
 % The value should be a dimension expression. By default
-% |width| and |height| use \cs{normalbaselineskip}, the |depth| is zero.
+% |width| is \qty{3}{\centi\meter}, |height| uses 1.05\cs{normalbaselineskip}, and
+% |depth| is 0.45\cs{normalbaselineskip}.
 % \end{function}
 %
 % \begin{function}{AP/N,appearance,AP/R,rollover-appearance,AP/D,down-appearance}
@@ -258,43 +254,29 @@
 % mouse hovers over the pushbutton) and the down appearance (when the
 % mouse clicks). They take as value a
 % \meta{appearance name} and expects that one form Xobjects
-% with this name has been created before. The initial value are
-% |pdffield/pushbutton/defaultN|, |pdffield/pushbutton/defaultD|,
-% |pdffield/pushbutton/defaultR|.
+% with this name has been created before.
+% It depends on the PDF viewer if such appearances
+% are shown. adobe reader for example ignores the down appearance.
 % \end{function}
 %
-% \begin{function}{value}
-%  \begin{syntax}
-%   |value| = text???.....\\
-%  \end{syntax}
-% \ldots ...
-% \end{function}
-
 % \begin{function}{action}
 %  \begin{syntax}
 %   |action| = .....\\
 %  \end{syntax}
-% \ldots ...
+% This key doesn't exist yet. It will (probably) be added when a interface
+% for actions are added.
 % \end{function}
 %
 % \subsection{Using with hyperref}
-% The \cs{Pushbutton} command from hyperref ?????
+% The \cs{Pushbutton} command from hyperref also adds a label. Something like
+% this could more or less fake it. But be aware that the options are not
+% identical.
 %
 % \begin{verbatim}
 % \ExplSyntaxOn\makeatletter
-% \def\@CheckBox[#1]#2{\LayoutCheckField{#2}{\pdffield_checkbox:n {name=#2,#1}}}
+% \def\@PushButton[#1]#2{\LayoutPushButtonField{#2}{\pdffield_pushbutton:n {name=#2,#1}}}
 % \ExplSyntaxOff\makeatother
 % \end{verbatim}
-%
-% \subsection{Some background}
-% For some general background about fieldsets, fields and field annotations, please
-% check \pkg{l3pdffield}. Here are only some remarks about the special case of
-% checkboxes.
-%
-% A checkbox consist of a field along with one or more field annotations.
-% ??????
-% The annotations can appear on more than one page or locations and if one instance
-% is checked all other instances follows and are checked too.
 %
 %
 % \end{documentation}
@@ -310,6 +292,7 @@
 % ,\bool_new:N
 % ,\box_dp:N
 % ,\box_ht:N
+% ,\l_tmpa_box
 % ,\clist_map_inline:nn
 % ,\color_export:nnN
 % ,\color_set:nn
@@ -324,19 +307,27 @@
 % ,\csname
 % ,\dim_eval:n
 % ,\dim_new:N
+% ,\dim_set:N
 % ,\endcsname
 % ,\exp_args:Ne
+% ,\exp_args:Nnx
+% ,\exp_args:Nx
 % ,\fboxsep
 % ,\group_begin:
 % ,\group_end:
 % ,\hbox_to_wd:nn
+% ,\hbox_set:Nn
 % ,\hfill
 % ,\hook_gput_code:nnn
 % ,\int_eval:n
+% ,\int_gincr:N
+% ,\int_new:N
+% ,\int_use:N
 % ,\l_keys_choice_int
 % ,\keys_define:nn
 % ,\keys_set:nn
 % ,\mode_leave_vertical:
+% ,\makebox
 % ,\msg_error:nnn
 % ,\msg_error:nnnn
 % ,\msg_new:nnn
@@ -356,6 +347,7 @@
 % ,\pdf_string_from_unicode:nnN
 % ,\pdfannot_box_ref_last:
 % ,\pdfannot_dict_put:nnn
+% ,\pdfannot_dict_put:nnx
 % ,\pdfannot_dict_remove:nn
 % ,\pdfannot_widget_box:nnn
 % ,\pdfdict_if_empty:nTF
@@ -388,6 +380,7 @@
 % ,\tl_put_left:Nn
 % ,\tl_if_empty:nTF
 % ,\tl_if_head_eq_charcode:nNTF
+% ,\tl_put_right:Nn
 % ,\tl_new:N
 % ,\tl_set:Nn
 % ,\tl_to_str:n
@@ -409,7 +402,7 @@
 %     ,\l_@@_pushbutton_totalht_dim
 %     ,\g_@@_pushbutton_cnt_int
 %  }
-% a pushbutton can setup the appearance only after the texts are known,
+% A pushbutton can setup the appearance only after the texts are known,
 % so the code is stored and executed later.
 %    \begin{macrocode}
 \tl_new:N   \l_@@_pushbutton_appearance_code_tl
@@ -418,19 +411,17 @@
 \int_new:N  \g_@@_pushbutton_cnt_int
 %    \end{macrocode}
 % \end{variable}
-% \subsection{Messages}
-% There are no specific messages.
 % \subsection{Appearances}
 % The default appearances are a rectangular frame with some text.
 %
 %  \begin{macro}
 %   {
 %    \@@_pushbutton_default_appearances:,
-%    pdffield/pushbutton/defaultN,
-%    pdffield/pushbutton/defaultR,
-%    pdffield/pushbutton/defaultD,
+%    pdffield/pushbutton/default-n,
+%    pdffield/pushbutton/defaultrollover-n,
+%    pdffield/pushbutton/defaultdown-n,
 %   }
-%  This defines the standard appearance. It is setup at the first
+%  This defines the standard appearances. They are setup at the first
 %  use of a pushbutton, and will adapt to the font family in use then.
 %    \begin{macrocode}
 \dim_set:Nn \l_@@_pushbutton_linewidth_dim {0.4pt}
@@ -741,23 +732,8 @@
 % \end{macro}
 %
 % \subsection{Keys}
-% Most keys are inherited simply the ones from the generic field and annot keys.
-% A key to decide if the box is initially checked or not.
-% We stay in the same family so that we can build a style.
-%  \begin{macro}{}
-%    \begin{macrocode}
-\keys_define:nn { pdffield  }
- {
- }
-
-%    \end{macrocode}
-% \end{macro}
-% \begin{macro}{\@@_pushbutton_value_handler:n,\@@_pushbutton_default_handler:n}
-% ??? probably unusuable
-% |value| and |default| do the same as checked.
-%    \begin{macrocode}
-%    \end{macrocode}
-% \end{macro}
+% Most keys are inherited from the generic field and annot keys.
+% We only need to handle the appearance in a special way.
 %
 % \begin{macro}{\@@_pushbutton_appearance_handler:nnn}
 %    \begin{macrocode}
