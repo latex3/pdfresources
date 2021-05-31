@@ -770,15 +770,39 @@
 % |radiosymbol| for this setting.
 % \end{function}
 %
-% The remaining key are useful for buttons only, currently no special syntax support
-% is implemented. They will be handled when the code for push buttons is developed and
-% tested.
+% \begin{function}{MK/RC,rollover-caption}
+%  \begin{syntax}
+%  |MK/RC| = \meta{string}\\
+%  |rollover-caption| = \meta{string}
+%  \end{syntax}
+% This sets a text for the rollover-caption. \meta{string} is passed through \cs{pdf_string_from_unicode:nnN}
+% and parentheses are added automatically. The key should be used only with
+% pushbuttons. It is unclear if is actually used by the PDF viewer, but the
+% pushbuttons modules uses the argument also to setup the appearance.
+% \end{function}
+%
+% \begin{function}{MK/AC,down-caption}
+%  \begin{syntax}
+%  |MK/AC| = \meta{string}\\
+%  |down-caption| = \meta{string}
+%  \end{syntax}
+% This sets a text for the down-caption.
+% \meta{string} is passed through \cs{pdf_string_from_unicode:nnN}
+% and parentheses are added automatically. The key should be used only with
+% pushbuttons. It is unclear if is actually used by the PDF viewer, but the
+% pushbuttons modules uses the argument also to setup the appearance.
+% \end{function}
+%
+% The remaining key are like the two above useful for pushbuttons only.
+% Currently no special syntax support
+% is implemented. They will be handled if needed when the code for
+% push buttons is developed and tested.
 % \begin{function}{MK/*}
 %  \begin{syntax}
 %  |MK/*| = \meta{various}
 %  \end{syntax}
 % These keys adds the various entries in the \emph{dynamic appearance dictionary}.
-% * should be one of  |RC|, |AC|, |I|, |RI|, |IX|, |IF|, |TP|.
+% * should be one of  |I|, |RI|, |IX|, |IF|, |TP|.
 % The |MK| dictionary can also be added by using |\pdfannot_dict_put:nnn{Widget}{MK}{...}|
 % but the two methods should not be mixed.
 % \end{function}
@@ -898,6 +922,9 @@
 %     ,\l_@@_tmpa_keys_tl
 %     ,\l_@@_currentparent_tl
 %     ,\l_@@_fieldID_tl
+%     ,\l_@@_caption_tl
+%     ,\l_@@_rollover_caption_tl
+%     ,\l_@@_down_caption_tl
 %  }
 % Some tmp variables, and a variable for the current parent and the
 % current fieldID.
@@ -907,6 +934,9 @@
 \tl_new:N  \l_@@_tmpa_keys_tl
 \tl_new:N  \l_@@_currentparent_tl
 \tl_new:N  \l_@@_fieldID_tl
+\tl_new:N  \l_@@_caption_tl
+\tl_new:N  \l_@@_rollover_caption_tl
+\tl_new:N  \l_@@_down_caption_tl
 %    \end{macrocode}
 % \end{variable}
 %
@@ -1683,6 +1713,7 @@
   {
     MK/CA .code:n =
      {
+       \tl_set:Nn \l_@@_caption_tl {#1}
        \tl_if_empty:nTF {#1}
         {
           \pdfannot_dict_remove:nn { widget/MK }{CA}
@@ -1695,10 +1726,50 @@
     ,MK/CA .groups:n = annot
    ,caption .meta:n = {MK/CA=#1}
   }
+
+\keys_define:nn { pdffield  }
+  {
+    MK/RC .code:n =
+     {
+       \tl_set:Nn \l_@@_rollover_caption_tl {#1}
+       \tl_if_empty:nTF {#1}
+        {
+          \pdfannot_dict_remove:nn { widget/MK }{RC}
+        }
+        {
+          \tl_set:Nn \l_@@_caption_tl {#1}
+          \pdf_string_from_unicode:nnN {utf8/string}{#1}\l_@@_tmpa_str
+          \pdfannot_dict_put:nnx {widget/MK}{RC}{\l_@@_tmpa_str}
+        }
+     }
+    ,MK/RC .groups:n = annot
+   ,rollover-caption .meta:n = {MK/RC=#1}
+  }
+
+\keys_define:nn { pdffield  }
+  {
+    MK/AC .code:n =
+     {
+       \tl_set:Nn \l_@@_down_caption_tl {#1}
+       \tl_if_empty:nTF {#1}
+        {
+          \pdfannot_dict_remove:nn { widget/MK }{AC}
+        }
+        {
+          \tl_set:Nn \l_@@_caption_tl {#1}
+          \pdf_string_from_unicode:nnN {utf8/string}{#1}\l_@@_tmpa_str
+          \pdfannot_dict_put:nnx {widget/MK}{AC}{\l_@@_tmpa_str}
+        }
+     }
+    ,MK/AC .groups:n = annot
+   ,down-caption .meta:n = {MK/AC=#1}
+  }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{MK/RC,MK/AC,MK/I,MK/RI,MK/IX,MK/IF,MK/TP}
-% These keys are currently not full documentated. It is unclear if they are usefull.
+%
+% \begin{macro}{MK/I,MK/RI,MK/IX,MK/IF,MK/TP}
+% The following keys are pushputtons only. Currently there is no special handling
+% involved as it is unclear if they are useful.
 %    \begin{macrocode}
 
 \cs_set_protected:Npn \@@_tmpa:n #1
@@ -1709,7 +1780,7 @@
         {
           \tl_if_empty:nTF {##1}
             {
-              \pdfannot_dict_remove:nn { widget/AP }{#1}
+              \pdfannot_dict_remove:nn { widget/MK }{#1}
             }
             {
               \pdfannot_dict_put:nnx {widget/MK}{#1}{##1}
@@ -1719,7 +1790,7 @@
      }
  }
 
-\clist_map_inline:nn {RC,AC,I,RI,IX,IF,TP}
+\clist_map_inline:nn {I,RI,IX,IF,TP}
   { \@@_tmpa:n {#1} }
 %    \end{macrocode}
 % \end{macro}
