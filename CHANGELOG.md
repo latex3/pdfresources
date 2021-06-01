@@ -10,6 +10,7 @@ this project uses date-based 'snapshot' version identifiers.
  - \pdffile_filespec:nnn to create a filespec dictionary
 ### Fixed
  - encoding of value in l3pdffield-textfield 
+ - encoding of value of TM and TU key
  
 
 ## [2021-05-14]
