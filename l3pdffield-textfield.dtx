@@ -637,7 +637,7 @@
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_textfield_V_handler:nN #1#2
   {
-     \pdf_string_from_unicode:nnN {utf8/string}{#1}#2
+     \pdf_string_from_unicode:nnN {utf16/hex}{#1}#2
   }
 %    \end{macrocode}
 % \end{macro}
@@ -646,11 +646,11 @@
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_textfield_value_handler:n #1
   {
-    \keys_set:nn{pdffield}{V={#1}}
+     \keys_set:nn{pdffield}{V={#1}}
   }
 \cs_new_protected:Npn \@@_textfield_default_handler:n #1
   {
-    \keys_set:nn{pdffield}{DV={#1}}
+     \keys_set:nn{pdffield}{DV={#1}}
   }
 %    \end{macrocode}
 % \end{macro}
