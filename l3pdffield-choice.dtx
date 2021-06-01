@@ -378,15 +378,15 @@
 % \begin{variable}
 %  {
 %      \l_@@_choice_values_seq
-%     ,\l_@@_choice_defaults_seq
-%     ,\l_@@_choice_displays_seq
+%     ,\l_@@_choice_defaultvalues_seq
+%     ,\l_@@_choice_displayvalues_seq
 %     ,\l_@@_choice_opt_seq
 %  }
 % variables to hold the value, the default value, and display variants. The opt
 % set will be used to build the content of opt
 %    \begin{macrocode}
 \seq_new:N  \l_@@_choice_values_seq
-\seq_new:N  \l_@@_choice_defaults_seq
+\seq_new:N  \l_@@_choice_defaultvalues_seq
 \seq_new:N  \l_@@_choice_displayvalues_seq
 \seq_new:N  \l_@@_choice_opt_seq
 %    \end{macrocode}
@@ -430,10 +430,16 @@
 %    \begin{macrocode}
         \int_compare:nNnTF {\bitset_item:Nn \l_@@_Ff_bitset {MultiSelect}} = {1}
           {
-
+            \tl_clear:N \l_@@_tmpa_tl
+            \seq_map_inline:Nn \l_@@_choice_defaultvalues_seq
+             {
+                \pdf_string_from_unicode:nnN{utf16/hex}{##1}\l_@@_tmpa_str
+                \tl_put_right:NV \l_@@_tmpa_tl \l_@@_tmpa_str
+                \pdfdict_put:nnx { l_@@/field }{V}  { [ \l_@@_tmpa_tl ] }
+             }
           }
           {
-            \tl_set:Nx \l_@@_tmpa_tl {\seq_item:Nn \l_@@_choice_defaults_seq {1} }
+            \tl_set:Nx \l_@@_tmpa_tl {\seq_item:Nn \l_@@_choice_defaultvalues_seq {1} }
             \exp_args:NnV
               \pdf_string_from_unicode:nnN{utf16/hex}\l_@@_tmpa_tl\l_@@_tmpb_str
             \pdfdict_put:nnx { l_@@/field }{V}  { \l_@@_tmpb_str }
