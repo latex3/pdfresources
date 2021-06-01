@@ -918,6 +918,7 @@
 % \begin{variable}
 %  {
 %      \l_@@_tmpa_str
+%     ,\l_@@_tmpb_str
 %     ,\l_@@_tmpa_tl
 %     ,\l_@@_tmpa_keys_tl
 %     ,\l_@@_currentparent_tl
@@ -930,6 +931,7 @@
 % current fieldID.
 %    \begin{macrocode}
 \str_new:N \l_@@_tmpa_str
+\str_new:N \l_@@_tmpb_str
 \tl_new:N  \l_@@_tmpa_tl
 \tl_new:N  \l_@@_tmpa_keys_tl
 \tl_new:N  \l_@@_currentparent_tl
@@ -1919,11 +1921,19 @@
            @@/preset/pushbutton .meta:n = {#1},
          }
       }
+  ,preset-choice .code:n =
+      {
+        \keys_define:nn { pdffield }
+         {
+           @@/preset/choice .meta:n = {#1},
+         }
+      }
   }
 \keys_set:nn{ pdffield / setup }{preset-checkbox={}}
 \keys_set:nn{ pdffield / setup }{preset-textfield={}}
 \keys_set:nn{ pdffield / setup }{preset-radiobutton={}}
 \keys_set:nn{ pdffield / setup }{preset-pushbutton={}}
+\keys_set:nn{ pdffield / setup }{preset-choice={}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\@@_style_create:nn}
