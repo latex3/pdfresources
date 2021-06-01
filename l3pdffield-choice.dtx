@@ -459,23 +459,23 @@
 %
 % \begin{macro}{\@@_choice:n}
 % The argument are key-val settings.
-% At first we map the handlers. To setup the appearance we need the
-% Opt array, so the appearance handler only stores the code.
+% At first we map the handlers.
+% As default appearance we reuse the text appearance: a simple gray background.
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_choice:n #1
   {
     \group_begin:
-   % \cs_set_eq:NN\@@_appearance_handler:nnn \@@_radio_appearance_handler:nnn
     \cs_set_eq:NN\@@_value_handler:n      \@@_choice_value_handler:n
     \cs_set_eq:NN\@@_default_handler:n    \@@_choice_default_handler:n
+    \@@_textfield_default_appearance:
 %    \end{macrocode}
 % Setting up the defaults.
 %   \begin{macrocode}
-    %\tl_set:Nn\l_@@_radio_appearance_code_tl{}
     \keys_set:nn {pdffield}
       {
          fieldID=
         ,name=choice
+        ,appearance = pdffield/textfield/default
         ,width  = 3cm
         ,height = \normalbaselineskip
         ,type=combo-edit
@@ -484,6 +484,21 @@
         ,FT= Ch
       }
      \@@_choice_set_type:
+     \keys_set:nn {pdffield}
+      {
+        ,DA=
+           {
+              \pdf_name_from_unicode_e:n{\l_@@_DA_fontname_tl}
+              \c_space_tl
+              \dim_to_decimal_in_bp:n{\l_@@_DA_fontsize_dim}
+              \c_space_tl
+              Tf
+              \c_space_tl
+              \l_@@_DA_fontcolor_tl
+              \c_space_tl
+              %\l_@@_text_DAextra_tl
+           }
+      }
 %    \end{macrocode}
 % If the fieldID has not been set explicitly, we use the name/T key
 %    \begin{macrocode}
@@ -498,10 +513,8 @@
 %    \begin{macrocode}
     \@@_choice_field:V\l_@@_fieldID_tl
 %    \end{macrocode}
-%
-% Now we set the appearances, if no key has been use we take the default.
+% And add the annotation.
 %    \begin{macrocode}
- %missing yet.
     \@@_annot:
     \group_end:
   }
@@ -525,11 +538,11 @@
   }
 \keys_define:nn{pdffield}
   {
-    display-values .code:n =
+    display .code:n =
      {
        \seq_set_eq:NN \l_@@_choice_displayvalues_seq #1
      }
-   ,top-value .code:n =
+   ,top-index .code:n =
      {
        \pdfdict_put:nnx {l_@@/field}{TI}{\int_eval:n{#1-1}}
      }
