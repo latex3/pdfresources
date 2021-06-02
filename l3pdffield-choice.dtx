@@ -170,22 +170,48 @@
 % For explicit control of the field ID  use the |fieldID| key.
 % \end{function}
 %
-%  \begin{function}{value}
+%  \begin{function}{value,values}
 %  \begin{syntax}
-%   |value| = {\meta{seq var 1},\meta{seq var 2}
+%   |value| = \Arg{comma separated list of values}
+%   |values| = \Arg{comma separated list of values}
 %  \end{syntax}
-%  With this key you set the export value names. \meta{seq_var 1} should contain
+%  With these keys you set the export value names. \meta{comma separated list of values} should contain
 %  the values in the order as wanted. The values are passed through |\pdf_string_from_unicode:nnN|
-%  and can use unicode. \meta{seq var 2} is optional and should contain the
-%  display values.
+%  and can use unicode.
 %  \end{function}
 %
-%  \begin{function}{default}
+%  \begin{function}{display-values}
 %  \begin{syntax}
-%   |default| = \meta{seq var}
+%   |display-values| = \Arg{comma separated list of values}
 %  \end{syntax}
-%  With this key you set the values which are selected when the PDF is opened.
-%  \meta{seq var} should contain a subset of the display values. (???)
+%  With this key you set the display value names if they should be
+%  different from the export values. They should be given in the same order as the values.
+%  The values are passed through |\pdf_string_from_unicode:nnN|
+%  and can use unicode.
+%  \end{function}
+%
+%  \begin{function}{default,default-values}
+%  \begin{syntax}
+%   |default|        = \Arg{comma separated list of values}
+%   |default-values| = \Arg{comma separated list of values}
+%  \end{syntax}
+%  With this keys you set the values which are selected when the PDF is opened.
+%  The use of this keys is a bit dubious. It seems to work okay for combo fields,
+%  but not for list fields. According to the PDF reference the
+%  values should be the display values, but it is not clear if the PDF viewer
+%  really implement it that way or if the export value should be preferred.
+%  Depending on the values it could be needed to
+%  add also an |I| array to the field.
+%  \end{function}
+
+%  \begin{function}{top-index}
+%  \begin{syntax}
+%   |top-index| = \Arg{integer}
+%  \end{syntax}
+%  With this key you set for a scrollable list field the number of the
+%  value  shown at the top. The first value has number 1 (that is the default).
+%  I'm not sure if viewers handle this correctly, so the setting should be used with
+%  care.
 %  \end{function}
 
 % \begin{function}{fieldID}
@@ -225,19 +251,57 @@
 %
 % \begin{function}{AP/N,appearance,AP/R,rollover-appearance,AP/D,down-appearance}
 %  \begin{syntax}
-%   |AP/N| = \meta{partial appearance name}\\
-%   |appearance| = \meta{partial appearance name}\\
-%   |AP/R| = \meta{partial appearance name}\\
-%   |rollover-appearance| = \meta{partial appearance name}\\
-%   |AP/D| = \meta{partial appearance name}\\
-%   |down-appearance| = \meta{partial appearance name}
+%   |AP/N| = \meta{appearance name}\\
+%   |appearance| = \meta{appearance name}\\
+%   |AP/R| = \meta{appearance name}\\
+%   |rollover-appearance| = \meta{appearance name}\\
+%   |AP/D| = \meta{appearance name}\\
+%   |down-appearance| = \meta{appearance name}
 %  \end{syntax}
-%  ???????????????
+%  This adds appearances. \meta{appearance name} should be the name of an form Xobjects.
+%  The default normal appearance is a simple gray background, the same as with
+%  text fields.
 % \end{function}
 %
-% \subsection{Using with hyperref}
-% ??????
+% The font are handled in a similar way as in textfield. Most of the remarks made there
+% are true for choice fields too.
 %
+% \begin{function}{fontcolor}
+%  \begin{syntax}
+%   |fontcolor| = \meta{color expression} \verb"|" [\meta{model}]\Arg{values}\\
+%  \end{syntax}
+% This is sets the color of font in the textfield. Internally currently RGB is used.
+% The colors used in
+% \meta{color expression} must be known to the \pkg{l3color} commands.
+% The initial color is black. It is a \emph{field} setting, that means instances
+% share the color.
+% \end{function}
+%
+% \begin{function}{fontsize}
+%  \begin{syntax}
+%   |fontsize| = \meta{dim expression}
+%  \end{syntax}
+% This is sets the size of the font in the textfield.
+% The default value is the current font size (\cs{f@size} in pt).
+% It is a \emph{field} setting, that means instances
+% share the size.
+% \end{function}
+%
+% \begin{function}{font}
+%  \begin{syntax}
+%   |font| = \meta{symbolic font name}
+%  \end{syntax}
+% This is sets the font in the textfield. See the discussion at the begin of
+% the documentation about some background. The default value is |Helv| and this
+% name is setup if you load hyperref and issue the \cs{Form} command.
+% The default value is the current font size (\cs{f@size} in pt).
+% It is a \emph{field} setting, that means instances
+% share the font.
+% \end{function}
+% \subsection{Using with hyperref}
+%
+% hyperref combines radio button and choice field in one command. This makes it
+% difficult to replicate the hyperref commands here.
 %
 % \end{documentation}
 %
@@ -508,7 +572,6 @@
         \tl_put_left:Nn \l_@@_fieldID_tl {@@/choice/}
       }
 %    \end{macrocode}
-% TODO Values, defaults ...
 % Now we build the field
 %    \begin{macrocode}
     \@@_choice_field:V\l_@@_fieldID_tl
@@ -530,17 +593,19 @@
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_choice_value_handler:n #1
   {
-    \seq_set_eq:NN \l_@@_choice_values_seq #1
+    \seq_set_from_clist:Nn \l_@@_choice_values_seq {#1}
   }
 \cs_new_protected:Npn \@@_choice_default_handler:n #1
   {
-    \seq_set_eq:NN \l_@@_choice_defaultvalues_seq #1
+    \seq_set_from_clist:Nn \l_@@_choice_defaultvalues_seq {#1}
   }
 \keys_define:nn{pdffield}
   {
-    display .code:n =
+     values .meta:n = {value={#1}}
+    ,default-values .meta:n = {default={#1}}
+    ,display-values .code:n =
      {
-       \seq_set_eq:NN \l_@@_choice_displayvalues_seq #1
+       \seq_set_from_clist:Nn \l_@@_choice_displayvalues_seq {#1}
      }
    ,top-index .code:n =
      {
