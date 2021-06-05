@@ -8,9 +8,12 @@ this project uses date-based 'snapshot' version identifiers.
 ## [Unreleased]
 ### Added
  - \pdffile_filespec:nnn to create a filespec dictionary
+ - sortkey and code for calculate actions
 ### Fixed
  - encoding of value in l3pdffield-textfield 
  - encoding of value of TM and TU key
+### Changed
+ - handling of ECMAscript in /AA keys 
  
 
 ## [2021-05-14]

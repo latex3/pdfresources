@@ -531,42 +531,41 @@
 % \end{function}
 %
 % The following four keys are used to add javascript (\enquote{ECMAScript}) code.
-% The values are currently only passed through \cs{pdf_string_from_unicode:nnN},
-% but this perhaps will have to change. The keys will be ignored if a pdfstandard
+% The values are expanded. It is recommended to store
+% the javascript in a stream object and to pass the object reference, but passing
+% a string (including parentheses) is possible too.
+% The keys will be ignored if a pdfstandard
 % is used that prohibits such actions.
 %
 % \begin{function}{AA/K,keystroke}
 %  \begin{syntax}
-%   |AA/K| = \meta{string (ECMAScript)}\\
-%   |keystroke| = \meta{string (ECMAScript)}
+%   |AA/K| = \meta{ECMAScript}\\
+%   |keystroke| = \meta{ECMAScript}
 %  \end{syntax}
 % This adds a keystroke action to the
-% additional action dictionary. The value is passed through
-% \cs{pdf_string_from_unicode:nnN}. The action is meant for text and choice fields.
-%  It is quite unclear if such an action
+% additional action dictionary. The action is meant for text and choice fields.
+% It is quite unclear if such an action
 %  make sense for non-terminal fields.
 %  \end{function}
 %
 % \begin{function}{AA/F,format}
 %  \begin{syntax}
-%   |AA/F| = \meta{string (ECMAScript)}\\
-%   |format| = \meta{string (ECMAScript)}
+%   |AA/F| = \meta{ECMAScript}\\
+%   |format| = \meta{ECMAScript}
 %  \end{syntax}
 % This adds a format action to the
-% additional action dictionary. The value is passed through
-% \cs{pdf_string_from_unicode:nnN}. The action is meant for text and choice fields.
+% additional action dictionary. The action is meant for text and choice fields.
 % It is quite unclear if such an action
 %  make sense for non-terminal fields.
 % \end{function}
 %
 % \begin{function}{AA/V,validate}
 %  \begin{syntax}
-%   |AA/V| = \meta{string (ECMAScript)}\\
-%   |validate| = \meta{string (ECMAScript)}
+%   |AA/V| = \meta{ECMAScript}\\
+%   |validate| = \meta{ECMAScript}
 %  \end{syntax}
 % This adds a validate action to the
-% additional action dictionary. The value is passed through
-% \cs{pdf_string_from_unicode:nnN}. It is quite unclear if such an action
+% additional action dictionary. It is quite unclear if such an action
 %  make sense for non-terminal fields.
 %  \end{function}
 %
@@ -576,9 +575,21 @@
 %   |calculate| = \meta{string (ECMAScript)}
 %  \end{syntax}
 % This adds a calculate action to the
-% additional action dictionary. The value is passed through
-% \cs{pdf_string_from_unicode:nnN}. It is quite unclear if such an action
-%  make sense for non-terminal fields.
+% additional action dictionary. It is quite unclear if such an action
+% make sense for non-terminal fields.
+% If an calculate action is used, the field will be added to the
+% AcroForm/CO array to define the calculation order. The order can
+% be controlled through the following key |sortkey|.
+% \end{function}
+%
+%  \begin{function}{sortkey}
+%  \begin{syntax}
+%   |sortkey| = \meta{string}
+%  \end{syntax}
+% This sets a sortkey for fields with calculate action.
+% The sortkeys are sorted lexically with |\str_compare:nNnTF|.
+% fields without sortkey will get an empty sortkey and so be at the begin,
+% the order of fields with the same sortkey is not defined.
 % \end{function}
 %
 % \begin{function}{DA}
@@ -703,19 +714,22 @@
 %
 % \begin{function}{AA/*}
 %  \begin{syntax}
-%  |AA/*| = \meta{string (ECMAScript)}
+%  |AA/*| = \meta{ECMAScript}
 %  \end{syntax}
 % * should be one of |F|, |Bl|, |D|, |U|, |E|, |X|, |PO|, |PC|, |PV|, |PI|.
 % Alias names for the first six keys are
 % |onfocus|, |onblur|, |onmousedown|, |onmouseup|, |onenter|,  |onexit|.
 % These keys adds then the respective key to the |/AA| dictionary
 % of the field annotation object.
-% Their value should be javascript code. The |/AA| dictionary
+% Their value should be javascript code. The value is expanded but not escaped.
+% It is recommended to
+% store the code in a stream object and to use the object reference as value.
+% The |/AA| dictionary
 % is suppressed if a pdf/A standard is set.
 %
 % For example
 % \begin{verbatim}
-%    onenter={app.alert('Hello');}
+%    onenter={(app.alert('Hello');)}
 % \end{verbatim}
 % \end{function}
 %
@@ -926,6 +940,8 @@
 %     ,\l_@@_caption_tl
 %     ,\l_@@_rollover_caption_tl
 %     ,\l_@@_down_caption_tl
+%     ,\g_@@_CO_sortkeys_prop
+%     ,\l_@@_CO_sortkey_str
 %  }
 % Some tmp variables, and a variable for the current parent and the
 % current fieldID.
@@ -939,6 +955,9 @@
 \tl_new:N  \l_@@_caption_tl
 \tl_new:N  \l_@@_rollover_caption_tl
 \tl_new:N  \l_@@_down_caption_tl
+\prop_new:N \g_@@_CO_sortkeys_prop
+\seq_new:N \g_@@_CO_sortkeys_seq
+\str_new:N  \l_@@_CO_sortkey_str
 %    \end{macrocode}
 % \end{variable}
 %
@@ -1128,6 +1147,14 @@
               {l_@@/field}
               {AA}
               {\pdf_object_ref_last:}
+            \pdfdict_get:nnN {l_@@/field/AA}{C}\l_@@_tmpa_tl
+            \quark_if_no_value:NF \l_@@_tmpa_tl
+              {
+                \prop_gput:Nxx\g_@@_CO_sortkeys_prop
+                  { \pdf_object_ref:n {@@/field/#1} }{ \l_@@_CO_sortkey_str }
+                \seq_gput_right:Nx\g_@@_CO_sortkeys_seq
+                  { \pdf_object_ref:n {@@/field/#1} }
+              }
           }
       }
     \hook_gput_code:nnn {shipout/lastpage}{pdffield} %xetex needs this ...
@@ -1139,6 +1166,26 @@
       }
     \pdf_object_write:nx {@@/field/#1} { \pdfdict_use:n {l_@@/field} }
   }
+
+\hook_gput_code:nnn {shipout/lastpage}{pdffield}
+  {
+     \prop_if_empty:NF \g_@@_CO_sortkeys_prop
+       {
+          \seq_sort:Nn \g_@@_CO_sortkeys_seq
+           {
+              \str_compare:eNeTF
+                { \prop_item:Nn \g_@@_CO_sortkeys_prop {#1} }
+                >
+                { \prop_item:Nn \g_@@_CO_sortkeys_prop {#2} }
+                { \sort_return_swapped: }
+                { \sort_return_same: }
+           }
+           \pdfmanagement_add:nnx
+            { Catalog / AcroForm }
+            { CO }
+            { \seq_use:Nn \g_@@_CO_sortkeys_seq{~} }
+       }
+   }
 
 \cs_new_protected:Npn \pdffield_field:nn #1 #2
   {
@@ -1472,15 +1519,14 @@
       {
          AA/#1 .code:n =
            {
-             \pdf_string_from_unicode:nnN {utf8/string-raw}{##1}\l_@@_tmpa_str
-             \str_if_empty:NTF \l_@@_tmpa_str
+             \tl_if_empty:nTF {#1}
                {
                  \pdfdict_remove:nn {l_@@/field/AA}{#1}
                }
                {
                  \pdfdict_put:nnx {l_@@/field/AA}
                   {#1}
-                  {<</S/JavaScript/JS(\l_@@_tmpa_str)>>}
+                  {<</S/JavaScript/JS\c_space_tl ##1>>}
                }
            },
         AA/#1 .groups:n  = {field}
@@ -1503,9 +1549,13 @@
 \@@_tmpa:nn {validate} {V}
 \@@_tmpa:nn {calculate}{C}
 
-
+\keys_define:nn {pdffield}
+ {
+   sortkey .code:n = {\str_set:Nx \l_@@_CO_sortkey_str {\tl_to_str:n{#1}}}
+ }
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{DA,Q,align,DS,RV}
 % The following keys are related to textfield and their format.
 %    \begin{macrocode}
@@ -1842,15 +1892,14 @@
       {
          AA/#1 .code:n =
            {
-             \pdf_string_from_unicode:nnN {utf8/string-raw}{##1}\l_@@_tmpa_str
-             \str_if_empty:NTF \l_@@_tmpa_str
+             \tl_if_empty:nTF {#1}
                {
                  \pdfannot_dict_remove:nn {widget/AA}{#1}
                }
                {
                  \pdfannot_dict_put:nnx {widget/AA}
                   {#1}
-                  {<</S/JavaScript/JS(\l_@@_tmpa_str)>>}
+                  {<</S/JavaScript/JS\c_space_tl##1>>}
                }
            },
          ,AA/#1 .groups:n = annot
