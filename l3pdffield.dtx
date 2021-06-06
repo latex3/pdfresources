@@ -91,14 +91,26 @@
 % \usepackage{l3pdffield-testphase}
 % \end{verbatim}
 %
-% The code is splitted into various submodules. \texttt{l3pdffield}
-% contains the basic commands to create a form field. The code related to field types
-% like checkboxes are in \texttt{l3pdffield-\emph{type}}, for example
-% \texttt{l3pdffield-checkbox}. Currently only checkboxes have been implemented,
-% other form fields like pushbutton,
-% radio buttons or text fields will follow later.
-% The code doesn't rely on to initialize the form,
-% but it can be used with hyperref.
+% The source code is splitted into various submodules. All code is combined in the
+% sty, but the documentation is in individual PDF.
+% \begin{description}
+% \item[\texttt{l3pdffield}] This contains the basic commands and keys
+%  to create a form field.
+% \item[\texttt{l3pdffield-checkbox}]  The code to created checkboxes.
+% \item[\texttt{l3pdffield-textfield}] The code to created text fields.
+% \item[\texttt{l3pdffield-radiobutton}] The code to create radio buttons.
+% \item[\texttt{l3pdffield-pushbutton}] The code to create push buttons.
+% \item[\texttt{l3pdffield-choice}] The code to create choice fields (lists and drop-down/combo
+% fields.
+% \item[\texttt{l3pdffield-action}] (not done yet)
+% Code related to actions, mostly submit and reset actions.
+% \item[\texttt{l3pdffield-signature}] (not done yet) Code for signature fields
+% \item[Form initialization] (not done yet) The |\Form| command/environment
+% of \pkg{hyperref} initialize a few things like fonts
+% for text fields. which should be moved. It is not stricly necessary to
+% have this code, most examples works without it, but in case of problems it is
+% possible to do the initialization by using the \pkg{hyperref} command.
+% \end{description}
 %
 % The code requires the new PDF management. The code makes use of
 % \pkg{l3pdfxform} to create the form Xobjects of the appearances.
@@ -590,6 +602,8 @@
 % The sortkeys are sorted lexically with |\str_compare:nNnTF|.
 % fields without sortkey will get an empty sortkey and so be at the begin,
 % the order of fields with the same sortkey is not defined.
+% The module only sorts fields created with the commands of this module, the
+% sorting of fields created by \pkg{hyperref} is independant.
 % \end{function}
 %
 % \begin{function}{DA}
