@@ -1,0 +1,279 @@
+% \iffalse meta-comment
+%
+%% File: l3pdfpdffield-action.dtx
+%
+% Copyright (C) 2021 The LaTeX Project
+%
+% It may be distributed and/or modified under the conditions of the
+% LaTeX Project Public License (LPPL), either version 1.3c of this
+% license or (at your option) any later version.  The latest version
+% of this license is in the file
+%
+%    http://www.latex-project.org/lppl.txt
+%
+% This file is part of the "LaTeX PDF management testphase bundle" (The Work in LPPL)
+% and all files in that bundle must be distributed together.
+%
+% -----------------------------------------------------------------------
+%
+% The development version of the bundle can be found at
+%
+%    https://github.com/latex3/pdfresources
+%
+% for those people who are interested.
+%
+%<*driver>
+\RequirePackage{pdfmanagement-testphase}
+\DeclareDocumentMetadata{}
+\makeatletter
+\declare@file@substitution{doc.sty}{doc-v3beta.sty}
+\makeatother
+\documentclass[full]{l3doc}
+\usepackage{array,booktabs,siunitx}
+\usepackage{l3pdffield-testphase,bearwear}
+\hypersetup{pdfauthor=The LaTeX Project,
+ pdftitle=l3pdffield (LaTeX PDF management testphase bundle)}
+\begin{document}
+  \DocInput{\jobname.dtx}
+\end{document}
+%</driver>
+% \fi
+% \providecommand\hook[1]{\texttt{#1}}
+% \ExplSyntaxOn
+% \pdffield_appearance:nn {pdffield/bear}
+%  {
+%    \tikz\bear\bearwear[shirt=red,body~deco={\node[font=\tiny\bfseries,white]~at~(beartummy){Push};}];
+%  }
+% \ExplSyntaxOff
+% \title{^^A
+%   The \pkg{l3pdffield-action} module\\ Commands to handle actions of form fields   ^^A
+%   \\ \LaTeX{} PDF management testphase bundle
+% }
+%
+% \author{^^A
+%  The \LaTeX{} Project\thanks
+%    {^^A
+%      E-mail:
+%        \href{mailto:latex-team@latex-project.org}
+%          {latex-team@latex-project.org}^^A
+%    }^^A
+% }
+%
+% \date{Version 0.95d, released 2021-05-14}
+%
+% \maketitle
+% \begin{documentation}
+% \section{\pkg{l3pdffield-action} Introduction}
+% This is the documentation for actions for formular fields, for general information about form fields
+% check the documentation l3pdffield.
+%
+%
+%
+% Please keep in mind
+% \begin{itemize}
+% \item Not every PDF viewer supports form fields.
+% \item The handling can depend on settings in the PDF viewer.
+% \item Standards like pdf/A disable features of form fields too
+% (as you typically can't change the PDF).
+% \end{itemize}
+% \section{Actions}
+%
+% Actions must be handled in three places: In the action dictionary (|/A|)
+% of the annotation(s), in the additional action dictionary of the field (|/AA|),
+% and in additional action dictionary (|/AA|) of the annotation(s). The distinction
+% between the two |/AA| dictionaries is important as field actions can only be
+% added when the field is initialized, so typically with the first field command
+% for a specific name.
+%
+% \subsection{The additional action dictionaries}
+% The actions in the |/AA| dictionaries are javascript (ECMAScript). An example is
+% the calculate action:
+%
+% \begin{verbatim}
+% Netto~\pdffield_textfield:n{name=netto}~
+% \pdf_object_unnamed_write:nx{stream}
+%   {
+%     {}
+%     {
+%      var~f_netto = this.getField("netto");
+%      event.value = 1.19*f_netto.value;
+%     }
+%   }
+% \tl_set:Nx\l_tmpa_tl{\pdf_object_ref_last:}
+% Brutto~\pdffield_textfield:n{name=brutto,AA/C={\l_tmpa_tl}}
+% \end{verbatim}
+%
+% The main problem with scripts is to get the escaping right. While it is possible
+% to pass the script as string, it is less error prone to include it as (file) stream
+% and to reference the object number.
+%
+% \subsection{The action dictionary}
+%
+% The action dictionary can contain much more actions. The PDF reference lists 20
+% different types: GoTo, GoToR, GoToE, GoToDp, Launch, Thread, URI, Sound, Movie,
+% Hide, Named, SubmitForm, ResetForm, ImportData, SetOCGState, Rendition,
+% Trans, GoTo3DView, JavaScript, RichMediaExecute.
+%
+% And action dictionary typically looks like this
+%
+% \begin{verbatim}
+% /A << /Type /Action
+%       /S    ... % type name, e.g. /URI
+%       /Next ... % optional, next option
+%       ...   ... % more keys
+%    >>
+% \end{verbatim}
+%
+% The |/Next| key allows to chain actions. The value can be a reference to a
+% single action, or an array of actions.
+%
+% It depends on the action type which other keys should be used.
+%
+% While almost all actions are usable in the annotations of a field, the three
+% actions SubmitForm, ResetForm and ImportData are specific to fields and need
+% explicit support. This support is the main task of this module.
+%
+% \subsubsection{ResetForm}
+% 
+%
+% \bigskip
+% \subsection{Commands}
+%
+%
+%
+% \subsection{Keys}
+%
+%
+% \subsection{Using with hyperref}
+%
+% \end{documentation}
+%
+% \begin{implementation}
+% \DoNotIndex
+%  {\\
+% ,\bitset_clear:N
+% ,\bitset_new:Nn
+% ,\bitset_set_false:Nn
+% ,\bitset_set_true:Nn
+% ,\bitset_to_arabic:N
+% ,\bool_new:N
+% ,\box_dp:N
+% ,\box_ht:N
+% ,\l_tmpa_box
+% ,\clist_map_inline:nn
+% ,\color_export:nnN
+% ,\color_set:nn
+% ,\color_set:nnn
+% ,\cs_new_protected:Npn
+% ,\cs_new_protected:cpn
+% ,\cs_set_eq:NN
+% ,\cs_gset_eq:cN
+% ,\cs_set_protected:Npn
+% ,\cs_generate_variant:Nn
+% ,\cs_gset_eq:NN
+% ,\csname
+% ,\dim_eval:n
+% ,\dim_new:N
+% ,\dim_set:N
+% ,\endcsname
+% ,\exp_args:Ne
+% ,\exp_args:Nnx
+% ,\exp_args:Nx
+% ,\fboxsep
+% ,\group_begin:
+% ,\group_end:
+% ,\hbox_to_wd:nn
+% ,\hbox_set:Nn
+% ,\hfill
+% ,\hook_gput_code:nnn
+% ,\int_eval:n
+% ,\int_gincr:N
+% ,\int_new:N
+% ,\int_use:N
+% ,\l_keys_choice_int
+% ,\keys_define:nn
+% ,\keys_set:nn
+% ,\mode_leave_vertical:
+% ,\makebox
+% ,\msg_error:nnn
+% ,\msg_error:nnnn
+% ,\msg_new:nnn
+% ,\msg_warning:nn
+% ,\msg_warning:nnn
+% ,\msg_warning:nnnnn
+% ,\NeedsTeXFormat
+% ,\normalsize
+% ,\pdf_name_from_unicode_e:n
+% ,\pdf_object_if_exist:nTF
+% ,\pdf_object_if_exist:nF
+% ,\pdf_object_new:nn
+% ,\pdf_object_ref:n
+% ,\pdf_object_ref_last:
+% ,\pdf_object_unnamed_write:nn
+% ,\pdf_object_write:nn
+% ,\pdf_string_from_unicode:nnN
+% ,\pdfannot_box_ref_last:
+% ,\pdfannot_dict_put:nnn
+% ,\pdfannot_dict_put:nnx
+% ,\pdfannot_dict_remove:nn
+% ,\pdfannot_widget_box:nnn
+% ,\pdfdict_if_empty:nTF
+% ,\pdfdict_get:nnN
+% ,\pdfdict_new:n
+% ,\pdfdict_put:nnn
+% ,\pdfdict_remove:nn
+% ,\pdfdict_use:n
+% ,\pdfmanagement_add:nnn
+% ,\pdfmeta_standard_verify:nTF
+% ,\pdfxform_if_exist:nTF
+% ,\pdfxform_new:nnn
+% ,\pdfxform_ref:n
+% ,\phantom
+% ,\prg_do_nothing:
+% ,\ProvidesExplPackage
+% ,\rule
+% ,\seq_gput_right:Nn
+% ,\seq_if_exist:NTF
+% ,\seq_new:N
+% ,\seq_use:Nn
+% ,\str_if_empty:NTF
+% ,\str_if_in:NnTF
+% ,\str_new:N
+% ,\strut
+% ,\strutbox
+% ,\tl_if_empty:NTF
+% ,\tl_if_empty:NT
+% ,\tl_if_empty:NF
+% ,\tl_put_left:Nn
+% ,\tl_if_empty:nTF
+% ,\tl_if_head_eq_charcode:nNTF
+% ,\tl_put_right:Nn
+% ,\tl_new:N
+% ,\tl_set:Nn
+% ,\tl_to_str:n
+% ,\use:c
+%   }
+% \section{\pkg{l3pdffield-pushbutton} Implementation}
+%    \begin{macrocode}
+%<*package>
+%<@@=pdffield>
+%    \end{macrocode}
+% \subsection{Variables}
+% \begin{variable}
+%  {
+%  }
+% A pushbutton can setup the appearance only after the texts are known,
+% so the code is stored and executed later.
+%    \begin{macrocode}
+%    \end{macrocode}
+% \end{variable}
+%
+% \subsection{user commands}
+% \begin{macro}{}
+%    \begin{macrocode}
+%</package>
+%    \end{macrocode}
+% \end{macro}
+%\end{implementation}
+
+% \PrintIndex
