@@ -1,0 +1,35 @@
+\RequirePackage{pdfmanagement-testphase}
+\DeclareDocumentMetadata{uncompress,pdfversion=2.0}
+\documentclass[]{article}
+\usepackage{l3pdffield-testphase}
+\begin{document}
+\ExplSyntaxOn
+\pdf_object_unnamed_write:nx{stream}
+   {
+    {}
+    {
+     var~f_B = this.getField("B");
+     var~f_C = this.getField("C");
+     event.value = f_B.value + f_C.value;
+    }
+   }
+\tl_set:Nx\l_tmpa_tl{\pdf_object_ref_last:}
+A~\pdffield_textfield:n{name=A,calculate={\l_tmpa_tl},sortkey=b}\par
+
+\pdf_object_unnamed_write:nx{stream}
+   {
+    {}
+    {
+     var~f_B = this.getField("B");
+     event.value = 10*f_B.value;
+    }
+   }
+\tl_set:Nx\l_tmpa_tl{\pdf_object_ref_last:}
+
+B~\pdffield_textfield:n{name=B,calculate={\l_tmpa_tl},sortkey=c}
+\par
+
+C~\pdffield_textfield:n{name=C}
+
+\ExplSyntaxOff
+\end{document}
