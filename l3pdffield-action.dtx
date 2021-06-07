@@ -180,7 +180,12 @@
 % The action is typically attached to a pushbutton, its only value is a file name.
 %
 % \subsubsection{SubmitForm}
-% 
+%
+% SubmitForm is the most challenging action. There are more keys in the dictionary,
+% 13 flags, and there are four export options, which require each some flag settings.
+%
+%
+%
 %
 %
 % \bigskip
@@ -333,6 +338,7 @@
 %  }
 %    \begin{macrocode}
 \tl_new:N  \l_@@_action_Flags_tl
+\tl_new:N  \l_@@_action_export_tl
 \seq_new:N \l_@@_action_Fields_seq
 \str_new:N \l_@@_action_F_str
 %    \end{macrocode}
@@ -346,7 +352,25 @@
 \pdfdict_put:nnn {l_@@/SubmitForm}{Type}{/Action}
 \pdfdict_put:nnn {l_@@/SubmitForm}{S}{/SubmitForm}
 %    \end{macrocode}
-%
+% \subsection{bitset for submit action}
+%    \begin{macrocode}
+\bitset_new:Nn \l_@@_Flags_bitset
+  {
+     Include/Exclude      = 1
+    ,IncludeNoValueFields = 2
+    ,ExportFormat         = 3
+    ,GetMethod            = 4
+    ,SubmitCoordinates    = 5
+    ,XFDF                 = 6
+    ,IncludeAppendSaves   = 7
+    ,IncludeAnnotations   = 8
+    ,SubmitPDF            = 9
+    ,CanonicalFormat      = 10
+    ,ExclNonUserAnnots    = 11
+    ,ExclFKey             = 12
+    ,EmbedForm            = 14
+  }
+%    \end{macrocode}
 % \subsection{Keys}
 %    \begin{macrocode}
 
@@ -392,6 +416,10 @@
       }
     ,exclude .code:n = {\tl_set:Nn \l_@@_action_Flags_tl {1}}
     ,include .code:n = {\tl_set:Nn \l_@@_action_Flags_tl {0}}
+    ,export .choices:nn = {pdf,fdf,html,xfdf}
+      {
+        \tl_set:Nn \l_@@_action_export_tl {#1}
+      }
   }
 %    \end{macrocode}
 %
@@ -420,6 +448,35 @@
     \pdfdict_put:nnn {l_@@/ResetForm}{Fields}{\pdf_object_ref_last:}
     \pdfdict_put:nnn {l_@@/ResetForm}{Flags}{#2}
     \pdf_object_unnamed_write:nx {dict} {\pdfdict_use:n{l_@@/ResetForm}}
+    \tl_const:cx { c_@@_action_reset_#3_tl }{ \pdf_object_ref_last: }
+    \cs_gset_eq:cN {@@_action_reset_#3:} \prg_do_nothing:
+  }
+\@@_action_reset_new:nn  {all}{fields={},exclude}
+%    \end{macrocode}
+% \subsection{New submit action}
+%
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_action_submit_new:nn #1 #2 %#1 name, #2 keyval
+  {
+    \group_begin:
+    \seq_clear:N \l_@@_action_Fields_seq
+    \keys_set:nn { pdffield / action }{ #2 }
+    \cs_new_protected:cpx {@@_action_submit_#1:}
+      {
+        \exp_not:N \@@_action_submit_aux:nnn
+         {\seq_use:Nn \l_@@_action_Fields_seq {~}}
+         { \l_@@_action_Flags_tl }
+         {#1}
+      }
+    \group_end:
+  }
+
+\cs_new_protected:Npn \@@_action_submit_aux:nnn #1 #2 #3 % fields content, #2 flag, #3 name
+  {
+    \pdf_object_unnamed_write:nx {array}{#1}
+    \pdfdict_put:nnn {l_@@/SubmitForm}{Fields}{\pdf_object_ref_last:}
+    \pdfdict_put:nnn {l_@@/SubmitForm}{Flags}{#2}
+    \pdf_object_unnamed_write:nx {dict} {\pdfdict_use:n{l_@@/SubmitForm}}
     \tl_const:cx { c_@@_action_reset_#3_tl }{ \pdf_object_ref_last: }
     \cs_gset_eq:cN {@@_action_reset_#3:} \prg_do_nothing:
   }
