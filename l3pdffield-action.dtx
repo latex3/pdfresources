@@ -80,13 +80,14 @@
 %
 % Actions must be handled in three places: In the action dictionary (|/A|)
 % of the annotation(s), in the additional action dictionary of the field (|/AA|),
-% and in additional action dictionary (|/AA|) of the annotation(s). The distinction
+% and in the additional action dictionary (|/AA|) of the annotation(s). The distinction
 % between the two |/AA| dictionaries is important as field actions can only be
 % added when the field is initialized, so typically with the first field command
-% for a specific name.
+% for a specific name, while annotation actions can be added for example only to
+% one specific instance of a checkbox.
 %
 % \subsection{The additional action dictionaries}
-% The actions in the |/AA| dictionaries are javascript (ECMAScript). An example is
+% The actions in the |/AA| dictionaries are JavaScript (ECMAScript) actions. An example is
 % the calculate action:
 %
 % \begin{verbatim}
@@ -119,7 +120,7 @@
 % \begin{verbatim}
 % /A << /Type /Action
 %       /S    ... % type name, e.g. /URI
-%       /Next ... % optional, next option
+%       /Next ... % optional, next action
 %       ...   ... % more keys
 %    >>
 % \end{verbatim}
@@ -130,16 +131,60 @@
 % It depends on the action type which other keys should be used.
 %
 % While almost all actions are usable in the annotations of a field, the three
-% actions SubmitForm, ResetForm and ImportData are specific to fields and need
+% actions |SubmitForm|, |ResetForm| and |ImportData| are specific to fields and need
 % explicit support. This support is the main task of this module.
 %
 % \subsubsection{ResetForm}
-% 
+% The |ResetForm| action resets the fields of a formular. The action is typically
+% attached to a pushbutton.
+%
+% In simple cases the action only need to contain the subtype entry and then resets
+% everything (sadly including the appearance of the pushbutton, sigh).
+%
+% \begin{verbatim}
+% \pdfannot_dict_put:nnn{widget}{A}{<</Type/Action/S/ResetForm>>}
+% \pdffield_pushbutton:n{name=R,caption=Reset}
+% \end{verbatim}
+%
+% A |ResetForm| action know two more keys: |/Fields| allows to describe or restrict
+% the fields which should be reset. Depending on the setting of the |/Flags| key
+% the value of |/Fields| describes the fields to reset or the fields to leave unchanged.
+%
+%
+% A reset action can be defined like this
+% \begin{verbatim}
+% \pdffield_action:nnn{reset-text}{reset}
+%   {
+%     fields= {A,B,C},
+%     exclude     % or include
+%   }
+% \end{verbatim}
+%
+% |reset-text| is the name the action can be referred to with the |action| key.
+% |reset| is the type.
+% |fields| is a list of \emph{fully qualified} field names, typically this can
+% be the short name set with |name| in a field declaration, but in complex fieldsets
+% it is need to include the parents in the name too, separated by periods.
+% If |exclude| is set, the list of fields describes the fields that should
+% be excluded from the reset. The default is |include|: the fields describes the fields
+% to reset, descendant are reset too!
+%
+% It is possible to define and use a reset action before all fields have been created.
+% The list of names can contain names that are actually not used by the field.
+%
+%
+% The action |reset-all| is predefined.
+%
 %
 % \bigskip
 % \subsection{Commands}
-%
-%
+% \begin{function}{\pdffield_action:nnn}
+% \begin{syntax}
+% \cs{pdffield_action:nn}\Arg{name}\Arg{type}\Arg{key val list}
+% \end{syntax}
+% This defines an action with the name \meta{name}. \meta{type}
+% should be one of |reset|, |submit|, or |import|. The keys are described below.
+% \end{function}
 %
 % \subsection{Keys}
 %
@@ -253,24 +298,122 @@
 % ,\tl_to_str:n
 % ,\use:c
 %   }
-% \section{\pkg{l3pdffield-pushbutton} Implementation}
+% \section{\pkg{l3pdffield-action} Implementation}
 %    \begin{macrocode}
 %<*package>
 %<@@=pdffield>
 %    \end{macrocode}
+% \subsection{Messages}
+%    \begin{macrocode}
+\msg_new:nnn {pdffield}{action-name-undefined}
+  {
+    The~action~name~`#1`~is~not~defined~and~
+    will~be~ignored.
+  }
+\msg_new:nnnn {pdffield}{action-type-undefined}
+  {
+    The~action~type~`#1`~is~unknown. \\
+    Action~`#2`~can't~be~defined.
+  }
+  {
+    Allowed~types~are~`reset`,~`submit`,~and~`import`. 
+  }
+%    \end{macrocode}
 % \subsection{Variables}
 % \begin{variable}
 %  {
+%    \l_@@_action_exclude_bool
 %  }
-% A pushbutton can setup the appearance only after the texts are known,
-% so the code is stored and executed later.
 %    \begin{macrocode}
+\tl_new:N \l_@@_action_Flags_tl
+\seq_new:N \l_@@_action_Fields_seq
 %    \end{macrocode}
 % \end{variable}
+% \subsection{dictionaries}
+%    \begin{macrocode}
+\pdfdict_new:n   {l_@@/ResetForm}
+\pdfdict_put:nnn {l_@@/ResetForm}{Type}{/Action}
+\pdfdict_put:nnn {l_@@/ResetForm}{S}{/ResetForm}
+%    \end{macrocode}
+%
+% \subsection{Keys}
+%    \begin{macrocode}
+
+\keys_define:nn { pdffield }
+  {
+    action .code:n =
+      {
+        \cs_if_exist:cTF { @@_action_reset_#1: }
+          {
+            \use:c { @@_action_reset_#1: }
+            \pdfannot_dict_put:nnx{widget}
+             {A}
+             {\tl_use:c { c_@@_action_reset_#1_tl } }
+          }
+          {
+            \msg_warning:nnn{pdffield}{action-name-undefined}{#1}
+          }
+      }
+  }
+
+\keys_define:nn { pdffield / action }
+  {
+    fields .code:n  =
+      {
+        \clist_map_inline:nn {#1}
+          {
+            \pdf_string_from_unicode:nnN {utf8/string}{##1}\l_@@_tmpa_str
+            \seq_put_right:NV\l_@@_action_Fields_seq \l_@@_tmpa_str
+          }
+      }
+    ,exclude .code:n = {\tl_set:Nn \l_@@_action_Flags_tl {1}}
+    ,include .code:n = {\tl_set:Nn \l_@@_action_Flags_tl {0}}
+  }
+%    \end{macrocode}
+%
+% \subsection{New reset action}
+%
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_action_reset_new:nn #1 #2 %#1 name, #2 keyval
+  {
+    \group_begin:
+    \seq_clear:N \l_@@_action_Fields_seq
+    \keys_set:nn { pdffield / action }{ #2 }
+    \cs_new_protected:cpx {@@_action_reset_#1:}
+      {
+
+        \exp_not:N \@@_action_reset_aux:nnn
+         {\seq_use:Nn \l_@@_action_Fields_seq {~}}
+         {\l_@@_action_Flags_tl}
+         {#1}
+      }
+    \group_end:
+  }
+
+\cs_new_protected:Npn \@@_action_reset_aux:nnn #1 #2 #3 % fields content, #2 flag, #3 name
+  {
+    \pdf_object_unnamed_write:nx {array}{#1}
+    \pdfdict_put:nnn {l_@@/ResetForm}{Fields}{\pdf_object_ref_last:}
+    \pdfdict_put:nnn {l_@@/ResetForm}{Flags}{#2}
+    \pdf_object_unnamed_write:nx {dict} {\pdfdict_use:n{l_@@/ResetForm}}
+    \tl_const:cx { c_@@_action_reset_#3_tl }{ \pdf_object_ref_last: }
+    \cs_gset_eq:cN {@@_action_reset_#3:} \prg_do_nothing:
+  }
+\@@_action_reset_new:nn  {reset-all}{fields={},exclude}
+%    \end{macrocode}
+%
 %
 % \subsection{user commands}
-% \begin{macro}{}
+% \begin{macro}{\pdffield_action:nnn}
 %    \begin{macrocode}
+\cs_new_protected:Npn \pdffield_action:nnn #1 #2 #3
+ {
+   \cs_if_exist:cTF { @@_action_#2_new:nn }
+      { \use:c { @@_action_#2_new:nn }{#1}{#3} }
+      {
+        \msg_error:nnnn{pdffield}{action-type-undefined}{#2}{#1}
+      }
+ }
 %</package>
 %    \end{macrocode}
 % \end{macro}
