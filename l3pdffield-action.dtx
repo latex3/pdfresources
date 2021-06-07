@@ -153,14 +153,14 @@
 %
 % A reset action can be defined like this
 % \begin{verbatim}
-% \pdffield_action:nnn{reset-text}{reset}
+% \pdffield_action:nnn{text}{reset}
 %   {
 %     fields= {A,B,C},
 %     exclude     % or include
 %   }
 % \end{verbatim}
 %
-% |reset-text| is the name the action can be referred to with the |action| key.
+% |text| is the name the action can be referred to with the |reset| key.
 % |reset| is the type.
 % |fields| is a list of \emph{fully qualified} field names, typically this can
 % be the short name set with |name| in a field declaration, but in complex fieldsets
@@ -173,7 +173,14 @@
 % The list of names can contain names that are actually not used by the field.
 %
 %
-% The action |reset-all| is predefined.
+% The action |all| is predefined.
+%
+% \subsubsection{ImportData}
+% The |ImportData| action allows to import field data from an external file.
+% The action is typically attached to a pushbutton, its only value is a file name.
+%
+% \subsubsection{SubmitForm}
+% 
 %
 %
 % \bigskip
@@ -183,7 +190,7 @@
 % \cs{pdffield_action:nn}\Arg{name}\Arg{type}\Arg{key val list}
 % \end{syntax}
 % This defines an action with the name \meta{name}. \meta{type}
-% should be one of |reset|, |submit|, or |import|. The keys are described below.
+% should be one of |reset| or |submit|. The keys are described below.
 % \end{function}
 %
 % \subsection{Keys}
@@ -335,6 +342,9 @@
 \pdfdict_new:n   {l_@@/ResetForm}
 \pdfdict_put:nnn {l_@@/ResetForm}{Type}{/Action}
 \pdfdict_put:nnn {l_@@/ResetForm}{S}{/ResetForm}
+\pdfdict_new:n   {l_@@/SubmitForm}
+\pdfdict_put:nnn {l_@@/SubmitForm}{Type}{/Action}
+\pdfdict_put:nnn {l_@@/SubmitForm}{S}{/SubmitForm}
 %    \end{macrocode}
 %
 % \subsection{Keys}
