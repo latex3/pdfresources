@@ -307,7 +307,7 @@
 %    \begin{macrocode}
 \msg_new:nnn {pdffield}{action-name-undefined}
   {
-    The~action~name~`#1`~is~not~defined~and~
+    The~`#1`~action~name~`#2`~is~not~defined~and~
     will~be~ignored.
   }
 \msg_new:nnnn {pdffield}{action-type-undefined}
@@ -316,7 +316,7 @@
     Action~`#2`~can't~be~defined.
   }
   {
-    Allowed~types~are~`reset`,~`submit`,~and~`import`. 
+    Allowed~types~are~`reset`,~`submit`,~and~`import`.
   }
 %    \end{macrocode}
 % \subsection{Variables}
@@ -325,8 +325,9 @@
 %    \l_@@_action_exclude_bool
 %  }
 %    \begin{macrocode}
-\tl_new:N \l_@@_action_Flags_tl
+\tl_new:N  \l_@@_action_Flags_tl
 \seq_new:N \l_@@_action_Fields_seq
+\str_new:N \l_@@_action_F_str
 %    \end{macrocode}
 % \end{variable}
 % \subsection{dictionaries}
@@ -341,7 +342,7 @@
 
 \keys_define:nn { pdffield }
   {
-    action .code:n =
+    reset .code:n =
       {
         \cs_if_exist:cTF { @@_action_reset_#1: }
           {
@@ -351,10 +352,23 @@
              {\tl_use:c { c_@@_action_reset_#1_tl } }
           }
           {
-            \msg_warning:nnn{pdffield}{action-name-undefined}{#1}
+            \msg_warning:nnnn{pdffield}{action-name-undefined}{reset}{#1}
           }
       }
   }
+
+\keys_define:nn { pdffield }
+  {
+    import .code:n =
+      {
+        \pdf_string_from_unicode:nnN {utf16/hex}{#1}\l_@@_action_F_str
+        \pdf_object_unnamed_write:nx {dict}{/Type/Action/S/ImportData/F\l_@@_action_F_str}
+        \pdfannot_dict_put:nnx{widget}
+          {A}
+          {\pdf_object_ref_last: }
+      }
+  }
+
 
 \keys_define:nn { pdffield / action }
   {
@@ -399,7 +413,7 @@
     \tl_const:cx { c_@@_action_reset_#3_tl }{ \pdf_object_ref_last: }
     \cs_gset_eq:cN {@@_action_reset_#3:} \prg_do_nothing:
   }
-\@@_action_reset_new:nn  {reset-all}{fields={},exclude}
+\@@_action_reset_new:nn  {all}{fields={},exclude}
 %    \end{macrocode}
 %
 %
