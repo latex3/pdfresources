@@ -524,7 +524,7 @@
       }
   }
 
-\keys_define:nn { pdffield }
+\keys_define:nn { pdffield / action }
   {
     ,setFlags .code:n =
       {
@@ -542,6 +542,15 @@
       }
     ,unsetsubmitflags .meta:n = {unsetFlags={#1}}
   }
+
+\keys_define:nn {pdffield / action}
+ {
+   charset .choices:nn =
+     {utf-8, utf-16, Shift-JIS, BigFive, GBK, UHC}
+     { }
+  ,url .code:n = {}
+  ,urlencode .bool_set:N = \l_@@_url_encode_bool
+ }
 %    \end{macrocode}
 %
 % \subsection{New reset action}
@@ -601,7 +610,7 @@
     \tl_const:cx { c_@@_action_reset_#3_tl }{ \pdf_object_ref_last: }
     \cs_gset_eq:cN {@@_action_reset_#3:} \prg_do_nothing:
   }
-\@@_action_reset_new:nn  {all}{fields={},exclude}
+
 %    \end{macrocode}
 %
 %
