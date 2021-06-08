@@ -153,22 +153,20 @@
 %
 % A reset action can be defined like this
 % \begin{verbatim}
-% \pdffield_action:nnn{text}{reset}
+% \pdffield_reset_new:nn
+%   {name}
 %   {
 %     fields= {A,B,C},
 %     exclude     % or include
 %   }
 % \end{verbatim}
 %
-% |text| is the name the action can be referred to with the |reset| key.
-% |reset| is the type.
-%
+% |name| is the name the action can be referred to with the |reset| key.
 %
 % It is possible to define and use a reset action before all fields have been created.
 % The list of names can contain names that are actually not used by the field.
 %
-%
-% The action |all| is predefined.
+% The reset action |all| is predefined.
 %
 % \subsubsection{ImportData}
 % The |ImportData| action allows to import field data from an external file.
@@ -178,6 +176,21 @@
 %
 % SubmitForm is the most challenging action. There are more keys in the dictionary,
 % 13 flags, and there are four export options, which require each some flag settings.
+% And the main argument is an url, which can contain special chars like \# or \% and
+% so need special handling.
+%
+% A submit action can be defined like this
+% \begin{verbatim}
+% \pdffield_submit_new:nnn
+%   {name}
+%   {
+%     fields= {A,B,C},
+%     exclude,     % or include
+%     setsubmitflag={...}
+%     ...
+%   }
+%   {URL}
+% \end{verbatim}
 %
 % The export options are |html|, |pdf|, |fdf| and |xfdf|.
 %
@@ -206,12 +219,12 @@
 %
 % \bigskip
 % \subsection{Commands}
-% \begin{function}{\pdffield_action:nnn}
+% \begin{function}{\pdffield_reset_new:nn}
 % \begin{syntax}
-% \cs{pdffield_action:nn}\Arg{name}\Arg{type}\Arg{key val list}
+% \cs{pdffield_reset:nn}\Arg{name}\Arg{key val list}
 % \end{syntax}
-% This defines an action with the name \meta{name}. \meta{type}
-% should be one of |reset| or |submit|. The keys are described below.
+% This defines an reset action with the name \meta{name}.
+% The keys are described below.
 % \end{function}
 %
 % \subsection{Keys}
@@ -383,14 +396,7 @@
     The~`#1`~action~name~`#2`~is~not~defined~and~
     will~be~ignored.
   }
-\msg_new:nnnn {pdffield}{action-type-undefined}
-  {
-    The~action~type~`#1`~is~unknown. \\
-    Action~`#2`~can't~be~defined.
-  }
-  {
-    Allowed~types~are~`reset`,~`submit`,~and~`import`.
-  }
+
 %    \end{macrocode}
 % \subsection{Variables}
 % \begin{variable}
@@ -430,6 +436,19 @@
     ,ExclNonUserAnnots    = 11
     ,ExclFKey             = 12
     ,EmbedForm            = 14
+    ,include/exclude      = 1
+    ,includenovaluefields = 2
+    ,exportformat         = 3
+    ,getmethod            = 4
+    ,submitcoordinates    = 5
+    ,xfdf                 = 6
+    ,includeappendsaves   = 7
+    ,includeannotations   = 8
+    ,submitpdf            = 9
+    ,canonicalformat      = 10
+    ,exclnonuserannots    = 11
+    ,exclfkey             = 12
+    ,embedform            = 14
   }
 
 \cs_new_protected:Npn \@@_action_flags_pdf:
@@ -516,8 +535,8 @@
             \seq_put_right:NV\l_@@_action_Fields_seq \l_@@_tmpa_str
           }
       }
-    ,exclude .code:n = {\tl_set:Nn \l_@@_action_Flags_tl {1}}
-    ,include .code:n = {\tl_set:Nn \l_@@_action_Flags_tl {0}}
+    ,exclude .code:n = { \bitset_set_true:Nn \l_@@_Flags_bitset {Include/Exclude }}
+    ,include .code:n = { \bitset_set_false:Nn \l_@@_Flags_bitset {Include/Exclude }}
     ,export .choices:nn = {pdf,fdf,html,xfdf}
       {
         \tl_set:Nn \l_@@_action_export_tl {#1}
@@ -528,10 +547,10 @@
   {
     ,setFlags .code:n =
       {
-          \clist_map_inline:nn {#1}
-           {
-             \bitset_set_true:Nn \l_@@_Flags_bitset {##1}
-           }
+        \clist_map_inline:nn {#1}
+          {
+            \bitset_set_true:Nn \l_@@_Flags_bitset {##1}
+          }
       }
     ,setsubmitflags .meta:n = {setFlags={#1}}
     ,unsetFlags .multichoice:
@@ -547,8 +566,7 @@
  {
    charset .choices:nn =
      {utf-8, utf-16, Shift-JIS, BigFive, GBK, UHC}
-     { }
-  ,url .code:n = {}
+     { \pdfdict_put:nnn { l_@@/SubmitForm }{#1} }
   ,urlencode .bool_set:N = \l_@@_url_encode_bool
  }
 %    \end{macrocode}
@@ -558,29 +576,22 @@
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_action_reset_new:nn #1 #2 %#1 name, #2 keyval
   {
-    \group_begin:
-    \seq_clear:N \l_@@_action_Fields_seq
-    \keys_set:nn { pdffield / action }{ #2 }
-    \cs_new_protected:cpx {@@_action_reset_#1:}
+    \cs_new_protected:cpn {@@_action_reset_#1:}
       {
-
-        \exp_not:N \@@_action_reset_aux:nnn
-         {\seq_use:Nn \l_@@_action_Fields_seq {~}}
-         {\l_@@_action_Flags_tl}
-         {#1}
+        \group_begin:
+        \seq_clear:N \l_@@_action_Fields_seq
+        \keys_set:nn { pdffield / action }{ #2 }
+        \pdf_object_unnamed_write:nx {array}{\seq_use:Nn \l_@@_action_Fields_seq {~}}
+        \pdfdict_put:nnn {l_@@/ResetForm}{Fields}{\pdf_object_ref_last:}
+        \pdfdict_put:nnn {l_@@/ResetForm}{Flags}
+          {\bitset_item:Nn\l_@@_Flags_bitset{Include/Exclude}}
+        \pdf_object_unnamed_write:nx {dict} {\pdfdict_use:n{l_@@/ResetForm}}
+        \tl_const:cx { c_@@_action_reset_#1_tl }{ \pdf_object_ref_last: }
+        \cs_gset_eq:cN {@@_action_reset_#1:} \prg_do_nothing:
+        \group_end:
       }
-    \group_end:
   }
 
-\cs_new_protected:Npn \@@_action_reset_aux:nnn #1 #2 #3 % fields content, #2 flag, #3 name
-  {
-    \pdf_object_unnamed_write:nx {array}{#1}
-    \pdfdict_put:nnn {l_@@/ResetForm}{Fields}{\pdf_object_ref_last:}
-    \pdfdict_put:nnn {l_@@/ResetForm}{Flags}{#2}
-    \pdf_object_unnamed_write:nx {dict} {\pdfdict_use:n{l_@@/ResetForm}}
-    \tl_const:cx { c_@@_action_reset_#3_tl }{ \pdf_object_ref_last: }
-    \cs_gset_eq:cN {@@_action_reset_#3:} \prg_do_nothing:
-  }
 \@@_action_reset_new:nn  {all}{fields={},exclude}
 %    \end{macrocode}
 % \subsection{New submit action}
@@ -589,42 +600,43 @@
 \cs_new_protected:Npn \@@_action_submit_new:nn #1 #2 %#1 name, #2 keyval
   {
     \group_begin:
-    \seq_clear:N \l_@@_action_Fields_seq
-    \keys_set:nn { pdffield / action }{ #2 }
-    \cs_new_protected:cpx {@@_action_submit_#1:}
-      {
-        \exp_not:N \@@_action_submit_aux:nnn
-         {\seq_use:Nn \l_@@_action_Fields_seq {~}}
-         { \l_@@_action_Flags_tl }
-         {#1}
-      }
-    \group_end:
+    \char_set_catcode_other:N \%
+    \char_set_catcode_other:N \#
+    \@@_action_submit_new:nnn {#1}{#2}
   }
-
-\cs_new_protected:Npn \@@_action_submit_aux:nnn #1 #2 #3 % fields content, #2 flag, #3 name
+\cs_new_protected:Npn \@@_action_submit_new:nnn #1 #2 #3 %#1 name, #2 keyval, #3 url
   {
-    \pdf_object_unnamed_write:nx {array}{#1}
-    \pdfdict_put:nnn {l_@@/SubmitForm}{Fields}{\pdf_object_ref_last:}
-    \pdfdict_put:nnn {l_@@/SubmitForm}{Flags}{#2}
-    \pdf_object_unnamed_write:nx {dict} {\pdfdict_use:n{l_@@/SubmitForm}}
-    \tl_const:cx { c_@@_action_reset_#3_tl }{ \pdf_object_ref_last: }
-    \cs_gset_eq:cN {@@_action_reset_#3:} \prg_do_nothing:
+    \group_end:
+    \cs_new_protected:cpn {@@_action_submit_#1:}
+      {
+        \group_begin:
+        \seq_clear:N    \l_@@_action_Fields_seq
+        \bitset_clear:N \l_@@_Flags_bitset
+        \keys_set:nn {pdffield/action}{#2}
+        \pdfdict_put:nnx { l_@@/SubmitForm }{Flags}{ \bitset_to_arabic:N \l_@@_Flags_bitset }
+        \bool_if:NTF \l_@@_url_encode_bool
+          { \pdf_string_from_unicode:nnN { utf8/URI }   {#3}\l_@@_tmpa_str }
+          { \pdf_string_from_unicode:nnN { utf8/string }{#3}\l_@@_tmpa_str }
+        \pdf_object_unnamed_write:nx {dict}
+          {
+            /FS/URL
+            /F \l_@@_tmpa_str
+          }
+        \pdfdict_put:nnx { l_@@/SubmitForm }{F}{ \pdf_object_ref_last: }
+        \pdf_object_unnamed_write:nx {dict} {\pdfdict_use:n{l_@@/SubmitForm}}
+        \tl_const:cx { c_@@_action_submit_#1_tl }{ \pdf_object_ref_last: }
+        \cs_gset_eq:cN { @@_action_submit_#1: } \prg_do_nothing:
+        \group_end:
+      }
   }
 
 %    \end{macrocode}
 %
 %
 % \subsection{user commands}
-% \begin{macro}{\pdffield_action:nnn}
+% \begin{macro}{\pdffield_reset_new:nn}
 %    \begin{macrocode}
-\cs_new_protected:Npn \pdffield_action:nnn #1 #2 #3
- {
-   \cs_if_exist:cTF { @@_action_#2_new:nn }
-      { \use:c { @@_action_#2_new:nn }{#1}{#3} }
-      {
-        \msg_error:nnnn{pdffield}{action-type-undefined}{#2}{#1}
-      }
- }
+\cs_set_eq:NN \pdffield_reset_new:nn \@@_action_reset_new:nn
 %</package>
 %    \end{macrocode}
 % \end{macro}
