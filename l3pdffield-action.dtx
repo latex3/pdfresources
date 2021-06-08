@@ -514,6 +514,23 @@
 
 \keys_define:nn { pdffield }
   {
+    submit .code:n =
+      {
+        \cs_if_exist:cTF { @@_action_submit_#1: }
+          {
+            \use:c { @@_action_submit_#1: }
+            \pdfannot_dict_put:nnx{widget}
+             {A}
+             {\tl_use:c { c_@@_action_submit_#1_tl } }
+          }
+          {
+            \msg_warning:nnnn{pdffield}{action-name-undefined}{submit}{#1}
+          }
+      }
+  }
+
+\keys_define:nn { pdffield }
+  {
     import .code:n =
       {
         \pdf_string_from_unicode:nnN {utf16/hex}{#1}\l_@@_action_F_str
@@ -637,6 +654,7 @@
 % \begin{macro}{\pdffield_reset_new:nn}
 %    \begin{macrocode}
 \cs_set_eq:NN \pdffield_reset_new:nn \@@_action_reset_new:nn
+\cs_set_eq:NN \pdffield_submit_new:nnn \@@_action_submit_new:nn
 %</package>
 %    \end{macrocode}
 % \end{macro}
