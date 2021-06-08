@@ -162,12 +162,7 @@
 %
 % |text| is the name the action can be referred to with the |reset| key.
 % |reset| is the type.
-% |fields| is a list of \emph{fully qualified} field names, typically this can
-% be the short name set with |name| in a field declaration, but in complex fieldsets
-% it is need to include the parents in the name too, separated by periods.
-% If |exclude| is set, the list of fields describes the fields that should
-% be excluded from the reset. The default is |include|: the fields describes the fields
-% to reset, descendant are reset too!
+%
 %
 % It is possible to define and use a reset action before all fields have been created.
 % The list of names can contain names that are actually not used by the field.
@@ -184,9 +179,30 @@
 % SubmitForm is the most challenging action. There are more keys in the dictionary,
 % 13 flags, and there are four export options, which require each some flag settings.
 %
+% The export options are |html|, |pdf|, |fdf| and |xfdf|.
 %
+% The following tabular describes the relation between these export options and the
+% flags. |0| and |1| in the tabular means that the value is set by the code. |*|
+% can be set by the user with the |setFlags| or |setsubmitflags| key.
 %
-%
+% \begin{center}
+% \begin{tabular}{lcccc}
+%     Flag                 & html  & pdf & fdf   & xfdf \\\hline
+%     Include/Exclude      & *     & 0   &  *    &  *   \\
+%     IncludeNoValueFields & *     & 0   &  *    &  *   \\
+%     ExportFormat         & 1     & 0   &  0    &  0   \\
+%     GetMethod            & *     & 0   &  0    &  0   \\
+%     SubmitCoordinates    & *     & 0   &  0    &  0   \\
+%     XFDF                 & 0     & 0   &  0    &  1   \\
+%     IncludeAppendSaves   & 0     & 0   &  *    &  0   \\
+%     IncludeAnnotations   & 0     & 0   &  *    &  0   \\
+%     SubmitPDF            & 0     & 1   &  0    &  0   \\
+%     CanonicalFormat      & *     & 0   &  *    &  *   \\
+%     ExclNonUserAnnots    & 0     & 0   &  *    &  0   \\
+%     ExclFKey             & 0     & 0   &  *    &  0   \\
+%     EmbedForm            & 0     & 0   &  *    &  0   \\%
+% \end{tabular}
+% \end{center}
 %
 % \bigskip
 % \subsection{Commands}
@@ -199,7 +215,52 @@
 % \end{function}
 %
 % \subsection{Keys}
+% \begin{function}{fields}
+% \begin{syntax}
+% |fields| = \Arg{comma list of fully qualified field names}
+% \end{syntax}
+% |fields| is a comma list of \emph{fully qualified} field names, typically this can
+% be the short name set with |name| in a field declaration, but in complex fieldsets
+% it is needed to include the parents in the name too, separated by periods.
+% If |exclude| is set, this list of fields describes the fields that should
+% be excluded from the reset. The default is |include|: the list describes the fields
+% to reset.  Descendant of fields are reset too!
 %
+% The key is relevant for reset and submit actions.
+% \end{function}
+%
+% \begin{function}{include, exclude}
+% \begin{syntax}
+% |include| \\
+% |exclude|
+% \end{syntax}
+% These keys decide if the list of fields describes the fields to include or
+% exclude. The default is |include|: the list describes the fields
+% to reset.
+%
+% The keys are relevant for reset and submit actions.
+% \end{function}
+%
+% \begin{function}{setsubmitflags,setFlags,unsetsubmitflags,unsetFlags}
+%  \begin{syntax}
+%   |setsubmitflags| = \meta{comma list of flags}\\
+%   |setFlags| = \meta{comma list of flags}\\
+%   |unsetsubmitflags| = |all| \verb"|" \meta{comma list of flags}\\
+%   |unsetFlags| = |all| \verb"|" \meta{comma list of flags}
+%  \end{syntax}
+%  These keys accept a list of flag names and then sets or unsets them, the resulting value
+% is then used with the \texttt{/Flags} key of a submit action. Depending
+% on the export type of the submit action some flags are set by the code.
+% See the tabular above.
+% The flag name can be given in PDF spelling (\texttt{IncludeNoValueFields}),
+% in lowercase (\texttt{includenovaluefields}), and as number. |unsetFlags| and its
+% alias |unsetsubmitflags|  know the special value |all| which clears all the fields.
+%
+% The list of flags are:
+% |Include/Exclude|, |IncludeNoValueFields|, |ExportFormat|, |GetMethod|,
+% |SubmitCoordinates|, |XFDF|, |IncludeAppendSaves|, |IncludeAnnotations|,
+% |SubmitPDF|, |CanonicalFormat|, |ExclNonUserAnnots|, |ExclFKey|, |EmbedForm|
+% \end{function}
 %
 % \subsection{Using with hyperref}
 %
@@ -370,6 +431,47 @@
     ,ExclFKey             = 12
     ,EmbedForm            = 14
   }
+
+\cs_new_protected:Npn \@@_action_flags_pdf:
+  {
+    \bitset_clear:N \l_@@_Flags_bitset
+    \bitset_set_true:Nn \l_@@_Flags_bitset { SubmitPDF }
+  }
+
+\cs_new_protected:Npn \@@_action_flags_html:
+  {
+    \bitset_set_true:Nn \l_@@_Flags_bitset { ExportFormat }
+    \bitset_set_false:Nn \l_@@_Flags_bitset { XFDF }
+    \bitset_set_false:Nn \l_@@_Flags_bitset { IncludeAppendSaves }
+    \bitset_set_false:Nn \l_@@_Flags_bitset { IncludeAnnotations }
+    \bitset_set_false:Nn \l_@@_Flags_bitset { SubmitPDF }
+    \bitset_set_false:Nn \l_@@_Flags_bitset { ExclNonUserAnnots }
+    \bitset_set_false:Nn \l_@@_Flags_bitset { ExclFKey }
+    \bitset_set_false:Nn \l_@@_Flags_bitset { EmbedForm }
+  }
+
+\cs_new_protected:Npn \@@_action_flags_fdf:
+  {
+    \bitset_set_false:Nn \l_@@_Flags_bitset { ExportFormat }
+    \bitset_set_false:Nn \l_@@_Flags_bitset { GetMethod }
+    \bitset_set_false:Nn \l_@@_Flags_bitset { SubmitCoordinates }
+    \bitset_set_false:Nn \l_@@_Flags_bitset { XFDF }
+    \bitset_set_false:Nn \l_@@_Flags_bitset { SubmitPDF }
+  }
+
+\cs_new_protected:Npn \@@_action_flags_xfdf:
+  {
+    \bitset_set_false:Nn \l_@@_Flags_bitset { ExportFormat }
+    \bitset_set_false:Nn \l_@@_Flags_bitset { GetMethod }
+    \bitset_set_false:Nn \l_@@_Flags_bitset { SubmitCoordinates }
+    \bitset_set_true:Nn \l_@@_Flags_bitset { XFDF }
+    \bitset_set_false:Nn \l_@@_Flags_bitset { IncludeAppendSaves }
+    \bitset_set_false:Nn \l_@@_Flags_bitset { IncludeAnnotations }
+    \bitset_set_false:Nn \l_@@_Flags_bitset { SubmitPDF }
+    \bitset_set_false:Nn \l_@@_Flags_bitset { ExclNonUserAnnots }
+    \bitset_set_false:Nn \l_@@_Flags_bitset { ExclFKey }
+    \bitset_set_false:Nn \l_@@_Flags_bitset { EmbedForm }
+  }
 %    \end{macrocode}
 % \subsection{Keys}
 %    \begin{macrocode}
@@ -420,6 +522,25 @@
       {
         \tl_set:Nn \l_@@_action_export_tl {#1}
       }
+  }
+
+\keys_define:nn { pdffield }
+  {
+    ,setFlags .code:n =
+      {
+          \clist_map_inline:nn {#1}
+           {
+             \bitset_set_true:Nn \l_@@_Flags_bitset {##1}
+           }
+      }
+    ,setsubmitflags .meta:n = {setFlags={#1}}
+    ,unsetFlags .multichoice:
+    ,unsetFlags / all .code:n = { \bitset_clear:N \l_@@_Flags_bitset}
+    ,unsetFlags / unknown .code:n =
+      {
+        \bitset_set_false:Nn \l_@@_Flags_bitset {#1}
+      }
+    ,unsetsubmitflags .meta:n = {unsetFlags={#1}}
   }
 %    \end{macrocode}
 %
