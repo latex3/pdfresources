@@ -8,6 +8,9 @@ this project uses date-based 'snapshot' version identifiers.
 ## [Unreleased]
 ### Added
  - \pdffile_filespec:nnn to create a filespec dictionary
+ 
+### Fixed
+ - utf8/URI in l3pdftools didn't handle ? 
 
 ## [2021-05-14]
 ### Fixed 
