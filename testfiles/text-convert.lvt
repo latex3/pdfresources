@@ -41,9 +41,9 @@
 
 \TEST{show~string-URI}
  {
-   \pdf_string_from_unicode:nnN{utf8/URI}{https://www.123.cy&abc=blub+}\l_tmpa_str
+   \pdf_string_from_unicode:nnN{utf8/URI}{https://www.123.cy&abc=blub+?zz}\l_tmpa_str
    \str_if_eq:onTF { \l_tmpa_str }
-     { (https://www.123.cy&abc=blub+) } { \TRUE } { \ERROR }
+     { (https://www.123.cy&abc=blub+?zz) } { \TRUE } { \ERROR }
  }
 
 \ExplSyntaxOff
