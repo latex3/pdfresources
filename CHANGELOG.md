@@ -7,14 +7,18 @@ this project uses date-based 'snapshot' version identifiers.
 
 ## [Unreleased]
 ### Added
- - \pdffile_filespec:nnn to create a filespec dictionary
- - sortkey and code for calculate actions
+ - l3pdffile: \pdffile_filespec:nnn to create a filespec dictionary
+ - l3pdffield: sortkey and code for calculate actions
+ - l3pdffield-radiobutton, a module for radiobuttons
+ - l3pdffield-pushbutton, a module for pushbuttons
+ - l3pdffield-choice, a module for choice fields
+ - l3pdffield-action, a module for reset/submit/import actions
 ### Fixed
- - utf8/URI in l3pdftools didn't handle ? 
- - encoding of value in l3pdffield-textfield 
- - encoding of value of TM and TU key
+ - l3pdftools: utf8/URI didn't handle "?" 
+ - l3pdffield: encoding of value in l3pdffield-textfield 
+ - l3pdffield: encoding of value of TM and TU key 
 ### Changed
- - handling of ECMAscript in /AA keys 
+ - l3pdffield: handling of ECMAscript in /AA keys 
  
 ## [2021-05-14]
 ### Fixed 
