@@ -39,12 +39,6 @@
 %</driver>
 % \fi
 % \providecommand\hook[1]{\texttt{#1}}
-% \ExplSyntaxOn
-% \pdffield_appearance:nn {pdffield/bear}
-%  {
-%    \tikz\bear\bearwear[shirt=red,body~deco={\node[font=\tiny\bfseries,white]~at~(beartummy){Push};}];
-%  }
-% \ExplSyntaxOff
 % \title{^^A
 %   The \pkg{l3pdffield-action} module\\ Commands to handle actions of form fields   ^^A
 %   \\ \LaTeX{} PDF management testphase bundle
@@ -67,28 +61,38 @@
 % This is the documentation for actions for formular fields, for general information about form fields
 % check the documentation l3pdffield.
 %
-%
+% \begin{center}
+%  \ExplSyntaxOn
+%  A:~ \pdffield_checkbox:n {name=A}\quad B:~\pdffield_checkbox:n {name=B}\par\bigskip
+%  \pdffield_pushbutton:n{name=all,caption=Reset~All,reset}\quad
+%  \pdffield_reset_new:nn{B}{fields=B}
+%  \pdffield_pushbutton:n{name=all,caption=Reset~B,reset=B}\quad
+%  \ExplSyntaxOff
+% \end{center}
 %
 % Please keep in mind
 % \begin{itemize}
 % \item Not every PDF viewer supports form fields.
+% \item Even if they support it, that doesn't mean that
+%  they support actions like Submit.
 % \item The handling can depend on settings in the PDF viewer.
 % \item Standards like pdf/A disable features of form fields too
 % (as you typically can't change the PDF).
 % \end{itemize}
+%
 % \section{Actions}
 %
 % Actions must be handled in three places: In the action dictionary (|/A|)
 % of the annotation(s), in the additional action dictionary of the field (|/AA|),
 % and in the additional action dictionary (|/AA|) of the annotation(s). The distinction
-% between the two |/AA| dictionaries is important as field actions can only be
+% between the two |/AA| dictionaries is relevant as field actions can only be
 % added when the field is initialized, so typically with the first field command
 % for a specific name, while annotation actions can be added for example only to
-% one specific instance of a checkbox.
+% one specific instance of a checkbox or to pushbuttons belonging to the same field.
 %
-% \subsection{The additional action dictionaries}
-% The actions in the |/AA| dictionaries are JavaScript (ECMAScript) actions. An example is
-% the calculate action:
+% \subsection{The additional action dictionaries (AA)}
+% The actions in the |/AA| dictionaries are JavaScript (ECMAScript) actions.
+% An example is the |calculate|/|AA/C| action, which is added with the |/C| key:
 %
 % \begin{verbatim}
 % Netto~\pdffield_textfield:n{name=netto}~
@@ -106,17 +110,17 @@
 %
 % The main problem with scripts is to get the escaping right. While it is possible
 % to pass the script as string, it is less error prone to include it as (file) stream
-% and to reference the object number.
+% and to reference the object number as done in the example.
 %
-% \subsection{The action dictionary}
+% \subsection{The action dictionary (A)}
 %
-% The action dictionary can contain much more actions. The PDF reference lists 20
-% different types: GoTo, GoToR, GoToE, GoToDp, Launch, Thread, URI, Sound, Movie,
+% The action dictionary can contain much more action types. The PDF reference lists 20
+% different types\footnote{Sound and Movie are deprecated in PDF~2.0}:
+% GoTo, GoToR, GoToE, GoToDp, Launch, Thread, URI, Sound, Movie,
 % Hide, Named, SubmitForm, ResetForm, ImportData, SetOCGState, Rendition,
 % Trans, GoTo3DView, JavaScript, RichMediaExecute.
 %
-% And action dictionary typically looks like this
-%
+% And action dictionary typically looks like this:
 % \begin{verbatim}
 % /A << /Type /Action
 %       /S    ... % type name, e.g. /URI
@@ -135,47 +139,53 @@
 % explicit support. This support is the main task of this module.
 %
 % \subsubsection{ResetForm}
-% The |ResetForm| action resets the fields of a formular. The action is typically
+% The |ResetForm| action resets the fields of a form. The action is typically
 % attached to a pushbutton.
 %
 % In simple cases the action only need to contain the subtype entry and then resets
-% everything (sadly including the appearance of the pushbutton, sigh).
+% everything (sadly with some side-effect on the appearance of the pushbutton, sigh).
 %
 % \begin{verbatim}
+% \group_begin:
 % \pdfannot_dict_put:nnn{widget}{A}{<</Type/Action/S/ResetForm>>}
 % \pdffield_pushbutton:n{name=R,caption=Reset}
+% \group_end:
 % \end{verbatim}
 %
-% A |ResetForm| action know two more keys: |/Fields| allows to describe or restrict
+% A |ResetForm| action knows two optional keys: |/Fields| allows to describe or restrict
 % the fields which should be reset. Depending on the setting of the |/Flags| key
 % the value of |/Fields| describes the fields to reset or the fields to leave unchanged.
 %
+% The commands of this module allow to store actions under a name which can then be
+% used in the key-val list of a field annotation.
 %
-% A reset action can be defined like this
+% A reset action can be defined and used like this
 % \begin{verbatim}
 % \pdffield_reset_new:nn
-%   {name}
+%   {myreset}
 %   {
 %     fields= {A,B,C},
 %     exclude     % or include
 %   }
-%  \pdffield_pushbutton:n{name=r,caption=Reset,reset=name}
+% \pdffield_pushbutton:n{name=r,caption=Reset,reset=myreset}
 % \end{verbatim}
 %
-% |name| is the name the action can be referred to with the |reset| key.
+% |myreset| is the name the action can be referred to with the |reset| key.
 %
-% It is possible to define and use a reset action before all fields have been created.
-% The list of names can contain names that are actually not used by the field.
+% It is possible to define and use a reset action before all fields it
+% refers too have been created.
+% The list of names can contain names that are actually not used by the form.
 %
 % The reset action |all| is predefined.
 %
 % \subsubsection{ImportData}
-% The |ImportData| action allows to import field data from an external file.
+% The |ImportData| action allows to import field data from an external file, for example
+% a |.fdf| created with the submit action.
 % The action is typically attached to a pushbutton, its only value is a file name.
 %
 % \subsubsection{SubmitForm}
 %
-% SubmitForm is the most challenging action. There are more keys in the dictionary,
+% |SubmitForm| is the most challenging action. There are more keys in the dictionary,
 % 13 flags, and there are four export options, which require each some flag settings.
 % And the main argument is an url, which can contain special chars like \# or \% and
 % so need special handling.
@@ -183,18 +193,22 @@
 % A submit action can be defined like this
 % \begin{verbatim}
 % \pdffield_submit_new:nnn
-%   {ABC}
+%   {mysubmit}
 %   {
+%     export = fdf,
 %     fields= {A,B,C},
 %     exclude,     % or include
-%     setsubmitflag={...}
+%     setsubmitflags={...}
 %     ...
 %   }
 %   {URL}
-% \pdffield_pushbutton:n{name=s,caption={Submit~A,B,C},submit=ABC}
+% \pdffield_pushbutton:n{name=s,caption={Submit~A,B,C},submit=mysubmit}
 % \end{verbatim}
 %
-% The export options are |html|, |pdf|, |fdf| and |xfdf|.
+% The export options are |html|, |pdf|, |fdf| and |xfdf|. The |html| export uses
+% my default the |POST| method, the |GET| method can be forced by setting the
+% |GetMethod| flag---at least according to the reference, I wasn't able yet to test it.
+%
 %
 % The following tabular describes the relation between these export options and the
 % flags. |0| and |1| in the tabular means that the value is set by the code. |*|
@@ -223,25 +237,29 @@
 % \subsection{Commands}
 % \begin{function}{\pdffield_reset_new:nn}
 % \begin{syntax}
-% \cs{pdffield_reset:nn}\Arg{name}\Arg{key val list}
+% \cs{pdffield_reset_new:nn}\Arg{name}\Arg{key val list}
 % \end{syntax}
-% This defines an reset action with the name \meta{name}.
+% This defines an new reset action with the name \meta{name}.
 % The keys are described below.
 % \end{function}
 %
 % \begin{function}{\pdffield_submit_new:nnn}
 % \begin{syntax}
-% \cs{pdffield_reset:nn}\Arg{name}\Arg{key val list}\Arg{URL}
+% \cs{pdffield_submit_new:nn}\Arg{name}\Arg{key val list}\Arg{URL}
 % \end{syntax}
 % This defines an submit action with the name \meta{name}.
 % The keys are described below. \meta{URL} should be given verbatim.
-% That means \#  and \% should not be escaped. If the URL contains non-ascii
-% it should be either entered percent encoded, or the |urlencode| key should
+% That means \#  and \% should not be escaped. The URL should be
+% correctly percent encoded, or the |urlencode| key should
 % be used then the code will create the percent encoding.
 %
 % \meta{URL} can be a mail address and should then start with |mailto:|.
+% A subject can be attached with |?subject=...|.
 % This normally works quite fine as it only needs a correctly working mail programm.
-% (But for some unknown reason my system don't like mail addresses with hyphens in them).
+% (But for some unknown reason my mail program don't like mail addresses with hyphens in them).
+%
+% Alternativly it should be an URL of a script, which should return the correct
+% answer (which one this is, is rather unclear).
 %
 % \end{function}
 %
@@ -253,10 +271,10 @@
 % |fields| is a comma list of \emph{fully qualified} field names, typically this can
 % be the short name set with |name| in a field declaration, but in complex fieldsets
 % it is needed to include the parents in the name too, separated by periods.
-% If |exclude| is set, this list of fields describes the fields that should
+% If |exclude| is set, this list describes the fields that should
 % be excluded from the reset or the submission.
 % The default is |include|: the list describes the fields
-% to reset/submit.  Descendant of fields are reset or submitted too!
+% to reset or submit. Descendant of fields are reset or submitted too!
 %
 % The key is relevant for reset and submit actions.
 % \end{function}
@@ -266,9 +284,9 @@
 % |include| \\
 % |exclude|
 % \end{syntax}
-% These keys unset/set the |Include/Exclude| flag and decide
-% if the list of fields describes the fields to include or
-% exclude. The default is |include|: the list describes the fields
+% These keys are shorthands to unset/set the |Include/Exclude| flag and decide
+% if the list of fields in the |fields| key are included or
+% excluded. The default is |include|: the list describes the fields
 % to reset or submit.
 %
 % The keys are relevant for reset and submit actions.
@@ -278,20 +296,20 @@
 % \begin{syntax}
 % |urlencode| = |true|\verb+|+|false|
 % \end{syntax}
-% When this is true the code will percent encode the submission url.
-% This is needed if the url contains non-ascii chars.
+% When this is true the code will percent encode the submission URL.
+% This is needed if the URL contains for example non-ascii chars or spaces.
 % \end{function}
 %
 % \begin{function}{setsubmitflags,setFlags,unsetsubmitflags,unsetFlags}
 %  \begin{syntax}
-%   |setsubmitflags| = \meta{comma list of flags}\\
-%   |setFlags| = \meta{comma list of flags}\\
-%   |unsetsubmitflags| = |all| \verb"|" \meta{comma list of flags}\\
-%   |unsetFlags| = |all| \verb"|" \meta{comma list of flags}
+%   |setsubmitflags| = \Arg{comma list of flags}\\
+%   |setFlags| = \Arg{comma list of flags}\\
+%   |unsetsubmitflags| = |all| \verb"|" \Arg{comma list of flags}\\
+%   |unsetFlags| = |all| \verb"|" \Arg{comma list of flags}
 %  \end{syntax}
-%  These keys accept a list of flag names and then sets or unsets them, the resulting value
+% These keys accept a list of flag names and then sets or unsets them, the resulting value
 % is then used with the \texttt{/Flags} key of a submit action. |Include/Exclude|
-% is also used by a reset, this flag can also be set with the |exclude| and |include|
+% is also used by a reset action andcan also be set with the |exclude| and |include|
 % keys.  Depending on the export type of the submit action some flags are set by the code.
 % See the tabular above for details.
 % The flag name can be given in PDF spelling (\texttt{IncludeNoValueFields}),
@@ -304,42 +322,58 @@
 % |SubmitPDF|, |CanonicalFormat|, |ExclNonUserAnnots|, |ExclFKey|, |EmbedForm|
 % \end{function}
 %
-% \begin{function}{urlencode}
+% \begin{function}{next}
 % \begin{syntax}
 % |next| = \meta{object reference}
 % \end{syntax}
-% This allows to add a follow up action. The value is expanded, so can
-% be |pdf_object_ref:n{name}| and point to a suitable object.
+% This allows to add a follow up action to the |/Next| key. The value is expanded, so can
+% be given as |\pdf_object_ref:n{name}| and point to a suitable object.
 % \end{function}
 %
-%  \subsection{Keys for fields}
+% \subsection{Keys for fields}
 % With the following keys actions can be attached to the annotation of a form field,
 % for example a pushbutton.
 %
-% \begin{function}{reset,submit,import}
+% \begin{function}{reset,submit}
 % \begin{syntax}
-% |reset| = \meta{name}\\
-% |submit| = \meta{name}\\
-% |import| = \meta{name}
+% |reset|  = \meta{name}\\
+% |submit| = \meta{name}
 % \end{syntax}
-% This adds the action \meta{name} as action to the annotation. The action must have
-% been defined first. The options are mutually exclusive, only one action can
+% This adds the reset or submit action \meta{name} as action to the annotation.
+% The action should be
+% been defined first. The actions are mutually exclusive, only one action can
 % be added. If more actions are needed use the |next| key.
+% For reset the default value |all| exists and it is used if the key is used
+% without value.
+% \end{function}
+%
+% \begin{function}{import}
+% \begin{syntax}
+% |import| = \meta{file name}
+% \end{syntax}
+% This adds an import action to the annotation. \meta{file name} should
+% be for example the name of a |.fdf| file. If the name contains a path use a
+% slash as separator. non-ascii chars should work, but ascii is safer.
+% The action is mutually exclusive to submit and reset.
 % \end{function}
 % \end{documentation}
 %
 % \begin{implementation}
 % \DoNotIndex
 %  {\\
+%  ,\%,\#
 % ,\bitset_clear:N
 % ,\bitset_new:Nn
 % ,\bitset_set_false:Nn
 % ,\bitset_set_true:Nn
 % ,\bitset_to_arabic:N
+% ,\bitset_item:Nn
 % ,\bool_new:N
+% ,\bool_if:NTF
 % ,\box_dp:N
 % ,\box_ht:N
 % ,\l_tmpa_box
+% ,\char_set_catcode_other:N
 % ,\clist_map_inline:nn
 % ,\color_export:nnN
 % ,\color_set:nn
@@ -348,6 +382,7 @@
 % ,\cs_new_protected:cpn
 % ,\cs_set_eq:NN
 % ,\cs_gset_eq:cN
+% ,\cs_if_exist:cTF
 % ,\cs_set_protected:Npn
 % ,\cs_generate_variant:Nn
 % ,\cs_gset_eq:NN
@@ -381,6 +416,7 @@
 % ,\msg_warning:nn
 % ,\msg_warning:nnn
 % ,\msg_warning:nnnnn
+% ,\msg_warning:nnnn
 % ,\NeedsTeXFormat
 % ,\normalsize
 % ,\pdf_name_from_unicode_e:n
@@ -390,6 +426,7 @@
 % ,\pdf_object_ref:n
 % ,\pdf_object_ref_last:
 % ,\pdf_object_unnamed_write:nn
+% ,\pdf_object_unnamed_write:nx
 % ,\pdf_object_write:nn
 % ,\pdf_string_from_unicode:nnN
 % ,\pdfannot_box_ref_last:
@@ -403,6 +440,7 @@
 % ,\pdfdict_put:nnn
 % ,\pdfdict_remove:nn
 % ,\pdfdict_use:n
+% ,\pdfdict_put:nnx
 % ,\pdfmanagement_add:nnn
 % ,\pdfmeta_standard_verify:nTF
 % ,\pdfxform_if_exist:nTF
@@ -416,6 +454,8 @@
 % ,\seq_if_exist:NTF
 % ,\seq_new:N
 % ,\seq_use:Nn
+% ,\seq_clear:N
+% ,\seq_put_right:NV
 % ,\str_if_empty:NTF
 % ,\str_if_in:NnTF
 % ,\str_new:N
@@ -431,6 +471,8 @@
 % ,\tl_new:N
 % ,\tl_set:Nn
 % ,\tl_to_str:n
+% ,\tl_const:cn
+% ,\tl_use:c
 % ,\use:c
 %   }
 % \section{\pkg{l3pdffield-action} Implementation}
@@ -450,18 +492,20 @@
 % \subsection{Variables}
 % \begin{variable}
 %  {
-%     ,\l_@@_action_Flags_tl
 %     ,\l_@@_action_export_tl
 %     ,\l_@@_action_Fields_seq
+%     ,\l_@@_action_next_tl
 %  }
+% We need to store the export, fields and next value into variables.
 %    \begin{macrocode}
-\tl_new:N  \l_@@_action_Flags_tl
 \tl_new:N  \l_@@_action_export_tl
 \seq_new:N \l_@@_action_Fields_seq
 \tl_new:N  \l_@@_action_next_tl
 %    \end{macrocode}
 % \end{variable}
 % \subsection{dictionaries}
+% \begin{macro}{l_@@/ResetForm,l_@@/SubmitForm}
+%  We define two dictionaries to handle the reset and submit code.
 %    \begin{macrocode}
 \pdfdict_new:n   {l_@@/ResetForm}
 \pdfdict_put:nnn {l_@@/ResetForm}{Type}{/Action}
@@ -470,7 +514,10 @@
 \pdfdict_put:nnn {l_@@/SubmitForm}{Type}{/Action}
 \pdfdict_put:nnn {l_@@/SubmitForm}{S}{/SubmitForm}
 %    \end{macrocode}
+% \end{macro}
 % \subsection{bitset for submit action}
+% \begin{variable}{\l_@@_Flags_bitset}
+% A bitset for the submit (and the one reset) flags:
 %    \begin{macrocode}
 \bitset_new:Nn \l_@@_Flags_bitset
   {
@@ -501,7 +548,17 @@
     ,exclfkey             = 12
     ,embedform            = 14
   }
-
+%    \end{macrocode}
+% \end{variable}
+% \begin{macro}
+%  {
+%   \@@_action_flags_pdf:
+%   ,\@@_action_flags_html:
+%   ,\@@_action_flags_fdf:
+%   ,\@@_action_flags_xfdf:
+%  }
+% The following commands sets the forced flags for the export options.
+%    \begin{macrocode}
 \cs_new_protected:Npn \@@_action_flags_pdf:
   {
     \bitset_clear:N \l_@@_Flags_bitset
@@ -543,9 +600,11 @@
     \bitset_set_false:Nn \l_@@_Flags_bitset { EmbedForm }
   }
 %    \end{macrocode}
+% \end{macro}
 % \subsection{Keys}
+% \begin{macro}{reset,submit,import}
+% These are the three additional keys for the field annotations
 %    \begin{macrocode}
-
 \keys_define:nn { pdffield }
   {
     reset .code:n =
@@ -561,6 +620,7 @@
             \msg_warning:nnnn{pdffield}{action-name-undefined}{reset}{#1}
           }
       }
+   ,reset .default:n = all
   }
 
 \keys_define:nn { pdffield }
@@ -584,7 +644,7 @@
   {
     import .code:n =
       {
-        \pdf_string_from_unicode:nnN {utf16/hex}{#1}\l_@@_tmpa_str
+        \pdf_string_from_unicode:nnN {utf8/string}{#1}\l_@@_tmpa_str
         \pdf_object_unnamed_write:nx {dict}{/Type/Action/S/ImportData/F\l_@@_tmpa_str}
         \pdfannot_dict_put:nnx{widget}
           {A}
@@ -592,7 +652,11 @@
       }
   }
 
-
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{fields,exclude,include,export,charset,urlencode,next}
+% These are keys used when defining the actions.
+%    \begin{macrocode}
 \keys_define:nn { pdffield / action }
   {
     fields .code:n  =
@@ -610,8 +674,16 @@
         \tl_set:Nn \l_@@_action_export_tl {#1}
       }
     ,export .initial:n = {html}
-  }
-
+    ,charset .choices:nn =
+      {utf-8, utf-16, Shift-JIS, BigFive, GBK, UHC}
+      { \pdfdict_put:nnn { l_@@/SubmitForm }{#1} }
+    ,urlencode .bool_set:N = \l_@@_url_encode_bool
+    ,next .tl_set:N = \l_@@_action_next_tl
+ }
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{setFlags,setsubmitflags,unsetFlags,unsetsubmitflags}
+%    \begin{macrocode}
 \keys_define:nn { pdffield / action }
   {
     ,setFlags .code:n =
@@ -630,19 +702,14 @@
       }
     ,unsetsubmitflags .meta:n = {unsetFlags={#1}}
   }
-
-\keys_define:nn {pdffield / action}
- {
-   charset .choices:nn =
-     {utf-8, utf-16, Shift-JIS, BigFive, GBK, UHC}
-     { \pdfdict_put:nnn { l_@@/SubmitForm }{#1} }
-  ,urlencode .bool_set:N = \l_@@_url_encode_bool
-  ,next .tl_set:N = \l_@@_action_next_tl
- }
 %    \end{macrocode}
+% \end{macro}
 %
 % \subsection{New reset action}
 %
+% \begin{macro}{ \@@_action_reset_new:nn }
+% The command defines a command which will setup the dictionary at first use,
+% and then store the reference in a constant.
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_action_reset_new:nn #1 #2 %#1 name, #2 keyval
   {
@@ -651,13 +718,25 @@
         \group_begin:
         \seq_clear:N \l_@@_action_Fields_seq
         \keys_set:nn { pdffield / action }{ #2 }
-        \pdf_object_unnamed_write:nx {array}{\seq_use:Nn \l_@@_action_Fields_seq {~}}
-        \pdfdict_put:nnx {l_@@/ResetForm}{Next}{\l_@@_action_next_tl}
-        \pdfdict_put:nnx {l_@@/ResetForm}{Fields}{\pdf_object_ref_last:}
-        \pdfdict_put:nnx {l_@@/ResetForm}{Flags}
-          {\bitset_item:Nn\l_@@_Flags_bitset{Include/Exclude}}
-        \pdf_object_unnamed_write:nx {dict} {\pdfdict_use:n{l_@@/ResetForm}}
-        \tl_const:cx { c_@@_action_reset_#1_tl }{ \pdf_object_ref_last: }
+        \pdf_object_unnamed_write:nx
+          { array }
+          { \seq_use:Nn \l_@@_action_Fields_seq {~} }
+        \tl_if_empty:NF \l_@@_action_next_tl
+          {
+            \pdfdict_put:nnx {l_@@/ResetForm}{Next}{\l_@@_action_next_tl}
+          }
+        \pdfdict_put:nnx
+          { l_@@/ResetForm }
+          { Fields }
+          { \pdf_object_ref_last: }
+        \pdfdict_put:nnx
+          { l_@@/ResetForm }
+          { Flags }
+          { \bitset_item:Nn\l_@@_Flags_bitset{Include/Exclude} }
+        \pdf_object_unnamed_write:nx
+          { dict }
+          { \pdfdict_use:n{l_@@/ResetForm} }
+        \tl_const:cx { c_@@_action_reset_#1_tl } { \pdf_object_ref_last: }
         \cs_gset_eq:cN {@@_action_reset_#1:} \prg_do_nothing:
         \group_end:
       }
@@ -665,8 +744,12 @@
 
 \@@_action_reset_new:nn  {all}{fields={},exclude}
 %    \end{macrocode}
-% \subsection{New submit action}
+% \end{macro}
 %
+% \subsection{New submit action}
+% \begin{macro}{\@@_action_submit_new:nn}
+% Quite similar to the reset command, only that we have to use an auxiliary
+% to grab the URL with suitable catcodes.
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_action_submit_new:nn #1 #2 %#1 name, #2 keyval
   {
@@ -685,8 +768,14 @@
         \bitset_clear:N \l_@@_Flags_bitset
         \keys_set:nn {pdffield/action}{#2}
         \use:c{ @@_action_flags_\l_@@_action_export_tl :}
-        \pdfdict_put:nnx { l_@@/SubmitForm }{Flags}{ \bitset_to_arabic:N \l_@@_Flags_bitset }
-        \pdfdict_put:nnx {l_@@/SubmitForm}{Next}{\l_@@_action_next_tl}
+        \pdfdict_put:nnx
+          { l_@@/SubmitForm }
+          { Flags }
+          { \bitset_to_arabic:N \l_@@_Flags_bitset }
+        \tl_if_empty:NF \l_@@_action_next_tl
+          {
+            \pdfdict_put:nnx {l_@@/SubmitForm}{Next}{\l_@@_action_next_tl}
+          }
         \bool_if:NTF \l_@@_url_encode_bool
           { \pdf_string_from_unicode:nnN { utf8/URI }   {#3}\l_@@_tmpa_str }
           { \pdf_string_from_unicode:nnN { utf8/string }{#3}\l_@@_tmpa_str }
@@ -695,21 +784,26 @@
             /FS/URL
             /F \l_@@_tmpa_str
           }
-        \pdfdict_put:nnx { l_@@/SubmitForm }{F}{ \pdf_object_ref_last: }
-        \pdf_object_unnamed_write:nx {dict} {\pdfdict_use:n{l_@@/SubmitForm}}
-        \tl_const:cx { c_@@_action_submit_#1_tl }{ \pdf_object_ref_last: }
+        \pdfdict_put:nnx
+          { l_@@/SubmitForm }
+          { F }
+          { \pdf_object_ref_last: }
+        \pdf_object_unnamed_write:nx
+          { dict }
+          { \pdfdict_use:n{ l_@@/SubmitForm } }
+        \tl_const:cx { c_@@_action_submit_#1_tl } { \pdf_object_ref_last: }
         \cs_gset_eq:cN { @@_action_submit_#1: } \prg_do_nothing:
         \group_end:
       }
   }
 
 %    \end{macrocode}
+% \end{macro}
 %
-%
-% \subsection{user commands}
-% \begin{macro}{\pdffield_reset_new:nn}
+% \subsection{User commands}
+% \begin{macro}{\pdffield_reset_new:nn, \pdffield_submit_new:nnn}
 %    \begin{macrocode}
-\cs_set_eq:NN \pdffield_reset_new:nn \@@_action_reset_new:nn
+\cs_set_eq:NN \pdffield_reset_new:nn   \@@_action_reset_new:nn
 \cs_set_eq:NN \pdffield_submit_new:nnn \@@_action_submit_new:nn
 %</package>
 %    \end{macrocode}
