@@ -275,7 +275,7 @@
 %
 % \begin{function}{\pdffield_annot:n,\pdffield_annot:V}
 % \begin{syntax}
-%  \cs{pdffield_field:nn}\Arg{key val list}
+%  \cs{pdffield_annot:n}\Arg{key val list}
 % \end{syntax}
 % This creates a new field annotation.
 % It is a widget annotation box created with \cs{pdfannot_widget_box:nnn}, and
@@ -285,6 +285,15 @@
 % The command also setup dictionaries to fill the |AP|, |MK| and |AA| dictionaries.
 % \end{function}
 %
+% \begin{function}{\pdffield_annot_ref_last:}
+% \begin{syntax}
+%  \pdffield_annot_ref_last:
+% \end{syntax}
+% If a tagged PDF should be created, the object
+% of the annotation of a field should be referenced in the Form structure element.
+% This command allows to retrieve the reference to this object.
+% \end{function}
+
 % \begin{function}{\pdffield_appearance:nn}
 % \begin{syntax}
 %  \cs{pdffield_appearance:nn}\Arg{name}\Arg{content}
@@ -956,6 +965,7 @@
 %     ,\l_@@_down_caption_tl
 %     ,\g_@@_CO_sortkeys_prop
 %     ,\l_@@_CO_sortkey_str
+%     ,\g_@@_annot_ref_last_tl
 %  }
 % Some tmp variables, and a variable for the current parent and the
 % current fieldID.
@@ -972,6 +982,7 @@
 \prop_new:N \g_@@_CO_sortkeys_prop
 \seq_new:N \g_@@_CO_sortkeys_seq
 \str_new:N  \l_@@_CO_sortkey_str
+\tl_new:N \g_@@_annot_ref_last_tl
 %    \end{macrocode}
 % \end{variable}
 %
@@ -1256,13 +1267,14 @@
            { \l_@@_annot_dp_dim }
          \hfill
       }
+    \tl_gset:Nx \g_@@_annot_ref_last_tl { \pdfannot_box_ref_last: }
     \tl_if_empty:NF \l_@@_currentparent_tl
       {
         \seq_if_exist:cTF {g_@@_field/Kids/\l_@@_currentparent_tl _seq}
          {
            \seq_gput_right:cx
              {g_@@_field/Kids/\l_@@_currentparent_tl _seq}
-             { \pdfannot_box_ref_last:}
+             { \g_@@_annot_ref_last_tl }
          }
          {
            \msg_error:nnx { pdffield}{parent-field-missing}{\l_@@_currentparent_tl}
@@ -1279,6 +1291,11 @@
 %    \end{macrocode}
 % \end{macro}
 %
+% \begin{macro}{\pdffield_annot_ref_last:}
+%    \begin{macrocode}
+\cs_new:Npn \pdffield_annot_ref_last: { \g_@@_annot_ref_last_tl }
+%    \end{macrocode}
+% \end{macro}
 % \subsection{auxiliary command for color keys}
 % \begin{macro}{\@@_color_set:nn }
 %    \begin{macrocode}

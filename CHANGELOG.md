@@ -13,6 +13,7 @@ this project uses date-based 'snapshot' version identifiers.
  - l3pdffield-pushbutton, a module for pushbuttons
  - l3pdffield-choice, a module for choice fields
  - l3pdffield-action, a module for reset/submit/import actions
+ - l3pdffield: \pdffield_annot_ref_last:, needed for tagging in OBJR object. 
 ### Fixed
  - l3pdftools: utf8/URI didn't handle "?" 
  - l3pdffield: encoding of value in l3pdffield-textfield 
