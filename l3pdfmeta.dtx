@@ -220,6 +220,9 @@
 %  this will e.g. be checked by the new hyperref driver.
 % \item[|annot_widget_no_A_AA|] (rule 6.9-2)  no A and AA dictionary in widget.
 % \item[|form_no_AA|] (6.9-3)  no /AA dictionary in form field
+% \item[|unicode|] that is set in the U-standards, A-2u and A-3u and means that
+% every text should be in unicode. This is not something that can be enforced or
+% tested from TeX, but in a current LaTeX normally ToUnicode are set for all fonts.
 % \end{description}
 %
 % \subsubsection{Tests with values and special handlers}
@@ -513,7 +516,9 @@
 %  \begin{variable}{
 %   \g_@@_standard_pdf/A-1B_prop ,
 %   \g_@@_standard_pdf/A-2B_prop ,
-%   \g_@@_standard_pdf/A-3B_prop
+%   \g_@@_standard_pdf/A-2U_prop ,
+%   \g_@@_standard_pdf/A-3B_prop ,
+%   \g_@@_standard_pdf/A-3U_prop ,
 %   }
 %     \begin{macrocode}
 \prop_new:c { g_@@_standard_pdf/A-1B_prop }
@@ -521,6 +526,8 @@
   {
     ,name             = pdf/A-1B
     ,type             = A
+    ,level            = 1
+    ,conformance      = B
     ,year             = 2005
     ,min_pdf_version  = 1.4        %minimum
     ,no_encryption    =
@@ -580,10 +587,24 @@
   { g_@@_standard_pdf/A-2B_prop }{name}{pdf/A-2B}
 \prop_gput:cnn
   { g_@@_standard_pdf/A-2B_prop }{year}{2011}
+\prop_gput:cnn
+  { g_@@_standard_pdf/A-2B_prop }{level}{2}
 % embedding files is allowed (with restrictions)
 \prop_gremove:cn
   { g_@@_standard_pdf/A-2B_prop }
   { embed_content}
+
+%A-2u ==============
+\prop_new:c { g_@@_standard_pdf/A-2U_prop }
+\prop_gset_eq:cc
+  { g_@@_standard_pdf/A-2U_prop }
+  { g_@@_standard_pdf/A-2B_prop }
+\prop_gput:cnn
+  { g_@@_standard_pdf/A-2U_prop }{name}{pdf/A-2U}
+\prop_gput:cnn
+  { g_@@_standard_pdf/A-2U_prop }{conformance}{U}
+\prop_gput:cnn
+  { g_@@_standard_pdf/A-2U_prop }{unicode}{}
 
 %A-3b ==============
 \prop_new:c { g_@@_standard_pdf/A-3B_prop }
@@ -593,11 +614,25 @@
 \prop_gput:cnn
   { g_@@_standard_pdf/A-3B_prop }{name}{pdf/A-3B}
 \prop_gput:cnn
-  { g_@@_standard_pdf/A-2B_prop }{year}{2012}
+  { g_@@_standard_pdf/A-3B_prop }{year}{2012}
+\prop_gput:cnn
+  { g_@@_standard_pdf/A-3B_prop }{level}{3}
 % embedding files is allowed (with restrictions)
 \prop_gremove:cn
   { g_@@_standard_pdf/A-3B_prop }
   { embed_content}
+
+%A-3u ==============
+\prop_new:c { g_@@_standard_pdf/A-3U_prop }
+\prop_gset_eq:cc
+  { g_@@_standard_pdf/A-3U_prop }
+  { g_@@_standard_pdf/A-3B_prop }
+\prop_gput:cnn
+  { g_@@_standard_pdf/A-3U_prop }{name}{pdf/A-3U}
+\prop_gput:cnn
+  { g_@@_standard_pdf/A-3U_prop }{conformance}{U}
+\prop_gput:cnn
+  { g_@@_standard_pdf/A-3U_prop }{unicode}{}
 %    \end{macrocode}
 % \end{variable}
 %

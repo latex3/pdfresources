@@ -14,6 +14,9 @@ this project uses date-based 'snapshot' version identifiers.
  - l3pdffield-choice, a module for choice fields
  - l3pdffield-action, a module for reset/submit/import actions
  - l3pdffield: \pdffield_annot_ref_last:, needed for tagging in OBJR object. 
+ - \pdffile_filespec:nnn to create a filespec dictionary
+ - l3pdfmeta, ltdocinit: support for pdf A-2u and A-3u
+ 
 ### Fixed
  - l3pdftools: utf8/URI didn't handle "?" 
  - l3pdffield: encoding of value in l3pdffield-textfield 
