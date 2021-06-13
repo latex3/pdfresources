@@ -103,10 +103,13 @@
 %    \item[\texttt{lang}] to set the Lang entry in the Catalog.
 %    E.g. \texttt{lang=de-DE}. The initial value is |en-US|
 %    \item[\texttt{pdfstandard}] Choice key to set the pdf standard.
-%      Currently |A-1b|, |A-2b| and |A-3b| are accepted as
-%      values. The underlying code to ensure the requirements (as far as they
+%      Currently |A-1b|, |A-2b|, |A-2u|, |A-3b| and |A-3u| are accepted as
+%      values. The casing is irrelevant, |a-1b| works too.
+%      The underlying code to ensure the requirements (as far as they
 %      can be ensured) is incomplete, but a color profile is included and the
-%      /OutputIntent is set. More information can be found in the documentation
+%      /OutputIntent is set. The |u| variants for example do not force unicode,
+%      but they will pass the information to hyperref and hyperxmp.
+%      More information can be found in the documentation
 %      of \pkg{l3pdfmeta}.
 %    \item[\texttt{colorprofiles}] This allows to load icc-colorprofiles. Details
 %    are described in the documentation of \pkg{l3pdfmeta}.
@@ -138,7 +141,7 @@
 %
 % \begin{function}{\GetDocumentProperties}
 % \begin{syntax}
-%  \cs{AddToDocumentProperties}\Arg{label/property}
+%  \cs{GetDocumentProperties}\Arg{label/property}
 % \end{syntax}
 % Expands to the \meta{value} corresponding to \meta{label/property}
 % in the container. If \meta{label/property} is missing,
@@ -329,7 +332,7 @@
         \keys_set:nn {document / metadata} {_pdfstandard=\str_uppercase:n{#1}}
       }
     ,_pdfstandard .choices:nn =
-      {A-1B,A-2B,A-3B}
+      {A-1B,A-2B,A-2U,A-3B,A-3U}
       {
         \prop_if_exist:cT { g__pdfmeta_standard_pdf/#1_prop }
           {

@@ -3962,6 +3962,16 @@
         #1 .code:n= { \@@_store_metadata:nn {#1}{##1}}
       }
   }
+
+\str_if_eq:eeT {A}{\pdfmeta_standard_item:n{type}}
+  {
+    \exp_args:Nnx
+      \keys_set:nn {hyp / setup}
+        {
+          ,pdfapart        = \pdfmeta_standard_item:n {level}
+          ,pdfaconformance = \pdfmeta_standard_item:n {conformance}
+        }
+  }
 %    \end{macrocode}
 %
 % \subsection{Transitions}
