@@ -8,6 +8,7 @@ this project uses date-based 'snapshot' version identifiers.
 ## [Unreleased]
 ### Added
  - \pdffile_filespec:nnn to create a filespec dictionary
+ - l3pdfmeta, ltdocinit: support for pdf A-2u and A-3u
  
 ### Fixed
  - utf8/URI in l3pdftools didn't handle ? 
