@@ -11,14 +11,15 @@ this project uses date-based 'snapshot' version identifiers.
  
 ### Fixed
  - utf8/URI in l3pdftools didn't handle ? 
-
+ - option handling of pdflscape-ltx
+ 
 ## [2021-05-14]
 ### Fixed 
  - xcolor patch for [ps] type used in pstricks
  - value of citecolor wasn't expanded (errored with tcolorbox)
  - \url, \href, \hrefurl, \hrefrun and \hrefpdf leaves now vmode
  - handling of pdfauthor, pdftitle and pdfsubject in hyperxmp patch
-
+ 
 ### Changed 
  - the module for formfield and checkboxes has been in part rewritten to 
    better fit to the new module for textfield. 

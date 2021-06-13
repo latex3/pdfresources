@@ -25,6 +25,8 @@
 \ProvidesExplPackage{pdflscape-ltx}{2021-05-14}{0.95d}
  {Display of landscape pages in PDF - adaption of pdflscape to the PDFmanagement bundle (testphase)}
 
+\DeclareOption*{\PassOptionsToPackage\CurrentOption{graphics}}
+\ProcessOptions
 \RequirePackage{lscape}
 % this always turns in the same direction as pdflscape does too.
 % left and right would need
