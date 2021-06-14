@@ -1333,10 +1333,18 @@
 %    \end{macrocode}
 % \end{macro}
 % \subsection{Tagging}
-% \begin{macro}{\@@_tag_add_struct_parent:,\@@_tag_add_objr:n}
+% \begin{macro}
+%  {
+%   \@@_tag_add_struct_parent:,
+%   \@@_tag_add_objr:n,
+%   \@@_tag_struct_begin:
+%   \@@_tag_struct_end:
+%   }
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_tag_add_struct_parent: {}
 \cs_new_protected:Npn \@@_tag_add_objr:n #1 {}
+\cs_new_protected:Npn \@@_tag_struct_begin: {}
+\cs_new_protected:Npn \@@_tag_struct_end: {}
 \hook_gput_code:nnn {begindocument} { l3pdffield }
  {
    \cs_if_exist:NT \tag_if_active:T
