@@ -1124,14 +1124,6 @@
 \def\Hy@numberline#1{#1\c_space_tl}   %needed by bookmark
 %    \end{macrocode}
 %
-% We force unicode as option. As bookmarks are still using \cs{pdfstringdef}
-% we also need to load puenc.def.
-%    \begin{macrocode}
-\HyPsd@LoadUnicode
-\Hy@unicodetrue
-\let\HyPsd@pdfencoding\HyPsd@pdfencoding@unicode
-\Hy@DisableOption{unicode}
-%    \end{macrocode}
 % The pdfversion should be set in \cs{DeclareDocumentMetadata} but we must
 % copy it to the \pkg{hyperref} command:
 %    \begin{macrocode}
