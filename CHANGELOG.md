@@ -23,6 +23,7 @@ this project uses date-based 'snapshot' version identifiers.
  - l3pdffield: encoding of value of TM and TU key 
  - utf8/URI in l3pdftools didn't handle ? 
  - option handling of pdflscape-ltx
+ - distiller failed due to empty /PAGES
 
 ### Changed
  - l3pdffield: handling of ECMAscript in /AA keys 
@@ -32,7 +33,7 @@ this project uses date-based 'snapshot' version identifiers.
  - xcolor patch for [ps] type used in pstricks
  - value of citecolor wasn't expanded (errored with tcolorbox)
  - \url, \href, \hrefurl, \hrefrun and \hrefpdf leaves now vmode
- - handling of pdfauthor, pdftitle and pdfsubject in hyperxmp patch
+ - handling of pdfauthor, pdftitle and pdfsubject in hyperxmp patch 
  
 ### Changed 
  - the module for formfield and checkboxes has been in part rewritten to 
