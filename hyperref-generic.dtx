@@ -1214,7 +1214,7 @@
     ,run-parameter .tl_set:N = \l_@@_href_run_parameter_tl
     ,nextactionraw .code:n =
      { %perhaps some safety match later, see hyperref code
-       \tl_if_empty:nTF
+       \tl_if_empty:nTF {#1}
          {
            \pdfdict_remove:nn{l_hyp/annot/A}{Next}
          }
@@ -3335,7 +3335,7 @@
      }
    ,pdfpagescrop  .code:n =
      {
-       \tl_if_empty:nTF %or blank?
+       \tl_if_empty:nTF {#1} %or blank?
          {
            \pdfmanagement_remove:nn {Pages} { CropBox }
          }
