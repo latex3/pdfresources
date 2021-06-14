@@ -5,7 +5,7 @@ first release 0.95a, 2021-02-23 will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 this project uses date-based 'snapshot' version identifiers.
 
-## [Unreleased]
+## [2021-06-14]
 ### Added
  - l3pdffile: \pdffile_filespec:nnn to create a filespec dictionary
  - l3pdffield: sortkey and code for calculate actions
@@ -16,6 +16,7 @@ this project uses date-based 'snapshot' version identifiers.
  - l3pdffield: \pdffield_annot_ref_last:, needed for tagging in OBJR object. 
  - \pdffile_filespec:nnn to create a filespec dictionary
  - l3pdfmeta, ltdocinit: support for pdf A-2u and A-3u
+ - l3pdffield: tagging support for form fields
  
 ### Fixed
  - l3pdftools: utf8/URI didn't handle "?" 
@@ -24,13 +25,12 @@ this project uses date-based 'snapshot' version identifiers.
  - utf8/URI in l3pdftools didn't handle ? 
  - option handling of pdflscape-ltx
  - distiller failed due to empty /PAGES
+ - small bugs in the hyperref driver
 
 ### Changed
  - l3pdffield: handling of ECMAscript in /AA keys 
- 
-### Changed
  - no longer force unicode in the generic hyperref driver as
-   it is the default where sensible anyway 
+   it is the default where sensible anyway and clashes with platex. 
  
 ## [2021-05-14]
 ### Fixed 
