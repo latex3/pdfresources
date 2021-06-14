@@ -914,9 +914,12 @@
 % push to the register command / issue the special
 \cs_new_protected:Npn \@@_Pages_gpush:
   {
-    \exp_args:Nx \__pdf_backend_Pages_primitive:n
+    \pdfdict_if_empty:nF { g__pdf_Core/Pages}
       {
-        \pdfdict_use:n { g__pdf_Core/Pages}
+        \exp_args:Nx \__pdf_backend_Pages_primitive:n
+          {
+            \pdfdict_use:n { g__pdf_Core/Pages}
+          }
       }
   }
 
