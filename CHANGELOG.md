@@ -15,6 +15,10 @@ this project uses date-based 'snapshot' version identifiers.
  - option handling of pdflscape-ltx
  - distiller failed due to empty /PAGES
  
+### Changed
+ - no longer force unicode in the generic hyperref driver as
+   it is the default where sensible anyway 
+ 
 ## [2021-05-14]
 ### Fixed 
  - xcolor patch for [ps] type used in pstricks
