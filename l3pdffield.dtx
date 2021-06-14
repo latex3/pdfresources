@@ -73,7 +73,7 @@
 %    }^^A
 % }
 %
-% \date{Version 0.95d, released 2021-05-14}
+% \date{Version 0.95e, released 2021-06-14}
 %
 % \maketitle
 % \begin{documentation}
@@ -255,6 +255,10 @@
 % to the structure where they are created. It is possible to deactivate tagging for
 % a field annotation by setting the |tag| to false as described below.
 %
+% If lualatex is used tagging require either that \pkg{tagpdf} is used with the
+% option |global-mc|, or mc-chunks must be correctly closed manually, as the automatic
+% code can't escape the grouping.
+%
 % It is recommended to use the |TU|/|altname| key to give the field a readable
 % name.
 %
@@ -307,7 +311,7 @@
 %
 % \begin{function}{\pdffield_annot_ref_last:}
 % \begin{syntax}
-%  \pdffield_annot_ref_last:
+%  \cs{pdffield_annot_ref_last:}
 % \end{syntax}
 % If a tagged PDF should be created, the object
 % of the annotation of a field should be referenced in the Form structure element.
@@ -883,11 +887,16 @@
 % ,\cs_new_protected:Npn
 % ,\cs_set_eq:NN
 % ,\cs_set_protected:Npn
+% ,\cs_if_exist:NTF
+% ,\cs_if_exist:NT
+% ,\cs_new:Npn
 % ,\csname
 % ,\dim_eval:n
 % ,\dim_new:N
 % ,\endcsname
 % ,\exp_args:Ne
+% ,\exp_args:Nnx
+% ,\exp_args:NV
 % ,\group_begin:
 % ,\group_end:
 % ,\hbox_to_wd:nn
@@ -961,7 +970,7 @@
 %<*package>
 %<@@=pdffield>
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesExplPackage{l3pdffield-testphase}{2021-05-14}{0.95d}%
+\ProvidesExplPackage{l3pdffield-testphase}{2021-06-14}{0.95e}%
   {form fields}
 %    \end{macrocode}
 % \subsection{hyperref specific command}
@@ -1005,6 +1014,7 @@
 \str_new:N  \l_@@_CO_sortkey_str
 \tl_new:N \g_@@_annot_ref_last_tl
 \bool_new:N \l_@@_tag_bool
+\bool_set_true:N \l_@@_tag_bool
 %    \end{macrocode}
 % \end{variable}
 %
@@ -1280,6 +1290,7 @@
            }
        }
     \mode_leave_vertical:
+    \@@_tag_struct_begin:
     \hbox_to_wd:nn
       { \l_@@_annot_wd_dim  }
       {
@@ -1292,6 +1303,7 @@
       }
     \tl_gset:Nx \g_@@_annot_ref_last_tl { \pdfannot_box_ref_last: }
     \exp_args:NV \@@_tag_add_objr:n \g_@@_annot_ref_last_tl
+    \@@_tag_struct_end:
     \tl_if_empty:NF \l_@@_currentparent_tl
       {
         \seq_if_exist:cTF {g_@@_field/Kids/\l_@@_currentparent_tl _seq}
@@ -1333,13 +1345,35 @@
        {
          \cs_set_protected:Npn \@@_tag_add_struct_parent:
            {
-             \pdfannot_dict_put:nnx {widget}{StructParent}{ \tag_struct_parent_int: }
+             \bool_if:NT \l_@@_tag_bool
+              {
+                \pdfannot_dict_put:nnx {widget}{StructParent}{ \tag_struct_parent_int: }
+              }
            }
          \cs_set_protected:Npn \@@_tag_add_objr:n #1
            {
-             \exp_args:Nnx
-              \tag_struct_insert_annot:nn {#1}{ \tag_struct_parent_int: }
+             \bool_if:NT \l_@@_tag_bool
+               {
+                 \exp_args:Nnx
+                 \tag_struct_insert_annot:nn {#1}{ \tag_struct_parent_int: }
+               }
            }
+         \cs_set_protected:Npn \@@_tag_struct_begin:
+          {
+            \bool_if:NT \l_@@_tag_bool
+             {
+                \tag_mc_end_push:
+                \tag_struct_begin:n{tag=Form}
+             }
+          }
+         \cs_set_protected:Npn \@@_tag_struct_end:
+          {
+            \bool_if:NT \l_@@_tag_bool
+             {
+               \tag_struct_end:
+               \tag_mc_begin_pop:n{}
+             }
+          }
        }
     }
  }
@@ -1697,6 +1731,15 @@
     ,width  .initial:n = 0pt
     ,height .initial:n = 0pt
     ,depth  .initial:n = 0pt
+  }
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{tag}
+% to disable tagging locall
+%    \begin{macrocode}
+\keys_define:nn { pdffield }
+  {
+    ,tag  .bool_set:N = \l_@@_tag_bool
   }
 %    \end{macrocode}
 % \end{macro}
