@@ -238,6 +238,26 @@
 % are related in a form field.  Tests with some PDF viewers
 % are needed here.
 %
+% \subsection{Tagged PDF}
+%
+% Field annotations are (like link annotations) not part of the page stream. But
+% they are obviously nevertheless meaningful content and must be consider if
+% a PDF is \enquote{tagged}, that means if a structure is added.
+%
+% According to the PDF references fields should be tagged by adding a |Form| structure
+% element containing the object reference to a field annotations. Fields with more than
+% one annotation like radio buttons need a |Form| structure for every one.
+% Additional some cross references to structure relevant object like the parent tree
+% are needed, for more info check the documentation of the \pkg{tagpdf} package.
+%
+% The commands of this module already contain the needed support. So if
+% \pkg{tagpdf} is used and tagging activated the fields will be added as |Form| element
+% to the structure where they are created. It is possible to deactivate tagging for
+% a field annotation by setting the |tag| to false as described below.
+%
+% It is recommended to use the |TU|/|altname| key to give the field a readable
+% name.
+%
 %
 % \section{Commands}
 % \begin{function}{\pdffield_field:nn,\pdffield_field:Vn}
@@ -966,6 +986,7 @@
 %     ,\g_@@_CO_sortkeys_prop
 %     ,\l_@@_CO_sortkey_str
 %     ,\g_@@_annot_ref_last_tl
+%     ,\l_@@_tag_bool
 %  }
 % Some tmp variables, and a variable for the current parent and the
 % current fieldID.
@@ -983,6 +1004,7 @@
 \seq_new:N \g_@@_CO_sortkeys_seq
 \str_new:N  \l_@@_CO_sortkey_str
 \tl_new:N \g_@@_annot_ref_last_tl
+\bool_new:N \l_@@_tag_bool
 %    \end{macrocode}
 % \end{variable}
 %
@@ -1241,6 +1263,7 @@
         \bitset_set_false:Nn \l_@@_F_bitset {NoView}
       }
     \pdfannot_dict_put:nnx {widget}{F}{ \bitset_to_arabic:N \l_@@_F_bitset }
+    \@@_tag_add_struct_parent:
     \tl_if_empty:NF \l_@@_currentparent_tl
       {
          \exp_args:Ne
@@ -1268,6 +1291,7 @@
          \hfill
       }
     \tl_gset:Nx \g_@@_annot_ref_last_tl { \pdfannot_box_ref_last: }
+    \exp_args:NV \@@_tag_add_objr:n \g_@@_annot_ref_last_tl
     \tl_if_empty:NF \l_@@_currentparent_tl
       {
         \seq_if_exist:cTF {g_@@_field/Kids/\l_@@_currentparent_tl _seq}
@@ -1294,6 +1318,31 @@
 % \begin{macro}{\pdffield_annot_ref_last:}
 %    \begin{macrocode}
 \cs_new:Npn \pdffield_annot_ref_last: { \g_@@_annot_ref_last_tl }
+%    \end{macrocode}
+% \end{macro}
+% \subsection{Tagging}
+% \begin{macro}{\@@_tag_add_struct_parent:,\@@_tag_add_objr:n}
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_tag_add_struct_parent: {}
+\cs_new_protected:Npn \@@_tag_add_objr:n #1 {}
+\hook_gput_code:nnn {begindocument} { l3pdffield }
+ {
+   \cs_if_exist:NT \tag_if_active:T
+    {
+      \tag_if_active:T
+       {
+         \cs_set_protected:Npn \@@_tag_add_struct_parent:
+           {
+             \pdfannot_dict_put:nnx {widget}{StructParent}{ \tag_struct_parent_int: }
+           }
+         \cs_set_protected:Npn \@@_tag_add_objr:n #1
+           {
+             \exp_args:Nnx
+              \tag_struct_insert_annot:nn {#1}{ \tag_struct_parent_int: }
+           }
+       }
+    }
+}    
 %    \end{macrocode}
 % \end{macro}
 % \subsection{auxiliary command for color keys}

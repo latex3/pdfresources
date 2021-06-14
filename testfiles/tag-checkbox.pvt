@@ -1,0 +1,21 @@
+% !Mode:: "TeX:DE:UTF-8:Main"
+
+\RequirePackage{pdfmanagement-testphase}
+\DeclareDocumentMetadata{uncompress}
+\RequirePackage{pdfmanagement-regressiontest}
+\documentclass{article}
+
+\usepackage{tagpdf}
+\usepackage{l3pdffield-testphase}
+
+\tagpdfsetup{activate-all,paratagging}
+
+\begin{document}
+
+aaaa
+\ExplSyntaxOn
+\pdffield_checkbox:n{name=a}
+\ExplSyntaxOff
+bbbb
+
+\end{document}
