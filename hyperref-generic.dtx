@@ -1959,17 +1959,26 @@
 % xetex version. It is not quite clear if really all three
 % are needed for the backends supported by this driver, but changing the hyperref
 % code would be difficult.
+% We add a hook. This allows e.g. the tagging code
+% to create also a structured destination.
+% We don't use the cmd hook, as we want the same hook for both start commands.
+% We make the current dest name available so that the hook code can use it.
 %  \begin{macro}
 %    {
 %      \hyper@anchor,
 %      \hyper@anchorstart,
-%      \hyper@anchorend
+%      \hyper@anchorend,
+%      hyp/anchor,
+%      \l_hyp_current_dest_name_tl
 %    }
 %    \begin{macrocode}
+\hook_new:n{hyp/anchor}
 \cs_new_protected:Npn \hyper@anchor #1
   {
     \exp_args:NnV
       \@@_destination:nn {#1} \l_@@_dest_pdfview_tl
+    \tl_set:Nn \l_hyp_current_dest_name_tl {#1}
+    \hook_use:n{hyp/anchor}
   }
 
 \cs_new_protected:Npn \hyper@anchorstart #1
@@ -1977,6 +1986,8 @@
     \Hy@activeanchortrue
     \exp_args:NnV
       \@@_destination:nn {#1} \l_@@_dest_pdfview_tl
+    \tl_set:Nn \l_hyp_current_dest_name_tl {#1}
+    \hook_use:n{hyp/anchor}
   }
 
 \cs_new_protected:Npn \hyper@anchorend
