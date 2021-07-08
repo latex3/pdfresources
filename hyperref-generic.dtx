@@ -2070,7 +2070,9 @@
 % \end{function}
 
 % \pkg{hyperref} adds a group with \cs{Hy@colorlink}, we move this outside the link
-% so that it groups the context hook too.
+% so that it groups the context hook too. We store again the destination name in the
+% public tl |\l_hyp_current_dest_name_tl| so that the hook code can make use of
+% it
 %    \begin{macrocode}
 
 \cs_new_protected:Npn \hyper@link #1 #2 #3 %#1 context, #2=destination name, #3 content
@@ -2079,6 +2081,7 @@
       {
         \Hy@VerboseLinkStart{#1}{#2}
         \group_begin:
+        \tl_set:Nn \l_hyp_current_dest_name_tl {#2}
         \hook_use:n {hyp/link/#1}
         \@@_link_goto_begin:nw {#2}#3\Hy@xspace@end
         \@@_link_goto_end:
@@ -2094,6 +2097,7 @@
       {
         \Hy@VerboseLinkStart{#1}{#2}% only for debug
         \group_begin:
+        \tl_set:Nn \l_hyp_current_dest_name_tl {#2}
         \hook_use:n {hyp/link/#1}
         \@@_link_goto_begin:nw {#2}
       }
