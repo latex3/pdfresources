@@ -2201,6 +2201,11 @@
             \pdfdict_put:nno {l_hyp/annot/A/GoToR}{D}{\l_@@_dest_name_tmpa_tl}
           }
         \mode_leave_vertical:
+%    \end{macrocode}
+% We use an extra object here, as ghostscript doesn't like the
+% object reference in the dict
+% https://chat.stackexchange.com/transcript/message/57361080#57361080
+%    \begin{macrocode}
         \pdf_object_unnamed_write:nx{dict}{\pdfdict_use:n {l_hyp/annot/A/GoToR}}
         \pdfannot_dict_put:nnx {link/GoToR}{A}{\pdf_object_ref_last:}
         \pdfannot_link:nxn %expansion??
