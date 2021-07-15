@@ -553,21 +553,10 @@
 % \subsection{\enquote{Page/Resources}: ExtGState, ColorSpace, Shading, Pattern}
 % Path: Page/Resources/ExtGState etc. The actual output of the resources is handled
 % together with the bdc/Properties. Here is only special code.
-% \begin{macro}{\@@_backend_PageResources_gput:nnn}
-% stores values for the page resources.
-% \begin{arguments}
-% \item name of the resource (ExtGState, ColorSpace, Shading, Pattern)
-% \item a pdf name without slash
-% \item value
-% \end{arguments}
-% \begin{macro}{\@@_backend_PageResources_obj_gpush:}
-% This pushes out the objects. It is a no-op with xdvipdfmx and dvips.
-%    \begin{macrocode}
-% backend commands the command to fill the register
-% and to push the values.
-%
+% \begin{macro}{\c_@@_backend_PageResources_clist}
 % The names are quite often needed
 % a similar list is now in l3pdfmanagement. Perhaps it should be merged.
+%    \begin{macrocode}
 %<*drivers>
 \clist_const:Nn \c_@@_backend_PageResources_clist
   {
@@ -577,9 +566,25 @@
     Shading,
   }
 %</drivers>
-% pdftex and luatex
+%    \end{macrocode}
+% \end{macro}
+%
+% Now the backend commands the command to fill the register
+% and to push the values.
+%
+% \begin{macro}{\@@_backend_PageResources_gput:nnn}
+% stores values for the page resources.
+% \begin{arguments}
+% \item name of the resource (ExtGState, ColorSpace, Shading, Pattern)
+% \item a pdf name without slash
+% \item value
+% \end{arguments}
+% \begin{macro}{\@@_backend_PageResources_obj_gpush:}
+% This pushes out the objects. It should be a no-op with xdvipdfmx and dvips
+% as it currently issued in the end-of-run hook!
+% create the backend objects:
+%    \begin{macrocode}
 %<*pdftex|luatex>
- %create the backend objects:
 \clist_map_inline:Nn \c_@@_backend_PageResources_clist
   {
     \@@_backend_object_new:nn {@@/Page/Resources/#1} {dict}
@@ -594,12 +599,14 @@
       }
    }
 %</pdftex|luatex>
+%    \end{macrocode}
+% values are only stored in a prop and will be output at end document.
+% luatex must also trigger the lua side
+%    \begin{macrocode}
 %<*luatex>
-%values are only stored in a prop and will be output at end document.
 \cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
   {
     \pdfdict_gput:nnn {g_@@_Core/Page/Resources/#1} { #2 }{ #3 }
-    % luatex must also trigger the lua side
     \tex_latelua:D{ltx.@@.Page.Resources.#1=true}
     \tex_latelua:D
       {
@@ -613,8 +620,10 @@
      \pdfdict_gput:nnn {g_@@_Core/Page/Resources/#1} { #2 }{ #3 }
    }
 %</pdftex>
+%    \end{macrocode}
+% code for end of document code
+%    \begin{macrocode}
 %<*pdftex|luatex>
-%code for end of document code
 \cs_new_protected:Npn \@@_backend_PageResources_obj_gpush:
   {
     \clist_map_inline:Nn \c_@@_backend_PageResources_clist
@@ -629,15 +638,19 @@
      }
   }
 %</pdftex|luatex>
+%    \end{macrocode}
 % xdvipdfmx
 % \special{pdf:pageresources<<#1>>} doesn't work correctly with object names ...
 % https://tug.org/pipermail/dvipdfmx/2019-August/000021.html,
 % so we use \special{pdf:put @resources}
 % this must be issued on every page!
-%<*dvipdfmx|xdvipdfmx>
-%objects should not only be created but also "initialized"
+% objects should not only be created but also "initialized"
 % initialization should be done before anyone tries to write
 % so we add rules for the backend.
+% The push command should not be used as it is
+% in the wrong end document hook. If needed a new command must be added.
+%    \begin{macrocode}
+%<*dvipdfmx|xdvipdfmx>
 %<xdvipdfmx>\hook_gset_rule:nnnn{shipout/firstpage}{l3backend-xetex}{after}{pdf}
 %<dvipdfmx>\hook_gset_rule:nnnn{shipout/firstpage}{l3backend-dvipdfmx}{after}{pdf}
 %
@@ -665,8 +678,11 @@
 
 \cs_new_protected:Npn \@@_backend_PageResources_obj_gpush: {}
 %</dvipdfmx|xdvipdfmx>
+%    \end{macrocode}
+% dvips unneeded, or no-op. The push command should not be used as it is
+% in the wrong end document hook. If needed a new command must be added.
+%    \begin{macrocode}
 %<*dvips>
-% dvips unneeded, or no-op
 \cs_new_protected:Npn \@@_backend_PageResources:n #1 {}
 \cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
   { %only for the show command TEST!!
@@ -674,8 +690,10 @@
   }
 \cs_new_protected:Npn \@@_backend_PageResources_obj_gpush: {}
 %</dvips>
+%    \end{macrocode}
+% dvipsvgm unneeded, or no-op
+%    \begin{macrocode}
 %<*dvisvgm>
-% dvips unneeded, or no-op
 \cs_new_protected:Npn \@@_backend_PageResources:n #1 {}
 \cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
   { %only for the show command TEST!!
