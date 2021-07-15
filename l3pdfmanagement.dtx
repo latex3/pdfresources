@@ -672,18 +672,11 @@
        }
   }
 
-\tl_gset:Nn \g__kernel_pdfmanagement_lastpage_shipout_code_tl
-  {
-    \bool_if:NT \g_@@_active_bool
-       {
-         \__pdf_backend_PageResources_obj_gpush:          %ExtGState etc
-       }
-  }
-
 \tl_gset:Nn \g__kernel_pdfmanagement_end_run_code_tl
   {
     \bool_if:NT \g_@@_active_bool
        {
+         \__pdf_backend_PageResources_obj_gpush:          %ExtGState etc
          \@@_Pages_gpush:            %pagesattr
          \@@_Info_gpush:             %pdfinfo
          \@@_Catalog_gpush:

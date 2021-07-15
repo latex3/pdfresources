@@ -201,19 +201,11 @@
       {
         \g__kernel_pdfmanagement_thispage_shipout_code_tl
       }
-    \tl_gput_left:Nn\@kernel@after@shipout@lastpage
-      {
-        \g__kernel_pdfmanagement_lastpage_shipout_code_tl
-      }
   }
   {
     \hook_gput_code:nnn{shipout/background}{pdf}
       {
         \g__kernel_pdfmanagement_thispage_shipout_code_tl
-      }
-    \hook_gput_code:nnn {shipout/lastpage} {pdf}
-      {
-        \g__kernel_pdfmanagement_lastpage_shipout_code_tl
       }
   }
 
