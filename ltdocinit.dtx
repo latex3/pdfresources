@@ -115,9 +115,20 @@
 %    are described in the documentation of \pkg{l3pdfmeta}.
 %    \item[\texttt{pdfmanagement}] Boolean. This activates/deactivates
 %      the core management code. By default the value is true.
-%    \item[firstaidoff] This accepts a comma lists of keysword and disable the patches
+%    \item[\texttt{firstaidoff}] This accepts a comma lists of keysword and disable the patches
 %    related to them. More information can be found in the documentation of
 %    \pkg{pdfmanagement-firstaid}.
+%    \item[\texttt{testphase}] This key is used to load testphase code. The values it accepts
+%    and their effect will change over time, when testphase packages are added or
+%    removed when the code is moved into the kernel. Currently the accepted values are
+%    \texttt{tagpdf}, this load the tagpdf package, \texttt{headings}, this loads
+%    code which reimplements heading commands, and \texttt{ptagging} this loads code
+%    to allow paragraph tagging to work with engine other than luatex.
+%    \item[\texttt{activate}] This key is used to enable some document wide functions. It is
+%    currently in an experimental state. The values and their behaviour are subject to change.
+%    Currently the only value is |tagging|,
+%    which will do |\tagpdfsetup{activate,paratagging,interwordspace}|. It requires that
+%    \pkg{tagpdf} has been loaded first with the |testphase| key.
 % \end{description}
 %
 % \subsection{Container for document properties}
@@ -235,8 +246,9 @@
              }
           }
 %    \end{macrocode}
-% Load more modules and the firstaid code.
+% Load more modules, the testphase code and the firstaid code.
 %    \begin{macrocode}
+        \g_@@_testphase_tl
         \RequirePackage{pdfmanagement-firstaid}
       }
   }
@@ -296,6 +308,13 @@
 \clist_new:N \g_@@_firstaidoff_clist
 %    \end{macrocode}
 % \end{variable}
+%  \begin{variable}{\g_@@_testphase_tl}
+%  a tl to store the testphase loading code so that we can load them at
+%  the end of the command.
+%    \begin{macrocode}
+\tl_new:N \g_@@_testphase_tl
+%    \end{macrocode}
+% \end{variable}
 %    \begin{macrocode}
 \keys_define:nn { document / metadata }
   {
@@ -346,6 +365,45 @@
       }
     ,pdfmanagement .bool_gset:N = \g_@@_active_bool
     ,firstaidoff .clist_gset:N = \g_@@_firstaidoff_clist
+    ,testphase .multichoice:
+    ,testphase / tagpdf .code:n =
+      {
+        \tl_gput_right:Nn\g_@@_testphase_tl
+          {
+            \RequirePackage{tagpdf}
+            \AddToDocumentProperties [document]{testphase/tagpdf}{loaded}
+          }
+      }
+    ,testphase / headings .code:n =
+      {
+        \tl_gput_right:Nn\g_@@_testphase_tl
+          {
+            \RequirePackage{headings-testphase}
+            \AddToDocumentProperties [document]{testphase/headings}{loaded}
+          }
+      }
+    ,testphase / ptagging .code:n =
+      {
+        \tl_gput_right:Nn\g_@@_testphase_tl
+          {
+            \AddToHook{class/after}
+              {
+                \RequirePackage{ptagging-testphase}
+                \AddToDocumentProperties [document]{testphase/ptagging}{loaded}
+              }
+          }
+      }
+    ,activate .multichoice:
+    ,activate / tagging .code:n =
+      {
+        \AddToHook{package/after/tagpdf}
+          {
+            \tagpdfsetup{activate,paratagging,interwordspace}
+            \AddToDocumentProperties [document]{tagging}{active}
+            \AddToDocumentProperties [document]{tagging/para}{active}
+            \AddToDocumentProperties [document]{tagging/interwordspace}{active}
+          }
+      }
   }
 %    \end{macrocode}
 %    \begin{macrocode}
