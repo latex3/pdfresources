@@ -859,11 +859,11 @@
 %^^A %% drivers are loaded in line 4745 in hyperref.sty in a \Hy@AtEndOfPackage command.
 %^^A %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %^^A %% list of new internal commands
-%^^A %% __hyp_link_goto_begin:nw : start command for links to internal destination
+%^^A %% @@_link_goto_begin:nw : start command for links to internal destination
 %^^A %%                             replaces \find@pdflink
-%^^A %% __hyp_link_goto_end:
-%^^A %% __hyp_destination:n     :  sets an anchor, replaces \new@pdflink
-%^^A %% \__hyp_PageLabels_gpush: : puts pagelabels in the catalog, used on every storing
+%^^A %% @@_link_goto_end:
+%^^A %% @@_destination:n     :  sets an anchor, replaces \new@pdflink
+%^^A %% \@@_PageLabels_gpush: : puts pagelabels in the catalog, used on every storing
 %^^A %% PDF String (text)
 %^^A %% *\@@_text_pdfstring:nnN  : replaces Hy@pstringdef, converts #1 to pdfstring in encoding #2
 %^^A %%                           and stores in N
@@ -882,10 +882,10 @@
 %^^A %% % helps to display key list messages
 %^^A %% \@@_clist_display:n
 %^^A %%
-%^^A %% \__hyp_info_generate_addons: what did this do??
+%^^A %% \@@_info_generate_addons: what did this do??
 %^^A %%
-%^^A %% \g__hyp_AcroForm_CoFields_prop
-%^^A %% \g__hyp_AcroForm_Fields_prop
+%^^A %% \g_@@_AcroForm_CoFields_prop
+%^^A %% \g_@@_AcroForm_Fields_prop
 %^^A %%
 %^^A %%  \g_@@_dest_pdfstartpage_tl ,
 %^^A %%  \g_@@_dest_pdfstartview_tl ,
@@ -1244,10 +1244,10 @@
   \let\protect\@unexpandable@protect
   \bool_if:NTF \l_@@_href_url_encode_bool
     {
-      \tl_set:Nn \l__hyp_text_enc_uri_print_tl {utf8/URI}
+      \tl_set:Nn \l_@@_text_enc_uri_print_tl {utf8/URI}
     }
     {
-      \tl_set:Nn \l__hyp_text_enc_uri_print_tl {utf8/string}
+      \tl_set:Nn \l_@@_text_enc_uri_print_tl {utf8/string}
     }
   \@ifnextchar\bgroup\Hy@href{\hyper@normalise\href@}%
 }
@@ -1274,10 +1274,10 @@
    \let\protect\@unexpandable@protect
    \bool_if:NTF \l_@@_href_url_encode_bool
     {
-      \tl_set:Nn \l__hyp_text_enc_uri_print_tl {utf8/URI}
+      \tl_set:Nn \l_@@_text_enc_uri_print_tl {utf8/URI}
     }
     {
-      \tl_set:Nn \l__hyp_text_enc_uri_print_tl {utf8/string}
+      \tl_set:Nn \l_@@_text_enc_uri_print_tl {utf8/string}
     }
   \hyper@normalise\@@_href_url_aux:nn}
 
@@ -1336,10 +1336,10 @@
    \let\protect \@unexpandable@protect
     \bool_if:NTF \l_@@_href_url_encode_bool
     {
-      \tl_set:Nn \l__hyp_text_enc_uri_print_tl {utf8/URI}
+      \tl_set:Nn \l_@@_text_enc_uri_print_tl {utf8/URI}
     }
     {
-      \tl_set:Nn \l__hyp_text_enc_uri_print_tl {utf8/string}
+      \tl_set:Nn \l_@@_text_enc_uri_print_tl {utf8/string}
     }
    \hyper@normalise\@@_href_url_aux:n
   }
@@ -2070,7 +2070,9 @@
 % \end{function}
 
 % \pkg{hyperref} adds a group with \cs{Hy@colorlink}, we move this outside the link
-% so that it groups the context hook too.
+% so that it groups the context hook too. We store again the destination name in the
+% public tl |\l_hyp_current_dest_name_tl| so that the hook code can make use of
+% it
 %    \begin{macrocode}
 
 \cs_new_protected:Npn \hyper@link #1 #2 #3 %#1 context, #2=destination name, #3 content
@@ -2079,9 +2081,10 @@
       {
         \Hy@VerboseLinkStart{#1}{#2}
         \group_begin:
+        \tl_set:Nn \l_hyp_current_dest_name_tl {#2}
         \hook_use:n {hyp/link/#1}
         \@@_link_goto_begin:nw {#2}#3\Hy@xspace@end
-        \__hyp_link_goto_end:
+        \@@_link_goto_end:
         \group_end:
         \Hy@VerboseLinkStop
       }
@@ -2094,6 +2097,7 @@
       {
         \Hy@VerboseLinkStart{#1}{#2}% only for debug
         \group_begin:
+        \tl_set:Nn \l_hyp_current_dest_name_tl {#2}
         \hook_use:n {hyp/link/#1}
         \@@_link_goto_begin:nw {#2}
       }
@@ -2197,6 +2201,11 @@
             \pdfdict_put:nno {l_hyp/annot/A/GoToR}{D}{\l_@@_dest_name_tmpa_tl}
           }
         \mode_leave_vertical:
+%    \end{macrocode}
+% We use an extra object here, as ghostscript doesn't like the
+% object reference in the dict
+% https://chat.stackexchange.com/transcript/message/57361080#57361080
+%    \begin{macrocode}
         \pdf_object_unnamed_write:nx{dict}{\pdfdict_use:n {l_hyp/annot/A/GoToR}}
         \pdfannot_dict_put:nnx {link/GoToR}{A}{\pdf_object_ref_last:}
         \pdfannot_link:nxn %expansion??
@@ -4142,14 +4151,14 @@
 % clearly faster than removing them from a sequence
 \def\HyField@AuxAddToFields#1
   {
-    \prop_gput:Nnn \g__hyp_AcroForm_Fields_prop {#1}{F}
+    \prop_gput:Nnn \g_@@_AcroForm_Fields_prop {#1}{F}
   }%
 
 %fields with empty key get a value too -- lets hope that
 %this give the expected behaviour
 \def\HyField@AuxAddToCoFields #1 #2
   {
-    \prop_gput:Nnn \g__hyp_AcroForm_CoFields_prop {a#1}{#2}
+    \prop_gput:Nnn \g_@@_AcroForm_CoFields_prop {a#1}{#2}
   }
 
 \Hy@AtBeginDocument
@@ -4207,9 +4216,9 @@
 \ExplSyntaxOff
 \ExplSyntaxOn
 \tl_new:N  \l_@@_CheckmarkYes_tl
-\tl_set:Nn \l_@@_CheckmarkYes_tl {  __hyp_xform_CheckMarkYes }
+\tl_set:Nn \l_@@_CheckmarkYes_tl {  @@_xform_CheckMarkYes }
 \tl_new:N  \l_@@_CheckmarkOff_tl
-\tl_set:Nn \l_@@_CheckmarkOff_tl {  __hyp_xform_CheckMarkOff }
+\tl_set:Nn \l_@@_CheckmarkOff_tl {  @@_xform_CheckMarkOff }
 
 \def\@Form[#1]
   {
@@ -4218,14 +4227,14 @@
     \pdf@ifdraftmode{}
       {
         \Hy@FormObjects
-        \prop_map_inline:Nn \g__hyp_AcroForm_Fields_prop
+        \prop_map_inline:Nn \g_@@_AcroForm_Fields_prop
           {
             \pdfmanagement_add:nnx { Catalog / AcroForm } { Fields }{##1}
             %\pdfmanagement_show:n { Catalog / AcroForm }
           }
-        \prop_if_empty:NF \g__hyp_AcroForm_CoFields_prop
+        \prop_if_empty:NF \g_@@_AcroForm_CoFields_prop
           {
-            \prop_map_inline:Nn \g__hyp_AcroForm_CoFields_prop
+            \prop_map_inline:Nn \g_@@_AcroForm_CoFields_prop
               {
                 \seq_put_right:Nn \l_@@_tmpa_seq {##1}
               }
@@ -4241,7 +4250,7 @@
                 \pdfmanagement_add:nnx { Catalog / AcroForm }
                   { CO }
                   {
-                    \prop_item:Nn \g__hyp_AcroForm_CoFields_prop {##1}
+                    \prop_item:Nn \g_@@_AcroForm_CoFields_prop {##1}
                   }
              }
           }
@@ -4273,7 +4282,7 @@
          \char123
          \group_end:
        }
-       {__hyp_xform_Ding}
+       {@@_xform_Ding}
     \MakeFieldObject
        {
          \group_begin:
@@ -4285,7 +4294,7 @@
          \phantom{\char123}
          \group_end:
        }
-       {__hyp_xform_DingOff}
+       {@@_xform_DingOff}
      \MakeFieldObject
        {
          \group_begin:
@@ -4297,7 +4306,7 @@
          \char51
          \group_end:
        }
-       {__hyp_xform_CheckMarkYes}
+       {@@_xform_CheckMarkYes}
      \MakeFieldObject
        {
         \group_begin:
@@ -4309,17 +4318,17 @@
          \phantom{\char51} %perhaps xetex needs some small glyph ..
          \group_end:
        }
-       {__hyp_xform_CheckMarkOff}
+       {@@_xform_CheckMarkOff}
      \MakeFieldObject
        {
          \fbox{\textcolor{yellow}{\textsf{Submit}}} %color?
        }
-       {__hyp_xform_Submit}
+       {@@_xform_Submit}
      \MakeFieldObject
        {
          \fbox{\textcolor{yellow}{\textsf{SubmitP}}} %color?
        }
-       {__hyp_xform_SubmitP}
+       {@@_xform_SubmitP}
   }
 \ExplSyntaxOff
 \let\@endForm\ltx@empty
@@ -4335,16 +4344,16 @@
     %\zref@labelbyprops{HyAnn@\the\HyAnn@Count}{abspage}%
     %\zref@labelbylist {HyAnn@\the\HyAnn@Count} {l3pdf}
     %\zref@refused{HyAnn@\the\HyAnn@Count}%
-    \__hyp_ref_label:en {HyAnn@\the\HyAnn@Count}{abspage}
-    \__hyp_ref_check:en {HyAnn@\the\HyAnn@Count}{abspage}
+    \@@_ref_label:en {HyAnn@\the\HyAnn@Count}{abspage}
+    \@@_ref_check:en {HyAnn@\the\HyAnn@Count}{abspage}
   }%
 \def\Fld@pageobjref
   {
-    \__hyp_ref_if_exist:enT {HyAnn@\the\HyAnn@Count}{abspage}
+    \@@_ref_if_exist:enT {HyAnn@\the\HyAnn@Count}{abspage}
       {
         /P~\pdf_pageobject_ref:n
           {
-            \__hyp_ref_value:en{HyAnn@\the\HyAnn@Count}{abspage}
+            \@@_ref_value:en{HyAnn@\the\HyAnn@Count}{abspage}
           }
       }
   }
@@ -4460,7 +4469,7 @@
   \endgroup
 }
 \tl_new:N  \l_@@_RadioYes_tl
-\tl_set:Nn \l_@@_RadioYes_tl { __hyp_xform_Ding }
+\tl_set:Nn \l_@@_RadioYes_tl { @@_xform_Ding }
 \def\@@Radio#1{%
   \Fld@listcount=0~%
   %\show\Fld@default
@@ -4485,8 +4494,8 @@
          <<
          /N
           <<
-          /\@currValue\c_space_tl \pdfxform_ref:o {__hyp_xform_Ding}
-          %/Off \c_space_tl \pdfxform_ref:n {__hyp_xform_DingOff} %hm
+          /\@currValue\c_space_tl \pdfxform_ref:o {@@_xform_Ding}
+          %/Off \c_space_tl \pdfxform_ref:n {@@_xform_DingOff} %hm
           >>
          >>
       }
@@ -4580,8 +4589,8 @@
       {
         \PDFForm@Submit
         /AP<<
-          /N~\pdfxform_ref:n {__hyp_xform_Submit}~
-          /D~\pdfxform_ref:n {__hyp_xform_SubmitP}
+          /N~\pdfxform_ref:n {@@_xform_Submit}~
+          /D~\pdfxform_ref:n {@@_xform_SubmitP}
          >>
        }
       \HyField@AddToFields
