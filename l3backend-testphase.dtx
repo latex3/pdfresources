@@ -106,11 +106,10 @@
 \cs_generate_variant:Nn \@@_backend_ref_value:nn {en}
 %</drivers>
 %    \end{macrocode}
+% avoid that destinations names are optimized with xelatex/dvipdfmx
+% see https://tug.org/pipermail/dvipdfmx/2019-May/000002.html
 %    \begin{macrocode}
 %<*dvipdfmx|xdvipdfmx>
-% avoid that destinations names are optimized.
-% is this still needed??
-% see https://tug.org/pipermail/dvipdfmx/2019-May/000002.html
     \__kernel_backend_literal:x { dvipdfmx:config~C~ 0x0010 }
 %</dvipdfmx|xdvipdfmx>
 %    \end{macrocode}
@@ -121,6 +120,7 @@
 \prop_new:N \g_@@_tmpa_prop
 \tl_new:N   \l_@@_tmpa_tl
 \box_new:N  \l_@@_backend_tmpa_box
+\box_new:N  \l_@@_backend_tmpb_box
 %</drivers>
 %    \end{macrocode}
 % \end{variable}
@@ -735,23 +735,23 @@
 %
 \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: dict_content
   {
-    \__pdf_backend_pdfmark:x{/#1~<<#2>>~/BDC}
+    \@@_backend_pdfmark:x{/#1~<<#2>>~/BDC}
   }
 \cs_set_protected:Npn \@@_backend_bdcobject:nn #1 #2 % #1 eg. Span, #2: object name
   {
-    \__pdf_backend_pdfmark:x{/#1~\@@_backend_object_ref:n{#2}~/BDC}
+    \@@_backend_pdfmark:x{/#1~\@@_backend_object_ref:n{#2}~/BDC}
   }
 \cs_set_protected:Npn \@@_backend_bdcobject:n #1  % #1 eg. Span,
   {
-    \__pdf_backend_pdfmark:x{/#1~\@@_backend_object_last:~/BDC}
+    \@@_backend_pdfmark:x{/#1~\@@_backend_object_last:~/BDC}
   }
 \cs_set_protected:Npn \@@_backend_emc:
   {
-    \__pdf_backend_pdfmark:n{/EMC} %
+    \@@_backend_pdfmark:n{/EMC} %
   }
 \cs_set_protected:Npn \@@_backend_bmc:n #1
   {
-    \__pdf_backend_pdfmark:n{/#1~/BMC} %
+    \@@_backend_pdfmark:n{/#1~/BMC} %
   }
 \cs_new_protected:Npn \@@_backend_PageResources_gpush:n #1 {}
 
@@ -1109,7 +1109,7 @@
   {
     \pdf_object_unnamed_write:nn {dict} { /Names [#1] }
     %n or x?
-    \__pdf_backend:x {put~@names~<</EmbeddedFiles~\pdf_object_ref_last: >>}
+    \@@_backend:x {put~@names~<</EmbeddedFiles~\pdf_object_ref_last: >>}
   }
 %</dvipdfmx|xdvipdfmx>
 
@@ -1482,6 +1482,119 @@
 \cs_new_protected:Npn \@@_backend_xform_use:n #1 {}
 \cs_new:Npn \@@_backend_xform_ref:n {}
 %</dvisvgm>
+%    \end{macrocode}
+% The xform code for dvips is based on code from the attachfile2 package
+% (in atfi-dvips), along with some ideas from pdfbase.
+% It is not finished. Using xform as appearance seems to work, but using the
+% xform in the document not. Also details like clipping and landscape is untested.
+%    \begin{macrocode}
+%<*dvips>
+\cs_new_protected:Npn\@@_backend_xform_new:nnnn #1 #2 #3 #4 % #1 name, #2 attribute, #4  content
+  {
+    \int_gincr:N \g_@@_backend_object_int
+    \int_const:cn
+      { c_@@_backend_xform_ \tl_to_str:n {#1} _int }
+      { \g_@@_backend_object_int }
+
+    \hbox_set:Nn \l_@@_backend_tmpa_box
+      {
+        \bool_set_true:N \l_@@_backend_xform_bool
+        \prop_gclear:c {\__kernel_pdfdict_name:n { g_@@_Core/Xform/Resources/Properties }}
+        #4
+      }
+   %store the dimensions
+    \tl_const:cx
+      { c_@@_backend_xform_wd_ \tl_to_str:n {#1} _tl }
+      { \tex_the:D \box_wd:N \l_@@_backend_tmpa_box }
+    \tl_const:cx
+      { c_@@_backend_xform_ht_ \tl_to_str:n {#1} _tl }
+      { \tex_the:D \box_ht:N \l_@@_backend_tmpa_box }
+    \tl_const:cx
+      { c_@@_backend_xform_dp_ \tl_to_str:n {#1} _tl }
+      { \tex_the:D \box_dp:N \l_@@_backend_tmpa_box }
+    \hbox_set:Nn\l_@@_backend_tmpb_box
+      {
+        \__kernel_backend_postscript:x
+          {
+            mark~
+            /_objdef~{ pdf.obj \int_use:N\g_@@_backend_object_int }\c_space_tl~
+            /BBox[
+            currentpoint~\dim_to_decimal:n{\box_dp:N \l_@@_backend_tmpa_box}~sub~
+            currentpoint~
+              exch~\dim_to_decimal:n{\box_wd:N \l_@@_backend_tmpa_box}~ add~
+              exch~\dim_to_decimal:n{\box_ht:N \l_@@_backend_tmpa_box}~ add~
+             ]
+             \str_if_eq:eeF{#1}{}
+              {
+                product~(Distiller)~search~{pop~pop~pop~#2}{pop}ifelse~
+              }
+             /BP~pdfmark~
+             gsave~
+            currentpoint~
+            2~copy~translate~
+            72.27~Resolution~div~72.27~VResolution~div~neg~scale~
+            exch~neg~exch~neg~translate
+          }
+        \box_use_drop:N\l_@@_backend_tmpa_box
+        \__kernel_backend_postscript:n
+          {
+            grestore ~ mark ~ /EP~pdfmark
+          }
+       \str_if_eq:eeF{#1}{}
+         {
+           \__kernel_backend_postscript:x
+             {
+               product~(Ghostscript)~search~
+                {
+                  pop~pop~pop~
+                  mark~
+                  { pdf.obj \int_use:c{c_@@_backend_xform_ \tl_to_str:n {#1} _int} }
+                    ~<<#2>>~/PUT~pdfmark
+                 }{pop}ifelse
+              }
+          }
+      }
+    \box_set_dp:Nn \l_@@_backend_tmpb_box { \c_zero_dim }
+    \box_set_ht:Nn \l_@@_backend_tmpb_box { \c_zero_dim }
+    \box_set_wd:Nn \l_@@_backend_tmpb_box { \c_zero_dim }
+    \mode_leave_vertical: 
+    \box_use:N\l_@@_backend_tmpb_box
+  }
+
+\cs_new_protected:Nn\__pdf_backend_xform_use:n
+   {
+     \__kernel_backend_postscript:x
+       {
+          gsave~currentpoint~translate~
+          Resolution~72~div~VResolution~neg~72~div~scale~
+          mark~{ pdf.obj \int_use:c{c__pdf_backend_xform_ \tl_to_str:n {#1} _int }}~
+          /SP~pdfmark ~ grestore
+       }
+   }
+%\cs_new_protected:Npn \@@_backend_xform_use:n #1
+%     {
+%       \hbox_set:Nn \l_@@_backend_tmpa_box
+%         {
+%           \__kernel_backend_postscript:x
+%            {
+%              gsave~currentpoint~translate~
+%              Resolution~72~div~VResolution~neg~72~div~scale~
+%              mark~{ pdf.obj \int_use:c{c_@@_backend_xform_ \tl_to_str:n {#1} _int }}~
+%              /SP~pdfmark ~ grestore
+%            }
+%         }
+%       \box_set_wd:Nn  \l_@@_backend_tmpa_box { \pdfxform_wd:n { #1 } }
+%       \box_set_ht:Nn  \l_@@_backend_tmpa_box { \pdfxform_ht:n { #1 } }
+%       \box_set_dp:Nn  \l_@@_backend_tmpa_box { \pdfxform_dp:n { #1 } }
+%       \box_use_drop:N \l_@@_backend_tmpa_box
+%     }
+
+\cs_new:Npn \@@_backend_xform_ref:n #1
+  {
+    { pdf.obj \int_use:c{c_@@_backend_xform_ \tl_to_str:n {#1} _int} }
+  }
+
+%</dvips>
 %<*drivers>
 %% all
 \prg_new_conditional:Npnn \@@_backend_xform_if_exist:n #1 { p , T , F , TF }

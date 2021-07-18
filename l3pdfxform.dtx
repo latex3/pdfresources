@@ -61,8 +61,11 @@
 % This module contains a number of commands to create \enquote{form XObjects},
 % for which pdf\TeX{} introduced the short name \enquote{xforms}.
 %
-% The status is still beta, so the style itself is currently named
-% \pkg{l3pdfxform-beta}. Missing is for example code for the dvips route.
+% The status is still beta.
+% The dvips route is supported only partially: using them in appearances
+% (see e.g. \pkg{l3pdffield-checkbox} seems to work, but using them in a document
+% directly not. The creation of a form involves typesetting and so can affect spacing.
+% 
 % Probably some of the function will also need to be enhanced by hooks.
 %
 %  \begin{function}[added = 2019-08-05,updated=2021-02-14]
@@ -194,6 +197,9 @@
     \tl_use:c { c_@@_backend_xform_dp_ \tl_to_str:n { #1 } _tl }
   }
 %    \end{macrocode}
+% \end{macro}
+% \begin{macro}[pTF]{\pdfxform_if_exist}
+% The command is defined in the backend (to avoid timing problems).
 % \end{macro}
 %    \begin{macrocode}
 %</package>

@@ -1,0 +1,21 @@
+% !Mode:: "TeX:DE:UTF-8:Main"
+\PassOptionsToPackage{enable-debug,check-declarations}{expl3}
+\RequirePackage[debug]{pdfmanagement-testphase}
+\DeclareDocumentMetadata {  }
+\RequirePackage{pdfmanagement-regressiontest}
+\documentclass{article}
+\usepackage{l3pdffield-testphase}
+\begin{document}
+\START
+text
+\ExplSyntaxOn
+\pdffield_checkbox:n {name=a,checked}
+
+\par
+xxx
+\par
+xxx\pdffield_radio:n{name=A,value=Duck}
+\pdffield_radio:n{name=A,value=Bär}
+\pdffield_radio:n{name=A,value=Hippo}
+\ExplSyntaxOff
+\end{document} 
