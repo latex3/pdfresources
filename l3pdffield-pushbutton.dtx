@@ -77,6 +77,8 @@
 % itself
 % \item Standards like pdf/A disable features of form fields too
 % (as you typically can't change the PDF).
+% \item The compilations involving postscript/pdfmark (dvips with ps2pdf or dvips
+% with distiller) can require special setups.
 % \end{itemize}
 % \section{Pushbuttons}
 % Click me:
@@ -89,7 +91,17 @@
 %  \pdffield_pushbutton:n{name=bear,appearance=pdffield/bear,width=23pt,height=30pt,depth=10pt}
 %  \group_end:
 % \ExplSyntaxOff
-%
+%^^A  ps2pdf doesn't like the I\'m, need to find out the right escape.
+%^^A  ps2pdf also requires an indirection (but distiller will probably require /Action
+%^^A instead of /A)
+%^^A  \group_begin:
+%^^A  \tl_set:Nn\l_tmpa_tl{app.alert('Hello!~Im~Bär!',3,0);}
+%^^A  \regex_replace_once:nnN{ä}{\x5Cu00E4}\l_tmpa_tl{}
+%^^A  \pdf_object_unnamed_write:nx{stream}{{}{\exp_not:o{\l_tmpa_tl}}}
+%^^A  \pdf_object_unnamed_write:nx{dict}{/S/JavaScript /JS~\pdf_object_ref_last:}
+%^^A  \pdfannot_dict_put:nnx{widget}{A}{\pdf_object_ref_last:}
+%^^A  \pdffield_pushbutton:n{name=bear,appearance=pdffield/bear,width=23pt,height=30pt,depth=10pt}
+%^^A  \group_end:%
 % \bigskip
 % \subsection{Commands}
 % \begin{function}{\pdffield_push:n}
