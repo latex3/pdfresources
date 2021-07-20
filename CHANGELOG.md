@@ -5,8 +5,18 @@ first release 0.95a, 2021-02-23 will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 this project uses date-based 'snapshot' version identifiers.
 ## [Unreleased]
+### Added
+ - key `testphase` to \DeclareDocumentMetadata to load testphase packages like
+   tagpdf, ptagging and headings
+ - key `activate` to \DeclareDocumentMetadata to activate e.g. tagging. 
+ 
+### Changed 
+ - a LaTeX format/L3 layer that loads l3color is now required
+    
 ### Fixed
  - argument order in \hrefrun was wrong. filename should be the first argument.
+ - xcolor firstaid, svgnames could no longer be loaded due to changes in l3color.
+   
 
 ## [2021-06-29]
 

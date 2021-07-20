@@ -133,14 +133,13 @@
 %  it is recommended for most options ---with the exception of a few mentioned below in
 %  section~\ref{sec:pkg-options}---to set them in \cs{hypersetup},
 %  not as package option.
-%  \item This driver uses \pkg{l3color} for the colors. All colors
+%  \item This driver uses the \pkg{l3color} module for the colors. All colors
 %  defined with \cs{color_set:nn} or \cs{color_set:nnn} will work.
 %  Colors defined with \pkg{xcolor} will work if they don't use one of
 %  the special color models not supported by \pkg{l3color} as
 %  \pkg{pdfmanagement-firstaid} contains a patch for xcolor.
 %  If the package \pkg{color} is used it is currently recommended to define
-%  colors after \pkg{hyperref}. This driver uses \pkg{l3color} for the colors,
-%  some special color models of \pkg{xcolor} won't work.
+%  colors after \pkg{hyperref}.
 %  \item Load a color package or graphicx to get the right page sizes.
 %  \item Report problems! Only known problem can be resolved.
 %  \end{itemize}
@@ -1972,6 +1971,7 @@
 %      \l_hyp_current_dest_name_tl
 %    }
 %    \begin{macrocode}
+\tl_new:N\l_hyp_current_dest_name_tl
 \hook_new:n{hyp/anchor}
 \cs_new_protected:Npn \hyper@anchor #1
   {
