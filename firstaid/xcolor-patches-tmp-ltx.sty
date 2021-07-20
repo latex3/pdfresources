@@ -8,7 +8,7 @@
 % #2:  model or models
 % #3: value: either numbers or a color name
 % #4 is the type: named or ps
-\cs_gset_protected:Npn \@expl@xcolor@set@@nnnn #1 #2 #3 #4
+\cs_gset_protected:Npn \__pdfmanagement_firstaid_xcolor_set:nnnn #1 #2 #3 #4
     {
       \str_case:nnF {#4}
         {
@@ -40,12 +40,14 @@
            }
         }
     }
- \cs_generate_variant:Nn \color_set:nn {ne}
- \cs_new_protected:Npn \@expl@xcolor@set@@ne #1 #2
-    {
-      \exp_args:Nx \__color_if_defined:nT {#2}
-           { \color_set:ne {#1}{#2} }
-    }
+\cs_generate_variant:Nn \__pdfmanagement_firstaid_xcolor_set:nnnn {nonn}
+\cs_set_eq:NN \@expl@xcolor@set@@nonn \__pdfmanagement_firstaid_xcolor_set:nonn
+\cs_generate_variant:Nn \color_set:nn {ne}
+\cs_new_protected:Npn \@expl@xcolor@set@@ne #1 #2
+   {
+     \exp_args:Nx \__color_if_defined:nT {#2}
+       { \color_set:ne {#1}{#2} }
+   }
 \ExplSyntaxOff
 %\pretocmd{\XC@col@rlet}   {\@expl@color@set@@ne{#2}{#4}}{}{\fail}
 \def\XC@col@rlet[#1]#2[#3]#4%
@@ -76,7 +78,7 @@
 
 %\pretocmd{\XC@definec@lor}{\@expl@color@set@@nnn{#2}{#4}{#5}}{}{\fail}
 \def\XC@definec@lor[#1]#2[#3]#4#5%
- {\@expl@xcolor@set@@nnnn{#2}{#4}{#5}{#1}%
+ {\@expl@xcolor@set@@nonn{#2}{#4}{#5}{#1}%
   \begingroup
   \XC@sdef\@@cls{#1}\XC@edef\@@nam{#2}\edef\colornameprefix{#3}%
   \XC@logdef\@@nam

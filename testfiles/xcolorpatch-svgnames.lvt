@@ -1,0 +1,19 @@
+\RequirePackage{pdfmanagement-testphase}
+\DeclareDocumentMetadata{}
+\RequirePackage{pdfmanagement-regressiontest}
+\documentclass{article}
+
+\usepackage[svgnames]{xcolor}
+
+
+\begin{document}
+abc
+\START
+\ExplSyntaxOn
+\TEST{show~YellowGreen}
+ {
+   \color_show:n{YellowGreen}
+ }
+\ExplSyntaxOff
+
+\end{document} 
