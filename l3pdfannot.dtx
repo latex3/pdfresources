@@ -67,6 +67,33 @@
 % and link annotations. Commands for other annotations like widgets will be added
 % later.
 %
+% \subsection{dvips specialities}
+% With most engines and backend the content of arguments like \Arg{annot spec}
+% are dictionaries with keys and values which looks like the PDF.
+% With dvips this is different. As it write at first a postscript file which is
+% then interpreted along the rule of the pdfmark reference (and the rules of the postscript
+% language) the handling is in some parts so different that it is difficult to hide
+% this in abstraction like the one of this module.
+% And there is the additional complication that the
+% two postscript processor ghostscript (ps2pdf) and distiller handles some code differently too.
+%
+% For now the following differences have been spotted, it is yet not quite clear
+% how to resolve them
+% \begin{itemize}
+% \item distiller doesn't like it if the action is provided by directly
+% providing the |/A| key with some values.
+% Instead it expects a keyword \texttt{/Action}, which it will
+% then translate to |/A|. For |GoTo| links this has been resolved at the backend level,
+% but for other link types this problem is open.
+% \item ghostscript doesn't like object references as values in some places.
+% The work around here (which is e.g. used by hyperref for GoToR link) is to
+% write the whole dictionary first as an object and to use its reference, but this
+% is something distiller doesn't like, sigh.
+% \item How to escaping text and create unicode can be different.
+% \end{itemize}
+%
+%
+%
 % \subsection{General annotation commands}
 %
 % \begin{function}[added = 2019-09-05, updated = 2020-04-14]
