@@ -131,8 +131,8 @@
 %    \pkg{tagpdf} has been loaded first with the |testphase| key.
 %    \item[\texttt{debug}] This key activates some debug options. Currently only the
 %    keys |para| (with the default and only value |show|),
-%    and |log| (with the values of \pkg{tagpdf})
-%    are known.
+%    and |log| (with the values of \pkg{tagpdf}) and |uncompress| (which does the same
+%    as |uncompress| as main key)  are known.
 % \end{description}
 %
 % \subsection{Container for document properties}
@@ -425,6 +425,10 @@
           {
             \tagpdfsetup{log=#1}
           }
+      }
+    ,debug / uncompress .code:n =
+      {
+        \pdf_uncompress:
       }
   }
 %    \end{macrocode}
