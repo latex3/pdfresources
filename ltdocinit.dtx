@@ -397,6 +397,17 @@
               }
           }
       }
+    ,testphase / unknown .code:n =
+      {
+        \tl_gput_right:Nn\g_@@_testphase_tl
+           {
+             \AddToHook{class/after}
+               {
+                 \RequirePackage{#1-testphase}
+                 \AddToDocumentProperties [document]{testphase/#1}{loaded}
+               }
+           }
+      }
     ,activate .multichoice:
     ,activate / tagging .code:n =
       {
