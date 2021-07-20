@@ -129,6 +129,10 @@
 %    Currently the only value is |tagging|,
 %    which will do |\tagpdfsetup{activate,paratagging,interwordspace}|. It requires that
 %    \pkg{tagpdf} has been loaded first with the |testphase| key.
+%    \item[\texttt{debug}] This key activates some debug options. Currently only the
+%    keys |para| (with the default and only value |show|),
+%    and |log| (with the values of \pkg{tagpdf})
+%    are known.
 % \end{description}
 %
 % \subsection{Container for document properties}
@@ -402,6 +406,24 @@
             \AddToDocumentProperties [document]{tagging}{active}
             \AddToDocumentProperties [document]{tagging/para}{active}
             \AddToDocumentProperties [document]{tagging/interwordspace}{active}
+          }
+      }
+    ,debug .code:n =
+      {
+        \keys_set:nn { document / metadata / debug } {#1}
+      }
+    ,debug / para .code:n =
+      {
+        \AddToHook{package/after/tagpdf}
+          {
+            \tagpdfsetup{paratagging-show}
+          }
+      }
+    ,debug / log .code:n =
+      {
+        \AddToHook{package/after/tagpdf}
+          {
+            \tagpdfsetup{log=#1}
           }
       }
   }
