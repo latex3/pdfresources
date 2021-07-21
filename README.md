@@ -1,6 +1,6 @@
 # LaTeX PDF management testphase bundle
 
-Version: 0.95f, 2021-06-29
+Version: 0.95g, 2021-07-21
 
 This package is used during a test phase to load the new PDF management code
 of LaTeX.

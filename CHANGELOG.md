@@ -4,13 +4,13 @@ first release 0.95a, 2021-02-23 will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 this project uses date-based 'snapshot' version identifiers.
-## [Unreleased]
+## [2021-07-21]
 ### Added
  - key `testphase` to \DeclareDocumentMetadata to load testphase packages like
    tagpdf, ptagging and headings
  - key `activate` to \DeclareDocumentMetadata to activate e.g. tagging. 
  - key `debug` with para=show, log=XX or uncompress as values.
- - xform support for dvips
+ - l3pdfxform: support for dvips
   
 ### Changed 
  - a LaTeX format/L3 layer that loads l3color is now required
