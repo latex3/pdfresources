@@ -10,13 +10,14 @@ this project uses date-based 'snapshot' version identifiers.
    tagpdf, ptagging and headings
  - key `activate` to \DeclareDocumentMetadata to activate e.g. tagging. 
  - key `debug` with para=show, log=XX or uncompress as values.
- 
+ - xform support for dvips
+  
 ### Changed 
  - a LaTeX format/L3 layer that loads l3color is now required
     
 ### Fixed
  - argument order in \hrefrun was wrong. filename should be the first argument.
- - xcolor firstaid, svgnames could no longer be loaded due to changes in l3color.
+ - xcolor firstaid: svgnames could no longer be loaded due to changes in l3color.
    
 
 ## [2021-06-29]
