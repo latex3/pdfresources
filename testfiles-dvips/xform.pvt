@@ -1,0 +1,26 @@
+% !Mode:: "TeX:DE:UTF-8:Main"
+\PassOptionsToPackage{enable-debug,check-declarations}{expl3}
+\RequirePackage[debug]{pdfmanagement-testphase}
+\DeclareDocumentMetadata {  }
+\RequirePackage{pdfmanagement-regressiontest}
+\documentclass{article}
+\begin{document}
+\START
+text
+\ExplSyntaxOn
+
+\pdfxform_new:nnn  {myxformA}{/yyy~(bla)}{yyyyy}
+
+\pdfmanagement_add:nnn{Page/Resources/ExtGState}{bearopacity}{<</ca~0.7/CA~0.7>>}
+
+\pdfxform_new:nnn  {myxform}{/yyy~(bla)}{xxxxxxxxxx}
+
+\pdfxform_use:n {myxform}~\pdfxform_use:n {myxformA}
+some~text~
+\pdfxform_use:n {myxform}
+~
+~\pdfxform_ref:n {myxform}
+%~\pdfxform_name_ref:n {myxform}
+%\prop_show:N\g__pdfxform_prop
+\ExplSyntaxOff
+\end{document} 

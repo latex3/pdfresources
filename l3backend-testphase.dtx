@@ -1484,9 +1484,9 @@
 %</dvisvgm>
 %    \end{macrocode}
 % The xform code for dvips is based on code from the attachfile2 package
-% (in atfi-dvips), along with some ideas from pdfbase.
-% It is not finished. Using xform as appearance seems to work, but using the
-% xform in the document not. Also details like clipping and landscape is untested.
+% (in atfi-dvips), along with some ideas from pdfbase and has been corrected
+% with the help of Alexander Grahn.
+% Details like clipping and landscape will probably be corrected in the future.
 %    \begin{macrocode}
 %<*dvips>
 \cs_new_protected:Npn\@@_backend_xform_new:nnnn #1 #2 #3 #4 % #1 name, #2 attribute, #4  content
@@ -1512,33 +1512,31 @@
     \tl_const:cx
       { c_@@_backend_xform_dp_ \tl_to_str:n {#1} _tl }
       { \tex_the:D \box_dp:N \l_@@_backend_tmpa_box }
+    %mirror the box
+    \box_scale:Nnn \l_@@_backend_tmpa_box {1} {-1}
     \hbox_set:Nn\l_@@_backend_tmpb_box
       {
         \__kernel_backend_postscript:x
           {
+            gsave~currentpoint~translate~
             mark~
             /_objdef~{ pdf.obj \int_use:N\g_@@_backend_object_int }\c_space_tl~
             /BBox[
-            currentpoint~\dim_to_decimal:n{\box_dp:N \l_@@_backend_tmpa_box}~sub~
+            currentpoint~\dim_to_decimal:n{\box_dp:N \l_@@_backend_tmpa_box}~72.27~div~VResolution~mul~add~
             currentpoint~
-              exch~\dim_to_decimal:n{\box_wd:N \l_@@_backend_tmpa_box}~ add~
-              exch~\dim_to_decimal:n{\box_ht:N \l_@@_backend_tmpa_box}~ add~
+              exch~\dim_to_decimal:n{\box_wd:N \l_@@_backend_tmpa_box}~72.27~div~Resolution~mul~add~
+              exch~\dim_to_decimal:n{\box_ht:N \l_@@_backend_tmpa_box}~72.27~div~VResolution~mul~sub~
              ]
              \str_if_eq:eeF{#1}{}
               {
                 product~(Distiller)~search~{pop~pop~pop~#2}{pop}ifelse~
               }
-             /BP~pdfmark~
-             gsave~
-            currentpoint~
-            2~copy~translate~
-            72.27~Resolution~div~72.27~VResolution~div~neg~scale~
-            exch~neg~exch~neg~translate
+             /BP~pdfmark~grestore~
           }
         \box_use_drop:N\l_@@_backend_tmpa_box
         \__kernel_backend_postscript:n
           {
-            grestore ~ mark ~ /EP~pdfmark
+            mark ~ /EP~pdfmark
           }
        \str_if_eq:eeF{#1}{}
          {
@@ -1557,38 +1555,30 @@
     \box_set_dp:Nn \l_@@_backend_tmpb_box { \c_zero_dim }
     \box_set_ht:Nn \l_@@_backend_tmpb_box { \c_zero_dim }
     \box_set_wd:Nn \l_@@_backend_tmpb_box { \c_zero_dim }
-    \mode_leave_vertical: 
-    \box_use:N\l_@@_backend_tmpb_box
+    \hook_gput_code:nnn {begindocument/end}{pdfxform}
+      {
+       \mode_leave_vertical:
+       \box_use:N\l_@@_backend_tmpb_box
+      }
   }
 
-\cs_new_protected:Nn\__pdf_backend_xform_use:n
-   {
-     \__kernel_backend_postscript:x
-       {
-          gsave~currentpoint~translate~
-          Resolution~72~div~VResolution~neg~72~div~scale~
-          mark~{ pdf.obj \int_use:c{c__pdf_backend_xform_ \tl_to_str:n {#1} _int }}~
-          /SP~pdfmark ~ grestore
-       }
-   }
-%\cs_new_protected:Npn \@@_backend_xform_use:n #1
-%     {
-%       \hbox_set:Nn \l_@@_backend_tmpa_box
-%         {
-%           \__kernel_backend_postscript:x
-%            {
-%              gsave~currentpoint~translate~
-%              Resolution~72~div~VResolution~neg~72~div~scale~
-%              mark~{ pdf.obj \int_use:c{c_@@_backend_xform_ \tl_to_str:n {#1} _int }}~
-%              /SP~pdfmark ~ grestore
-%            }
-%         }
-%       \box_set_wd:Nn  \l_@@_backend_tmpa_box { \pdfxform_wd:n { #1 } }
-%       \box_set_ht:Nn  \l_@@_backend_tmpa_box { \pdfxform_ht:n { #1 } }
-%       \box_set_dp:Nn  \l_@@_backend_tmpa_box { \pdfxform_dp:n { #1 } }
-%       \box_use_drop:N \l_@@_backend_tmpa_box
-%     }
 
+\cs_new_protected:Npn \@@_backend_xform_use:n #1
+  {
+    \hbox_set:Nn \l_@@_backend_tmpa_box
+      {
+        \__kernel_backend_postscript:x
+         {
+           gsave~currentpoint~translate~1~-1~scale~
+           mark~{ pdf.obj \int_use:c{c__pdf_backend_xform_ \tl_to_str:n {#1} _int }}~
+          /SP~pdfmark ~ grestore
+         }
+      }
+    \box_set_wd:Nn  \l_@@_backend_tmpa_box { \pdfxform_wd:n { #1 } }
+    \box_set_ht:Nn  \l_@@_backend_tmpa_box { \pdfxform_ht:n { #1 } }
+    \box_set_dp:Nn  \l_@@_backend_tmpa_box { \pdfxform_dp:n { #1 } }
+    \box_use_drop:N \l_@@_backend_tmpa_box
+  }
 \cs_new:Npn \@@_backend_xform_ref:n #1
   {
     { pdf.obj \int_use:c{c_@@_backend_xform_ \tl_to_str:n {#1} _int} }

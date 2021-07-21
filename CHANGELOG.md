@@ -8,7 +8,7 @@ this project uses date-based 'snapshot' version identifiers.
 ### Added
  - key `testphase` to \DeclareDocumentMetadata to load testphase packages like
    tagpdf, ptagging and headings
- - key `activate` to \DeclareDocumentMetadata to activate e.g. tagging. 
+ - key `activate` to \DeclareDocumentMetadata to activate e.g. tagging.  
  
 ### Changed 
  - a LaTeX format/L3 layer that loads l3color is now required

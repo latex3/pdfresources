@@ -1,0 +1,16 @@
+\PassOptionsToPackage{enable-debug,check-declarations}{expl3}
+\RequirePackage[debug]{pdfmanagement-testphase}
+\DeclareDocumentMetadata {  }
+\RequirePackage{pdfmanagement-regressiontest}
+\documentclass{article}
+\ExplSyntaxOn
+\pdfxform_new:nnn  {myxformA}{/yyy~(bla)}{yyyyy}
+\ExplSyntaxOff
+\begin{document}
+\START
+text
+\ExplSyntaxOn
+\pdfxform_use:n {myxformA}
+some~text~
+\ExplSyntaxOff
+\end{document} 

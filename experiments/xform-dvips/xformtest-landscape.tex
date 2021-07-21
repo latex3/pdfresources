@@ -1,0 +1,76 @@
+\RequirePackage{pdfmanagement-testphase}
+\DeclareDocumentMetadata{backend=dvips,uncompress,pdfversion=2.0}
+
+\documentclass[dvips]{article}
+\usepackage[landscape]{geometry}
+% or
+%\documentclass[dvips,landscape]{article}
+
+\usepackage{l3pdffield-testphase,bearwear}
+\usepackage{attachfile2}
+\usepackage{pdfbase}
+
+\begin{document}\parindent=0pt
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% l3backend-testphase-dvips
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\verb+l3backend-testphase-dvips.def+ (new):\\[2ex]
+\ExplSyntaxOn
+\pdfxform_new:nnn {test}{}{\mbox{qXFORMp}} % text with decenders
+some~text~with~decenders$\rightarrow$\pdfxform_use:n{test}
+\quad\quad\quad\quad\quad\quad again$\rightarrow$\pdfxform_use:n{test}
+\par
+\pdffield_appearance:nn {pdffield/bear}
+  {
+    \tikz\bear\bearwear[shirt=red,body~deco={\node[font=\tiny\bfseries,white]~at~(beartummy){Push};}];
+  }
+\group_begin:
+Push button:\pdfannot_dict_put:nnn {widget}{A}{<</S/Named /N/LastPage>>}
+\sffamily\bfseries\pdffield_pushbutton:n
+  {name=my/go,width=4cm,height=5cm,appearance=pdffield/bear,caption=GO~TO~LAST~PAGE,rollover-caption=click~me!}
+\group_end:
+
+\newpage
+%%%%%%%%%%%%%%
+% attachfile2
+%%%%%%%%%%%%%%
+\verb+attachfile2.sty+:\\[2ex]
+\makeatletter
+\atfi@set@appearance{qXFORMp}
+some~text~with~decenders$\rightarrow$\atfi@refxform{\atfi@appearanceobj}
+\quad\quad\quad\quad\quad\quad again$\rightarrow$\atfi@refxform{\atfi@appearanceobj}
+\par
+\atfi@set@appearance{\tikz\bear\bearwear[shirt=red,body~deco={\node[font=\tiny\bfseries,white]~at~(beartummy){Push};}];}
+Push button:\pbs_pdfannot:nnnn{4cm}{5cm}{0pt}{
+  /Subtype/Widget /F~0 /FT/Btn /Ff~65536 /T (my/go3)
+  /A << /S/Named /N/LastPage >>
+  /MK << /CA (GO~TO~LAST~PAGE) /RC (click~me!) >>
+  /AP~<</N~\atfi@appearanceobj>>
+}\phantom{\rule{4cm}{5cm}}
+\pbs_appendtofields:n{\pbs_pdflastann:}
+\makeatother
+
+\newpage
+%%%%%%%%%%
+% pdfbase
+%%%%%%%%%%
+\verb+pdfbase.sty+:\\[2ex]
+\sbox{0}{qXFORMp}
+\pbs_pdfxform:nnnnn{}{0}{}{}{0}
+some~text~with~decenders$\rightarrow$\pbs_pdfrefxform:n{\pbs_pdflastxform:}
+\quad\quad\quad\quad\quad\quad again$\rightarrow$\pbs_pdfrefxform:n{\pbs_pdflastxform:}
+\par
+\sbox{0}{\tikz\bear\bearwear[shirt=red,body~deco={\node[font=\tiny\bfseries,white]~at~(beartummy){Push};}];}
+\pbs_pdfxform:nnnnn{}{1}{}{}{0}
+Push button:\pbs_pdfannot:nnnn{4cm}{5cm}{0pt}{
+  /Subtype/Widget /F~0 /FT/Btn /Ff~65536 /T (my/go2)
+  /A << /S/Named /N/LastPage >>
+  /MK << /CA (GO~TO~LAST~PAGE) /RC (click~me!) >>
+  /AP~<</N~\pbs_pdflastxform:>>
+}\phantom{\rule{4cm}{5cm}}
+\pbs_appendtofields:n{\pbs_pdflastann:}
+\ExplSyntaxOff
+\newpage
+\Huge The End.
+\end{document}
+
