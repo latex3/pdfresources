@@ -137,9 +137,14 @@
 %   {\pdfmanagement_if_active:}
 %   This conditional tests if the resource management code is active.
 %  \end{function}
-%
+%  \begin{function}[added=2021-07-23]
+%   {\IfPDFManagementActiveTF}
+%   This is a LaTeX2e version of the conditional
+%  \end{function}
+
 % \begin{function}[added = 2020-04-06]
-%   {\pdfmanagement_add:nnn,\pdfmanagement_add:nnx,\pdfmanagement_add:nxx}
+%   {\pdfmanagement_add:nnn,\pdfmanagement_add:nnx,\pdfmanagement_add:nxx,\pdfmanagement_add:xxx,
+%    \PDFManagmentAdd}
 %   \begin{syntax}
 %     \cs{pdfmanagement_add:nnn} \Arg{resource path} \Arg{name} \Arg{value}
 %   \end{syntax}
@@ -152,7 +157,8 @@
 % keys used in PDF dictionaries (see the l3pdfdict module) the name is escaped
 % with \cs{str_convert_pdfname:n} when stored.
 % \Arg{value} should be a valid PDF value for this Name in the
-% target dictionary.
+% target dictionary. |\PDFManagmentAdd| is a copy of |\pdfmanagement_add:xxx|
+% and so expands all its arguments.
 %
 %
 % The code works with all major engines but not necessarily
@@ -707,7 +713,8 @@
       }
   }
 
-\cs_generate_variant:Nn \pdfmanagement_add:nnn {nnx,nxx}
+\cs_generate_variant:Nn \pdfmanagement_add:nnn {nnx,nxx,xxx}
+\cs_set_eq:NN \PDFManagmentAdd \pdfmanagement_add:xxx
 %    \end{macrocode}
 % \subsection{Hooks -- shipout and end of run code}
 % Code is executed in three places: At shipout of every page,
