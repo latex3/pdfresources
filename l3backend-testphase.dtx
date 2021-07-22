@@ -1123,81 +1123,33 @@
 %<*dvisvgm>
 \cs_new_protected:Npn \@@_backend_Names_gpush:nn #1 #2 {}
 %</dvisvgm>
-
 %    \end{macrocode}
-% Names in the EmbeddedFiles name tree must sorted alphabetically,
-% so we need commands to create this names. And we need a sequence to store
-% the names and the objects. We use the prefix l3ef, and we assume that at
-% most 9999 files will be used.
-% \begin{variable}{\g_@@_backend_EmbeddedFiles_int}
-% \end{variable}
-% \begin{macro}{\@@_backend_EmbeddedFiles_name:}
-%    \begin{macrocode}
-%<*drivers>
-\int_new:N \g_@@_backend_EmbeddedFiles_int
-\cs_new:Npn \@@_backend_EmbeddedFiles_name:
- {
-   (
-    l3ef
-    \int_compare:nNnT {\g_@@_backend_EmbeddedFiles_int} < {10}
-     {0}
-    \int_compare:nNnT {\g_@@_backend_EmbeddedFiles_int} < {100}
-     {0}
-    \int_compare:nNnT {\g_@@_backend_EmbeddedFiles_int} < {1000}
-     {0}
-    \int_use:N \g_@@_backend_EmbeddedFiles_int
-   )
- }
-%</drivers>
-%    \end{macrocode}
-% \end{macro}
-% \begin{variable}{\g_@@_backend_EmbeddedFiles_seq,\g_@@_backend_EmbeddedFiles_named_prop}
-% The sequence will hold the content of the array that is pushed out at then
-% end (not with dvips), the prop holds the obj names-names relation.
-% \end{variable}
-%    \begin{macrocode}
-%<*drivers>
-\seq_new:N \g_@@_backend_EmbeddedFiles_seq
-\prop_new:N \g_@@_backend_EmbeddedFiles_named_prop
-%</drivers>
-%    \end{macrocode}
-% \begin{macro}{\@@_backend_NamesEmbeddedFiles_add:n}
-% This command saves an object reference of a filespec dictionary in the
-% EmbeddedFiles name tree. We define a prop to store the relation between
-% object name and name in the name tree.
+% EmbeddedFiles is a bit special.
+% For once we need backend commands for dvips.
+% But we want also an option to create the name on the fly.
+% \begin{macro}{\@@_backend_NamesEmbeddedFiles_add:nn}
+% dvips need special backend code to create the name tree.
+% With the other engines it does nothing.
 %    \begin{macrocode}
 %<*pdftex|luatex|dvipdfmx|xdvipdfmx>
-\cs_new_protected:Npn  \@@_backend_NamesEmbeddedFiles_add:n #1
-    %#1 object ref
-    {
-      \int_gincr:N \g_@@_backend_EmbeddedFiles_int
-      \prop_gput:Nnx \g_@@_backend_EmbeddedFiles_named_prop
-        { #1 }
-        { \@@_backend_EmbeddedFiles_name: }
-      \seq_gput_right:Nx \g_@@_backend_EmbeddedFiles_seq
-        { \@@_backend_EmbeddedFiles_name: \c_space_tl #1 }
-    }
-
+\cs_new_protected:Npn  \@@_backend_NamesEmbeddedFiles_add:nn #1 #2 {}
 %</pdftex|luatex|dvipdfmx|xdvipdfmx>
 %<*dvips>
-\cs_new_protected:Npn  \@@_backend_NamesEmbeddedFiles_add:n #1
+\cs_new_protected:Npn  \@@_backend_NamesEmbeddedFiles_add:nn #1 #2
       {
-        \int_gincr:N \g_@@_backend_EmbeddedFiles_int
-        \prop_gput:Nnx \g_@@_backend_EmbeddedFiles_named_prop
-         { #1 }
-         { \@@_backend_EmbeddedFiles_name: }
         \@@_backend_pdfmark:x
           {
-            /Name~\@@_backend_EmbeddedFiles_name:~
-            /FS~#1~
+            /Name~#1~
+            /FS~#2~
             /EMBED
           }
       }
 %</dvips>
 %<*dvisvgm>
 %no op. Or is there any sensible use for it?
-\cs_new_protected:Npn  \@@_backend_NamesEmbeddedFiles_add:n #1
+\cs_new_protected:Npn  \@@_backend_NamesEmbeddedFiles_add:nn #1 #2
       {}
+
 %</dvisvgm>
 %    \end{macrocode}
 % \end{macro}

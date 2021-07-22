@@ -581,18 +581,27 @@
 % Kids. But this can be changed if the need arise.
 % \end{itemize}
 %
-% The following name trees can be filled with this method:
+% The following name trees can be filled with this method. Currently only the
+% first three are activated. For  the first, |EmbeddedFiles| there are two methods
+% to add a value:\\
+% |\pdfmanagement_add:nnn{Catalog/Names/EmbeddedFiles}{name}{reference}|
+% and
+% |\pdfmanagement_add:nnn{Catalog/Names}{EmbeddedFiles}{reference}|.
+% This is intended, the second methods creates a name on the fly (with the prefix l3ef)
 %
 % \medskip
 % \noindent
 % \begin{tabularx}{\linewidth}{ll>{\raggedright\arraybackslash}X}
-% Catalog/Names & AP & A name tree mapping name strings to annotation appearance streams\\
-% Catalog/Names & JavaScript & A name tree mapping name strings to documentlevel ECMAScript actions\\
-% Catalog/Names & Pages & A name tree mapping name strings to visible pages for use in interactive forms\\
-% Catalog/Names & Templates & A name tree mapping name strings to invisible pages for use in interactive forms\\
-% Catalog/Names & IDS & A name tree mapping digital identifiers to Web.Capture content sets\\
-% Catalog/Names & URLS & A name tree mapping name strings to documentlevel ECMAScript actions\\
-% Catalog/Names & Renditions & A name tree mapping name strings (which shall have Unicode encoding) to rendition objects
+% Catalog/Names/EmbeddedFiles & A name tree mapping name strings to file
+% specifications for embedded file streams. The value should be a reference to a filespec
+% dictionary\\
+% Catalog/Names/AP & A name tree mapping name strings to annotation appearance streams\\
+% Catalog/Names/JavaScript & A name tree mapping name strings to documentlevel ECMAScript actions\\
+% (inactive) Catalog/Names/Pages & A name tree mapping name strings to visible pages for use in interactive forms\\
+% (inactive) Catalog/Names/Templates & A name tree mapping name strings to invisible pages for use in interactive forms\\
+% (inactive) Catalog/Names/IDS & A name tree mapping digital identifiers to Web.Capture content sets\\
+% (inactive) Catalog/Names/URLS & A name tree mapping name strings to documentlevel ECMAScript actions\\
+% (inactive) Catalog/Names/Renditions & A name tree mapping name strings (which shall have Unicode encoding) to rendition objects
 %  (it is not quite clear yet, what unicode encoding means here. Perhaps this string will need special handling)\\
 % \end{tabularx}
 % \end{documentation}
@@ -621,6 +630,9 @@
 
 \msg_new:nnn  { pdfmanagement } { no-show }
               { It~is~not~possible~to~show~the~content~of~'#1'.}
+
+\msg_new:nnn  { pdfmanagement } { name-exist }
+              { The~name~'#1'~has~already~been~used~for~name~tree~'#2'.}
 
 \msg_new:nnn  { pdfmanagement } { show-dict }
   {
@@ -1155,9 +1167,9 @@
        \prop_get:coNTF
          { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/Names/#1 }}
          { \l_@@_tmpa_tl }
-         { \l_@@_tmpb_tl }
+         \l_@@_tmpb_tl
          {
-           % error
+           \msg_error:nnnn{pdfmanagement}{name-exist}{##1}{#1}
          }
          {
            \prop_gput:con
@@ -1167,6 +1179,34 @@
          }
      }
  }
+%    \end{macrocode}
+% EmbeddedFiles is a bit special. For once there is special backend code
+% needed by dvips. Beside this we also want the option to create the file name
+% on the fly, so they are actually two access methods:
+% |\pdfmanagement_add:nnn{Catalog/Names/EmbeddedFiles}{name}{reference}|
+% and
+% |\pdfmanagement_add:nnn{Catalog/Names}{EmbeddedFiles}{reference}|
+%    \begin{macrocode}
+\pdfdict_new:n { g__pdf_Core/Catalog/Names/EmbeddedFiles}
+\cs_new_protected:cpn { @@_handler/Catalog/Names/EmbeddedFiles/?_gput:nn } #1 #2
+  {
+    \pdf_string_from_unicode:nnN {utf8/string}{#1}\l_@@_tmpa_tl
+    \prop_get:coNTF
+       { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/Names/EmbeddedFiles } }
+       { \l_@@_tmpa_tl }
+       \l_@@_tmpb_tl
+       {
+         \msg_error:nnnn{pdfmanagement}{name-exist}{#1}{EmbeddedFiles} % error
+       }
+       {
+         \prop_gput:con
+           { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/Names/EmbeddedFiles }}
+           { \l_@@_tmpa_tl }
+           { #2 }
+         \exp_args:No
+         \__pdf_backend_NamesEmbeddedFiles_add:nn {\l_@@_tmpa_tl}{#2}
+      }
+  }
 %    \end{macrocode}
 % \end{macro}
 % % \paragraph {Building the catalog: Push order}
@@ -1190,7 +1230,7 @@
       { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog} }
       \__pdf_backend_catalog_gput:nn
     % output names tree:
-    \use:c { @@_/Catalog/Names/EmbeddedFiles_gpush: }
+    \use:c{ @@_/Catalog/Names_gpush:n } {EmbeddedFiles}
     \clist_map_inline:Nn \c_@@_Catalog_nametree_clist
      {
       \use:c{ @@_/Catalog/Names_gpush:n } {##1}
@@ -1477,6 +1517,30 @@
 % \begin{NOTE}{UF}
 % TODO access function for the name in the name tree
 % \end{NOTE}
+% \begin{variable}{\g_@@_EmbeddedFiles_int}
+% We want to create names for files on the fly. For this we use an int.
+%    \begin{macrocode}
+\int_new:N \g_@@_EmbeddedFiles_int
+%    \end{macrocode}
+% \end{variable}
+% \begin{macro}{\@@_EmbeddedFiles_name:}
+% We use the prefix l3ef, and pad numbers below 9999.
+%    \begin{macrocode}
+\cs_new:Npn \@@_EmbeddedFiles_name:
+ {
+   (
+    l3ef
+    \int_compare:nNnT {\g_@@_EmbeddedFiles_int} < {10}
+     {0}
+    \int_compare:nNnT {\g_@@_EmbeddedFiles_int} < {100}
+     {0}
+    \int_compare:nNnT {\g_@@_EmbeddedFiles_int} < {1000}
+     {0}
+    \int_use:N \g_@@_EmbeddedFiles_int
+   )
+ }
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{ Handler}
 % EmbeddedFiles is an array and needs a special handler to add values.
 %    \begin{macrocode}
@@ -1484,30 +1548,18 @@
 
 \cs_new_protected:cpn { @@_handler/Catalog/Names/EmbeddedFiles_gput:n } #1
   {
-    \__pdf_backend_NamesEmbeddedFiles_add:n { #1 }
-  }
-%    \end{macrocode}
-% \end{macro}
-% The entry should only be added if there are actually embedded files.
-% This can be tested by checking the names_seq
-% \begin{macro}{\@@_/Catalog/Names/EmbeddedFiles_gpush:}
-%    \begin{macrocode}
-%
-\cs_new_protected:cpn { @@_/Catalog/Names/EmbeddedFiles_gpush: }
-  {
-    \seq_if_empty:NF \g__pdf_backend_EmbeddedFiles_seq
-      {
-        \exp_args:Nnx \__pdf_backend_Names_gpush:nn
-          {EmbeddedFiles}
-          {
-            \seq_use:Nn \g__pdf_backend_EmbeddedFiles_seq {~}
-          }
-      }
+    \int_gincr:N \g_@@_EmbeddedFiles_int
+    \exp_args:Nnx
+    \prop_gput:cnn
+      { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/Names/EmbeddedFiles }}
+      { \@@_EmbeddedFiles_name: }
+      { #1 }
+     \exp_args:Nx
+     \__pdf_backend_NamesEmbeddedFiles_add:nn {\@@_EmbeddedFiles_name:} { #1 }
   }
 %    \end{macrocode}
 % \end{macro}
 % This pushes out the other names trees (but not with dvips).
-% TODO it should perhaps be unified with EmbeddedFiles.
 % \begin{macro}{\@@_/Catalog/Names/?_gpush:}
 %    \begin{macrocode}
 \cs_new_protected:cpn  { @@_/Catalog/Names_gpush:n } #1 %#1 name of name tree
