@@ -1,0 +1,35 @@
+\RequirePackage{pdfmanagement-testphase}
+\DeclareDocumentMetadata{backend=dvips,uncompress,pdfversion=2.0}
+
+\documentclass[dvips]{article}
+%\usepackage[landscape]{geometry}
+% or
+%\documentclass[dvips,landscape]{article}
+
+\usepackage{l3pdffield-testphase,bearwear}
+\usepackage{attachfile2}
+\usepackage{pdfbase}
+\usepackage{xsavebox}
+
+\begin{document}\parindent=0pt
+\verb+l3backend-testphase-dvips.def+ (new):\\[2ex]
+\ExplSyntaxOn
+\pdfxform_new:nnn {test}{}{\mbox{qXFORMp}} % text with decenders
+some~text~with~decenders$\rightarrow$\pdfxform_use:n{test}
+\quad\quad\quad\quad\quad\quad again$\rightarrow$\pdfxform_use:n{test}
+\par
+\pdffield_appearance:nn {pdffield/bear}
+  {
+    \tikz\bear\bearwear[shirt=red,body~deco={\node[font=\tiny\bfseries,white]~at~(beartummy){Push};}];
+  }
+\group_begin:
+Push button:\pdfannot_dict_put:nnn {widget}{A}{<</S/Named /N/LastPage>>}
+\sffamily\bfseries\pdffield_pushbutton:n
+  {name=my/go,width=4cm,height=5cm,appearance=pdffield/bear,caption=GO~TO~LAST~PAGE,rollover-caption=click~me!}
+\group_end:
+
+\ExplSyntaxOff
+\newpage
+\Huge The End.
+\end{document}
+
