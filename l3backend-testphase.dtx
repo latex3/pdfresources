@@ -1094,11 +1094,6 @@
 %    \begin{macrocode}
 % pdflatex
 %<*pdftex>
-\cs_new_protected:Npn \@@_backend_NamesEmbeddedFiles_gpush:n #1 %array content
-  {
-     \pdf_object_unnamed_write:nn {dict} {/Names [#1] }
-     \tex_pdfnames:D {/EmbeddedFiles~\pdf_object_ref_last:}
-  }
 \cs_new_protected:Npn \@@_backend_Names_gpush:nn #1 #2 %#1 name of name tree, #2 array content
   {
      \pdf_object_unnamed_write:nn {dict} {/Names [#2] }
@@ -1106,11 +1101,6 @@
   }
 %</pdftex>
 %<*luatex>
-\cs_new_protected:Npn \@@_backend_NamesEmbeddedFiles_gpush:n #1 %array content
-  {
-    \pdf_object_unnamed_write:nn {dict} {/Names [#1] }
-    \tex_pdfextension:D~names~{/EmbeddedFiles~\pdf_object_ref_last: }
-  }
 \cs_new_protected:Npn \@@_backend_Names_gpush:nn #1 #2 %#1 name of name tree, #2 array content
   {
      \pdf_object_unnamed_write:nn {dict} {/Names [#2] }
@@ -1118,12 +1108,6 @@
   }
 %</luatex>
 %<*dvipdfmx|xdvipdfmx>
-\cs_new_protected:Npn \@@_backend_NamesEmbeddedFiles_gpush:n #1 %array content
-  {
-    \pdf_object_unnamed_write:nn {dict} { /Names [#1] }
-    %n or x?
-    \@@_backend:x {put~@names~<</EmbeddedFiles~\pdf_object_ref_last: >>}
-  }
 \cs_new_protected:Npn \@@_backend_Names_gpush:nn #1 #2 %#1 name of name tree, #2 array content
   {
      \pdf_object_unnamed_write:nn {dict} {/Names [#2] }
@@ -1133,12 +1117,10 @@
 
 %dvips: noop
 %<*dvips>
-\cs_new_protected:Npn \@@_backend_NamesEmbeddedFiles_gpush:n #1 {}
 \cs_new_protected:Npn \@@_backend_Names_gpush:nn #1 #2  {}
 %</dvips>
 %dvisvgm: noop
 %<*dvisvgm>
-\cs_new_protected:Npn \@@_backend_NamesEmbeddedFiles_gpush:n #1 {}
 \cs_new_protected:Npn \@@_backend_Names_gpush:nn #1 #2 {}
 %</dvisvgm>
 
