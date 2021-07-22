@@ -1086,8 +1086,11 @@
 % \subsubsection { Special case: the /Names/EmbeddedFiles dictionary }
 % Entries to /Names are handled differently, in part (/Desc) it is automatic, for
 % other special commands like \cs{pdfnames} must be used. For EmbeddedFiles
-% we need some code to push the tree if files have been added. dvips wants code
-% for every file and then creates the Name tree automatically.
+% dvips wants code for every file and then creates the Name tree automatically.
+% Other name trees are ignored.
+% TODO: Currently the code for EmbeddedFiles is still a bit
+% different but this should be merged, all name trees should be handled with the
+% same code.
 %    \begin{macrocode}
 % pdflatex
 %<*pdftex>
@@ -1096,12 +1099,22 @@
      \pdf_object_unnamed_write:nn {dict} {/Names [#1] }
      \tex_pdfnames:D {/EmbeddedFiles~\pdf_object_ref_last:}
   }
+\cs_new_protected:Npn \@@_backend_Names_gpush:nn #1 #2 %#1 name of name tree, #2 array content
+  {
+     \pdf_object_unnamed_write:nn {dict} {/Names [#2] }
+     \tex_pdfnames:D {/#1~\pdf_object_ref_last:}
+  }
 %</pdftex>
 %<*luatex>
 \cs_new_protected:Npn \@@_backend_NamesEmbeddedFiles_gpush:n #1 %array content
   {
     \pdf_object_unnamed_write:nn {dict} {/Names [#1] }
     \tex_pdfextension:D~names~{/EmbeddedFiles~\pdf_object_ref_last: }
+  }
+\cs_new_protected:Npn \@@_backend_Names_gpush:nn #1 #2 %#1 name of name tree, #2 array content
+  {
+     \pdf_object_unnamed_write:nn {dict} {/Names [#2] }
+     \tex_pdfextension:D~names~ {/#1~\pdf_object_ref_last:}
   }
 %</luatex>
 %<*dvipdfmx|xdvipdfmx>
@@ -1111,15 +1124,22 @@
     %n or x?
     \@@_backend:x {put~@names~<</EmbeddedFiles~\pdf_object_ref_last: >>}
   }
+\cs_new_protected:Npn \@@_backend_Names_gpush:nn #1 #2 %#1 name of name tree, #2 array content
+  {
+     \pdf_object_unnamed_write:nn {dict} {/Names [#2] }
+     \@@_backend:x {put~@names~<</#1~\pdf_object_ref_last: >>}
+  }
 %</dvipdfmx|xdvipdfmx>
 
 %dvips: noop
 %<*dvips>
 \cs_new_protected:Npn \@@_backend_NamesEmbeddedFiles_gpush:n #1 {}
+\cs_new_protected:Npn \@@_backend_Names_gpush:nn #1 #2  {}
 %</dvips>
 %dvisvgm: noop
 %<*dvisvgm>
 \cs_new_protected:Npn \@@_backend_NamesEmbeddedFiles_gpush:n #1 {}
+\cs_new_protected:Npn \@@_backend_Names_gpush:nn #1 #2 {}
 %</dvisvgm>
 
 %    \end{macrocode}

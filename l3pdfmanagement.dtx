@@ -549,6 +549,52 @@
 %                                                  attach the file to the file panel.
 %   \end{tabularx}
 %
+% \paragraph{Catalog entries for name trees}
+%
+% \emph{Not supported in the dvips backend, pdfmark doesn't have an interface here}.
+%
+% In various places the PDF format allows to reference objects by name instead
+% of by object reference. The relationship between a name and the object reference
+% are store in so-called \emph{name trees}, which are stored in the
+% Catalog/Names dictionary. The |/Dests| and the |/EmbeddedFiles| name trees are
+% handled implicitly if destinations or files are added. Names to the other
+% name trees can be added with |\pdfmanagement_add:nnn|, e.g. to add an value to
+% the AP names (for appearance streams) use
+%
+% \begin{verbatim}
+% \pdfmanagement_add:nnx  { Catalog / Names / AP } {myAPname} {\pdf_object_ref_last:}
+% \end{verbatim}
+%
+% Remarks:
+% \begin{itemize}
+% \item The name |myAPname| is processed through |\pdf_string_from_unicode:nnN{utf8/string}|
+% and parentheses are added automatically. Ensure that the use of the name
+% handles it in the same way.
+% \item It is currently not possible to test if a name has already been used
+% by another package or previous code,
+% so use names where you can be confident that they are unique.
+% (It would be possible to split up the first part and test, but it would slow
+% down the compilation and I'm not sure if it is worth the trouble)
+% \item The value is not preprocessed, it is up-to-you to ensure that it does the
+% right thing.
+% \item Currently the structure of the name tree is flat, it doesn't use
+% Kids. But this can be changed if the need arise.
+% \end{itemize}
+%
+% The following name trees can be filled with this method:
+%
+% \medskip
+% \noindent
+% \begin{tabularx}{\linewidth}{ll>{\raggedright\arraybackslash}X}
+% Catalog/Names & AP & A name tree mapping name strings to annotation appearance streams\\
+% Catalog/Names & JavaScript & A name tree mapping name strings to documentlevel ECMAScript actions\\
+% Catalog/Names & Pages & A name tree mapping name strings to visible pages for use in interactive forms\\
+% Catalog/Names & Templates & A name tree mapping name strings to invisible pages for use in interactive forms\\
+% Catalog/Names & IDS & A name tree mapping digital identifiers to Web.Capture content sets\\
+% Catalog/Names & URLS & A name tree mapping name strings to documentlevel ECMAScript actions\\
+% Catalog/Names & Renditions & A name tree mapping name strings (which shall have Unicode encoding) to rendition objects
+%  (it is not quite clear yet, what unicode encoding means here. Perhaps this string will need special handling)\\
+% \end{tabularx}
 % \end{documentation}
 %
 % \begin{implementation}
@@ -593,6 +639,16 @@
     command~'#1'~ignored.
   }
 %    \end{macrocode}
+%
+% \begin{variable}{\l_@@_tmpa_tl,\l_@@_tmpb_tl,\l_@@_tmpa_seq}
+% Some temp variables
+%    \begin{macrocode}
+\tl_new:N \l_@@_tmpa_tl
+\tl_new:N \l_@@_tmpb_tl
+\seq_new:N \l_@@_tmpa_seq
+%    \end{macrocode}
+% \end{variable}
+
 % \begin{variable}{\g_@@_active_bool}
 % This boolean will control the activation of the management code.
 % It is used in the hooks, and in some backend files.
@@ -1059,7 +1115,20 @@
     AcroForm/CO
   }
 
-
+%    \end{macrocode}
+% Names trees in Catalog/Names. We prepare the full list
+% but activate only AP and JavaScript for now.
+%    \begin{macrocode}
+\clist_const:Nn \c_@@_Catalog_nametree_clist
+  {
+    AP,
+    JavaScript,
+%    Pages,
+%    Templates,
+%    IDS,
+%    URLS,
+%    Renditions
+  }
 
 \clist_map_inline:Nn \c_@@_Catalog_seq_clist
  {
@@ -1076,6 +1145,28 @@
       { g_@@_/Catalog/OCProperties/Configs_seq }
       {  #1  }
   }
+
+\clist_map_inline:Nn \c_@@_Catalog_nametree_clist
+ {
+   \pdfdict_new:n { g__pdf_Core/Catalog/Names/#1}
+   \cs_new_protected:cpn { @@_handler/Catalog/Names/#1/?_gput:nn } ##1 ##2
+     {
+       \pdf_string_from_unicode:nnN {utf8/string}{##1}\l_@@_tmpa_tl
+       \prop_get:coNTF
+         { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/Names/#1 }}
+         { \l_@@_tmpa_tl }
+         { \l_@@_tmpb_tl }
+         {
+           % error
+         }
+         {
+           \prop_gput:con
+             { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/Names/#1 }}
+             { \l_@@_tmpa_tl }
+             { ##2 }
+         }
+     }
+ }
 %    \end{macrocode}
 % \end{macro}
 % % \paragraph {Building the catalog: Push order}
@@ -1100,6 +1191,10 @@
       \__pdf_backend_catalog_gput:nn
     % output names tree:
     \use:c { @@_/Catalog/Names/EmbeddedFiles_gpush: }
+    \clist_map_inline:Nn \c_@@_Catalog_nametree_clist
+     {
+      \use:c{ @@_/Catalog/Names_gpush:n } {##1}
+     }
   }
 %    \end{macrocode}
 % \end{macro}
@@ -1283,12 +1378,12 @@
       { 0 }
       {
         \__pdf_backend_object_new:nn  { @@/Catalog/OCProperties } { dict }
-        \seq_gpop_left:cN { g_@@_/Catalog/OCProperties/Configs_seq} \l_tmpa_tl
+        \seq_gpop_left:cN { g_@@_/Catalog/OCProperties/Configs_seq} \l_@@_tmpa_tl
         \exp_args:Nnx
           \__pdf_backend_object_write:nn {@@/Catalog/OCProperties}
             {
               /OCGs~[ \seq_use:cn { g_@@_/Catalog/OCProperties/OCGs_seq } {~} ]
-              /D~\l_tmpa_tl~
+              /D~\l_@@_tmpa_tl~
               \seq_if_empty:cF { g_@@_/Catalog/OCProperties/Configs_seq }
                 {
                   /Configs~
@@ -1402,12 +1497,40 @@
   {
     \seq_if_empty:NF \g__pdf_backend_EmbeddedFiles_seq
       {
-        \exp_args:Nx \__pdf_backend_NamesEmbeddedFiles_gpush:n
+        \exp_args:Nnx \__pdf_backend_Names_gpush:nn
+          {EmbeddedFiles}
           {
             \seq_use:Nn \g__pdf_backend_EmbeddedFiles_seq {~}
           }
       }
   }
+%    \end{macrocode}
+% \end{macro}
+% This pushes out the other names trees (but not with dvips).
+% TODO it should perhaps be unified with EmbeddedFiles.
+% \begin{macro}{\@@_/Catalog/Names/?_gpush:}
+%    \begin{macrocode}
+\cs_new_protected:cpn  { @@_/Catalog/Names_gpush:n } #1 %#1 name of name tree
+ {
+   \pdfdict_if_empty:nF { g__pdf_Core/Catalog/Names/#1 }
+     {
+       \seq_clear:N \l_@@_tmpa_seq
+       \prop_map_inline:cn
+         {\__kernel_pdfdict_name:n { g__pdf_Core/Catalog/Names/#1 }}
+         { \seq_put_right:Nn \l_@@_tmpa_seq {##1~##2}}
+       \seq_sort:Nn  \l_@@_tmpa_seq
+         {
+           \str_compare:nNnTF {##1} > {##2}
+             { \sort_return_swapped: }
+             { \sort_return_same: }
+         }
+       \exp_args:Nnx \__pdf_backend_Names_gpush:nn
+         {#1}
+         {
+           \seq_use:Nn \l_@@_tmpa_seq {~}
+         }
+     }
+ }
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{@@_handler/Catalog/?_show:}
