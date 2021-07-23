@@ -1082,6 +1082,7 @@
 %  \end{variable}
 %  \begin{macro}{ \@@_catalog_XX_gput:n }
 % Various commands to handle subentries and special cases.
+% At first we set up a few lists of the various types.
 %    \begin{macrocode}
 \pdfdict_new:n { g__pdf_Core/Catalog}
 
@@ -1138,16 +1139,17 @@
 %    \end{macrocode}
 % Names trees in Catalog/Names. We prepare the full list
 % but activate only AP and JavaScript for now.
+% /EmbeddedFiles has special code and so is not in the name list.
 %    \begin{macrocode}
 \clist_const:Nn \c_@@_Catalog_nametree_clist
   {
     AP,
     JavaScript,
-%    Pages,
-%    Templates,
-%    IDS,
-%    URLS,
-%    Renditions
+%   Pages,
+%   Templates,
+%   IDS,
+%   URLS,
+%   Renditions
   }
 
 \clist_map_inline:Nn \c_@@_Catalog_seq_clist
@@ -1166,25 +1168,32 @@
       {  #1  }
   }
 
+\cs_new_protected:Npn \@@_nametree_add_aux:nnn #1 #2 #3
+  %#1 name tree, #2 sanitized name #3 value
+  {
+     \prop_get:coNTF
+       { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/Names/#1 }}
+       { #2 }
+       \l_@@_tmpb_tl
+       {
+         \msg_error:nnnn{pdfmanagement}{name-exist}{#2}{#1}
+       }
+       {
+         \prop_gput:con
+           { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/Names/#1 }}
+           { #2 }
+           { #3 }
+       }
+  }
+
 \clist_map_inline:Nn \c_@@_Catalog_nametree_clist
  {
    \pdfdict_new:n { g__pdf_Core/Catalog/Names/#1}
    \cs_new_protected:cpn { @@_handler/Catalog/Names/#1/?_gput:nn } ##1 ##2
      {
        \pdf_string_from_unicode:nnN {utf8/string}{##1}\l_@@_tmpa_tl
-       \prop_get:coNTF
-         { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/Names/#1 }}
-         { \l_@@_tmpa_tl }
-         \l_@@_tmpb_tl
-         {
-           \msg_error:nnnn{pdfmanagement}{name-exist}{##1}{#1}
-         }
-         {
-           \prop_gput:con
-             { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/Names/#1 }}
-             { \l_@@_tmpa_tl }
-             { ##2 }
-         }
+       \exp_args:Nno
+         \@@_nametree_add_aux:nnn {#1}{\l_@@_tmpa_tl}{##2}
      }
  }
 %    \end{macrocode}
@@ -1199,21 +1208,11 @@
 \cs_new_protected:cpn { @@_handler/Catalog/Names/EmbeddedFiles/?_gput:nn } #1 #2
   {
     \pdf_string_from_unicode:nnN {utf8/string}{#1}\l_@@_tmpa_tl
-    \prop_get:coNTF
-       { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/Names/EmbeddedFiles } }
-       { \l_@@_tmpa_tl }
-       \l_@@_tmpb_tl
-       {
-         \msg_error:nnnn{pdfmanagement}{name-exist}{#1}{EmbeddedFiles} % error
-       }
-       {
-         \prop_gput:con
-           { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/Names/EmbeddedFiles }}
-           { \l_@@_tmpa_tl }
-           { #2 }
-         \exp_args:No
-         \__pdf_backend_NamesEmbeddedFiles_add:nn {\l_@@_tmpa_tl}{#2}
-      }
+    \exp_args:Nno
+    \@@_nametree_add_aux:nnn
+      {EmbeddedFiles}{\l_@@_tmpa_tl}{#2}
+    \exp_args:No
+    \__pdf_backend_NamesEmbeddedFiles_add:nn {\l_@@_tmpa_tl}{#2}
   }
 %    \end{macrocode}
 % \end{macro}
