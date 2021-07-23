@@ -4,6 +4,20 @@ first release 0.95a, 2021-02-23 will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 this project uses date-based 'snapshot' version identifiers.
+
+
+##[Unreleased]
+### Added 
+ - \IfPDFManagementActiveTF as copy of `\pdfmanagement_if_active:TF
+ - \PDFManagementAdd as copy of `\pdfmanagement_add:xxx`
+ - Support for name trees /AP and /JavaScript in Catalog/Names
+ - Support to add user file names to /EmbeddedFiles (beside the existing 
+   way with automatically generated names)
+
+### Changed 
+ - Implementation of the /EmbeddedFiles name tree, it is now more in line
+   with the other name trees.
+   
 ## [2021-07-21]
 ### Added
  - key `testphase` to \DeclareDocumentMetadata to load testphase packages like
