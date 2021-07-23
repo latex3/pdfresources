@@ -172,6 +172,10 @@
 % backends. Some engines have to use labels and the aux-file to setup
 % the dictionaries and so need at least two compilations to put everything
 % in place.
+% \item dvips doesn't support everything. It is for example not possible
+% to add manually or through side effects
+% a name tree like /AP or /JavaScript, pdfmark doesn't provide a handler
+% here---at least I didn't find anything suitable.
 % \end{itemize}
 % \end{function}
 %
@@ -1151,7 +1155,9 @@
 %   URLS,
 %   Renditions
   }
-
+%    \end{macrocode}
+% now we create the handler. The entries in the seq-list store in a seq
+%    \begin{macrocode}
 \clist_map_inline:Nn \c_@@_Catalog_seq_clist
  {
    \seq_new:c { g_@@_/Catalog/#1_seq } % new name later
@@ -1161,13 +1167,20 @@
      }
  }
 
+%    \end{macrocode}
+% OCProperties/D is special: it handles a default. This is done by adding to
+% the left of the seq
+%    \begin{macrocode}
 \cs_new_protected:cpn { @@_handler/Catalog/OCProperties/D_gput:n } #1
   {
     \seq_gput_left:cn
       { g_@@_/Catalog/OCProperties/Configs_seq }
       {  #1  }
   }
-
+%    \end{macrocode}
+% The name tree keys store in a property and check for duplicates. This is done
+% with an auxiliary.
+%    \begin{macrocode}
 \cs_new_protected:Npn \@@_nametree_add_aux:nnn #1 #2 #3
   %#1 name tree, #2 sanitized name #3 value
   {
@@ -1185,7 +1198,9 @@
            { #3 }
        }
   }
-
+%    \end{macrocode}
+% This is the standard handler for most names trees:
+%    \begin{macrocode}
 \clist_map_inline:Nn \c_@@_Catalog_nametree_clist
  {
    \pdfdict_new:n { g__pdf_Core/Catalog/Names/#1}
@@ -1567,6 +1582,9 @@
 %    \end{macrocode}
 % \end{macro}
 % This pushes out the other names trees (but not with dvips).
+% TODO: currently it simply write in the root of the name tree.
+% That is the fastest.
+% If they get longer we perhaps need to build something with Kids and Limits.
 % \begin{macro}{\@@_/Catalog/Names/?_gpush:}
 %    \begin{macrocode}
 \cs_new_protected:cpn  { @@_/Catalog/Names_gpush:n } #1 %#1 name of name tree
