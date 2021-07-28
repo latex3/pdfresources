@@ -17,6 +17,8 @@ this project uses date-based 'snapshot' version identifiers.
 ### Changed 
  - Implementation of the /EmbeddedFiles name tree, it is now more in line
    with the other name trees.
+ - \Form no longer creates xform objects -- this affected spacing and produced
+   empty pages. The xform objects are now only created if fields are used.  
    
 ## [2021-07-21]
 ### Added

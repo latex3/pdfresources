@@ -906,9 +906,6 @@
 %^^A %% \l_@@_para_tmpa_tl
 %^^A %% \l_@@_text_tmpa_str
 %^^A %% \g_@@_text_tmpa_str
-%^^A %% \l_@@_CheckmarkYes_tl
-%^^A %% \l_@@_CheckmarkOff_tl
-%^^A %% \l_@@_RadioYes_tl
 %^^A %% \g_@@_bordercolormodel_tl
 %
 %^^A %% \l_@@_dest_pdfview_tl
@@ -4215,14 +4212,9 @@
 
 \ExplSyntaxOff
 \ExplSyntaxOn
-\tl_new:N  \l_@@_CheckmarkYes_tl
-\tl_set:Nn \l_@@_CheckmarkYes_tl {  @@_xform_CheckMarkYes }
-\tl_new:N  \l_@@_CheckmarkOff_tl
-\tl_set:Nn \l_@@_CheckmarkOff_tl {  @@_xform_CheckMarkOff }
 
 \def\@Form[#1]
   {
-    \@ifundefined{textcolor}{\let\textcolor\@gobble}{}
     \kvsetkeys{Form}{#1}
     \pdf@ifdraftmode{}
       {
@@ -4240,8 +4232,7 @@
               }
             \seq_sort:Nn \l_@@_tmpa_seq
               {
-                \int_compare:nNnTF { \pdf@strcmp{##1}{##2} } > { 0 }
-                %\str_compare:nNnTF {##1} > {##2}
+                \str_compare:nNnTF {##1} > {##2}
                   { \sort_return_swapped: }
                   { \sort_return_same: }
               }
@@ -4271,64 +4262,6 @@
            \pdfmanagement_remove:nn {Catalog / AcroForm }{NeedAppearances}
          }
        }
-     \MakeFieldObject
-       {
-         \group_begin:
-         \fontfamily{pzd}
-         \fontencoding{U}
-         \fontseries{m}
-         \fontshape{n}
-         \selectfont
-         \char123
-         \group_end:
-       }
-       {@@_xform_Ding}
-    \MakeFieldObject
-       {
-         \group_begin:
-         \fontfamily{pzd}
-         \fontencoding{U}
-         \fontseries{m}
-         \fontshape{n}
-         \selectfont
-         \phantom{\char123}
-         \group_end:
-       }
-       {@@_xform_DingOff}
-     \MakeFieldObject
-       {
-         \group_begin:
-         \fontfamily{pzd}
-         \fontencoding{U}
-         \fontseries{m}
-         \fontshape{n}
-         \selectfont
-         \char51
-         \group_end:
-       }
-       {@@_xform_CheckMarkYes}
-     \MakeFieldObject
-       {
-        \group_begin:
-         \fontfamily{pzd}
-         \fontencoding{U}
-         \fontseries{m}
-         \fontshape{n}
-         \selectfont
-         \phantom{\char51} %perhaps xetex needs some small glyph ..
-         \group_end:
-       }
-       {@@_xform_CheckMarkOff}
-     \MakeFieldObject
-       {
-         \fbox{\textcolor{yellow}{\textsf{Submit}}} %color?
-       }
-       {@@_xform_Submit}
-     \MakeFieldObject
-       {
-         \fbox{\textcolor{yellow}{\textsf{SubmitP}}} %color?
-       }
-       {@@_xform_SubmitP}
   }
 \ExplSyntaxOff
 \let\@endForm\ltx@empty
@@ -4468,8 +4401,7 @@
     }%
   \endgroup
 }
-\tl_new:N  \l_@@_RadioYes_tl
-\tl_set:Nn \l_@@_RadioYes_tl { @@_xform_Ding }
+
 \def\@@Radio#1{%
   \Fld@listcount=0~%
   %\show\Fld@default
@@ -4484,7 +4416,21 @@
     \leavevmode
     \HyAnn@AbsPageLabel
     \Hy@escapeform\PDFForm@Radio
-    \pdfannot_box:nnnn
+    \pdfxform_if_exist:nF { @@_xform_Ding }
+      {
+        \pdfxform_new:nnn { @@_xform_Ding } {}
+         {
+           \group_begin:
+           \fontfamily{pzd}
+           \fontencoding{U}
+           \fontseries{m}
+           \fontshape{n}
+           \selectfont
+           \char123
+           \group_end:
+         }
+      }
+    \pdfannot_box:nnnx
       {\Fld@width}
       {\Fld@height}
       {0pt} %is this correct?
@@ -4494,7 +4440,7 @@
          <<
          /N
           <<
-          /\@currValue\c_space_tl \pdfxform_ref:o {@@_xform_Ding}
+          /\@currValue\c_space_tl \pdfxform_ref:n {@@_xform_Ding}
           %/Off \c_space_tl \pdfxform_ref:n {@@_xform_DingOff} %hm
           >>
          >>
@@ -4582,6 +4528,18 @@
     \HyAnn@AbsPageLabel
     \Hy@escapeform\PDFForm@Submit
     \hbox_set:Nn \l_tmpa_box { \MakeButtonField {#2}}
+    \pdfxform_if_exist:nF
+     { @@_xform_Submit }
+     {
+       \pdfxform_new:nnn { @@_xform_Submit }{}
+        {
+          \fbox{\color_select:n{yellow}\textsf{Submit}}
+        }
+       \pdfxform_new:nnn { @@_xform_SubmitP }{}
+        {
+          \fbox{\color_select:n{yellow}\textsf{SubmitP}}
+        }
+     }
     \pdfannot_box:nnnn
       {\box_wd:N\l_tmpa_box}
       {\box_ht:N\l_tmpa_box}
@@ -4654,6 +4612,33 @@
           \mode_leave_vertical:
           \HyAnn@AbsPageLabel
           \Hy@escapeform\PDFForm@Check
+          \pdfxform_if_exist:nF { @@_xform_CheckMarkYes }
+             {
+               \pdfxform_new:nnn
+                {@@_xform_CheckMarkYes}{}
+                {
+                  \group_begin:
+                  \fontfamily{pzd}
+                  \fontencoding{U}
+                  \fontseries{m}
+                  \fontshape{n}
+                  \selectfont
+                  \char51
+                  \group_end:
+                }
+               \pdfxform_new:nnn
+                {@@_xform_CheckMarkOff}{}
+                {
+                  \group_begin:
+                  \fontfamily{pzd}
+                  \fontencoding{U}
+                  \fontseries{m}
+                  \fontshape{n}
+                  \selectfont
+                  \phantom{\char51} %perhaps xetex needs some small glyph ..
+                  \group_end:
+                }
+             }
           \pdfannot_box:nnnn
             {\Fld@width}
             {\Fld@height}
@@ -4874,8 +4859,8 @@
      <<
       /N
         <<
-          /Yes~\pdfxform_ref:o{\l_@@_CheckmarkYes_tl}
-          /Off~\pdfxform_ref:o{\l_@@_CheckmarkOff_tl}
+          /Yes~\pdfxform_ref:n{@@_xform_CheckMarkYes}
+          /Off~\pdfxform_ref:n{@@_xform_CheckMarkOff}
         >>
     >>
   /MK<<
