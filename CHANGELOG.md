@@ -6,13 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 this project uses date-based 'snapshot' version identifiers.
 
 
-##[Unreleased]
+## [2021-07-31]
 ### Added 
  - \IfPDFManagementActiveTF as copy of `\pdfmanagement_if_active:TF
  - \PDFManagementAdd as copy of `\pdfmanagement_add:xxx`
  - Support for name trees /AP and /JavaScript in Catalog/Names
  - Support to add user file names to /EmbeddedFiles (beside the existing 
    way with automatically generated names)
+ - if xcolor is loaded the colors it predefines are now predefined also for l3color  
 
 ### Changed 
  - Implementation of the /EmbeddedFiles name tree, it is now more in line
