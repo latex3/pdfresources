@@ -1091,6 +1091,16 @@
     No~value~is~equivalent~to~using~`true`.
   }
 %    \end{macrocode}
+% A message for creator and producer which can't be removed.
+%    \begin{macrocode}
+\msg_new:nnn
+  { hyp }
+  { empty-info-value }
+  {
+    Empty~value~for~key~#1.\\
+    This~isn't~honored~by~all~backends.
+  }
+%    \end{macrocode}
 % \section{Variants}
 %    \begin{macrocode}
 \cs_generate_variant:Nn\pdf_destination:nn {nf}
@@ -3763,7 +3773,8 @@
 % \subsubsection{\enquote{info keys}}
 % \begin{hypkey}{pdfauthor,pdftitle,pdfcreator,pdfsubject,pdfproducer,pdfkeywords}
 % The keys store their value also in the metadate container, so that hyperxmp can
-% use them.
+% use them. Creator and Producer can't be removed with the pdfmanagement,
+% but we allow to set an empty value.
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_setup_info_key:nn #1 #2
   {
@@ -3773,7 +3784,22 @@
           {
             \tl_if_blank:nTF {##1}
               {
-                \pdfmanagement_remove:nn {Info}{#2}
+                \str_case:nnF { #1 }
+                 {
+                   {creator}
+                   {
+                     \msg_info:nnn { hyp }{ empty-info-value } { pdfcreator }
+                     \pdfmanagement_add:nnx {Info}{Creator}{()}
+                   }
+                   {producer}
+                   {
+                     \msg_info:nnn { hyp }{ empty-info-value } { pdfproducer }
+                     \pdfmanagement_add:nnx {Info}{Producer}{()}
+                   }
+                 }
+                 {
+                   \pdfmanagement_remove:nn {Info}{#2}
+                 }
               }
               {
                 \@@_text_pdfstring_info:nN {##1}\l_@@_tmpa_str
@@ -3838,7 +3864,7 @@
                 \pdfmanagement_remove:nn {Info}{#2}
               }
               {
-                \pdfmanagement_add:nnx {Info}{#2}{(\tl_to_str:n {##1})}
+                \pdfmanagement_add:nnx {Info}{#2}{(##1)}
               }
              \@@_store_metadata:nn {pdf#1}{##1}
           }
@@ -3852,7 +3878,7 @@
                 \pdfmanagement_remove:nn {Info}{#2}
               }
               {
-                \pdfmanagement_add:nnx {Info}{#2}{(\tl_to_str:n {##1})}
+                \pdfmanagement_add:nnx {Info}{#2}{(##1)}
               }
             \exp_args:Nx \@@_store_metadata:nn {pdf\str_lowercase:n{#1}}{##1}
           }
