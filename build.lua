@@ -1,6 +1,6 @@
 #!/usr/bin/env texlua
-packageversion="0.95g"
-packagedate="2021-07-21"
+packageversion="0.95h"
+packagedate="2021-07-31"
 
 -- Build script for "LaTeX PDF management testphase bundle" bundle
 
@@ -74,7 +74,8 @@ checkconfigs = {"build",
 tagfiles = {
             "*dtx",
             "firstaid/*.sty",
-            "README.md"
+            "README.md",
+            "CHANGELOG.md"
            }
 
 function update_tag (file,content,tagname,tagdate)
@@ -114,6 +115,11 @@ function update_tag (file,content,tagname,tagdate)
    content = string.gsub (content,
                          "Version: %d%.%d+%a, %d%d%d%d%-%d%d%-%d%d",
                          "Version: " .. packageversion .. ", " .. packagedate )
+   return content
+ elseif string.match (file, "^CHANGELOG.md$") then
+   content = string.gsub (content,
+                         "%[Unreleased%]",
+                         "[".. packagedate.."]" )
    return content
  end
  return content
