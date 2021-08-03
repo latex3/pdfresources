@@ -4,7 +4,12 @@ first release 0.95a, 2021-02-23 will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 this project uses date-based 'snapshot' version identifiers.
+## [Unreleased]
+### Changed
+ - colorscheme 'original' has been renamed to 'primary-colors'
 
+### Added
+ - preliminary support for standard A-2a and A-3a 
 
 ## [2021-07-31]
 ### Added 
