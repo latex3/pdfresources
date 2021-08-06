@@ -357,8 +357,12 @@
 %  Some main changes are
 %  \begin{itemize}
 %  \item The default colors have been changed.
-%  \item |citecolor| is no longer set with |allcolors| and it is not part of the
-%  color scheme, it is only supported for compability.
+%  \item Citations have by default no special color, they are
+%  colored like other internal links. You can use |citecolor| and |citebordercolor| to
+%  assign them a special color. This color is not reset if you use |allcolors| or
+%  switch to another color scheme. If you want the colors to follow |linkcolor| again
+%  you should remove the label |hyp/cite| and/or |hyp/citeborder|
+%  from the hook |hyp/link/cite|.
 %  \item a number of color schemes have been predefined.
 %  \end{itemize}
 %
@@ -1396,22 +1400,37 @@
 %
 %    \begin{macrocode}
 \hook_new:n{hyp/link/cite}
-\color_set:nnn {hyp/color/cite}{HTML}{2E7E2A}
-\color_set:nn  {hyp/color/citeborder}{hyp/color/cite!60!white}
+%\color_set:nnn {hyp/color/cite}{HTML}{2E7E2A}
+%\color_set:nn  {hyp/color/citeborder}{hyp/color/cite!60!white}
 \keys_define:nn { hyp / setup }
   {
-    ,citecolor .code:n = {\@@_color_set:ne {hyp/color/cite}{#1}}
+    ,citecolor .code:n = {\@@_color_set:ne {hyp/color/cite}{#1}\@@_citecolor_hook_init:}
     ,citebordercolor
-      .code:n = {\@@_color_set:ne {hyp/color/citeborder}{#1}}
+      .code:n = {\@@_color_set:ne {hyp/color/citeborder}{#1}\@@_citebordercolor_hook_init:}
   }
-\hook_gput_code:nnn { hyp/link/cite }{hyp/cite}
-  {
-    \keys_set:nn { hyp / setup }
-      {
-        ,linkbordercolor= hyp/color/citeborder
-        ,linkcolor      = hyp/color/cite
-      }
+\cs_new_protected:Npn \@@_citecolor_hook_init:
+ {
+   \hook_gput_code:nnn { hyp/link/cite }{hyp/cite}
+     {
+       \keys_set:nn { hyp / setup }
+         {
+           linkcolor      = hyp/color/cite
+         }
+     }
+  \cs_gset_eq:NN \@@_citecolor_hook_init: \prg_do_nothing:
   }
+\cs_new_protected:Npn \@@_citebordercolor_hook_init:
+ {
+   \hook_gput_code:nnn { hyp/link/cite }{hyp/citeborder}
+     {
+       \keys_set:nn { hyp / setup }
+         {
+           linkbordercolor      = hyp/color/citeborder
+         }
+     }
+  \cs_gset_eq:NN \@@_citebordercolor_hook_init: \prg_do_nothing:
+  }
+
 %    \end{macrocode}
 % \section{Checks}
 % The driver can not work properly if the pdfmanagement is not active,
@@ -2519,7 +2538,7 @@
                   { C }
                }
                {
-                 \@@_color_set:ne {hyp/color/#1border}{##1}                 
+                 \@@_color_set:ne {hyp/color/#1border}{##1}
                  \color_export:nVN
                    {hyp/color/#1border}
                    \g_@@_bordercolormodel_str
