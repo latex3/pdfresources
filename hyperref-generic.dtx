@@ -2342,39 +2342,13 @@
 % \section{Link decorations}
 % \subsection{Functions to export and select colors}
 % We support two input syntax: color expressions and model with values.
-% \begin{function}{\@@_color_export:nnN}
-%   \begin{syntax}
-%    \cs{@@_color_export:nnN} \Arg{color} \Arg{export format} \meta{tlvar}
-%   \end{syntax}
-%   This exports a color as space separated numbers as needed in in |/C|.
-%  \Arg{color} should have either the format |[model]{value}| or be a color expression.
-%  For examples: |[rgb]{1,0,.5}| or |red!50!blue|. The export format is either
-%  |space-sep-cmyk| or |space-sep-rgb|.
-% \end{function}
-%  \begin{macro}{\@@_color_export:nnN,\@@_color_export_aux:wnnN}
-%   Color keys need to parse color expressions. Two input types are supported:
-%  |color=[rgb]{1,0,.5}| and |color=red!50!blue|. The colors are exported
-%  to PDF syntax (space separated numbers).
+% Exporting can be done by first setting the color with \cs{@@_color_set:nn}
+% (if needed to a temporary color name)
+% and then using \cs{color_export:nnN}. But we need a variant as the export
+% format |space-sep-cmyk| or |space-sep-rgb| is stored in a tl.
 %    \begin{macrocode}
-\cs_new_protected:Npn \@@_color_export:nnN #1  #2  #3
- {
-   \tl_if_head_eq_charcode:nNTF {#1}[ %]
-    {
-      \@@_color_export_aux:wnnN  #1 {#2} #3
-    }
-    {
-      \color_export:nnN {#1} {#2} #3
-    }
- }
-
-\cs_new_protected:Npn \@@_color_export_aux:wnnN  [#1] #2 #3 #4
-  {
-     \color_export:nnnN {#1}{#2}{#3}#4
-  }
-
-\cs_generate_variant:Nn \@@_color_export:nnN {xVN}
+\cs_generate_variant:Nn \color_export:nnN {nVN}
 %    \end{macrocode}
-% \end{macro}
 %
 % \begin{function}{\@@_color_select:n}
 %   \begin{syntax}
@@ -2410,7 +2384,7 @@
 %
 % \begin{function}{\@@_color_set:nn}
 %   \begin{syntax}
-%    \cs{@@_color_set:nN} \Arg{ name } \Arg{color} \\
+%    \cs{@@_color_set:nn} \Arg{ name } \Arg{color} \\
 %   \end{syntax}
 %  These commands store the color in \Arg{name}.
 %  \Arg{color} should have either the format |[model]{value}| or be a color expression.
@@ -2545,7 +2519,11 @@
                   { C }
                }
                {
-                 \@@_color_export:xVN {##1}\g_@@_bordercolormodel_str \l_@@_tmpa_tl
+                 \@@_color_set:ne {hyp/color/#1border}{##1}                 
+                 \color_export:nVN
+                   {hyp/color/#1border}
+                   \g_@@_bordercolormodel_str
+                   \l_@@_tmpa_tl
                  \pdfannot_dict_put:nnx
                    {link/#2}
                    { C }
