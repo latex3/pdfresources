@@ -1193,13 +1193,13 @@
 \tl_new:N   \l_@@_href_pdf_destination_tl
 \tl_new:N   \l_@@_href_pdf_page_tl
 \tl_new:N   \l_@@_href_run_parameter_tl
-\cs_new_protected:Npn \@@_href_url_format {\begingroup\Url}
+\cs_new_protected:Npn \@@_href_url_format: {\begingroup\Url}
 
 
 \keys_define:nn { hyp / href }
   {
     ,urlencode  .bool_set:N =  \l_@@_href_url_encode_bool
-    ,format     .code:n = { \cs_set_eq:NN \@@_href_url_format #1 },
+    ,format     .code:n = { \cs_set:Nn \@@_href_url_format: {#1} },
     ,protocol  .tl_set:N   =  \l_@@_href_url_protocol_tl
     ,destination .tl_set:N = \l_@@_href_pdf_destination_tl
     ,pdfremotestartview .code:n =
@@ -1241,7 +1241,7 @@
     ,href / urlencode .initial:n  = {false}
     ,href / protocol  .tl_set:N   =   \l_@@_href_url_protocol_tl
     ,href / destination .tl_set:N = \l_@@_href_pdf_destination_tl
-    ,href / format  .code:n = { \cs_set_eq:NN \@@_href_url_format #1 }
+    ,href / format  .code:n = { \cs_set:Nn \@@_href_url_format:{#1} }
   }
 
 \hook_new_pair:nn{cmd/href/before}{cmd/href/after}
@@ -1357,7 +1357,7 @@
 \cs_new_protected:Npn \@@_href_url_aux:n #1
  {
    \exp_args:Nno
-     \hyper@linkurl{\@@_href_url_format {#1}}
+     \hyper@linkurl{\@@_href_url_format: {#1}}
      {\l_@@_href_url_protocol_tl#1}
    \group_end:
    \hook_use:n{cmd/url/after}
