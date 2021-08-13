@@ -773,7 +773,7 @@
 % Typically the name of destination can be retrieved by setting a label, this works also
 % with unnumbered sections. But there is until now no command to get
 % the name in an expandable way so that it can be used e.g. in bookmarks.
-% This driver defines here the new command XXXXXX which should be
+% This driver defines here the new command \cs|hyperget|.
 %
 %
 %\section{Assorted key descriptions}\label{sec:keydesc}
@@ -928,7 +928,7 @@
 %^^A %% \l_@@_dest_pdfview_tl
 %^^A %% list of commands which probably will have to change
 %^^A TODO: move hrefurl, hrefrun, hrefpdf into hyperref. They should also work
-%^^A with other drivers. Move XXXXX into hyperref
+%^^A with other drivers. Move hyperget into hyperref
 % \end{documentation}
 % \begin{implementation}
 %  \part{\pkg{hyperref-generic} driver implementation}
@@ -1208,10 +1208,27 @@
   }
 %    \end{macrocode}
 %
-% This command allows to retrieve a destination name from a label in an expandable
-% way. TODO: it should go into hyperref at some time.
+% \begin{macro}{\hyperget}
+% This command allows to data in an expandable way.
+% Currently it is only used to retrieve a destination name from a label for
+% the use in bookmarks.
+% TODO: it should go into hyperref at some time.
+% TODO: decide if there should be an error.
+% TODO: document properly.
 %    \begin{macrocode}
-\cs_new:Npn \XXXXX #1
+\cs_new:Npn \hyperget #1 #2
+  {
+    \use:c { @@_get_#1:n } { #2}
+  }
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\@@_get_dest:n}
+% This retrieve a destination name from a label.
+% If the label doesn't exist it defaults to Doc-Start.
+% This should be adapted when the ref system change.
+% TODO move to hyperref
+%    \begin{macrocode}
+\cs_new:Npn \@@_get_dest:n  #1
   {
     \HyperDestNameFilter
      {
@@ -1222,9 +1239,10 @@
         {
           Doc-Start
         }
-     }   
+     }
   }
 %    \end{macrocode}
+% \end{macro}
 % Allow non-ascii in href, and add more href versions.
 % We add a few new keys:
 % |urlencode| to force percent encoding (\cs{hrefurl}, \cs{href})
