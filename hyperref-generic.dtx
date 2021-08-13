@@ -762,6 +762,19 @@
 %  \end{itemize}
 %  \end{itemize}
 %
+% \subsection{Names of destinations}
+% hyperref creates two types of destination names: For numbered structures
+% (so when the anchor is set by \cs{refstepcounter}) it builds the name
+% from the counter name and the \cs{theH...} representation: |<counter name>.\theH<counter name>|.
+%
+% For unnumbered structures, e.g. starred chapters or anchors created with \cs{phantomsection}
+% it uses names like |section*.<number>| and |chapter*.<number>|.
+%
+% Typically the name of destination can be retrieved by setting a label, this works also
+% with unnumbered sections. But there is until now no command to get
+% the name in an expandable way so that it can be used e.g. in bookmarks.
+% This driver defines here the new command XXXXXX which should be
+%
 %
 %\section{Assorted key descriptions}\label{sec:keydesc}
 %The following gives a few details to some keys that are perhaps not
@@ -914,6 +927,8 @@
 %
 %^^A %% \l_@@_dest_pdfview_tl
 %^^A %% list of commands which probably will have to change
+%^^A TODO: move hrefurl, hrefrun, hrefpdf into hyperref. They should also work
+%^^A with other drivers. Move XXXXX into hyperref
 % \end{documentation}
 % \begin{implementation}
 %  \part{\pkg{hyperref-generic} driver implementation}
@@ -1176,6 +1191,38 @@
       \msg_warning:nnxxx { hyp } { unknown-key }
       { hyp~/~setup }{ \l_keys_key_str } { #1 }
     }
+  }
+%    \end{macrocode}
+%
+% Hyperref creates a number of destinations automatically. E.g. in unnumbered
+% chapters and sections and with \cs{phantomsection}. The following key allows
+% to force a specific name for the destination so that it can be used by bookmarks.
+%    \begin{macrocode}
+\keys_define:nn { hyp / setup }
+  {
+    next-auto-anchor .code:n =
+    {
+      \AddToHookNext{__hyp/dest/makeauto}
+       {\Hy@MakeCurrentHref{#1}}
+    }
+  }
+%    \end{macrocode}
+%
+% This command allows to retrieve a destination name from a label in an expandable
+% way. TODO: it should go into hyperref at some time.
+%    \begin{macrocode}
+\cs_new:Npn \XXXXX #1
+  {
+    \HyperDestNameFilter
+     {
+       \cs_if_exist:cTF {r@#1}
+        {
+          \tl_item:cn {r@#1}{4}
+        }
+        {
+          Doc-Start
+        }
+     }   
   }
 %    \end{macrocode}
 % Allow non-ascii in href, and add more href versions.
