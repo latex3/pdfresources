@@ -1489,11 +1489,27 @@
   { \msg_error:nn { hyp}{ missing-resource-management } }
 %    \end{macrocode}
 % Outlines/bookmarks require the bookmark package.
-% TODO check pdfpagemode if booksmarks are suppressed.
+% TODO check pdfpagemode if bookmarks are suppressed.
+% TODO We overwrite the color key here for now, but this should be moved to bookmark
+%
 %    \begin{macrocode}
+\AddToHook { package / after / bookmark}
+ {
+   \define@key{BKM}{color}
+     {
+       \__hyp_color_set:ne {__hyp/tmpa}{#1}
+       \color_export:nVN
+         {__hyp/tmpa}
+         \g__hyp_bordercolormodel_str
+         \BKM@color
+     }
+ }
 \legacy_if:nT { Hy@bookmarks }
   {
-    \AddToHook{begindocument/before}[hyperref/bookmark]{\RequirePackage{bookmark}}
+    \AddToHook{begindocument/before}[hyperref/bookmark]
+     {
+       \RequirePackage{bookmark}
+     }
   }
 \legacy_if:nT {Hy@draft}
   {
@@ -2415,7 +2431,7 @@
 %
 % \begin{function}{\@@_color_select:n}
 %   \begin{syntax}
-%    \cs{@@_color_select:nN} \Arg{color} \\
+%    \cs{@@_color_select:n} \Arg{color} \\
 %   \end{syntax}
 %  These commands select a (text) color.
 %  \Arg{color} should have either the format |[model]{value}| or be a color expression.

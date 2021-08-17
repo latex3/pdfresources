@@ -8,6 +8,7 @@ this project uses date-based 'snapshot' version identifiers.
 ## [Unreleased]
 ### Changed
  - colorscheme 'original' has been renamed to 'primary-colors'
+ - color key is overwritten to use l3color
 
 ### Added
  - preliminary support for standard A-2a and A-3a 
