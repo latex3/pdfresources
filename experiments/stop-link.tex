@@ -1,0 +1,28 @@
+\RequirePackage{pdfmanagement-testphase}
+\DeclareDocumentMetadata{uncompress}
+
+\documentclass{article}
+\usepackage{output-patches-testphase}
+\usepackage{lipsum}
+\usepackage{hyperref}
+\usepackage{color,xpatch,fancyhdr}
+\pagestyle{fancy}
+\lhead{HEADER \href{https://tug.org}{linklinklink}}
+\lfoot{FOOTER}
+
+\ExplSyntaxOn\makeatletter
+\tl_gput_left:Nn \@kernel@before@head{\pdfannot_link_off:}
+\tl_gput_right:Nn \@kernel@after@head{\pdfannot_link_on:}
+\tl_gput_left:Nn \@kernel@before@foot{\pdfannot_link_off:}
+\tl_gput_right:Nn \@kernel@after@foot{\pdfannot_link_on:}
+\ExplSyntaxOff
+\makeatother
+
+\textheight=2.5cm
+\begin{document}
+
+\section{abc}
+x\\x\\x\\x
+\href{https://www.latex-project.org}{Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.}\\x
+
+\end{document}
