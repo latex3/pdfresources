@@ -1,0 +1,140 @@
+% \iffalse meta-comment
+%
+%% File: output-patches.dtx (C) Copyright 2020-2021 Frank Mittelbach
+%
+% It may be distributed and/or modified under the conditions of the
+% LaTeX Project Public License (LPPL), either version 1.3c of this
+% license or (at your option) any later version.  The latest version
+% of this license is in the file
+%
+%    https://www.latex-project.org/lppl.txt
+%
+%<*driver>
+\documentclass{l3doc}
+
+\EnableCrossrefs
+\CodelineIndex
+\begin{document}
+  \DocInput{output-patches.dtx}
+\end{document}
+%</driver>
+%
+% \fi
+%
+% \providecommand\hook[1]{\texttt{#1}}
+%
+%
+%
+% \title{Temporary output patches for tagging and better link support}
+% \author{Frank Mittelbach \and Ulrike Fischer}
+%
+% \maketitle
+%
+% \section{Introduction}
+%
+%    This package contains a few patches of internal \LaTeX{} needed
+%    to support paragraph tagging across
+%    page boundaries (in \pdfTeX) and improve the behaviour of links across page breaks.
+%
+%    Until this get properly integrated with the kernel code this has
+%    to be taken as a prototype and code, interfaces as well as
+%    behavior may change without notice and certainly without any
+%    backwards compatibility!
+%
+%
+% \StopEventually{\setlength\IndexMin{200pt}  \PrintIndex  }
+%
+%
+% \section{The Implementation}
+%    \begin{macrocode}
+%<*package>
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\RequirePackage{etoolbox}
+%    \end{macrocode}
+%
+%
+%  \subsection{Patching the OR}
+%  This add hooks around header and footer.
+%  At first initialize the hooks
+%    \begin{macrocode}
+\newcommand\@kernel@before@head{}
+\newcommand\@kernel@before@foot{}
+\newcommand\@kernel@after@head{}
+\newcommand\@kernel@after@foot{}
+\newcommand\@kernel@before@footins{}
+\newcommand\@kernel@before@cclv{}
+\newcommand\@mult@ptagging@hook{}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+
+\patchcmd\@outputpage
+ {\vfil\color@hbox\normalcolor\hb@xt@\textwidth{\@thehead}\color@endbox}
+ {\vfil\@kernel@before@head\color@hbox\normalcolor\hb@xt@\textwidth{\@thehead}\color@endbox\@kernel@after@head}
+ {\typeout{Patching header in \string\@outputpage}}{\PATCHerror }
+
+
+\patchcmd\@outputpage
+ {\color@hbox\normalcolor\hb@xt@\textwidth{\@thefoot}\color@endbox}
+ {\@kernel@before@foot\color@hbox\normalcolor\hb@xt@\textwidth{\@thefoot}\color@endbox\@kernel@after@foot}
+ {\typeout{Patching footer in \string\@outputpage}{\PATCHerror }
+%    \end{macrocode}
+%
+%  \begin{macro}{\@makecol}
+%    We have to patch \cs{@makecol} in two places:
+%    \begin{itemize}
+%    \item
+%      update 255 up front to add missing tmb/tme if necessary
+%    \item
+%      update the \cs{footins} stream if that one got split
+%    \end{itemize}
+%    \begin{macrocode}
+
+\patchcmd\@makecol
+    {\vskip\skip\footins}
+    {\vskip\skip\footins\@kernel@before@footins}
+  {\typeout{Patching \string\@makecol\space for tagging}}{\PATCHerror }
+
+% for some reason patching with etoolbox only works in this order ...
+
+\pretocmd\@makecol{\@kernel@before@cclv}
+  {\typeout{Patching \string\@makecol\space for tagging}}{\PATCHerror }
+%    \end{macrocode}
+%  \end{macro}
+%
+% \subsection{\pkg{multicol} adjustments}
+%
+%    The patches for pkg{multicol} are fairly minimal:
+%    \begin{itemize}
+%    \item At the start of the environment anything already on the
+%    page is picked up and stored in \cs{partial@page}, we may need to add
+%    a TMB to that (it should have a proper TME). This has to happen
+%    in the \enquote{main} stream context.
+%    \item
+%    \item
+%    \end{itemize}
+%
+%    \begin{macrocode}
+\AddToHook{package/after/multicol}{% multicol needs later loading
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+  \patchcmd\page@sofar
+      {\setbox\z@\hbox{p}\global\dimen\tw@\dp\z@}%
+      {%
+        \setbox\z@\hbox{p}\global\dimen\tw@\dp\z@
+        \@mult@ptagging@hook
+      }%
+      {\typeout{Patching \string\page@sofar\space for tagging}}{\PATCHerror}%
+}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\endinput
+%</package>
+%    \end{macrocode}
+%
+% \Finale
+%
