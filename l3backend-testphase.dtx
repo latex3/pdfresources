@@ -1153,6 +1153,53 @@
 %</dvisvgm>
 %    \end{macrocode}
 % \end{macro}
+%  \subsubsection{Additional annotation commands}
+% Starting with texlive 2021 pdftex and luatex offer commands to interrupt
+% a link. That can for example be used to exclude the header and footer from
+% the link. We add here backend support for this.
+%    \begin{macrocode}
+%<*drivers>
+\cs_new_protected:Npn \@@_backend_annotation_linkoff:{}
+\cs_new_protected:Npn \@@_backend_annotation_linkon: {}
+%</drivers>
+%<*pdftex>
+\cs_if_exist:NT \pdfrunninglinkoff
+ {
+   \cs_new_protected:Npn \@@_backend_annotation_linkoff:
+    {
+      \pdfrunninglinkoff
+    }
+   \cs_new_protected:Npn \@@_backend_annotation_linkon:
+    {
+      \pdfrunninglinkon
+    }
+ }
+%</pdftex>
+%<*luatex>
+\int_compare:nNnT {\tex_luatexversion:D } > {112}
+ {
+   \cs_new_protected:Npn \@@_backend_annotation_linkoff:
+    {
+      \pdfextension linkstate 1
+    }
+   \cs_new_protected:Npn \@@_backend_annotation_linkon:
+    {
+      \pdfextension linkstate 0
+    }
+ }
+%</luatex>
+%<*dvipdfmx|xdvipdfmx>
+  \cs_new_protected:Npn \@@_backend_annotation_linkoff:
+    {
+     \@@_backend:n { nolink }
+    }
+   \cs_new_protected:Npn \@@_backend_annotation_linkon:
+    {
+      \@@_backend:n { link }
+    }
+%</dvipdfmx|xdvipdfmx>
+%    \end{macrocode}
+%
 %  \subsubsection{Form XObject / backend }
 %  \begin{macro}{ \@@_backend_xform_new:nnnn }
 %  \begin{arguments}
