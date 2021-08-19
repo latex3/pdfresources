@@ -1159,17 +1159,17 @@
 % the link. We add here backend support for this.
 %    \begin{macrocode}
 %<*drivers>
-\cs_new_protected:Npn \@@_backend_annotation_linkoff:{}
-\cs_new_protected:Npn \@@_backend_annotation_linkon: {}
+\cs_new_protected:Npn \@@_backend_link_off:{}
+\cs_new_protected:Npn \@@_backend_link_on: {}
 %</drivers>
 %<*pdftex>
 \cs_if_exist:NT \pdfrunninglinkoff
  {
-   \cs_new_protected:Npn \@@_backend_annotation_linkoff:
+   \cs_set_protected:Npn \@@_backend_link_off:
     {
       \pdfrunninglinkoff
     }
-   \cs_new_protected:Npn \@@_backend_annotation_linkon:
+   \cs_set_protected:Npn \@@_backend_link_on:
     {
       \pdfrunninglinkon
     }
@@ -1178,22 +1178,22 @@
 %<*luatex>
 \int_compare:nNnT {\tex_luatexversion:D } > {112}
  {
-   \cs_new_protected:Npn \@@_backend_annotation_linkoff:
+   \cs_set_protected:Npn \@@_backend_link_off:
     {
       \pdfextension linkstate 1
     }
-   \cs_new_protected:Npn \@@_backend_annotation_linkon:
+   \cs_set_protected:Npn \@@_backend_link_on:
     {
       \pdfextension linkstate 0
     }
  }
 %</luatex>
 %<*dvipdfmx|xdvipdfmx>
-  \cs_new_protected:Npn \@@_backend_annotation_linkoff:
+  \cs_set_protected:Npn \@@_backend_link_off:
     {
      \@@_backend:n { nolink }
     }
-   \cs_new_protected:Npn \@@_backend_annotation_linkon:
+   \cs_set_protected:Npn \@@_backend_link_on:
     {
       \@@_backend:n { link }
     }
