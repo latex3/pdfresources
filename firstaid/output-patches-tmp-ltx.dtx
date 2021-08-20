@@ -15,7 +15,7 @@
 \EnableCrossrefs
 \CodelineIndex
 \begin{document}
-  \DocInput{output-patches.dtx}
+  \DocInput{output-patches-tmp-ltx.dtx}
 \end{document}
 %</driver>
 %
@@ -51,6 +51,8 @@
 %    \end{macrocode}
 %
 %    \begin{macrocode}
+\ProvidesPackage{output-patches-tmp-ltx}
+        [2021-08-20 v0.95 Temporary patches of output commands]
 \RequirePackage{etoolbox}
 %    \end{macrocode}
 %
@@ -129,6 +131,20 @@
       }%
       {\typeout{Patching \string\page@sofar\space for tagging}}{\PATCHerror}%
 }
+%    \end{macrocode}
+%
+% \subsection{Interrupt hooks}
+% This requires the l3pdfannot module!
+% We add the code here an not in hyperref, as it should also work with links
+% created directly with the l3pdfannot commands. The file is only
+% loaded by the pdfmanagement, so no need to test if the commands exist.
+%    \begin{macrocode}
+\ExplSyntaxOn
+\def\@kernel@before@head{\pdfannot_link_off:}
+\def\@kernel@before@foot{\pdfannot_link_off:}
+\def\@kernel@after@head {\pdfannot_link_on:}
+\def\@kernel@after@foot {\pdfannot_link_on:}
+\ExplSyntaxOff
 %    \end{macrocode}
 %
 %    \begin{macrocode}

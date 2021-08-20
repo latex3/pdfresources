@@ -28,6 +28,7 @@ else
                 "firstaid/pdflscape-ltx.sty",
                 "firstaid/xcolor-patches-tmp-ltx.sty",
                 "firstaid/color-ltx.sty",
+                "firstaid/output-patches-tmp-ltx.dtx",
                 "support/pdfmanagement-regressiontest.sty",
                 "newpackages/new-bookmark.sty",
                 "newpackages/bkm-generic.def",

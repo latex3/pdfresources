@@ -71,7 +71,7 @@
   {LaTeX PDF management testphase bundle / firstaid-patches}
 
 %<@@=pdfmanagement>
-\clist_map_inline:nn {pgf,transparent,hyperxmp,pdflscape,xcolor,color,beamer}
+\clist_map_inline:nn {pgf,transparent,hyperxmp,pdflscape,xcolor,color,beamer,output}
   {
     \bool_new:c       { g_@@_firstaid_#1_bool }
     \bool_gset_true:c { g_@@_firstaid_#1_bool }
@@ -86,6 +86,16 @@
 \msg_new:nnn  { pdfmanagement } { firstaid }
               { loading~pdfmanagement~firstaid~code~for~#1 }
 %    \end{macrocode}
+% \subsection{Output routine}
+% This load as few patches for the LaTeX output routine commands. They add
+% hooks for the interruption of links and for paragraph tagging.
+%    \begin{macrocode}
+\bool_if:NT \g_@@_firstaid_output_bool
+  {
+    \RequirePackage{output-patches-tmp-ltx}
+  }
+%    \end{macrocode}
+
 % \subsection{\pkg{beamer}}
 % \pkg{beamer} makes use of the now unsupported syntax |linkbordercolor={.5 .5 .5}|.
 % To avoid an error we define this color as a name.
