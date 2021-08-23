@@ -12,6 +12,8 @@ this project uses date-based 'snapshot' version identifiers.
 
 ### Added
  - preliminary support for standard A-2a and A-3a 
+ - output patches to firstaid to support interruption of links
+   and tagging of paragraphs with page splits.
 
 ## [2021-07-31]
 ### Added 
