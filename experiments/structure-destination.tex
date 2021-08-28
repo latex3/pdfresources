@@ -1,0 +1,102 @@
+\RequirePackage{pdfmanagement-testphase}
+\DeclareDocumentMetadata{
+   uncompress,
+   testphase={tagpdf},
+   activate=tagging,
+  }
+
+
+\documentclass{article}
+\usepackage{graphicx,iftex}
+\ExplSyntaxOn
+\ifxetex
+% with dvipdfmx/xdvipdfmx creating a structure destination is trivial, as one
+% only has to exchange the @thispage object:
+\cs_new_protected:Npn \__pdf_backend_destination_struct:nnn #1#2#3
+  {
+    \__pdf_backend:x
+      {
+        dest ~ ( \exp_not:n {#1} )
+        [
+          #3
+          \str_case:nnF {#2}
+            {
+              { xyz }   { /XYZ ~ @xpos ~ @ypos ~ null }
+              { fit }   { /Fit }
+              { fitb }  { /FitB }
+              { fitbh } { /FitBH }
+              { fitbv } { /FitBV ~ @xpos }
+              { fith }  { /FitH ~ @ypos }
+              { fitv }  { /FitV ~ @xpos }
+              { fitr }  { /Fit }
+            }
+            { /XYZ ~ @xpos ~ @ypos ~ \fp_eval:n { (#2) / 100 } }
+        ]
+      }
+  }
+\fi  
+\cs_generate_variant:Nn  \__pdf_backend_destination_struct:nnn {nnx}
+% similar adaption needed
+%\cs_new_protected:Npn \__pdf_backend_destination_struct:nnnn #1#2#3#4
+%  {
+%    \exp_args:Ne \__pdf_backend_destination_struct_aux:nnnn
+%      { \dim_eval:n {#2} } {#1} {#3} {#4}
+%  }
+%\cs_new_protected:Npn \__pdf_backend_destination_struct_aux:nnnn #1#2#3#4
+%  {
+%    \vbox_to_zero:n
+%      {
+%        \__kernel_kern:n {#4}
+%        \hbox:n
+%          {
+%            \__pdf_backend:n { obj ~ @pdf_ #2 _llx ~ @xpos }
+%            \__pdf_backend:n { obj ~ @pdf_ #2 _lly ~ @ypos }
+%          }
+%        \tex_vss:D
+%      }
+%    \__kernel_kern:n {#1}
+%    \vbox_to_zero:n
+%      {
+%        \__kernel_kern:n { -#3 }
+%        \hbox:n
+%          {
+%            \__pdf_backend:n
+%              {
+%                dest ~ (#2)
+%                [
+%                  @thispage
+%                  /FitR ~
+%                    @pdf_ #2 _llx ~ @pdf_ #2 _lly ~
+%                    @xpos ~ @ypos
+%                ]
+%              }
+%          }
+%        \tex_vss:D
+%      }
+%    \__kernel_kern:n { -#1 }
+%  }
+
+\ExplSyntaxOff
+\begin{document}
+
+bbbbb
+\ExplSyntaxOn
+
+\pdf_object_ref:n{__tag/struct/1}
+
+\__pdf_backend_destination_struct:nnn  {abc}{fit}{@thispage}
+\__pdf_backend_destination_struct:nnx  {xyz}{fith}{\pdf_object_ref:n{__tag/struct/1}}
+\ExplSyntaxOff
+%
+%abc
+%\tagpdfparaOff
+%
+%\tagstructbegin{tag=Figure,alttext=Show tags of examples}\tagmcbegin{tag=Figure}
+%\includegraphics{example-image}
+%\tagmcend\tagstructend
+%
+%\tagpdfparaOn
+%
+%abc
+
+\end{document}
