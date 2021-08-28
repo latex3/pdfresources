@@ -1,6 +1,6 @@
 #!/usr/bin/env texlua
-packageversion="0.95h"
-packagedate="2021-07-31"
+packageversion="0.95i"
+packagedate="2021-08-28"
 
 -- Build script for "LaTeX PDF management testphase bundle" bundle
 
@@ -19,7 +19,8 @@ if options["target"] == "ctan" then
                 "firstaid/pdflscape-ltx.sty",
                 "firstaid/xcolor-patches-tmp-ltx.sty",
                 "firstaid/color-ltx.sty",
-                 }
+                "firstaid/output-patches-tmp-ltx.dtx"
+                }
 else
  sourcefiles =  {"*.dtx","*.ins",
                 "l3ref-tmp.sty",
@@ -28,6 +29,7 @@ else
                 "firstaid/pdflscape-ltx.sty",
                 "firstaid/xcolor-patches-tmp-ltx.sty",
                 "firstaid/color-ltx.sty",
+                "firstaid/output-patches-tmp-ltx.dtx",
                 "firstaid/output-patches-tmp-ltx.dtx",
                 "support/pdfmanagement-regressiontest.sty",
                 "newpackages/new-bookmark.sty",
