@@ -124,6 +124,9 @@
     \exp_args:NNe
     \pdfstringdef\@pdftitle{\GetDocumentProperties{hyperref/pdftitle}}
     \cs_set_eq:NN\hyxmp@pdftitle\@pdftitle
+    \exp_args:NNe
+    \pdfstringdef\@pdfcopyright{\GetDocumentProperties{hyperref/pdfcopyright}}
+    \cs_set_eq:NN\hyxmp@pdfcopyright\@pdfcopyright
     % pdflang,
     \tl_if_exist:cF{@pdflang}{\tl_new:c{@pdflang}}
     \tl_set:cx {@pdflang}{\GetDocumentProperties{document/lang}}
