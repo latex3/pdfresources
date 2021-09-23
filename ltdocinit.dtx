@@ -254,7 +254,7 @@
 % Load more modules, the testphase code and the firstaid code.
 %    \begin{macrocode}
         \g_@@_testphase_tl
-        \RequirePackage{pdfmanagement-firstaid}        
+        \RequirePackage{pdfmanagement-firstaid}
       }
   }
 %    \end{macrocode}
@@ -412,7 +412,12 @@
     ,activate .multichoice:
     ,activate / tagging .code:n =
       {
-        \AddToHook{package/after/tagpdf}
+        \AddToHook
+          {
+           \IfFormatAtLeastTF{2021-11-15}
+             {package/tagpdf/after}
+             {package/after/tagpdf}
+          }
           {
             \tagpdfsetup{activate,paratagging,interwordspace}
             \AddToDocumentProperties [document]{tagging}{active}
@@ -426,16 +431,26 @@
       }
     ,debug / para .code:n =
       {
-        \AddToHook{package/after/tagpdf}
+        \AddToHook
           {
-            \tagpdfsetup{paratagging-show}
+            \IfFormatAtLeastTF{2021-11-15}
+             {package/tagpdf/after}
+             {package/after/tagpdf}
+          }
+          {
+             \tagpdfsetup{paratagging-show}
           }
       }
     ,debug / log .code:n =
       {
-        \AddToHook{package/after/tagpdf}
+        \AddToHook
           {
-            \tagpdfsetup{log=#1}
+            \IfFormatAtLeastTF{2021-11-15}
+             {package/tagpdf/after}
+             {package/after/tagpdf}
+          }
+          {
+             \tagpdfsetup{log=#1}
           }
       }
     ,debug / uncompress .code:n =
