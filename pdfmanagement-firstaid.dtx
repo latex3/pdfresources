@@ -137,7 +137,12 @@
 %    \begin{macrocode}
 \bool_if:NT \g_@@_firstaid_xcolor_bool
   {
-    \AddToHook{package/after/xcolor}
+    \AddToHook
+       {
+         \IfFormatAtLeastTF{2021-11-15}
+           {package/xcolor/after}
+           {package/after/xcolor}
+       }
        {\RequirePackage{xcolor-patches-tmp-ltx}\XC@@@@names}
   }
 %    \end{macrocode}
@@ -170,7 +175,12 @@
 \bool_if:NT \g_@@_firstaid_pgf_bool
   {
     \msg_info:nnn{pdfmanagement }{firstaid}{pgf}
-    \AddToHook{file/after/pgfrcs.sty}
+    \AddToHook
+      {
+        \IfFormatAtLeastTF{2021-11-15}
+          {file/pgfrcs.sty/after}
+          {file/after/pgfrcs.sty}
+      }
       {
         \cs_set_eq:NN
           \@@_pgfori_pgfutil@setuppdfresources
@@ -274,7 +284,11 @@
 \bool_if:NT \g_@@_firstaid_hyperxmp_bool
  {
     \AddToHook
-      {file/after/hyperxmp.sty}
+      {
+        \IfFormatAtLeastTF{2021-11-15}
+         {file/hyperxmp.sty/after}
+         {file/after/hyperxmp.sty}
+      }
       {\RequirePackage{hyperxmp-patches-tmp-ltx}}
  }
 %</package>
