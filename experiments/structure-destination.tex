@@ -1,3 +1,4 @@
+% !Mode:: "TeX:UTF-8:Main"
 \RequirePackage{pdfmanagement-testphase}
 \DeclareDocumentMetadata{
    uncompress,
@@ -10,13 +11,14 @@
 \usepackage{graphicx,iftex}
 \ExplSyntaxOn
 \ifxetex
-% with dvipdfmx/xdvipdfmx creating a structure destination is trivial, as one
-% only has to exchange the @thispage object:
+% with dest one could create a "named" structure destination, but
+% as the pdf according to the reference wants an array, we use obj
+% so that we can reference it:
 \cs_new_protected:Npn \__pdf_backend_destination_struct:nnn #1#2#3
   {
     \__pdf_backend:x
       {
-        dest ~ ( \exp_not:n {#1} )
+        obj ~ @pdf.dest.\exp_not:n{#1}
         [
           #3
           \str_case:nnF {#2}
@@ -34,8 +36,28 @@
         ]
       }
   }
-\fi  
+\fi
 \cs_generate_variant:Nn  \__pdf_backend_destination_struct:nnn {nnx}
+
+\ExplSyntaxOff
+\begin{document}
+
+bbbbb
+\ExplSyntaxOn
+\__pdf_backend_destination:nn          {earth}{xyz}
+\__pdf_backend_destination_struct:nnx  {earth}{xyz}{\pdf_object_ref:n{__tag/struct/1}}
+
+\exp_args:Nx
+ \__pdf_backend_link_begin:n 
+    { /Subtype /Link /A << /S /GoTo /D ( earth ) /SD~ @pdf.dest.earth >> }
+ blub
+ \__pdf_backend_link_end:
+\ExplSyntaxOff
+
+\end{document}
+
+
+
 % similar adaption needed
 %\cs_new_protected:Npn \__pdf_backend_destination_struct:nnnn #1#2#3#4
 %  {
@@ -75,28 +97,3 @@
 %      }
 %    \__kernel_kern:n { -#1 }
 %  }
-
-\ExplSyntaxOff
-\begin{document}
-
-bbbbb
-\ExplSyntaxOn
-
-\pdf_object_ref:n{__tag/struct/1}
-
-\__pdf_backend_destination_struct:nnn  {abc}{fit}{@thispage}
-\__pdf_backend_destination_struct:nnx  {xyz}{fith}{\pdf_object_ref:n{__tag/struct/1}}
-\ExplSyntaxOff
-%
-%abc
-%\tagpdfparaOff
-%
-%\tagstructbegin{tag=Figure,alttext=Show tags of examples}\tagmcbegin{tag=Figure}
-%\includegraphics{example-image}
-%\tagmcend\tagstructend
-%
-%\tagpdfparaOn
-%
-%abc
-
-\end{document}
