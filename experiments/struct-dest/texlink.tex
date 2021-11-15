@@ -1,0 +1,21 @@
+\pdfcompresslevel0
+
+\pdfdest num 42 fit
+\pdfdest struct 12345 num 42 fit % Assuming that 12345 0 R is a vlid reference to the non existing structure element at this location...
+Hello
+
+\hfill\eject
+\pdfdest name {earth} fit
+\pdfdest struct 1337 name {earth} fit % Assuming that 12345 0 R is a vlid reference to the non existing structure element at this location...
+World
+
+\vfill\eject
+\leavevmode
+\pdfstartlink goto struct num 42 num 42 First\pdfendlink
+\space
+\pdfstartlink goto struct name {earth} name {earth} Second\pdfendlink
+\space
+\pdfstartlink goto struct name {i_dont_exists} name {me neither} Third\pdfendlink
+\space
+\pdfstartlink goto file {f.pdf} struct {[(external_element_id) /Fit]} name {marcel} Forth\pdfendlink
+\bye
