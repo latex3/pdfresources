@@ -139,9 +139,7 @@
   {
     \AddToHook
        {
-         \IfFormatAtLeastTF{2021-11-15}
-           {package/xcolor/after}
-           {package/after/xcolor}
+         package/xcolor/after
        }
        {\RequirePackage{xcolor-patches-tmp-ltx}\XC@@@@names}
   }
@@ -177,9 +175,7 @@
     \msg_info:nnn{pdfmanagement }{firstaid}{pgf}
     \AddToHook
       {
-        \IfFormatAtLeastTF{2021-11-15}
-          {file/pgfrcs.sty/after}
-          {file/after/pgfrcs.sty}
+        file/pgfrcs.sty/after
       }
       {
         \cs_set_eq:NN
@@ -285,9 +281,7 @@
  {
     \AddToHook
       {
-        \IfFormatAtLeastTF{2021-11-15}
-         {file/hyperxmp.sty/after}
-         {file/after/hyperxmp.sty}
+       file/hyperxmp.sty/after
       }
       {\RequirePackage{hyperxmp-patches-tmp-ltx}}
  }
