@@ -134,8 +134,15 @@
 
 % we need to provide a few commands so that hyperxmp stops to overwrite them
 % in \AtEndPreamble
+% we need also add it to the document properties to avoid stray commas
+% with empty author.
 \AddToHook{begindocument/before}[pdfmanagement/firstaid/hyperxmp]{%
- \def\@pdfauthor{Author}\def\@pdftitle {Title}}
+ \def\@pdfauthor{Author}\def\@pdftitle {Title}%
+ \tl_if_blank:eT{\GetDocumentProperties{hyperref/pdfauthor}}
+  {\AddToDocumentProperties[hyperref]{pdfauthor}{Author}}
+ \tl_if_blank:eT{\GetDocumentProperties{hyperref/pdftitle}}
+  {\AddToDocumentProperties[hyperref]{pdfauthor}{Title}}
+ }
 
 \DeclareHookRule{begindocument/before}{pdfmanagement/firstaid/hyperxmp}{before}{hyperxmp}
 
