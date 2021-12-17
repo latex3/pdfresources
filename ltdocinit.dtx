@@ -208,12 +208,15 @@
 %    \end{macrocode}
 % The wanted backend must be detected first, we read the init key and then
 % force the loading by loading expl3.
-% The backend contains now management command, so the boolean should be set to true first.
+% The backend can contains management commands, so the boolean should be set to true first.
 %    \begin{macrocode}
-        \keys_set_groups:nnn { document / metadata} {init}{ #1 }
-        %should be loaded after the backend is set.
         \bool_gset_true:N \g_@@_active_bool
-        \RequirePackage{expl3}
+        \keys_set_groups:nnn { document / metadata} {init}{ #1 }
+        %if no backend has been loaded force it now:
+        \str_if_exist:NF \c_sys_backend_str
+          {
+            \sys_load_backend:n {}
+          }
 %    \end{macrocode}
 % Now we load the extra backend code
 %    \begin{macrocode}
@@ -322,11 +325,17 @@
 %    \begin{macrocode}
 \keys_define:nn { document / metadata }
   {
-    backend .code:n =
+    backend .choices:nn =
+      { dvipdfmx , dvips , dvisvgm , luatex , pdftex , pdfmode , xdvipdfmx , xetex }
       {
-        \PassOptionsToPackage { driver=#1 } {expl3}
-        \AddToDocumentProperties[document]{backend}{#1}
+        \sys_load_backend:n {#1}
       },
+%    backend .code:n =
+%      {
+%
+%        \PassOptionsToPackage { driver=#1 } {expl3}
+%        \AddToDocumentProperties[document]{backend}{#1}
+%      },
     backend .groups:n = { init } ,
   }
 
