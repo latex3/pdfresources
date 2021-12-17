@@ -26,7 +26,7 @@
 \RequirePackage{pdfmanagement-testphase}
 \DeclareDocumentMetadata{pdfstandard=A-2b}
 \makeatletter
-\declare@file@substitution{doc.sty}{doc-v3beta.sty}
+%\declare@file@substitution{doc.sty}{doc-v3beta.sty}
 \makeatother
 \documentclass{l3doc}
 \usepackage{tabularx,array,booktabs,hyperxmp}
@@ -125,8 +125,9 @@
 % written by the kernel directly and this can not be done without proper,
 % well-defined and well-behaving interfaces and hooks.
 %
-% Some first steps for better support of PDF related commands have been already done
-% with the \pkg{l3pdf} package which has now been integrated into \pkg{l3kernel}.
+% Some first steps for better support of PDF related commands have been done
+% with the \pkg{l3pdf} package which has now been integrated as a module
+% into \pkg{l3kernel}.
 % It offers backend independent commands to create
 % PDF objects and destination, to set the compress level and the PDF version.
 %
