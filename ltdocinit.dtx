@@ -378,6 +378,10 @@
           {
             \RequirePackage{tagpdf}
             \AddToDocumentProperties [document]{testphase/tagpdf}{loaded}
+            \tagpdfsetup{activate,paratagging,interwordspace}
+            \AddToDocumentProperties [document]{tagging}{active}
+            \AddToDocumentProperties [document]{tagging/para}{active}
+            \AddToDocumentProperties [document]{tagging/interwordspace}{active}
           }
       }
     ,testphase / unknown .code:n =
@@ -394,16 +398,9 @@
     ,activate .multichoice:
     ,activate / tagging .code:n =
       {
-        \AddToHook
-          {
-            package/tagpdf/after
-          }
-          {
-            \tagpdfsetup{activate,paratagging,interwordspace}
-            \AddToDocumentProperties [document]{tagging}{active}
-            \AddToDocumentProperties [document]{tagging/para}{active}
-            \AddToDocumentProperties [document]{tagging/interwordspace}{active}
-          }
+        \PackageWarning{pdfmanagement-testphase}
+         {The~activate~key~is~deprecated.\MessageBreak
+          Tagging~is~activated~with~'testphase=tagpdf'~directly}{}
       }
     ,debug .code:n =
       {
