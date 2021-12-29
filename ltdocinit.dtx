@@ -121,10 +121,9 @@
 %    \pkg{pdfmanagement-firstaid}.
 %    \item[\texttt{testphase}] This key is used to load testphase code. The values it accepts
 %    and their effect will change over time, when testphase packages are added or
-%    removed when the code is moved into the kernel. Currently the accepted values are
-%    \texttt{tagpdf}, this load the tagpdf package, \texttt{headings}, this loads
-%    code which reimplements heading commands, and \texttt{ptagging} this loads code
-%    to allow paragraph tagging to work with engine other than luatex.
+%    removed when the code is moved into the kernel. The value
+%    \texttt{tagpdf} will the tagpdf package, other values will try to load a package
+%    \meta{value}-testphase.
 %    \item[\texttt{activate}] This key is used to enable some document wide functions. It is
 %    currently in an experimental state. The values and their behaviour are subject to change.
 %    Currently the only value is |tagging|,
@@ -385,25 +384,6 @@
           {
             \RequirePackage{tagpdf}
             \AddToDocumentProperties [document]{testphase/tagpdf}{loaded}
-          }
-      }
-    ,testphase / headings .code:n =
-      {
-        \tl_gput_right:Nn\g_@@_testphase_tl
-          {
-            \RequirePackage{headings-testphase}
-            \AddToDocumentProperties [document]{testphase/headings}{loaded}
-          }
-      }
-    ,testphase / ptagging .code:n =
-      {
-        \tl_gput_right:Nn\g_@@_testphase_tl
-          {
-            \AddToHook{class/after}
-              {
-                \RequirePackage{ptagging-testphase}
-                \AddToDocumentProperties [document]{testphase/ptagging}{loaded}
-              }
           }
       }
     ,testphase / unknown .code:n =
