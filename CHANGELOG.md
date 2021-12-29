@@ -5,6 +5,17 @@ first release 0.95a, 2021-02-23 will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 this project uses date-based 'snapshot' version identifiers.
 
+## [XXXX-XX-XX]
+### Changed
+ - the keys `firstaidoff` and `pdfmanagment` should now be set with the `debug` key.
+ 
+### Fixed
+
+ - adapted the file hooks to the changes in LaTeX
+ - small bugs
+ 
+  
+
 ## [2021-08-28]
 ### Changed
  - colorscheme 'original' has been renamed to 'primary-colors'
