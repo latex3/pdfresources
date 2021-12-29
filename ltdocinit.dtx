@@ -114,25 +114,27 @@
 %      of \pkg{l3pdfmeta}.
 %    \item[\texttt{colorprofiles}] This allows to load icc-colorprofiles. Details
 %    are described in the documentation of \pkg{l3pdfmeta}.
-%    \item[\texttt{pdfmanagement}] Boolean. This activates/deactivates
-%      the core management code. By default the value is true.
-%    \item[\texttt{firstaidoff}] This accepts a comma lists of keysword and disable the patches
-%    related to them. More information can be found in the documentation of
-%    \pkg{pdfmanagement-firstaid}.
 %    \item[\texttt{testphase}] This key is used to load testphase code. The values it accepts
 %    and their effect will change over time, when testphase packages are added or
 %    removed when the code is moved into the kernel. The value
 %    \texttt{tagpdf} will the tagpdf package, other values will try to load a package
-%    \meta{value}-testphase.
+%    \meta{value}-testphase. The |testphase| key can only be used in the first \cs{DeclareDocumentMetadata}.
 %    \item[\texttt{activate}] This key is used to enable some document wide functions. It is
 %    currently in an experimental state. The values and their behaviour are subject to change.
 %    Currently the only value is |tagging|,
 %    which will do |\tagpdfsetup{activate,paratagging,interwordspace}|. It requires that
 %    \pkg{tagpdf} has been loaded first with the |testphase| key.
-%    \item[\texttt{debug}] This key activates some debug options. Currently only the
-%    keys |para| (with the default and only value |show|),
-%    and |log| (with the values of \pkg{tagpdf}) and |uncompress| (which does the same
-%    as |uncompress| as main key)  are known.
+%    \item[\texttt{debug}] This key activates some debug options. It takes a list of key-values
+%    as value. Currently the following keys are known:
+%     \begin{description}
+%     \item[\texttt{para}] with the default and only value |show|. It will activate the |paratagging-show|
+%     option of \pkg{tagpdf},
+%     \item[\texttt{log}]  with the values as described in the documentation \pkg{tagpdf},
+%     \item[\texttt{uncompress}] which does the same as |uncompress| as main key
+%     \item[\texttt{pdfmanagement}] a boolean which allows to deactivate the pdfmanagement.
+%    \item[\texttt{firstaidoff}] This accepts a comma lists of keywords and disables the patches
+%    related to them. More information can be found in the documentation of
+%    \pkg{pdfmanagement-firstaid}.%
 % \end{description}
 %
 % \subsection{Container for document properties}
@@ -329,12 +331,6 @@
       {
         \sys_load_backend:n {#1}
       },
-%    backend .code:n =
-%      {
-%
-%        \PassOptionsToPackage { driver=#1 } {expl3}
-%        \AddToDocumentProperties[document]{backend}{#1}
-%      },
     backend .groups:n = { init } ,
   }
 
@@ -375,8 +371,6 @@
       {
         \msg_warning:nnn{pdf}{unknown-standard}{#1}
       }
-    ,pdfmanagement .bool_gset:N = \g_@@_active_bool
-    ,firstaidoff .clist_gset:N = \g_@@_firstaidoff_clist
     ,testphase .multichoice:
     ,testphase / tagpdf .code:n =
       {
@@ -439,6 +433,8 @@
       {
         \pdf_uncompress:
       }
+    ,debug / pdfmanagement .bool_gset:N = \g_@@_active_bool
+    ,debug / firstaidoff .clist_gset:N = \g_@@_firstaidoff_clist
   }
 %    \end{macrocode}
 %    \begin{macrocode}
