@@ -7,7 +7,11 @@ this project uses date-based 'snapshot' version identifiers.
 
 ## [XXXX-XX-XX]
 ### Changed
- - the keys `firstaidoff` and `pdfmanagment` should now be set with the `debug` key.
+ - the keys `firstaidoff` and `pdfmanagement` should now be set with the `debug` key.
+ - the activate key has been removed, its function is integrated in the testphase key. 
+ - `testphase=tagpdf` will execute the tagpdf keys `activate,paratagging,interwordspace`
+    and so automatically activate tagging. 
+ - testphase will now load files from the latex-lab bundle  
  
 ### Fixed
 
