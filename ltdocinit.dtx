@@ -191,7 +191,6 @@
 % \begin{implementation}
 %
 % \section{\pkg{ltdocinit} implementation}
-% \subsection{\cs{DocumentMetadata}/\cs{DeclareDocumentMetadata}}
 %    \begin{macrocode}
 %<@@=pdfmanagement>
 %<*header>
@@ -201,7 +200,142 @@
 %    \end{macrocode}
 % \cs{DocumentMetadata} will be defined by the kernel in short time.
 % So we define it and the keys here only if it is not already defined.
+%  \subsection{The keys for \cs{DocumentMetadata}}
+%  We define the keys first so that we can test if \cs{DocumentMetadata}
+%  exist (testing for the format date would be nice but would fail for the current
+%  latex-dev).
+%  \begin{variable}{\g_@@_firstaidoff_clist}
+%  A list to store the firstaid code which should be disabled
+%    \begin{macrocode}
+%<*package>
+\clist_new:N \g_@@_firstaidoff_clist
+%    \end{macrocode}
+% \end{variable}
+%  \begin{variable}{\g_@@_testphase_tl}
+%  a tl to store the testphase loading code so that we can load them at
+%  the end of the command.
+%    \begin{macrocode}
+\tl_new:N \g_@@_testphase_tl
+%    \end{macrocode}
+% \end{variable}
+%    \begin{macrocode}
+\cs_if_free:NT \DocumentMetadata
+  {
+    \keys_define:nn { document / metadata }
+      {
+        backend .choices:nn =
+          { dvipdfmx , dvips , dvisvgm , luatex , pdftex , pdfmode , xdvipdfmx , xetex }
+          {
+            \sys_load_backend:n {#1}
+          },
+        backend .groups:n = { init } ,
+      }
+
+    \keys_define:nn { document / metadata }
+      {
+        ,pdfversion .code:n =
+          {
+            \pdf_version_gset:n { #1 }
+            \AddToDocumentProperties[document]{pdfversion}{#1}
+          }
+        ,uncompress .code:n =
+          {
+            \pdf_uncompress:
+          }
+        ,uncompress .value_forbidden:n = true
+        ,lang .code:n =
+          {
+            \pdfmanagement_add:nnn {Catalog} {Lang}{(#1)}
+            \AddToDocumentProperties[document]{lang}{#1}
+          }
+        %,xmpmeta .bool_gset:N = \g_pdfmeta_xmp_bool %see pdfmeta unused and undefined for now!
+        % this uses internal command from pdfmeta, it should probably move there ...
+        ,pdfstandard .code:n =
+          {
+            \exp_args:Nnx
+            \keys_set:nn {document / metadata} {_pdfstandard=\str_uppercase:n{#1}}
+          }
+        ,_pdfstandard .choices:nn =
+          {A-1B,A-2A,A-2B,A-2U,A-3A,A-3B,A-3U}
+          {
+            \prop_if_exist:cT { g__pdfmeta_standard_pdf/#1_prop }
+              {
+                \prop_gset_eq:Nc \g__pdfmeta_standard_prop { g__pdfmeta_standard_pdf/#1 _prop }
+              }
+            \AddToDocumentProperties [document]{pdfstandard}{#1}
+          }
+        ,_pdfstandard / unknown .code:n =
+          {
+            \msg_warning:nnn{pdf}{unknown-standard}{#1}
+          }
+        ,testphase .multichoice:
+        ,testphase / tagpdf .code:n =
+          {
+            \tl_gput_right:Nn\g_@@_testphase_tl
+              {
+                \file_if_exist_input:nF {tagpdf-latex-lab-testphase.ltx}
+                  {
+                    \RequirePackage{tagpdf}
+                    \AddToDocumentProperties [document]{testphase/tagpdf}{loaded}
+                    \tagpdfsetup{activate,paratagging,interwordspace}
+                    \AddToDocumentProperties [document]{tagging}{active}
+                    \AddToDocumentProperties [document]{tagging/para}{active}
+                    \AddToDocumentProperties [document]{tagging/interwordspace}{active}
+                  }
+              }
+          }
+        ,testphase / unknown .code:n =
+          {
+            \tl_gput_right:Nn\g_@@_testphase_tl
+               {
+                 \file_if_exist_input:nF {#1-latex-lab-testphase.ltx}
+                  {
+                     \msg_warning:nnn{document}{latex-lab-pkg-missing}{#1}
+                  }
+               }
+          }
+        ,activate .multichoice:
+        ,activate / tagging .code:n =
+          {
+            \PackageWarning{pdfmanagement-testphase}
+             {The~activate~key~is~deprecated.\MessageBreak
+              Tagging~is~activated~with~'testphase=tagpdf'~directly}{}
+          }
+        ,debug .code:n =
+          {
+            \keys_set:nn { document / metadata / debug } {#1}
+          }
+        ,debug / para .code:n =
+          {
+            \AddToHook
+              {
+                package/tagpdf/after
+              }
+              {
+                 \tagpdfsetup{paratagging-show}
+              }
+          }
+        ,debug / log .code:n =
+          {
+            \AddToHook
+              {
+               package/tagpdf/after
+              }
+              {
+                 \tagpdfsetup{log=#1}
+              }
+          }
+        ,debug / uncompress .code:n =
+          {
+            \pdf_uncompress:
+          }
+        ,debug / pdfmanagement .bool_gset:N = \g_@@_active_bool
+        ,debug / firstaidoff .clist_gset:N = \g_@@_firstaidoff_clist
+      }
+   }
+%    \end{macrocode}
 %
+% \subsection{\cs{DocumentMetadata}/\cs{DeclareDocumentMetadata}}
 % At first we have to define the older alias \cs{DeclareDocumentMetadata} if
 % \cs{DocumentMetadata} is already defined in a newer LaTeX version. Here
 % we load the latex-lab support (if it hasn't been loaded
@@ -209,7 +343,6 @@
 % to \cs{DocumentMetadata}
 %
 %    \begin{macrocode}
-%<*package>
 \cs_if_exist:NT \DocumentMetadata
    {
      \cs_new_protected:Npn \DeclareDocumentMetadata
@@ -373,136 +506,6 @@
   }
 %    \end{macrocode}
 % \end{macro}
-%  \subsection{The keys for \cs{DocumentMetadata}}
-%  As they use \cs{AddToDocumentProperties} they have to come after
-%  it has been defined.
-%
-%  \begin{variable}{\g_@@_firstaidoff_clist}
-%  A list to store the firstaid code which should be disabled
-%    \begin{macrocode}
-\clist_new:N \g_@@_firstaidoff_clist
-%    \end{macrocode}
-% \end{variable}
-%  \begin{variable}{\g_@@_testphase_tl}
-%  a tl to store the testphase loading code so that we can load them at
-%  the end of the command.
-%    \begin{macrocode}
-\tl_new:N \g_@@_testphase_tl
-%    \end{macrocode}
-% \end{variable}
-%    \begin{macrocode}
-\keys_define:nn { document / metadata }
-  {
-    backend .choices:nn =
-      { dvipdfmx , dvips , dvisvgm , luatex , pdftex , pdfmode , xdvipdfmx , xetex }
-      {
-        \sys_load_backend:n {#1}
-      },
-    backend .groups:n = { init } ,
-  }
-
-\keys_define:nn { document / metadata }
-  {
-    ,pdfversion .code:n =
-      {
-        \pdf_version_gset:n { #1 }
-        \AddToDocumentProperties[document]{pdfversion}{#1}
-      }
-    ,uncompress .code:n =
-      {
-        \pdf_uncompress:
-      }
-    ,uncompress .value_forbidden:n = true
-    ,lang .code:n =
-      {
-        \pdfmanagement_add:nnn {Catalog} {Lang}{(#1)}
-        \AddToDocumentProperties[document]{lang}{#1}
-      }
-    %,xmpmeta .bool_gset:N = \g_pdfmeta_xmp_bool %see pdfmeta unused and undefined for now!
-    % this uses internal command from pdfmeta, it should probably move there ...
-    ,pdfstandard .code:n =
-      {
-        \exp_args:Nnx
-        \keys_set:nn {document / metadata} {_pdfstandard=\str_uppercase:n{#1}}
-      }
-    ,_pdfstandard .choices:nn =
-      {A-1B,A-2A,A-2B,A-2U,A-3A,A-3B,A-3U}
-      {
-        \prop_if_exist:cT { g__pdfmeta_standard_pdf/#1_prop }
-          {
-            \prop_gset_eq:Nc \g__pdfmeta_standard_prop { g__pdfmeta_standard_pdf/#1 _prop }
-          }
-        \AddToDocumentProperties [document]{pdfstandard}{#1}
-      }
-    ,_pdfstandard / unknown .code:n =
-      {
-        \msg_warning:nnn{pdf}{unknown-standard}{#1}
-      }
-    ,testphase .multichoice:
-    ,testphase / tagpdf .code:n =
-      {
-        \tl_gput_right:Nn\g_@@_testphase_tl
-          {
-            \file_if_exist_input:nF {tagpdf-latex-lab-testphase.ltx}
-              {
-                \RequirePackage{tagpdf}
-                \AddToDocumentProperties [document]{testphase/tagpdf}{loaded}
-                \tagpdfsetup{activate,paratagging,interwordspace}
-                \AddToDocumentProperties [document]{tagging}{active}
-                \AddToDocumentProperties [document]{tagging/para}{active}
-                \AddToDocumentProperties [document]{tagging/interwordspace}{active}
-              }
-          }
-      }
-    ,testphase / unknown .code:n =
-      {
-        \tl_gput_right:Nn\g_@@_testphase_tl
-           {
-             \file_if_exist_input:nF {#1-latex-lab-testphase.ltx}
-              {
-                 \msg_warning:nnn{document}{latex-lab-pkg-missing}{#1}
-              }
-           }
-      }
-    ,activate .multichoice:
-    ,activate / tagging .code:n =
-      {
-        \PackageWarning{pdfmanagement-testphase}
-         {The~activate~key~is~deprecated.\MessageBreak
-          Tagging~is~activated~with~'testphase=tagpdf'~directly}{}
-      }
-    ,debug .code:n =
-      {
-        \keys_set:nn { document / metadata / debug } {#1}
-      }
-    ,debug / para .code:n =
-      {
-        \AddToHook
-          {
-            package/tagpdf/after
-          }
-          {
-             \tagpdfsetup{paratagging-show}
-          }
-      }
-    ,debug / log .code:n =
-      {
-        \AddToHook
-          {
-           package/tagpdf/after
-          }
-          {
-             \tagpdfsetup{log=#1}
-          }
-      }
-    ,debug / uncompress .code:n =
-      {
-        \pdf_uncompress:
-      }
-    ,debug / pdfmanagement .bool_gset:N = \g_@@_active_bool
-    ,debug / firstaidoff .clist_gset:N = \g_@@_firstaidoff_clist
-  }
-%    \end{macrocode}
 %    \begin{macrocode}
 %</package>
 %    \end{macrocode}
