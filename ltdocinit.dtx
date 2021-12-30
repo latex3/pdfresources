@@ -57,14 +57,19 @@
 % \begin{documentation}
 %
 % \section{\pkg{ltdocinit} documentation}
-% This small module defines \cs{DeclareDocumentMetadata} and the related keys.
+% This small module defines \cs{DocumentMetadata} and the older alias
+% \cs{DeclareDocumentMetadata} and the related keys.
 % It also defines commands to store document properties in a global container.
 %
-% \subsection{\cs{DeclareDocumentMetadata}}
+% When the kernel will provide \cs{DocumentMetadata} directly
+% this module will slowly disappear.
 %
-% \begin{function}{\DeclareDocumentMetadata}
+% \subsection{\cs{DocumentMetadata}/\cs{DeclareDocumentMetadata}}
+%
+% \begin{function}{\DocumentMetadata,\DeclareDocumentMetadata}
 % \begin{syntax}
-%  \cs{DeclareDocumentMetadata}\Arg{key-value list}
+%  \cs{DocumentMetadata}\Arg{key-value list}\\
+%  \cs{DeclareDocumentMetadata}\Arg{key-value list} (deprecated)
 % \end{syntax}
 % \end{function}
 %
@@ -75,29 +80,33 @@
 % for example the pdf version can no longer be changed if a
 % package has used code which already opened the PDF.
 %
-% \cs{DeclareDocumentMetadata} as a new command
+% \cs{DocumentMetadata} as a new command
 % should unify such settings in one place.
-% It should be used before \cs{documentclass}, directly after
-% loading \pkg{pdfmanagement-testphase}. \cs{DeclareDocumentMetadata}
-% can be used more than once.
+% It should be used before \cs{documentclass}.
+% \cs{DocumentMetadata} can be used more than once.
 %
-% The keys defined for \cs{DeclareDocumentMetadata}
+% With a \LaTeX{} 2022-06-01 or newer (currently provided as |latex-dev|) the command
+% is provided by the kernel and will load the pdfmanagement,
+% with older \LaTeX{} the pdfmanagement must be loaded
+% first manually with |\RequirePackage{pdfmanagement-testphase}|.
+%
+% The keys defined for \cs{DocumentMetadata}
 % currently allows to set the PDF version, to set the PDF \texttt{/Lang},
 % to uncompress a pdf, to set the language and to declare a few PDF standards
-% and some colorprofiles.
+% and to load some colorprofiles.
 %
-% \cs{DeclareDocumentMetadata} is also used to
+% \cs{DocumentMetadata} is also used to
 % activate the new PDF management code and it loads
 % a number of required files for the PDF management code.
 % As this forces the loading of the backend files, a backend
 % which can't be detected automatically like |dvipdfmx|,
-% must be set in the first \cs{DeclareDocumentMetadata}.
+% must be set in the first \cs{DocumentMetadata}.
 %
 % Currently the following keys are implemented
 %
 % \begin{description}
 %    \item[\texttt{backend}] passes the backend name to expl3.
-%    This will probably be extended to  pass the value also to packages.
+%^^A    This will probably be extended to  pass the value also to packages.
 %    \item[\texttt{pdfversion}] e.g. \texttt{pdfversion=1.7}
 %    \item[\texttt{uncompress}] no value. Forces an uncompressed pdf.
 %    \item[\texttt{lang}] to set the Lang entry in the Catalog.
@@ -120,7 +129,7 @@
 %    \texttt{tagpdf} will load the tagpdf package. It will also issue
 %    |\tagpdfsetup{activate,paratagging,interwordspace}| and so activate tagging.
 %    Other values will be added later.
-%    The |testphase| key can only be used in the first \cs{DeclareDocumentMetadata}.
+%    The |testphase| key can only be used in the first \cs{DocumentMetadata}.
 %    \item[\texttt{activate}] This key is used to enable some document wide functions. It is
 %    currently in an experimental state. The values and their behaviour are subject to change.
 %    Currently the only value is |tagging|,
@@ -154,7 +163,7 @@
 % \end{syntax}
 % This stores \meta{value} under the key \meta{label}/\meta{property}.
 % By default \meta{label} is the current package name |\@currname|. If another
-% label is choosen, it should be one which avoids clashes with other packages
+% label is chosen, it should be one which avoids clashes with other packages
 % using the container. The label |document| is reserved.
 % \end{function}
 %
@@ -182,7 +191,7 @@
 % \begin{implementation}
 %
 % \section{\pkg{ltdocinit} implementation}
-% \subsection{\cs{DeclareDocumentMetadata}}
+% \subsection{\cs{DocumentMetadata}/\cs{DeclareDocumentMetadata}}
 %    \begin{macrocode}
 %<@@=pdfmanagement>
 %<*header>
@@ -190,86 +199,136 @@
   {Initialize document metadata}
 %</header>
 %    \end{macrocode}
-% \cs{DeclareDocumentMetadata} should for now not be used after
+% \cs{DocumentMetadata} will be defined by the kernel in short time.
+% So we define it and the keys here only if it is not already defined.
+%
+% At first we have to define the older alias \cs{DeclareDocumentMetadata} if
+% \cs{DocumentMetadata} is already defined in a newer LaTeX version. Here
+% we load the latex-lab support (if it hasn't been loaded
+% before) and redefine then \cs{DeclareDocumentMetadata}
+% to \cs{DocumentMetadata}
+%
+%    \begin{macrocode}
+%<*package>
+\cs_if_exist:NT \DocumentMetadata
+   {
+     \cs_new_protected:Npn \DeclareDocumentMetadata
+        {
+          \cs_if_free:NT \DocumentMetadata
+            {
+              \file_if_exist_input:nF {documentmetadata-support.ltx}%
+               {
+                 \@latex@error
+                   {No~support~files~for~\noexpand\DeclareDocumentMetadata~found}
+                   {
+                     Is~the~'LaTeX-lab'~bundle~installed?
+                     \MessageBreak
+                     Without~it,~the~declaration~is~ignored.
+                   }
+                \let\DeclareDocumentMetadata\@gobble
+               }
+            }
+          \RenewDocumentCommand \DeclareDocumentMetadata {}
+           { \DocumentMetadata }
+          \DocumentMetadata
+        }
+    }
+%    \end{macrocode}
+% Now we provide a definition for \cs{DocumentMetadata} if it doesn't exist yet.
+%    \begin{macrocode}
+\cs_if_free:NT \DocumentMetadata
+  {
+%    \end{macrocode}
+% \cs{DocumentMetadata} should for now not be used after
 % \cs{documentclass} so we error in this case. It can be used more than once
 % but follow-up calls should not do the initialization code.
 %    \begin{macrocode}
-%<*package>
-\prop_gput:Nnn \g_msg_module_type_prop { document } { LaTeX }
-\prop_gput:Nnn \g_msg_module_name_prop { document } { DocumentMetadata }
-\msg_new:nnn  { document } { setup-after-documentclass }
-              {
-                \token_to_str:N \DeclareDocumentMetadata \c_space_tl
-                should~be~used~only~before~\token_to_str:N\documentclass
-              }
-\msg_new:nnn  { document } { latex-lab-pkg-missing }
-              {
-                LaTeX-lab~package~'#1'~not~found.
-              }
-%    \end{macrocode}
-% \begin{macro}{\DeclareDocumentMetadata}
-%    \begin{macrocode}
-\NewDocumentCommand\DeclareDocumentMetadata { m }
-  {
-    \cs_if_eq:NNTF \documentclass \@twoclasseserror
-      { \msg_error:nn { document }{ setup-after-documentclass } }
+    \prop_gput:Nnn \g_msg_module_type_prop { document } { LaTeX }
+    \prop_gput:Nnn \g_msg_module_name_prop { document } { DocumentMetadata }
+    \msg_new:nnn
+      { document } { setup-after-documentclass }
       {
+        \token_to_str:N \DocumentMetadata \c_space_tl
+        should~be~used~only~before~\token_to_str:N\documentclass
+      }
+    \msg_new:nnn
+      { document } { latex-lab-pkg-missing }
+      {
+        LaTeX-lab~package~'#1'~not~found.
+      }
+%    \end{macrocode}
+% \begin{macro}{\DocumentMetadata}
+%    \begin{macrocode}
+    \NewDocumentCommand\DocumentMetadata { m }
+      {
+        \cs_if_eq:NNTF \documentclass \@twoclasseserror
+          { \msg_error:nn { document }{ setup-after-documentclass } }
+          {
 %    \end{macrocode}
 % The wanted backend must be detected first, we read the init key and then
 % force the loading by loading expl3.
 % The backend can contains management commands, so the boolean should be set to true first.
 %    \begin{macrocode}
-        \bool_gset_true:N \g_@@_active_bool
-        \keys_set_groups:nnn { document / metadata} {init}{ #1 }
+            \bool_gset_true:N \g_@@_active_bool
+            \keys_set_groups:nnn { document / metadata} {init}{ #1 }
         %if no backend has been loaded force it now:
-        \str_if_exist:NF \c_sys_backend_str
-          {
-            \sys_load_backend:n {}
-          }
+            \str_if_exist:NF \c_sys_backend_str
+              {
+                \sys_load_backend:n {}
+              }
 %    \end{macrocode}
 % Now we load the extra backend code
 %    \begin{macrocode}
         \ExplSyntaxOn\makeatletter
-          \file_input:n {l3backend-testphase-\c_sys_backend_str.def}
+              \file_input:n {l3backend-testphase-\c_sys_backend_str.def}
         \ExplSyntaxOff\makeatother
 %    \end{macrocode}
 % set the default language, process the rest of the keys,
 % and setup the generic driver
 %    \begin{macrocode}
-        \keys_set_filter:nnn  { document / metadata } { init } { lang=en-US, #1 }
-        \bool_if:NT \g_@@_active_bool
-          {
-            \PassOptionsToPackage{customdriver=hgeneric-testphase}{hyperref}
-          }
+            \keys_set_filter:nnn  { document / metadata } { init } { lang=en-US, #1 }
+            \bool_if:NT \g_@@_active_bool
+              {
+                \PassOptionsToPackage{customdriver=hgeneric-testphase}{hyperref}
+              }
 %    \end{macrocode}
 % \cs{pdfmanagement_add:nnn} has collected values in this hook.
 %    \begin{macrocode}
-        \hook_use_once:n {pdfmanagement/add}
+           \hook_use_once:n {pdfmanagement/add}
 %    \end{macrocode}
-% Redefine \cs{DeclareDocumentMetadata} so that it only process the keys.
+% Redefine \cs{DocumentMetadata} so that it only process the keys.
 % We need to update the hyperref option if the active status changes.
 %    \begin{macrocode}
-        \RenewDocumentCommand\DeclareDocumentMetadata { m }
-          {
-            \keys_set_filter:nnn  { document / metadata } { init } { ##1 }
-            \bool_if:NTF \g_@@_active_bool
-             {
-               \str_remove_all:cn {opt@hyperref.sty}{customdriver=hgeneric-testphase}
-               \PassOptionsToPackage{customdriver=hgeneric-testphase}{hyperref}
-             }
-             {
-               \str_remove_all:cn {opt@hyperref.sty}{customdriver=hgeneric-testphase}
-             }
-          }
+           \RenewDocumentCommand\DocumentMetadata { m }
+              {
+                \keys_set_filter:nnn  { document / metadata } { init } { ##1 }
+                \bool_if:NTF \g_@@_active_bool
+                  {
+                    \str_remove_all:cn
+                      {opt@hyperref.sty}{customdriver=hgeneric-testphase}
+                    \PassOptionsToPackage
+                      {customdriver=hgeneric-testphase}{hyperref}
+                 }
+                 {
+                   \str_remove_all:cn
+                     {opt@hyperref.sty}{customdriver=hgeneric-testphase}
+                 }
+              }
 %    \end{macrocode}
 % Load more modules, the testphase code and the firstaid code.
 %    \begin{macrocode}
-        \g_@@_testphase_tl
-        \RequirePackage{pdfmanagement-firstaid}
+            \g_@@_testphase_tl
+            \RequirePackage{pdfmanagement-firstaid}
+          }
       }
+%    \end{macrocode}
+% At last we need to provide the older alias here too
+%    \begin{macrocode}
+    \NewDocumentCommand\DeclareDocumentMetadata{}{\DocumentMetadata}
   }
 %    \end{macrocode}
 % \end{macro}
+%
 % \subsection{Container for document Properties}
 % The container for the document properties is a prop
 % \begin{variable}{\g_@@_documentproperties_prop}
@@ -314,7 +373,7 @@
   }
 %    \end{macrocode}
 % \end{macro}
-%  \subsection{The keys for \cs{DeclareDocumentMetadata}}
+%  \subsection{The keys for \cs{DocumentMetadata}}
 %  As they use \cs{AddToDocumentProperties} they have to come after
 %  it has been defined.
 %
