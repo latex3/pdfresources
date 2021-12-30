@@ -117,8 +117,10 @@
 %    \item[\texttt{testphase}] This key is used to load testphase code. The values it accepts
 %    and their effect will change over time, when testphase packages are added or
 %    removed when the code is moved into the kernel. The value
-%    \texttt{tagpdf} will the tagpdf package, other values will try to load a package
-%    \meta{value}-testphase. The |testphase| key can only be used in the first \cs{DeclareDocumentMetadata}.
+%    \texttt{tagpdf} will load the tagpdf package. It will also issue
+%    |\tagpdfsetup{activate,paratagging,interwordspace}| and so activate tagging.
+%    Other values will be added later.
+%    The |testphase| key can only be used in the first \cs{DeclareDocumentMetadata}.
 %    \item[\texttt{activate}] This key is used to enable some document wide functions. It is
 %    currently in an experimental state. The values and their behaviour are subject to change.
 %    Currently the only value is |tagging|,
@@ -193,10 +195,16 @@
 % but follow-up calls should not do the initialization code.
 %    \begin{macrocode}
 %<*package>
+\prop_gput:Nnn \g_msg_module_type_prop { document } { LaTeX }
+\prop_gput:Nnn \g_msg_module_name_prop { document } { DocumentMetadata }
 \msg_new:nnn  { document } { setup-after-documentclass }
               {
                 \token_to_str:N \DeclareDocumentMetadata \c_space_tl
                 should~be~used~only~before~\token_to_str:N\documentclass
+              }
+\msg_new:nnn  { document } { latex-lab-pkg-missing }
+              {
+                LaTeX-lab~package~'#1'~not~found.
               }
 %    \end{macrocode}
 % \begin{macro}{\DeclareDocumentMetadata}
@@ -376,23 +384,25 @@
       {
         \tl_gput_right:Nn\g_@@_testphase_tl
           {
-            \RequirePackage{tagpdf}
-            \AddToDocumentProperties [document]{testphase/tagpdf}{loaded}
-            \tagpdfsetup{activate,paratagging,interwordspace}
-            \AddToDocumentProperties [document]{tagging}{active}
-            \AddToDocumentProperties [document]{tagging/para}{active}
-            \AddToDocumentProperties [document]{tagging/interwordspace}{active}
+            \file_if_exist_input:nF {tagpdf-latex-lab-testphase.ltx}
+              {
+                \RequirePackage{tagpdf}
+                \AddToDocumentProperties [document]{testphase/tagpdf}{loaded}
+                \tagpdfsetup{activate,paratagging,interwordspace}
+                \AddToDocumentProperties [document]{tagging}{active}
+                \AddToDocumentProperties [document]{tagging/para}{active}
+                \AddToDocumentProperties [document]{tagging/interwordspace}{active}
+              }
           }
       }
     ,testphase / unknown .code:n =
       {
         \tl_gput_right:Nn\g_@@_testphase_tl
            {
-             \AddToHook{class/after}
-               {
-                 \RequirePackage{#1-testphase}
-                 \AddToDocumentProperties [document]{testphase/#1}{loaded}
-               }
+             \file_if_exist_input:nF {#1-latex-lab-testphase.ltx}
+              {
+                 \msg_warning:nnn{document}{latex-lab-pkg-missing}{#1}
+              }
            }
       }
     ,activate .multichoice:
