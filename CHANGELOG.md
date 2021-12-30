@@ -12,6 +12,7 @@ this project uses date-based 'snapshot' version identifiers.
  - `testphase=tagpdf` will execute the tagpdf keys `activate,paratagging,interwordspace`
     and so automatically activate tagging. 
  - testphase will now load files from the latex-lab bundle  
+ - renamed `\DeclareDocumentMetadata` to `\DocumentMetadata` (the older version is still provided).
  
 ### Fixed
 
