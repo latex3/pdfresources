@@ -1,0 +1,196 @@
+% !Mode:: "TeX:UTF-8:Main"
+\RequirePackage{pdfmanagement-testphase}
+\DeclareDocumentMetadata{
+   uncompress,
+   testphase={tagpdf},
+   activate=tagging,pdfversion=2.0
+  }
+
+
+\documentclass{article}
+\usepackage{graphicx,iftex,hyperref,lipsum}
+\ExplSyntaxOn
+%backend code
+% dvips: probably no-op
+% pdftex
+%\sys_if_engine_pdftex:T
+% {
+%   \cs_new_protected:Npn \@@_backend_struct_destination:nnn #1#2#3 %#1 structure ref
+%  {
+%%<*luatex>
+%    \tex_pdfextension:D dest ~
+%%</luatex>
+%%<*pdftex>
+%    \tex_pdfdest:D
+%%</pdftex>
+%        name {#1}
+%        \str_case:nnF {#2}
+%          {
+%            { xyz }   { xyz }
+%            { fit }   { fit }
+%            { fitb }  { fitb }
+%            { fitbh } { fitbh }
+%            { fitbv } { fitbv }
+%            { fith }  { fith }
+%            { fitv }  { fitv }
+%            { fitr }  { fitr }
+%          }
+%          { xyz ~ zoom \fp_eval:n { #2 * 10 } }
+%        \scan_stop:
+%  }
+%
+%
+% }
+
+
+%destinations
+
+\bool_new:N \l_pdf_struct_destination_bool
+\tl_new:N   \l_pdf_struct_destination_tl
+\bool_set_true:N \l_pdf_struct_destination_bool
+\tl_set:Nn \l_pdf_struct_destination_tl { __tag/struct/\g__tag_struct_stack_current_tl }
+%goto links
+\ifxetex
+% with dest one could create a "named" structure destination, but
+% as the pdf according to the reference wants an array, we use obj
+% so that we can reference it:
+\cs_set_protected:Npn \__pdf_backend_destination:nn #1#2
+  {
+    \__pdf_backend:x
+      {
+        dest ~ ( \exp_not:n {#1} )
+        [
+          @thispage
+          \str_case:nnF {#2}
+            {
+              { xyz }   { /XYZ ~ @xpos ~ @ypos ~ null }
+              { fit }   { /Fit }
+              { fitb }  { /FitB }
+              { fitbh } { /FitBH }
+              { fitbv } { /FitBV ~ @xpos }
+              { fith }  { /FitH ~ @ypos }
+              { fitv }  { /FitV ~ @xpos }
+              { fitr }  { /Fit }
+            }
+            { /XYZ ~ @xpos ~ @ypos ~ \fp_eval:n { (#2) / 100 } }
+        ]
+      }
+    \bool_if:NT \l_pdf_struct_destination_bool
+     {
+      \__pdf_backend:x
+       {
+        obj ~ @pdf.dest.\exp_not:n{#1}
+        [
+          \exp_args:Ne \pdf_object_ref:n { \l_pdf_struct_destination_tl }
+          \str_case:nnF {#2}
+            {
+              { xyz }   { /XYZ ~ @xpos ~ @ypos ~ null }
+              { fit }   { /Fit }
+              { fitb }  { /FitB }
+              { fitbh } { /FitBH }
+              { fitbv } { /FitBV ~ @xpos }
+              { fith }  { /FitH ~ @ypos }
+              { fitv }  { /FitV ~ @xpos }
+              { fitr }  { /Fit }
+            }
+            { /XYZ ~ @xpos ~ @ypos ~ \fp_eval:n { (#2) / 100 } }
+        ]
+      }
+     }
+  }
+
+\cs_set_protected:Npn \__pdf_backend_link_begin_goto:nnw #1#2
+  {
+   \bool_if:NTF \l_pdf_struct_destination_bool
+     {
+       \__pdf_backend_link_begin:n { #1 /Subtype /Link /A << /S /GoTo /D ( #2 ) /SD~@pdf.dest.#2  >> }
+     }
+     {
+       \__pdf_backend_link_begin:n { #1 /Subtype /Link /A << /S /GoTo /D ( #2 ) >> }
+     }
+  }
+
+\fi
+
+\ExplSyntaxOff
+\begin{document}
+
+\lipsum[1-6]
+
+\tagstructbegin{tag=H1}
+\ExplSyntaxOn\makeatletter
+%\__tag_prop_gput:cnx
+%          { g__tag_struct_\int_eval:n {\c@g__tag_struct_abs_int}_prop }
+%          { ID }
+%          { (someID) }
+\ExplSyntaxOff\makeatother\refstepcounter{section}\label{blub}section\tagstructend
+%\ExplSyntaxOn
+%\__pdf_backend_destination:nn          {earth2}{xyz}bbb
+%
+%%@@/struct/\g_@@_struct_stack_current_tl
+%%\tl_show:N \g__tag_struct_stack_current_tl
+%\par
+%
+%aaa\__pdf_backend_destination:nn          {earth}{xyz}
+%%\__pdf_backend_struct_destination:nnn  {__tag/struct/1}{earth}{xyz}
+%
+%\exp_args:Nx
+% \__pdf_backend_link_begin:n
+%    { /Subtype /Link /A << /S /GoTo /D ( earth ) /SD~ @pdf.dest.earth >> }
+% blub
+% \__pdf_backend_link_end:
+%
+%
+% \__pdf_backend_link_begin:n
+%    { /Subtype /Link /A << /S /GoTo /D ( earth2 ) /SD~ @pdf.dest.earth2 >> }
+% blub
+% \__pdf_backend_link_end:
+%% \pdf_object_ref_last:
+%\ExplSyntaxOff
+
+\lipsum 
+
+xx\ref{blub}
+\end{document}
+
+
+
+% similar adaption needed
+%\cs_new_protected:Npn \__pdf_backend_destination_struct:nnnn #1#2#3#4
+%  {
+%    \exp_args:Ne \__pdf_backend_destination_struct_aux:nnnn
+%      { \dim_eval:n {#2} } {#1} {#3} {#4}
+%  }
+%\cs_new_protected:Npn \__pdf_backend_destination_struct_aux:nnnn #1#2#3#4
+%  {
+%    \vbox_to_zero:n
+%      {
+%        \__kernel_kern:n {#4}
+%        \hbox:n
+%          {
+%            \__pdf_backend:n { obj ~ @pdf_ #2 _llx ~ @xpos }
+%            \__pdf_backend:n { obj ~ @pdf_ #2 _lly ~ @ypos }
+%          }
+%        \tex_vss:D
+%      }
+%    \__kernel_kern:n {#1}
+%    \vbox_to_zero:n
+%      {
+%        \__kernel_kern:n { -#3 }
+%        \hbox:n
+%          {
+%            \__pdf_backend:n
+%              {
+%                dest ~ (#2)
+%                [
+%                  @thispage
+%                  /FitR ~
+%                    @pdf_ #2 _llx ~ @pdf_ #2 _lly ~
+%                    @xpos ~ @ypos
+%                ]
+%              }
+%          }
+%        \tex_vss:D
+%      }
+%    \__kernel_kern:n { -#1 }
+%  }
