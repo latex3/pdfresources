@@ -3,7 +3,8 @@
 \DeclareDocumentMetadata{
    uncompress,
    testphase={tagpdf},
-   activate=tagging,pdfversion=2.0
+   activate=tagging,pdfversion=2.0,
+   %backend=dvipdfmx
   }
 
 
@@ -43,80 +44,151 @@
 % }
 
 
-%destinations
 
 \bool_new:N \l_pdf_struct_destination_bool
 \tl_new:N   \l_pdf_struct_destination_tl
+
+%dvips: no-op?
+%xetex + dvipdfmx
+\bool_if:nT {\str_if_eq_p:Vn\c_sys_backend_str {xetex} ||\str_if_eq_p:Vn\c_sys_backend_str {dvipdfmx} } 
+{
+  % The pdf according to the reference wants an array, so we use obj for the structure destination
+  % so that we can reference it:
+  \cs_set_protected:Npn \__pdf_backend_destination:nn #1#2
+    {
+      \__pdf_backend:x
+        {
+          dest ~ ( \exp_not:n {#1} )
+          [
+            @thispage
+            \str_case:nnF {#2}
+              {
+                { xyz }   { /XYZ ~ @xpos ~ @ypos ~ null }
+                { fit }   { /Fit }
+                { fitb }  { /FitB }
+                { fitbh } { /FitBH }
+                { fitbv } { /FitBV ~ @xpos }
+                { fith }  { /FitH ~ @ypos }
+                { fitv }  { /FitV ~ @xpos }
+                { fitr }  { /Fit }
+              }
+              { /XYZ ~ @xpos ~ @ypos ~ \fp_eval:n { (#2) / 100 } }
+          ]
+        }
+      \bool_lazy_and:nnT 
+        {\l_pdf_struct_destination_bool}
+        {\exp_args:Ne \pdf_object_if_exist_p:n { \l_pdf_struct_destination_tl }} 
+        {
+          \__pdf_backend:x
+           {
+            obj ~ @pdf.SDest.\exp_not:n{#1}
+            [
+              \exp_args:Ne \pdf_object_ref:n { \l_pdf_struct_destination_tl }
+              \str_case:nnF {#2}
+                {
+                  { xyz }   { /XYZ ~ @xpos ~ @ypos ~ null }
+                  { fit }   { /Fit }
+                  { fitb }  { /FitB }
+                  { fitbh } { /FitBH }
+                  { fitbv } { /FitBV ~ @xpos }
+                  { fith }  { /FitH ~ @ypos }
+                  { fitv }  { /FitV ~ @xpos }
+                  { fitr }  { /Fit }
+                }
+                { /XYZ ~ @xpos ~ @ypos ~ \fp_eval:n { (#2) / 100 } }
+            ]
+          }
+        }
+    }
+  \cs_set_protected:Npn \__pdf_backend_destination_aux:nnnn #1#2#3#4
+    {
+      \vbox_to_zero:n
+        {
+          \__kernel_kern:n {#4}
+          \hbox:n
+            {
+              \__pdf_backend:n { obj ~ @pdf_ #2 _llx ~ @xpos }
+              \__pdf_backend:n { obj ~ @pdf_ #2 _lly ~ @ypos }
+            }
+          \tex_vss:D
+        }
+      \__kernel_kern:n {#1}
+      \vbox_to_zero:n
+        {
+          \__kernel_kern:n { -#3 }
+          \hbox:n
+            {
+              \__pdf_backend:n
+                {
+                  dest ~ (#2)
+                  [
+                    @thispage
+                    /FitR ~
+                      @pdf_ #2 _llx ~ @pdf_ #2 _lly ~
+                      @xpos ~ @ypos
+                  ]
+                }
+              \bool_lazy_and:nnT
+                {\l_pdf_struct_destination_bool}
+                {\exp_args:Ne \pdf_object_if_exist_p:n { \l_pdf_struct_destination_tl }}
+                {\tl_show:n{#2}
+                  \__pdf_backend:x
+                    {
+                      obj ~ @pdf.SDest.\exp_not:n{#2}
+                      [
+                        \exp_args:Ne \pdf_object_ref:n { \l_pdf_struct_destination_tl }
+                        /FitR ~
+                          @pdf_ #2 _llx ~ @pdf_ #2 _lly ~
+                          @xpos ~ @ypos
+                      ]
+                    }
+                }                
+            }
+          \tex_vss:D
+        }
+      \__kernel_kern:n { -#1 }
+    }
+  \cs_set_protected:Npn \__pdf_backend_link_begin_goto:nnw #1#2
+    {
+     \bool_if:NTF \l_pdf_struct_destination_bool
+       {
+         \__pdf_backend_link_begin:n { #1 /Subtype /Link /A << /S /GoTo /D ( #2 ) /SD~@pdf.SDest.#2  >> }
+       }
+       {
+         \__pdf_backend_link_begin:n { #1 /Subtype /Link /A << /S /GoTo /D ( #2 ) >> }
+       }
+    }
+}
+
+%pdftex
+
+\bool_lazy_all:nT
+  {
+    { \str_if_eq_p:Vn\c_sys_backend_str {pdftex} }    
+    { \int_compare_p:nNn {\tex_pdftexversion:D } > {139} }
+    { \int_compare_p:nNn {\tex_pdftexrevision:D } > {23} }
+  }   
+  {
+   %redefine here
+  }
+  
+
+%for the tests ...
 \bool_set_true:N \l_pdf_struct_destination_bool
 \tl_set:Nn \l_pdf_struct_destination_tl { __tag/struct/\g__tag_struct_stack_current_tl }
-%goto links
-\ifxetex
-% with dest one could create a "named" structure destination, but
-% as the pdf according to the reference wants an array, we use obj
-% so that we can reference it:
-\cs_set_protected:Npn \__pdf_backend_destination:nn #1#2
-  {
-    \__pdf_backend:x
-      {
-        dest ~ ( \exp_not:n {#1} )
-        [
-          @thispage
-          \str_case:nnF {#2}
-            {
-              { xyz }   { /XYZ ~ @xpos ~ @ypos ~ null }
-              { fit }   { /Fit }
-              { fitb }  { /FitB }
-              { fitbh } { /FitBH }
-              { fitbv } { /FitBV ~ @xpos }
-              { fith }  { /FitH ~ @ypos }
-              { fitv }  { /FitV ~ @xpos }
-              { fitr }  { /Fit }
-            }
-            { /XYZ ~ @xpos ~ @ypos ~ \fp_eval:n { (#2) / 100 } }
-        ]
-      }
-    \bool_if:NT \l_pdf_struct_destination_bool
-     {
-      \__pdf_backend:x
-       {
-        obj ~ @pdf.dest.\exp_not:n{#1}
-        [
-          \exp_args:Ne \pdf_object_ref:n { \l_pdf_struct_destination_tl }
-          \str_case:nnF {#2}
-            {
-              { xyz }   { /XYZ ~ @xpos ~ @ypos ~ null }
-              { fit }   { /Fit }
-              { fitb }  { /FitB }
-              { fitbh } { /FitBH }
-              { fitbv } { /FitBV ~ @xpos }
-              { fith }  { /FitH ~ @ypos }
-              { fitv }  { /FitV ~ @xpos }
-              { fitr }  { /Fit }
-            }
-            { /XYZ ~ @xpos ~ @ypos ~ \fp_eval:n { (#2) / 100 } }
-        ]
-      }
-     }
-  }
-
-\cs_set_protected:Npn \__pdf_backend_link_begin_goto:nnw #1#2
-  {
-   \bool_if:NTF \l_pdf_struct_destination_bool
-     {
-       \__pdf_backend_link_begin:n { #1 /Subtype /Link /A << /S /GoTo /D ( #2 ) /SD~@pdf.dest.#2  >> }
-     }
-     {
-       \__pdf_backend_link_begin:n { #1 /Subtype /Link /A << /S /GoTo /D ( #2 ) >> }
-     }
-  }
-
-\fi
 
 \ExplSyntaxOff
 \begin{document}
+%\lipsum[1-6]
+\ExplSyntaxOn
+abc\pdf_destination:nnnn{xx}{1cm}{1cm}{1cm}
 
-\lipsum[1-6]
-
+\par x\__pdf_backend_link_begin:n
+    { /Subtype /Link /A << /S /GoTo /D ( xx ) /SD~ @pdf.SDest.xx >> }
+ blub
+ \__pdf_backend_link_end:
+\ExplSyntaxOff
+\end{document}
 \tagstructbegin{tag=H1}
 \ExplSyntaxOn\makeatletter
 %\__tag_prop_gput:cnx
@@ -124,7 +196,7 @@
 %          { ID }
 %          { (someID) }
 \ExplSyntaxOff\makeatother\refstepcounter{section}\label{blub}section\tagstructend
-%\ExplSyntaxOn
+\ExplSyntaxOn
 %\__pdf_backend_destination:nn          {earth2}{xyz}bbb
 %
 %%@@/struct/\g_@@_struct_stack_current_tl
@@ -141,14 +213,14 @@
 % \__pdf_backend_link_end:
 %
 %
-% \__pdf_backend_link_begin:n
-%    { /Subtype /Link /A << /S /GoTo /D ( earth2 ) /SD~ @pdf.dest.earth2 >> }
-% blub
-% \__pdf_backend_link_end:
+ \__pdf_backend_link_begin:n
+    { /Subtype /Link /A << /S /GoTo /D ( xx ) /SD~ @pdf.dest.xx >> }
+ blub
+ \__pdf_backend_link_end:
 %% \pdf_object_ref_last:
-%\ExplSyntaxOff
+\ExplSyntaxOff
 
-\lipsum 
+\lipsum
 
 xx\ref{blub}
 \end{document}
@@ -193,4 +265,4 @@ xx\ref{blub}
 %        \tex_vss:D
 %      }
 %    \__kernel_kern:n { -#1 }
-%  }
+%  } 
