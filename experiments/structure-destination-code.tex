@@ -3,48 +3,16 @@
 \DeclareDocumentMetadata{
    uncompress,
    testphase={tagpdf},
-   activate=tagging,pdfversion=2.0,
+   activate=tagging,
+   pdfversion=2.0,
    %backend=dvipdfmx
   }
 
 
 \documentclass{article}
-\usepackage{graphicx,iftex,hyperref,lipsum}
+\usepackage{graphicx,iftex,lipsum}
+\usepackage{hyperref}
 \ExplSyntaxOn
-%backend code
-% dvips: probably no-op
-% pdftex
-%\sys_if_engine_pdftex:T
-% {
-%   \cs_new_protected:Npn \@@_backend_struct_destination:nnn #1#2#3 %#1 structure ref
-%  {
-%%<*luatex>
-%    \tex_pdfextension:D dest ~
-%%</luatex>
-%%<*pdftex>
-%    \tex_pdfdest:D
-%%</pdftex>
-%        name {#1}
-%        \str_case:nnF {#2}
-%          {
-%            { xyz }   { xyz }
-%            { fit }   { fit }
-%            { fitb }  { fitb }
-%            { fitbh } { fitbh }
-%            { fitbv } { fitbv }
-%            { fith }  { fith }
-%            { fitv }  { fitv }
-%            { fitr }  { fitr }
-%          }
-%          { xyz ~ zoom \fp_eval:n { #2 * 10 } }
-%        \scan_stop:
-%  }
-%
-%
-% }
-
-
-
 \bool_new:N \l_pdf_struct_destination_bool
 \tl_new:N   \l_pdf_struct_destination_tl
 
@@ -169,7 +137,7 @@
     { \int_compare_p:nNn {\tex_pdftexrevision:D } > {23} }
   }
   {
-   %redefine here
+   %redefinitions
    \cs_set_protected:Npn \__pdf_backend_destination:nn #1#2
      {
        \tex_pdfdest:D
@@ -223,7 +191,7 @@
       \bool_lazy_and:nnT
          {\l_pdf_struct_destination_bool}
          {\exp_args:Ne \pdf_object_if_exist_p:n { \l_pdf_struct_destination_tl }}
-         { 
+         {
            \tex_pdfdest:D
              struct~
              \int_use:c
@@ -233,14 +201,14 @@
              width  \dim_eval:n {#2} ~
              height \dim_eval:n {#3} ~
              depth  \dim_eval:n {#4} \scan_stop:
-         } 
-     }  
+         }
+     }
    \cs_set_protected:Npn \__pdf_backend_link_begin_goto:nnw #1#2
-     { 
+     {
       \bool_if:NTF \l_pdf_struct_destination_bool
         { \__pdf_backend_link_begin:nnnw {#1} { goto~struct~name~{#2}~name } {#2}}
-        { \__pdf_backend_link_begin:nnnw {#1} { goto~name } {#2}} 
-     }     
+        { \__pdf_backend_link_begin:nnnw {#1} { goto~name } {#2}}
+     }
   }
 
 %luatex. The trigger is the development id, if it is larger than 7468 we assume that structure destinations are there.
@@ -250,7 +218,7 @@
     { \int_compare_p:nNn {\directlua{tex.print(status.list()["development_id"])} } > {7468} }
   }
   {
-   %redefine here
+   %redefinitions
    \cs_set_protected:Npn \__pdf_backend_destination:nn #1#2
      {
        \tex_pdfextension:D dest ~
@@ -321,18 +289,32 @@
       \bool_if:NTF \l_pdf_struct_destination_bool
         { \__pdf_backend_link_begin:nnnw {#1} { goto~struct~name~{#2}~name } {#2}}
         { \__pdf_backend_link_begin:nnnw {#1} { goto~name } {#2}}
-     }     
+     }
   }
-  
+
 %for the tests ...
 \bool_set_true:N \l_pdf_struct_destination_bool
 \tl_set:Nn \l_pdf_struct_destination_tl { __tag/struct/\g__tag_struct_stack_current_tl }
 
+%avoid that page destinations count as structure ...
+\makeatletter
+\tl_put_left:Nn\Hy@EveryPageBoxHook{\bool_set_false:N \l_pdf_struct_destination_bool}
+\makeatletter
 \ExplSyntaxOff
+%\tagpdfsetup{exclude-header-footer=pagination}
 \begin{document}
 
+\lipsum*{1-4}DEST\phantomsection\label{blub}
+\newpage
+\pageref{blub}
+\end{document}
+
+abc\tagmcend\tagstructbegin{tag=Artifact}\tagmcbegin{tag=Artifact}xxx\tagmcend\tagstructend\tagmcbegin{tag=P}blub
 \ExplSyntaxOn
-xx\pdf_destination:nn{blub}{fit}
+%xx\pdf_destination:nn{blub}{fit}
+\ExplSyntaxOff
+\end{document}
+
 %abc\pdf_destination:nnnn{xx}{1cm}{1cm}{1cm}
 %
 %\par x\__pdf_backend_link_begin:n
