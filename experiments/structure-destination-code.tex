@@ -170,6 +170,45 @@
   }   
   {
    %redefine here
+   \cs_set_protected:Npn \__pdf_backend_destination:nn #1#2
+     {
+       \tex_pdfdest:D
+           name {#1}
+           \str_case:nnF {#2}
+             {
+               { xyz }   { xyz }
+               { fit }   { fit }
+               { fitb }  { fitb }
+               { fitbh } { fitbh }
+               { fitbv } { fitbv }
+               { fith }  { fith }
+               { fitv }  { fitv }
+               { fitr }  { fitr }
+             }
+             { xyz ~ zoom \fp_eval:n { #2 * 10 } }
+           \scan_stop:
+       \bool_if:NT\l_pdf_struct_destination_bool
+        {    
+          \tex_pdfdest:D
+              struct~
+              \int_use:c 
+                { c__pdf_backend_object_ \exp_args:Ne \tl_to_str:n {\l_pdf_struct_destination_tl} _int }~
+              name {#1}
+              \str_case:nnF {#2}
+                {
+                  { xyz }   { xyz }
+                  { fit }   { fit }
+                  { fitb }  { fitb }
+                  { fitbh } { fitbh }
+                  { fitbv } { fitbv }
+                  { fith }  { fith }
+                  { fitv }  { fitv }
+                  { fitr }  { fitr }
+                }
+                { xyz ~ zoom \fp_eval:n { #2 * 10 } }
+              \scan_stop:
+          } 
+     }
   }
   
 
@@ -181,12 +220,30 @@
 \begin{document}
 %\lipsum[1-6]
 \ExplSyntaxOn
-abc\pdf_destination:nnnn{xx}{1cm}{1cm}{1cm}
-
-\par x\__pdf_backend_link_begin:n
-    { /Subtype /Link /A << /S /GoTo /D ( xx ) /SD~ @pdf.SDest.xx >> }
- blub
- \__pdf_backend_link_end:
+\tl_set:Nx 
+  \l_tmpa_tl
+   {
+     \bool_if:NT\l_pdf_struct_destination_bool {struct ~\int_use:c
+        { c__pdf_backend_object_ \exp_args:Ne \tl_to_str:n {\l_pdf_struct_destination_tl} _int }}
+   }
+\tl_show:N\l_tmpa_tl
+blub
+%\exp_last_unbraced:Ne
+\pdfdest %\l_tmpa_tl~ 
+  %{
+%   \bool_if:NT\l_pdf_struct_destination_bool
+%   {struct ~\int_use:c
+%        { c__pdf_backend_object_ \exp_args:Ne \tl_to_str:n {\l_pdf_struct_destination_tl} _int }
+%   }
+%  }
+ struct~18~
+  ~ name~{blub}~fit
+%abc\pdf_destination:nnnn{xx}{1cm}{1cm}{1cm}
+%
+%\par x\__pdf_backend_link_begin:n
+%    { /Subtype /Link /A << /S /GoTo /D ( xx ) /SD~ @pdf.SDest.xx >> }
+% blub
+% \__pdf_backend_link_end:
 \ExplSyntaxOff
 \end{document}
 \tagstructbegin{tag=H1}
