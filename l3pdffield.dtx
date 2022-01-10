@@ -343,7 +343,7 @@
 % \Arg{key-val} can be an arbitrary collection of the keys of the module.
 % \end{function}
 %
-% \begin{function}{create-style}
+% \begin{function}{style}
 % \begin{syntax}
 %  |style| = \Arg{style}
 % \end{syntax}
@@ -463,7 +463,7 @@
 % The value is passed through \cs{pdf_string_from_unicode:nnN}
 % \end{function}
 %
-% \begin{function}{mappingname,TM}
+% \begin{function}{FT}
 %  \begin{syntax}
 %   |FT| = |Btn|\verb"|"|Tx|\verb"|"|Ch|\verb"|"|Sig|
 %  \end{syntax}
@@ -710,6 +710,13 @@
 % all values are zero.
 % \end{function}
 %
+% \begin{function}{tag}
+%  \begin{syntax}
+%   |tag| = |true|\verb+|+|false|
+%  \end{syntax}
+% This key is related to tagging and enables/disables the tagging.
+% \end{function}
+%
 % \begin{function}{parent}
 %  \begin{syntax}
 %   |parent| = \meta{field ID}\\
@@ -763,7 +770,7 @@
 %  \begin{syntax}
 %  |AA/*| = \meta{ECMAScript}
 %  \end{syntax}
-% * should be one of |F|, |Bl|, |D|, |U|, |E|, |X|, |PO|, |PC|, |PV|, |PI|.
+% * should be one of |Fo|, |Bl|, |D|, |U|, |E|, |X|, |PO|, |PC|, |PV|, |PI|.
 % Alias names for the first six keys are
 % |onfocus|, |onblur|, |onmousedown|, |onmouseup|, |onenter|,  |onexit|.
 % These keys adds then the respective key to the |/AA| dictionary
@@ -858,7 +865,7 @@
 % Currently no special syntax support
 % is implemented. They will be handled if needed when the code for
 % push buttons is developed and tested.
-% \begin{function}{MK/*}
+% \begin{function}{MK/I,MK/RI,MK/IX,MK/IF,MK/TP}
 %  \begin{syntax}
 %  |MK/*| = \meta{various}
 %  \end{syntax}
@@ -1743,7 +1750,7 @@
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{tag}
-% to disable tagging locall
+% to disable tagging locally
 %    \begin{macrocode}
 \keys_define:nn { pdffield }
   {
