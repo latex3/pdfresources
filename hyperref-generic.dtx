@@ -2,7 +2,7 @@
 %
 %% File: hyperref-generic.dtx
 %
-% Copyright (C) 2021 The LaTeX Project
+% Copyright (C) 2021-2022 The LaTeX Project
 %
 % It may be distributed and/or modified under the conditions of the
 % LaTeX Project Public License (LPPL), either version 1.3c of this
@@ -26,7 +26,7 @@
 %
 %<*driver>
 \RequirePackage{pdfmanagement-testphase}
-\DeclareDocumentMetadata{pdfstandard=A-2b}
+\DocumentMetadata{pdfstandard=A-2b}
 \makeatletter
 \declare@file@substitution{doc.sty}{doc-v3beta.sty}
 \makeatother
@@ -104,7 +104,7 @@
 % should start like this
 % \begin{verbatim}
 % \RequirePackage{pdfmanagement-testphase} %loads the code
-% \DeclareDocumentMetadata % activates it
+% \DocumentMetadata % activates it
 %   {
 %    %% options
 %    %% e.g. pdf version, backend:
@@ -113,6 +113,18 @@
 %   }
 %  \end{verbatim}
 %
+%  Starting with \LaTeX-2022-06-01 (or a suitable latex-dev) loading the testphase
+%  package is no longer required and this can be simplified to
+% \begin{verbatim}
+% \DocumentMetadata
+%   {
+%    %% options
+%    %% e.g. pdf version, backend:
+%    % pdfversion=1.7,
+%    % backend = dvipdfmx
+%   }
+%  \end{verbatim}
+
 %  The new driver tries to be compatible with the standard \pkg{hyperref} drivers
 %  but there are nevertheless differences. Some of them due to the still experimental
 %  status of the driver, others are design decisions: one part of the project is
@@ -201,10 +213,9 @@
 %  If the key hasn't be set, the result is empty. This gives external
 %  packages a public and reliable access to the data.
 %
-%  \item |pdflang| is deprecated. Instead \cs{DeclareDocumentMetadata}
-%  should be used:
+%  \item |pdflang| is deprecated. Instead \cs{DocumentMetadata} should be used:
 %  \begin{verbatim}
-%  \DeclareDocumentMetadata{lang=de-DE}
+%  \cs{DocumentMetadata}{lang=de-DE}
 %  \end{verbatim}
 %
 %  The value can be retrieved as |document/lang|.
@@ -626,7 +637,7 @@
 %  \section{Dropped options}
 %  A number of options are ignored by this driver
 %  \begin{description}
-%  \item[pdfversion] The pdfversion should be set in \cs{DeclareDocumentMetadata}
+%  \item[pdfversion] The pdfversion should be set in \cs{DocumentMetadata}
 %  \item[setpagesize] The key is ignored and the PDF page size is not
 %  set. Load \pkg{color} or \pkg{graphicx} or use a class which sets the PDF page size.
 %  \item[breaklinks] The option does nothing sensible anyway (apart from triggering
@@ -636,9 +647,9 @@
 %  \item[pdfa] If this option is set to true \pkg{hyperref} normally checks and sets
 %  a small number of requirements for the PDF standard PDF/A.
 %  The key is ignored with this driver. Instead the wanted standard should be declared
-%  in \cs{DeclareDocumentMetadata}:
+%  in \cs{DocumentMetadata}:
 %  \begin{verbatim}
-%  \DeclareDocumentMetadata{pdfstandard=A-2b}
+%  \DocumentMetadata{pdfstandard=A-2b}
 %  \end{verbatim}
 %  Currently |A-1b|, |A-2b|, |A-3b| can be set.
 %  The support for various requirements is still incomplete, but the parts that
@@ -882,7 +893,7 @@
 % the setting is global (and has to be done in the preamble).
 %
 % \DescribeHypkey{pdflang} The key will work, but it is recommended to the set
-% the language in \cs{DeclareDocumentMetadata} instead.
+% the language in \cs{DocumentMetadata} instead.
 %^^A %% This is an adapted version of hluatex.def
 %^^A %% meant to test the use of the commands
 %^^A %% from pdfmanagement.sty
@@ -971,31 +982,45 @@
 %    \end{macrocode}
 % At first a message for the testing of the resource management
 %    \begin{macrocode}
-\msg_new:nnnn
-  { hyp }
-  { missing-resource-management }
-  { The~PDF~resource~management~is~required~for~this~hyperref~driver! }
+\cs_if_exist:NTF \DocumentMetadata
   {
-     Activate~it~with \\
-     \tl_to_str:n{\RequirePackage{pdfmanagement-testphase}}\\
-     \tl_to_str:n{\DeclareDocumentMetadata{<options>}}\\
-     before~\tl_to_str:n{\documentclass}
+   \msg_new:nnnn
+      { hyp }
+      { missing-resource-management }
+      { The~PDF~resource~management~is~required~for~this~hyperref~driver! }
+      {
+         Activate~it~with \\
+         \tl_to_str:n{\DocumentMetadata{<options>}}\\
+         before~\tl_to_str:n{\documentclass}
+      }
   }
+  {
+    \msg_new:nnnn
+      { hyp }
+      { missing-resource-management }
+      { The~PDF~resource~management~is~required~for~this~hyperref~driver! }
+      {
+         Activate~it~with \\
+         \tl_to_str:n{\RequirePackage{pdfmanagement-testphase}}\\
+         \tl_to_str:n{\DocumentMetadata{<options>}}\\
+         before~\tl_to_str:n{\documentclass}
+      }
+   }
 %    \end{macrocode}
-% The pdfversion should be set in \cs{DeclareDocumentMetadata}
+% The pdfversion should be set in \cs{DocumentMetadata}
 %    \begin{macrocode}
 \msg_new:nnnn
   { hyp }
   { pdfversion-disabled }
   {
     This~hyperref~driver~ignores~the~pdfversion~key!\\
-    Set~the~pdfversion~in~\token_to_str:N \DeclareDocumentMetadata
+    Set~the~pdfversion~in~\token_to_str:N \DocumentMetadata
   }
   {
     For example:\\
     \tl_to_str:n
      {
-      \DeclareDocumentMetadata { pdfversion=1.7 }
+      \DocumentMetadata { pdfversion=1.7 }
      }
   }
 %    \end{macrocode}
@@ -1163,7 +1188,7 @@
 \def\Hy@numberline#1{#1\c_space_tl}   %needed by bookmark
 %    \end{macrocode}
 %
-% The pdfversion should be set in \cs{DeclareDocumentMetadata} but we must
+% The pdfversion should be set in \cs{DocumentMetadata} but we must
 % copy it to the \pkg{hyperref} command:
 %    \begin{macrocode}
 \cs_set_eq:NN \Hy@pdfminorversion \pdf_version_minor:

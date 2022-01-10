@@ -2,7 +2,7 @@
 %
 %% File: l3pdfmeta.dtx
 %
-% Copyright (C) 2018-2021 The LaTeX Project
+% Copyright (C) 2018-2022 The LaTeX Project
 %
 % It may be distributed and/or modified under the conditions of the
 % LaTeX Project Public License (LPPL), either version 1.3c of this
@@ -24,7 +24,7 @@
 %
 %<*driver>
 \RequirePackage{pdfmanagement-testphase}
-\DeclareDocumentMetadata{pdfstandard=A-2b}
+\DocumentMetadata{pdfstandard=A-2b}
 \makeatletter
 \declare@file@substitution{doc.sty}{doc-v3beta.sty}
 \makeatother
@@ -192,7 +192,7 @@
 %  reference it in a /Outputintent and that all output intents reference
 %  the same colorprofile. The value stores the subtype.
 %  {\em This requirement is detected and fulfilled by \pkg{l3pdfmeta} if the
-%   provided interface in \cs{DeclareDocumentMetadata} is used, see below}.
+%   provided interface in \cs{DocumentMetadata} is used, see below}.
 %
 % \item[|annot_flags|] in annotations the |Print| flag should be true,
 %  |Hidden|, |Invisible|, |NoView| should be false.
@@ -235,7 +235,7 @@
 %  It should be checked against the current PDF version (\cs{pdf_version:}).
 %  A failure means that the version should be changed.
 %  This check is done by \pkg{l3pdfmeta} when the version is set with
-%  \cs{DeclareDocumentMetadata} so more checks are only needed if the version is changed later.
+%  \cs{DocumentMetadata} so more checks are only needed if the version is changed later.
 %
 % \item[|named_actions|]    this requirement restricts the list of
 % allowed named actions to |NextPage|, |PrevPage|, |FirstPage|, |LastPage|.
@@ -290,7 +290,7 @@
 % The interface looks like this
 %
 % \begin{verbatim}
-%  \DeclareDocumentMetadata
+%  \DocumentMetadata
 %    {
 %      %other options for example pdfstandard
 %       colorprofiles=
@@ -318,7 +318,7 @@
 % color profile, the setting is changed to the equivalent of
 %
 % \begin{verbatim}
-%  \DeclareDocumentMetadata
+%  \DocumentMetadata
 %    {
 %      %other options
 %       pdfstandard=A-2b,
