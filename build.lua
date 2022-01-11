@@ -39,7 +39,7 @@ else
                 }
 end
 
-checkruns = 3
+checkruns = 4
 
 
   -- tl2020
@@ -67,10 +67,12 @@ checkruns = 3
 checkengines = {"luatex","pdftex","xetex"}
 
 
-checkconfigs = {"build",
-                "config-noxetex",
-                "config-luatex",
-                "config-dvips"
+checkconfigs = {"build", -- luatex, pdftex, xetex
+                "config-noxetex", --pdftex + luatex (std)
+                "config-luatex",  -- luatex
+                "config-dvips",   -- latex + dvips
+                "config-pdftex",  -- pdftex
+                "config-xetex"    -- xetex
                 }
 
 -- tagging
