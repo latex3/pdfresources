@@ -2,7 +2,7 @@
 %
 %% File: pdfmanagement-testphase.dtx
 %
-% Copyright (C) 2019-2021 The LaTeX Project
+% Copyright (C) 2019-2022 The LaTeX Project
 %
 % It may be distributed and/or modified under the conditions of the
 % LaTeX Project Public License (LPPL), either version 1.3c of this
@@ -24,7 +24,7 @@
 %
 %<*driver>
 \RequirePackage{pdfmanagement-testphase}
-\DeclareDocumentMetadata{pdfstandard=A-2b}
+\DocumentMetadata{pdfstandard=A-2b}
 \makeatletter
 %\declare@file@substitution{doc.sty}{doc-v3beta.sty}
 \makeatother
@@ -66,7 +66,7 @@
 % \begin{verbatim}
 % \RequirePackage{pdfmanagement-testphase}   % load the package
 %
-% \DeclareDocumentMetadata      % activate the PDF management (with options)
+% \DocumentMetadata      % activate the PDF management (with options)
 %     {
 %       % options
 %     }
@@ -76,6 +76,8 @@
 %  Note that the activation has to happen before the \cs{documentclass} declaration.
 %  Because of this, the package needs loading with \cs{RequirePackage}.
 %
+% Starting with LaTeX 2022-06-01 (or a suitable latex-dev) it is no longer necessary to
+% load pdfmanagement-testphase manually, using \cs{DocumentMetadata} is enough.
 %
 %
 % \section*{Feedback wanted!}
@@ -172,7 +174,7 @@
 %
 % Loading the package will only \emph{load} the modules,
 % to \emph{activate} the core PDF management the trigger command
-% \cs{DeclareDocumentMetadata} has to be used too.
+% \cs{DocumentMetadata} has to be used too.
 % The loading and activation has to be done
 % \emph{before} the \cs{documentclass} command.
 %
@@ -202,22 +204,24 @@
 % \section{Use}\label{sec:use}
 % The package should be loaded before \cs{documentclass}. To activate
 % the resource management it should be followed by
-% \cs{DeclareDocumentMetadata}\marg{key-val}.
-% The options of \cs{DeclareDocumentMetadata} are described in the documentation of
+% \cs{DocumentMetadata}\marg{key-val}.
+% The options of \cs{DocumentMetadata} are described in the documentation of
 % \pkg{ltdocinit}.
 %
 % \begin{verbatim}
 % \RequirePackage{pdfmanagement-testphase} % load the package
-% \DeclareDocumentMetadata % activates the PDF management interface
+%                                          % not needed with LaTeX 2022-06-01
+% \DocumentMetadata % activates the PDF management interface
 %     {
 %        %options
 %     }
 % \documentclass {...}
 % \end{verbatim}
 %
-% The PDF management can be deactivated either setting the key
+% The PDF management can be deactivated either setting in the \texttt{debug} key
+% the key
 % \texttt{pdfmanagement} to \texttt{false} or by commenting out
-% the whole \cs{DeclareDocumentMetadata} declaration.
+% the whole \cs{DocumentMetadata} declaration.
 %
 % To test if the PDF management is active the predicate
 % \cs{pdfmanagement_if_active:TF} can be used, see the documentation of \pkg{l3pdfmanagement}.
@@ -251,7 +255,7 @@
 %
 % \item[l3pdfmanagement] This is the core code of the PDF management.
 %
-% \item[ltdocinit] This module provides the \cs{DeclareDocumentMetadata} command.
+% \item[ltdocinit] This module provides the \cs{DocumentMetadata} command.
 %
 % \item[hyperref-generic] This module provides a new generic hyperref driver.
 % The driver will
@@ -333,23 +337,23 @@
 % Some patch code is provided by the bundle and loaded automatically,
 % but it is not complete currently. Failures are e.g. possible with complicated
 % author or title settings. The handling of dates isn't correct either yet.
-% The patch code can be disabled by using |firstaidoff=hyperxmp| in \cs{DeclareDocumentMetadata}
+% The patch code can be disabled by using |debug={firstaidoff=hyperxmp}| in \cs{DocumentMetadata}
 %
 % \subsection{tikz/pgf}
 % \pkg{pgf} writes to the page resources too and so is incompatible. The needed
 % changes are rather small and will be done in coordination with the maintainer.
 % Until this works, \pkg{pagemanagement} will load the patches automatically.
-% This can be disabled by using |firstaidoff=pgf| in \cs{DeclareDocumentMetadata}
+% This can be disabled by using |debug={firstaidoff=pgf}| in \cs{DocumentMetadata}
 %
 % \subsection{transparent}
 % The package \pkg{transparent} is incompatible. A replacement has been written
 % (\pkg{transparent-ltx}) and is loaded automatically. It requires a very recent
 % L3 programming layer!
-% This can be disabled by using |firstaidoff=transparent| in \cs{DeclareDocumentMetadata}
+% This can be disabled by using |debug={firstaidoff=transparent}| in \cs{DocumentMetadata}
 % \subsection{pdflscape}
 % The package \pkg{pdflscape} is incompatible. A replacement has been written
 % (\pkg{pdflscape-ltx}) and is loaded automatically.
-% This can be disabled by using |firstaidoff=pdflscape| in \cs{DeclareDocumentMetadata}
+% This can be disabled by using |debug={firstaidoff=pdflscape}| in \cs{DocumentMetadata}
 %
 % \subsection{colorspace}
 % The package is incompatible. Some patches
@@ -394,6 +398,7 @@
     \MessageBreak Loading~is~aborted.}{}
  \DeclareOption { debug }{}
  \newcommand\DeclareDocumentMetadata[1]{}
+ \newcommand\DocumentMetadata[1]{}
  \ProcessOptions\relax
  }
 \IfFormatAtLeastTF{2020-10-01}{}{\endinput}
@@ -418,7 +423,7 @@
 %<*package>
 %\RequirePackage{l3pdfdict}       % needed by l3pdfmanagement
 %\RequirePackage{l3pdfmanagement} % loads the core code with the boolean
-%\RequirePackage{ltdocinit}       % DeclareDocumentMetadata,
+%\RequirePackage{ltdocinit}       % DocumentMetadata,
 %% can perhaps be combined or made optional ...
 %\RequirePackage{l3pdfannot}
 %\RequirePackage{l3pdfxform-beta}

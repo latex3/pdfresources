@@ -2,7 +2,7 @@
 %
 %% File: l3pdfmanagement.dtx
 %
-% Copyright (C) 2018-2021 The LaTeX Project
+% Copyright (C) 2018-2022 The LaTeX Project
 %
 % It may be distributed and/or modified under the conditions of the
 % LaTeX Project Public License (LPPL), either version 1.3c of this
@@ -24,7 +24,7 @@
 %
 %<*driver>
 \RequirePackage{pdfmanagement-testphase}
-\DeclareDocumentMetadata{pdfstandard=A-2b}
+\DocumentMetadata{pdfstandard=A-2b}
 \makeatletter
 \declare@file@substitution{doc.sty}{doc-v3beta.sty}
 \makeatother
@@ -674,7 +674,7 @@
 % \begin{variable}{\g_@@_active_bool}
 % This boolean will control the activation of the management code.
 % It is used in the hooks, and in some backend files.
-% % \cs{DeclareDocumentMetadata} should set it to true
+% % \cs{DocumentMetadata} should set it to true
 %    \begin{macrocode}
 \bool_new:N \g_@@_active_bool
 %    \end{macrocode}
@@ -1563,7 +1563,7 @@
  }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{ Handler}
+% \begin{macro}{ \@@_handler/Catalog/Names/EmbeddedFiles_gput:n }
 % EmbeddedFiles is an array and needs a special handler to add values.
 %    \begin{macrocode}
 \pdfdict_new:n { g__pdf_Core/Catalog/Names }
