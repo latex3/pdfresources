@@ -125,10 +125,20 @@
 %    are described in the documentation of \pkg{l3pdfmeta}.
 %    \item[\texttt{testphase}] This key is used to load testphase code. The values it accepts
 %    and their effect will change over time, when testphase packages are added or
-%    removed or when the code is moved into the kernel. The value
-%    \texttt{tagpdf} will load the tagpdf package. It will also issue
-%    |\tagpdfsetup{activate,paratagging,interwordspace}| and so activate tagging.
-%    Other values will be added later.
+%    removed or when the code is moved into the kernel.
+%     \begin{description}
+%    \item[\texttt{phase-I}]
+%       This value loads code implementing the first phase of the project~\cite{blueprint}, i.e., it
+%       will load the tagpdf package. It will also activate tagging by issuing
+%       |\tagpdfsetup{activate,interwordspace}|. This phase
+%       is frozen.
+%    \item[\texttt{phase-II}]
+%       This is the current development phase.
+%       Currently it differs from \texttt{phase-I} only in one point: It will
+%       additionally activate tagging of paragraphs with
+%       |\tagpdfsetup{paratagging}|. In the upcoming months it will
+%       also enable automatic tagging of other basic document elements.
+%    \end{description}
 %    The |testphase| key can only be used in the first \cs{DocumentMetadata}.
 %    \item[\texttt{debug}] This key activates some debug options. It takes a list of key-values
 %    as value. Currently the following keys are known:
