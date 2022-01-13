@@ -1,6 +1,6 @@
 # LaTeX PDF management testphase bundle
 
-Version: 0.95i, 2021-08-28
+Version: 0.95j, 2022-01-13
 
 This package is used during a test phase to load the new PDF management code
 of LaTeX.
@@ -31,7 +31,7 @@ For manual installation: unpack by compiling the .ins, then move all
 
 
 ## Copyright (C)
-* 2021 The LaTeX Project
+* 2021-2022 The LaTeX Project
 
 ## License
 LaTeX Project Public License, version 1.3c or later.

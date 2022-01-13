@@ -1,6 +1,6 @@
 #!/usr/bin/env texlua
-packageversion="0.95i"
-packagedate="2021-08-28"
+packageversion="0.95j"
+packagedate="2022-01-13"
 
 -- Build script for "LaTeX PDF management testphase bundle" bundle
 
@@ -42,8 +42,6 @@ end
 checkruns = 4
 
 
-  -- tl2020
-  print("TL2020 or later")
 
   specialformats = specialformats or {}
   specialformats["latex"] = specialformats["latex"] or
