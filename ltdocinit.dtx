@@ -105,24 +105,34 @@
 % Currently the following keys are implemented
 %
 % \begin{description}
-%    \item[\texttt{backend}] passes the backend name to expl3.
-%^^A    This will probably be extended to  pass the value also to packages.
-%    \item[\texttt{pdfversion}] e.g. \texttt{pdfversion=1.7}
-%    \item[\texttt{uncompress}] no value. Forces an uncompressed pdf.
-%    \item[\texttt{lang}] to set the Lang entry in the Catalog.
-%    E.g. \texttt{lang=de-DE}. The initial value is |en-US|
+%    \item[\texttt{backend}] Passes the backend name to expl3. This is
+%      needed only if the needed backend can't be automatically
+%      determined or if the workflow used requires a special backend.
+%
+%^^A    This will probably be extended to  pass the value also to
+%^^A      packages.
+%
+%    \item[\texttt{pdfversion}] Sets the PDF version explicitly, e.g., \texttt{pdfversion=1.7}
+%    \item[\texttt{uncompress}] (no value) Forces an uncompressed pdf
+%      --- mainly for debugging purposes.
+%
+%    \item[\texttt{lang}] Explicitly sets the Lang entry in the Catalog,
+%     e.g., \texttt{lang=de-DE}. If not given the default value used is |en-US|.
+%
 %    \item[\texttt{pdfstandard}] Choice key to set the pdf standard.
 %      Currently |A-1b|, |A-2a|, |A-2b|, |A-2u|, |A-3a|, |A-3b| and |A-3u| are accepted as
 %      values. The casing is irrelevant, |a-1b| works too.
 %      The underlying code to ensure the requirements (as far as they
-%      can be ensured) is incomplete, but a color profile is included and the
-%      /OutputIntent is set. The |u| variants for example do not force unicode,
+%      can be ensured) is still incomplete, but a color profile is included and the
+%      \texttt{/OutputIntent} is set. The |u| variants for example do not force unicode,
 %      but they will pass the information to hyperref and hyperxmp. The |a| variants
 %      do \emph{not} enforce (or even test) a tagged pdf yet.
 %      More information can be found in the documentation
 %      of \pkg{l3pdfmeta}.
+%
 %    \item[\texttt{colorprofiles}] This allows to load icc-colorprofiles. Details
-%    are described in the documentation of \pkg{l3pdfmeta}.
+%       are described in the documentation of \pkg{l3pdfmeta}.
+%
 %    \item[\texttt{testphase}] This key is used to load testphase code. The values it accepts
 %    and their effect will change over time, when testphase packages are added or
 %    removed or when the code is moved into the kernel.
@@ -140,17 +150,18 @@
 %       also enable automatic tagging of other basic document elements.
 %    \end{description}
 %    The |testphase| key can only be used in the first \cs{DocumentMetadata}.
+%
 %    \item[\texttt{debug}] This key activates some debug options. It takes a list of key-values
 %    as value. Currently the following keys are known:
 %     \begin{description}
 %     \item[\texttt{para}] with the default and only value |show|. It will activate the |paratagging-show|
-%     option of \pkg{tagpdf},
+%       option of \pkg{tagpdf},
 %     \item[\texttt{log}]  with the values as described in the documentation \pkg{tagpdf},
 %     \item[\texttt{uncompress}] which does the same as |uncompress| as main key
 %     \item[\texttt{pdfmanagement}] a boolean which allows to deactivate the pdfmanagement.
-%    \item[\texttt{firstaidoff}] This accepts a comma lists of keywords and disables the patches
-%    related to them. More information can be found in the documentation of
-%    \pkg{pdfmanagement-firstaid}.%
+%     \item[\texttt{firstaidoff}] This accepts a comma lists of keywords and disables the patches
+%       related to them. More information can be found in the documentation of
+%       \pkg{pdfmanagement-firstaid}.
 %    \end{description}
 % \end{description}
 %
@@ -191,6 +202,14 @@
 % \end{syntax}
 % This show the current content of the container.
 % \end{function}
+%
+% \begin{thebibliography}{9}
+%
+% \bibitem{blueprint} Frank Mittelbach and Chris Rowley:
+%   \emph{\LaTeX{} Tagged PDF\,---\,A blueprint for a large project}.
+%   \url{https://latex-project.org/publications/indexbyyear/2020/}
+%
+% \end{thebibliography}
 %
 % \end{documentation}
 %
