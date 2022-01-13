@@ -17,7 +17,8 @@ this project uses date-based 'snapshot' version identifiers.
     additionally activate paratagging. The value `tagpdf` for the `testphase` 
     key has been deprecated. It will not error for some time and has been aliased to 
     `phase-II`, but it is recommended to use the new values `phase-I` and `phase-II` instead.     
- - renamed `\DeclareDocumentMetadata` to `\DocumentMetadata` (the older version is still provided).
+ - renamed `\DeclareDocumentMetadata` to `\DocumentMetadata` (the older version is still provided)
+   to follow the development in latex-dev.
  
 ### Fixed
 
@@ -28,6 +29,9 @@ this project uses date-based 'snapshot' version identifiers.
 
  - the `activate` key has been removed, its function is integrated in the testphase key. 
 
+### Added 
+ - preliminary support for structure destination to prepare for binary changes in texlive 2022
+ 
 ## [2021-08-28]
 ### Changed
  - colorscheme 'original' has been renamed to 'primary-colors'
