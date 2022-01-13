@@ -5,12 +5,16 @@ first release 0.95a, 2021-02-23 will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 this project uses date-based 'snapshot' version identifiers.
 
-## [XXXX-XX-XX]
+## [Unreleased] 
+
+## [2022-01-13]
 ### Changed
  - the keys `firstaidoff` and `pdfmanagement` should now be set with the `debug` key.
  - `testphase=tagpdf` will execute the tagpdf keys `activate,paratagging,interwordspace`
     and so automatically activate tagging. 
- - testphase will now load files from the latex-lab bundle  
+ - `testphase` will now load files from the latex-lab bundle. This requires a current 
+    latex-dev: LaTeX2e <2022-06-01> pre-release-1.  
+ -  new values for `testphase`: `phase-I` and `phase-II`. See the documentation of ltdocinit.    
  - renamed `\DeclareDocumentMetadata` to `\DocumentMetadata` (the older version is still provided).
  
 ### Fixed
@@ -20,8 +24,9 @@ this project uses date-based 'snapshot' version identifiers.
 
 ### Removed
 
- - the activate key has been removed, its function is integrated in the testphase key. 
-   
+ - the `activate` key has been removed, its function is integrated in the testphase key. 
+ - the value `tagpdf` for the `testphase` key has been deprecated. It will continue to
+   work for some time, but it is recommended to use the new values `phase-I` and `phase-II` instead. 
 
 ## [2021-08-28]
 ### Changed
