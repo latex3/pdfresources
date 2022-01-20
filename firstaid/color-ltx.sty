@@ -12,7 +12,7 @@
 %%
 %%
 %% color.dtx Copyright (C) 1994--1999 David Carlisle
-%%           Copyright (C) 2005-2021
+%%           Copyright (C) 2005-2022
 %% The LaTeX Project and any individual authors listed elsewhere
 %% in this file.
 %%
@@ -24,8 +24,8 @@
 %% This file has the LPPL maintenance status "maintained".
 %%
 \NeedsTeXFormat{LaTeX2e}[1995/12/01]
-\ProvidesPackage{color}[2022-01-20 v0.95j
-  Standard LaTeX Color (patched for l3color, part of pdfmanagement-testphase, original version 2021/12/07 v1.3c) (DPC)]
+\ProvidesPackage{color-ltx}[2022-01-20 v0.95j
+  Standard LaTeX Color (patched for l3color, part of pdfmanagement-testphase, original version 2022/01/06 v1.3d) (DPC)]
 \edef\Gin@codes{%
  \catcode`\noexpand\^^A\the\catcode`\^^A\relax
  \catcode`\noexpand\"\the\catcode`\"\relax
@@ -190,6 +190,7 @@
  \dimen@\dp\z@\advance\dimen@\fboxsep\dp\z@\dimen@
  {#1{#2\color@block{\wd\z@}{\ht\z@}{\dp\z@}%
       \box\z@}}}
+\InputIfFileExists{mathcolor.ltx}{}{}
 \def\color@setgroup{\begingroup\set@color}
 \let\color@begingroup\begingroup
 \def\color@endgroup{\endgraf\endgroup}
