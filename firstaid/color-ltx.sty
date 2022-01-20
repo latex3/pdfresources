@@ -12,7 +12,9 @@
 %%
 %%
 %% color.dtx Copyright (C) 1994--1999 David Carlisle
-%%           Copyright (C) 2005-2020 David Carlisle, LaTeX3 Project
+%%           Copyright (C) 2005-2021
+%% The LaTeX Project and any individual authors listed elsewhere
+%% in this file.
 %%
 %% This file is part of the Standard LaTeX `Graphics Bundle'.
 %% It may be distributed under the terms of the LaTeX Project Public
@@ -22,8 +24,8 @@
 %% This file has the LPPL maintenance status "maintained".
 %%
 \NeedsTeXFormat{LaTeX2e}[1995/12/01]
-\ProvidesPackage{color-ltx}[2022-01-13 v0.95j
-  Standard LaTeX Color (patched for l3color, part of pdfmanagement-testphase, original version 2021/03/07 v1.2e) (DPC)]
+\ProvidesPackage{color}[2022-01-20 v0.95j
+  Standard LaTeX Color (patched for l3color, part of pdfmanagement-testphase, original version 2021/12/07 v1.3c) (DPC)]
 \edef\Gin@codes{%
  \catcode`\noexpand\^^A\the\catcode`\^^A\relax
  \catcode`\noexpand\"\the\catcode`\"\relax
@@ -58,7 +60,7 @@
                       \def\c@lor@namefile{dvipsnam.def}}
 \DeclareOption{xdvi}{\ExecuteOptions{dvips,monochrome}}
 \DeclareOption{dvipdf}{\def\Gin@driver{dvipdf.def}}
-\DeclareOption{dvipdfm}{\def\Gin@driver{dvipdfm.def}}
+\DeclareOption{dvipdfm}{\def\Gin@driver{dvipdfmx.def}}
 \DeclareOption{dvipdfmx}{\def\Gin@driver{dvipdfmx.def}}
 \DeclareOption{pdftex}{\def\Gin@driver{pdftex.def}}
 \DeclareOption{luatex}{\def\Gin@driver{luatex.def}}
@@ -82,7 +84,7 @@
 \let\c@lor@usename\@gobble
 \DeclareOption{usenames}{%
   \def\c@lor@usename#1{%
-    \expandafter\color@named\csname\string\color @#1\endcsname{#1}}}
+    \expandafter\color@named\csname\@backslashchar color@#1\endcsname{#1}}}
 \DeclareRobustCommand\color{%
   \@ifnextchar[\@undeclaredcolor\@declaredcolor}
 \def\@undeclaredcolor[#1]#2{%
@@ -92,10 +94,10 @@
      \set@color}%
   \ignorespaces}
 \def\@declaredcolor#1{%
-  \@ifundefined{\string\color @#1}%
+  \@ifundefined{\@backslashchar color@#1}%
     {\c@lor@error{`#1'}}%
     {\expandafter\let\expandafter\current@color
-     \csname\string\color @#1\endcsname
+     \csname\@backslashchar color@#1\endcsname
      \set@color}%
   \ignorespaces}
 \protected\def\textcolor#1#{\@textcolor{#1}}
@@ -107,7 +109,7 @@
       \color}
 \protected\def\nopagecolor{%
   \@ifundefined{no@page@color}{%
-    \PackageInfo{color}{\string\nopagecolor\space is not supported}%
+    \PackageInfo{color}{\@backslashchar nopagecolor\space is not supported}%
   }{%
     \no@page@color
   }%
@@ -115,12 +117,12 @@
 \protected\def\definecolor#1#2#3{%
   \@ifundefined{color@#2}%
     {\c@lor@error{model `#2'}}%
-    {\@ifundefined{\string\color @#1}{}%
+    {\@ifundefined{\@backslashchar color@#1}{}%
       {\PackageInfo{color}{Redefining color #1}}%
      \csname color@#2\expandafter\endcsname
-         \csname\string\color @#1\endcsname{#3}}%
-    \@expl@color@set@@nnn{#1}{#2}{#3}%
-  }
+         \csname\@backslashchar color@#1\endcsname{#3}}%
+     \@expl@color@set@@nnn{#1}{#2}{#3}%
+   }
 \protected\def\DefineNamedColor#1#2#3#4{%
   \@ifundefined{define@color@#1}%
     {\c@lor@error{model `#1'}}%
