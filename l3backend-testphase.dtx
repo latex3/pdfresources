@@ -1488,8 +1488,15 @@
 % (in atfi-dvips), along with some ideas from pdfbase and has been corrected
 % with the help of Alexander Grahn.
 % Details like clipping and landscape will probably be corrected in the future.
+% We need some temporary variables to store dimensions
 %    \begin{macrocode}
 %<*dvips>
+\tl_new:N \l_@@_backend_xform_tmpwd_tl
+\tl_new:N \l_@@_backend_xform_tmpdp_tl
+\tl_new:N \l_@@_backend_xform_tmpht_tl
+%    \end{macrocode}
+%
+%    \begin{macrocode}
 \cs_new_protected:Npn\@@_backend_xform_new:nnnn #1 #2 #3 #4 % #1 name, #2 attribute, #4  content
   {
     \int_gincr:N \g_@@_backend_object_int
@@ -1513,31 +1520,51 @@
     \tl_const:cx
       { c_@@_backend_xform_dp_ \tl_to_str:n {#1} _tl }
       { \tex_the:D \box_dp:N \l_@@_backend_tmpa_box }
-    %mirror the box
-    \box_scale:Nnn \l_@@_backend_tmpa_box {1} {-1}
+   %store content dimensions in DPI units (Dots) (code from issue 25)
+    \tl_set:Nx\l_@@_backend_xform_tmpwd_tl
+      {
+        \dim_to_decimal_in_sp:n{ \box_wd:N \l_@@_backend_tmpa_box }~
+        65536~div~72.27~div~DVImag~mul~Resolution~mul~
+      }
+    \tl_set:Nx\l_@@_backend_xform_tmpht_tl
+      {
+        \dim_to_decimal_in_sp:n{ \box_ht:N \l_@@_backend_tmpa_box }~
+        65536~div~72.27~div~DVImag~mul~VResolution~mul~
+      }
+    \tl_set:Nx\l_@@_backend_xform_tmpdp_tl
+      {
+        \dim_to_decimal_in_sp:n{ \box_dp:N \l_@@_backend_tmpa_box }~
+        65536~div~72.27~div~DVImag~mul~VResolution~mul~
+      }
+    % mirror the box
+    %\box_scale:Nnn \l_@@_backend_tmpa_box {1} {-1}
     \hbox_set:Nn\l_@@_backend_tmpb_box
       {
         \__kernel_backend_postscript:x
           {
-            gsave~currentpoint~translate~
+            gsave~currentpoint~
+            initclip~ % restore default clipping path (page device/whole page)
+            clippath~pathbbox~newpath~pop~pop~
+            \tl_use:N\l_@@_backend_xform_tmpdp_tl~add~translate~
             mark~
-            /_objdef~{ pdf.obj \int_use:N\g_@@_backend_object_int }\c_space_tl~
-            /BBox[
-            currentpoint~\dim_to_decimal:n{\box_dp:N \l_@@_backend_tmpa_box}~72.27~div~VResolution~mul~add~
-            currentpoint~
-              exch~\dim_to_decimal:n{\box_wd:N \l_@@_backend_tmpa_box}~72.27~div~Resolution~mul~add~
-              exch~\dim_to_decimal:n{\box_ht:N \l_@@_backend_tmpa_box}~72.27~div~VResolution~mul~sub~
-             ]
-             \str_if_eq:eeF{#1}{}
-              {
-                product~(Distiller)~search~{pop~pop~pop~#2}{pop}ifelse~
-              }
-             /BP~pdfmark~grestore~
+              /_objdef~{ pdf.obj \int_use:N\g_@@_backend_object_int }\c_space_tl~
+              /BBox[
+                0~
+                \tl_use:N\l_@@_backend_xform_tmpht_tl~
+                \tl_use:N\l_@@_backend_xform_tmpwd_tl~
+                \tl_use:N\l_@@_backend_xform_tmpdp_tl~
+                neg
+              ]
+              \str_if_eq:eeF{#1}{}
+               {
+                 product~(Distiller)~search~{pop~pop~pop~#2}{pop}ifelse~
+               }
+            /BP~pdfmark~1~-1~scale~neg~exch~neg~exch~translate
           }
         \box_use_drop:N\l_@@_backend_tmpa_box
         \__kernel_backend_postscript:n
           {
-            mark ~ /EP~pdfmark
+            mark ~ /EP~pdfmark  ~ grestore
           }
        \str_if_eq:eeF{#1}{}
          {
