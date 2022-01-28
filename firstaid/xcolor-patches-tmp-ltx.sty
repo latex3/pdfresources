@@ -43,10 +43,13 @@
 \cs_generate_variant:Nn \__pdfmanagement_firstaid_xcolor_set:nnnn {nonn}
 \cs_set_eq:NN \@expl@xcolor@set@@nonn \__pdfmanagement_firstaid_xcolor_set:nonn
 \cs_generate_variant:Nn \color_set:nn {ne}
+\tl_new:N\l__pdfmanagement_firstaid_tmpa_tl
+% the color name should be sanitized to avoid problems with e.g. french making ! active
 \cs_new_protected:Npn \@expl@xcolor@set@@ne #1 #2
    {
-     \exp_args:Nx \__color_if_defined:nT {#2}
-       { \color_set:ne {#1}{#2} }
+     \XC@edef\l__pdfmanagement_firstaid_tmpa_tl{#2}
+     \exp_args:NV \__color_if_defined:nT \l__pdfmanagement_firstaid_tmpa_tl
+       { \color_set:ne {#1}{\l__pdfmanagement_firstaid_tmpa_tl} }
    }
 \ExplSyntaxOff
 %\pretocmd{\XC@col@rlet}   {\@expl@color@set@@ne{#2}{#4}}{}{\fail}

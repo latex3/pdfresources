@@ -7,6 +7,10 @@ this project uses date-based 'snapshot' version identifiers.
 
 ## [Unreleased] 
 
+### Fixed
+
+- xcolor patch failed with color names containing active chars (e.g. from french)
+
 ## [2022-01-13]
 ### Changed
  - the keys `firstaidoff` and `pdfmanagement` should now be set with the `debug` key.
