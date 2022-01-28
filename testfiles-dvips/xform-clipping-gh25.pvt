@@ -1,0 +1,24 @@
+\PassOptionsToPackage{enable-debug,check-declarations}{expl3}
+\DocumentMetadata {uncompress}
+\RequirePackage{pdfmanagement-regressiontest}
+
+\documentclass{article}
+
+\usepackage{l3pdffield-testphase}
+\usepackage{graphicx}
+% see https://github.com/latex3/pdfresources/issues/25
+\begin{document}\parindent=0pt
+\ExplSyntaxOn
+\START
+
+Content~clipping~should~be~avoided~during~XForm~generation:%
+\pdfxform_new:nnn{img}{}{\includegraphics{example-image}}\par
+\pdfxform_use:n{img}\par
+
+Push~button:\pdfannot_dict_put:nnn {widget}{A}{<</S/Named /N/LastPage>>}
+\pdffield_pushbutton:n
+  {name=my/go,width=4cm,height=3cm,appearance=img,caption=GO~TO~LAST~PAGE,rollover-caption=click~me!}
+\ExplSyntaxOff
+\newpage
+\Huge The End.
+\end{document}
