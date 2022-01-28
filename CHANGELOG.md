@@ -14,6 +14,7 @@ this project uses date-based 'snapshot' version identifiers.
 ### Fixed
 
  - xcolor patch failed with color names containing active chars (e.g. from french)
+ - clipping of xform object on the dvips route (issue #25)
 
 ## [2022-01-13]
 ### Changed
