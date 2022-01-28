@@ -7,9 +7,13 @@ this project uses date-based 'snapshot' version identifiers.
 
 ## [Unreleased] 
 
+### Changed 
+ - adapted the color patch to the changes in (x)color.sty (mathcolor)
+ - documentation uses new doc version (so needs currently latex-dev to compile)
+  
 ### Fixed
 
-- xcolor patch failed with color names containing active chars (e.g. from french)
+ - xcolor patch failed with color names containing active chars (e.g. from french)
 
 ## [2022-01-13]
 ### Changed
