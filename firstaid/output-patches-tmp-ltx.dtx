@@ -58,16 +58,15 @@
 %
 %
 %  \subsection{Patching the OR}
-%  This add hooks around header and footer.
-%  At first initialize the hooks
+%  This add hooks around header and footer, in \cs{@makecol} and in multicol.
+%  At first initialize some of the hooks. We use providecommand to avoid problems if
+%  the kernel changes here and provides them directly.
 %    \begin{macrocode}
-\newcommand\@kernel@before@head{}
-\newcommand\@kernel@before@foot{}
-\newcommand\@kernel@after@head{}
-\newcommand\@kernel@after@foot{}
-\newcommand\@kernel@before@footins{}
-\newcommand\@kernel@before@cclv{}
-\newcommand\@mult@ptagging@hook{}
+\providecommand\@kernel@before@head{}
+\providecommand\@kernel@before@foot{}
+\providecommand\@kernel@after@head{}
+\providecommand\@kernel@after@foot{}
+\providecommand\@mult@ptagging@hook{}% multicol
 %    \end{macrocode}
 %
 %    \begin{macrocode}
@@ -92,17 +91,26 @@
 %    \item
 %      update the \cs{footins} stream if that one got split
 %    \end{itemize}
+%
+%   If the new latex-lab file for the output routine exists we load it.
+%   In the other case we patch \cs{@makecol} manually.
 %    \begin{macrocode}
+\IfFileExists{latex-lab-new-or.ltx}
+ {\input{latex-lab-new-or.ltx}}
+ {
+  \providecommand\@kernel@before@footins{}
+  \providecommand\@kernel@before@cclv{}
 
-\patchcmd\@makecol
-    {\vskip\skip\footins}
-    {\vskip\skip\footins\@kernel@before@footins}
-  {\typeout{Patching \string\@makecol\space for tagging}}{\PATCHerror }
+  \patchcmd\@makecol
+      {\vskip\skip\footins}
+      {\vskip\skip\footins\@kernel@before@footins}
+    {\typeout{Patching \string\@makecol\space for tagging}}{\PATCHerror }
 
 % for some reason patching with etoolbox only works in this order ...
 
-\pretocmd\@makecol{\@kernel@before@cclv}
-  {\typeout{Patching \string\@makecol\space for tagging}}{\PATCHerror }
+  \pretocmd\@makecol{\@kernel@before@cclv}
+    {\typeout{Patching \string\@makecol\space for tagging}}{\PATCHerror }
+  }
 %    \end{macrocode}
 %  \end{macro}
 %
