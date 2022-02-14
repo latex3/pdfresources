@@ -4175,12 +4175,12 @@
       }
     ,direction .choices:nn =
       {H,V}
-      { \pdfdict_put:nnn {l_@@_page/Trans}{ S }{/#1} }
+      { \pdfdict_put:nnn {l_@@_page/Trans}{ Dm }{/#1} }
     ,direction .choices:nn =
       {0,90,180,270,315}
-      { \pdfdict_put:nnn {l_@@_page/Trans}{ DI }{ #1 } }
+      { \pdfdict_put:nnn {l_@@_page/Trans}{ Di }{ #1 } }
     ,direction / None .code:n =
-      { \pdfdict_put:nnn {l_@@_page/Trans}{ DI }{ /None } }
+      { \pdfdict_put:nnn {l_@@_page/Trans}{ Di }{ /None } }
     ,direction / unknown .code:n =
       {
         \msg_warning:nnxxx { hyp } { unknown-choice }
