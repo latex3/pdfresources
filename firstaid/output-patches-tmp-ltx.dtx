@@ -92,14 +92,23 @@
 %      update the \cs{footins} stream if that one got split
 %    \end{itemize}
 %
-%   If the new latex-lab file for the output routine exists we load it.
+%   If the new latex-lab file for the output routine it will do the right thing.
 %   In the other case we patch \cs{@makecol} manually.
 %    \begin{macrocode}
-\IfFileExists{latex-lab-new-or.ltx}
- {\input{latex-lab-new-or.ltx}}
- {
-  \providecommand\@kernel@before@footins{}
-  \providecommand\@kernel@before@cclv{}
+%\ShowDocumentProperties
+\begingroup
+    \edef\x{\GetDocumentProperties{document/testphase/new-or}}%
+    \edef\y{loaded}%
+  \expandafter\endgroup
+  \ifx\x\y
+    \expandafter\@firstoftwo
+  \else
+    \expandafter\@secondoftwo
+  \fi
+   {}
+   {
+    \providecommand\@kernel@before@footins{}
+    \providecommand\@kernel@before@cclv{}
 
   \patchcmd\@makecol
       {\vskip\skip\footins}

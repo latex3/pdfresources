@@ -310,9 +310,11 @@
           {
             \tl_gput_right:Nn\g_@@_testphase_tl
                {
+                 \AddToDocumentProperties [document]{testphase/#1}{loaded}
                  \file_if_exist_input:nF {#1-latex-lab-testphase.ltx}
                   {
                      \msg_warning:nnn{document}{latex-lab-pkg-missing}{#1}
+                     \AddToDocumentProperties [document]{testphase/#1}{missing}
                   }
                }
           }
