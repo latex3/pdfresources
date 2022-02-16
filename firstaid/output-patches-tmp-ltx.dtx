@@ -92,25 +92,25 @@
 %      update the \cs{footins} stream if that one got split
 %    \end{itemize}
 %
-%   If the new latex-lab file for the output routine exists we load it.
+%   If the new latex-lab file for the output routine is loaded it will do the right thing.
 %   In the other case we patch \cs{@makecol} manually.
 %    \begin{macrocode}
-\IfFileExists{latex-lab-new-or.ltx}
- {\input{latex-lab-new-or.ltx}}
- {
-  \providecommand\@kernel@before@footins{}
-  \providecommand\@kernel@before@cclv{}
+\@ifpackageloaded{latex-lab-testphase-new-or}
+   {}
+   {
+    \providecommand\@kernel@before@footins{}
+    \providecommand\@kernel@before@cclv{}
 
-  \patchcmd\@makecol
+    \patchcmd\@makecol
       {\vskip\skip\footins}
       {\vskip\skip\footins\@kernel@before@footins}
-    {\typeout{Patching \string\@makecol\space for tagging}}{\PATCHerror }
+      {\typeout{Patching \string\@makecol\space for tagging}}{\PATCHerror }
 
 % for some reason patching with etoolbox only works in this order ...
 
-  \pretocmd\@makecol{\@kernel@before@cclv}
-    {\typeout{Patching \string\@makecol\space for tagging}}{\PATCHerror }
-  }
+    \pretocmd\@makecol{\@kernel@before@cclv}
+     {\typeout{Patching \string\@makecol\space for tagging}}{\PATCHerror }
+   }
 %    \end{macrocode}
 %  \end{macro}
 %
