@@ -1,84 +1,9 @@
-\ProvidesPackage {pdfmanagement-regressiontest}[2021-02-08 regression test code for the pdfmanagement 0.1]
+\ProvidesPackage {pdfmanagement-regressiontest}[2022-02-10 regression test code for the pdfmanagement 0.1]
 
 \ExplSyntaxOn
 \cs_if_exist:NT\STARTMESSAGE
  {
    \endinput
- }
-
-\str_case:Vn \c_sys_backend_str
- {
-   {luatex}
-   {
-     \cs_new_protected:Npn \pdfsetupregressiontest
-      {
-        \pdfmanagement_add:nnn{Info}{Creator}{(TeX)}
-        \pdfmanagement_add:nnn{Info}{Producer}{(LuaTeX)}
-        \pdfmanagement_add:nnn{Info}{CreationDate}{(D:20010101205959-00'00')}
-        \pdfmanagement_add:nnn{Info}{ModDate}{(D:20010101205959-00'00')}
-        \pdfvariable suppressoptionalinfo 7\relax
-        \pdfvariable trailerid
-         {[~
-           <2350CAD05F8A7AF0AA4058486855344F>~
-           <2350CAD05F8A7AF0AA4058486855344F>~
-         ]}
-        \sys_gset_rand_seed:n{1000}
-      }
-   }
-   {pdftex}
-   {
-     \cs_new_protected:Npn \pdfsetupregressiontest
-       {
-         \pdfmanagement_add:nnn{Info}{Creator}{(TeX)}
-         \pdfmanagement_add:nnn{Info}{Producer}{(pdfTeX)}
-         \pdfmanagement_add:nnn{Info}{CreationDate}{(D:20010101205959-00'00')}
-         \pdfmanagement_add:nnn{Info}{ModDate}{(D:20010101205959-00'00')}
-         \pdfsuppressptexinfo7 \relax
-         \pdftrailerid{2350CAD05F8A7AF0AA4058486855344F}
-         \sys_gset_rand_seed:n{1000}
-       }
-   }
-   {dvips}
-   {
-     \cs_new_protected:Npn \pdfsetupregressiontest
-       {
-         \pdfmanagement_add:nnn{Info}{Creator}{(TeX)}
-         \pdfmanagement_add:nnn{Info}{CreationDate}{(D:20010101205959-00'00')}
-         \pdfmanagement_add:nnn{Info}{ModDate}{(D:20010101205959-00'00')}
-         \special{!~<</DocumentUUID~(DocumentUUID)>>~setpagedevice}
-         \special{!~<</InstanceUUID~(InstanceUUID)>>~setpagedevice}
-         \sys_gset_rand_seed:n{1000}
-       }
-   }
-   {dvipdfmx}
-   {
-     \cs_new_protected:Npn \pdfsetupregressiontest
-       {
-         \pdfmanagement_add:nnn{Info}{Creator}{(TeX)}
-         \pdfmanagement_add:nnn{Info}{Producer}{(dvipdfmx)}
-         \pdfmanagement_add:nnn{Info}{CreationDate}{(D:20010101205959-00'00')}
-         \special{pdf:trailerid [~
-          <00112233445566778899aabbccddeeff>~
-          <00112233445566778899aabbccddeeff>~
-          ]}
-         \sys_gset_rand_seed:n{1000}
-       }
-   }
-   {xetex}
-   {
-     \cs_new_protected:Npn \pdfsetupregressiontest
-       {
-         \pdfmanagement_add:nnn{Info}{Creator}{(TeX)}
-         \pdfmanagement_add:nnn{Info}{Producer}{(xetex)}
-         \pdfmanagement_add:nnx{Info}{CreationDate}{(D:20010101194934+01'00')}
-         \pdfmanagement_add:nnn{Info}{ModDate}{(D:20010101205959-00'00')}
-         \special{pdf:trailerid [~
-          <00112233445566778899aabbccddeeff>~
-          <00112233445566778899aabbccddeeff>~
-          ]}
-         \sys_gset_rand_seed:n{1000}
-       }
-   }
  }
  \ExplSyntaxOff
 
@@ -331,8 +256,8 @@
   \fi
 \fi
 %%%changed
-\ifcsname pdfsetupregressiontest\endcsname
-   \pdfsetupregressiontest
+\ifcsname pdfmeta_set_regression_data:\endcsname
+   \csname pdfmeta_set_regression_data:\endcsname
 \else
    \ifnum 0%
      \ifx\pdfoutput\@undefined\else\ifnum\pdfoutput>0 1\fi\fi
