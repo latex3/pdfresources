@@ -1983,6 +1983,7 @@
 %<*drivers>
 \cs_new_protected:Npn \@@_backend_set_regression_data:
   {
+    \sys_gset_rand_seed:n{1000}
     \pdfmanagement_add:nnn{Info}{Creator}{(TeX)}
     \pdfmanagement_add:nnn{Info}{CreationDate}{(D:20010101205959-00'00')}
     \pdfmanagement_add:nnn{Info}{ModDate}{(D:20010101205959-00'00')}
@@ -1998,7 +1999,7 @@
       <00112233445566778899aabbccddeeff>~
       <00112233445566778899aabbccddeeff>~
           ]}
-%<dvipdfmx>
+%</dvipdfmx>
 %<*xdvipdfmx>
     \pdfmanagement_add:nnn{Info}{Producer}{(xetex)}
     \__kernel_backend_literal:e
@@ -2006,7 +2007,7 @@
       <00112233445566778899aabbccddeeff>~
       <00112233445566778899aabbccddeeff>~
           ]}
-%<xdvipdfmx>
+%</xdvipdfmx>
 %<*pdftex>
    \pdfmanagement_add:nnn{Info}{Producer}{(pdfTeX)}
    \tex_pdfsuppressptexinfo:D 7 \scan_stop:

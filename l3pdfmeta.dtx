@@ -332,6 +332,17 @@
 % The pdf/A standards will use |A=sRGB.icc| by default, so this doesn't
 % need to be declared explicitly.
 %
+% \subsection{Regression tests}
+% When doing regression tests one has to set various metadata to fix values.
+
+% \begin{function}{\pdfmeta_set_regression_data:}
+% \begin{syntax}
+% \cs{pdfmeta_set_regression_data:}
+% \end{syntax}
+% This sets various metadata to values needed by the \LaTeX{}
+% regression tests.
+% It also sets the seed for random functions.
+% \end{function}
 %
 % \end{documentation}
 %
@@ -875,6 +886,12 @@
    }
 %    \end{macrocode}
 %
+% \subsection{Regression test}
+% This is simply a copy of the backend function.
+%    \begin{macrocode}
+\cs_new_protected:Npn \pdfmeta_set_regression_data:
+   { \__pdf_backend_set_regression_data: }
+%    \end{macrocode}
 %    \begin{macrocode}
 %</package>
 %    \end{macrocode}
