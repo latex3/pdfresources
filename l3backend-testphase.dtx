@@ -1975,6 +1975,56 @@
   }
 %</luatex>
 %    \end{macrocode}
+% \subsection{Settings for regression tests}
+% When doing pdf based regression tests some meta data in the pdf should have
+% fixed values to get identical pdf's. We define here the backend dependant
+% part. The main command is then in l3pdfmeta
+%    \begin{macrocode}
+%<*drivers>
+\cs_new_protected:Npn \@@_backend_set_regression_data:
+  {
+    \pdfmanagement_add:nnn{Info}{Creator}{(TeX)}
+    \pdfmanagement_add:nnn{Info}{CreationDate}{(D:20010101205959-00'00')}
+    \pdfmanagement_add:nnn{Info}{ModDate}{(D:20010101205959-00'00')}
+%</drivers>
+%<*dvips>
+    \__kernel_backend_literal:e{!~<</DocumentUUID~(DocumentUUID)>>~setpagedevice}
+    \__kernel_backend_literal:e{!~<</InstanceUUID~(InstanceUUID)>>~setpagedevice}
+%</dvips>
+%<*dvipdfmx>
+    \pdfmanagement_add:nnn{Info}{Producer}{(dvipdfmx)}
+    \__kernel_backend_literal:e
+      {pdf:trailerid [~
+      <00112233445566778899aabbccddeeff>~
+      <00112233445566778899aabbccddeeff>~
+          ]}
+%<dvipdfmx>
+%<*xdvipdfmx>
+    \pdfmanagement_add:nnn{Info}{Producer}{(xetex)}
+    \__kernel_backend_literal:e
+      {pdf:trailerid [~
+      <00112233445566778899aabbccddeeff>~
+      <00112233445566778899aabbccddeeff>~
+          ]}
+%<xdvipdfmx>
+%<*pdftex>
+   \pdfmanagement_add:nnn{Info}{Producer}{(pdfTeX)}
+   \tex_pdfsuppressptexinfo:D 7 \scan_stop:
+   \pdftrailerid{2350CAD05F8A7AF0AA4058486855344F}
+%</pdftex>
+%<*luatex>
+   \pdfmanagement_add:nnn{Info}{Producer}{(LuaTeX)}
+   \tex_pdfvariable:D suppressoptionalinfo 7\relax
+   \tex_pdfvariable:D trailerid
+     {[~
+       <2350CAD05F8A7AF0AA4058486855344F>~
+       <2350CAD05F8A7AF0AA4058486855344F>~
+     ]}
+%</luatex>
+%<*drivers>
+   }
+%</drivers>
+%    \end{macrocode}
 % \subsection{lua code for lualatex}
 %    \begin{macrocode}
 %<*lua>
