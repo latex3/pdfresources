@@ -62,7 +62,7 @@ checkruns = 4
 --     }
 
 -- packtdszip = true
-checkengines = {"luatex","pdftex","xetex"}
+checkengines = {"pdftex","luatex","xetex"}
 
 
 checkconfigs = {"build", -- luatex, pdftex, xetex
