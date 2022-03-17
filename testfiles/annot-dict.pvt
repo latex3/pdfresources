@@ -1,6 +1,6 @@
 \RequirePackage{pdfmanagement-testphase}
-\DeclareDocumentMetadata{}
-\RequirePackage{pdfmanagement-regressiontest}
+\DocumentMetadata{}
+\input{regression-test}
 \documentclass{article}
 \ExplSyntaxOn
 \pdf_uncompress:
@@ -14,7 +14,7 @@
 \pdfannot_dict_put:nnn{widget}{FT}{/Tx}
 \pdfannot_dict_put:nnn{widget}{MK}{<</BC[1~0~0]/BG[1~1~1]>>}
 \cs_generate_variant:Nn \pdfannot_box:nnnn {nnnx}
-xx\pdfannot_box:nnnx          
+xx\pdfannot_box:nnnx
           {1cm}
           {1cm}
           {0pt}
