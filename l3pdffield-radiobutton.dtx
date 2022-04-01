@@ -240,7 +240,6 @@
 %   {
 %     group   = A,         % required, can also be given as name=A or T=A
 %     value   = button1,   % required,  on-state of this button
-%     default = button4    % default of the group,
 %                          % if not given choice (button1) is used
 %                          % should refer to an existing button!
 %                          % It will set the V and the DV key
@@ -250,6 +249,7 @@
 %   {
 %     group   = A,        % required, can also be given as name=A or T=A
 %     value   = button2   % required,  export value of this button
+%     default             % this button is default of the group,
 %   }
 % \pdffield_radio:n
 %   {
@@ -270,6 +270,8 @@
 % is neither needed for this (but doesn't harm either) nor
 % does it change the behaviour, at least again not in the PDF viewers I tried.
 %
+% The button with the key |default| will be selected at the start (together with the
+% buttons with the same value). If no default is set this is the first button.
 %
 % \bigskip
 % \subsection{Commands}
@@ -350,14 +352,13 @@
 %
 %  \begin{function}{default}
 %  \begin{syntax}
-%   |default| = \meta{string}
+%   |default|
 %  \end{syntax}
 %  With this key you set the button which is checked when the PDF is opened.
-%  The key must be used in the command of the first button. If it is missing
-%  the value of the first button is used as default.
-%  \meta{string} should be identical to a |value| of one of the buttons of the group.
-%  This is not checked, buttons can be created on various pages, so it would
-%  require a label/ref system to keep track of the names.
+%  The key must be used in the command of the button which should be the default.
+%  If it is missing the first button is used as default.
+%  A label-ref system is used to get the right numbers, so normally two compilations
+%  are needed if the first button is not the default
 %  \end{function}
 
 % \begin{function}{fieldID}
@@ -560,7 +561,7 @@
 % \begin{variable}
 %  {
 %      \l_@@_radio_value_tl
-%     ,\l_@@_radio_default_tl
+%     ,\l_@@_radio_default_bool
 %     ,\l_@@_radio_value_num_int
 %     ,\l_@@_radio_appearance_code_tl
 %  }
@@ -569,7 +570,7 @@
 % so the code is stored and executed later.
 %    \begin{macrocode}
 \tl_new:N  \l_@@_radio_value_tl
-\tl_new:N  \l_@@_radio_default_tl
+\bool_new:N  \l_@@_radio_default_bool
 \int_new:N \l_@@_radio_value_num_int
 \tl_new:N  \l_@@_radio_appearance_code_tl
 %    \end{macrocode}
@@ -638,6 +639,17 @@
 % \end{macro}
 %
 %\subsection{Creating the field}
+% We need to retrieve the index of the default through a
+% label, so we need an ref attribute:
+%
+%    \begin{macrocode}
+\ref_attribute_gset:nnnn {pdfradioindex}{0}{now}
+  {
+    \int_use:N\l_@@_radio_value_num_int
+  }
+\cs_generate_variant:Nn \ref_label:nn {V}
+\cs_generate_variant:Nn \ref_value:nn {V}
+%    \end{macrocode}
 % A field should be created if the name doesn't exist yet
 %  \begin{macro}{\@@_radio_field:n}
 %    \begin{macrocode}
@@ -659,16 +671,13 @@
               {\seq_use:cn {g_@@_radio_opt_#1_seq}{~}}
           }
 %    \end{macrocode}
-% The default value is always the first in the array.
+% The default value is either the first in the array
+% of the index of the
 % If a default has been set, it is added to the left
 % of the seq.
 %    \begin{macrocode}
-        \tl_if_eq:NnF \l_@@_radio_default_tl{()}
-         {
-           \seq_gput_left:cV { g_@@_radio_opt_#1_seq }\l_@@_radio_default_tl
-         }
-        \pdfdict_put:nnx { l_@@/field }{V}  { /0 }
-        \pdfdict_put:nnx { l_@@/field }{DV} { /0 }
+        \pdfdict_put:nnx { l_@@/field }{V}  { /\ref_value:nn{#1}{pdfradioindex} }
+        \pdfdict_put:nnx { l_@@/field }{DV} { /\ref_value:nn{#1}{pdfradioindex} }
 %    \end{macrocode}
 % now we create the field and set it as parent for the following annotation.
 %    \begin{macrocode}
@@ -697,6 +706,7 @@
 % Setting up the defaults.
 %   \begin{macrocode}
     \tl_set:Nn\l_@@_radio_appearance_code_tl{}
+    \bool_set_false:N\l_@@_radio_default_bool
     \keys_set:nn {pdffield}
       {
          fieldID=
@@ -722,12 +732,12 @@
 %    \begin{macrocode}
     \@@_radio_field:V\l_@@_fieldID_tl
 %    \end{macrocode}
+% Put the value into the seq
+%    \begin{macrocode}
+    \seq_gput_right:cV { g_@@_radio_opt_ \l_@@_fieldID_tl _seq }\l_@@_radio_value_tl
+%    \end{macrocode}
 %  Retrieve the number for the label
 %    \begin{macrocode}
-    \seq_if_in:cVF { g_@@_radio_opt_ \l_@@_fieldID_tl _seq }\l_@@_radio_value_tl
-      {
-        \seq_gput_right:cV { g_@@_radio_opt_ \l_@@_fieldID_tl _seq }\l_@@_radio_value_tl
-      }
     \int_zero:N \l_@@_radio_value_num_int
     \exp_args:Nc
     \seq_map_inline:Nn { g_@@_radio_opt_ \l_@@_fieldID_tl _seq }
@@ -740,11 +750,19 @@
           \int_incr:N \l_@@_radio_value_num_int
         }
      }
+     \bool_if:NT\l_@@_radio_default_bool
+      {
+        \exp_args:Ne
+        \ref_label:nn{\l_@@_fieldID_tl}{pdfradioindex}
+      }
 %    \end{macrocode}
 % Annotations with the default value are set to on, the rest to off
 %    \begin{macrocode}
-   \int_compare:nNnTF { \l_@@_radio_value_num_int } = 0
-     { \pdfannot_dict_put:nnx {widget}{AS}{/0} }
+   \int_compare:nNnTF { \l_@@_radio_value_num_int } =
+       {
+         \ref_value:Vn\l_@@_fieldID_tl{pdfradioindex}
+       }
+     { \pdfannot_dict_put:nnx {widget}{AS}{/\ref_value:Vn\l_@@_fieldID_tl{pdfradioindex}} }
      { \pdfannot_dict_put:nnx {widget}{AS}{/Off} }
 %    \end{macrocode}
 % Now we set the appearances, if no key has been use we take the default.
@@ -774,11 +792,12 @@
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_radio_value_handler:n #1
   {
-    \pdf_string_from_unicode:nnN {utf8/string}{#1}\l_@@_radio_value_tl
+    \pdf_string_from_unicode:nnN {utf16/string}{#1}\l_@@_radio_value_tl
   }
 \cs_new_protected:Npn \@@_radio_default_handler:n #1
   {
-    \pdf_string_from_unicode:nnN {utf8/string}{#1}\l_@@_radio_default_tl
+    %\pdf_string_from_unicode:nnN {utf8/string}{#1}\l_@@_radio_default_tl
+    \bool_set_true:N \l_@@_radio_default_bool
   }
 %    \end{macrocode}
 % \end{macro}
