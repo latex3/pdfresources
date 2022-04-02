@@ -573,6 +573,8 @@
 \bool_new:N  \l_@@_radio_default_bool
 \int_new:N \l_@@_radio_value_num_int
 \tl_new:N  \l_@@_radio_appearance_code_tl
+\bool_new:N \l_@@_radio_unison_bool % if true use same name (e.g. /1) for same value
+\bool_set_true:N \l_@@_radio_unison_bool
 %    \end{macrocode}
 % \end{variable}
 %
@@ -738,10 +740,12 @@
 %    \end{macrocode}
 %  Retrieve the number for the label
 %    \begin{macrocode}
-    \int_zero:N \l_@@_radio_value_num_int
-    \exp_args:Nc
-    \seq_map_inline:Nn { g_@@_radio_opt_ \l_@@_fieldID_tl _seq }
-     {
+  \bool_if:NTF \l_@@_radio_unison_bool
+    {
+     \int_zero:N \l_@@_radio_value_num_int
+     \exp_args:Nc
+     \seq_map_inline:Nn { g_@@_radio_opt_ \l_@@_fieldID_tl _seq }
+      {
        \str_if_eq:nVTF { ##1 } \l_@@_radio_value_tl
         {
           \seq_map_break:
@@ -749,12 +753,18 @@
         {
           \int_incr:N \l_@@_radio_value_num_int
         }
+      }
+     }
+     {
+       \int_set:Nn \l_@@_radio_value_num_int
+         {\seq_count:c { g_@@_radio_opt_ \l_@@_fieldID_tl _seq } -1 }
      }
      \bool_if:NT\l_@@_radio_default_bool
       {
         \exp_args:Ne
         \ref_label:nn{\l_@@_fieldID_tl}{pdfradioindex}
       }
+
 %    \end{macrocode}
 % Annotations with the default value are set to on, the rest to off
 %    \begin{macrocode}

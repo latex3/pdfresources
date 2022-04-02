@@ -63,4 +63,26 @@
  \end{tabular}
  \ExplSyntaxOff
 
-\end{document}
+
+ \ExplSyntaxOn
+ \bool_set_false:N \l__pdffield_radio_unison_bool
+ 
+ \begin{tabular}{ccc}
+ \pdffield_radio:n{setfieldflags=radiosinunison,name=C,value=Bär,appearance=pdffield/bear,width=\box_wd:N\l_pdffield_bear_box,height=\box_ht:N\l_pdffield_bear_box}&
+ \pdffield_radio:n{name=C,value=Sieglinde,default,appearance=pdffield/hippo,width=\box_wd:N\l_pdffield_hippo_box,height=\box_ht:N\l_pdffield_hippo_box}&
+ \pdffield_radio:n{name=C,value=Duck,appearance=pdffield/duck,width=\box_wd:N\l_pdffield_duck_box,height=\box_ht:N\l_pdffield_duck_box}\\[1ex]
+ \pdffield_radio:n{name=C,value=Bär}&
+ \pdffield_radio:n{name=C,value=Sieglinde}&
+ \pdffield_radio:n{name=C,value=Duck}
+ \end{tabular}
+\par 
+ \begin{tabular}{ccc}
+ \pdffield_radio:n{unsetfieldflags=radiosinunison,name=D,value=Bär,appearance=pdffield/bear,width=\box_wd:N\l_pdffield_bear_box,height=\box_ht:N\l_pdffield_bear_box}&
+ \pdffield_radio:n{name=D,default,value=Sieglinde,appearance=pdffield/hippo,width=\box_wd:N\l_pdffield_hippo_box,height=\box_ht:N\l_pdffield_hippo_box}&
+ \pdffield_radio:n{name=D,value=Duck,appearance=pdffield/duck,width=\box_wd:N\l_pdffield_duck_box,height=\box_ht:N\l_pdffield_duck_box}\\[1ex]
+ \pdffield_radio:n{name=D,value=Bär}&
+ \pdffield_radio:n{name=D,value=Sieglinde}&
+ \pdffield_radio:n{name=D,value=Duck}
+ \end{tabular}
+ \ExplSyntaxOff
+\end{document} 
