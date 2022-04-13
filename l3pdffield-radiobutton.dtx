@@ -264,11 +264,15 @@
 % \end{verbatim}
 %
 %
-% If two radio field annotations use the same |value| they are selected and
-% unselected together, like checkboxes with the same |/Yes| state. This can be used
-% to build radio groups which works \enquote{in unison}. The flag |RadiosInUnison|
+% If two radio field annotations use the same |value| this value can be mapped either
+% to the same index or to two different indices in the \texttt{/Opt} array.
+% In the first case they are selected and unselected together (\enquote{in unison}),
+% like checkboxes with the same |/Yes| state. The key |inunison| below allows to switch
+% between the two cases. The flag |RadiosInUnison|
 % is neither needed for this (but doesn't harm either) nor
-% does it change the behaviour, at least again not in the PDF viewers I tried.
+% does it change the behaviour, at least again not in the PDF viewers I tried,
+% nevertheless the key will set it accordingly just in case.
+%
 %
 % The button with the key |default| will be selected at the start (together with the
 % buttons with the same value). If no default is set this is the first button.
@@ -360,7 +364,20 @@
 %  A label-ref system is used to get the right numbers, so normally two compilations
 %  are needed if the first button is not the default
 %  \end{function}
-
+%
+%  \begin{function}{inunison}
+%  \begin{syntax}
+%   |inunison| = |true|\verb+|+|false|
+%  \end{syntax}
+%  As described above this handle the \enquote{inunison} behaviour.
+%  If set to true (the default)
+%  buttons with the same value will be selected and unselected together.
+%  The keys sets or unsets also the flag |RadiosInUnison| accordingly
+%  (but it is unknown  if it has any effect). The key should be set on the first
+%  field. Normally it should be unneeded to use the key:
+%  to avoid the unison effect it makes more sense to use different values.
+%  \end{function}
+%
 % \begin{function}{fieldID}
 %  \begin{syntax}
 %   |fieldID| = \meta{field ID}\\
@@ -673,10 +690,7 @@
               {\seq_use:cn {g_@@_radio_opt_#1_seq}{~}}
           }
 %    \end{macrocode}
-% The default value is either the first in the array
-% of the index of the
-% If a default has been set, it is added to the left
-% of the seq.
+% The default value is retrieved through a label:
 %    \begin{macrocode}
         \pdfdict_put:nnx { l_@@/field }{V}  { /\ref_value:nn{#1}{pdfradioindex} }
         \pdfdict_put:nnx { l_@@/field }{DV} { /\ref_value:nn{#1}{pdfradioindex} }
@@ -684,6 +698,17 @@
 % now we create the field and set it as parent for the following annotation.
 %    \begin{macrocode}
         \@@_field:n { @@/radio/#1 }
+%    \end{macrocode}
+% If the inunison bool has been set to false we need to pass this to the
+% kids.
+%    \begin{macrocode}
+    \bool_if:NF \l_@@_radio_unison_bool
+      {
+        \cs_new:cpn {g_@@_radio_unison_state_#1_tl}
+         {
+           \bool_set_false:N \l_@@_radio_unison_bool
+         }
+      }
       }
     \keys_set:nn {pdffield}{parent=@@/radio/#1}
   }
@@ -715,6 +740,7 @@
         ,name=radio
         ,width  = \normalbaselineskip
         ,height = \normalbaselineskip
+        ,inunison
         ,@@/preset/radiobutton
         ,#1
         ,unsetFf={Pushbutton}
@@ -729,6 +755,10 @@
         \pdfdict_get:nnN {l_@@/field}{T}\l_@@_fieldID_tl
         \tl_put_left:Nn \l_@@_fieldID_tl {@@/radio/}
       }
+%    \end{macrocode}
+% If unison has been set for the field pass it on:
+%    \begin{macrocode}
+   \cs_if_exist_use:c {g_@@_radio_unison_state_ \l_@@_fieldID_tl _tl}
 %    \end{macrocode}
 % Now we build the field
 %    \begin{macrocode}
@@ -821,6 +851,25 @@
 %    \end{macrocode}
 % \end{macro}
 %
+% \begin{macro}{inunison}
+%    \begin{macrocode}
+\keys_define:nn { pdffield }
+ {
+    inunison .choice:
+   ,inunison / true .code:n =
+     {
+       \bool_set_true:N  \l_@@_radio_unison_bool
+       \bitset_set_true:Nn \l_@@_Ff_bitset {RadiosInUnison}
+     }
+   ,inunison / false .code:n =
+     {
+       \bool_set_false:N  \l_@@_radio_unison_bool
+       \bitset_set_false:Nn \l_@@_Ff_bitset {RadiosInUnison}
+     }
+   ,inunison .default:n = {true}
+ }
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\@@_radio_appearance_handler:nnn}
 % The handler for the appearances stores only the code
 % as it must be executed rather late.
