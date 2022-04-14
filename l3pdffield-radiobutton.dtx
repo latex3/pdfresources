@@ -105,6 +105,16 @@
 % \pdffield_radio:n{name=A,value=Sieglinde}&
 % \pdffield_radio:n{name=A,value=Duck}
 % \end{tabular}
+% \par not in unison: \par
+%
+% \begin{tabular}{ccc}
+% \pdffield_radio:n{inunison=false,name=C,value=Bär,appearance=pdffield/bear,width=\box_wd:N\l_pdffield_bear_box,height=\box_ht:N\l_pdffield_bear_box}&
+% \pdffield_radio:n{name=C,value=Sieglinde,default,appearance=pdffield/hippo,width=\box_wd:N\l_pdffield_hippo_box,height=\box_ht:N\l_pdffield_hippo_box}&
+% \pdffield_radio:n{name=C,value=Duck,appearance=pdffield/duck,width=\box_wd:N\l_pdffield_duck_box,height=\box_ht:N\l_pdffield_duck_box}\\[1ex]
+% \pdffield_radio:n{name=C,value=Bär}&
+% \pdffield_radio:n{name=C,value=Sieglinde}&
+% \pdffield_radio:n{name=C,value=Duck}
+% \end{tabular}
 % \ExplSyntaxOff
 % \end{center}
 %
@@ -271,7 +281,8 @@
 % between the two cases. The flag |RadiosInUnison|
 % is neither needed for this (but doesn't harm either) nor
 % does it change the behaviour, at least again not in the PDF viewers I tried,
-% nevertheless the key will set it accordingly just in case.
+% nevertheless the key will set it accordingly just in case. The two examples at
+% the begin of the document show the two variants.
 %
 %
 % The button with the key |default| will be selected at the start (together with the
