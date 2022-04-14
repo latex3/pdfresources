@@ -1,6 +1,6 @@
 #!/usr/bin/env texlua
-packageversion="0.95l"
-packagedate="2022-02-16"
+packageversion="0.95m"
+packagedate="2022-03-17"
 
 -- Build script for "LaTeX PDF management testphase bundle" bundle
 
@@ -62,7 +62,7 @@ checkruns = 4
 --     }
 
 -- packtdszip = true
-checkengines = {"luatex","pdftex","xetex"}
+checkengines = {"pdftex","luatex","xetex"}
 
 
 checkconfigs = {"build", -- luatex, pdftex, xetex
