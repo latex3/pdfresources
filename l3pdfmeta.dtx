@@ -515,8 +515,12 @@
   {
     \pdfmeta_standard_verify:nF { annot_flags }
      { \@@_verify_pdfa_annot_flags: }
+    \pdfmeta_standard_verify:nnF { min_pdf_version }
+     { \pdf_version: }
+     { \typeout{Wrong Version!!} }
   }
 %    \end{macrocode}
+%
 %
 %  \subsubsection{pdf/A}
 %  We use global properties so that follow up standards can be
@@ -531,6 +535,7 @@
 %   \g_@@_standard_pdf/A-3A_prop ,
 %   \g_@@_standard_pdf/A-3B_prop ,
 %   \g_@@_standard_pdf/A-3U_prop ,
+%   \g_@@_standard_pdf/A-4_prop ,
 %   }
 %     \begin{macrocode}
 \prop_new:c { g_@@_standard_pdf/A-1B_prop }
@@ -542,6 +547,7 @@
     ,conformance      = B
     ,year             = 2005
     ,min_pdf_version  = 1.4        %minimum
+    ,max_pdf_version  = 1.4        %minimum
     ,no_encryption    =
     ,no_external_content =  % no F, FFilter, or FDecodeParms in stream dicts
     ,no_embed_content = % no EF key in filespec, no /Type/EmbeddedFiles
@@ -605,7 +611,8 @@
 \prop_gremove:cn
   { g_@@_standard_pdf/A-2B_prop }
   { embed_content}
-
+\prop_gput:cnn
+  { g_@@_standard_pdf/A-2B_prop }{max_pdf_version}{1.7}
 %A-2u ==============
 \prop_new:c { g_@@_standard_pdf/A-2U_prop }
 \prop_gset_eq:cc
@@ -669,6 +676,22 @@
   { g_@@_standard_pdf/A-3A_prop }{conformance}{A}
 \prop_gput:cnn
   { g_@@_standard_pdf/A-3A_prop }{tagged}{}
+
+%A-4 ==============
+\prop_new:c { g_@@_standard_pdf/A-4_prop }
+\prop_gset_eq:cc
+  { g_@@_standard_pdf/A-4_prop }
+  { g_@@_standard_pdf/A-3U_prop }
+\prop_gput:cnn
+  { g_@@_standard_pdf/A-4_prop }{name}{pdf/A-4}
+\prop_gput:cnn
+  { g_@@_standard_pdf/A-4_prop }{min_pdf_version}{2.0}
+\prop_gput:cnn
+  { g_@@_standard_pdf/A-4_prop }{year}{2020}
+\prop_gremove:cn
+  { g_@@_standard_pdf/A-4_prop }{conformance}
+\prop_gremove:cn
+  { g_@@_standard_pdf/A-4_prop }{max_pdf_version}
 %    \end{macrocode}
 % \end{variable}
 %
