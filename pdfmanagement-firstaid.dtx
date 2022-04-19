@@ -68,7 +68,7 @@
   {LaTeX PDF management testphase bundle / firstaid-patches}
 
 %<@@=pdfmanagement>
-\clist_map_inline:nn {pgf,transparent,hyperxmp,pdflscape,xcolor,color,beamer,output}
+\clist_map_inline:nn {pgf,transparent,hyperxmp,pdflscape,xcolor,color,beamer,output,colorspace}
   {
     \bool_new:c       { g_@@_firstaid_#1_bool }
     \bool_gset_true:c { g_@@_firstaid_#1_bool }
@@ -291,48 +291,14 @@
 % as colorspace uses temporary macros whose contents is lost.
 %    \begin{macrocode}
 %<*package>
-%<@@=pdf>
-% this must be earlier, to avoid problems with luatex which has two pageresources
-% lua/tex
-\hook_gput_code:nnn {begindocument} {pdf}
-  {
-    \tl_if_exist:NT \spc@op
+\bool_if:NT \g_@@_firstaid_colorspace_bool
+ {
+    \AddToHook
       {
-        \def\spc@Pageresources#1{}
+       package/colorspace/after
       }
-
-  }
-
-\hook_gput_code:nnn {begindocument/end} {pdf}
-  {
-    \tl_if_exist:NT \spc@op
-      {
-        \@@_backend_object_new:nn  {__spc_extgstate_op_false}{dict}
-        \@@_backend_object_write:nn
-          {__spc_extgstate_op_false}
-          {/Type /ExtGState~/op~false~/OP~false}
-        \pdfmanagement_add:nnn
-          {Page/Resources/ExtGState}
-          {SPCko}
-          {\@@_backend_object_ref:n {__spc_extgstate_op_false}}
-        \@@_backend_object_new:nn  {__spc_extgstate_op_true0}{dict}
-        \@@_backend_object_write:nn
-          {__spc_extgstate_op_true0}
-          {/Type /ExtGState~/op~true~/OP~true~/OPM~0}%
-        \pdfmanagement_add:nnn
-          {Page/Resources/ExtGState}
-          {SPCmz}
-          {\@@_backend_object_ref:n {__spc_extgstate_op_true0}}
-        \@@_backend_object_new:nn  {__spc_extgstate_op_true1}{dict}
-        \@@_backend_object_write:nn
-          {__spc_extgstate_op_true1}
-          {/Type /ExtGState~/op~true~/OP~true~/OPM~1}%
-         \pdfmanagement_add:nnn
-          {Page/Resources/ExtGState}
-          {SPCop}
-          {\@@_backend_object_ref:n {__spc_extgstate_op_true1}}
-      }
-  }
+      {\RequirePackage{colorspace-patches-tmp-ltx}}
+ }
 %</package>
 %    \end{macrocode}%
 % \end{documentation}
