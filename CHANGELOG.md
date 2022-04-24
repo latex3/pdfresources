@@ -8,6 +8,7 @@ this project uses date-based 'snapshot' version identifiers.
 
 ## Fixed
  - Support/firstaid for colorspace package
+ - Support for metadata with hyperxmp and xetex
  
  
 ## [2022-04-14]

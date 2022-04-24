@@ -148,19 +148,24 @@
 
 % hyperxmp puts the code into enddocument, but for xetex this is too late.
 % so we move that to shipout/lastpage and add our command before.
-\RemoveFromHook{enddocument}[hyperxmp]
-\AddToHook{shipout/lastpage}[pdfmanagement-firstaid]
- {
-  \__hyxmp_get_metadata:
-  \hyxmp@auto@assign@data
-  \hyxmp@check@standards
-  \hyxmp@warn@if@no@metadata
-  \hyxmp@embed@packet
- }
-
-%\AddToHook{enddocument}[pdfmanagement-firstaid]{\__hyxmp_get_metadata:}
-
-%\DeclareHookRule{enddocument}{pdfmanagement-firstaid}{before}{hyperxmp}
+% the luatex code must stay in enddocument as hyperxmp tries to detect the pdf size
+% there.
+\sys_if_output_dvi:TF
+  {
+    \RemoveFromHook{enddocument}[hyperxmp]
+    \AddToHook{shipout/lastpage}[pdfmanagement-firstaid]
+      {
+        \__hyxmp_get_metadata:
+        \hyxmp@auto@assign@data
+        \hyxmp@check@standards
+        \hyxmp@warn@if@no@metadata
+        \hyxmp@embed@packet
+       }
+   }
+   {
+     \AddToHook{enddocument}[pdfmanagement-firstaid]{\__hyxmp_get_metadata:}
+     \DeclareHookRule{enddocument}{pdfmanagement-firstaid}{before}{hyperxmp}
+   }
 
 
 \endinput
