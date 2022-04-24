@@ -146,9 +146,21 @@
 
 \DeclareHookRule{begindocument/before}{pdfmanagement/firstaid/hyperxmp}{before}{hyperxmp}
 
-\AddToHook{enddocument}[pdfmanagement-firstaid]{\__hyxmp_get_metadata:}
+% hyperxmp puts the code into enddocument, but for xetex this is too late.
+% so we move that to shipout/lastpage and add our command before.
+\RemoveFromHook{enddocument}[hyperxmp]
+\AddToHook{shipout/lastpage}[pdfmanagement-firstaid]
+ {
+  \__hyxmp_get_metadata:
+  \hyxmp@auto@assign@data
+  \hyxmp@check@standards
+  \hyxmp@warn@if@no@metadata
+  \hyxmp@embed@packet
+ }
 
-\DeclareHookRule{enddocument}{pdfmanagement-firstaid}{before}{hyperxmp}
+%\AddToHook{enddocument}[pdfmanagement-firstaid]{\__hyxmp_get_metadata:}
+
+%\DeclareHookRule{enddocument}{pdfmanagement-firstaid}{before}{hyperxmp}
 
 
 \endinput
