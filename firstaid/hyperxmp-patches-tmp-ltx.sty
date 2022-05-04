@@ -52,6 +52,8 @@
       \Hy@pdfatrue
       \tl_set:Nn \@pdfapart{#2}
       \tl_set:Nx \@pdfaconformance{#3}
+      \tl_if_eq:NnT \@pdfaconformance{Z}
+       { \tl_clear:N \@pdfaconformance }
     }
  }
 \cs_new_protected:Npn \__hyxmp_get_metadata:
