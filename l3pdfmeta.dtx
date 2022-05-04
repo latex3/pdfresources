@@ -362,6 +362,11 @@
 %<*package>
 \msg_new:nnn  {pdf }{unknown-standard}{The~standard~'#1'~is~unknown~and~has~been~ignored}
 %    \end{macrocode}
+% Message for not fitting pdf version
+%    \begin{macrocode}
+\msg_new:nnn  {pdf }{wrong-pdfversion}
+  {PDF~version~#1~is~too~#2~for~standard~'#3'.}
+%    \end{macrocode}
 % \begin{variable}{\l_@@_tmpa_tl,\l_@@_tmpb_tl,\l_@@_tmpa_str}
 %    \begin{macrocode}
 \tl_new:N\l_@@_tmpa_tl
@@ -456,6 +461,19 @@
  }
 %    \end{macrocode}
 % \end{macro}
+% The next is the counter part and checks that the version is not to high
+% \begin{macro}{\@@_standard_verify_handler_max_pdf_version:nn}
+%    \begin{macrocode}
+%
+\cs_new_protected:Npn \@@_standard_verify_handler_max_pdf_version:nn #1 #2
+ {
+   \pdf_version_compare:NnTF >
+     { #2 }
+     {\prg_return_false:}
+     {\prg_return_true:}
+ }
+%    \end{macrocode}
+% \end{macro}
 % The next checks if the user value is in the list and returns a failure if not.
 % \begin{macro}{\@@_standard_verify_handler_named_actions:nn}
 %    \begin{macrocode}
@@ -517,7 +535,24 @@
      { \@@_verify_pdfa_annot_flags: }
     \pdfmeta_standard_verify:nnF { min_pdf_version }
      { \pdf_version: }
-     { \typeout{Wrong Version!!} }
+     { \msg_warning:nnxxx {pdf}{wrong-pdfversion}
+       {\pdf_version:}{low}
+       {
+        \pdfmeta_standard_item:n{type}
+        -
+        \pdfmeta_standard_item:n{level}
+       }
+     }
+    \pdfmeta_standard_verify:nnF { max_pdf_version }
+     { \pdf_version: }
+     { \msg_warning:nnxxx {pdf}{wrong-pdfversion}
+       {\pdf_version:}{high}
+       {
+        \pdfmeta_standard_item:n{type}
+        -
+        \pdfmeta_standard_item:n{level}
+       }
+     }
   }
 %    \end{macrocode}
 %
