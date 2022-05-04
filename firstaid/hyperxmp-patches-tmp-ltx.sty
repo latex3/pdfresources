@@ -45,21 +45,27 @@
  }
 
 % A standard should be retrieved from the document settings.
-\cs_new:Npn \__hypxmp_get_Astandard:w #1-#2#3#4\q_stop
+\cs_new:Npn \__hypxmp_get_Astandard:
  {
-   \tl_if_eq:nnT{#1}{A}
+   \exp_args:Ne \tl_if_eq:nnT{\pdfmeta_standard_item:n{type}}{A}
     {
       \Hy@pdfatrue
-      \tl_set:Nn \@pdfapart{#2}
-      \tl_set:Nx \@pdfaconformance{#3}
-      \tl_if_eq:NnT \@pdfaconformance{Z}
-       { \tl_clear:N \@pdfaconformance }
+      \tl_set:Nx \@pdfapart{\pdfmeta_standard_item:n{level}}
+      \tl_set:Nx \@pdfaconformance{\pdfmeta_standard_item:n{conformance}}
     }
  }
+% A-4 will need also the year, so we have to extend the schema
+\renewcommand*{\hyxmp@pdfa@id@schema}{%
+  \ifHy@pdfa
+    \exp_args:Nnx\hyxmp@add@simple{pdfaid:part}{\pdfmeta_standard_item:n{level}}
+    \exp_args:Nnx\hyxmp@add@simple{pdfaid:conformance}{\pdfmeta_standard_item:n{conformance}}
+    \exp_args:Nnx\hyxmp@add@simple{pdfaid:rev}{\pdfmeta_standard_item:n{year}}
+  \fi
+}
+
 \cs_new_protected:Npn \__hyxmp_get_metadata:
  {
-  \exp_last_unbraced:Ne \__hypxmp_get_Astandard:w
-    {\GetDocumentProperties{document/pdfstandard}}Z-ZZZ\q_stop
+   \__hypxmp_get_Astandard:
    \clist_map_inline:nn
     {
       % hyperxmp keys:
