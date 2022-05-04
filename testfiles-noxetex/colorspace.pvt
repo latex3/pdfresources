@@ -1,0 +1,18 @@
+% Test doesn't make sense with xelatex/dvips as they don't
+% work with transparent and colorspace anyway ...
+\PassOptionsToPackage{enable-debug,check-declarations}{expl3}
+\DocumentMetadata {  }
+\input{regression-test}
+\documentclass{article}
+
+\usepackage{tikz}
+\usepackage{colorspace}
+\definespotcolor{myblue}{HKS 44 K}[cmyk]{1,0.5,0,0}
+\definespotcolor{mygreen}{BarTone 555 GN}{.8,.2,.5,.3}
+
+\begin{document}
+\color{myblue} abc
+\color{mygreen} cde
+
+\color{red} red
+\end{document} 

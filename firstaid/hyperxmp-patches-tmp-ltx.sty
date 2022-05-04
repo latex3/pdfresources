@@ -19,7 +19,7 @@
 %
 % for those people who are interested.
 \NeedsTeXFormat{LaTeX2e}[2020/10/01]
-\ProvidesExplPackage{hyperxmp-patches-tmp-ltx}{2022-03-17}{0.95m}
+\ProvidesExplPackage{hyperxmp-patches-tmp-ltx}{2022-04-14}{0.95n}
   {Store hyperref metadata in XMP format / temporay patches to test pdfresource management ... UF}
 
 \cs_if_exist:NT \pdfmanagement_add:nnn
@@ -146,9 +146,26 @@
 
 \DeclareHookRule{begindocument/before}{pdfmanagement/firstaid/hyperxmp}{before}{hyperxmp}
 
-\AddToHook{enddocument}[pdfmanagement-firstaid]{\__hyxmp_get_metadata:}
-
-\DeclareHookRule{enddocument}{pdfmanagement-firstaid}{before}{hyperxmp}
+% hyperxmp puts the code into enddocument, but for xetex this is too late.
+% so we move that to shipout/lastpage and add our command before.
+% the luatex code must stay in enddocument as hyperxmp tries to detect the pdf size
+% there.
+\sys_if_output_dvi:TF
+  {
+    \RemoveFromHook{enddocument}[hyperxmp]
+    \AddToHook{shipout/lastpage}[pdfmanagement-firstaid]
+      {
+        \__hyxmp_get_metadata:
+        \hyxmp@auto@assign@data
+        \hyxmp@check@standards
+        \hyxmp@warn@if@no@metadata
+        \hyxmp@embed@packet
+       }
+   }
+   {
+     \AddToHook{enddocument}[pdfmanagement-firstaid]{\__hyxmp_get_metadata:}
+     \DeclareHookRule{enddocument}{pdfmanagement-firstaid}{before}{hyperxmp}
+   }
 
 
 \endinput

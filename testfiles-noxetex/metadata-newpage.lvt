@@ -1,0 +1,31 @@
+\PassOptionsToPackage{enable-debug,check-declarations}{expl3}
+\RequirePackage{pdfmanagement-testphase}
+\DocumentMetadata {lang=de-DE  }
+\input{regression-test}
+
+\documentclass{article}
+
+\usepackage{hyperxmp,kantlipsum}
+
+\usepackage[]
+   {hyperref}
+
+\hypersetup{  pdftoolbar=false,
+   pdfauthor={Ulrike Fischer},
+   pdftitle={A test of metadata},
+   pdfnonfullscreenpagemode=UseNone,
+   pdfnumcopies=4,
+   pdfpagelayout=SinglePage
+   }
+
+
+\begin{document}
+s
+
+\START
+\showoutput
+ blblb \kant
+ 
+ \pagebreak 
+ 
+\end{document}
