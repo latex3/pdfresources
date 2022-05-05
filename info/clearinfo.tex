@@ -1,0 +1,26 @@
+The following more or less clears the info dictionary.
+
+\pdfmanagement_add:nnn{Info}{Creator}{null}
+\pdfmanagement_add:nnn{Info}{Producer}{null}
+\pdfmanagement_add:nnn{Info}{CreationDate}{null}
+\pdfmanagement_add:nnn{Info}{Title}{null}
+\pdfmanagement_add:nnn{Info}{Trapped}{null}
+\pdfmanagement_add:nnn{Info}{ModDate}{null}
+
+\tex_pdfsuppressptexinfo:D 7 \scan_stop: %pdftex
+\tex_pdfvariable:D suppressoptionalinfo 7\relax %luatex
+
+if ModDate should stay
+
+\pdf_object_unnamed_write:nn{dict}{}
+\pdfmanagement_add:nnx{Catalog}{PieceInfo}{\pdf_object_ref_last:}
+
+
+Comments
+
+- verapdf doesn't yet handle the null entries correctly 
+- doesn't work with xdvipdfmx: if e.g. Producer is null it fills it with the standard text.
+- doesn't work with dvips
+- a future pdftex will have  \pdfomitinfodict to suppress the info completly.
+
+

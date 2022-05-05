@@ -222,6 +222,17 @@
 % tested from TeX, but in a current LaTeX normally ToUnicode are set for all fonts.
 % \item[|tagged|] that is set in A-2a and A-3a and means that the pdf must be
 % tagged. This is currently neither tested not enforced somewhere.
+% \item[|Trailer_no_Info|] The \texttt{Info} dictionary
+% has been deprecated since quite some time. Metadata should be set with
+% XMP-data instead. In PDF A-4 now the \texttt{Info} dictionary
+% shall not be present in the trailer dictionary at all
+% (unless there exists a PieceInfo entry in the Catalog). And if it is present
+% it should only contain the \texttt{/ModDate} entry. The engines
+% do not offer currently an option to suppress the dictionary completly,
+% one can only give the entries the value null (it only works for all entries
+% with lualatex and pdflatex). The next pdflatex will offer \cs{pdfomitinfodict}.
+% Until then l3pdfmeta does nothing with this requirement.
+%
 % \end{description}
 %
 % \subsubsection{Tests with values and special handlers}
