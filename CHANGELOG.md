@@ -6,7 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 this project uses date-based 'snapshot' version identifiers.
 ## [Unreleased]
 
-## Fixed
+### Added
+ - allow standard pdf/A-4
+ - check requirement for max-pdfversion
+ - add requirement for Info dictionary
+ 
+### Fixed
  - Support/firstaid for colorspace package
  - Support for metadata with hyperxmp and xetex
  
