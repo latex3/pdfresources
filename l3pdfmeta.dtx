@@ -228,11 +228,28 @@
 %
 % \begin{description}
 %
-% \item[|min_pdf_version|]  stores the minimal PDF version.
+% \item[|min_pdf_version|]  stores the minimal PDF version needed for
+%  a standard.
 %  It should be checked against the current PDF version (\cs{pdf_version:}).
 %  A failure means that the version should be changed.
-%  This check is done by \pkg{l3pdfmeta} when the version is set with
-%  \cs{DocumentMetadata} so more checks are only needed if the version is changed later.
+%  Currently there is only one hard requirement which leads to a failure in
+%  a validator like verapdf: The A-4 standard should use PDF 2.0.
+%  As PDF A-1 is based on PDF 1.4 and PDF A-2 and A-3 are based
+%  on PDF 1.7 \pkg{l3pdfmeta} also sets these versions also as requirements.
+%  These requirements are checked by \pkg{l3pdfmeta} when the version is set with
+%  \cs{DocumentMetadata} and a warning is issued (but the version is
+%  not changed). More checks are only needed if the version is changed later.
+%
+%
+% \item[|max_pdf_version|]  stores the maximal PDF version.
+%  It should be checked against the current PDF version (\cs{pdf_version:}).
+%  A failure means that the version should be changed.
+%  The check is currently relevant only for the A-1 to A-3 standards:
+%  PDF 2.0 leads to a failure in a validator like verapdf so the maximal
+%  version should be PDF 1.7.
+%  This requirement is checked by \pkg{l3pdfmeta} when the version is set with
+%  \cs{DocumentMetadata} and a warning is issued (but the version is
+%  not changed). More checks are only needed if the version is changed later.
 %
 % \item[|named_actions|]    this requirement restricts the list of
 % allowed named actions to |NextPage|, |PrevPage|, |FirstPage|, |LastPage|.
