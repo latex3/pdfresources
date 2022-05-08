@@ -360,6 +360,20 @@
 %   Values added to \texttt{ThisPage} can not be removed. It is not possible to
 %   show the content of this dictionary with \cs{pdfmanagement_show:n}.
 % \end{function}
+%
+% \paragraph{Changing the \texttt{/MediaBox}}: It is possible to change
+% the \texttt{/MediaBox} of one or more pages by setting it for the \texttt{Page}
+% or \texttt{ThisPage} path (using \texttt{Pages} doesn't work, the engines
+% overwrite this)---this works even with dvips and allows to create
+% pages of different sizes. But you must be careful with the values.
+% If you set e.g. with pdflatex \cs{pdfpageheight} to 300bp you get a mediabox of
+% |0 0 595 300|, but pdflatex measure from the top and will also move
+% the reference point up, so effectivly
+% you get the \emph{upper} third of the page. If you set the \texttt{/MediaBox}
+% to |0 0 595 300| with \cs{pdfmanagement_add:nnn} you get the \emph{lower} third.
+% In general it is better to use only the primitive commands to avoid confusing
+% results.
+%
 % \subsubsection{\enquote{Page/Resources}: ExtGState, ColorSpace, Shading, Pattern}
 % \begin{NOTE}{UF}
 % Only for pdf/luatex and xdvipdfmx backend- and pdf-code is needed to add values
