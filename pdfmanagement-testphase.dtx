@@ -421,12 +421,14 @@
 %\RequirePackage{l3pdfdict}       % needed by l3pdfmanagement
 %\RequirePackage{l3pdfmanagement} % loads the core code with the boolean
 %\RequirePackage{ltdocinit}       % DocumentMetadata,
-%% can perhaps be combined or made optional ...
+%can perhaps be combined or made optional ...
 %\RequirePackage{l3pdfannot}
 %\RequirePackage{l3pdfxform-beta}
 %\RequirePackage{l3pdfmeta}       %
 %\RequirePackage{l3pdftools}
 %\RequirePackage{l3pdffile}
+\IfFileExists{tagpdf-dummy.sty}
+  {\RequirePackage{tagpdf-dummy}}{}
 \input{pdfmanagement-testphase.ltx}
 %</package>
 %    \end{macrocode}

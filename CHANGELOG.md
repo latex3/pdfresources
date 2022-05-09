@@ -10,6 +10,8 @@ this project uses date-based 'snapshot' version identifiers.
  - allow standard pdf/A-4
  - check requirement for max-pdfversion
  - add requirement for Info dictionary
+ - load tagpdf-dummy if it exist to provide the
+   tagging commands.
  
 ### Fixed
  - Support/firstaid for colorspace package
