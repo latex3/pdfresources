@@ -35,7 +35,10 @@
                {
                  %this is for multi models, it will break if there is model
                  %l3 doesn't know, but the case is rare, so accept it for now.
-                 \color_set:nnn{#1}{#2}{#3}
+                 \str_if_in:nnT {#2}{/}
+                  {
+                    \color_set:nnn{#1}{#2}{#3}
+                  }  
                }
            }
         }
