@@ -68,7 +68,7 @@
   {LaTeX PDF management testphase bundle / firstaid-patches}
 
 %<@@=pdfmanagement>
-\clist_map_inline:nn {pgf,transparent,hyperxmp,pdflscape,xcolor,color,beamer,output,colorspace}
+\clist_map_inline:nn {pgf,transparent,hyperxmp,pdflscape,xcolor,color,beamer,output,colorspace,fontspec}
   {
     \bool_new:c       { g_@@_firstaid_#1_bool }
     \bool_gset_true:c { g_@@_firstaid_#1_bool }
@@ -82,6 +82,34 @@
   }
 \msg_new:nnn  { pdfmanagement } { firstaid }
               { loading~pdfmanagement~firstaid~code~for~#1 }
+\msg_new:nnn  { pdfmanagement } { firstaid-changed }
+              { package~#1~has~changed.~Check~if~patch~is~still~valid! }
+%    \end{macrocode}
+% \subsection{Fontspec}
+% When using luaLaTeX opacity is broken (issue \#30) as
+% fontspec/luaotfload doesn't use the pdfmanagement but write to ExtGState directly
+% To repair this some new lua code is needed. This also
+% improves the color parsing and allows to use cmyk and spot colors as font colors.
+% It is also needed to use a patch version of \texttt{fontspec-luatex.sty} to
+% slightly change the way how the Opacity and Color key are handled.
+%    \begin{macrocode}
+\bool_if:NT \g_@@_firstaid_fontspec_bool
+  {
+    \sys_if_engine_luatex:T
+     {
+       \msg_info:nnn{pdfmanagement}{firstaid}{fontspec}
+       \file_if_exist:nT { luaotfload-l3color-tmp.lua }
+         {
+           \lua_load_module:n { luaotfload-l3color-tmp.lua }
+         }
+     }
+    \declare@file@substitution{fontspec-luatex.sty}{fontspec-luatex-tmp-ltx.sty}
+    \AddToHook{package/fontspec/after}
+     {
+       \str_if_eq:vnF{ver@fontspec.sty}{2022/01/15~v2.8a~Font~selection~for~XeLaTeX~and~LuaLaTeX}
+        {\msg_warn:nnn{pdfmanagement}{firstaid-changed}{fontspec}}
+     }
+  }
 %    \end{macrocode}
 % \subsection{Output routine}
 % This load as few patches for the LaTeX output routine commands. They add

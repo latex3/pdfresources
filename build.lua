@@ -20,7 +20,9 @@ if options["target"] == "ctan" then
                 "firstaid/xcolor-patches-tmp-ltx.sty",
                 "firstaid/color-ltx.sty",
                 "firstaid/output-patches-tmp-ltx.dtx",
-                "firstaid/colorspace-patches-tmp-ltx.sty"
+                "firstaid/colorspace-patches-tmp-ltx.sty",
+                "firstaid/fontspec-luatex-tmp-ltx.sty",
+                "firstaid/luaotfload-l3color-tmp.lua"
                 }
 else
  sourcefiles =  {"*.dtx","*.ins",
@@ -33,6 +35,8 @@ else
                 "firstaid/output-patches-tmp-ltx.dtx",
                 "firstaid/output-patches-tmp-ltx.dtx",
                 "firstaid/colorspace-patches-tmp-ltx.sty",
+                "firstaid/fontspec-luatex-tmp-ltx.sty",
+                "firstaid/luaotfload-l3color-tmp.lua",
                 "support/pdfmanagement-regressiontest.sty",
                 "newpackages/new-bookmark.sty",
                 "newpackages/bkm-generic.def",
