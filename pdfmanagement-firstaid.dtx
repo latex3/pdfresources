@@ -94,30 +94,31 @@
 % slightly change the way how the Opacity and Color key are handled.
 % The patch is only executed if luaotfload is new enough.
 %    \begin{macrocode}
-\lua_now:n
-  {
-   if~not~luaotfload.set_transparent_colorstack~
-   then~
-     tex.print("\\bool_set_false:N\\g_@@_firstaid_fontspec_bool")~
-   end
-  }
-\bool_if:NT \g_@@_firstaid_fontspec_bool
-  {
-    \sys_if_engine_luatex:T
-     {
-       \msg_info:nnn{pdfmanagement}{firstaid}{fontspec}
-       \file_if_exist:nT { luaotfload-l3color-tmp.lua }
-         {
-           \lua_load_module:n { luaotfload-l3color-tmp.lua }
-         }
-     }
-    \declare@file@substitution{fontspec-luatex.sty}{fontspec-luatex-tmp-ltx.sty}
-    \AddToHook{package/fontspec/after}
-     {
-       \str_if_eq:vnF{ver@fontspec.sty}{2022/01/15~v2.8a~Font~selection~for~XeLaTeX~and~LuaLaTeX}
-        {\msg_warn:nnn{pdfmanagement}{firstaid-changed}{fontspec}}
-     }
-  }
+\sys_if_engine_luatex:T
+   {
+     \lua_now:n
+       {
+        if~not~luaotfload.set_transparent_colorstack~
+        then~
+          tex.print("\\bool_set_false:N\\g_@@_firstaid_fontspec_bool")~
+        end
+       }
+     \bool_if:NT \g_@@_firstaid_fontspec_bool
+       {
+            \msg_info:nnn{pdfmanagement}{firstaid}{fontspec}
+            \file_if_exist:nT { luaotfload-l3color-tmp.lua }
+              {
+                \lua_load_module:n { luaotfload-l3color-tmp.lua }
+              }
+
+         \declare@file@substitution{fontspec-luatex.sty}{fontspec-luatex-tmp-ltx.sty}
+         \AddToHook{package/fontspec/after}
+          {
+            \str_if_eq:vnF{ver@fontspec.sty}{2022/01/15~v2.8a~Font~selection~for~XeLaTeX~and~LuaLaTeX}
+             {\msg_warn:nnn{pdfmanagement}{firstaid-changed}{fontspec}}
+          }
+       }
+   }
 %    \end{macrocode}
 % \subsection{Output routine}
 % This load as few patches for the LaTeX output routine commands. They add
