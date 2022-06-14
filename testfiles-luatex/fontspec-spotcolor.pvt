@@ -1,0 +1,20 @@
+\DocumentMetadata{uncompress}
+\input{regression-test}
+\documentclass{article}
+\usepackage{fontspec}
+\usepackage{xcolor}
+\ExplSyntaxOn
+ \color_model_new:nnn { sepblue } { Separation }
+    {
+      name = PANTONE~3005~U ,
+      alternative-model = cmyk ,
+      alternative-values = {1, 0.56, 0,0},
+    }
+  \color_set:nnn{spotblue}{sepblue}{1}
+  \color_set:nnn{cmykblue}{cmyk}{1,1,1,0.5}
+\ExplSyntaxOff
+\setmainfont{texgyretermes}[Color=cmykblue]
+\setsansfont{texgyretermes}[Color=spotblue,Opacity=0.2]
+\begin{document}
+TTT \sffamily MMM
+\end{document}
