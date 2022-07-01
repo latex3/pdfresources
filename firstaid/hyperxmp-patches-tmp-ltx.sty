@@ -59,7 +59,8 @@
   \ifHy@pdfa
     \exp_args:Nnx\hyxmp@add@simple{pdfaid:part}{\pdfmeta_standard_item:n{level}}
     \exp_args:Nnx\hyxmp@add@simple{pdfaid:conformance}{\pdfmeta_standard_item:n{conformance}}
-    \exp_args:Nnx\hyxmp@add@simple{pdfaid:rev}{\pdfmeta_standard_item:n{year}}
+    \int_compare:nNnT{\pdfmeta_standard_item:n{level}}>{3}
+     { \exp_args:Nnx\hyxmp@add@simple{pdfaid:rev}{\pdfmeta_standard_item:n{year}} }
   \fi
 }
 
