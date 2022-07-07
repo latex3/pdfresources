@@ -1319,7 +1319,6 @@
   \hook_use:n{cmd/href/before}
   \group_begin:
   \keys_set:nn { hyp / href } {#1}
-  \let\protect\@unexpandable@protect
   \bool_if:NTF \l_@@_href_url_encode_bool
     {
       \tl_set:Nn \l_@@_text_enc_uri_print_tl {utf8/URI}
@@ -1349,7 +1348,6 @@
    \hook_use:n{cmd/href/before}
    \group_begin:
    \keys_set:nn { hyp / href } {#1}
-   \let\protect\@unexpandable@protect
    \bool_if:NTF \l_@@_href_url_encode_bool
     {
       \tl_set:Nn \l_@@_text_enc_uri_print_tl {utf8/URI}
@@ -1373,7 +1371,6 @@
   \hook_use:n{cmd/hrefpdf/before}
   \group_begin:
   \keys_set:nn { hyp / href } {#1}
-  \let\protect\@unexpandable@protect
   \hyper@normalise\@@_href_pdf_aux:nn
  }
 
@@ -1391,7 +1388,6 @@
   \hook_use:n{cmd/hrefrun/before}
   \group_begin:
   \keys_set:nn { hyp / href } {#1}
-  \let\protect\@unexpandable@protect
   \hyper@normalise\@@_href_run_aux:nn
  }
 
@@ -1411,7 +1407,6 @@
    \hook_use:n{cmd/url/before}
    \group_begin:
    \keys_set:nn {hyp / href } {#1}
-   \let\protect \@unexpandable@protect
     \bool_if:NTF \l_@@_href_url_encode_bool
     {
       \tl_set:Nn \l_@@_text_enc_uri_print_tl {utf8/URI}
@@ -4119,7 +4114,7 @@
 % |\hypersetup{pdfpagetransition={style=Fly,duration=2,direction=90,opaque=false}}|
 %
 % The keys allowed in the argument of |pdfpagetransition| are
-% 
+%
 % \begin{tabular}{l>{\raggedright\arraybackslash}p{6cm}}
 % style    &  one of Split, Blinds, Box, Wipe, Dissolve, Glitter, R, Fly, Push, Cover, Uncover, Fade\\
 % duration &  a number, describes the duration of the transition\\
