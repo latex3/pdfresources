@@ -3090,12 +3090,8 @@
 %    \begin{macrocode}
 \keys_define:nn { hyp / setup }
  {
-   ,verbose .choice:
-   ,verbose / true  .code:n = { \Hy@verbosetrue}
-   ,verbose / false .code:n = { \Hy@verbosefalse}
-   ,verbose .default:n = {true}
-   ,debug .meta:n = {verbose=#1}
-   ,debug .default:n = {true}
+   ,verbose   .legacy_if_set:n  = {Hy@verbose}
+   ,debug     .legacy_if_set:n  = {Hy@verbose}
  }
 \keys_define:nn { hyp / setup }
   {
@@ -3124,8 +3120,8 @@
    ,linkfileprefix .tl_set:N  = \Hy@linkfileprefix
    ,localanchorname .legacy_if_set:n = {Hy@localanchorname}
    ,naturalnames .legacy_if_set:n = {Hy@naturalnames}
-   ,pageanchor .legacy_if_set:n = {Hy@pageanchor}
-   ,plainpages .legacy_if_set:n = {Hy@plainpages}
+   ,pageanchor   .legacy_if_set:n = {Hy@pageanchor}
+   ,plainpages   .legacy_if_set:n = {Hy@plainpages}
  }
 
 \keys_define:nn { hyp / setup }
