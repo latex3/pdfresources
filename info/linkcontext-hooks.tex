@@ -1,0 +1,106 @@
+% !Mode:: "TeX:UTF-8:Main"
+\DocumentMetadata{}
+\documentclass{l3doc}
+\usepackage{tcolorbox}
+\tcbuselibrary{listings}
+
+\MakeShortVerb|
+\hypersetup{pdfborder=0 0 1}
+
+\IfFormatAtLeastTF{2021-11-15}
+ {}
+ {\providecommand\ActivateGenericHook{\ProvideHook}}
+
+\ActivateGenericHook{hyp/link/acro} %cheating
+\ActivateGenericHook{hyp/link/link}
+
+\title{Handling conceptual links  with generic hooks}
+\author{Ulrike Fischer}
+\begin{document}
+
+\maketitle
+
+The basic command \pkg{hyperref} uses to create an internal document link (a \enquote{GoTo} link in PDF speech)
+has a quite unknown first argument which can be used to differentiate the links.
+Only two values for this argument are currently in use: |cite| used by various citation commands and |link| used
+for everything else. The actual effect of the argument is quite restricted in older \pkg{hyperref} versions:
+It only calls |\csname @#1color\endcsname| at some point, so it simply
+selects a color.
+
+In the new \pkg{hyperref} driver which is used when the pdfmanagement is active this argument has been connected
+with a generic hook, |hyp/link/|\meta{name}. This hook is executed at the begin of the link command, outside
+the actual link but inside a group.
+
+Packages or code which create links which are used for a specific concept,
+like e.g. citations, or acronyms, or glossary terms,
+or links to an author list can make use of this to make the links customizable by the user.
+They only need to create the link with |\hyper@linkstart| and |\hyper@linkend| with a suitable
+first argument (both commands are official interfaces of \pkg{hyperref} for links) and to activate the
+relevant hook (for |cite| the hook is already declared, \pkg{hyperref} uses it to reimplement
+the |citecolor| keys. So it can be used directly).
+For other types (including the default type |link|) the hooks must be activated first.
+This can be done with |\ActivateGenericHook|.
+
+
+The hook can e.g. change colors with |\hypersetup| or add some text before the link.
+The color of a internal link is stored in |hyp/color/link|,
+using |\colorlet| to change it is possible too, but this method is less clean: it relies a bit
+on some knowledge about the internal processing, and doesn't work for border colors which are
+set differently to text colors.
+
+
+
+
+
+\hypertarget{some-target}{}
+
+\begin{tcblisting}{title= Example with the predefined hook for the keyword \enquote{cite}}
+\makeatletter
+\hyper@linkstart{cite}{some-target}1234\hyper@linkend
+
+\AddToHook{hyp/link/cite}
+ {Cite:~\hypersetup{linkcolor=blue,linkbordercolor=yellow}}
+
+\hyper@linkstart{cite}{some-target}1234\hyper@linkend
+
+\end{tcblisting}
+
+
+
+\begin{tcblisting}{title= Activation of a new keyword}
+
+\ActivateGenericHook{hyp/link/acro}
+\AddToHookNext{hyp/link/acro}{Acro:~\colorlet{hyp/color/link}{blue}\sffamily}
+
+\makeatletter
+\hyper@linkstart{acro}{some-target}acronym\hyper@linkend\ more text
+\makeatother
+
+\end{tcblisting}
+
+
+\begin{tcblisting}{title= Activation of the existing keyword \enquote{link}}
+
+\AddToHook{hyp/link/link}{Link:~\colorlet{hyp/color/link}{orange}\sffamily}
+\ActivateGenericHook{hyp/link/link}
+
+\makeatletter
+\hyper@linkstart{link}{some-target}see 1\hyper@linkend
+\makeatother
+
+\hyperlink{some-target}{see 2}
+\end{tcblisting}
+
+
+\begin{tcblisting}{title= keyword without hook activation}
+
+\hypersetup{linkcolor=brown,linkbordercolor=red}
+\AddToHook{hyp/link/unknown}{Blub??}
+\makeatletter
+\hyper@linkstart{unknown}{some-target}acronym\hyper@linkend\ more text
+\makeatother
+
+\end{tcblisting}
+
+
+\end{document} 
