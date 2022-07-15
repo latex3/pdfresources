@@ -560,7 +560,7 @@
 %  \item |backref|
 %  \item |CJKbookmarks| this key should not be used anymore. At some time
 %  it will be removed.
-%  \item |destlabels|    (destination names are taken from \cs{label} if possible)
+%  \item |destlabel|    (destination names are taken from \cs{label} if possible)
 %  \item |encap|
 %  \item |hyperfigures|  (according to the \pkg{hyperref} manual
 %  it makes figures hyper links, but actually is a no-op for most drivers, and it
@@ -3090,12 +3090,8 @@
 %    \begin{macrocode}
 \keys_define:nn { hyp / setup }
  {
-   ,verbose .choice:
-   ,verbose / true  .code:n = { \Hy@verbosetrue}
-   ,verbose / false .code:n = { \Hy@verbosefalse}
-   ,verbose .default:n = {true}
-   ,debug .meta:n = {verbose=#1}
-   ,debug .default:n = {true}
+   ,verbose   .legacy_if_set:n  = {Hy@verbose}
+   ,debug     .legacy_if_set:n  = {Hy@verbose}
  }
 \keys_define:nn { hyp / setup }
   {
@@ -3120,27 +3116,12 @@
  {
    ,extension .tl_set:N = \XR@ext
    ,extension .initial:n= pdf
-   ,hypertexnames .choice:
-   ,hypertexnames / true  .code:n = { \Hy@hypertexnamestrue}
-   ,hypertexnames / false .code:n = { \Hy@hypertexnamesfalse}
-   ,hypertexnames .default:n = {true}
+   ,hypertexnames .legacy_if_set:n = {Hy@hypertexnames}
    ,linkfileprefix .tl_set:N  = \Hy@linkfileprefix
-   ,localanchorname .choice:
-   ,localanchorname / true  .code:n = { \Hy@localanchornametrue }
-   ,localanchorname / false .code:n = { \Hy@localanchornamefalse }
-   ,localanchorname .default:n = {true}
-   ,naturalnames .choice:
-   ,naturalnames / true  .code:n = { \Hy@naturalnamestrue}
-   ,naturalnames / false .code:n = { \Hy@naturalnamesfalse}
-   ,naturalnames .default:n = {true}
-   ,pageanchor .choice:
-   ,pageanchor / true  .code:n = { \Hy@pageanchortrue}
-   ,pageanchor / false .code:n = { \Hy@pageanchorfalse}
-   ,pageanchor .default:n = {true}
-   ,plainpages .choice:
-   ,plainpages / true  .code:n = { \Hy@plainpagestrue}
-   ,plainpages / false .code:n = { \Hy@plainpagesfalse}
-   ,plainpages .default:n = {true}
+   ,localanchorname .legacy_if_set:n = {Hy@localanchorname}
+   ,naturalnames .legacy_if_set:n = {Hy@naturalnames}
+   ,pageanchor   .legacy_if_set:n = {Hy@pageanchor}
+   ,plainpages   .legacy_if_set:n = {Hy@plainpages}
  }
 
 \keys_define:nn { hyp / setup }
@@ -3196,14 +3177,8 @@
    ,bookmarks / false .code:n = {\RemoveFromHook {begindocument/before}[hyperref/bookmark]}
    ,bookmarks / true .code:n = {}
    ,bookmarks .default:n = {true}
-   ,bookmarksnumbered .choice:
-   ,bookmarksnumbered / false .code:n = { \Hy@bookmarksnumberedfalse }
-   ,bookmarksnumbered / true .code:n  = { \Hy@bookmarksnumberedtrue }
-   ,bookmarksnumbered .default:n      = {true}
-   ,bookmarksopen .choice:
-   ,bookmarksopen / false .code:n = { \Hy@bookmarksopenfalse }
-   ,bookmarksopen / true .code:n  = { \Hy@bookmarksopentrue }
-   ,bookmarksopen .default:n      = {true}
+   ,bookmarksnumbered .legacy_if_set:n  = {Hy@bookmarksnumbered}
+   ,bookmarksopen .legacy_if_set:n = {Hy@bookmarksopen}
    ,bookmarksopenlevel .tl_set:N = \@bookmarksopenlevel
    ,bookmarkstype .tl_set:N = \Hy@bookmarkstype
    ,pdfcenterwindow    .choice:
@@ -5299,6 +5274,8 @@
     \hss
   }%
 }
+\@ifundefined{hyper@nopatch@sectioning}
+{
 \let\H@old@ssect\@ssect
 \def\@ssect#1#2#3#4#5{%
   \Hy@MakeCurrentHrefAuto{section*}%
@@ -5387,6 +5364,7 @@
     \H@old@sect{#1}{#2}{#3}{#4}{#5}{#6}[{#7}]{#8}%
   }%
 }
+}{}
 \expandafter\def\csname Parent-4\endcsname{}
 \expandafter\def\csname Parent-3\endcsname{}
 \expandafter\def\csname Parent-2\endcsname{}
