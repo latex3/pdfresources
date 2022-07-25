@@ -153,6 +153,10 @@
   {\AddToDocumentProperties[hyperref]{pdfauthor}{Title}}
  }
 
+% hyperxmp recalculates pdfproduce at begin document and we should copy that definition
+\AddToHook{begindocument/end}
+ {\edef\next{\noexpand\AddToDocumentProperties[hyperref]{pdfproducer}{\@pdfproducer}}\next}
+
 \DeclareHookRule{begindocument/before}{pdfmanagement/firstaid/hyperxmp}{before}{hyperxmp}
 
 % hyperxmp puts the code into enddocument, but for xetex this is too late.
