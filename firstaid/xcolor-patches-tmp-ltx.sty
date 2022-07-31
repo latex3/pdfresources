@@ -47,12 +47,13 @@
 \cs_generate_variant:Nn \color_set:nn {ne}
 \tl_new:N\l__pdfmanagement_firstaid_tmpa_tl
 % the color name should be sanitized to avoid problems with e.g. french making ! active
-\cs_new_protected:Npn \@expl@xcolor@set@@ne #1 #2
+\cs_new_protected:Npn \__pdfmanagement_firstaid_xcolor_set:nn #1 #2
    {
      \XC@edef\l__pdfmanagement_firstaid_tmpa_tl{#2}
      \exp_args:NV \__color_if_defined:nT \l__pdfmanagement_firstaid_tmpa_tl
        { \color_set:ne {#1}{\l__pdfmanagement_firstaid_tmpa_tl} }
    }
+\cs_set_eq:NN \@expl@xcolor@set@@ne \__pdfmanagement_firstaid_xcolor_set:nn
 \ExplSyntaxOff
 
 \endinput
