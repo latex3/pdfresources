@@ -587,7 +587,7 @@
 %<*pdftex|luatex>
 \clist_map_inline:Nn \c_@@_backend_PageResources_clist
   {
-    \@@_backend_object_new:nn {@@/Page/Resources/#1} {dict}
+    \pdf_object_new:nn {@@/Page/Resources/#1} {dict}
     \cs_if_exist:NT \tex_directlua:D
       {
         \tex_directlua:D
@@ -631,7 +631,7 @@
         \prop_if_empty:cF
           { \__kernel_pdfdict_name:n { g_@@_Core/Page/Resources/##1} }
           {
-            \@@_backend_object_write:nx
+            \pdf_object_write:nx
               { @@/Page/Resources/##1 }
               { \pdfdict_use:n { g_@@_Core/Page/Resources/##1} }
           }
@@ -656,8 +656,8 @@
 %
 \clist_map_inline:Nn \c_@@_backend_PageResources_clist
   {
-    \@@_backend_object_new:nn   { @@/Page/Resources/#1 } { dict }
-    \hook_gput_code:nnn{shipout/firstpage}{pdf}{\@@_backend_object_write:nn { @@/Page/Resources/#1 } {}}
+    \pdf_object_new:nn   { @@/Page/Resources/#1 } { dict }
+    \hook_gput_code:nnn{shipout/firstpage}{pdf}{\pdf_object_write:nn { @@/Page/Resources/#1 } {}}
   }
 \cs_new_protected:Npn \@@_backend_PageResources:n #1
   {
