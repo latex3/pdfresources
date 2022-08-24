@@ -8,7 +8,11 @@ this project uses date-based 'snapshot' version identifiers.
 ## [Unreleased]
 
 ### Changed
-  - the patch for xcolor has been removed as xcolor will contain this support.
+ - internal cleanup
+ - prepare for change in l3backend
+  
+### Fixed
+ - ensure that pdfproducer is set with hyperxmp
 
 ## [2022-07-08]
 ### Fixed 
