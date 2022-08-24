@@ -1,6 +1,6 @@
 #!/usr/bin/env texlua
-packageversion="0.95q"
-packagedate="2022-07-08"
+packageversion="0.95r"
+packagedate="2022-08-24"
 
 -- Build script for "LaTeX PDF management testphase bundle" bundle
 

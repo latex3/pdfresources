@@ -5,11 +5,11 @@ first release 0.95a, 2021-02-23 will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 this project uses date-based 'snapshot' version identifiers.
 
-## [Unreleased]
+## [2022-08-24]
 
 ### Changed
  - internal cleanup
- - prepare for change in l3backend
+ - prepare for change in l3backend object handling
   
 ### Fixed
  - ensure that pdfproducer is set with hyperxmp
