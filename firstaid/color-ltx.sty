@@ -24,7 +24,7 @@
 %% This file has the LPPL maintenance status "maintained".
 %%
 \NeedsTeXFormat{LaTeX2e}[1995/12/01]
-\ProvidesPackage{color-ltx}[2022-07-08 v0.95q
+\ProvidesPackage{color-ltx}[2022-08-24 v0.95r
   Standard LaTeX Color (patched for l3color, part of pdfmanagement-testphase, original version 2022/01/06 v1.3d) (DPC)]
 \edef\Gin@codes{%
  \catcode`\noexpand\^^A\the\catcode`\^^A\relax
@@ -136,25 +136,18 @@
       \c@lor@usename{#2}}}}
 \@onlypreamble\DefineNamedColor
 \protected\def\@expl@color@set@@nnn#1#2#3{}
-\ifdefined\ExplSyntaxOn
-  \ExplSyntaxOn
-  \cs_gset_protected:Npn \@expl@color@set@@nnn #1 #2 #3
-   {
-    \cs_if_exist:NT \color_set:nnn
-      { \cs_if_exist:cTF { __color_parse_model_ #2 :w }
-         {
-          \color_set:nnn {#1}{#2}{#3}
-         }
-         { %for dvi mode
-          \tl_if_eq:nnT{#2}{named}
-           {
-             \color_set:nn{#1}{#3}
-           }
-         }
-     }
-   }
-  \ExplSyntaxOff
-\fi
+\ExplSyntaxOn
+\cs_set_protected:Npn \@expl@color@set@@nnn #1 #2 #3
+  {
+   \str_if_eq:nnTF {#2}{named}
+    {
+      \color_set:nn {#1}{#3}
+    }
+    {
+      \color_set:nnn {#1}{#2}{#3}
+    }
+  }
+\ExplSyntaxOff
 \newif\ifcolors@
 \colors@true
 \def\c@lor@special#1#2{%
