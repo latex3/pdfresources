@@ -1,5 +1,5 @@
 \PassOptionsToPackage{enable-debug,check-declarations}{expl3}
-\RequirePackage[debug]{pdfmanagement-testphase}
+
 \DocumentMetadata
  {
    pdfversion=1.7, %not so good with pdftex ...
@@ -9,8 +9,8 @@
 \documentclass{article}
 \ExplSyntaxOn
 %some senseless additions to test the commands
-\pdf_object_new:nn {ocg1}{dict}
-\pdf_object_write:nn {ocg1}
+\pdf_object_new:n {ocg1}
+\pdf_object_write:nnn {ocg1}{dict}
  {/Type/OCG
   /Name(View)
   /Usage
@@ -26,8 +26,8 @@
     >>}
 
 
-\pdf_object_new:nn {ocg2}{dict}
-\pdf_object_write:nn {ocg2}
+\pdf_object_new:n {ocg2}
+\pdf_object_write:nnn {ocg2}{dict}
  {/Type/OCG
   /Name(View)
   /Usage<<
@@ -41,8 +41,8 @@
     >>
   }
 
-\pdf_object_new:nn   {ocgd}{dict}
-\pdf_object_write:nn {ocgd}
+\pdf_object_new:n   {ocgd}
+\pdf_object_write:nnn {ocgd}{dict}
  {
   /OFF /Blabla
  }

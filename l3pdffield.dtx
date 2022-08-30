@@ -925,7 +925,7 @@
 % ,\pdf_object_ref:n
 % ,\pdf_object_ref_last:
 % ,\pdf_object_unnamed_write:nx
-% ,\pdf_object_write:nx
+% ,\pdf_object_write:nnx
 % ,\pdf_string_from_unicode:nnN
 % ,\pdfannot_box_ref_last:
 % ,\pdfannot_dict_put:nnn
@@ -1220,12 +1220,12 @@
       }
     \hook_gput_code:nnn {shipout/lastpage}{pdffield} %xetex needs this ...
       {
-        \pdf_object_write:nx {@@/field/Kids/#1}
+        \pdf_object_write:nnx {@@/field/Kids/#1} { array }
           {
             \seq_use:cn{g_@@_field/Kids/#1_seq}{~}
           }
       }
-    \pdf_object_write:nx {@@/field/#1} { \pdfdict_use:n {l_@@/field} }
+    \pdf_object_write:nnx {@@/field/#1} { dict } { \pdfdict_use:n {l_@@/field} }
   }
 
 \hook_gput_code:nnn {shipout/lastpage}{pdffield}

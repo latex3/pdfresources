@@ -1,5 +1,5 @@
 
-\RequirePackage{pdfmanagement-testphase}
+
 \DocumentMetadata {}
 \input{regression-test}
 
@@ -7,11 +7,11 @@
 
 \begin{document}
 \ExplSyntaxOn
-\pdf_object_new:nn   {objA}{dict}
-\pdf_object_write:nn {objA}{/Type/Artifact}
+\pdf_object_new:n   {objA}
+\pdf_object_write:nnn {objA}{dict}{/Type/Artifact}
 
-\pdf_object_new:nn   {objB}{dict}
-\pdf_object_write:nn {objB}{/ActualText~(abc)}
+\pdf_object_new:n   {objB}
+\pdf_object_write:nnn {objB}{dict}{/ActualText~(abc)}
 
 \vspace*{44\baselineskip}
 \pdf_bdcobject:nn {Span}{objA}xxx

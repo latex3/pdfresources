@@ -152,7 +152,7 @@
 %   This command adds a BDC marked content operator to the current page stream.
 %   \meta{tag} is the tag of this operator (without the leading slash),
 %   \meta{object name}  is a the name of an dictionary object reserved with
-%   \cs{pdf_object_new:nn} and filled with \cs{pdf_object_write:n} with
+%   \cs{pdf_object_new:n} and filled with \cs{pdf_object_write:nnn} with
 %   the properties of the BDC. Reusing a predefined object can save space
 %   but the command works correctly
 %   only if the resources management has been activated and should be used only
@@ -195,8 +195,8 @@
 %    It should be on the same page as the bdc-command.
 %
 %   \begin{verbatim}
-%   \pdf_object_new:nn   {module/objA}{dict}
-%   \pdf_object_write:nn {module/objA}{/Type/Artifact}
+%   \pdf_object_new:n     {module/objA}
+%   \pdf_object_write:nnn {module/objA}{dict}{/Type/Artifact}
 %   \pdf_bdc:nn {Span}{module/objA}
 %   text
 %   \pdf_emc:

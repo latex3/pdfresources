@@ -177,7 +177,7 @@
 % Embedding an existing file is in most cases quite straightforward. This module
 % offers commands, but it can also be done with the basic commands
 % from the |l3pdf| module \cs{pdf_object_unnamed_write:nn} or
-% \cs{pdf_object_new:nn}/\cs{pdf_object_write:nn} or primitive commands
+% \cs{pdf_object_new:n}/\cs{pdf_object_write:nnn} or primitive commands
 % to create objects.
 % The object number should be stored for the reference
 % in the |/Filespec| dictionary.
@@ -645,7 +645,7 @@
           \@@_filename_convert_to_print:nN  { #2 } \l_@@_tmpa_str
           \pdfdict_put:nnx {l_pdffile/Filespec}{F} { \l_@@_tmpa_str }
           \pdfdict_put:nnx {l_pdffile/Filespec}{UF}{ \l_@@_tmpa_str }
-          \pdf_object_write:nx { #1 }
+          \pdf_object_write:nnx { #1 } { dict }
             {
               \pdfdict_use:n { l_pdffile/Filespec}
               \tl_if_empty:nF { #3 }

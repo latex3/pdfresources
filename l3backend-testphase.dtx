@@ -624,8 +624,8 @@
         \prop_if_empty:cF
           { \__kernel_pdfdict_name:n { g_@@_Core/Page/Resources/##1} }
           {
-            \pdf_object_write:nx
-              { @@/Page/Resources/##1 }
+            \pdf_object_write:nnx
+              { @@/Page/Resources/##1 } { dict }
               { \pdfdict_use:n { g_@@_Core/Page/Resources/##1} }
           }
      }
@@ -650,7 +650,10 @@
 \clist_map_inline:Nn \c_@@_backend_PageResources_clist
   {
     \pdf_object_new:nn   { @@/Page/Resources/#1 } { dict }
-    \hook_gput_code:nnn{shipout/firstpage}{pdf}{\pdf_object_write:nn { @@/Page/Resources/#1 } {}}
+    \hook_gput_code:nnn
+      {shipout/firstpage}
+      {pdf}
+      {\pdf_object_write:nnn { @@/Page/Resources/#1 } { dict } {}}
   }
 \cs_new_protected:Npn \@@_backend_PageResources:n #1
   {

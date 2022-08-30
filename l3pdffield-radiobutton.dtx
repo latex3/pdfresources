@@ -521,8 +521,8 @@
 % ,\pdf_object_ref_last:
 % ,\pdf_object_unnamed_write:nn
 % ,\pdf_object_unnamed_write:nx
-% ,\pdf_object_write:nx
-% ,\pdf_object_write:nn
+% ,\pdf_object_write:nnx
+% ,\pdf_object_write:nnn
 % ,\pdf_string_from_unicode:nnN
 % ,\pdfannot_box_ref_last:
 % ,\pdfannot_dict_put:nnn
@@ -696,8 +696,8 @@
         \seq_new:c { g_@@_radio_opt_#1_seq }
         \hook_gput_code:nnn {shipout/lastpage}{pdffield/radio}
           {
-            \pdf_object_write:nx
-              {@@/field/@@/radio-Opt/#1}
+            \pdf_object_write:nnx
+              {@@/field/@@/radio-Opt/#1} { array }
               {\seq_use:cn {g_@@_radio_opt_#1_seq}{~}}
           }
 %    \end{macrocode}

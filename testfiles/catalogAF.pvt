@@ -1,5 +1,5 @@
 \PassOptionsToPackage{enable-debug,check-declarations}{expl3}
-\RequirePackage{pdfmanagement-testphase}
+
 \DocumentMetadata
  {
    pdfversion=2.0, %not so good with pdftex ...
@@ -10,10 +10,10 @@
 \documentclass{article}
 \ExplSyntaxOn
 %senseless values ...
-\pdf_object_new:nn   {filespec1}{dict}
-\pdf_object_write:nn {filespec1} {/Type /Filespec /UF (example1.pdf)}
-\pdf_object_new:nn   {filespec2}{dict}
-\pdf_object_write:nn {filespec2} {/Type /Filespec /UF (example2.pdf)}
+\pdf_object_new:n   {filespec1}
+\pdf_object_write:nnn {filespec1}{dict} {/Type /Filespec /UF (example1.pdf)}
+\pdf_object_new:n   {filespec2}
+\pdf_object_write:nnn {filespec2}{dict} {/Type /Filespec /UF (example2.pdf)}
 
 \pdfmanagement_add:nnx { Catalog } {AF} {\pdf_object_ref:n {filespec1}}
 \pdfmanagement_add:nnx { Catalog } {AF} {\pdf_object_ref:n {filespec2}}

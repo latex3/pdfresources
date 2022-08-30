@@ -538,8 +538,8 @@
 % The value is an object reference. It is sensible to declare the object
 % first. E.g.
 %  \begin{verbatim}
-%  \pdf_object_new:nn   {module/intent}{dict}
-%  \pdf_object_write:nn {module/intent}{...}
+%  \pdf_object_new:n     {module/intent}
+%  \pdf_object_write:nnn {module/intent}{dict}{...}
 %  \pdfmanagement_add:nnx  {Catalog} {OutputIntents}{\pdf_object_ref:n {module/intent}}
 %  \end{verbatim}
 %
@@ -1280,8 +1280,8 @@
      { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/AA } }
      {
        \pdf_object_new:nn  { @@/Catalog/AA } { dict }
-       \pdf_object_write:nx
-            { @@/Catalog/AA }
+       \pdf_object_write:nnx
+            { @@/Catalog/AA }{ dict }
             { \pdfdict_use:n { g__pdf_Core/Catalog/AA } }
        \exp_args:Nnx
          \__pdf_backend_catalog_gput:nn
@@ -1310,8 +1310,8 @@
     \seq_if_empty:cF { g_@@_/Catalog/AcroForm/Fields_seq }
       {
         \pdf_object_new:nn  { @@/Catalog/AcroForm/Fields } { array }
-        \pdf_object_write:nx
-            { @@/Catalog/AcroForm/Fields }
+        \pdf_object_write:nnx
+            { @@/Catalog/AcroForm/Fields } { array }
             { \seq_use:cn { g_@@_/Catalog/AcroForm/Fields_seq } {~} }
         \exp_args:Nnnx
           \prop_gput:cnn %we have to use \prop here to avoid the handler ...
@@ -1322,9 +1322,8 @@
     \seq_if_empty:cF { g_@@_/Catalog/AcroForm/CO_seq }
       {
         \pdf_object_new:nn  { @@/Catalog/AcroForm/CO } { array }
-        \exp_args:Nnx
-          \pdf_object_write:nn
-            { @@/Catalog/AcroForm/CO }
+        \pdf_object_write:nnx
+            { @@/Catalog/AcroForm/CO } { array }
             { \seq_use:cn { g_@@_/Catalog/AcroForm/CO_seq } {~} }
         \exp_args:Nnnx
           \prop_gput:cnn %we have to use \prop here to avoid the handler ...
@@ -1335,9 +1334,8 @@
      \prop_if_empty:cF { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/AcroForm/DR/Font}}
        {
          \pdf_object_new:nn { @@/Catalog/AcroForm/DR/Font } {dict}
-         \exp_args:Nnx
-           \pdf_object_write:nn
-             { @@/Catalog/AcroForm/DR/Font }
+         \pdf_object_write:nnx
+             { @@/Catalog/AcroForm/DR/Font } { dict }
              { \pdfdict_use:n { g__pdf_Core/Catalog/AcroForm/DR/Font } }
          \exp_args:Nnnx
            \prop_gput:cnn %we have to use \prop here to avoid the handler ...
@@ -1348,9 +1346,8 @@
      \prop_if_empty:cF { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/AcroForm/DR}}
        {
          \pdf_object_new:nn { @@/Catalog/AcroForm/DR } {dict}
-         \exp_args:Nnx
-           \pdf_object_write:nn
-             { @@/Catalog/AcroForm/DR }
+         \pdf_object_write:nnx
+             { @@/Catalog/AcroForm/DR } { dict }
              { \pdfdict_use:n { g__pdf_Core/Catalog/AcroForm/DR } }
          \exp_args:Nnnx
            \prop_gput:cnn %we have to use \prop here to avoid the handler ...
@@ -1361,9 +1358,8 @@
      \prop_if_empty:cF { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/AcroForm} }
        {
          \pdf_object_new:nn { @@/Catalog/AcroForm } {dict}
-         \exp_args:Nnx
-           \pdf_object_write:nn
-             { @@/Catalog/AcroForm }
+         \pdf_object_write:nnx
+             { @@/Catalog/AcroForm } { dict }
              { \pdfdict_use:n { g__pdf_Core/Catalog/AcroForm } }
          \exp_args:Nnnx
            \@@_handler_gput:nnn
@@ -1386,9 +1382,8 @@
      { g_@@_/Catalog/AF_seq }
      {
        \pdf_object_new:nn  { @@/Catalog/AF } { array }
-       \exp_args:Nnx
-         \pdf_object_write:nn
-            { @@/Catalog/AF }
+       \pdf_object_write:nnx
+            { @@/Catalog/AF } { array }
             { \seq_use:cn { g_@@_/Catalog/AF_seq } {~} }
        \exp_args:Nnx
          \__pdf_backend_catalog_gput:nn
@@ -1410,10 +1405,9 @@
      { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/MarkInfo } }
      {
        \pdf_object_new:nn  { @@/Catalog/MarkInfo } { dict }
-       \exp_args:Nnx
-         \pdf_object_write:nn
-            { @@/Catalog/MarkInfo }
-            { \pdfdict_use:n { g__pdf_Core/Catalog/MarkInfo } }
+       \pdf_object_write:nnx
+          { @@/Catalog/MarkInfo } { dict }
+          { \pdfdict_use:n { g__pdf_Core/Catalog/MarkInfo } }
        \exp_args:Nnx
          \__pdf_backend_catalog_gput:nn
            {MarkInfo}
@@ -1452,9 +1446,8 @@
       {
         \pdf_object_new:nn  { @@/Catalog/OCProperties } { dict }
         \seq_gpop_left:cN { g_@@_/Catalog/OCProperties/Configs_seq} \l_@@_tmpa_tl
-        \exp_args:Nnx
-          \pdf_object_write:nn {@@/Catalog/OCProperties}
-            {
+        \pdf_object_write:nnx {@@/Catalog/OCProperties} {dict}
+           {
               /OCGs~[ \seq_use:cn { g_@@_/Catalog/OCProperties/OCGs_seq } {~} ]
               /D~\l_@@_tmpa_tl~
               \seq_if_empty:cF { g_@@_/Catalog/OCProperties/Configs_seq }
@@ -1462,7 +1455,7 @@
                   /Configs~
                   [ \seq_use:cn { g_@@_/Catalog/OCProperties/Configs_seq} {~} ]
                 }
-            }
+           }
         \exp_args:Nnx
           \__pdf_backend_catalog_gput:nn
             { OCProperties }
@@ -1482,9 +1475,8 @@
      { g_@@_/Catalog/OutputIntents_seq }
      {
        \pdf_object_new:nn  { @@/Catalog/OutputIntents } { array }
-       \exp_args:Nnx
-         \pdf_object_write:nn
-            { @@/Catalog/OutputIntents }
+       \pdf_object_write:nnx
+            { @@/Catalog/OutputIntents } { array }
             { \seq_use:cn { g_@@_/Catalog/OutputIntents_seq } {~} }
        \exp_args:Nnx
          \__pdf_backend_catalog_gput:nn
@@ -1507,9 +1499,8 @@
      { g_@@_/Catalog/Requirements_seq }
      {
        \pdf_object_new:nn  { @@/Catalog/Requirements } { array }
-       \exp_args:Nnx
-         \pdf_object_write:nn
-            { @@/Catalog/Requirements }
+       \pdf_object_write:nnx
+            { @@/Catalog/Requirements } { array }
             { \seq_use:cn { g_@@_/Catalog/Requirements_seq } {~} }
        \exp_args:Nnx
          \__pdf_backend_catalog_gput:nn
@@ -1532,9 +1523,8 @@
      { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/ViewerPreferences } }
      {
        \pdf_object_new:nn  { @@/Catalog/ViewerPreferences } { dict }
-       \exp_args:Nnx
-         \pdf_object_write:nn
-            { @@/Catalog/ViewerPreferences }
+       \pdf_object_write:nnx
+            { @@/Catalog/ViewerPreferences } { dict }
             { \pdfdict_use:n { g__pdf_Core/Catalog/ViewerPreferences } }
        \exp_args:Nnx
          \__pdf_backend_catalog_gput:nn

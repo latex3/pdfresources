@@ -35,25 +35,25 @@
   {
     \tl_if_exist:NT \spc@op
       {
-        \pdf_object_new:nn  {__spc_extgstate_op_false}{dict}
-        \pdf_object_write:nn
-          {__spc_extgstate_op_false}
+        \pdf_object_new:n  {__spc_extgstate_op_false}
+        \pdf_object_write:nnn
+          {__spc_extgstate_op_false}{dict}
           {/Type /ExtGState~/op~false~/OP~false}
         \pdfmanagement_add:nnn
           {Page/Resources/ExtGState}
           {SPCko}
           {\pdf_object_ref:n {__spc_extgstate_op_false}}
-        \pdf_object_new:nn  {__spc_extgstate_op_true0}{dict}
-        \pdf_object_write:nn
-          {__spc_extgstate_op_true0}
+        \pdf_object_new:n  {__spc_extgstate_op_true0}
+        \pdf_object_write:nnn
+          {__spc_extgstate_op_true0}{dict}
           {/Type /ExtGState~/op~true~/OP~true~/OPM~0}%
         \pdfmanagement_add:nnn
           {Page/Resources/ExtGState}
           {SPCmz}
           {\pdf_object_ref:n {__spc_extgstate_op_true0}}
-        \pdf_object_new:nn  {__spc_extgstate_op_true1}{dict}
-        \pdf_object_write:nn
-          {__spc_extgstate_op_true1}
+        \pdf_object_new:n  {__spc_extgstate_op_true1}
+        \pdf_object_write:nnn
+          {__spc_extgstate_op_true1}{dict}
           {/Type /ExtGState~/op~true~/OP~true~/OPM~1}%
          \pdfmanagement_add:nnn
           {Page/Resources/ExtGState}

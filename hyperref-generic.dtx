@@ -2761,17 +2761,17 @@
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_ocg_init:
   {
-     \pdf_object_new:nn   { @@/OCG/View }   { dict }
-     \pdf_object_new:nn   { @@/OCG/Print }  { dict }
-     \pdf_object_new:nn   { @@/OCG/config } { dict }
-     \pdf_object_new:nn   { @@/OCG/refarray }   { array }
-        \pdf_object_write:nx { @@/OCG/refarray }
+     \pdf_object_new:n   { @@/OCG/View }
+     \pdf_object_new:n   { @@/OCG/Print }
+     \pdf_object_new:n   { @@/OCG/config }
+     \pdf_object_new:n   { @@/OCG/refarray }   
+        \pdf_object_write:nnx { @@/OCG/refarray } { array }
           {
             \pdf_object_ref:n { @@/OCG/View }
             \c_space_tl
             \pdf_object_ref:n { @@/OCG/Print }
           }
-        \pdf_object_write:nn { @@/OCG/View }
+        \pdf_object_write:nnn { @@/OCG/View } { dict }
           {
             /Type/OCG
             /Name(View)
@@ -2781,7 +2781,7 @@
               /View  <</ViewState/ON  >>~
              >>
           }
-        \pdf_object_write:nn { @@/OCG/Print }
+        \pdf_object_write:nnn { @@/OCG/Print } { dict }
           {
             /Type/OCG
             /Name(Print)
@@ -2793,7 +2793,7 @@
           }
        \pdfmanagement_add:nnx { Catalog / OCProperties }{OCGs }{ \pdf_object_ref:n {@@/OCG/View} }
        \pdfmanagement_add:nnx { Catalog / OCProperties }{OCGs }{ \pdf_object_ref:n {@@/OCG/Print} }
-       \pdf_object_write:nx { @@/OCG/config }
+       \pdf_object_write:nnx { @@/OCG/config } { dict }
          {
            /OFF[\pdf_object_ref:n { @@/OCG/Print }]
            /AS[
@@ -4732,10 +4732,10 @@
 \ExplSyntaxOn
 \def\Hy@FormObjects
   {
-    \pdf_object_new:nn   {@@/Encoding/pdfdoc }   { dict }
-    \pdf_object_new:nn   {@@/Font/ZaDb } { dict }
-    \pdf_object_new:nn   {@@/Font/Helv }    { dict }
-    \pdf_object_write:nx {@@/Encoding/pdfdoc }
+    \pdf_object_new:n   {@@/Encoding/pdfdoc }
+    \pdf_object_new:n   {@@/Font/ZaDb }
+    \pdf_object_new:n   {@@/Font/Helv }
+    \pdf_object_write:nnx {@@/Encoding/pdfdoc } { dict }
       {
         /Type/Encoding
         /Differences[
@@ -4777,14 +4777,14 @@
           /uacute/ucircumflex/udieresis/yacute/thorn/ydieresis
          ]
       }
-    \pdf_object_write:nn {@@/Font/ZaDb }
+    \pdf_object_write:nnn {@@/Font/ZaDb } { dict }
       {
         /Type/Font
         /Subtype/Type1
         /Name/ZaDb
         /BaseFont/ZapfDingbats
       }
-    \pdf_object_write:nx {@@/Font/Helv }
+    \pdf_object_write:nnx {@@/Font/Helv } { dict }
       {
         /Type/Font
         /Subtype/Type1
