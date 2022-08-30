@@ -889,7 +889,7 @@
   {
     \pdf_object_if_exist:nF { __color_icc_ #1 }
       {
-        \pdf_object_new:nn  { __color_icc_ #1 }{fstream}
+        \pdf_object_new:n  { __color_icc_ #1 }
         \pdf_object_write:nnx { __color_icc_ #1 } { fstream }
          {
            {/N\c_space_tl

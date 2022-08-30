@@ -335,7 +335,7 @@
 %  created stream.
 %
 %  \begin{verbatim}
-%  \pdf_object_new:nn{module/filespec/A}{dict} % a new filespec object
+%  \pdf_object_new:n {module/filespec/A} % a new filespec object
 %  \pdf_object_ref:n {module/filespec/A}       % a reference
 %  \pdf_object_unnamed_write:nn { stream }{ {...}{content} } %writing the stream
 %  % filling and writing the filespec dictionary:
@@ -704,7 +704,7 @@
            }
         \tl_if_blank:nTF { #2 }
           {
-            \pdf_object_new:nn   { #3 } {dict}
+            \pdf_object_new:n   { #3 }
             \exp_args:Nnnx
               \@@_filespec_write:nnn
                 %#1 dict, #2 target file name, #3 object ref
@@ -713,7 +713,7 @@
                 {\l_@@_embed_ref_tl}
           }
           {
-            \pdf_object_new:nn   { #3 } {dict}
+            \pdf_object_new:n   { #3 }
             \exp_args:Nnnx
               \@@_filespec_write:nnn
                 %#1 dict, #2 target file name, #3 object ref
@@ -747,7 +747,7 @@
            { #1 }
            \l_@@_automimetype_tl
          \tl_set:Nx \l_@@_embed_ref_tl { \pdf_object_ref_last: }
-         \pdf_object_new:nn   { #3 } {dict}
+         \pdf_object_new:n   { #3 }
          \exp_args:Nnxx
            \@@_filespec_write:nnn
              %#1 dict, #2 target file name, #3 object ref

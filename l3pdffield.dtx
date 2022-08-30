@@ -921,7 +921,7 @@
 % ,\NeedsTeXFormat
 % ,\pdf_name_from_unicode_e:n
 % ,\pdf_object_if_exist:nTF
-% ,\pdf_object_new:nn
+% ,\pdf_object_new:n
 % ,\pdf_object_ref:n
 % ,\pdf_object_ref_last:
 % ,\pdf_object_unnamed_write:nx
@@ -1167,8 +1167,8 @@
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_field:n #1
   {
-    \pdf_object_new:nn {@@/field/#1}      {dict}
-    \pdf_object_new:nn {@@/field/Kids/#1} {array}
+    \pdf_object_new:n {@@/field/#1}
+    \pdf_object_new:n {@@/field/Kids/#1} 
     \tl_if_empty:NTF \l_@@_currentparent_tl
       {
         \pdfmanagement_add:nnx

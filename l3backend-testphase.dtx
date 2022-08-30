@@ -580,7 +580,7 @@
 %<*pdftex|luatex>
 \clist_map_inline:Nn \c_@@_backend_PageResources_clist
   {
-    \pdf_object_new:nn {@@/Page/Resources/#1} {dict}
+    \pdf_object_new:n {@@/Page/Resources/#1}
     \cs_if_exist:NT \tex_directlua:D
       {
         \tex_directlua:D
@@ -649,7 +649,7 @@
 %
 \clist_map_inline:Nn \c_@@_backend_PageResources_clist
   {
-    \pdf_object_new:nn   { @@/Page/Resources/#1 } { dict }
+    \pdf_object_new:n   { @@/Page/Resources/#1 } 
     \hook_gput_code:nnn
       {shipout/firstpage}
       {pdf}

@@ -1279,7 +1279,7 @@
     \prop_if_empty:cF
      { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/AA } }
      {
-       \pdf_object_new:nn  { @@/Catalog/AA } { dict }
+       \pdf_object_new:n  { @@/Catalog/AA }
        \pdf_object_write:nnx
             { @@/Catalog/AA }{ dict }
             { \pdfdict_use:n { g__pdf_Core/Catalog/AA } }
@@ -1309,7 +1309,7 @@
   {
     \seq_if_empty:cF { g_@@_/Catalog/AcroForm/Fields_seq }
       {
-        \pdf_object_new:nn  { @@/Catalog/AcroForm/Fields } { array }
+        \pdf_object_new:n  { @@/Catalog/AcroForm/Fields }
         \pdf_object_write:nnx
             { @@/Catalog/AcroForm/Fields } { array }
             { \seq_use:cn { g_@@_/Catalog/AcroForm/Fields_seq } {~} }
@@ -1321,7 +1321,7 @@
       }
     \seq_if_empty:cF { g_@@_/Catalog/AcroForm/CO_seq }
       {
-        \pdf_object_new:nn  { @@/Catalog/AcroForm/CO } { array }
+        \pdf_object_new:n  { @@/Catalog/AcroForm/CO }
         \pdf_object_write:nnx
             { @@/Catalog/AcroForm/CO } { array }
             { \seq_use:cn { g_@@_/Catalog/AcroForm/CO_seq } {~} }
@@ -1333,7 +1333,7 @@
       }
      \prop_if_empty:cF { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/AcroForm/DR/Font}}
        {
-         \pdf_object_new:nn { @@/Catalog/AcroForm/DR/Font } {dict}
+         \pdf_object_new:n { @@/Catalog/AcroForm/DR/Font }
          \pdf_object_write:nnx
              { @@/Catalog/AcroForm/DR/Font } { dict }
              { \pdfdict_use:n { g__pdf_Core/Catalog/AcroForm/DR/Font } }
@@ -1345,7 +1345,7 @@
        }
      \prop_if_empty:cF { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/AcroForm/DR}}
        {
-         \pdf_object_new:nn { @@/Catalog/AcroForm/DR } {dict}
+         \pdf_object_new:n { @@/Catalog/AcroForm/DR }
          \pdf_object_write:nnx
              { @@/Catalog/AcroForm/DR } { dict }
              { \pdfdict_use:n { g__pdf_Core/Catalog/AcroForm/DR } }
@@ -1357,7 +1357,7 @@
        }
      \prop_if_empty:cF { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/AcroForm} }
        {
-         \pdf_object_new:nn { @@/Catalog/AcroForm } {dict}
+         \pdf_object_new:n { @@/Catalog/AcroForm }
          \pdf_object_write:nnx
              { @@/Catalog/AcroForm } { dict }
              { \pdfdict_use:n { g__pdf_Core/Catalog/AcroForm } }
@@ -1381,7 +1381,7 @@
     \seq_if_empty:cF
      { g_@@_/Catalog/AF_seq }
      {
-       \pdf_object_new:nn  { @@/Catalog/AF } { array }
+       \pdf_object_new:n  { @@/Catalog/AF }
        \pdf_object_write:nnx
             { @@/Catalog/AF } { array }
             { \seq_use:cn { g_@@_/Catalog/AF_seq } {~} }
@@ -1404,7 +1404,7 @@
     \prop_if_empty:cF
      { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/MarkInfo } }
      {
-       \pdf_object_new:nn  { @@/Catalog/MarkInfo } { dict }
+       \pdf_object_new:n  { @@/Catalog/MarkInfo }
        \pdf_object_write:nnx
           { @@/Catalog/MarkInfo } { dict }
           { \pdfdict_use:n { g__pdf_Core/Catalog/MarkInfo } }
@@ -1444,7 +1444,7 @@
       >
       { 0 }
       {
-        \pdf_object_new:nn  { @@/Catalog/OCProperties } { dict }
+        \pdf_object_new:n  { @@/Catalog/OCProperties }
         \seq_gpop_left:cN { g_@@_/Catalog/OCProperties/Configs_seq} \l_@@_tmpa_tl
         \pdf_object_write:nnx {@@/Catalog/OCProperties} {dict}
            {
@@ -1474,7 +1474,7 @@
     \seq_if_empty:cF
      { g_@@_/Catalog/OutputIntents_seq }
      {
-       \pdf_object_new:nn  { @@/Catalog/OutputIntents } { array }
+       \pdf_object_new:n  { @@/Catalog/OutputIntents }
        \pdf_object_write:nnx
             { @@/Catalog/OutputIntents } { array }
             { \seq_use:cn { g_@@_/Catalog/OutputIntents_seq } {~} }
@@ -1498,7 +1498,7 @@
     \seq_if_empty:cF
      { g_@@_/Catalog/Requirements_seq }
      {
-       \pdf_object_new:nn  { @@/Catalog/Requirements } { array }
+       \pdf_object_new:n  { @@/Catalog/Requirements }
        \pdf_object_write:nnx
             { @@/Catalog/Requirements } { array }
             { \seq_use:cn { g_@@_/Catalog/Requirements_seq } {~} }
@@ -1522,7 +1522,7 @@
     \prop_if_empty:cF
      { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/ViewerPreferences } }
      {
-       \pdf_object_new:nn  { @@/Catalog/ViewerPreferences } { dict }
+       \pdf_object_new:n  { @@/Catalog/ViewerPreferences } 
        \pdf_object_write:nnx
             { @@/Catalog/ViewerPreferences } { dict }
             { \pdfdict_use:n { g__pdf_Core/Catalog/ViewerPreferences } }
