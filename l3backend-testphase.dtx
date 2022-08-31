@@ -649,7 +649,7 @@
 %
 \clist_map_inline:Nn \c_@@_backend_PageResources_clist
   {
-    \pdf_object_new:n   { @@/Page/Resources/#1 } 
+    \pdf_object_new:n   { @@/Page/Resources/#1 }
     \hook_gput_code:nnn
       {shipout/firstpage}
       {pdf}
@@ -2003,6 +2003,40 @@
     \pdfmanagement_add:nnn{Info}{ModDate}{(D:20010101205959-00'00')}
    }
 %</drivers>
+%    \end{macrocode}
+%
+% \subsection{Uncompressed metadata object stream}
+% The xmp metadata should be written uncompressed to pdf.
+% With luatex this is possible by using the |uncompressed| key word.
+% With pdftex one can change locally the compresslevel. (x)dvipdfmx does
+% it automatically and doesn't need some special command. No solution
+% is known imho for the dvips route. We need it only once, so we make
+% it special and probably no public interface is needed. It writes
+% an unnamed object so should be referenced directly with |\pdf_object_ref_last:|
+%    \begin{macrocode}
+%<*luatex>
+\cs_new_protected:Npn \__pdf_backend_metadata_stream:n #1
+  {
+    \tex_immediate:D \tex_pdfextension:D obj ~uncompressed~
+      \__pdf_backend_object_write:nn {stream} {{/Type~/Metadata~/Subtype~/XML}{#1}}
+  }
+%</luatex>
+%<*pdftex>
+\cs_new_protected:Npn \__pdf_backend_metadata_stream:n #1
+  {
+    \group_begin:
+     \tex_pdfcompresslevel:D  0 \scan_stop:
+     \tex_immediate:D \tex_pdfobj:D
+     \__pdf_backend_object_write:nn {stream} {{/Type~/Metadata~/Subtype~/XML}{#1}}
+    \group_end:
+  }
+%</pdftex>
+%<*xdvipdfmx|dvipdfmx|dvips|dvisvgm>
+\cs_new_protected:Npn \__pdf_backend_metadata_stream:n #1
+  {
+    \pdf_object_unnamed_write:nn {stream}{{/Type~/Metadata~/Subtype~/XML}{#1}}
+  }
+%</xdvipdfmx|dvipdfmx|dvips|dvisvgm>
 %    \end{macrocode}
 % \subsection{lua code for lualatex}
 %    \begin{macrocode}
