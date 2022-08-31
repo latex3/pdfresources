@@ -22,13 +22,20 @@
 \ProvidesExplPackage{colorspace-patches-tmp-ltx}{2022-08-24}{0.95r}
   {temporay patches to for the colorspace package to test pdfresource management ... UF}
 
+% colorspace can define more models, that l3color can't yet handle.
+\cs_set_protected:Npn \expl@color@set@@nnn #1#2#3
+ {
+   \cs_if_exist:cT { __color_parse_model_ #2 :w }
+    { \color_set:nnn{#1}{#2}{#3} }
+ }
+
+
 \hook_gput_code:nnn {begindocument} {pdf}
   {
     \tl_if_exist:NT \spc@op
       {
         \def\spc@Pageresources#1{}
       }
-
   }
 
 \hook_gput_code:nnn {begindocument/end} {pdf}
