@@ -2006,11 +2006,15 @@
 %    \end{macrocode}
 %
 % \subsection{Uncompressed metadata object stream}
-% The xmp metadata should be written uncompressed to pdf.
+% The xmp metadata should be written \enquote{uncompressed} to pdf.
+% It is not quite clear what exactly that means. Probably it only
+% means that there should be no |/Filter| key in the stream, but
+% packages like \pkg{pdfx} and \pkg{hyperref} try to suppress object
+% compression too, so we add support for it too.
 % With luatex this is possible by using the |uncompressed| key word.
 % With pdftex one can change locally the compresslevel. (x)dvipdfmx does
 % it automatically and doesn't need some special command. No solution
-% is known imho for the dvips route. We need it only once, so we make
+% is known for the dvips route. We need it only once, so we make
 % it special and probably no public interface is needed. It writes
 % an unnamed object so should be referenced directly with |\pdf_object_ref_last:|
 %    \begin{macrocode}
