@@ -877,9 +877,10 @@
 % /D    & \meta{array of numbers} & dash pattern (lines/gaps) (default [3])
 % \end{tabular}
 %
-% \DescribeHypkey{pdfcreationdate}\DescribeHypkey{pdfmoddate}
+% \DescribeHypkey{pdfcreationdate}\DescribeHypkey{pdfmoddate}\DescribeHypkey{pdfmetadate}
 % Setting these keys is normally not needed. If they are used the values
-% are stored directly in the Info dictionary for |/Creationdate| and |/ModDate|.
+% of the first two keys are stored directly in the Info dictionary for
+% |/Creationdate| and |/ModDate|. All three keys are used in XMP-metadata.
 % The values are converted to strings but not processed further, so they should
 % have the correct PDF format without the enclosing parentheses,
 % e.g. |D:20200202111111+01'00'|.
@@ -4010,10 +4011,6 @@
    ,pdfauthortitle
    ,pdfcaptionwriter
    ,pdfmetalang
-   ,pdfapart
-   ,pdfaconformance
-   ,pdfuapart
-   ,pdfxstandard
    ,pdfsource
    ,pdfdocumentid
    ,pdfinstanceid
