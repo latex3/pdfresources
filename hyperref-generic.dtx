@@ -2764,7 +2764,7 @@
      \pdf_object_new:n   { @@/OCG/View }
      \pdf_object_new:n   { @@/OCG/Print }
      \pdf_object_new:n   { @@/OCG/config }
-     \pdf_object_new:n   { @@/OCG/refarray }   
+     \pdf_object_new:n   { @@/OCG/refarray }
         \pdf_object_write:nnx { @@/OCG/refarray } { array }
           {
             \pdf_object_ref:n { @@/OCG/View }
@@ -3900,7 +3900,7 @@
 \@@_setup_info_key:nn {keywords}  {Keywords}
 %    \end{macrocode}
 % \end{hypkey}
-% \begin{hypkey}{pdfcreationdate,pdfmoddate}
+% \begin{hypkey}{pdfcreationdate,pdfmoddate,pdfmetadata}
 % These keys are not really needed. We store them too in the container.
 % CreationDate and ModDate should not use the hex encoding.
 %    \begin{macrocode}
@@ -3938,6 +3938,10 @@
 
 \@@_setup_info_date_key:nn {creationdate}  {CreationDate}
 \@@_setup_info_date_key:nn {moddate}  {ModDate}
+\keys_define:nn { hyp / setup }
+      {
+        pdfmetadate  .code:n = { \@@_store_metadata:nn {pdfmetadate}{#1} }
+      }
 %    \end{macrocode}
 % \end{hypkey}
 % \begin{hypkey}{pdftrapped}
