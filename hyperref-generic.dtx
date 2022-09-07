@@ -3810,14 +3810,11 @@
   {
    ,pdflang       .code:n =
           {
-            \tl_if_empty:nTF { #1 }
-              {
-                \pdfmanagement_remove:nn {Catalog} { Lang }
-              }
+            \tl_if_empty:nF { #1 }
               {
                 \pdfmanagement_add:nnx {Catalog} { Lang } { (#1) }
+                \AddToDocumentProperties[document]{lang}{#1}
               }
-            \AddToDocumentProperties[document]{lang}{#1}
           }
    }
 %    \end{macrocode}
