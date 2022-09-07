@@ -3172,7 +3172,7 @@
           {
              \pdfmanagement_add:nnx {Catalog} { URI }{ <</Base \l_@@_tmpa_tl>> }
           }
-        \@@_store_metadata:nn {baseurl}{#1}  
+        \@@_store_metadata:nn {baseurl}{#1}
      }
    %only false does something ...
    ,bookmarks .choice:
@@ -3817,7 +3817,7 @@
               {
                 \pdfmanagement_add:nnx {Catalog} { Lang } { (#1) }
               }
-            \@@_store_metadata:nn {pdflang}{#1}
+            \AddToDocumentProperties[document]{lang}{#1}
           }
    }
 %    \end{macrocode}
