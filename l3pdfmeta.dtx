@@ -371,6 +371,192 @@
 % regression tests.
 % It also sets the seed for random functions.
 % \end{function}
+%% \section{XMP-metadata}
+% XMP-metadata are data in XML format embedded in a stream
+% inside the PDF and referenced from the |/Catalog|.
+% Such a XMP-metadata stream contains various document related data,
+% is required by various PDF standards and can replace
+% or extend the data in the |/Info| dictionary.
+% In PDF 2.0 the /Info dictionary is actually deprecated
+% and only XMP-metadata should be used for the metadata of the PDF.
+%
+% The content of a XMP-metadata stream is not a fix set of data.
+% Typically fields like the title, the author, the language and keywords will
+% be there. But standards like e.g. ZUGferd (a standard for electronic bills)
+% can require to add more fields, and it is also possible
+% to define and add purely local data.
+%
+% In some workflows (e.g. if dvips + ghostscript is used)
+% a XMP-metadata stream with some standard content is added automatically by
+% the backend, but normally it must be created with code.
+%
+% For this task the packages \pkg{hyperxmp}, \pkg{xmpincl} or \pkg{pdfx}
+% (which uses \pkg{xmpincl})
+% can be used, but all these packages are not compatible with the
+% pdfmanagement\footnote{\pkg{hyperxmp} was partly compatible as the pdfmanagement
+% contained some patches for it.}
+% The following code is meant as replacement for these packages.
+%
+% \pkg{hyperxmp} uses |\hypersetup| as user interface to enter the XMP-metadata.
+% This syntax is also supported by the new code\footnote{with a number of changes which
+% are discussed in more details below}, so if \pkg{hyperref}
+% has been loaded, e.g. |pdftitle=xxx| can be used to set the title.
+% But XMP-metadata shouldn't require to use \pkg{hyperref} and in a future
+% version an interface without \pkg{hyperref} will be added.
+%
+% TODO
+% There is currently no user interface command to extend the XMP-metadata
+% with for example the code needed for ZUGferd,
+% they will be added in a second step.
+%
+%
+% \subsection{Encoding and escaping}
+%
+% XMP-metadata are stored as UTF-8 in the PDF. This mean if you open a PDF in an editor
+% a content like \enquote{grüße} will be shown probably as \enquote{grÃ¼ÃŸe}.
+% As XMP-metadata are in XML format special chars like |<|, |>|, and |&| and
+% \texttt{\textquotestraightdblbase} must be escaped.
+%
+% \pkg{hyperxmp} hooks into \pkg{hyperref} and passes all
+% input through |\pdfstringdef|. This means a word like
+% \enquote{hallo} is first converted by |\pdfstringdef| into\\
+% |\376\377\000h\000a\000l\000l\000o| and then back to UTF-8 by
+% \pkg{hyperxmp} and in the course of this action
+% the XML-escapings are applied.
+%
+% \pkg{pdfx} uses |\pdfstringdef| together with
+% a special fontencoding (similar to the PU-encoding of \pkg{hyperref})
+% for a similar aim.
+%
+% The code here is based on |\text_purify:n| followed by a few replacements for the
+% escaping. User data should normally be declared in the preamble (or even in the
+% |\DocumentMetadata| command), and consist of rather simple text; |&| can be entered
+% as |\&| (but directly |&| will normally work too),
+% babel shorthands should not be used. Some datas are interpreted as comma lists,
+% in this cases commas which are part of the text should be protected by braces.
+% In some cases a text in brackets like |[en]| is interpreted as language tag,
+% if they are part of a text they should be protected by braces too.
+% XMP-metadata are stored uncompressed in the PDF so if in doubt if a value has
+% been passed correctly, open the PDF in an editor, copy the whole block and
+% pass it to a validator, e.g. \url{https://www.w3.org/RDF/Validator/}.
+%
+% \subsection{User interfaces and differences to \pkg{hyperxmp} }
+%
+% \subsubsection{PDF standards}
+%
+% The \pkg{hyperxmp}/\pkg{hyperref} keys |pdfapart|, |pdfaconformance|, |pdfuapart|,
+% |pdfxstandard| and |pdfa| are ignored by this code. Standards must be set with the
+% |pdfstandard| key of |\DocumentMetadata|. This key can be used more than once,
+% e.g. \\
+% |pdfstandard=A-2b,pdfstandard=X-4,pdfstandard=UA-1|.
+% \\ Note that using these
+% keys doesn't mean that the document actually follows the standard. \LaTeX{}
+% can neither ensure nor check all requirements of standard, and not everything
+% it can do theoretically has already been implemented.
+% When setting an |A| standard, the code will e.g. insert a color profile and
+% warn if the PDF version doesn't fit, but |X| and |UA| currently only
+% adds the relevant declarations to the XMP-metadata.
+% It is up to the author to ensure and validate
+% that the document actually follows the standard.
+%
+% \subsubsection{Dates}
+% \begin{itemize}
+% \item
+% The dates |xmp:CreateDate|, |xmp:ModifyDate|, |xmp:MetadataDate|
+% are normally set automatically to the current date/time when the compilation
+% started. If they should be changed
+% (e.g. for regression tests to produce reproducible documents) they can
+% be set with |\hypersetup| with the keys
+% |pdfcreationdate|, |pdfmoddate| and |pdfmetadate|.
+%
+% \begin{verbatim}
+% \hypersetup{pdfcreationdate=D:20010101205959-00'00'}
+% \end{verbatim}
+%
+% The format should be a full date/time in PDF format, so one of these (naturally
+% the numbers can change:
+% \begin{verbatim}
+%  D:20010101205959-00'00'
+%  D:20010101205959+00'00'
+%  D:20010101205959Z
+% \end{verbatim}
+%
+% \item The date |dc:date| is an \enquote{author date} and so
+% should normally be set to the same date as
+% given by |\date|. This can be done  with the key |pdfdate|\footnote{Extracting
+% the value automatically from \texttt{\textbackslash date} is not really possible
+% as authors often put formatting or additional info in this command.}.
+% The value should be a date in ISO 8601 format:
+%
+% \begin{verbatim}
+% 2022             %year
+% 2022-09-04       %year-month-day
+% 2022-09-04T19:20 %year-month-day hour:minutes
+% 2022-09-04T19:20:30 % year-month-day hour:minutes:second
+% 2022-09-04T19:20:30.45 % year-month-day hour:minutes:second with fraction
+% 2022-09-04T19:20+01:00 % with time zone designator
+% 2022-09-04T19:20-02:00 % time zone designator
+% 2022-09-04T19:20Z      % time zone designator
+% \end{verbatim}
+%
+% It is also possible to give the date as a full date in PDF format as described
+% above. If not set the current date/time is used.
+%\end{itemize}
+%
+% \subsection{Language}
+% The code assumes that a default language is always declared
+% (as the pdfmanagement gives the |/Lang| entry in the catalog a default value)
+% This language can be changed with the |\DocumentMetadata| key |lang| (preferred)
+% but the \pkg{hyperref} key |pdflang| is also honored. Its value should be a
+% simple language tag like |de| or |de-DE|.
+%
+% The main language is also used in a number of attributes in the XMP data,
+% if wanted a different language can be set here with the
+% \pkg{hyperref}/\pkg{hyperxmp} key |pdfmetalang|.
+%
+% A number of entries can be given a language tag. Such a language is
+% given by using an \enquote{optional argument} before the text:
+%
+% \begin{verbatim}
+% \hypersetup{pdftitle={[en]english,[de]deutsch}}
+% \hypersetup{pdfsubtitle={[en]subtitle in english}}
+% \end{verbatim}
+%
+% \subsection{Rights}
+% The keys |pdfcopyright| and |pdflicenseurl| work similar as in \pkg{hyperxmp}.
+% But differently to \pkg{hyperxmp} the code doesn't set the |xmpRights:Marked|
+% property, as I have some doubts that one deduce its value simply
+% by checking if the other keys have been used; if needed it should be added manually.
+%
+% \subsection{PDF related data}
+% The PDF producer is for all engines by default built from the engine
+% name and the engine version and doesn't use the banners as with \pkg{hyperxmp}
+% and \pkg{pdfx}, it can be set manually with the |pdfproducer| key.
+%
+% The key |pdftrapped| is ignored. |Trapped| is deprecated in PDF 2.0.
+%
+% \subsection{Document data}
+%
+% The authors should be given with the |pdfauthor| key, separated by commas. If an
+% author contains a comma, protect/hide it by a brace.
+
+% \subsection{User commands}
+%  The XMP-meta data are added automatically. This can be suppressed with the
+%  |\DocumentMetadata| key |xmp|.
+%
+% \begin{function}{\pdfmeta_xmp_add:n}
+% \begin{syntax}
+% \cs{pdfmeta_xmp_add:n}\Arg{XML}
+% \end{syntax}
+% With this command additional XML code can be added to the Metadata.
+% The content is added unchanged, and not sanitized.
+% \end{function}
+% \begin{function}{\pdfmeta_xmp_xmlns_new:nn}
+% \begin{syntax}
+% \cs{pdfmeta_xmp_xmlns_new:nn}\Arg{prefix}\Arg{uri}
+% \end{syntax}
+% With this command a xmlns name space can be added.
+% \end{function}
 %
 % \end{documentation}
 %
@@ -986,6 +1172,1301 @@
 \cs_new_protected:Npn \pdfmeta_set_regression_data:
    { \__pdf_backend_set_regression_data: }
 %    \end{macrocode}
+%
+% \section{XMP-Metadata}
+
+% \begin{variable}{\g_@@_xmp_bool}
+% This boolean decides if the metadata are included
+%    \begin{macrocode}
+\bool_new:N\g_@@_xmp_bool
+\bool_gset_true:N \g_@@_xmp_bool
+%    \end{macrocode}
+% \end{variables}
+% Preset the two fields to avoid problems with standards.
+%    \begin{macrocode}
+\pdfmanagement_add:nnx {Info}{Producer}{(\c_sys_engine_exec_str-\c_sys_engine_version_str)}
+\pdfmanagement_add:nnx {Info}{Creator}{(LaTeX)}
+%    \end{macrocode}
+% \subsection{New document keys}
+%    \begin{macrocode}
+\keys_define:nn { document / metadata }
+ {
+   _pdfstandard / X-4 .code:n =
+    {\AddToDocumentProperties [document]{pdfstandard-X}{PDF/X-4}},
+   _pdfstandard / X-4p .code:n =
+    {\AddToDocumentProperties [document]{pdfstandard-X}{PDF/X-4p}},
+   _pdfstandard / X-5g .code:n =
+    {\AddToDocumentProperties [document]{pdfstandard-X}{PDF/X-5g}},
+   _pdfstandard / X-5n .code:n =
+    {\AddToDocumentProperties [document]{pdfstandard-X}{PDF/X-5n}},
+   _pdfstandard / X-5pg .code:n =
+    {\AddToDocumentProperties [document]{pdfstandard-X}{PDF/X-5pg}},
+   _pdfstandard / X-6 .code:n =
+    {\AddToDocumentProperties [document]{pdfstandard-X}{PDF/X-6p}},
+   _pdfstandard / X-6n .code:n =
+    {\AddToDocumentProperties [document]{pdfstandard-X}{PDF/X-6n}},
+   _pdfstandard / X-6p .code:n =
+    {\AddToDocumentProperties [document]{pdfstandard-X}{PDF/X-6p}},
+   _pdfstandard / UA-1 .code:n =
+    {\AddToDocumentProperties [document]{pdfstandard-UA}{1}},
+   xmp  .bool_gset:N = \g_@@_xmp_bool
+ }
+%    \end{macrocode}
+% \subsection{Messages}
+%    \begin{macrocode}
+\msg_new:nnn{pdfmeta}{namespace-defined}{The~xmlns~namespace~`#1`~is~already~declared}
+%    \end{macrocode}
+% \subsection{Some helper commands}
+% \subsubsection{Generate a BOM}
+% \begin{macro}{\@@_xmp_generate_bom:}
+%    \begin{macrocode}
+\bool_lazy_or:nnTF
+  { \sys_if_engine_luatex_p: }
+  { \sys_if_engine_xetex_p: }
+  {
+    \cs_new:Npn \@@_xmp_generate_bom:
+      { \char_generate:nn {"FEFF}{12} }
+  }
+  {
+    \cs_new:Npn \@@_xmp_generate_bom:
+      {
+        \char_generate:nn {"EF}{12}
+        \char_generate:nn {"BB}{12}
+        \char_generate:nn {"BF}{12}
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsubsection{Indentation}
+% We provide a command which indents the xml based
+% on a counter, and one which accepts a fix number.
+% The counter can be increased and decreased.
+%
+% \begin{variable}{\l_@@_xmp_indent_int}
+%    \begin{macrocode}
+\int_new:N  \l_@@_xmp_indent_int
+%    \end{macrocode}
+% \end{variable}
+% \begin{macro}{\@@_xmp_indent:,
+%               \@@_xmp_indent:n,
+%               \@@_xmp_incr_indent:,
+%               \@@_xmp_decr_indent:}
+%    \begin{macrocode}
+\cs_new:Npn \@@_xmp_indent:
+  {
+    \iow_newline:
+    \prg_replicate:nn {\l_@@_xmp_indent_int}{\c_space_tl}
+  }
+
+\cs_new:Npn \@@_xmp_indent:n #1
+  {
+    \iow_newline:
+    \prg_replicate:nn {#1}{\c_space_tl}
+  }
+
+\cs_new_protected:Npn \@@_xmp_incr_indent:
+  {
+    \int_incr:N \l_@@_xmp_indent_int
+  }
+
+\cs_new_protected:Npn \@@_xmp_decr_indent:
+  {
+    \int_decr:N \l_@@_xmp_indent_int
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsubsection{Date and time handling}
+% If the date is given in PDF format we have to split it to create
+% the XMP format. We use a precompiled regex for this.
+% To some extend the regex can also handle incomplete dates.
+%
+% \begin{variable}{\l_@@_xmp_date_regex}
+%    \begin{macrocode}
+\regex_new:N \l_@@_xmp_date_regex
+\regex_set:Nn \l_@@_xmp_date_regex
+ {D:(\d{4})(\d{2})(\d{2})(\d{2})?(\d{2})?(\d{2})?([Z\+\-])?(?:(\d{2})\')?(?:(\d{2})\')?}
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{macro}{\@@_xmp_date_split:nN}
+% This command takes a date in PDF format, splits it with the regex and
+% stores the captures in a sequence.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_xmp_date_split:nN #1 #2 %#1 date, #2 seq
+  {
+    \regex_split:NnN \l_@@_xmp_date_regex {#1} #2
+  }
+\cs_generate_variant:Nn \@@_xmp_date_split:nN {VN,eN}
+%    \end{macrocode}
+% \end{macro}
+
+% \begin{macro}[EXP]{\@@_xmp_print_date:N}
+% This prints the date stored in a sequence as created
+% by the previous command.
+%
+%    \begin{macrocode}
+\cs_new:Npn\@@_xmp_print_date:N #1 % seq
+  {
+    \tl_if_blank:eTF { \seq_item:Nn #1 {1} }
+     {
+       \seq_item:Nn #1 {2} %year
+        -
+       \seq_item:Nn #1 {3} %month
+        -
+       \seq_item:Nn #1 {4} % day
+       \tl_if_blank:eF
+         { \seq_item:Nn #1 {5} }
+         { T \seq_item:Nn #1 {5} } %hour
+       \tl_if_blank:eF
+         { \seq_item:Nn #1 {6} }
+         { : \seq_item:Nn #1 {6} } %minutes
+       \tl_if_blank:eF
+         { \seq_item:Nn #1 {7} }
+         { : \seq_item:Nn #1 {7} } %seconds
+       \seq_item:Nn #1 {8}  %Z,+,-
+       \seq_item:Nn #1 {9}
+       \tl_if_blank:eF
+         { \seq_item:Nn #1 {10} }
+         { : \seq_item:Nn #1 {10} }
+      }
+      {
+        \seq_item:Nn #1 {1}
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{variable}{\l_@@_xmp_currentdate_tl,\l_@@_xmp_currentdate_seq}
+% The tl var contains the date of the log-file in PDF format,
+% the seq the result splitted with the regex.
+%    \begin{macrocode}
+\tl_new:N  \l_@@_xmp_currentdate_tl
+\seq_new:N \l_@@_xmp_currentdate_seq
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{macro}{\@@_xmp_date_get:nNN}
+% This checks a document property and if empty uses the current date.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_xmp_date_get:nNN #1 #2 #3
+  %#1 property, #2 tl var with PDF date, #3 seq for splitted date
+  {
+    \tl_set:Nx #2 { \GetDocumentProperties{#1} }
+    \tl_if_blank:VTF #2
+      {
+        \seq_set_eq:NN #3 \l_@@_xmp_currentdate_seq
+        \tl_set_eq:NN  #2 \l_@@_xmp_currentdate_tl
+      }
+      {
+        \@@_xmp_date_split:VN #2 #3
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+% \subsubsection{UUID}
+% We need a command to generate an uuid
+% \begin{macro}{\@@_xmp_create_uuid:nN}
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_xmp_create_uuid:nN #1 #2
+  {
+    \str_set:Nx#2 {\str_lowercase:f{\tex_mdfivesum:D{#1}}}
+    \str_set:Nx#2
+      { uuid:
+        \str_range:Nnn #2{1}{8}
+        -\str_range:Nnn#2{9}{12}
+        -4\str_range:Nnn#2{13}{15}
+        -8\str_range:Nnn#2{16}{18}
+        -\str_range:Nnn#2{19}{30}
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsubsection{Purifying and escaping of strings}
+%
+% \begin{macro}{\@@_xmp_sanitize:nN}
+% We have to sanitize the user input. For this we pass
+% it through |\text_purify| and then replace a few special chars.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_xmp_sanitize:nN #1 #2
+%#1 input string, #2 str with the output
+  {
+    \group_begin:
+     \text_declare_purify_equivalent:Nn \& {\tl_to_str:N & }
+     \text_declare_purify_equivalent:Nn \texttilde {\c_tilde_str}
+     \tl_set:Nx \l_@@_tmpa_tl { \text_purify:n {#1} }
+     \str_gset:Nx \g_@@_tmpa_str { \tl_to_str:N \l_@@_tmpa_tl }
+     \str_greplace_all:Nnn\g_@@_tmpa_str {&}{&amp;}
+     \str_greplace_all:Nnn\g_@@_tmpa_str {<}{&lt;}
+     \str_greplace_all:Nnn\g_@@_tmpa_str {>}{&gt;}
+     \str_greplace_all:Nnn\g_@@_tmpa_str {"}{&quot;}
+    \group_end:
+     \str_set_eq:NN #2 \g_@@_tmpa_str
+  }
+
+\cs_generate_variant:Nn\@@_xmp_sanitize:nN {VN}
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Language handling}
+% The language of the metadata is used in various attributes, so we store it in
+% command.
+% \begin{variable}{\l_@@_xmp_doclang_tl,\l_@@_xmp_metalang_tl}
+\tl_new:N \l_@@_xmp_doclang_tl
+\tl_new:N \l_@@_xmp_metalang_tl
+% \end{variable}
+%
+% The language is retrieved at the start of the packet. We assume that
+% |lang| is always set and so don't use the |x-default| value of \pkg{hyperxmp}.
+%
+% \begin{variable}{\l_@@_xmp_lang_regex}
+%    \begin{macrocode}
+\regex_new:N\l_@@_xmp_lang_regex
+\regex_set:Nn\l_@@_xmp_lang_regex {\A\[([A-Za-z\-]+)\](.*)}
+%    \end{macrocode}
+% \end{variable}
+%
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_xmp_lang_get:nNN #1 #2 #3
+% #1 text, #2 tl var for lang match (or default), #3 tl var for text
+  {
+    \regex_extract_once:NnN \l_@@_xmp_lang_regex {#1}\l_@@_tmpa_seq
+    \seq_if_empty:NTF \l_@@_tmpa_seq
+      {
+        \tl_set:Nn #2 \l_@@_xmp_metalang_tl
+        \tl_set:Nn #3 {#1}
+      }
+      {
+        \tl_set:Nx #2 {\seq_item:Nn\l_@@_tmpa_seq{2}}
+        \tl_set:Nx #3 {\seq_item:Nn\l_@@_tmpa_seq{3}}
+      }
+  }
+\cs_generate_variant:Nn \@@_xmp_lang_get:nNN {eNN,VNN}
+%    \end{macrocode}
+%
+
+
+% \subsection{Filling the packet}
+% This tl var that holds the whole packet
+% \begin{variable}{\g_@@_xmp_packet_tl}
+%    \begin{macrocode}
+\tl_new:N \g_@@_xmp_packet_tl
+%    \end{macrocode}
+% \end{variable}
+%
+% \subsubsection{Helper commands to add lines and lists}
+%
+% \begin{macro}{\@@_xmp_add_packet_chunk:n}
+% This is the most basic command.
+% It is meant to produce a line and will use the current indent.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_xmp_add_packet_chunk:n #1
+  {
+    \tl_gput_right:Nx\g_@@_xmp_packet_tl
+      {
+        \@@_xmp_indent:  \exp_not:n{#1}
+      }
+  }
+\cs_generate_variant:Nn \@@_xmp_add_packet_chunk:n {e}
+%    \end{macrocode}
+% \end{macro}
+
+% \begin{macro}{\@@_xmp_add_packet_open:nn}
+% This commands opens a xml structure and increases the indent.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_xmp_add_packet_open:nn #1 #2 %#1 prefix #2 name
+  {
+    \@@_xmp_add_packet_chunk:n {<#1:#2>}
+    \@@_xmp_incr_indent:
+  }
+\cs_generate_variant:Nn \@@_xmp_add_packet_open:nn  {ne}
+%    \end{macrocode}
+% \end{macro}
+
+% \begin{macro}{\@@_xmp_add_packet_open_attr:nnn}
+% This commands opens a xml structure too but allows also to give an
+% attribute.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_xmp_add_packet_open_attr:nnn #1 #2 #3
+  %#1 prefix #2 name #3 attr
+  {
+    \@@_xmp_add_packet_chunk:n {<#1:#2~#3>}
+    \@@_xmp_incr_indent:
+  }
+\cs_generate_variant:Nn \@@_xmp_add_packet_open_attr:nnn  {nne}
+%    \end{macrocode}
+% \end{macro}
+
+% \begin{macro}{\@@_xmp_add_packet_close:nn}
+% This closes a structure and decreases the indent.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_xmp_add_packet_close:nn #1 #2 %#1 prefix #2:name
+  {
+    \@@_xmp_decr_indent:
+    \@@_xmp_add_packet_chunk:n {</#1:#2>}
+  }
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\@@_xmp_add_packet_line:nnn}
+%   This will produce a full line with open and closing xml.
+%   The content is sanitized. We test if there is content to be
+%   able to suppress data which has not be set.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_xmp_add_packet_line:nnn #1 #2 #3
+ %#1 prefix #2 name #3 content
+  {
+    \tl_if_blank:nF {#3}
+     {
+      \@@_xmp_sanitize:nN {#3}\l_@@_tmpa_str
+      \@@_xmp_add_packet_chunk:e {<#1:#2>\l_@@_tmpa_str</#1:#2>}
+     }
+  }
+\cs_generate_variant:Nn \@@_xmp_add_packet_line:nnn {nne,nnV,nee}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\@@_xmp_add_packet_line_attr:nnnn}
+% A similar command with attribute
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_xmp_add_packet_line_attr:nnnn #1 #2 #3 #4
+ %#1 prefix #2 name #3 attribute #4 content
+  {
+    \tl_if_blank:nF {#4}
+     {
+      \@@_xmp_sanitize:nN {#4}\l_@@_tmpa_str
+      \@@_xmp_add_packet_chunk:e {<#1:#2~#3>\l_@@_tmpa_str</#1:#2>}
+     }
+  }
+\cs_generate_variant:Nn \@@_xmp_add_packet_line_attr:nnnn {nnee,nneV}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@@_xmp_add_packet_line_default:nnnn}
+%    \begin{macrocode}
+ \cs_new_protected:Npn \@@_xmp_add_packet_line_default:nnnn #1 #2 #3 #4
+   % #1 prefix #2 name #3 default #4 content
+   {
+     \tl_if_blank:nTF { #4 }
+      {
+       \tl_set:Nn  \l_@@_tmpa_tl  {#3}
+      }
+      {
+        \tl_set:Nn \l_@@_tmpa_tl  {#4}
+      }
+     \@@_xmp_add_packet_line:nnV {#1}{#2}\l_@@_tmpa_tl
+   }
+\cs_generate_variant:Nn \@@_xmp_add_packet_line_default:nnnn {nnee}
+%    \end{macrocode}
+% \end{macro}
+% Some data are stored as unordered (Bag) or ordered lists (Seq) or (Alt).
+% Here we check also for the language.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_xmp_add_packet_list:nnnn #1 #2 #3 #4
+  %#1 prefix, #2 name,  #3 type (Seq/Bag/Alt) #4 a clist
+  {
+    \clist_if_empty:nF { #4 }
+      {
+        \@@_xmp_add_packet_open:nn {#1}{#2}
+         \@@_xmp_add_packet_open:nn {rdf}{#3}
+          \clist_map_inline:nn {#4}
+            {
+              \@@_xmp_lang_get:nNN {##1}\l_@@_tmpa_tl\l_@@_tmpb_tl
+              \@@_xmp_add_packet_line_attr:nneV
+               {rdf}{li}{xml:lang="\l_@@_tmpa_tl" }\l_@@_tmpb_tl
+            }
+         \@@_xmp_add_packet_close:nn{rdf}{#3}
+        \@@_xmp_add_packet_close:nn {#1}{#2}
+     }
+   }
+\cs_generate_variant:Nn \@@_xmp_add_packet_list:nnnn {nnne}
+%    \end{macrocode}
+%
+% \subsubsection{Building the main packet}
+%
+% \begin{macro}{\@@_xmp_build_packet:}
+% This is the main command to build the packet.
+% As data has to be set and collected first, it will be expanded
+% rather late in the document.
+%
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_xmp_build_packet:
+  {
+%    \end{macrocode}
+% Get the main languages
+% \begin{NOTE}{UF}
+% think if an error is needed for empty lang.
+% \end{NOTE}
+%    \begin{macrocode}
+   \tl_set:Nx \l_@@_xmp_doclang_tl  {\GetDocumentProperties{document/lang}}
+   \tl_set:Nx \l_@@_xmp_metalang_tl {\GetDocumentProperties{hyperref/pdfmetalang}}
+   \tl_if_blank:VT \l_@@_xmp_metalang_tl
+    { \cs_set_eq:NN \l_@@_xmp_metalang_tl\l_@@_xmp_doclang_tl}
+%    \end{macrocode}
+% The start of the package.
+% No need to try to juggle with catcode, this is fix text
+%    \begin{macrocode}
+     \@@_xmp_add_packet_chunk:e
+      {<?xpacket~begin="\@@_xmp_generate_bom:"~id="W5M0MpCehiHzreSzNTczkc9d"?>}
+     \@@_xmp_add_packet_open:nn{x}{xmpmeta~xmlns:x="adobe:ns:meta/"}
+      \@@_xmp_add_packet_open:ne{rdf}
+        {RDF~xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns\c_hash_str"}
+%    \end{macrocode}
+% The  rdf namespaces
+%    \begin{macrocode}
+       \@@_xmp_add_packet_open_attr:nne
+         {rdf}{Description}{rdf:about="" \g_@@_xmp_xmlns_tl}
+%    \end{macrocode}
+% The extensions
+%    \begin{macrocode}
+        \@@_xmp_add_packet_open:nn{pdfaExtension}{schemas}
+         \@@_xmp_add_packet_open:nn {rdf}{Bag}
+           \seq_map_inline:Nn \l_@@_xmp_schema_seq
+              {
+                \tl_use:c { g_@@_xmp_schema_##1_tl }
+              }
+         \@@_xmp_add_packet_close:nn {rdf}{Bag}
+        \@@_xmp_add_packet_close:nn {pdfaExtension}{schemas}
+%    \end{macrocode}
+% Now starts the part with the data.
+%    \begin{macrocode}
+    % data
+        \@@_xmp_build_pdf:
+        \@@_xmp_build_xmpRights:
+        \@@_xmp_build_standards: %pdfaid,pdfxid,pdfuaid
+        \@@_xmp_build_dc:
+        \@@_xmp_build_photoshop:
+        \@@_xmp_build_xmp:
+        \@@_xmp_build_xmpMM:
+        \@@_xmp_build_prism:
+        \@@_xmp_build_iptc:
+        \@@_xmp_build_user: %user additions
+    % end
+      \@@_xmp_add_packet_close:nn {rdf}{Description}
+     \@@_xmp_add_packet_close:nn {rdf}{RDF}
+    \@@_xmp_add_packet_close:nn {x}{xmpmeta}
+    \int_set:Nn  \l_@@_xmp_indent_int{20}
+    \prg_replicate:nn{10}{\@@_xmp_add_packet_chunk:n {}}
+    \int_zero:N \l_@@_xmp_indent_int
+    \@@_xmp_add_packet_chunk:n {<?xpacket~end="w"?>}
+ }
+%    \end{macrocode}
+% \end{macro}
+
+% \subsection{Building the chunks: rdf namespaces}
+% This is the list of external names spaces.
+% They are rather simple, and we store them directly
+% into a string. Special chars should be escaped properly,
+% see e.g. |\c_hash_str| for the hash.
+
+% \begin{variable}{\g_@@_xmp_xmlns_tl,\g_@@_xmp_xmlns_prop}
+% The string will hold the prepared chunk, the prop stores the name spaces
+% so that one can check on the user level for duplicates.
+%    \begin{macrocode}
+\str_new:N  \g_@@_xmp_xmlns_tl
+\prop_new:N \g_@@_xmp_xmlns_prop
+%    \end{macrocode}
+% \end{variable}
+% \begin{macro}{\@@_xmp_xmlns_new:nn,\@@_xmp_xmlns_new:nx}
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_xmp_xmlns_new:nn #1 #2
+  {
+    \prop_gput:Nnn \g_@@_xmp_xmlns_prop {#1}{#2}
+    \tl_gput_right:Nx \g_@@_xmp_xmlns_tl
+      {
+        \@@_xmp_indent:n{4} xmlns:\exp_not:n{#1="#2"}
+      }
+  }
+\cs_generate_variant:Nn \@@_xmp_xmlns_new:nn {nx}
+%    \end{macrocode}
+% \end{macro}
+% Now we fill the data. The list is more or less the same as in hyperxmp
+%    \begin{macrocode}
+\@@_xmp_xmlns_new:nn {pdf}      {http://ns.adobe.com/pdf/1.3/}
+\@@_xmp_xmlns_new:nn {xmpRights}{http://ns.adobe.com/xap/1.0/rights/}
+\@@_xmp_xmlns_new:nn {dc}       {http://purl.org/dc/elements/1.1/}
+\@@_xmp_xmlns_new:nn {photoshop}{http://ns.adobe.com/photoshop/1.0/}
+\@@_xmp_xmlns_new:nn {xmp}      {http://ns.adobe.com/xap/1.0/}
+\@@_xmp_xmlns_new:nn {xmpMM}    {http://ns.adobe.com/xap/1.0/mm/}
+\@@_xmp_xmlns_new:nx {stEvt}
+  {http://ns.adobe.com/xap/1.0/sType/ResourceEvent\c_hash_str}
+\@@_xmp_xmlns_new:nn {pdfaid}   {http://www.aiim.org/pdfa/ns/id/}
+\@@_xmp_xmlns_new:nn {pdfuaid}  {http://www.aiim.org/pdfua/ns/id/}
+\@@_xmp_xmlns_new:nn {pdfx}     {http://ns.adobe.com/pdfx/1.3/}
+\@@_xmp_xmlns_new:nn {pdfxid}   {http://www.npes.org/pdfx/ns/id/}
+\@@_xmp_xmlns_new:nn {prism}    {http://prismstandard.org/namespaces/basic/3.0/}
+%\@@_xmp_xmlns_new:nn {jav}      {http://www.niso.org/schemas/jav/1.0/}
+%\@@_xmp_xmlns_new:nn {xmpTPg}   {http://ns.adobe.com/xap/1.0/t/pg/}
+\@@_xmp_xmlns_new:nx {stFnt}    {http://ns.adobe.com/xap/1.0/sType/Font\c_hash_str}
+\@@_xmp_xmlns_new:nn {Iptc4xmpCore}{http://iptc.org/std/Iptc4xmpCore/1.0/xmlns/}
+\@@_xmp_xmlns_new:nn {pdfaExtension}{http://www.aiim.org/pdfa/ns/extension/}
+\@@_xmp_xmlns_new:nx {pdfaSchema}{http://www.aiim.org/pdfa/ns/schema\c_hash_str}
+\@@_xmp_xmlns_new:nx {pdfaProperty}{http://www.aiim.org/pdfa/ns/property\c_hash_str}
+\@@_xmp_xmlns_new:nx {pdfaType} {http://www.aiim.org/pdfa/ns/type\c_hash_str}
+\@@_xmp_xmlns_new:nx {pdfaField}{http://www.aiim.org/pdfa/ns/field\c_hash_str}
+%    \end{macrocode}
+
+% \subsection{Building the chunks: Extensions}
+% In this part local name spaces or additional names in a name space can be declared.
+% A \enquote{schema} declaration consist of the declaration of the name, uri and prefix
+% which then surrounds a bunch of property declarations.
+% The current code doesn't support all syntax options but sticks to
+% what is used in \pkg{hyperxmp} and \pkg{pdfx}.
+% If needed it can be extended later.
+%
+% \begin{variable}{\l_@@_xmp_schema_seq}
+% This variable will hold the list of prefix so that we can loop
+% to produce the final XML
+%    \begin{macrocode}
+\seq_new:N \l_@@_xmp_schema_seq
+%    \end{macrocode}
+% \end{variable}
+%
+% \begin{macro}{\@@_xmp_schema_new:nnn}
+%  With this command a new schema can be declared. The main tl contains the
+%  XML wrapper code, it then includes the list of properties which are
+%  created with the next command.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_xmp_schema_new:nnn #1 #2 #3
+  %#1 name #2 prefix, #3 text
+  {
+    \seq_put_right:Nn \l_@@_xmp_schema_seq { #2 }
+    \tl_new:c { g_@@_xmp_schema_#2_tl }
+    \tl_new:c { g_@@_xmp_schema_#2_properties_tl }
+    \tl_gput_right:cn { g_@@_xmp_schema_#2_tl }
+      {
+        \@@_xmp_add_packet_open_attr:nnn{rdf}{li}{rdf:parseType="Resource"}
+         \@@_xmp_add_packet_line:nnn {pdfaSchema}{schema}{#1}
+         \@@_xmp_add_packet_line:nnn {pdfaSchema}{prefix}{#2}
+         \@@_xmp_add_packet_line:nnn {pdfaSchema}{namespaceURI}{#3}
+         \@@_xmp_add_packet_open:nn {pdfaSchema}{property}
+          \@@_xmp_add_packet_open:nn{rdf}{Seq}
+              \tl_use:c { g_@@_xmp_schema_#2_properties_tl }
+          \@@_xmp_add_packet_close:nn{rdf}{Seq}
+         \@@_xmp_add_packet_close:nn {pdfaSchema}{property}
+        \cs_if_exist_use:c {@@_xmp_schema_#2_additions:}
+        \@@_xmp_add_packet_close:nn{rdf}{li}
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+
+% \begin{macro}{\@@_xmp_property_new:nnn}
+%  This adds a property to a schema.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_xmp_property_new:nnnnn #1 #2 #3 #4 #5 %
+    %#1 schema #2 name, #3 type, #4 category #5 description
+  {
+    \tl_gput_right:cn { g_@@_xmp_schema_#1_properties_tl }
+      {
+        \@@_xmp_add_packet_open:nn {rdf}{li~rdf:parseType="Resource"}
+          \@@_xmp_add_packet_line:nnn {pdfaProperty}{name}{#2}
+          \@@_xmp_add_packet_line:nnn {pdfaProperty}{valueType}{#3}
+          \@@_xmp_add_packet_line:nnn {pdfaProperty}{category}{#4}
+          \@@_xmp_add_packet_line:nnn {pdfaProperty}{description}{#5}
+        \@@_xmp_add_packet_close:nn{rdf}{li}
+     }
+  }
+%    \end{macrocode}
+% \end{macro}
+
+% \begin{macro}{\@@_xmp_add_packet_field:nnn}
+%  This adds a field to a schema.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_xmp_add_packet_field:nnn #1 #2 #3 %
+  %#1 name #2 valuetype #3 description
+  {
+    \@@_xmp_add_packet_open_attr:nnn {rdf}{li}{rdf:parseType="Resource"}
+          \@@_xmp_add_packet_line:nnn {pdfaField}{name}{#1}
+          \@@_xmp_add_packet_line:nnn {pdfaField}{valueType}{#2}
+          \@@_xmp_add_packet_line:nnn {pdfaField}{description}{#3}
+    \@@_xmp_add_packet_close:nn{rdf}{li}
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsubsection{The extension data}
+%
+% The list of extension has been reviewed and compared with
+% the list of namespaces which can be used in pdf/A-1\footnote{While
+% A-1 builds on PDF 1.4 and so it probably no longer relevant, it is
+% not quite clear if one can remove this for A-2 and newer, so we stay on the
+% safe side.}
+%
+%
+% [1]~\url{https://www.pdfa.org/wp-content/uploads/2011/08/tn0008_predefined_xmp_properties_in_pdfa-1_2008-03-20.pdf}
+% and the content of the namespaces as listed here
+% [2]~\url{https://developer.adobe.com/xmp/docs/XMPNamespaces/pdf/}
+%
+%
+%  \begin{description}
+%  \item[pdf] property: Trapped.
+%  We ignore it, it seems to validate without it.
+%  \item[xmpMM] properties DocumentID, InstanceID, VersionID,
+%  Renditionclass declared by hyperxmp.
+%  Properties InstanceID and OriginalDocumentID declared by pdfx (pdfx.xmp)
+%  With the exception of OriginalDocumentID all are already allowed and
+%  predefined. We ignore OriginalDocumentID until requested.
+%  \item[pdfaid] properties part and conformance are declared by hyperxmp, but
+%  no here as already in http://www.aiim.org/pdfa/ns/id/. But we declare
+%  year so that it can be used also with older A-standards.
+%   \begin{macro}{pdfaid~(schema)}
+%    \begin{macrocode}
+\@@_xmp_schema_new:nnn
+   {PDF/A~Identification~Schema}
+   {pdfaid}
+   {http://www.aiim.org/pdfa/ns/id/}
+\@@_xmp_property_new:nnnnn
+   {pdfaid}
+   {year}
+   {Integer}
+   {internal}
+   {Year~of~standard}
+%    \end{macrocode}
+% \end{macro}
+%  \item[pdfuaid] here we need to declare the property \enquote{part}.
+% \begin{macro}{pdfuaid~(schema)}
+%    \begin{macrocode}
+\@@_xmp_schema_new:nnn
+   {PDF/UA~Universal~Accessibility~Schema}
+   {pdfuaid}
+   {http://www.aiim.org/pdfua/ns/id/}
+\@@_xmp_property_new:nnnnn
+   {pdfuaid}
+   {part}
+   {Integer}
+   {internal}
+   {Part~of~ISO~14289~standard}
+%    \end{macrocode}
+% \end{macro}
+% \item[pdfx] According to [1] not an allowed schema, but it seems
+% to validate and allow to set the pdf/X version, \pkg{hyperxmp}
+% declares here the properties |GTS_PDFXVersion| and |GTS_PDFXConformance|.
+% Ignored as only relevant for older pdf/X version not supported by the pdfmanagement.
+%
+% \item[pdfxid] we set this so that we
+% can add the pdf/X version for pdf/X-4 and higher
+% \begin{macro}{pdfxid~(schema)}
+%    \begin{macrocode}
+\@@_xmp_schema_new:nnn
+    {PDF/X~ID~Schema}
+    {pdfxid}
+    {http://www.npes.org/pdfx/ns/id/}
+\@@_xmp_property_new:nnnnn
+    {pdfxid}
+    {GTS_PDFXVersion}
+    {Text}
+    {internal}
+    {ID~of~PDF/X~standard}
+%    \end{macrocode}
+% \end{macro}
+
+%\item[Prism]
+% \begin{macro}{prism~(schema)}
+%    \begin{macrocode}
+\@@_xmp_schema_new:nnn
+  {PRISM~Basic~Metadata}
+  {prism}
+  {http://prismstandard.org/namespaces/basic/3.0/}
+\@@_xmp_property_new:nnnnn
+  {prism}
+  {complianceProfile}
+  {Text}
+  {internal}
+  {PRISM~specification~compliance~profile~to~which~this~document~adheres}
+\@@_xmp_property_new:nnnnn
+  {prism}
+  {publicationName}
+  {Text}
+  {external}
+  {Publication name}
+\@@_xmp_property_new:nnnnn
+  {prism}
+  {aggregationType}
+  {Text}
+  {external}
+  {Publication type}
+\@@_xmp_property_new:nnnnn
+  {prism}
+  {bookEdition}
+  {Text}
+  {external}
+  {Edition~of~the~book~in~which~the~document~was~published}
+\@@_xmp_property_new:nnnnn
+  {prism}
+  {volume}
+  {Text}
+  {external}
+  {Publication~volume~number}
+\@@_xmp_property_new:nnnnn
+  {prism}
+  {number}
+  {Text}
+  {external}
+  {Publication~issue~number~within~a~volume}
+\@@_xmp_property_new:nnnnn
+  {prism}
+  {pageRange}
+  {Text}
+  {external}
+  {Page~range~for~the~document~within~the~print~version~of~its~publication}
+\@@_xmp_property_new:nnnnn
+  {prism}
+  {issn}
+  {Text}
+  {external}
+  {ISSN~for~the~printed~publication~in~which~the~document~was~published}
+\@@_xmp_property_new:nnnnn
+  {prism}
+  {eIssn}
+  {Text}
+  {external}
+  {ISSN~for~the~electronic~publication~in~which~the~document~was~published}
+\@@_xmp_property_new:nnnnn
+  {prism}
+  {isbn}
+  {Text}
+  {external}
+  {ISBN for the publication in which the document was published}
+\@@_xmp_property_new:nnnnn
+  {prism}
+  {doi}
+  {Text}
+  {external}
+  {Digital~Object~Identifier~for~the~document}
+\@@_xmp_property_new:nnnnn
+  {prism}
+  {url}
+  {URL}
+  {external}
+  {URL~at~which~the~document~can~be~found}
+\@@_xmp_property_new:nnnnn
+  {prism}
+  {byteCount}
+  {Integer}
+  {internal}
+  {Approximate~file~size~in~octets}
+\@@_xmp_property_new:nnnnn
+  {prism}
+  {pageCount}
+  {Integer}
+  {internal}
+  {Number~of~pages~in~the~print~version~of~the~document}
+\@@_xmp_property_new:nnnnn
+  {prism}
+  {subtitle}
+  {Text}
+  {external}
+  {Document's subtitle}
+%    \end{macrocode}
+% \end{macro}
+% \item[iptc]
+%    \begin{macrocode}
+\@@_xmp_schema_new:nnn
+  {IPTC~Core~Schema}
+  {Iptc4xmpCore}
+  {http://iptc.org/std/Iptc4xmpCore/1.0/xmlns/}
+\@@_xmp_property_new:nnnnn
+  {Iptc4xmpCore}
+  {CreatorContactInfo}
+  {ContactInfo}
+  {external}
+  {Document~creator's~contact~information}
+\cs_new_protected:cpn { @@_xmp_schema_Iptc4xmpCore_additions: }
+  {
+    \@@_xmp_add_packet_open:nn{pdfaSchema}{valueType}
+      \@@_xmp_add_packet_open:nn{rdf}{Seq}
+        \@@_xmp_add_packet_open_attr:nnn{rdf}{li}{rdf:parseType="Resource"}
+          \@@_xmp_add_packet_line:nnn{pdfaType}{type}{ContactInfo}
+          \@@_xmp_add_packet_line:nnn{pdfaType}{namespaceURI}
+             {http://iptc.org/std/Iptc4xmpCore/1.0/xmlns/}
+          \@@_xmp_add_packet_line:nnn{pdfaType}{prefix}{Iptc4xmpCore}
+          \@@_xmp_add_packet_line:nnn{pdfaType}{description}
+            {Basic~set~of~information~to~get~in~contact~with~a~person}
+          \@@_xmp_add_packet_open:nn{pdfaType}{field}
+           \@@_xmp_add_packet_open:nn{rdf}{Seq}
+            \@@_xmp_add_packet_field:nnn{CiAdrCity}{Text}
+              {Contact~information~city}
+            \@@_xmp_add_packet_field:nnn{CiAdrCtry}{Text}
+              {Contact~information~country}
+            \@@_xmp_add_packet_field:nnn{CiAdrExtadr}{Text}
+              {Contact~information~address}
+            \@@_xmp_add_packet_field:nnn{CiAdrPcode}{Text}
+              {Contact~information~local~postal~code}
+            \@@_xmp_add_packet_field:nnn{CiAdrRegion}{Text}
+              {Contact~information~regional~information~such~as~state~or~province}
+            \@@_xmp_add_packet_field:nnn{CiEmailWork}{Text}
+              {Contact~information~email~address(es)}
+            \@@_xmp_add_packet_field:nnn{CiTelWork}{Text}
+              {Contact~information~telephone~number(s)}
+            \@@_xmp_add_packet_field:nnn{CiUrlWork}{Text}
+              {Contact~information~Web~URL(s)}
+           \@@_xmp_add_packet_close:nn{rdf}{Seq}
+         \@@_xmp_add_packet_close:nn{pdfaType}{field}
+        \@@_xmp_add_packet_close:nn{rdf}{li}
+      \@@_xmp_add_packet_close:nn{rdf}{Seq}
+    \@@_xmp_add_packet_close:nn{pdfaSchema}{valueType}
+  }
+%    \end{macrocode}
+% \item[jav]: currently ignored
+%
+% \end{description}
+% \subsection{The actual user / document data}
+
+% \subsubsection{pdf}
+% This builds pdf related the data with the (prefix \enquote{pdf}).
+%
+% \begin{macro}{\@@_xmp_build_pdf:}
+% \begin{macro}{
+%   Producer/pdfproducer,
+%   PDFversion}
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_xmp_build_pdf:
+  {
+%    \end{macrocode}
+% At first the producer. If not given manually we build it from the exec string
+% plus the version number
+%    \begin{macrocode}
+  \@@_xmp_add_packet_line_default:nnee
+    {pdf}{Producer}
+    {\c_sys_engine_exec_str-\c_sys_engine_version_str}
+    {\GetDocumentProperties{hyperref/pdfproducer}}
+%    \end{macrocode}
+%  Now the PDF version
+%    \begin{macrocode}
+   \@@_xmp_add_packet_line:nne{pdf}{PDFVersion}{\pdf_version:}
+%    \end{macrocode}
+%    \begin{macrocode}
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \subsubsection{xmp}
+% This builds the data with the (prefix \enquote{xmp}).
+%
+% \begin{macro}{\@@_xmp_build_xmp:}
+% \begin{macro}{
+%   CreatorTool/pdfcreator,
+%   BaseUrl/baseurl}
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_xmp_build_xmp:
+  {
+%    \end{macrocode}
+% The creator
+%    \begin{macrocode}
+  \@@_xmp_add_packet_line_default:nnee
+    {xmp}{CreatorTool}
+    {LaTeX}
+    { \GetDocumentProperties{hyperref/pdfcreator} }
+%    \end{macrocode}
+% The baseurl
+%    \begin{macrocode}
+   \@@_xmp_add_packet_line_default:nnee
+     {xmp}{BaseURL}{}
+     { \GetDocumentProperties{hyperref/baseurl} }
+%    \end{macrocode}
+% CreationDate
+%    \begin{macrocode}
+    \@@_xmp_date_get:nNN
+      {hyperref/pdfcreationdate}\l_@@_tmpa_tl\l_@@_tmpa_seq
+    \@@_xmp_add_packet_line:nne{xmp}{CreateDate}{\@@_xmp_print_date:N\l_@@_tmpa_seq}
+    \pdfmanagement_add:nnx{Info}{CreationDate}{(\l_@@_tmpa_tl)}
+%    \end{macrocode}
+% ModifyDate
+%    \begin{macrocode}
+    \@@_xmp_date_get:nNN
+      {hyperref/pdfmoddate}\l_@@_tmpa_tl\l_@@_tmpa_seq
+    \@@_xmp_add_packet_line:nne{xmp}{ModifyDate}{\@@_xmp_print_date:N\l_@@_tmpa_seq}
+    \pdfmanagement_add:nnx{Info}{ModDate}{(\l_@@_tmpa_tl)}
+%    \end{macrocode}
+% MetadataDate
+%    \begin{macrocode}
+    \@@_xmp_date_get:nNN
+      {hyperref/pdfmetadate}\l_@@_tmpa_tl\l_@@_tmpa_seq
+    \@@_xmp_add_packet_line:nne{xmp}{MetadataDate}{\@@_xmp_print_date:N\l_@@_tmpa_seq}
+%    \end{macrocode}
+%    \begin{macrocode}
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \subsubsection{Standards}
+%    The metadata for standards are taken from the |pdfstandard| key
+%    of |\DocumentMetadata|.
+%    The values for A-standards are taken from the property, X and UA are currently
+%    taken from the document container, this should be changed when merging of
+%    standards are possible.
+% \begin{macro}{\@@_xmp_build_standards:}
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_xmp_build_standards:
+  {
+    \@@_xmp_add_packet_line:nne {pdfaid}{part}{\pdfmeta_standard_item:n{level}}
+    \@@_xmp_add_packet_line:nne
+      {pdfaid}{conformance}{\pdfmeta_standard_item:n{conformance}}
+    \@@_xmp_add_packet_line:nne {pdfaid}{year} {\pdfmeta_standard_item:n{year}}
+    \@@_xmp_add_packet_line:nne
+      {pdfxid}{GTS_PDFXVersion}{\GetDocumentProperties{document/pdfstandard-X}}
+    \@@_xmp_add_packet_line:nne
+      {pdfuaid}{part}{\GetDocumentProperties{document/pdfstandard-UA}}
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+
+% \subsubsection{Photoshop}
+% \begin{macro}{\@@_xmp_build_photoshop:}
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_xmp_build_photoshop:
+  {
+%    \end{macrocode}
+% pdfauthortitle/photoshop:AuthorsPosition
+%    \begin{macrocode}
+   \@@_xmp_add_packet_line:nne{photoshop}{AuthorsPosition}
+     { \GetDocumentProperties{hyperref/pdfauthortitle} }
+%    \end{macrocode}
+% pdfcaptionwriter/photoshop:CaptionWriter
+%    \begin{macrocode}
+   \@@_xmp_add_packet_line:nne{photoshop}{CaptionWriter}
+     { \GetDocumentProperties{hyperref/pdfcaptionwriter} }
+%    \end{macrocode}
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+
+% \subsection{XMP Media Management}
+
+% \begin{macro}{\@@_xmp_build_xmpMM:}
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_xmp_build_xmpMM:
+  {
+%    \end{macrocode}
+% pdfdocumentid / xmpMM:DocumentID
+%    \begin{macrocode}
+    \str_set:Nx\l_@@_tmpa_str {\GetDocumentProperties{hyperref/pdfdocumentid}}
+    \str_if_empty:NT \l_@@_tmpa_str
+      {
+        \@@_xmp_create_uuid:nN
+          {\jobname\GetDocumentProperty{hyperref/pdftitle}}
+          \l_@@_tmpa_str
+      }
+    \@@_xmp_add_packet_line:nnV{xmpMM}{DocumentID}
+      \l_@@_tmpa_str
+%    \end{macrocode}
+% pdfinstanceid / xmpMM:InstanceID
+%    \begin{macrocode}
+    \str_set:Nx\l_@@_tmpa_str {\GetDocumentProperties{hyperref/pdfinstanceid}}
+    \str_if_empty:NT \l_@@_tmpa_str
+      {
+        \@@_xmp_create_uuid:nN
+          {\jobname\l_@@_xmp_currentdate_tl}
+          \l_@@_tmpa_str
+      }
+    \@@_xmp_add_packet_line:nnV{xmpMM}{InstanceID}
+      \l_@@_tmpa_str
+%    \end{macrocode}
+% pdfversionid/xmpMM:VersionID
+%    \begin{macrocode}
+   \@@_xmp_add_packet_line:nne{xmpMM}{VersionID}
+     { \GetDocumentProperties{hyperref/pdfversionid} }
+%    \end{macrocode}
+% pdfrendition/xmpMM:RenditionClass
+%    \begin{macrocode}
+   \@@_xmp_add_packet_line:nne{xmpMM}{RenditionClass}
+     { \GetDocumentProperties{hyperref/pdfrendition} }
+%    \end{macrocode}
+%    \begin{macrocode}
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Rest of dublin Core data}
+%
+% \begin{macro}{\@@_xmp_build_dc:}
+% \begin{macro}{
+%  dc:creator/pdfauthor,
+%  dc:subject/pdfkeywords,
+%  dc:type/pdftype,
+%  dc:publisher/pdfpublisher,
+%  dc:description/pdfsubject,
+%  dc:language/lang/pdflang,
+%  dc:identifier/pdfidentifier,
+%  photoshop:AuthorsPosition/pdfauthortitle,
+%  photoshop:CaptionWriter/pdfcaptionwriter
+%  }
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_xmp_build_dc:
+  {
+%    \end{macrocode}
+% pdfauthor/dc:creator
+%    \begin{macrocode}
+    \@@_xmp_add_packet_list:nnne {dc}{creator}{Seq}
+       { \GetDocumentProperties{hyperref/pdfauthor} }
+    \int_compare:nNnT {0\pdfmeta_standard_item:n{level}}={1}
+       { \pdfmanagement_remove:nn{Info}{Author} }
+%    \end{macrocode}
+% pdftitle/dc:title. This is rather complex as we want to support a list
+% with different languages.
+%    \begin{macrocode}
+    \@@_xmp_add_packet_list:nnne {dc}{title}{Alt}
+       { \GetDocumentProperties{hyperref/pdftitle} }
+%    \end{macrocode}
+% pdfkeywords/dc:subject
+%    \begin{macrocode}
+    \@@_xmp_add_packet_list:nnne {dc}{subject}{Bag}
+       { \GetDocumentProperties{hyperref/pdfkeywords} }
+    \int_compare:nNnT {0\pdfmeta_standard_item:n{level}}={1}
+       { \pdfmanagement_remove:nn{Info}{Keywords} }
+%    \end{macrocode}
+% pdftype/dc:type, commas must be protected so we test first
+%    \begin{macrocode}
+    \tl_if_blank:eTF { \GetDocumentProperties{hyperref/pdftype} }
+       {
+         \@@_xmp_add_packet_list:nnne {dc}{type}{Bag}{Text}
+       }
+       {
+        \@@_xmp_add_packet_list:nnne {dc}{type}{Bag}
+          { { \GetDocumentProperties{hyperref/pdftype} }}
+       }
+%    \end{macrocode}
+% pdfpublisher/dc:publisher, commas are protected
+%    \begin{macrocode}
+    \@@_xmp_add_packet_list:nnne {dc}{publisher}{Bag}
+        {{ \GetDocumentProperties{hyperref/pdfpublisher} }}
+%    \end{macrocode}
+% pdfsubject/dc:description
+%    \begin{macrocode}
+   \@@_xmp_add_packet_open:nn {dc}{description}
+     \@@_xmp_add_packet_open:nn {rdf}{Alt}
+       \@@_xmp_add_packet_line_attr:nnee
+         {rdf}{li}{xml:lang="\l_@@_xmp_metalang_tl"}
+         {\GetDocumentProperties{hyperref/pdfsubject}}
+     \@@_xmp_add_packet_close:nn {rdf}{Alt}
+   \@@_xmp_add_packet_close:nn {dc}{description}
+%    \end{macrocode}
+% lang/pdflang/dc:language
+%    \begin{macrocode}
+   \@@_xmp_add_packet_list:nnne {dc}{language}{Bag}
+     { \l_@@_xmp_doclang_tl }
+%    \end{macrocode}
+% pdfidentifier/dc:identifier
+%    \begin{macrocode}
+   \@@_xmp_add_packet_line:nne{dc}{identifier}
+     { \GetDocumentProperties{hyperref/pdfidentifier} }
+%    \end{macrocode}
+% pdfdate/dc:date
+%    \begin{macrocode}
+   \@@_xmp_date_get:nNN {hyperref/pdfdate}\l_@@_tmpa_tl\l_@@_tmpa_seq
+    \@@_xmp_add_packet_list:nnne {dc}{date}{Seq}
+          {\@@_xmp_print_date:N\l_@@_tmpa_seq}
+%    \end{macrocode}
+% The file format
+%    \begin{macrocode}
+   \@@_xmp_add_packet_line:nnn{dc}{format}{application/pdf}
+%    \end{macrocode}
+% The source
+%    \begin{macrocode}
+    \@@_xmp_add_packet_line_default:nnee
+     {dc}{source}
+     { \c_sys_jobname_str.tex }
+     { \GetDocumentProperties{hyperref/pdfsource} }
+%    \end{macrocode}
+%    \begin{macrocode}
+    \@@_xmp_add_packet_list:nnne{dc}{rights}{Alt}
+     {\GetDocumentProperties{hyperref/pdfcopyright}}
+%    \end{macrocode}
+%    \begin{macrocode}
+  }
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \subsection{xmpRights}
+% \begin{macro}{\@@_xmp_build_xmpRights:}
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_xmp_build_xmpRights:
+  {
+    \@@_xmp_add_packet_line:nne
+      {xmpRights}
+      {WebStatement}
+      {\GetDocumentProperties{hyperref/pdflicenseurl}}
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{IPTC}
+% \begin{macro}{\@@_xmp_build_iptc:}
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_xmp_build_iptc:
+  {
+    \@@_xmp_add_packet_open_attr:nnn
+     {Iptc4xmpCore}{CreatorContactInfo}{rdf:parseType="Resource"}
+     \@@_xmp_add_packet_line:nne
+       {Iptc4xmpCore}{CiAdrExtadr}
+       {\GetDocumentProperties{hyperref/pdfcontactaddress}}
+     \@@_xmp_add_packet_line:nne
+        {Iptc4xmpCore}{CiAdrCity}
+        {\GetDocumentProperties{hyperref/pdfcontactcity}}
+     \@@_xmp_add_packet_line:nne
+        {Iptc4xmpCore}{CiAdrPcode}
+        {\GetDocumentProperties{hyperref/pdfcontactpostcode}}
+     \@@_xmp_add_packet_line:nne
+        {Iptc4xmpCore}{CiAdrCtry}
+        {\GetDocumentProperties{hyperref/pdfcontactcountry}}
+     \@@_xmp_add_packet_line:nne
+        {Iptc4xmpCore}{CiTelWork}
+        {\GetDocumentProperties{hyperref/pdfcontactphone}}
+     \@@_xmp_add_packet_line:nne
+        {Iptc4xmpCore}{CiEmailWork}
+        {\GetDocumentProperties{hyperref/pdfcontactemail}}
+     \@@_xmp_add_packet_line:nne
+        {Iptc4xmpCore}{CiUrlWork}
+        {\GetDocumentProperties{hyperref/pdfcontacturl}}
+     \@@_xmp_add_packet_close:nn
+     {Iptc4xmpCore}{CreatorContactInfo}
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsection{Prism}
+% \begin{macro}{\@@_xmp_build_prism:}
+% \begin{macro}
+%  {
+%   complianceProfile,
+%   prism:subtitle/pdfsubtitle,
+%
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_xmp_build_prism:
+  {
+%    \end{macrocode}
+% The compliance profile is a fix value taken from \pkg{hyperxmp}
+%    \begin{macrocode}
+    \@@_xmp_add_packet_line:nnn
+      {prism}{complianceProfile}
+      {three}
+%    \end{macrocode}
+% the next two values can take an optional language argument.
+% First subtitle
+%    \begin{macrocode}
+    \@@_xmp_lang_get:eNN
+     {\GetDocumentProperties{hyperref/pdfsubtitle}}
+     \l_@@_tmpa_tl\l_@@_tmpb_tl
+    \@@_xmp_add_packet_line_attr:nneV
+      {prism}{subtitle}
+      {xml:lang="\l_@@_tmpa_tl"}
+      \l_@@_tmpb_tl
+%    \end{macrocode}
+% Then publicationName
+%    \begin{macrocode}
+    \@@_xmp_lang_get:eNN
+     {\GetDocumentProperties{hyperref/pdfpublication}}
+     \l_@@_tmpa_tl\l_@@_tmpb_tl
+    \@@_xmp_add_packet_line_attr:nneV
+      {prism}{publicationName}
+      {xml:lang="\l_@@_tmpa_tl"}
+      \l_@@_tmpb_tl
+%    \end{macrocode}
+% Now the rest
+%    \begin{macrocode}
+    \@@_xmp_add_packet_line:nne
+      {prism}{bookEdition}
+      {\GetDocumentProperties{hyperref/pdfbookedition}}
+    \@@_xmp_add_packet_line:nne
+      {prism}{aggregationType}
+      {\GetDocumentProperties{hyperref/pdfpubtype}}
+    \@@_xmp_add_packet_line:nne
+      {prism}{volume}
+      {\GetDocumentProperties{hyperref/pdfvolumenum}}
+    \@@_xmp_add_packet_line:nne
+      {prism}{number}
+      {\GetDocumentProperties{hyperref/pdfissuenum}}
+    \@@_xmp_add_packet_line:nne
+      {prism}{pageRange}
+      {\GetDocumentProperties{hyperref/pdfpagerange}}
+    \@@_xmp_add_packet_line:nne
+      {prism}{issn}
+      {\GetDocumentProperties{hyperref/pdfissn}}
+    \@@_xmp_add_packet_line:nne
+      {prism}{eIssn}
+      {\GetDocumentProperties{hyperref/pdfeissn}}
+    \@@_xmp_add_packet_line:nne
+      {prism}{doi}
+      {\GetDocumentProperties{hyperref/pdfdoi}}
+    \@@_xmp_add_packet_line:nne
+      {prism}{url}
+      {\GetDocumentProperties{hyperref/pdfurl}}
+%    \end{macrocode}
+% The page count is take from the previous run or from
+% pdfnumpages.
+%    \begin{macrocode}
+     \tl_set:Nx \l_@@_tmpa { \GetDocumentProperties{hyperref/pdfnumpages} }
+     \@@_xmp_add_packet_line:nne
+      {prism}{pageCount}
+      {\tl_if_blank:VTF \l_@@_tmpa{\PreviousTotalPages}{\l_@@_tmpa}}
+%    \end{macrocode}
+%    \begin{macrocode}
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsubsection{User additions}
+%
+% \begin{variable}{\g_@@_xmp_user_packet_str }
+\tl_new:N \g_@@_xmp_user_packet_tl
+% \end{macro}
+% \begin{macro}{\@@_xmp_build_user: }
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_xmp_build_user:
+ {
+   \int_zero:N \l_@@_xmp_indent_int
+   \g_@@_xmp_user_packet_tl
+   \int_set:Nn \l_@@_xmp_indent_int {3}
+ }
+%    \end{macrocode}
+% \end{macro}
+% \subsection{Activating the metadata}
+% We don't try to get the byte count. So we can put everything
+% in the |shipout/lastpage| hook
+%    \begin{macrocode}
+\AddToHook{shipout/lastpage}
+  {
+    \bool_if:NT\g_@@_xmp_bool
+     {
+       \file_get_timestamp:nN{\jobname.log}\l_@@_xmp_currentdate_tl
+       \@@_xmp_date_split:VN\l_@@_xmp_currentdate_tl\l_@@_xmp_currentdate_seq
+       \@@_xmp_build_packet:
+       \exp_args:No
+       \__pdf_backend_metadata_stream:n {\g_@@_xmp_packet_tl}
+        \pdfmanagement_add:nnx {Catalog} {Metadata}{\pdf_object_ref_last:}
+     }
+  }
+%    \end{macrocode}
+
+% \subsection{User commands}
+
+% \begin{macro}{\pdfmeta_xmp_add:n }
+%    \begin{macrocode}
+\cs_new_protected:Npn \pdfmeta_xmp_add:n #1
+  {
+    \tl_gput_right:Nn \g_@@_xmp_user_packet_tl
+      {
+        \@@_xmp_add_packet_chunk:n { #1 }
+      }
+  }
+%    \end{macrocode}
+
+% \begin{macro}{\pdfmeta_xmp_xmlns_new:nn }
+%    \begin{macrocode}
+\cs_new_protected:Npn \pdfmeta_xmp_xmlns_new:nn #1 #2
+  {
+    \prop_if_in:NnTF \g_@@_xmp_xmlns_prop {#1}
+      {\msg_warning:nnn{pdfmeta}{namespace-defined}{#1}}
+      {\@@_xmp_xmlns_new:nn {#1}{#2}}
+  }
+%    \end{macrocode}
+% \end{macro}
 %    \begin{macrocode}
 %</package>
 %    \end{macrocode}
