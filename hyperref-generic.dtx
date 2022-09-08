@@ -3825,7 +3825,11 @@
 % The keys store their value also in the metadate container, so that hyperxmp can
 % use them. Creator and Producer can't be removed with the pdfmanagement,
 % but we allow to set an empty value.
+% If the value begin with an optional argument, we assume a multilanguage clist and
+% use only the first value.
 %    \begin{macrocode}
+\regex_new:N\l_@@_optlang_regex
+\regex_set:Nn\l_@@_optlang_regex {\A\[([A-Za-z\-]+)\](.*)}
 \cs_new_protected:Npn \@@_setup_info_key:nn #1 #2
   {
     \keys_define:nn { hyp / setup }
@@ -3852,7 +3856,17 @@
                  }
               }
               {
-                \@@_text_pdfstring_info:nN {##1}\l_@@_tmpa_str
+                \tl_set:Nx\l_@@_tmpa_tl {\clist_item:nn{##1}{1}}
+                \exp_args:NNV
+                 \regex_extract_once:NnN \l_@@_optlang_regex \l_@@_tmpa_tl\l_@@_tmpa_seq
+                \seq_if_empty:NTF\l_@@_tmpa_seq
+                 {
+                   \@@_text_pdfstring_info:nN {##1}\l_@@_tmpa_str
+                 }
+                 {
+                   \exp_args:Nx
+                   \@@_text_pdfstring_info:nN {\seq_item:Nn \l_@@_tmpa_seq{3}}\l_@@_tmpa_str
+                 }
                 \str_if_eq:VnF\l_@@_tmpa_str{<FEFF>}
                   {
                     \pdfmanagement_add:nnx {Info}{#2}{\l_@@_tmpa_str}
