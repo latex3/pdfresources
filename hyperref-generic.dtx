@@ -200,6 +200,18 @@
 %  \begin{verbatim}
 %  pdfauthor = {Bär, Peter Anteater, {Riley, the sloth}}
 %  \end{verbatim}
+%
+%  \item It is possible to store titles in more than one language. If the value begins with
+%  an \enquote{optional argument} which represents a language tag, the value is taken
+%  as a comma list and splitted. The first value is used for the Info dictionary,
+%  the others are used in the XMP-metadata. Commas in a title must then be
+%  protected with braces:
+%
+%  \begin{verbatim}
+%  pdftitle = {[en]English Title,[de] Deutscher Titel,[fr]{titre français, avec comma}}
+%  \end{verbatim}
+%
+%
 %  \item All values of relevant keys (including keys from the hyperxmp package)
 %  will be stored in a Metadata container, and can be retrieved with
 %  \cs{GetDocumentProperties}.

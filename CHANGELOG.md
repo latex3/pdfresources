@@ -8,7 +8,8 @@ this project uses date-based 'snapshot' version identifiers.
 ## [Unreleased]
 
 ### Changed
- - XMP-Metadata are uncompress (if supported by the engines).
+ - XMP-Metadata are uncompressed (if supported by the engines).
+ - pdftitle allows to set the titles in various languages.
 
 ## [2022-08-24]
 
