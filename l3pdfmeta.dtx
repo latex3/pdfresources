@@ -395,11 +395,15 @@
 \msg_new:nnn  {pdf }{wrong-pdfversion}
   {PDF~version~#1~is~too~#2~for~standard~'#3'.}
 %    \end{macrocode}
-% \begin{variable}{\l_@@_tmpa_tl,\l_@@_tmpb_tl,\l_@@_tmpa_str}
+% \begin{variable}{\l_@@_tmpa_tl,\l_@@_tmpb_tl,\l_@@_tmpa_str,
+%  \g_@@tmpa_str,\l_@@_tmpa_seq,\l_@@_tmpb_seq}
 %    \begin{macrocode}
-\tl_new:N\l_@@_tmpa_tl
-\tl_new:N\l_@@_tmpb_tl
+\tl_new:N  \l_@@_tmpa_tl
+\tl_new:N  \l_@@_tmpb_tl
 \str_new:N \l_@@_tmpa_str
+\str_new:N \g_@@_tmpa_str
+\seq_new:N \l_@@_tmpa_seq
+\seq_new:N \l_@@_tmpb_seq
 %    \end{macrocode}
 % \end{variable}
 % \subsection{Standards (work in progress)}
