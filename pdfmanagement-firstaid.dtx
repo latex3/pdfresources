@@ -68,7 +68,7 @@
   {LaTeX PDF management testphase bundle / firstaid-patches}
 
 %<@@=pdfmanagement>
-\clist_map_inline:nn {pgf,transparent,hyperxmp,pdflscape,xcolor,color,beamer,output,colorspace,fontspec}
+\clist_map_inline:nn {pgf,transparent,hyperxmp,xmp,pdflscape,xcolor,color,beamer,output,colorspace,fontspec}
   {
     \bool_new:c       { g_@@_firstaid_#1_bool }
     \bool_gset_true:c { g_@@_firstaid_#1_bool }
@@ -84,6 +84,10 @@
               { loading~pdfmanagement~firstaid~code~for~#1 }
 \msg_new:nnn  { pdfmanagement } { firstaid-changed }
               { package~#1~has~changed.~Check~if~patch~is~still~valid! }
+\msg_new:nnn  { pdfmanagement } { firstaid-disabled }
+              { The~loading~of~package~#1~is~disabled.\\
+                It~is~not~compatible~with~the~PDF~management. }
+
 %    \end{macrocode}
 % \subsection{Fontspec}
 % When using luaLaTeX opacity is broken (issue \#30) as
@@ -318,6 +322,26 @@
        file/hyperxmp.sty/after
       }
       {\RequirePackage{hyperxmp-patches-tmp-ltx}}
+ }
+%    \end{macrocode}
+% \subsection{xmp}
+% This handles the new xmp code.
+%    \begin{macrocode}
+\bool_if:NT \g_@@_firstaid_xmp_bool
+ {
+   \disable@package@load{hyperxmp}{\msg_warning:nnn{pdfmanagement}{firstaid-disabled}{hyperxmp}}
+   \disable@package@load{pdfx}    {\msg_warning:nnn{pdfmanagement}{firstaid-disabled}{pdfx}}
+   \AddToHook
+     {
+       file/doclicense.sty/after
+     }
+     {
+       \hypersetup
+         {
+           pdfcopyright  = {\doclicenseLongTextForHyperref},
+           pdflicenseurl = {\doclicenseURL},
+         }
+     }
  }
 %</package>
 %    \end{macrocode}
