@@ -2404,7 +2404,7 @@
      \tl_set:Nx \l_@@_tmpa_tl { \GetDocumentProperties{hyperref/pdfnumpages} }
      \@@_xmp_add_packet_line:nne
       {prism}{pageCount}
-      {\tl_if_blank:VTF \l_@@_tmpa{\PreviousTotalPages}{\l_@@_tmpa_tl}}
+      {\tl_if_blank:VTF \l_@@_tmpa_tl {\PreviousTotalPages}{\l_@@_tmpa_tl}}
 %    \end{macrocode}
 %    \begin{macrocode}
   }
