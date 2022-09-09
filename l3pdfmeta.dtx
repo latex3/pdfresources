@@ -1188,7 +1188,7 @@
   {
    \pdfmanagement_add:nnx {Info}{Producer}{(\c_sys_engine_exec_str-\c_sys_engine_version_str)}
    \pdfmanagement_add:nnx {Info}{Creator}{(LaTeX)}
-  } 
+  }
 %    \end{macrocode}
 % \subsection{New document keys}
 %    \begin{macrocode}
@@ -1618,7 +1618,7 @@
 % The  rdf namespaces
 %    \begin{macrocode}
        \@@_xmp_add_packet_open_attr:nne
-         {rdf}{Description}{rdf:about="" \g_@@_xmp_xmlns_tl}
+         {rdf}{Description}{rdf:about=""~xml:lang="\l_@@_xmp_metalang_tl" \g_@@_xmp_xmlns_tl}
 %    \end{macrocode}
 % The extensions
 %    \begin{macrocode}
@@ -2223,7 +2223,7 @@
     \int_compare:nNnT {0\pdfmeta_standard_item:n{level}}={1}
        { \pdfmanagement_remove:nn{Info}{Keywords} }
 %    \end{macrocode}
-% pdftype/dc:type, commas must be protected so we test first
+% pdftype/dc:type
 %    \begin{macrocode}
     \tl_if_blank:eTF { \GetDocumentProperties{hyperref/pdftype} }
        {
@@ -2234,20 +2234,16 @@
           { { \GetDocumentProperties{hyperref/pdftype} }}
        }
 %    \end{macrocode}
-% pdfpublisher/dc:publisher, commas are protected
+% pdfpublisher/dc:publisher
 %    \begin{macrocode}
-    \@@_xmp_add_packet_list:nnne {dc}{publisher}{Bag}
-        {{ \GetDocumentProperties{hyperref/pdfpublisher} }}
+   \@@_xmp_add_packet_list:nnne {dc}{publisher}{Bag}
+     { \GetDocumentProperties{hyperref/pdfpublisher} }
 %    \end{macrocode}
 % pdfsubject/dc:description
 %    \begin{macrocode}
-   \@@_xmp_add_packet_open:nn {dc}{description}
-     \@@_xmp_add_packet_open:nn {rdf}{Alt}
-       \@@_xmp_add_packet_line_attr:nnee
-         {rdf}{li}{xml:lang="\l_@@_xmp_metalang_tl"}
-         {\GetDocumentProperties{hyperref/pdfsubject}}
-     \@@_xmp_add_packet_close:nn {rdf}{Alt}
-   \@@_xmp_add_packet_close:nn {dc}{description}
+   \@@_xmp_add_packet_list:nnne
+    {dc}{description}{Alt}
+    {\GetDocumentProperties{hyperref/pdfsubject}}
 %    \end{macrocode}
 % lang/pdflang/dc:language
 %    \begin{macrocode}
