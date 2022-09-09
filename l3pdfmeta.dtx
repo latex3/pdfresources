@@ -1184,8 +1184,11 @@
 % \end{variables}
 % Preset the two fields to avoid problems with standards.
 %    \begin{macrocode}
-\pdfmanagement_add:nnx {Info}{Producer}{(\c_sys_engine_exec_str-\c_sys_engine_version_str)}
-\pdfmanagement_add:nnx {Info}{Creator}{(LaTeX)}
+\hook_gput_code:nnn{pdfmanagement/add}{pdfmanagement}
+  {
+   \pdfmanagement_add:nnx {Info}{Producer}{(\c_sys_engine_exec_str-\c_sys_engine_version_str)}
+   \pdfmanagement_add:nnx {Info}{Creator}{(LaTeX)}
+  } 
 %    \end{macrocode}
 % \subsection{New document keys}
 %    \begin{macrocode}
