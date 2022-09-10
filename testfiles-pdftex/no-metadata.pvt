@@ -2,18 +2,11 @@
 %
 \DocumentMetadata
  {
-   pdfstandard=a-2b,
-   pdfstandard=X-4,
-   pdfstandard=ua-1,
-}
+   xmp=false
+ }
 \input{regression-test}
 \documentclass{article}
 \usepackage{hyperref}
-\usepackage[
-type={CC},
-modifier={by-sa},
-version={4.0},
-]{doclicense}
 
 \hypersetup{%
 pdftitle={%
@@ -58,9 +51,5 @@ pdfidentifier={info:lccn/50013519}
 }
 \begin{document}
 
-\ExplSyntaxOn
-\exp_args:Nx\pdfmeta_xmp_add:n {<abc>\iow_newline:</abc>}
-\ShowDocumentProperties
-\ExplSyntaxOff
 blub
 \end{document}
