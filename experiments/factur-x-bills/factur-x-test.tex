@@ -1,0 +1,71 @@
+% !Mode:: "TeX:UTF-8:Main"
+\DocumentMetadata{uncompress,pdfstandard=a-3b}
+\documentclass{article}
+
+\ExplSyntaxOn
+\pdfmeta_xmp_xmlns_new:nn{fx}{urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0\c_hash_str}
+
+\cs_generate_variant:Nn \__pdfmeta_xmp_schema_new:nnn {nne}
+\__pdfmeta_xmp_schema_new:nne
+  {Factur-X~PDFA~Extension~Schema}
+  {fx}
+  {urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0\c_hash_str}
+
+\__pdfmeta_xmp_property_new:nnnnn
+  {fx}
+  {DocumentFileName}
+  {Text}
+  {external}
+  {name~of~the~embedded~XML~invoice~file}
+\__pdfmeta_xmp_property_new:nnnnn
+  {fx}
+  {DocumentType}
+  {Text}
+  {external}
+  {INVOICE}
+\__pdfmeta_xmp_property_new:nnnnn
+  {fx}
+  {Version}
+  {Text}
+  {external}
+  {The~actual~version~of~the~factur-x~schema}
+\__pdfmeta_xmp_property_new:nnnnn
+  {fx}
+  {ConformanceLevel}
+  {Text}
+  {external}
+  {The~conformance~level~of~the~factur-x~data}
+  
+
+\cs_generate_variant:Nn\pdfmeta_xmp_add:n{e}
+\pdfmeta_xmp_add:e
+ {
+  % fix INVOICE
+  <fx:DocumentType>INVOICE</fx:DocumentType>\iow_newline:
+  % fix factur-x.xml
+  <fx:DocumentFileName>factur-x.xml</fx:DocumentFileName>\iow_newline:
+  % fix schema version
+  <fx:Version>1.0</fx:Version>\iow_newline:
+  % variable (zulässige Werte MINIMUM, BASIC WL, BASIC, EN 16931, EXTENDED, XRECHNUNG)
+  <fx:ConformanceLevel>BASIC</fx:ConformanceLevel>\iow_newline:
+  % 
+ }
+
+\group_begin:
+\pdfdict_put:nnn {l_pdffile/Filespec} {AFRelationship}{/Alternative}
+\pdfdict_put:nnn {l_pdffile/Filespec} {Desc}{(Factur-X/ZUGFeRD-Rechnung)}
+\pdffile_embed_file:nnn {rechnung.xml}{factur-x.xml}{zugferd/rechnung} 
+\group_end:
+
+\pdfmanagement_add:nnx
+  {Catalog/Names}
+  {EmbeddedFiles}
+  {\pdf_object_ref:n{zugferd/rechnung}}
+% steht in der docu ist aber pdf 2.0 ....  
+\pdfmanagement_add:nnx{Catalog}{AF}{\pdf_object_ref:n{zugferd/rechnung}}  
+\ExplSyntaxOff
+
+\begin{document}
+eine Rechnung
+
+\end{document}
