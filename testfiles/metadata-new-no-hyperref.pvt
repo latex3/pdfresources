@@ -1,0 +1,15 @@
+\DocumentMetadata{uncompress,pdfstandard=a-2b}
+\input{regression-test}
+\documentclass{article}
+\AddToDocumentProperties[hyperref]{pdfauthor}{Ulrike Fischer}
+\AddToDocumentProperties[hyperref]{pdftitle}{κάτι στα ελληνικά}
+\ExplSyntaxOn
+\pdf_string_from_unicode:nnN {utf16/hex}{κάτι~στα~ελληνικά}\l_tmpa_tl
+\pdfmanagement_add:nnx{Info}{Title}{\l_tmpa_tl}
+\pdf_string_from_unicode:nnN {utf16/hex}{Ulrike~Fischer}\l_tmpa_tl
+\pdfmanagement_add:nnx{Info}{Author}{\l_tmpa_tl}
+\ExplSyntaxOff
+\begin{document}
+abc
+abc
+\end{document} 
