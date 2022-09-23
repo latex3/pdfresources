@@ -23,10 +23,9 @@
 % for those people who are interested.
 %
 %<*driver>
-\RequirePackage{pdfmanagement-testphase}
 \DocumentMetadata{pdfstandard=A-2b}
 \documentclass[full]{l3doc}
-\usepackage{array,booktabs,hyperxmp}
+\usepackage{array,booktabs}
 \hypersetup{pdfauthor=The LaTeX Project,pdftitle=l3pdfmeta (LaTeX PDF management testphase bundle)}
 
 \begin{document}
@@ -2345,7 +2344,9 @@
 % We want the block and also the resources only if they are actually used. So we pack
 % them first in a local variable
 % \begin{variable}{\l_@@_xmp_iptc_data_tl}
+%    \begin{macrocode}
 \tl_new:N\l_@@_xmp_iptc_data_tl
+%    \end{macrocode}
 % \end{variable}
 % \begin{macro}{\@@_xmp_build_iptc_data:N}
 %    \begin{macrocode}
