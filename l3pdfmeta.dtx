@@ -371,7 +371,8 @@
 % regression tests.
 % It also sets the seed for random functions.
 % \end{function}
-%% \section{XMP-metadata}
+%
+%  \section{XMP-metadata}
 % XMP-metadata are data in XML format embedded in a stream
 % inside the PDF and referenced from the |/Catalog|.
 % Such a XMP-metadata stream contains various document related data,
@@ -394,7 +395,7 @@
 % (which uses \pkg{xmpincl})
 % can be used, but all these packages are not compatible with the
 % pdfmanagement\footnote{\pkg{hyperxmp} was partly compatible as the pdfmanagement
-% contained some patches for it.}
+% contained some patches for it, but these patches have now been removed.}.
 % The following code is meant as replacement for these packages.
 %
 % \pkg{hyperxmp} uses |\hypersetup| as user interface to enter the XMP-metadata.
@@ -404,8 +405,7 @@
 % But XMP-metadata shouldn't require to use \pkg{hyperref} and in a future
 % version an interface without \pkg{hyperref} will be added.
 %
-% TODO
-% There is currently no user interface command to extend the XMP-metadata
+% There is currently no full user interface command to extend the XMP-metadata
 % with for example the code needed for ZUGferd,
 % they will be added in a second step.
 %
@@ -423,20 +423,21 @@
 % |\376\377\000h\000a\000l\000l\000o| and then back to UTF-8 by
 % \pkg{hyperxmp} and in the course of this action
 % the XML-escapings are applied.
-%
 % \pkg{pdfx} uses |\pdfstringdef| together with
 % a special fontencoding (similar to the PU-encoding of \pkg{hyperref})
 % for a similar aim.
-%
 % The code here is based on |\text_purify:n| followed by a few replacements for the
-% escaping. User data should normally be declared in the preamble (or even in the
+% escaping.
+%
+% User data should normally be declared in the preamble (or even in the
 % |\DocumentMetadata| command), and consist of rather simple text; |&| can be entered
 % as |\&| (but directly |&| will normally work too),
 % babel shorthands should not be used. Some datas are interpreted as comma lists,
 % in this cases commas which are part of the text should be protected by braces.
 % In some cases a text in brackets like |[en]| is interpreted as language tag,
 % if they are part of a text they should be protected by braces too.
-% XMP-metadata are stored uncompressed in the PDF so if in doubt if a value has
+% XMP-metadata are stored uncompressed in the PDF so if you are unsure
+% if a value has
 % been passed correctly, open the PDF in an editor, copy the whole block and
 % pass it to a validator, e.g. \url{https://www.w3.org/RDF/Validator/}.
 %
@@ -451,7 +452,7 @@
 % |pdfstandard=A-2b,pdfstandard=X-4,pdfstandard=UA-1|.
 % \\ Note that using these
 % keys doesn't mean that the document actually follows the standard. \LaTeX{}
-% can neither ensure nor check all requirements of standard, and not everything
+% can neither ensure nor check all requirements of a standard, and not everything
 % it can do theoretically has already been implemented.
 % When setting an |A| standard, the code will e.g. insert a color profile and
 % warn if the PDF version doesn't fit, but |X| and |UA| currently only
@@ -474,7 +475,7 @@
 % \end{verbatim}
 %
 % The format should be a full date/time in PDF format, so one of these (naturally
-% the numbers can change:
+% the numbers can change):
 % \begin{verbatim}
 %  D:20010101205959-00'00'
 %  D:20010101205959+00'00'
@@ -1173,7 +1174,7 @@
    { \__pdf_backend_set_regression_data: }
 %    \end{macrocode}
 %
-% \section{XMP-Metadata}
+% \section{XMP-Metadata implementation}
 
 % \begin{variable}{\g_@@_xmp_bool}
 % This boolean decides if the metadata are included
@@ -1181,7 +1182,7 @@
 \bool_new:N\g_@@_xmp_bool
 \bool_gset_true:N \g_@@_xmp_bool
 %    \end{macrocode}
-% \end{variables}
+% \end{variable}
 % Preset the two fields to avoid problems with standards.
 %    \begin{macrocode}
 \hook_gput_code:nnn{pdfmanagement/add}{pdfmanagement}
@@ -1417,8 +1418,10 @@
 % The language of the metadata is used in various attributes, so we store it in
 % command.
 % \begin{variable}{\l_@@_xmp_doclang_tl,\l_@@_xmp_metalang_tl}
+%    \begin{macrocode}
 \tl_new:N \l_@@_xmp_doclang_tl
 \tl_new:N \l_@@_xmp_metalang_tl
+%    \end{macrocode}
 % \end{variable}
 %
 % The language is retrieved at the start of the packet. We assume that
@@ -2134,6 +2137,7 @@
    \@@_xmp_add_packet_line:nne{photoshop}{CaptionWriter}
      { \GetDocumentProperties{hyperref/pdfcaptionwriter} }
 %    \end{macrocode}
+%    \begin{macrocode}
   }
 %    \end{macrocode}
 % \end{macro}
@@ -2335,7 +2339,7 @@
 %  {
 %   complianceProfile,
 %   prism:subtitle/pdfsubtitle,
-%
+%  }
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_xmp_build_prism:
   {
@@ -2409,12 +2413,15 @@
   }
 %    \end{macrocode}
 % \end{macro}
+% \end{macro}
 %
 % \subsubsection{User additions}
 %
 % \begin{variable}{\g_@@_xmp_user_packet_str }
+%    \begin{macrocode}
 \tl_new:N \g_@@_xmp_user_packet_tl
-% \end{macro}
+%    \end{macrocode}
+% \end{variable}
 % \begin{macro}{\@@_xmp_build_user: }
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_xmp_build_user:
@@ -2455,7 +2462,7 @@
       }
   }
 %    \end{macrocode}
-
+% \end{macro}
 % \begin{macro}{\pdfmeta_xmp_xmlns_new:nn }
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdfmeta_xmp_xmlns_new:nn #1 #2
