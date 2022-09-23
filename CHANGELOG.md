@@ -7,6 +7,10 @@ this project uses date-based 'snapshot' version identifiers.
 
 ## [Unreleased]
 
+### Added
+ - XMP-Metadata are now created by the code. hyperxmp is no longer used and
+   compatible. More details in l3pdfmeta.
+   
 ### Changed
  - XMP-Metadata are uncompressed (if supported by the engines).
  - pdftitle allows to set the titles in various languages.
