@@ -1645,8 +1645,8 @@
 % we preprocess a number of data to be able to suppress them and their schema
 % if there are unused. Currently only done for iptc
 %    \begin{macrocode}
-   \@@_xmp_build_iptc_data:N \@@_xmp_iptc_data_tl
-   \tl_if_empty:NT \@@_xmp_iptc_data_tl
+   \@@_xmp_build_iptc_data:N \l_@@_xmp_iptc_data_tl
+   \tl_if_empty:NT \l_@@_xmp_iptc_data_tl
      {
        \seq_remove_all:Nn \l_@@_xmp_schema_seq { Iptc4xmpCore }
      }
@@ -2344,14 +2344,14 @@
 % \subsection{IPTC}
 % We want the block and also the resources only if they are actually used. So we pack
 % them first in a local variable
-% \begin{variable}{\@@_xmp_iptc_data_tl}
-\tl_new:N\@@_xmp_iptc_data_tl
+% \begin{variable}{\l_@@_xmp_iptc_data_tl}
+\tl_new:N\l_@@_xmp_iptc_data_tl
 % \end{variable}
 % \begin{macro}{\@@_xmp_build_iptc_data:N}
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_xmp_build_iptc_data:N #1
   {
-     \tl_clear:N \@@_xmp_iptc_data_tl
+     \tl_clear:N #1
      \@@_xmp_incr_indent:\@@_xmp_incr_indent:\@@_xmp_incr_indent:\@@_xmp_incr_indent:
      \@@_xmp_add_packet_line:nneN
        {Iptc4xmpCore}{CiAdrExtadr}
@@ -2389,11 +2389,11 @@
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_xmp_build_iptc:
   {
-    \tl_if_empty:NF\@@_xmp_iptc_data_tl
+    \tl_if_empty:NF\l_@@_xmp_iptc_data_tl
      {
        \@@_xmp_add_packet_open_attr:nnn
         {Iptc4xmpCore}{CreatorContactInfo}{rdf:parseType="Resource"}
-       \tl_gput_right:Nx\g_@@_xmp_packet_tl { \@@_xmp_iptc_data_tl }
+       \tl_gput_right:Nx\g_@@_xmp_packet_tl { \l_@@_xmp_iptc_data_tl }
        \@@_xmp_add_packet_close:nn
         {Iptc4xmpCore}{CreatorContactInfo}
     }
