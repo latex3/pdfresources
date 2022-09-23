@@ -1479,6 +1479,21 @@
 %    \end{macrocode}
 % \end{macro}
 
+% \begin{macro}{\@@_xmp_add_packet_chunk:nN}
+% This is the most basic command.
+% It is meant to produce a line and will use the current indent.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_xmp_add_packet_chunk:nN #1 #2
+  {
+    \tl_put_right:Nx#2
+      {
+        \@@_xmp_indent:  \exp_not:n{#1}
+      }
+  }
+\cs_generate_variant:Nn \@@_xmp_add_packet_chunk:nN {eN}
+%    \end{macrocode}
+% \end{macro}
+
 % \begin{macro}{\@@_xmp_add_packet_open:nn}
 % This commands opens a xml structure and increases the indent.
 %    \begin{macrocode}
@@ -1530,6 +1545,24 @@
      }
   }
 \cs_generate_variant:Nn \@@_xmp_add_packet_line:nnn {nne,nnV,nee}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\@@_xmp_add_packet_line:nnnN}
+%   This will produce a full line with open and closing xml and store it in
+%   the given tl-var. This allows to prebuild blocks and then to test if there are empty.
+%   The content is sanitized. We test if there is content to be
+%   able to suppress data which has not be set.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_xmp_add_packet_line:nnnN #1 #2 #3 #4
+ %#1 prefix #2 name #3 content #4 tl_var to prebuilt.
+  {
+    \tl_if_blank:nF {#3}
+     {
+      \@@_xmp_sanitize:nN {#3}\l_@@_tmpa_str
+      \@@_xmp_add_packet_chunk:eN {<#1:#2>\l_@@_tmpa_str</#1:#2>} #4
+     }
+  }
+\cs_generate_variant:Nn \@@_xmp_add_packet_line:nnnN {nneN}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\@@_xmp_add_packet_line_attr:nnnn}
@@ -1608,6 +1641,15 @@
    \tl_set:Nx \l_@@_xmp_metalang_tl {\GetDocumentProperties{hyperref/pdfmetalang}}
    \tl_if_blank:VT \l_@@_xmp_metalang_tl
     { \cs_set_eq:NN \l_@@_xmp_metalang_tl\l_@@_xmp_doclang_tl}
+%    \end{macrocode}
+% we preprocess a number of data to be able to suppress them and their schema
+% if there are unused. Currently only done for iptc
+%    \begin{macrocode}
+   \@@_xmp_build_iptc_data:N \@@_xmp_iptc_data_tl
+   \tl_if_empty:NT \@@_xmp_iptc_data_tl
+     {
+       \seq_remove_all:Nn \l_@@_xmp_schema_seq { Iptc4xmpCore }
+     }
 %    \end{macrocode}
 % The start of the package.
 % No need to try to juggle with catcode, this is fix text
@@ -2300,35 +2342,61 @@
 % \end{macro}
 %
 % \subsection{IPTC}
+% We want the block and also the resources only if they are actually used. So we pack
+% them first in a local variable
+% \begin{variable}{\@@_xmp_iptc_data_tl}
+\tl_new:N\@@_xmp_iptc_data_tl
+% \end{variable}
+% \begin{macro}{\@@_xmp_build_iptc_data:N}
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_xmp_build_iptc_data:N #1
+  {
+     \tl_clear:N \@@_xmp_iptc_data_tl
+     \@@_xmp_incr_indent:\@@_xmp_incr_indent:\@@_xmp_incr_indent:\@@_xmp_incr_indent:
+     \@@_xmp_add_packet_line:nneN
+       {Iptc4xmpCore}{CiAdrExtadr}
+       {\GetDocumentProperties{hyperref/pdfcontactaddress}}
+       #1
+     \@@_xmp_add_packet_line:nneN
+       {Iptc4xmpCore}{CiAdrCity}
+       {\GetDocumentProperties{hyperref/pdfcontactcity}}
+       #1
+     \@@_xmp_add_packet_line:nneN
+       {Iptc4xmpCore}{CiAdrPcode}
+       {\GetDocumentProperties{hyperref/pdfcontactpostcode}}
+       #1
+     \@@_xmp_add_packet_line:nneN
+       {Iptc4xmpCore}{CiAdrCtry}
+       {\GetDocumentProperties{hyperref/pdfcontactcountry}}
+       #1
+     \@@_xmp_add_packet_line:nneN
+       {Iptc4xmpCore}{CiTelWork}
+       {\GetDocumentProperties{hyperref/pdfcontactphone}}
+       #1
+     \@@_xmp_add_packet_line:nneN
+       {Iptc4xmpCore}{CiEmailWork}
+       {\GetDocumentProperties{hyperref/pdfcontactemail}}
+       #1
+     \@@_xmp_add_packet_line:nneN
+       {Iptc4xmpCore}{CiUrlWork}
+       {\GetDocumentProperties{hyperref/pdfcontacturl}}
+       #1
+     \@@_xmp_decr_indent:\@@_xmp_decr_indent:\@@_xmp_decr_indent:\@@_xmp_decr_indent:
+  }
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\@@_xmp_build_iptc:}
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_xmp_build_iptc:
   {
-    \@@_xmp_add_packet_open_attr:nnn
-     {Iptc4xmpCore}{CreatorContactInfo}{rdf:parseType="Resource"}
-     \@@_xmp_add_packet_line:nne
-       {Iptc4xmpCore}{CiAdrExtadr}
-       {\GetDocumentProperties{hyperref/pdfcontactaddress}}
-     \@@_xmp_add_packet_line:nne
-        {Iptc4xmpCore}{CiAdrCity}
-        {\GetDocumentProperties{hyperref/pdfcontactcity}}
-     \@@_xmp_add_packet_line:nne
-        {Iptc4xmpCore}{CiAdrPcode}
-        {\GetDocumentProperties{hyperref/pdfcontactpostcode}}
-     \@@_xmp_add_packet_line:nne
-        {Iptc4xmpCore}{CiAdrCtry}
-        {\GetDocumentProperties{hyperref/pdfcontactcountry}}
-     \@@_xmp_add_packet_line:nne
-        {Iptc4xmpCore}{CiTelWork}
-        {\GetDocumentProperties{hyperref/pdfcontactphone}}
-     \@@_xmp_add_packet_line:nne
-        {Iptc4xmpCore}{CiEmailWork}
-        {\GetDocumentProperties{hyperref/pdfcontactemail}}
-     \@@_xmp_add_packet_line:nne
-        {Iptc4xmpCore}{CiUrlWork}
-        {\GetDocumentProperties{hyperref/pdfcontacturl}}
-     \@@_xmp_add_packet_close:nn
-     {Iptc4xmpCore}{CreatorContactInfo}
+    \tl_if_empty:NF\@@_xmp_iptc_data_tl
+     {
+       \@@_xmp_add_packet_open_attr:nnn
+        {Iptc4xmpCore}{CreatorContactInfo}{rdf:parseType="Resource"}
+       \tl_gput_right:Nx\g_@@_xmp_packet_tl { \@@_xmp_iptc_data_tl }
+       \@@_xmp_add_packet_close:nn
+        {Iptc4xmpCore}{CreatorContactInfo}
+    }
   }
 %    \end{macrocode}
 % \end{macro}
