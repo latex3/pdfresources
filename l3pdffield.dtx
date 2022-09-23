@@ -23,7 +23,6 @@
 % for those people who are interested.
 %
 %<*driver>
-\RequirePackage{pdfmanagement-testphase}
 \DocumentMetadata{}
 \documentclass{l3doc}
 \usepackage{array,booktabs,caption}
@@ -1168,7 +1167,7 @@
 \cs_new_protected:Npn \@@_field:n #1
   {
     \pdf_object_new:n {@@/field/#1}
-    \pdf_object_new:n {@@/field/Kids/#1} 
+    \pdf_object_new:n {@@/field/Kids/#1}
     \tl_if_empty:NTF \l_@@_currentparent_tl
       {
         \pdfmanagement_add:nnx

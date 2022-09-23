@@ -23,10 +23,9 @@
 % for those people who are interested.
 %
 %<*driver>
-\RequirePackage{pdfmanagement-testphase}
 \DocumentMetadata{pdfstandard=A-2b}
 \documentclass[full]{l3doc}
-\usepackage{array,booktabs,hyperxmp}
+\usepackage{array,booktabs}
 \hypersetup{pdfauthor=The LaTeX Project,pdftitle=ltdocinit (LaTeX PDF management testphase bundle)}
 
 \begin{document}
@@ -130,6 +129,9 @@
 %
 %    \item[\texttt{colorprofiles}] This allows to load icc-colorprofiles. Details
 %       are described in the documentation of \pkg{l3pdfmeta}.
+%
+%    \item[\texttt{xmp}] A boolean, if set to false no XMP metadata are added to the PDF.
+%    The default is true. Details are described in the documentation of \pkg{l3pdfmeta}.
 %
 %    \item[\texttt{testphase}] This key is used to load testphase code. The values it accepts
 %    and their effect will change over time, when testphase packages are added or

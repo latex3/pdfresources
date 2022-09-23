@@ -23,11 +23,10 @@
 % for those people who are interested.
 %
 %<*driver>
-\RequirePackage{pdfmanagement-testphase}
 \DocumentMetadata{pdfstandard=A-2b}
 \documentclass[full]{l3doc}
 \usepackage{tabularx}
-\usepackage{array,booktabs,hyperxmp}
+\usepackage{array,booktabs}
 \hypersetup{pdfauthor=The LaTeX Project,pdftitle=l3pdfmanagement (LaTeX PDF management testphase bundle)}
 
 \providecommand\potentialclash{\noindent\llap{\dbend\ }}
@@ -1522,7 +1521,7 @@
     \prop_if_empty:cF
      { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/ViewerPreferences } }
      {
-       \pdf_object_new:n  { @@/Catalog/ViewerPreferences } 
+       \pdf_object_new:n  { @@/Catalog/ViewerPreferences }
        \pdf_object_write:nnx
             { @@/Catalog/ViewerPreferences } { dict }
             { \pdfdict_use:n { g__pdf_Core/Catalog/ViewerPreferences } }
