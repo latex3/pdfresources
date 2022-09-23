@@ -35,7 +35,7 @@
   {Text}
   {external}
   {The~conformance~level~of~the~factur-x~data}
-  
+
 
 \cs_generate_variant:Nn\pdfmeta_xmp_add:n{e}
 \pdfmeta_xmp_add:e
@@ -48,24 +48,24 @@
   <fx:Version>1.0</fx:Version>\iow_newline:
   % variable (zulässige Werte MINIMUM, BASIC WL, BASIC, EN 16931, EXTENDED, XRECHNUNG)
   <fx:ConformanceLevel>BASIC</fx:ConformanceLevel>\iow_newline:
-  % 
+  %
  }
 
 \group_begin:
-\pdfdict_put:nnn {l_pdffile/Filespec} {AFRelationship}{/Alternative}
+\pdfdict_put:nnn {l_pdffile/Filespec} {AFRelationship}{/Alternative} %or /Source in some cases
 \pdfdict_put:nnn {l_pdffile/Filespec} {Desc}{(Factur-X/ZUGFeRD-Rechnung)}
-\pdffile_embed_file:nnn {rechnung.xml}{factur-x.xml}{zugferd/rechnung} 
+\pdffile_embed_file:nnn {rechnung.xml}{factur-x.xml}{zugferd/rechnung}
 \group_end:
 
 \pdfmanagement_add:nnx
   {Catalog/Names}
   {EmbeddedFiles}
   {\pdf_object_ref:n{zugferd/rechnung}}
-% steht in der docu ist aber pdf 2.0 ....  
-\pdfmanagement_add:nnx{Catalog}{AF}{\pdf_object_ref:n{zugferd/rechnung}}  
+% steht in der docu ist aber pdf 2.0 ....
+\pdfmanagement_add:nnx{Catalog}{AF}{\pdf_object_ref:n{zugferd/rechnung}}
 \ExplSyntaxOff
 
 \begin{document}
 eine Rechnung
 
-\end{document}
+\end{document} 
