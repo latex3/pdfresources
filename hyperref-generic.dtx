@@ -165,8 +165,9 @@
 %
 %  \enquote{Metadata}, informations about the document, are stored in a PDF in two
 %  places: The |/Info| dictionary and the XMP-metadata. \pkg{hyperref} only handles the
-%  |/Info| dictionary. The XMP-metadata can be added with like \pkg{pdfx} and
-%  \pkg{hyperxmp}.
+%  |/Info| dictionary. The XMP-metadata  are added by code from \pkg{l3pdfmeta}.
+%  (without the pdfmanagement the XMP-metadata can be added with packages like \pkg{pdfx} and
+%  \pkg{hyperxmp}).
 %
 %  The |/Info| dictionary can be filled with arbitrary keys, but the PDF viewer typically
 %  care only about a few, like |/Author|, |/Title| and |/Keywords|.
@@ -233,9 +234,6 @@
 %  \pkg{hyperref} has a few keys to set dates. They typically expect the date
 %  in \enquote{PDF} format: |D:YYYYMMDDhhmmss+01'00'|.
 %
-%  One should be aware that \pkg{hyperxmp} will sometimes
-%  overwrites such settings.
-%  ^^A XMP: yyyy-mm-ddThh:mm:ss+tt:tt, PDF: D:YYYYMMDDhhmmss+01'00'
 %
 %  \section{PDF page size (mediabox)}
 %  The standard \pkg{hyperref} driver contain code to set the PDF page size.
@@ -3833,7 +3831,7 @@
 %
 % \subsubsection{\enquote{info keys}}
 % \begin{hypkey}{pdfauthor,pdftitle,pdfcreator,pdfsubject,pdfproducer,pdfkeywords}
-% The keys store their value also in the metadate container, so that hyperxmp can
+% The keys store their value also in the metadata container, so that hyperxmp can
 % use them. Creator and Producer can't be removed with the pdfmanagement,
 % but we allow to set an empty value.
 % If the value begin with an optional argument, we assume a multilanguage clist and
@@ -4024,7 +4022,7 @@
 %
 % \subsection{hyperxmp keys}
 % hyperxmp defines lots of keys for \cs{hypersetup}.
-% They now longer work with this driver. So we provide them,
+% They now longer work with this driver. So we provide most of them,
 % but they are only stored as metadata:
 %    \begin{macrocode}
 \clist_map_inline:nn

@@ -325,20 +325,21 @@
 % see the documentation of \pkg{l3pdfmeta}.
 %
 % \subsection{hyperxmp}
-% \pkg{hyperxmp} uses \cs{pdfcatalog} to insert the \texttt{/MetaData} reference. This
-% makes it incompatible, but adjusting this is even possible with external
-% patches. \pkg{hyperxmp} also relies on some \pkg{hyperref} internals, so
-% changes in \pkg{hyperref} must be coordinated.
+% \pkg{hyperxmp} uses \cs{pdfcatalog} to insert the \texttt{/MetaData} reference
+% and also relies on some \pkg{hyperref} internals which are not present in the new
+% generic driver used by \pkg{hyperref} when the pdfmanagement is active.
+% This makes \pkg{hyperxmp} incompatible.
 %
-% Some patch code is provided by the bundle and loaded automatically,
-% but it is not complete currently. Failures are e.g. possible with complicated
-% author or title settings. The handling of dates isn't correct either yet.
-% The patch code can be disabled by using |debug={firstaidoff=hyperxmp}| in \cs{DocumentMetadata}
+% For some time some patch code was provided by the bundle to keep \pkg{hyperxmp}
+% working but starting with version  0.95s XMP-metadata are handled directly
+% by the \pkg{pdfmanagement-testphase} bundle (see the documentation of \pkg{l3pdfmeta})
+% and the patch code has been removed and the loading of
+% \pkg{hyperxmp} has been disabled.
 %
 % \subsection{tikz/pgf}
 % \pkg{pgf} writes to the page resources too and so is incompatible. The needed
 % changes are rather small and will be done in coordination with the maintainer.
-% Until this works, \pkg{pagemanagement} will load the patches automatically.
+% Until this works, \pkg{pdfmanagement-testphase} will load the patches automatically.
 % This can be disabled by using |debug={firstaidoff=pgf}| in \cs{DocumentMetadata}
 %
 % \subsection{transparent}
@@ -355,7 +356,7 @@
 % The package is incompatible. Some patches
 % have been added to \pkg{pdfmanagement-firstaid}.
 % Alternative code for spot colors is
-% in the \pkg{l3color} package which has now been add to \pkg{l3kernel}.
+% in the \pkg{l3color} package which has now been added to \pkg{l3kernel}.
 %
 % \subsection{embedfile, attachfile, attachfile2}
 % Tools needed to be able to write a replacement

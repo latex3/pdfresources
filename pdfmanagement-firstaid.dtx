@@ -63,11 +63,11 @@
 % |debug={firstaidoff={name1,name2,...},...}|.
 %    \begin{macrocode}
 %<*package>
-\ProvidesExplPackage{pdfmanagement-firstaid}{2022-09-23}{0.95s}
+\ProvidesExplPackage{pdfmanagement-firstaid}{2022-09-26}{0.95s}
   {LaTeX PDF management testphase bundle / firstaid-patches}
 
 %<@@=pdfmanagement>
-\clist_map_inline:nn {pgf,transparent,hyperxmp,xmp,pdflscape,xcolor,color,beamer,output,colorspace,fontspec}
+\clist_map_inline:nn {pgf,transparent,xmp,pdflscape,xcolor,color,beamer,output,colorspace,fontspec}
   {
     \bool_new:c       { g_@@_firstaid_#1_bool }
     \bool_gset_true:c { g_@@_firstaid_#1_bool }
@@ -311,18 +311,7 @@
    \declare@file@substitution{pdflscape.sty}{pdflscape-ltx.sty}
  }
 %    \end{macrocode}
-% \subsection{hyperxmp}
-% We add some code at the end of hyperxmp.sty.
-%    \begin{macrocode}
-\bool_if:NT \g_@@_firstaid_hyperxmp_bool
- {
-    \AddToHook
-      {
-       file/hyperxmp.sty/after
-      }
-      {\RequirePackage{hyperxmp-patches-tmp-ltx}}
- }
-%    \end{macrocode}
+%
 % \subsection{xmp}
 % This handles the new xmp code.
 %    \begin{macrocode}
