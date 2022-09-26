@@ -5,12 +5,15 @@ first release 0.95a, 2021-02-23 will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 this project uses date-based 'snapshot' version identifiers.
 
-## [2022-09-23]
+## [2022-09-26]
 
 ### Added
- - XMP-Metadata are now created by the code. hyperxmp is no longer used and
-   compatible. More details in l3pdfmeta.
-   
+ - XMP-Metadata are now created by code in l3pdfmeta. 
+   More details can be found in l3pdfmeta. 
+ 
+### Removed 
+ -  The patch which allowed the use of hyperxmp has been removed as no longer needed. 
+ 
 ### Changed
  - XMP-Metadata are uncompressed (if supported by the engines).
  - pdftitle allows to set the titles in various languages.
