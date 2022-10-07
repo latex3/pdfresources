@@ -3,10 +3,10 @@
 \DocumentMetadata {  }
 \input{regression-test}
 \documentclass{article}
+\stockheight   = 297mm
+\stockwidth    = 210mm
 \usepackage{zref-user}
-\ExplSyntaxOn
-\pdf_uncompress:
-\ExplSyntaxOff
+
 \makeatletter
 \def\myrotate#1{\ifodd\zref@extractdefault{#1}{page}{0} -90\else 90 \fi}
 \makeatother
