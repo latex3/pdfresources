@@ -2,10 +2,11 @@
 % ok for pdftex and luatex. Perhaps some changes to avoid a two pass are possible/needed
 % fails with xetex because of the missing \pdf_link_last:
 \PassOptionsToPackage{enable-debug,check-declarations}{expl3}
-\RequirePackage{pdfmanagement-testphase}
 \DocumentMetadata {  }
 \input{regression-test}
 \documentclass{article}
+\stockheight   = 297mm
+\stockwidth    = 210mm
 \usepackage{hyperref}
 \begin{document}
 \begin{Form}
