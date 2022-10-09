@@ -1598,6 +1598,26 @@
 %    \end{macrocode}
 % \end{macro}
 % Some data are stored as unordered (Bag) or ordered lists (Seq) or (Alt).
+% The first variant are for simple text without language support:
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_xmp_add_packet_list_simple:nnnn #1 #2 #3 #4
+  %#1 prefix, #2 name,  #3 type (Seq/Bag/Alt) #4 a clist
+  {
+    \clist_if_empty:nF { #4 }
+      {
+        \@@_xmp_add_packet_open:nn {#1}{#2}
+         \@@_xmp_add_packet_open:nn {rdf}{#3}
+          \clist_map_inline:nn {#4}
+            {
+              \@@_xmp_add_packet_line:nnn
+               {rdf}{li}{##1}
+            }
+         \@@_xmp_add_packet_close:nn{rdf}{#3}
+        \@@_xmp_add_packet_close:nn {#1}{#2}
+     }
+   }
+\cs_generate_variant:Nn \@@_xmp_add_packet_list_simple:nnnn {nnnV,nnne}
+%    \end{macrocode}
 % Here we check also for the language.
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_xmp_add_packet_list:nnnn #1 #2 #3 #4
@@ -2270,14 +2290,13 @@
 %    \end{macrocode}
 % pdftype/dc:type
 %    \begin{macrocode}
-    \tl_if_blank:eTF { \GetDocumentProperties{hyperref/pdftype} }
-       {
-         \@@_xmp_add_packet_list:nnne {dc}{type}{Bag}{Text}
-       }
-       {
-        \@@_xmp_add_packet_list:nnne {dc}{type}{Bag}
-          { { \GetDocumentProperties{hyperref/pdftype} }}
-       }
+  \pdfmanagement_get_documentproperties:nNTF { hyperref/pdftype } \l_@@_tmpa_tl
+    {
+      \@@_xmp_add_packet_list_simple:nnnV {dc}{type}{Bag}\l_@@_tmpa_tl
+    }
+    {
+      \@@_xmp_add_packet_list_simple:nnnn {dc}{type}{Bag}{Text}
+    }
 %    \end{macrocode}
 % pdfpublisher/dc:publisher
 %    \begin{macrocode}
@@ -2292,8 +2311,8 @@
 %    \end{macrocode}
 % lang/pdflang/dc:language
 %    \begin{macrocode}
-   \@@_xmp_add_packet_list:nnne {dc}{language}{Bag}
-     { \l_@@_xmp_doclang_tl }
+   \@@_xmp_add_packet_list_simple:nnnV
+     {dc}{language}{Bag}\l_@@_xmp_doclang_tl
 %    \end{macrocode}
 % pdfidentifier/dc:identifier
 %    \begin{macrocode}
@@ -2303,8 +2322,8 @@
 % pdfdate/dc:date
 %    \begin{macrocode}
    \@@_xmp_date_get:nNN {hyperref/pdfdate}\l_@@_tmpa_tl\l_@@_tmpa_seq
-    \@@_xmp_add_packet_list:nnne {dc}{date}{Seq}
-          {\@@_xmp_print_date:N\l_@@_tmpa_seq}
+    \@@_xmp_add_packet_list_simple:nnne
+     {dc}{date}{Seq}{\@@_xmp_print_date:N\l_@@_tmpa_seq}
 %    \end{macrocode}
 % The file format
 %    \begin{macrocode}
