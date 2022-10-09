@@ -195,9 +195,10 @@
 % using the container. The label |document| is reserved.
 % \end{function}
 %
-% \begin{function}{\GetDocumentProperties}
+% \begin{function}[updated=2022-10-09]{\GetDocumentProperties,\pdfmanagement_get_documentproperties:n}
 % \begin{syntax}
-%  \cs{GetDocumentProperties}\Arg{label/property}
+%  \cs{GetDocumentProperties}\Arg{label/property}\\
+%  \cs{pdfmanagement_get_documentproperties:n}\Arg{label/property}
 % \end{syntax}
 % Expands to the \meta{value} corresponding to \meta{label/property}
 % in the container. If \meta{label/property} is missing,
@@ -207,6 +208,22 @@
 % when appearing in an x-type argument expansion.
 % \end{function}
 %
+% \begin{function}[added=2022-10-09,TF]{\pdfmanagement_get_documentproperties:nN}
+% \begin{syntax}
+%  \cs{pdfmanagement_get_documentproperties:nNTF}\Arg{label/property} \meta{token list variable}\\
+%  ~~~~ \Arg{true code} \Arg{false code}
+% \end{syntax}
+%   If the \meta{label/property} is not present in the document properties
+%   container, leaves the \meta{false code} in the input stream.
+%   The value of the
+%   \meta{token list variable} is not defined in this case and should
+%   not be relied upon.  If the \meta{label/property} is present in the
+%   container, stores the corresponding \meta{value} in the
+%   \meta{token list variable} without removing it from the
+%   container, then leaves the \meta{true code} in the input
+%   stream.  The \meta{token list variable} is assigned locally.
+% \end{function}
+% 
 % \begin{function}{\ShowDocumentProperties}
 % \begin{syntax}
 %  \cs{ShowDocumentProperties}
@@ -526,6 +543,33 @@
   {
     \prop_item:Nn \g_@@_documentproperties_prop {#1}
   }
+%    \end{macrocode}
+% \end{macro}
+% For uses in modules (e.g. l3pdfmeta)
+% we provide an expl3 version without the xparse overhead:
+%
+% \begin{macro}[EXP]{\pdfmanagement_get_documentproperties:n}
+%    \begin{macrocode}
+\cs_new:Npn\pdfmanagement_get_documentproperties:n #1
+  {
+    \prop_item:Nn \g_@@_documentproperties_prop {#1}
+  }
+%    \end{macrocode}
+% \end{macro}
+% The following allows to retrieve the values with branching.
+% \begin{macro}[added=2022-10-09]{\pdfmanagement_get_documentproperties:nNTF}
+%    \begin{macrocode}
+\prg_new_protected_conditional:Npnn
+  \pdfmanagement_get_documentproperties:nN #1#2 { T , F , TF }
+    {
+     \prop_get:NnNTF \g_@@_documentproperties_prop  {#1} #2
+       {
+        \prg_return_true:
+       }
+       {
+        \prg_return_false:
+       }
+    }
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ShowDocumentProperties}
