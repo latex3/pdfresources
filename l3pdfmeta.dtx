@@ -387,6 +387,22 @@
 % with for example the code needed for ZUGferd,
 % they will be added in a second step.
 %
+% \subsection{Debug option}
+%
+% The resulting XMP-packet can be written to an external file by activating a debug
+% option
+%
+% \begin{verbatim}
+% \DocumentMetadata{debug={xmp-export}}
+% %or
+% \DocumentMetadata{debug={xmp-export=true}}
+% %or
+% \DocumentMetadata{debug={xmp-export=filename}}
+% \end{verbatim}
+%
+% By default the data are written to \verb+\jobname.xmpi+, if a \texttt{filename} is
+% given, then \verb+filename.xmpi+ is used instead. \verb+xmp-export=false+ deactivates
+% the export.
 %
 % \subsection{Encoding and escaping}
 %
@@ -1193,6 +1209,31 @@
     {\AddToDocumentProperties [document]{pdfstandard-UA}{1}},
    xmp  .bool_gset:N = \g_@@_xmp_bool
  }
+%    \end{macrocode}
+% XMP debugging option
+%    \begin{macrocode}
+\bool_new:N \g_@@_xmp_export_bool
+\str_new:N  \g_@@_xmp_export_str
+
+\keys_define:nn { document / metadata }
+  {
+    ,debug / xmp-export .choice:
+    ,debug / xmp-export / true .code:n=
+      {
+        \bool_gset_true:N \g_@@_xmp_export_bool
+        \str_gset_eq:NN \g_@@_xmp_export_str \c_sys_jobname_str
+      }
+    ,debug / xmp-export / false .code:n =
+      {
+        \bool_gset_false:N \g_@@_xmp_export_bool
+      }
+    ,debug / xmp-export /unknown .code:n =
+      {
+        \bool_gset_true:N \g_@@_xmp_export_bool
+        \str_gset:Nn \g_@@_xmp_export_str { #1 }
+      }
+    ,debug / xmp-export .default:n = true
+  }
 %    \end{macrocode}
 % \subsection{Messages}
 %    \begin{macrocode}
@@ -2513,6 +2554,12 @@
        \exp_args:No
        \__pdf_backend_metadata_stream:n {\g_@@_xmp_packet_tl}
         \pdfmanagement_add:nnx {Catalog} {Metadata}{\pdf_object_ref_last:}
+       \bool_if:NT \g_@@_xmp_export_bool
+        {
+          \iow_open:Nn\g_tmpa_iow{\g_@@_xmp_export_str.xmpi}
+          \exp_args:NNo\iow_now:Nn\g_tmpa_iow{\g_@@_xmp_packet_tl}
+          \iow_close:N\g_tmpa_iow
+        }
      }
   }
 %    \end{macrocode}
