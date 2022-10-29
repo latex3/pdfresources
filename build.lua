@@ -35,7 +35,6 @@ else
                 "firstaid/colorspace-patches-tmp-ltx.sty",
                 "firstaid/fontspec-luatex-tmp-ltx.sty",
                 "firstaid/luaotfload-l3color-tmp.lua",
-                "support/pdfmanagement-regressiontest.sty",
                 "newpackages/new-bookmark.sty",
                 "newpackages/bkm-generic.def",
                 "newpackages/new-attachfile.sty",
