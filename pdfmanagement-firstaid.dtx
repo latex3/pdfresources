@@ -309,9 +309,9 @@
        {
          \msg_warning:nnnn{pdfmanagement}{firstaid-too-old}
          {transparent}
-         {1.5~from~2022-10-27}    
-       }    
-    } 
+         {1.5~from~2022-10-27}
+       }
+    }
  }
 %    \end{macrocode}
 % \subsection{\pkg{pdflscape}}
@@ -325,9 +325,9 @@
        {
          \msg_warning:nnnn{pdfmanagement}{firstaid-too-old}
          {pdflscape}
-         {0.13~from~2022-10-27}    
-       }    
-    } 
+         {0.13~from~2022-10-27}
+       }
+    }
  }
 %    \end{macrocode}
 %
@@ -338,6 +338,17 @@
  {
    \disable@package@load{hyperxmp}{\msg_warning:nnn{pdfmanagement}{firstaid-disabled}{hyperxmp}}
    \disable@package@load{pdfx}    {\msg_warning:nnn{pdfmanagement}{firstaid-disabled}{pdfx}}
+   \AddToHook{package/doclicense/after}
+    {
+      \AtBeginDocument
+        {
+          \hypersetup
+            {
+              pdfcopyright  = {\doclicenseLongTextForHyperref},
+              pdflicenseurl = {\doclicenseURL},
+            }
+        }
+    }
  }
 %</package>
 %    \end{macrocode}
