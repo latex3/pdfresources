@@ -127,12 +127,25 @@
    }
 %    \end{macrocode}
 % \subsection{Output routine}
-% This load as few patches for the LaTeX output routine commands. They add
-% hooks for the interruption of links and for paragraph tagging.
+% The patches for the LaTeX output routine commands for the tagging
+% of the header/footer, the suppressing of links
+% and the patch to multicol for the para tagging
+% by default, but must be requested with the key \texttt{testphase=new-or-1}.
+% But until latex-lab has been updated we must ensure that they are loaded with
+% the various phases.
 %    \begin{macrocode}
 \bool_if:NT \g_@@_firstaid_output_bool
   {
-    \RequirePackage{output-patches-tmp-ltx}
+%    \end{macrocode}
+% This catches also phase-II and tagpdf.
+%    \begin{macrocode}
+    \AddToHook{package/latex-lab-testphase-new-or/after}
+      {\RequirePackage{latex-lab-testphase-new-or-1}}
+%    \end{macrocode}
+% This is for phase-II
+%    \begin{macrocode}
+    \AddToHook{file/phase-I-latex-lab-testphase/after}
+      {\RequirePackage{latex-lab-testphase-new-or-1}}
   }
 %    \end{macrocode}
 

@@ -51,8 +51,8 @@
 %    \end{macrocode}
 %
 %    \begin{macrocode}
-\ProvidesPackage{output-patches-tmp-ltx}
-        [2021-08-20 v0.95 Temporary patches of output commands]
+\ProvidesPackage{latex-lab-testphase-new-or-1}
+        [2022-10-29 v0.96 Temporary output patches for tagging and better link support]
 \RequirePackage{etoolbox}
 %    \end{macrocode}
 %
@@ -144,7 +144,7 @@
 %
 % \subsection{Interrupt hooks}
 % This requires the l3pdfannot module!
-% We add the code here an not in hyperref, as it should also work with links
+% We add the code here and not in hyperref, as it should also work with links
 % created directly with the l3pdfannot commands. The file is only
 % loaded by the pdfmanagement, so no need to test if the commands exist.
 %    \begin{macrocode}
@@ -157,9 +157,15 @@
 %    \end{macrocode}
 %
 %    \begin{macrocode}
-\endinput
 %</package>
 %    \end{macrocode}
-%
+
+%    \begin{macrocode}
+%<*latex-lab>
+\ProvidesFile{new-or-1-latex-lab-testphase.ltx}
+        [2022-10-26 v0.8 Temporary output patches for tagging and better link support]
+\RequirePackage{latex-lab-testphase-new-or-1}
+%</latex-lab>
+%    \end{macrocode}
 % \Finale
 %
