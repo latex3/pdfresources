@@ -4,11 +4,12 @@ rem l3build save -cconfig-dvips \1
 rem l3build save -cconfig-luatex -e\2 \1
 rem l3build save -cconfig-noxetex -e\2 \1
 
-l3build save -eluatex documentmetadata-support-000
-l3build save -eluatex tag-checkbox
-l3build save -epdftex tag-checkbox
-l3build save -exetex tag-checkbox
+Failed tests for configuration build:
 
-l3build save -cconfig-luatex structure-destination
-l3build save -cconfig-pdftex structure-destination
-l3build save -cconfig-xetex structure-destination
+  Check failed with difference files
+  - ./build/test/documentmetadata-support-000.luatex.fc
+  - ./build/test/documentmetadata-support-000.pdftex.fc
+  - ./build/test/documentmetadata-support-000.xetex.fc
+
+
+
