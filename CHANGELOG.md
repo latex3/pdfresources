@@ -9,10 +9,13 @@ this project uses date-based 'snapshot' version identifiers.
 
 ### Added 
  - ltdocinit: expl3 functions to retrieve values from the document properties.
+ - ltdocinit/firstaid: the output patches for header and footer 
+   are no longer loaded by default but must be loaded with the testphase key.
+    
 
 ### Changed
  - removed firstaid for transparent. The package is now compatible.
- - remove firstaid for pdflscape. The package is now compatible. 
+ - removed firstaid for pdflscape. The package is now compatible. 
 
 ### Fixed
  - fault firstaid for doclicense

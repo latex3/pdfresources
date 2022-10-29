@@ -81,7 +81,7 @@
 % It should be used before \cs{documentclass}.
 % \cs{DocumentMetadata} can be used more than once.
 %
-% With a \LaTeX{} 2022-06-01 or newer (currently provided as |latex-dev|) the command
+% With a \LaTeX{} 2022-06-01 or newer the command
 % is provided by the kernel and will load the pdfmanagement,
 % with older \LaTeX{} the pdfmanagement must be loaded
 % first manually with |\RequirePackage{pdfmanagement-testphase}|.
@@ -148,6 +148,15 @@
 %    and their effect will change over time, when testphase packages are added or
 %    removed or when the code is moved into the kernel.
 %     \begin{description}
+%    \item[\texttt{new-or-1}] This patches a few commands related
+%    to the output routing. They are needed for the tagging
+%    of paragraphs, for the tagging of header and footer and 
+%    to allow the PDF management to insert code which avoids that
+%    links happening at page breaks spills into the header and footer. 
+%    This code is also loaded be the following values.
+%    \item[\texttt{new-or}] This loads more changes to the output routine required for the 
+%    tagging. It is not compatible with every class! The code is also loaded by the 
+%    \texttt{phase-II} value.
 %    \item[\texttt{phase-I}]
 %       This value loads code implementing the first phase of the project~\cite{blueprint}, i.e., it
 %       will load the tagpdf package. It will also activate tagging by issuing
@@ -170,6 +179,7 @@
 %     \item[\texttt{log}]  with the values as described in the documentation \pkg{tagpdf},
 %     \item[\texttt{uncompress}] which does the same as |uncompress| as main key
 %     \item[\texttt{pdfmanagement}] a boolean which allows to deactivate the pdfmanagement.
+%     This should only be done for debugging! 
 %     \item[\texttt{firstaidoff}] This accepts a comma lists of keywords and disables the patches
 %       related to them. More information can be found in the documentation of
 %       \pkg{pdfmanagement-firstaid}.
