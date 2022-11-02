@@ -15,7 +15,7 @@ this project uses date-based 'snapshot' version identifiers.
  - removed firstaid for pdflscape as the package is now compatible. 
  - ltdocinit/firstaid: the output patches for header and footer 
    are no longer loaded by default but must be loaded with the testphase key.
-
+ - removed firstaid for beamer as no longer needed
 ### Fixed
  - faulty firstaid for doclicense
  
