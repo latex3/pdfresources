@@ -53,43 +53,9 @@
 % \begin{documentation}
 %
 % \section{\pkg{ltdocinit} documentation}
-% This small module defines \cs{DocumentMetadata} and the older alias
-% \cs{DeclareDocumentMetadata} and the related keys.
-% It also defines commands to store document properties in a global container.
-%
-% When the kernel will provide \cs{DocumentMetadata} directly
-% this module will slowly disappear.
-%
-% \subsection{\cs{DocumentMetadata}/\cs{DeclareDocumentMetadata}}
-%
-% \begin{function}{\DocumentMetadata,\DeclareDocumentMetadata}
-% \begin{syntax}
-%  \cs{DocumentMetadata}\Arg{key-value list}\\
-%  \cs{DeclareDocumentMetadata}\Arg{key-value list} (deprecated)
-% \end{syntax}
-% \end{function}
-%
-% Currently there is no dedicated location to declare settings concerning
-% a document as a whole. Settings are placed somewhere in the preamble or
-% with the class options or even with some package options.
-% For some settings this can be too late,
-% for example the pdf version can no longer be changed if a
-% package has used code which already opened the PDF.
-%
-% \cs{DocumentMetadata} as a new command
-% should unify such settings in one place.
-% It should be used before \cs{documentclass}.
-% \cs{DocumentMetadata} can be used more than once.
-%
-% With a \LaTeX{} 2022-06-01 or newer the command
-% is provided by the kernel and will load the pdfmanagement,
-% with older \LaTeX{} the pdfmanagement must be loaded
-% first manually with |\RequirePackage{pdfmanagement-testphase}|.
-%
-% The keys defined for \cs{DocumentMetadata}
-% currently allows to set the PDF version, to set the PDF \texttt{/Lang},
-% to uncompress a pdf, to set the language and to declare a few PDF standards
-% and to load some colorprofiles.
+% This small module defined \cs{DocumentMetadata} but the definition  
+% has been moved to latex-lab. The documentation can be found in 
+% \texttt{documentmetadata-support-doc-.pdf}
 %
 % \cs{DocumentMetadata} is also used to
 % activate the new PDF management code and it loads
@@ -98,25 +64,36 @@
 % which can't be detected automatically like |dvipdfmx|,
 % must be set in the first \cs{DocumentMetadata}.
 %
-% Currently the following keys are implemented
+% 
+% Here only a few newer keys are defined and the older \cs{DeclareDocumentMetadata}
+% is provided.
+%
+% The module also defines commands to store document properties in a global container.
+%
+% This module will slowly disappear.
+%
+% \subsection{\cs{DocumentMetadata}/\cs{DeclareDocumentMetadata}}
+%
+% \begin{function}{\DeclareDocumentMetadata}
+% \begin{syntax}
+%  \cs{DeclareDocumentMetadata}\Arg{key-value list} (deprecated)
+% \end{syntax}
+% This is an older alias for \cs{DocumentMetadata}
+% \end{function}
+%
+% Additionally to the keys described in \texttt{documentmetadata-support-doc-.pdf}
+% the following keys/values are implemented
 %
 % \begin{description}
-%    \item[\texttt{backend}] Passes the backend name to expl3. This is
-%      needed only if the needed backend can't be automatically
-%      determined or if the workflow used requires a special backend.
-%
-%^^A    This will probably be extended to  pass the value also to
-%^^A      packages.
-%
-%    \item[\texttt{pdfversion}] Sets the PDF version explicitly, e.g., \texttt{pdfversion=1.7}
-%    \item[\texttt{uncompress}] (no value) Forces an uncompressed pdf
-%      --- mainly for debugging purposes.
-%
-%    \item[\texttt{lang}] Explicitly sets the Lang entry in the Catalog,
-%     e.g., \texttt{lang=de-DE}. If not given the default value used is |en-US|.
 %
 %    \item[\texttt{pdfstandard}] Choice key to set the pdf standard.
-%      Currently |A-1b|, |A-2a|, |A-2b|, |A-2u|, |A-3a|, |A-3b|, |A-3u| and |A-4|
+%    
+%      Starting with version 0.95s it is also possible to use the values
+%      |X-4|, |X-4p|, |X-5g|, |X-5n|, |X-5pg|, |X-6|, |X-6n|, |X-6p|, |UA-1| for
+%      a PDF/X and PDF/UA standard. These keys set \emph{only} the relevant
+%      XMP-metadata.
+%      
+%      Beside this |A-1b|, |A-2a|, |A-2b|, |A-2u|, |A-3a|, |A-3b|, |A-3u| and |A-4|
 %      are accepted as values for A-standards. The casing is irrelevant, |a-1b| works too.
 %      Note that using these
 %      key doesn't mean that the document actually follows the standard. \LaTeX{}
@@ -130,23 +107,15 @@
 %      More information can be found in the documentation
 %      of \pkg{l3pdfmeta}.
 %
-%      Starting with version 0.95s it is also possible to use the values
-%      |X-4|, |X-4p|, |X-5g|, |X-5n|, |X-5pg|, |X-6|, |X-6n|, |X-6p|, |UA-1| for
-%      a PDF/X and PDF/UA standard. These keys set \emph{only} the relevant
-%      XMP-metadata.
-%
 %      |pdfstandard| can be used more than once to set overlapping standards, e.g:\\
 %      |pdfstandard=A-2b,pdfstandard=X-4,pdfstandard=UA-1|
-%
-%    \item[\texttt{colorprofiles}] This allows to load icc-colorprofiles. Details
-%       are described in the documentation of \pkg{l3pdfmeta}.
 %
 %    \item[\texttt{xmp}] A boolean, if set to false no XMP metadata are added to the PDF.
 %    The default is true. Details are described in the documentation of \pkg{l3pdfmeta}.
 %
 %    \item[\texttt{testphase}] This key is used to load testphase code. The values it accepts
 %    and their effect will change over time, when testphase packages are added or
-%    removed or when the code is moved into the kernel.
+%    removed or when the code is moved into the kernel. New value here are
 %     \begin{description}
 %    \item[\texttt{new-or-1}] This patches a few commands related
 %    to the output routing. They are needed for the tagging
@@ -157,17 +126,6 @@
 %    \item[\texttt{new-or}] This loads more changes to the output routine required for the 
 %    tagging. It is not compatible with every class! The code is also loaded by the 
 %    \texttt{phase-II} value.
-%    \item[\texttt{phase-I}]
-%       This value loads code implementing the first phase of the project~\cite{blueprint}, i.e., it
-%       will load the tagpdf package. It will also activate tagging by issuing
-%       |\tagpdfsetup{activate,interwordspace}|. This phase
-%       is frozen.
-%    \item[\texttt{phase-II}]
-%       This is the current development phase.
-%       Currently it differs from \texttt{phase-I} only in one point: It will
-%       additionally activate tagging of paragraphs with
-%       |\tagpdfsetup{paratagging}|. In the upcoming months it will
-%       also enable automatic tagging of other basic document elements.
 %    \end{description}
 %    The |testphase| key can only be used in the first \cs{DocumentMetadata}.
 %
@@ -296,249 +254,13 @@
       }
   }
 %    \end{macrocode}
-%    \begin{macrocode}
-\cs_if_free:NT \DocumentMetadata
-  {
-    \keys_define:nn { document / metadata }
-      {
-        backend .choices:nn =
-          { dvipdfmx , dvips , dvisvgm , luatex , pdftex , pdfmode , xdvipdfmx , xetex }
-          {
-            \sys_load_backend:n {#1}
-          },
-        backend .groups:n = { init } ,
-      }
-
-    \keys_define:nn { document / metadata }
-      {
-        ,pdfversion .code:n =
-          {
-            \pdf_version_gset:n { #1 }
-            \AddToDocumentProperties[document]{pdfversion}{#1}
-          }
-        ,uncompress .code:n =
-          {
-            \pdf_uncompress:
-          }
-        ,uncompress .value_forbidden:n = true
-        ,lang .code:n =
-          {
-            \pdfmanagement_add:nnn {Catalog} {Lang}{(#1)}
-            \AddToDocumentProperties[document]{lang}{#1}
-          }
-        %,xmpmeta .bool_gset:N = \g_pdfmeta_xmp_bool %see pdfmeta unused and undefined for now!
-        % this uses internal command from pdfmeta, it should probably move there ...
-        ,pdfstandard .code:n =
-          {
-            \exp_args:Nnx
-            \keys_set:nn {document / metadata} {_pdfstandard=\str_uppercase:n{#1}}
-          }
-        ,_pdfstandard .choices:nn =
-          {A-1B,A-2A,A-2B,A-2U,A-3A,A-3B,A-3U,A-4}
-          {
-            \prop_if_exist:cT { g__pdfmeta_standard_pdf/#1_prop }
-              {
-                \prop_gset_eq:Nc \g__pdfmeta_standard_prop { g__pdfmeta_standard_pdf/#1 _prop }
-              }
-            \AddToDocumentProperties [document]{pdfstandard}{#1}
-          }
-        ,_pdfstandard / unknown .code:n =
-          {
-            \msg_warning:nnn{pdf}{unknown-standard}{#1}
-          }
-        ,testphase .multichoice:
-        ,testphase / tagpdf .code:n =
-          {
-            \tl_gput_right:Nn\g_@@_testphase_tl
-              {
-                \file_if_exist_input:nF {tagpdf-latex-lab-testphase.ltx}
-                  {
-                    \RequirePackage{tagpdf}
-                    \AddToDocumentProperties [document]{testphase/tagpdf}{loaded}
-                    \tagpdfsetup{activate,paratagging,interwordspace}
-                    \AddToDocumentProperties [document]{tagging}{active}
-                    \AddToDocumentProperties [document]{tagging/para}{active}
-                    \AddToDocumentProperties [document]{tagging/interwordspace}{active}
-                  }
-              }
-          }        
-        ,testphase / unknown .code:n =
-          {
-            \tl_gput_right:Nn\g_@@_testphase_tl
-               {
-                 \AddToDocumentProperties [document]{testphase/#1}{loaded}
-                 \file_if_exist_input:nF {#1-latex-lab-testphase.ltx}
-                  {
-                     \msg_warning:nnn{document}{latex-lab-pkg-missing}{#1}
-                     \AddToDocumentProperties [document]{testphase/#1}{missing}
-                  }
-               }
-          }
-        ,activate .multichoice:
-        ,activate / tagging .code:n =
-          {
-            \PackageWarning{pdfmanagement-testphase}
-             {The~activate~key~is~deprecated.\MessageBreak
-              Tagging~is~activated~with~'testphase=tagpdf'~directly}{}
-          }
-        ,debug .code:n =
-          {
-            \keys_set:nn { document / metadata / debug } {#1}
-          }
-        ,debug / para .code:n =
-          {
-            \AddToHook
-              {
-                package/tagpdf/after
-              }
-              {
-                 \tagpdfsetup{paratagging-show}
-              }
-          }
-        ,debug / log .code:n =
-          {
-            \AddToHook
-              {
-               package/tagpdf/after
-              }
-              {
-                 \tagpdfsetup{log=#1}
-              }
-          }
-        ,debug / uncompress .code:n =
-          {
-            \pdf_uncompress:
-          }
-        ,debug / pdfmanagement .bool_gset:N = \g_@@_active_bool
-        ,debug / firstaidoff .clist_gset:N = \g_@@_firstaidoff_clist
-      }
-   }
-%    \end{macrocode}
 %
-% \subsection{\cs{DocumentMetadata}/\cs{DeclareDocumentMetadata}}
-% At first we have to define the older alias \cs{DeclareDocumentMetadata} if
-% \cs{DocumentMetadata} is already defined in a newer LaTeX version. Here
-% we load the latex-lab support (if it hasn't been loaded
-% before) and redefine then \cs{DeclareDocumentMetadata}
-% to \cs{DocumentMetadata}
+% \subsection{\cs{DeclareDocumentMetadata}}
+% We define the older alias \cs{DeclareDocumentMetadata}
 %
+% \begin{macro}{\DeclareDocumentMetadata}
 %    \begin{macrocode}
-\cs_if_exist:NT \DocumentMetadata
-   {
-     \cs_new_protected:Npn \DeclareDocumentMetadata
-        {
-          \cs_if_free:NT \DocumentMetadata
-            {
-              \file_if_exist_input:nF {documentmetadata-support.ltx}%
-               {
-                 \@latex@error
-                   {No~support~files~for~\noexpand\DeclareDocumentMetadata~found}
-                   {
-                     Is~the~'LaTeX-lab'~bundle~installed?
-                     \MessageBreak
-                     Without~it,~the~declaration~is~ignored.
-                   }
-                \let\DeclareDocumentMetadata\@gobble
-               }
-            }
-          \RenewDocumentCommand \DeclareDocumentMetadata {}
-           { \DocumentMetadata }
-          \DocumentMetadata
-        }
-    }
-%    \end{macrocode}
-% Now we provide a definition for \cs{DocumentMetadata} if it doesn't exist yet.
-%    \begin{macrocode}
-\cs_if_free:NT \DocumentMetadata
-  {
-%    \end{macrocode}
-% \cs{DocumentMetadata} should for now not be used after
-% \cs{documentclass} so we error in this case. It can be used more than once
-% but follow-up calls should not do the initialization code.
-%    \begin{macrocode}
-    \prop_gput:Nnn \g_msg_module_type_prop { document } { LaTeX }
-    \prop_gput:Nnn \g_msg_module_name_prop { document } { DocumentMetadata }
-    \msg_new:nnn
-      { document } { setup-after-documentclass }
-      {
-        \token_to_str:N \DocumentMetadata \c_space_tl
-        should~be~used~only~before~\token_to_str:N\documentclass
-      }
-    \msg_new:nnn
-      { document } { latex-lab-pkg-missing }
-      {
-        LaTeX-lab~package~'#1'~not~found.
-      }
-%    \end{macrocode}
-% \begin{macro}{\DocumentMetadata}
-%    \begin{macrocode}
-    \NewDocumentCommand\DocumentMetadata { m }
-      {
-        \cs_if_eq:NNTF \documentclass \@twoclasseserror
-          { \msg_error:nn { document }{ setup-after-documentclass } }
-          {
-%    \end{macrocode}
-% The wanted backend must be detected first, we read the init key and then
-% force the loading by loading expl3.
-% The backend can contains management commands, so the boolean should be set to true first.
-%    \begin{macrocode}
-            \bool_gset_true:N \g_@@_active_bool
-            \keys_set_groups:nnn { document / metadata} {init}{ #1 }
-        %if no backend has been loaded force it now:
-            \str_if_exist:NF \c_sys_backend_str
-              {
-                \sys_load_backend:n {}
-              }
-%    \end{macrocode}
-% Now we load the extra backend code
-%    \begin{macrocode}
-        \ExplSyntaxOn\makeatletter
-              \file_input:n {l3backend-testphase-\c_sys_backend_str.def}
-        \ExplSyntaxOff\makeatother
-%    \end{macrocode}
-% set the default language, process the rest of the keys,
-% and setup the generic driver
-%    \begin{macrocode}
-            \keys_set_filter:nnn  { document / metadata } { init } { lang=en-US, #1 }
-            \bool_if:NT \g_@@_active_bool
-              {
-                \PassOptionsToPackage{customdriver=hgeneric-testphase}{hyperref}
-              }
-%    \end{macrocode}
-% \cs{pdfmanagement_add:nnn} has collected values in this hook.
-%    \begin{macrocode}
-           \hook_use_once:n {pdfmanagement/add}
-%    \end{macrocode}
-% Redefine \cs{DocumentMetadata} so that it only process the keys.
-% We need to update the hyperref option if the active status changes.
-%    \begin{macrocode}
-           \RenewDocumentCommand\DocumentMetadata { m }
-              {
-                \keys_set_filter:nnn  { document / metadata } { init } { ##1 }
-                \bool_if:NTF \g_@@_active_bool
-                  {
-                    \str_remove_all:cn
-                      {opt@hyperref.sty}{customdriver=hgeneric-testphase}
-                    \PassOptionsToPackage
-                      {customdriver=hgeneric-testphase}{hyperref}
-                 }
-                 {
-                   \str_remove_all:cn
-                     {opt@hyperref.sty}{customdriver=hgeneric-testphase}
-                 }
-              }
-%    \end{macrocode}
-% Load more modules, the testphase code and the firstaid code.
-%    \begin{macrocode}
-            \g_@@_testphase_tl
-            \RequirePackage{pdfmanagement-firstaid}
-          }
-      }
-%    \end{macrocode}
-% At last we need to provide the older alias here too
-%    \begin{macrocode}
-    \NewDocumentCommand\DeclareDocumentMetadata{}{\DocumentMetadata}
-  }
+\NewCommandCopy\DeclareDocumentMetadata\DocumentMetadata
 %    \end{macrocode}
 % \end{macro}
 %
