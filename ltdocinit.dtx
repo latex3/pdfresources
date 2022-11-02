@@ -282,6 +282,21 @@
 %    \end{macrocode}
 % \end{variable}
 %    \begin{macrocode}
+\keys_define:nn { document / metadata }
+  {
+    ,testphase / new-or-1 .code:n =   
+      {
+        \tl_gput_right:Nn\g_@@_testphase_tl
+           {
+             \file_if_exist_input:nF {new-or-1-latex-lab-testphase.ltx}
+               {
+                \RequirePackage{output-patches-tmp-ltx}
+               }
+           }    
+      }
+  }
+%    \end{macrocode}
+%    \begin{macrocode}
 \cs_if_free:NT \DocumentMetadata
   {
     \keys_define:nn { document / metadata }
@@ -346,7 +361,7 @@
                     \AddToDocumentProperties [document]{tagging/interwordspace}{active}
                   }
               }
-          }
+          }        
         ,testphase / unknown .code:n =
           {
             \tl_gput_right:Nn\g_@@_testphase_tl
