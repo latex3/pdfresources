@@ -1,6 +1,6 @@
 #!/usr/bin/env texlua
-packageversion="0.95s"
-packagedate="2022-09-26"
+packageversion="0.95t"
+packagedate="2022-11-03"
 
 -- Build script for "LaTeX PDF management testphase bundle" bundle
 
@@ -14,8 +14,6 @@ installfiles = {"*.sty","*.cls","*.def","*.lua","*.ltx"}
 if options["target"] == "ctan" then
   sourcefiles =  {"*.dtx","*.ins",
                 "l3ref-tmp.sty",
-                "firstaid/transparent-ltx.sty",
-                "firstaid/pdflscape-ltx.sty",
                 "firstaid/xcolor-patches-tmp-ltx.sty",
                 "firstaid/color-ltx.sty",
                 "firstaid/output-patches-tmp-ltx.dtx",
@@ -26,11 +24,8 @@ if options["target"] == "ctan" then
 else
  sourcefiles =  {"*.dtx","*.ins",
                 "l3ref-tmp.sty",
-                "firstaid/transparent-ltx.sty",
-                "firstaid/pdflscape-ltx.sty",
                 "firstaid/xcolor-patches-tmp-ltx.sty",
                 "firstaid/color-ltx.sty",
-                "firstaid/output-patches-tmp-ltx.dtx",
                 "firstaid/output-patches-tmp-ltx.dtx",
                 "firstaid/colorspace-patches-tmp-ltx.sty",
                 "firstaid/fontspec-luatex-tmp-ltx.sty",

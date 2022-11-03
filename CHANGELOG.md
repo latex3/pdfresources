@@ -5,7 +5,7 @@ first release 0.95a, 2021-02-23 will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 this project uses date-based 'snapshot' version identifiers.
 
-## [Unreleased]
+## [2022-11-03]
 
 ### Added 
  - ltdocinit: expl3 functions to retrieve values from the document properties.
@@ -16,6 +16,7 @@ this project uses date-based 'snapshot' version identifiers.
  - ltdocinit/firstaid: the output patches for header and footer 
    are no longer loaded by default but must be loaded with the testphase key.
  - removed firstaid for beamer as no longer needed
+ - ltdocinit: removed definition for \DocumentMetadata, it is now provided by latex-lab
 ### Fixed
  - faulty firstaid for doclicense
  
