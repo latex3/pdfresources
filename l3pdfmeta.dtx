@@ -2191,8 +2191,10 @@
   {
     \@@_xmp_add_packet_line:nne {pdfaid}{part}{\pdfmeta_standard_item:n{level}}
     \@@_xmp_add_packet_line:nne
-      {pdfaid}{conformance}{\pdfmeta_standard_item:n{conformance}}
-    \@@_xmp_add_packet_line:nne {pdfaid}{year} {\pdfmeta_standard_item:n{year}}
+      {pdfaid}{conformance}{\pdfmeta_standard_item:n{conformance}}  
+    \int_compare:nNnTF {\pdfmeta_standard_item:n{level}}<{4}  
+     {\@@_xmp_add_packet_line:nne {pdfaid}{year} {\pdfmeta_standard_item:n{year}}}
+     {\@@_xmp_add_packet_line:nne {pdfaid}{rev}  {\pdfmeta_standard_item:n{year}}}
     \@@_xmp_add_packet_line:nne
       {pdfxid}{GTS_PDFXVersion}{\GetDocumentProperties{document/pdfstandard-X}}
     \@@_xmp_add_packet_line:nne
