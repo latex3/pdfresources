@@ -1,0 +1,13 @@
+\DocumentMetadata{uncompress,pdfversion=2.0,pdfstandard=a-4}
+\input{regression-test}
+\documentclass{article}
+\ExplSyntaxOn
+\AddToHook{shipout/lastpage}{\tl_show:N\g__pdfmeta_xmp_packet_tl}
+\ExplSyntaxOff
+\begin{document}
+
+\START
+
+some text
+
+\end{document}
