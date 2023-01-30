@@ -10,6 +10,9 @@ this project uses date-based 'snapshot' version identifiers.
 ### Fixed
  - pdf A4 uses pdfaid:rev not pdfaid:year.
  - pdfcreationdate and pdfmoddate key 
+ 
+### Added
+ - firstaid support for luacolor  (pdfmode)
 
 ## [2022-11-03] 
 

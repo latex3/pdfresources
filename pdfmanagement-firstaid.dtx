@@ -67,7 +67,9 @@
   {LaTeX PDF management testphase bundle / firstaid-patches}
 
 %<@@=pdfmanagement>
-\clist_map_inline:nn {pgf,transparent,xmp,pdflscape,xcolor,color,beamer,output,colorspace,fontspec}
+\clist_map_inline:nn 
+  {pgf,transparent,xmp,pdflscape,xcolor,color,
+   beamer,output,colorspace,fontspec,luacolor}
   {
     \bool_new:c       { g_@@_firstaid_#1_bool }
     \bool_gset_true:c { g_@@_firstaid_#1_bool }
@@ -194,6 +196,65 @@
        }
        {\RequirePackage{xcolor-patches-tmp-ltx}}
   }
+%    \end{macrocode}
+%
+% \subsection{luacolor}
+% 
+%  The luacolor package doesn't take colors from l3color into account.
+%  We add a fix, but only for pdf mode. It is disable if luacolor is updated,
+%  assuming that the update will then handle it (or expl3 directly)
+%    \begin{macrocode}
+\bool_lazy_all:nT 
+  { 
+    {\sys_if_engine_luatex_p:} 
+    {\g_@@_firstaid_luacolor_bool} 
+    {\sys_if_output_pdf_p:} 
+  }
+  {
+    \AddToHook{package/luacolor/after}
+     {
+      \@ifpackagelater{luacolor}{2021-02-18}{}
+        {
+          \cs_set_protected:Npn \__color_backend_select:nn #1#2
+           {
+             \tl_set:Nn \l__color_backend_fill_tl {#1}
+             \tl_set:Nn \l__color_backend_stroke_tl {#2}
+             \LuaCol@setattribute\LuaCol@Attribute
+               {
+                 \directlua
+                   {
+                     oberdiek.luacolor.get("\luaescapestring{#1~#2}")
+                   }
+               }
+            }
+          \cs_set_protected:Npn \__color_backend_fill:n #1
+            {
+             \tl_set:Nn \l__color_backend_fill_tl {#1}
+             \LuaCol@setattribute\LuaCol@Attribute
+               {
+                 \directlua
+                   {
+                     oberdiek.luacolor.get("\luaescapestring{#1}")
+                   }
+               } 
+            }
+          \cs_set_protected:Npn \__color_backend_stroke:n #1
+            {
+              \tl_set:Nn \l__color_backend_stroke_tl {#1}
+              \LuaCol@setattribute\LuaCol@Attribute
+                {
+                  \directlua
+                    {
+                      oberdiek.luacolor.get("\luaescapestring{#1}")
+                    }
+                } 
+            }
+          \cs_set_protected:Npn \__color_backend_reset:  {}
+          \cs_set_eq:NN \__color_backend_fill_reset:   \__color_backend_reset:
+          \cs_set_eq:NN \__color_backend_stroke_reset: \__color_backend_reset:
+        }
+     }   
+  }  
 %    \end{macrocode}
 % \subsection{\pkg{pgf}}
 %
