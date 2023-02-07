@@ -88,6 +88,9 @@ function update_tag (file,content,tagname,tagdate)
   content = string.gsub (content,
                          "date{Version %d%.%d+%a, released %d%d%d%d%-%d%d%-%d%d",
                          "date{Version "..packageversion..", released ".. packagedate)
+  content = string.gsub (content,
+                         "Copyright %(C%) (%d%d%d%d)%-%d%d%d%d",
+                         "Copyright (C) %1-"..os.date("%Y"))                                
   return content
   elseif string.match (file, "%.dtx$" ) then
    content = string.gsub (content,
@@ -103,6 +106,10 @@ function update_tag (file,content,tagname,tagdate)
   content = string.gsub (content,
                          "date{Version %d%.%d+%a, released %d%d%d%d%-%d%d%-%d%d",
                          "date{Version "..packageversion..", released ".. packagedate)
+  content = string.gsub (content,
+                         "Copyright %(C%) (%d%d%d%d)%-%d%d%d%d",
+                         "Copyright (C) %1-"..os.date("%Y"))                                
+                         
   return content
   elseif string.match (file, "%.sty$" ) then
    content = string.gsub (content,
@@ -116,6 +123,9 @@ function update_tag (file,content,tagname,tagdate)
    content = string.gsub (content,
                          "Version: %d%.%d+%a, %d%d%d%d%-%d%d%-%d%d",
                          "Version: " .. packageversion .. ", " .. packagedate )
+   content = string.gsub (content,
+                         "(%d%d%d%d)%-%d%d%d%d",
+                         "%1-"..os.date("%Y"))                                
    return content
  elseif string.match (file, "^CHANGELOG.md$") then
    content = string.gsub (content,

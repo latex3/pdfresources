@@ -31,7 +31,7 @@ For manual installation: unpack by compiling the .ins, then move all
 
 
 ## Copyright (C)
-* 2021-2022 The LaTeX Project
+* 2021-2023 The LaTeX Project
 
 ## License
 LaTeX Project Public License, version 1.3c or later.
