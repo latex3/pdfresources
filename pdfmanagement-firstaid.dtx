@@ -201,8 +201,9 @@
 % \subsection{luacolor}
 % 
 %  The luacolor package doesn't take colors from l3color into account.
-%  We add a fix, but only for pdf mode. It is disable if luacolor is updated,
-%  assuming that the update will then handle it (or expl3 directly)
+%  We add a fix, but only for pdf mode. luacolor can disable the 
+%  code by clearing the hook if needed.
+%  
 %    \begin{macrocode}
 \bool_lazy_all:nT 
   { 
@@ -213,47 +214,44 @@
   {
     \AddToHook{package/luacolor/after}
      {
-      \@ifpackagelater{luacolor}{2021-02-18}{}
+       \cs_set_protected:Npn \__color_backend_select:nn #1#2
         {
-          \cs_set_protected:Npn \__color_backend_select:nn #1#2
-           {
-             \tl_set:Nn \l__color_backend_fill_tl {#1}
-             \tl_set:Nn \l__color_backend_stroke_tl {#2}
-             \LuaCol@setattribute\LuaCol@Attribute
-               {
-                 \directlua
-                   {
-                     oberdiek.luacolor.get("\luaescapestring{#1~#2}")
-                   }
-               }
-            }
-          \cs_set_protected:Npn \__color_backend_fill:n #1
+          \tl_set:Nn \l__color_backend_fill_tl {#1}
+          \tl_set:Nn \l__color_backend_stroke_tl {#2}
+          \LuaCol@setattribute\LuaCol@Attribute
             {
-             \tl_set:Nn \l__color_backend_fill_tl {#1}
-             \LuaCol@setattribute\LuaCol@Attribute
-               {
-                 \directlua
-                   {
-                     oberdiek.luacolor.get("\luaescapestring{#1}")
-                   }
-               } 
-            }
-          \cs_set_protected:Npn \__color_backend_stroke:n #1
-            {
-              \tl_set:Nn \l__color_backend_stroke_tl {#1}
-              \LuaCol@setattribute\LuaCol@Attribute
+              \directlua
                 {
-                  \directlua
-                    {
-                      oberdiek.luacolor.get("\luaescapestring{#1}")
-                    }
-                } 
+                  oberdiek.luacolor.get("\luaescapestring{#1~#2}")
+                }
             }
-          \cs_set_protected:Npn \__color_backend_reset:  {}
-          \cs_set_eq:NN \__color_backend_fill_reset:   \__color_backend_reset:
-          \cs_set_eq:NN \__color_backend_stroke_reset: \__color_backend_reset:
-        }
-     }   
+         }
+       \cs_set_protected:Npn \__color_backend_fill:n #1
+         {
+          \tl_set:Nn \l__color_backend_fill_tl {#1}
+          \LuaCol@setattribute\LuaCol@Attribute
+            {
+              \directlua
+                {
+                  oberdiek.luacolor.get("\luaescapestring{#1}")
+                }
+            } 
+         }
+       \cs_set_protected:Npn \__color_backend_stroke:n #1
+         {
+           \tl_set:Nn \l__color_backend_stroke_tl {#1}
+           \LuaCol@setattribute\LuaCol@Attribute
+             {
+               \directlua
+                 {
+                   oberdiek.luacolor.get("\luaescapestring{#1}")
+                 }
+             } 
+         }
+       \cs_set_protected:Npn \__color_backend_reset:  {}
+       \cs_set_eq:NN \__color_backend_fill_reset:   \__color_backend_reset:
+       \cs_set_eq:NN \__color_backend_stroke_reset: \__color_backend_reset:
+     }      
   }  
 %    \end{macrocode}
 % \subsection{\pkg{pgf}}
