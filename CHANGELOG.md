@@ -11,7 +11,8 @@ this project uses date-based 'snapshot' version identifiers.
  - l3pdffile: \pdffile_embed_stream:nnN to embed a stream without creating a named
    object. 
 
-## [2023-02-07]
+### Changed 
+ - l3pdffile: default mime type of tex-files changed to application/x-tex. 
 
 ### Fixed
  - pdf A4 uses pdfaid:rev not pdfaid:year.
