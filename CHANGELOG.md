@@ -5,7 +5,7 @@ first release 0.95a, 2021-02-23 will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 this project uses date-based 'snapshot' version identifiers.
 
-## [Unreleased]
+## [2023-02-14]
  
 ### Added
  - l3pdffile: \pdffile_embed_stream:nnN to embed a stream without creating a named
@@ -14,6 +14,7 @@ this project uses date-based 'snapshot' version identifiers.
 ### Changed 
  - l3pdffile: default mime type of tex-files changed to application/x-tex. 
 
+## [2023-02-07]
 ### Fixed
  - pdf A4 uses pdfaid:rev not pdfaid:year.
  - pdfcreationdate and pdfmoddate key 
