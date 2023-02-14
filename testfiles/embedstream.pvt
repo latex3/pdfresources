@@ -1,0 +1,19 @@
+\DocumentMetadata{}
+\input{regression-test}
+\documentclass{article}
+\begin{document}
+
+\START abc 
+\ExplSyntaxOn
+\pdfdict_put:nnn  {l_pdffile/Filespec} {AFRelationship}{/Source} 
+\pdfdict_put:nnn  {l_pdffile/Filespec} {Desc}{(this~is~a~source)} 
+\pdfdict_put:nnn  {l_pdffile/Params} {ModDate}{(D:20200422135851Z)} 
+
+\pdffile_embed_stream:nnN{Some~stream}{test-embed.tex}\l_tmpa_tl 
+
+
+\pdfmanagement_add:nnx{Catalog/Names}{EmbeddedFiles}{\l_tmpa_tl}
+
+\ExplSyntaxOff
+
+\end{document}
