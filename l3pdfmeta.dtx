@@ -1893,7 +1893,19 @@
 %  Renditionclass declared by hyperxmp.
 %  Properties InstanceID and OriginalDocumentID declared by pdfx (pdfx.xmp)
 %  With the exception of OriginalDocumentID all are already allowed and
-%  predefined. We ignore OriginalDocumentID until requested.
+%  predefined. 
+%    \begin{macrocode}
+\@@_xmp_schema_new:nnn
+   {XMP~Media~Management~Schema}
+   {xmpMM}
+   {http://ns.adobe.com/xap/1.0/mm/}
+\@@_xmp_property_new:nnnnn
+   {xmpMM}
+   {OriginalDocumentID}
+   {URI}
+   {internal}
+   {The~common~identifier~for~all~versions~and~renditions~of~a~document.}
+%    \end{macrocode}
 %  \item[pdfaid] properties part and conformance are declared by hyperxmp, but
 %  no here as already in http://www.aiim.org/pdfa/ns/id/. But we declare
 %  year so that it can be used also with older A-standards.
