@@ -2047,6 +2047,37 @@
   }
 %</xdvipdfmx|dvipdfmx|dvips|dvisvgm>
 %    \end{macrocode}
+%
+% \subsection{Suppressing deprecated PDF features}
+% 
+% \texttt{/ProcSet}, \texttt{/CharSet} and the \texttt{/Info} dictionary
+% are deprecated in PDF 2.0. For the pdf/A-4 standard they must be suppressed.
+% Not every engine is able to do this, but for pdfTeX and luatex we define suitable
+% backend command. \texttt{/ProcSet} is suppress automatically in pdf 2.0 which should be
+% ok. 
+% The option to omit /Charset exists already for quite some time:
+% \begin{macro}{\__pdf_backend_omit_charset:n}
+%    \begin{macrocode}
+%<*xdvipdfmx|dvipdfmx|dvips|dvisvgm>
+\cs_new_protected:Npn \__pdf_backend_omit_charset:n #1 {} %#1 number
+%</xdvipdfmx|dvipdfmx|dvips|dvisvgm>
+%<*pdftex>
+\cs_new_protected:Npn \__pdf_backend_omit_charset:n #1 %#1 number
+  {
+    \tex_pdfomitcharset:D = #1 \scan_stop:
+  } 
+%</pdftex>
+%<*luatex>
+\cs_new_protected:Npn \__pdf_backend_omit_charset:n #1 %#1 number
+  {
+    \tex_pdfvariable:D omitcharset  = #1 \scan_stop:
+  } 
+%</luatex>
+%    \end{macrocode}
+% \end{macro}
+% 
+% 
+%
 % \subsection{lua code for lualatex}
 %    \begin{macrocode}
 %<*lua>
