@@ -2,6 +2,9 @@
 packageversion="0.95w"
 packagedate="2023-02-20"
 
+local luatexstatus = status.list()
+local istl2023 = string.match (luatexstatus.banner,"2023")
+
 -- Build script for "LaTeX PDF management testphase bundle" bundle
 
 -- Identify the bundle and module
