@@ -200,17 +200,18 @@
 % tested from TeX, but in a current LaTeX normally ToUnicode are set for all fonts.
 % \item[|tagged|] that is set in A-2a and A-3a and means that the pdf must be
 % tagged. This is currently neither tested not enforced somewhere.
+% \item[|no_CharSet|] CharSet is deprecated is pdf 2.0 and should not
+% be used in A-4. l3pdfmeta will therefore suppress it for the 
+% engines pdftex and luatex (the other engines have no suitable option)
 % \item[|Trailer_no_Info|] The \texttt{Info} dictionary
 % has been deprecated since quite some time. Metadata should be set with
 % XMP-data instead. In PDF A-4 now the \texttt{Info} dictionary
 % shall not be present in the trailer dictionary at all
 % (unless there exists a PieceInfo entry in the Catalog). And if it is present
-% it should only contain the \texttt{/ModDate} entry. The engines
-% do not offer currently an option to suppress the dictionary completly,
-% one can only give the entries the value null (it only works for all entries
-% with lualatex and pdflatex). The next pdflatex will offer \cs{pdfomitinfodict}.
-% Until then l3pdfmeta does nothing with this requirement.
-%
+% it should only contain the \texttt{/ModDate} entry. In
+% texlive 2023 the engines pdftex and luatex have primitives
+% to suppress the dictionary
+% and l3pdfmeta will make use of it. 
 % \end{description}
 %
 % \subsubsection{Tests with values and special handlers}
@@ -746,6 +747,10 @@
   {
     \pdfmeta_standard_verify:nF { annot_flags }
      { \@@_verify_pdfa_annot_flags: }
+    \pdfmeta_standard_verify:nF { Trailer_no_Info }
+     { \__pdf_backend_omit_info:n {1} }
+    \pdfmeta_standard_verify:nF { no_CharSet }
+     { \__pdf_backend_omit_charset:n {1} }  
     \pdfmeta_standard_verify:nnF { min_pdf_version }
      { \pdf_version: }
      { \msg_warning:nnxxx {pdf}{wrong-pdfversion}
@@ -938,6 +943,8 @@
   { g_@@_standard_pdf/A-4_prop }{min_pdf_version}{2.0}
 \prop_gput:cnn
   { g_@@_standard_pdf/A-4_prop }{year}{2020}
+\prop_gput:cnn
+  { g_@@_standard_pdf/A-4_prop }{no_CharSet}{}
 \prop_gput:cnn
   { g_@@_standard_pdf/A-4_prop }{Trailer_no_Info}{}
 \prop_gremove:cn
