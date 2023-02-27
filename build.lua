@@ -65,14 +65,30 @@ checkruns = 4
 -- packtdszip = true
 checkengines = {"pdftex","luatex","xetex"}
 
+-- with tl2023 we exclue dvips tests for now
+--
 
+if istl2023 then
 checkconfigs = {"build", -- luatex, pdftex, xetex
                 "config-noxetex", --pdftex + luatex (std)
                 "config-luatex",  -- luatex
                 "config-dvips",   -- latex + dvips
                 "config-pdftex",  -- pdftex
+                "config-pdftex-23",  -- pdftex, texlive 2023
+                "config-luatex-23",  -- luatex, texlive 2023
                 "config-xetex"    -- xetex
                 }
+else
+checkconfigs = {"build", -- luatex, pdftex, xetex
+                "config-noxetex", --pdftex + luatex (std)
+                "config-luatex",  -- luatex
+                "config-dvips",   -- latex + dvips
+                "config-pdftex",  -- pdftex
+                "config-pdftex-22",  -- pdftex
+                "config-luatex-22",  -- luatex
+                "config-xetex"    -- xetex
+                }
+end
 
 -- tagging
 tagfiles = {
@@ -93,7 +109,7 @@ function update_tag (file,content,tagname,tagdate)
                          "date{Version "..packageversion..", released ".. packagedate)
   content = string.gsub (content,
                          "Copyright %(C%) (%d%d%d%d)%-%d%d%d%d",
-                         "Copyright (C) %1-"..os.date("%Y"))                                
+                         "Copyright (C) %1-"..os.date("%Y"))
   return content
   elseif string.match (file, "%.dtx$" ) then
    content = string.gsub (content,
@@ -111,8 +127,8 @@ function update_tag (file,content,tagname,tagdate)
                          "date{Version "..packageversion..", released ".. packagedate)
   content = string.gsub (content,
                          "Copyright %(C%) (%d%d%d%d)%-%d%d%d%d",
-                         "Copyright (C) %1-"..os.date("%Y"))                                
-                         
+                         "Copyright (C) %1-"..os.date("%Y"))
+
   return content
   elseif string.match (file, "%.sty$" ) then
    content = string.gsub (content,
@@ -128,7 +144,7 @@ function update_tag (file,content,tagname,tagdate)
                          "Version: " .. packageversion .. ", " .. packagedate )
    content = string.gsub (content,
                          "(%d%d%d%d)%-%d%d%d%d",
-                         "%1-"..os.date("%Y"))                                
+                         "%1-"..os.date("%Y"))
    return content
  elseif string.match (file, "^CHANGELOG.md$") then
    content = string.gsub (content,
