@@ -1965,6 +1965,7 @@
     \pdfmanagement_add:nnn{Info}{Creator}{(TeX)}
 %</drivers>
 %<*dvips>
+    \AddToHook{begindocument}{\pdfmanagement_add:nnn{Info}{Producer}{(pdfTeX+dvips)}}
     \__kernel_backend_literal:e{!~<</DocumentUUID~(DocumentUUID)>>~setpagedevice}
     \__kernel_backend_literal:e{!~<</InstanceUUID~(InstanceUUID)>>~setpagedevice}
 %</dvips>
