@@ -1,6 +1,6 @@
 #!/usr/bin/env texlua
-packageversion="0.95w"
-packagedate="2023-02-20"
+packageversion="0.95x"
+packagedate="2023-03-09"
 
 local luatexstatus = status.list()
 local istl2023 = string.match (luatexstatus.banner,"2023")
