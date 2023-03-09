@@ -21,8 +21,6 @@ if options["target"] == "ctan" then
                 "firstaid/color-ltx.sty",
                 "firstaid/output-patches-tmp-ltx.dtx",
                 "firstaid/colorspace-patches-tmp-ltx.sty",
-                "firstaid/fontspec-luatex-tmp-ltx.sty",
-                "firstaid/luaotfload-l3color-tmp.lua"
                 }
 else
  sourcefiles =  {"*.dtx","*.ins",
@@ -31,8 +29,6 @@ else
                 "firstaid/color-ltx.sty",
                 "firstaid/output-patches-tmp-ltx.dtx",
                 "firstaid/colorspace-patches-tmp-ltx.sty",
-                "firstaid/fontspec-luatex-tmp-ltx.sty",
-                "firstaid/luaotfload-l3color-tmp.lua",
                 "newpackages/new-bookmark.sty",
                 "newpackages/bkm-generic.def",
                 "newpackages/new-attachfile.sty",
