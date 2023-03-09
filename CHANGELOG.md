@@ -11,7 +11,7 @@ this project uses date-based 'snapshot' version identifiers.
  - regression data producer in xmp
  
 ### Changed
- - removed/reduced font 
+ - removed/reduced fontspec firstaid to avoid clash with new l3backend and with option parsing (issue #47)
  
 ## [2023-02-20]
 
