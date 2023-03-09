@@ -96,36 +96,21 @@
 % \subsection{Fontspec}
 % When using luaLaTeX opacity is broken (issue \#30) as
 % fontspec/luaotfload doesn't use the pdfmanagement but write to ExtGState directly
-% To repair this some new lua code is needed. This also
-% improves the color parsing and allows to use cmyk and spot colors as font colors.
-% It is also needed to use a patch version of \texttt{fontspec-luatex.sty} to
-% slightly change the way how the Opacity and Color key are handled.
-% The patch is only executed if luaotfload is new enough.
+% To repair this some new lua code is needed. It also needs a new fontspec
+% and a change in the color key. 
 %    \begin{macrocode}
 \sys_if_engine_luatex:T
    {
-     \lua_now:n
-       {
-        if~not~luaotfload.set_transparent_colorstack~
-        then~
-          tex.print("\\bool_gset_false:N\\g_@@_firstaid_fontspec_bool")~
-        end
-       }
      \bool_if:NT \g_@@_firstaid_fontspec_bool
        {
-            \msg_info:nnn{pdfmanagement}{firstaid}{fontspec}
-            \file_if_exist:nT { luaotfload-l3color-tmp.lua }
-              {
-                \lua_load_module:n { luaotfload-l3color-tmp.lua }
-              }
-
-         \declare@file@substitution{fontspec-luatex.sty}{fontspec-luatex-tmp-ltx.sty}
-         \AddToHook{package/fontspec/after}
+         \@ifpackagelater{fontspec}{2023-03-10}
           {
-            \str_if_eq:vnF{ver@fontspec.sty}{2022/01/15~v2.8a~Font~selection~for~XeLaTeX~and~LuaLaTeX}
-             {\msg_warning:nnn{pdfmanagement}{firstaid-changed}{fontspec}}
-          }
-       }
+            \__fontspec_keys_define_code:nnn {fontspec} {Color}
+             {
+               \tl_set:Nn \l__fontspec_hexcol_tl {#1}
+             }
+          }{}
+      }               
    }
 %    \end{macrocode}
 % \subsection{Output routine}
