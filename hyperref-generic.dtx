@@ -97,10 +97,9 @@
 % combination should work too.
 %
 % The driver \emph{requires} the new PDF management code, so documents wanting to use it
-% should start like this
+% should start like this (this requires \LaTeX-2022-06-01  or newer):
 % \begin{verbatim}
-% \RequirePackage{pdfmanagement-testphase} %loads the code
-% \DocumentMetadata % activates it
+% \DocumentMetadata %loads the PDF management and activates it
 %   {
 %    %% options
 %    %% e.g. pdf version, backend:
@@ -109,18 +108,6 @@
 %   }
 %  \end{verbatim}
 %
-%  Starting with \LaTeX-2022-06-01 (or a suitable latex-dev) loading the testphase
-%  package is no longer required and this can be simplified to
-% \begin{verbatim}
-% \DocumentMetadata
-%   {
-%    %% options
-%    %% e.g. pdf version, backend:
-%    % pdfversion=1.7,
-%    % backend = dvipdfmx
-%   }
-%  \end{verbatim}
-
 %  The new driver tries to be compatible with the standard \pkg{hyperref} drivers
 %  but there are nevertheless differences. Some of them due to the still experimental
 %  status of the driver, others are design decisions: one part of the project is

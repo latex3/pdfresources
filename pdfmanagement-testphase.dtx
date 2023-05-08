@@ -52,17 +52,29 @@
 % \maketitle
 % \begin{documentation}
 % \section*{Abstract}
-%  {\em This is a temporary package created to allow the manual
+%  {\em This is a temporary bundle created to allow the external
 %   loading of the new \LaTeX{} PDF management code during a test phase.
 %  It will disappear when the code is integrated into the \LaTeX{} format.}
 %
 %  \medskip
-%  \noindent During the test phase the package should be used like this:
+%  \noindent When using \LaTeX-2022-06-01  or newer, the 
+%  PDF management code is loaded if you use \cs{DocumentMetadata} before
+%  \cs{documentclass}. 
 %
 % \begin{verbatim}
-% \RequirePackage{pdfmanagement-testphase}   % load the package
+% \DocumentMetadata      % load activate the PDF management (with options)
+%     {
+%       % options
+%     }
 %
-% \DocumentMetadata      % activate the PDF management (with options)
+%  \documentclass {...}
+% \end{verbatim}
+% 
+% In older \LaTeX{} is has to be loaded explicitly:
+% 
+% \begin{verbatim}
+% \RequirePackage{pdfmanagement-testphase}
+% \DocumentMetadata      % load activate the PDF management (with options)
 %     {
 %       % options
 %     }
@@ -71,9 +83,6 @@
 % \end{verbatim}
 %  Note that the activation has to happen before the \cs{documentclass} declaration.
 %  Because of this, the package needs loading with \cs{RequirePackage}.
-%
-% Starting with LaTeX 2022-06-01 (or a suitable latex-dev) it is no longer necessary to
-% load pdfmanagement-testphase manually, using \cs{DocumentMetadata} is enough.
 %
 %
 % \section*{Feedback wanted!}
