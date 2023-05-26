@@ -1213,7 +1213,11 @@
    _pdfstandard / X-6p .code:n =
     {\AddToDocumentProperties [document]{pdfstandard-X}{PDF/X-6p}},
    _pdfstandard / UA-1 .code:n =
-    {\AddToDocumentProperties [document]{pdfstandard-UA}{1}},
+    {
+     \AddToDocumentProperties [document]{pdfstandard-UA}{{1}{2016}}
+    },
+   _pdfstandard / UA-2 .code:n =
+    {\AddToDocumentProperties [document]{pdfstandard-UA}{{2}{2023}}},    
    xmp  .bool_gset:N = \g_@@_xmp_bool
  }
 %    \end{macrocode}
@@ -1930,7 +1934,8 @@
    {Year~of~standard}
 %    \end{macrocode}
 % \end{macro}
-%  \item[pdfuaid] here we need to declare the property \enquote{part}.
+%  \item[pdfuaid] here we need (?) to declare the property 
+%  \enquote{part} and \enquote{rev}.
 % \begin{macro}{pdfuaid~(schema)}
 %    \begin{macrocode}
 \@@_xmp_schema_new:nnn
@@ -1943,6 +1948,12 @@
    {Integer}
    {internal}
    {Part~of~ISO~14289~standard}
+\@@_xmp_property_new:nnnnn
+   {pdfuaid}
+   {rev}
+   {Integer}
+   {internal}
+   {Revision~of~ISO~14289~standard}   
 %    \end{macrocode}
 % \end{macro}
 % \item[pdfx] According to [1] not an allowed schema, but it seems
@@ -2216,8 +2227,13 @@
      {\@@_xmp_add_packet_line:nne {pdfaid}{rev}  {\pdfmeta_standard_item:n{year}}}
     \@@_xmp_add_packet_line:nne
       {pdfxid}{GTS_PDFXVersion}{\GetDocumentProperties{document/pdfstandard-X}}
-    \@@_xmp_add_packet_line:nne
-      {pdfuaid}{part}{\GetDocumentProperties{document/pdfstandard-UA}}
+    \pdfmanagement_get_documentproperties:nNT {document/pdfstandard-UA}\l_@@_tmpa_tl  
+     { 
+       \@@_xmp_add_packet_line:nne
+        {pdfuaid}{part}{\exp_last_unbraced:No\use_i:nn \l_@@_tmpa_tl}          
+      \@@_xmp_add_packet_line:nne
+        {pdfuaid}{rev}{\exp_last_unbraced:No\use_ii:nn \l_@@_tmpa_tl}            
+     } 
   }
 %    \end{macrocode}
 % \end{macro}
