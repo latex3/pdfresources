@@ -89,9 +89,10 @@
 %    \item[\texttt{pdfstandard}] Choice key to set the pdf standard.
 %    
 %      Starting with version 0.95s it is also possible to use the values
-%      |X-4|, |X-4p|, |X-5g|, |X-5n|, |X-5pg|, |X-6|, |X-6n|, |X-6p|, |UA-1|, |UA-2| for
+%      |X-4|, |X-4p|, |X-5g|, |X-5n|, |X-5pg|, |X-6|, |X-6n|, |X-6p|, |UA-1|, for
 %      a PDF/X and PDF/UA standard. These keys set \emph{only} the relevant
-%      XMP-metadata. Note that |UA-2| hasn't been released yet and should be used only together
+%      XMP-metadata. In version 0.95z support for |UA-2| has been added but
+%      note that |UA-2| hasn't been released yet. It should be used only together
 %      with pdf version 2.0.
 %      
 %      Beside this |A-1b|, |A-2a|, |A-2b|, |A-2u|, |A-3a|, |A-3b|, |A-3u| and |A-4|
@@ -142,6 +143,9 @@
 %     \item[\texttt{firstaidoff}] This accepts a comma lists of keywords and disables the patches
 %       related to them. More information can be found in the documentation of
 %       \pkg{pdfmanagement-firstaid}.
+%     \item[\texttt{xmp-export}] This will export the XMP-metadata to a file \verb+\jobname.xmpi+.
+%     with \texttt{debug=\{xmp-export=filename\}} the file name can be changed. 
+%     More information can be found in the documentation of \pkg{l3pdfmeta}.  
 %    \end{description}
 % \end{description}
 %
