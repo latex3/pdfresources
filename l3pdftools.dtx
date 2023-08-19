@@ -126,7 +126,7 @@
 % if the management is active.
 % \begin{function}[updated = 2020-07-03]
 %   {
-%     \pdf_bdc:nn
+%     \pdf_bdc:nn, \pdf_bdc:ee
 %   }
 %   \begin{syntax}
 %     \cs{pdf_bdc:nn} \Arg{tag} \Arg{dictionary content}
@@ -139,8 +139,26 @@
 %   Without the resource management the content is used directly. It then
 %   depends on the backend how it is handled: with dvips a name is used
 %   while the pdfmode engines and dvipdfmx write the content into the stream.
-%
 % \end{function}
+% \begin{function}[added = 2023-08-18]
+%   {
+%     \pdf_bdc_shipout:ee
+%   }
+%   \begin{syntax}
+%     \cs{pdf_bdc_shipout:ee} \Arg{tag} \Arg{dictionary content}
+%   \end{syntax}
+%    This command adds a BDC marked content operator to the current page stream.
+%   \meta{tag} is the tag of this operator (without the leading slash),
+%   \meta{dictionary content} is the content of the second argument.
+%   
+%   Differently to \cs{pdf_bdc:ee} the arguments are not expanded when the 
+%   command is \emph{used}, but only at \emph{shipout}. 
+%   This requires new engines which
+%   allow to use the keyword \texttt{shipout} with the primitive
+%   \cs{special} and \cs{pdfliteral}. The content of \meta{dictionary content}
+%   is added in the stream. 
+% \end{function}
+% 
 % \begin{function}[added = 2020-07-03]
 %   {
 %     \pdf_bdcobject:nn
@@ -405,13 +423,17 @@
 % \end{macro}
 %
 % \subsubsection{BDC  operator commands}
-% \begin{macro}{\pdf_bdc:nn}
+% \begin{macro}{\pdf_bdc:nn,\pdf_bdc:ee}
+% \begin{macro}{\pdf_bdc_shipout:ee}
 % \begin{macro}{\pdf_bdcobject:nn}
 % \begin{macro}{\pdf_bdcobject:n}
 % \begin{macro}{\pdf_bmc:n}
 % \begin{macro}{\pdf_emc:}
 %    \begin{macrocode}
 \cs_new_protected:Npn  \pdf_bdc:nn #1 #2 { \@@_backend_bdc:nn { #1 }{ #2 } }
+\cs_generate_variant:Nn \pdf_bdc:nn {ee}
+\cs_new_protected:Npn  \pdf_bdc_shipout:ee #1 #2 
+ { \@@_backend_bdc_shipout:ee { #1 }{ #2 } }
 \cs_new_protected:Npn  \pdf_bdcobject:nn #1 #2 { \@@_backend_bdcobject:nn { #1 }{ #2 } }
 \cs_new_protected:Npn  \pdf_bdcobject:n #1     { \@@_backend_bdcobject:n  { #1 } }
 \cs_new_protected:Npn  \pdf_bmc:n #1     { \@@_backend_bmc:n  { #1 } }
