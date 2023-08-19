@@ -3,7 +3,6 @@ packageversion="0.95x"
 packagedate="2023-03-09"
 
 local luatexstatus = status.list()
-local istl2023 = string.match (luatexstatus.banner,"2023")
 
 -- Build script for "LaTeX PDF management testphase bundle" bundle
 
@@ -64,27 +63,13 @@ checkengines = {"pdftex","luatex","xetex"}
 -- with tl2023 we exclue dvips tests for now
 --
 
-if istl2023 then
 checkconfigs = {"build", -- luatex, pdftex, xetex
                 "config-noxetex", --pdftex + luatex (std)
                 "config-luatex",  -- luatex
                 "config-dvips",   -- latex + dvips
                 "config-pdftex",  -- pdftex
-                "config-pdftex-23",  -- pdftex, texlive 2023
-                "config-luatex-23",  -- luatex, texlive 2023
                 "config-xetex"    -- xetex
                 }
-else
-checkconfigs = {"build", -- luatex, pdftex, xetex
-                "config-noxetex", --pdftex + luatex (std)
-                "config-luatex",  -- luatex
-                "config-dvips",   -- latex + dvips
-                "config-pdftex",  -- pdftex
-                "config-pdftex-22",  -- pdftex
-                "config-luatex-22",  -- luatex
-                "config-xetex"    -- xetex
-                }
-end
 
 -- tagging
 tagfiles = {
