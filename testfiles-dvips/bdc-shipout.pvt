@@ -1,0 +1,16 @@
+\DocumentMetadata{uncompress,xmp=false} 
+\input{regression-test}
+\documentclass{book}%
+
+\begin{document}%
+\START 
+\def\mytag{abc}
+\def\mydict{MCID 0}
+\ExplSyntaxOn
+\pdf_bdc_shipout:ee{\mytag}{\mydict} xxx \pdf_emc: 
+\ExplSyntaxOff
+
+\def\mytag{xyz}
+\def\mydict{MCID 1}
+
+\end{document}
