@@ -80,6 +80,71 @@
   {LaTeX~PDF~management~testphase~bundle~backend~support: XeTeX}
 %</xdvipdfmx>
 %    \end{macrocode}
+% \subsection{Support for delayed literal and special}
+% Starting with TeXlive 2023 the engines support a \texttt{shipout} keyword
+% for \cs{pdfliteral} and \cs{special}. When used the argument is not expanded
+% when the command is used but only when the page is shipped out. This allows for example
+% the tagging code to delay the page-wise numbering of MC-chunks until the page is 
+% actually built.
+% 
+% The following commands provide the needed kernel backend support. This are basically
+% copies of similar commands of l3backend-basics
+% \begin{macro}
+%   {
+%     \__kernel_backend_shipout_literal:n,
+%     \__kernel_backend_shipout_literal:x
+%   }
+%  The one shared function for all backends is access to the basic
+%  \tn{special} primitive:
+%    \begin{macrocode}
+%<*drivers>
+\cs_new_protected:Npn \__kernel_backend_shipout_literal:n #1
+  { \tex_special:D~shipout { #1} }
+\cs_generate_variant:Nn \__kernel_backend_shipout_literal:n { x }
+%</drivers>
+%    \end{macrocode}
+% \end{macro}
+% 
+%    \begin{macrocode}
+%<*luatex|pdftex>
+%    \end{macrocode}
+% \begin{macro}{\__kernel_backend_shipout_literal_pdf:n, \__kernel_backend_shipout_literal_pdf:x}
+%   This is equivalent to \verb|\special{pdf:}| but the engine can
+%   track it. Without the \texttt{direct} keyword everything is kept in
+%   sync: the transformation matrix is set to the current point automatically.
+%   Note that this is still inside the text (\texttt{BT} \dots \texttt{ET}
+%   block).
+%    \begin{macrocode}
+\cs_new_protected:Npn \__kernel_backend_shipout_literal_pdf:n #1
+  {
+%<*luatex>
+    \tex_pdfextension:D ~ shipout ~ literal
+%</luatex>
+%<*pdftex>
+    \tex_pdfliteral:D ~ shipout ~
+%</pdftex>
+      { #1 }
+  }
+\cs_generate_variant:Nn \__kernel_backend_shipout_literal_pdf:n { x }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\__kernel_backend_shipout_literal_page:n}
+%  Page literals are pretty simple. 
+%    \begin{macrocode}
+\cs_new_protected:Npn \__kernel_backend_shipout_literal_page:n #1
+  {
+%<*luatex>
+    \tex_pdfextension:D ~ shipout ~ literal ~
+%</luatex>
+%<*pdftex>
+    \tex_pdfliteral:D ~ shipout ~
+%</pdftex>
+        page { #1 }
+  }
+%    \end{macrocode}
+% \end{macro} 
+
 % \subsection{Crossreferences}
 % This uses the temporary l3ref-tmp.sty. It will
 % will be replaced by kernel code later.
@@ -704,13 +769,15 @@
 % \begin{macro}
 %   {
 %     \@@_backend_bdc:nn,
+%     \@@_backend_shipout_bdc:nn,
 %     \@@_backend_bdcobject:nn,
 %     \@@_backend_bdcobject:n,
 %     \@@_backend_bmc:n,
 %     \@@_backend_emc:,
 %     \@@_backend_PageResources_gpush:n
 %   }
-% \cs{@@_backend_bdc:nn}, \cs{@@_backend_bdcobject:nn}, \cs{@@_backend_bdcobject:n},
+% \cs{@@_backend_bdc:nn}, \cs{@@_backend_shipout_bdc:nn},
+% \cs{@@_backend_bdcobject:nn}, \cs{@@_backend_bdcobject:n},
 % \cs{@@_backend_bmc:n} and \cs{@@_backend_emc:}
 %  are the backend command that
 %  create the bdc/emc marker and store the properties.
@@ -733,6 +800,16 @@
   {
     \@@_backend_pdfmark:x{/#1~<<#2>>~/BDC}
   }
+
+\cs_new_protected:Npn \@@_backend_shipout_bdc:nn #1 #2 % #1 eg. Span, #2: dict_content
+  { 
+    \__kernel_backend_shipout_literal:n
+      {ps: SDict ~ begin ~ mark /#1~<<#2>>~/BDC ~ pdfmark ~ end }
+  }  
+
+\cs_new_protected:Npn \__kernel_backend_postscript:n #1
+  { \__kernel_backend_literal:n { ps: SDict ~ begin ~ #1 ~ end } }  
+  
 \cs_set_protected:Npn \@@_backend_bdcobject:nn #1 #2 % #1 eg. Span, #2: object name
   {
     \@@_backend_pdfmark:x{/#1~\@@_backend_object_ref:n{#2}~/BDC}
@@ -757,6 +834,8 @@
 %
 \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: dict_content
   {}
+\cs_set_protected:Npn \@@_backend_shipout_bdc:nn #1 #2 % #1 eg. Span, #2: dict_content
+  {}  
 \cs_set_protected:Npn \@@_backend_bdcobject:nn #1 #2 % #1 eg. Span, #2: object name
   {}
 \cs_set_protected:Npn \@@_backend_bdcobject:n #1  % #1 eg. Span,
@@ -831,6 +910,11 @@
     \__kernel_backend_literal:n {pdf:code~ /#1~<<#2>>~BDC }
   }
 
+\cs_set_protected:Npn \@@_backend_bdc_shipout_contstream:nn #1 #2
+  {
+    \__kernel_backend_shipout_literal:n {pdf:code~ /#1~<<#2>>~BDC }
+  }
+  
 \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2
   {
     \bool_if:NTF  \g__pdfmanagement_active_bool
@@ -838,6 +922,9 @@
       {\cs_gset_eq:NN \@@_backend_bdc:nn \@@_backend_bdc_contstream:nn}
       \@@_backend_bdc:nn {#1}{#2}
   }
+  
+\cs_set_eq:NN \@@_backend_shipout_bdc:nn \@@_backend_bdc_shipout_contstream:nn
+
 \cs_set_protected:Npn \@@_backend_emc:
   {
     \__kernel_backend_literal:n {pdf:code~EMC}  %pdfbase
@@ -922,6 +1009,12 @@
   {
     \__kernel_backend_literal_page:n { /#1~<<#2>>~BDC }
   }
+  
+\cs_set_protected:Npn \@@_backend_bdc_shipout_contstream:nn #1 #2
+  {
+    \__kernel_backend_shipout_literal_page:n { /#1~<<#2>>~BDC }
+  }  
+  
 \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2
   {
     \bool_if:NTF  \g__pdfmanagement_active_bool
@@ -929,6 +1022,8 @@
       {\cs_gset_eq:NN \@@_backend_bdc:nn \@@_backend_bdc_contstream:nn}
       \@@_backend_bdc:nn {#1}{#2}
   }
+\cs_set_eq:NN \@@_backend_shipout_bdc:nn \@@_backend_bdc_shipout_contstream:nn
+
 \cs_set_protected:Npn \@@_backend_emc:
   {
     \__kernel_backend_literal_page:n { EMC }
@@ -1013,6 +1108,10 @@
    {
      \__kernel_backend_literal_page:n { /#1~<<#2>>~BDC }
    }
+\cs_set_protected:Npn \@@_backend_bdc_shipout_contstream:nn #1 #2
+   {
+     \__kernel_backend_literal_page:n { /#1~<<#2>>~BDC }
+   }   
 \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2
   {
     \bool_if:NTF  \g__pdfmanagement_active_bool
@@ -1020,6 +1119,8 @@
       {\cs_gset_eq:NN \@@_backend_bdc:nn \@@_backend_bdc_contstream:nn}
       \@@_backend_bdc:nn {#1}{#2}
   }
+\cs_set_eq:NN \@@_backend_shipout_bdc:nn \@@_backend_bdc_shipout_contstream:nn
+  
 \cs_set_protected:Npn \@@_backend_emc:
   {
     \__kernel_backend_literal_page:n { EMC }
