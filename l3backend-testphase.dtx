@@ -91,16 +91,14 @@
 % copies of similar commands of l3backend-basics
 % \begin{macro}
 %   {
-%     \__kernel_backend_shipout_literal:n,
-%     \__kernel_backend_shipout_literal:x
+%     \__kernel_backend_shipout_literal:e
 %   }
 %  The one shared function for all backends is access to the basic
 %  \tn{special} primitive:
 %    \begin{macrocode}
 %<*drivers>
-\cs_new_protected:Npn \__kernel_backend_shipout_literal:n #1
+\cs_new_protected:Npn \__kernel_backend_shipout_literal:e #1
   { \tex_special:D~shipout { #1} }
-\cs_generate_variant:Nn \__kernel_backend_shipout_literal:n { x }
 %</drivers>
 %    \end{macrocode}
 % \end{macro}
@@ -108,34 +106,33 @@
 %    \begin{macrocode}
 %<*luatex|pdftex>
 %    \end{macrocode}
-% \begin{macro}{\__kernel_backend_shipout_literal_pdf:n, \__kernel_backend_shipout_literal_pdf:x}
+% \begin{macro}{\__kernel_backend_shipout_literal_pdf:e}
 %   This is equivalent to \verb|\special{pdf:}| but the engine can
 %   track it. Without the \texttt{direct} keyword everything is kept in
 %   sync: the transformation matrix is set to the current point automatically.
 %   Note that this is still inside the text (\texttt{BT} \dots \texttt{ET}
 %   block).
 %    \begin{macrocode}
-\cs_new_protected:Npn \__kernel_backend_shipout_literal_pdf:n #1
+\cs_new_protected:Npn \__kernel_backend_shipout_literal_pdf:e #1
   {
 %<*luatex>
-    \tex_pdfextension:D ~ shipout ~ literal
+    \tex_pdfextension:D ~ literal ~ shipout ~ 
 %</luatex>
 %<*pdftex>
     \tex_pdfliteral:D ~ shipout ~
 %</pdftex>
       { #1 }
   }
-\cs_generate_variant:Nn \__kernel_backend_shipout_literal_pdf:n { x }
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\__kernel_backend_shipout_literal_page:n}
+% \begin{macro}{\__kernel_backend_shipout_literal_page:e}
 %  Page literals are pretty simple. 
 %    \begin{macrocode}
-\cs_new_protected:Npn \__kernel_backend_shipout_literal_page:n #1
+\cs_new_protected:Npn \__kernel_backend_shipout_literal_page:e #1
   {
 %<*luatex>
-    \tex_pdfextension:D ~ shipout ~ literal ~
+    \tex_pdfextension:D ~ literal ~ shipout ~ 
 %</luatex>
 %<*pdftex>
     \tex_pdfliteral:D ~ shipout ~
@@ -770,14 +767,14 @@
 % \begin{macro}
 %   {
 %     \@@_backend_bdc:nn,
-%     \@@_backend_shipout_bdc:nn,
+%     \@@_backend_shipout_bdc:ee,
 %     \@@_backend_bdcobject:nn,
 %     \@@_backend_bdcobject:n,
 %     \@@_backend_bmc:n,
 %     \@@_backend_emc:,
 %     \@@_backend_PageResources_gpush:n
 %   }
-% \cs{@@_backend_bdc:nn}, \cs{@@_backend_shipout_bdc:nn},
+% \cs{@@_backend_bdc:nn}, \cs{@@_backend_shipout_bdc:ee},
 % \cs{@@_backend_bdcobject:nn}, \cs{@@_backend_bdcobject:n},
 % \cs{@@_backend_bmc:n} and \cs{@@_backend_emc:}
 %  are the backend command that
@@ -799,17 +796,14 @@
 %
 \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: dict_content
   {
-    \@@_backend_pdfmark:x{/#1~<<#2>>~/BDC}
+    \@@_backend_pdfmark:n{/#1~<<#2>>~/BDC}
   }
 
-\cs_new_protected:Npn \@@_backend_shipout_bdc:nn #1 #2 % #1 eg. Span, #2: dict_content
+\cs_new_protected:Npn \@@_backend_bdc_shipout:ee #1 #2 % #1 eg. Span, #2: dict_content
   { 
-    \__kernel_backend_shipout_literal:n
+    \__kernel_backend_shipout_literal:e
       {ps: SDict ~ begin ~ mark /#1~<<#2>>~/BDC ~ pdfmark ~ end }
   }  
-
-\cs_new_protected:Npn \__kernel_backend_postscript:n #1
-  { \__kernel_backend_literal:n { ps: SDict ~ begin ~ #1 ~ end } }  
   
 \cs_set_protected:Npn \@@_backend_bdcobject:nn #1 #2 % #1 eg. Span, #2: object name
   {
@@ -835,7 +829,7 @@
 %
 \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: dict_content
   {}
-\cs_set_protected:Npn \@@_backend_shipout_bdc:nn #1 #2 % #1 eg. Span, #2: dict_content
+\cs_set_protected:Npn \@@_backend_shipout_bdc:ee #1 #2 % #1 eg. Span, #2: dict_content
   {}  
 \cs_set_protected:Npn \@@_backend_bdcobject:nn #1 #2 % #1 eg. Span, #2: object name
   {}
@@ -880,7 +874,7 @@
      \int_gincr:N \g_@@_backend_name_int
      \__kernel_backend_literal:x
        {
-         pdf:code~/#1/l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC
+         pdf:code~/\exp_not:n{#1}/l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC
        }
      \__kernel_backend_literal:x
        {
@@ -911,9 +905,9 @@
     \__kernel_backend_literal:n {pdf:code~ /#1~<<#2>>~BDC }
   }
 
-\cs_set_protected:Npn \@@_backend_bdc_shipout_contstream:nn #1 #2
+\cs_set_protected:Npn \@@_backend_bdc_shipout_contstream:ee #1 #2
   {
-    \__kernel_backend_shipout_literal:n {pdf:code~ /#1~<<#2>>~BDC }
+    \__kernel_backend_shipout_literal:e {pdf:code~ /#1~<<#2>>~BDC }
   }
   
 \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2
@@ -924,7 +918,7 @@
       \@@_backend_bdc:nn {#1}{#2}
   }
   
-\cs_set_eq:NN \@@_backend_shipout_bdc:nn \@@_backend_bdc_shipout_contstream:nn
+\cs_set_eq:NN \@@_backend_bdc_shipout:ee \@@_backend_bdc_shipout_contstream:ee
 
 \cs_set_protected:Npn \@@_backend_emc:
   {
@@ -977,7 +971,7 @@
   {
     \int_gincr:N \g_@@_backend_name_int
     \exp_args:Nx\__kernel_backend_literal_page:n
-      { /#1 ~ /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC }
+      { /\exp_not:n{#1} ~ /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC }
     \bool_if:NTF \l_@@_backend_xform_bool
       {
         \exp_args:Nnx\pdfdict_gput:nnn %no handler needed
@@ -1011,9 +1005,9 @@
     \__kernel_backend_literal_page:n { /#1~<<#2>>~BDC }
   }
   
-\cs_set_protected:Npn \@@_backend_bdc_shipout_contstream:nn #1 #2
+\cs_set_protected:Npn \@@_backend_bdc_shipout_contstream:ee #1 #2
   {
-    \__kernel_backend_shipout_literal_page:n { /#1~<<#2>>~BDC }
+    \__kernel_backend_shipout_literal_page:e { /#1~<<#2>>~BDC }
   }  
   
 \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2
@@ -1023,7 +1017,7 @@
       {\cs_gset_eq:NN \@@_backend_bdc:nn \@@_backend_bdc_contstream:nn}
       \@@_backend_bdc:nn {#1}{#2}
   }
-\cs_set_eq:NN \@@_backend_shipout_bdc:nn \@@_backend_bdc_shipout_contstream:nn
+\cs_set_eq:NN \@@_backend_bdc_shipout:ee \@@_backend_bdc_shipout_contstream:ee
 
 \cs_set_protected:Npn \@@_backend_emc:
   {
@@ -1069,7 +1063,7 @@
   {
     \int_gincr:N \g_@@_backend_name_int
     \exp_args:Nx\__kernel_backend_literal_page:n
-      { /#1 ~ /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC }
+      { /\exp_not:n{#1} ~ /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC }
     % code to set the property ....
     \int_gincr:N\g_@@_backend_resourceid_int
     \bool_if:NTF \l_@@_backend_xform_bool
@@ -1109,9 +1103,9 @@
    {
      \__kernel_backend_literal_page:n { /#1~<<#2>>~BDC }
    }
-\cs_set_protected:Npn \@@_backend_bdc_shipout_contstream:nn #1 #2
+\cs_set_protected:Npn \@@_backend_bdc_shipout_contstream:ee #1 #2
    {
-     \__kernel_backend_literal_page:n { /#1~<<#2>>~BDC }
+     \__kernel_backend_shipout_literal_page:e { /#1~<<#2>>~BDC }
    }   
 \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2
   {
@@ -1120,7 +1114,7 @@
       {\cs_gset_eq:NN \@@_backend_bdc:nn \@@_backend_bdc_contstream:nn}
       \@@_backend_bdc:nn {#1}{#2}
   }
-\cs_set_eq:NN \@@_backend_shipout_bdc:nn \@@_backend_bdc_shipout_contstream:nn
+\cs_set_eq:NN \@@_backend_bdc_shipout:ee \@@_backend_bdc_shipout_contstream:ee
   
 \cs_set_protected:Npn \@@_backend_emc:
   {
