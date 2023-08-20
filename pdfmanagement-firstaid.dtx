@@ -113,31 +113,6 @@
       }               
    }
 %    \end{macrocode}
-% \subsection{Output routine}
-% The patches for the LaTeX output routine commands for the tagging
-% of the header/footer, the suppressing of links
-% and the patch to multicol for the para tagging
-% by default, but must be requested with the key \texttt{testphase=new-or-1}.
-% But until latex-lab has been updated we must ensure that they are loaded with
-% the various phases.
-%    \begin{macrocode}
-\bool_if:NT \g_@@_firstaid_output_bool
-  {
-%    \end{macrocode}
-% This catches also phase-II and tagpdf.
-%    \begin{macrocode}
-    \file_if_exist:nF {new-or-1-latex-lab-testphase.ltx}
-      { 
-        \AddToHook{package/latex-lab-testphase-new-or/after}
-          {\RequirePackage{output-patches-tmp-ltx}}
-%    \end{macrocode}
-% This is for phase-I
-%    \begin{macrocode}
-        \AddToHook{package/tagpdf/after}
-          {\RequirePackage{output-patches-tmp-ltx}}
-      }    
-  }
-%    \end{macrocode}
 
 % \subsection{\pkg{beamer}}
 % \pkg{beamer} made use of the now unsupported syntax |linkbordercolor={.5 .5 .5}|.
