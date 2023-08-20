@@ -85,20 +85,60 @@
 % for \cs{pdfliteral} and \cs{special}. When used the argument is not expanded
 % when the command is used but only when the page is shipped out. This allows for example
 % the tagging code to delay the page-wise numbering of MC-chunks until the page is 
-% actually built.
+% actually built. For now we test the engine support and define for this a boolean:
+%    \begin{macrocode}
+%<*drivers>
+\bool_new:N\l__kernel_delayed_shipout_bool
+\sys_if_engine_luatex:T
+ {
+   \int_compare:nNnF {\tex_luatexversion:D} > {116}
+    {
+      \bool_set_true:N\l__kernel_delayed_shipout_bool
+    }
+ }
+\sys_if_engine_pdftex:T
+ {
+   \fp_compare:nNnT{\int_use:N\tex_pdftexversion:D.\tex_pdftexrevision:D}>{140.24}
+    {
+      \bool_set_true:N\l__kernel_delayed_shipout_bool
+    }
+ } 
+\sys_if_engine_ptex:T
+ {
+   \int_compare:nNnT{\tex_epTeXversion:D} > {230213}
+    {
+      \bool_set_true:N\l__kernel_delayed_shipout_bool
+    }
+ }  
+\sys_if_engine_uptex:T
+ {
+   \int_compare:nNnT{\tex_epTeXversion:D} > {230213}
+    {
+      \bool_set_true:N\l__kernel_delayed_shipout_bool
+    }
+ }   
+\sys_if_engine_xetex:T
+ {
+   \fp_compare:nNnT{\int_use:N\tex_XeTeXversion:D\tex_XeTeXrevision:D} > {0.999994}
+    {
+      \bool_set_true:N\l__kernel_delayed_shipout_bool
+    }
+ }    
+%    \end{macrocode}
 % 
 % The following commands provide the needed kernel backend support. This are basically
-% copies of similar commands of l3backend-basics
+% copies of similar commands of l3backend-basics.
 % \begin{macro}
 %   {
 %     \__kernel_backend_shipout_literal:e
 %   }
 %  The one shared function for all backends is access to the basic
-%  \tn{special} primitive:
+%  \tn{special} primitive. 
 %    \begin{macrocode}
-%<*drivers>
-\cs_new_protected:Npn \__kernel_backend_shipout_literal:e #1
-  { \tex_special:D~shipout { #1} }
+\bool_if:NT \l__kernel_delayed_shipout_bool
+ {
+   \cs_new_protected:Npn \__kernel_backend_shipout_literal:e #1
+     { \tex_special:D~shipout { #1} }
 %</drivers>
 %    \end{macrocode}
 % \end{macro}
@@ -113,33 +153,34 @@
 %   Note that this is still inside the text (\texttt{BT} \dots \texttt{ET}
 %   block).
 %    \begin{macrocode}
-\cs_new_protected:Npn \__kernel_backend_shipout_literal_pdf:e #1
-  {
+  \cs_new_protected:Npn \__kernel_backend_shipout_literal_pdf:e #1
+    {
 %<*luatex>
-    \tex_pdfextension:D ~ literal ~ shipout ~ 
+      \tex_pdfextension:D ~ literal ~ shipout ~ 
 %</luatex>
 %<*pdftex>
-    \tex_pdfliteral:D ~ shipout ~
+      \tex_pdfliteral:D ~ shipout ~
 %</pdftex>
-      { #1 }
-  }
+        { #1 }
+    }
 %    \end{macrocode}
 % \end{macro}
 %
 % \begin{macro}{\__kernel_backend_shipout_literal_page:e}
 %  Page literals are pretty simple. 
 %    \begin{macrocode}
-\cs_new_protected:Npn \__kernel_backend_shipout_literal_page:e #1
-  {
+  \cs_new_protected:Npn \__kernel_backend_shipout_literal_page:e #1
+    {
 %<*luatex>
-    \tex_pdfextension:D ~ literal ~ shipout ~ 
+      \tex_pdfextension:D ~ literal ~ shipout ~ 
 %</luatex>
 %<*pdftex>
-    \tex_pdfliteral:D ~ shipout ~
+      \tex_pdfliteral:D ~ shipout ~
 %</pdftex>
         page { #1 }
-  }
+    }
 %</luatex|pdftex> 
+%<drivers> }
 %    \end{macrocode}
 % \end{macro} 
 
@@ -799,11 +840,14 @@
     \@@_backend_pdfmark:n{/#1~<<#2>>~/BDC}
   }
 
-\cs_new_protected:Npn \@@_backend_bdc_shipout:ee #1 #2 % #1 eg. Span, #2: dict_content
-  { 
-    \__kernel_backend_shipout_literal:e
-      {ps: SDict ~ begin ~ mark /#1~<<#2>>~/BDC ~ pdfmark ~ end }
-  }  
+\bool_if:NT\l__kernel_delayed_shipout_bool
+  {
+    \cs_new_protected:Npn \@@_backend_bdc_shipout:ee #1 #2 % #1 eg. Span, #2: dict_content
+      { 
+        \__kernel_backend_shipout_literal:e
+          {ps: SDict ~ begin ~ mark /#1~<<#2>>~/BDC ~ pdfmark ~ end }
+      }
+  }      
   
 \cs_set_protected:Npn \@@_backend_bdcobject:nn #1 #2 % #1 eg. Span, #2: object name
   {
@@ -829,8 +873,11 @@
 %
 \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: dict_content
   {}
-\cs_set_protected:Npn \@@_backend_shipout_bdc:ee #1 #2 % #1 eg. Span, #2: dict_content
-  {}  
+\bool_if:NT\l__kernel_delayed_shipout_bool
+  {  
+    \cs_set_protected:Npn \@@_backend_shipout_bdc:ee #1 #2 % #1 eg. Span, #2: dict_content
+      {}  
+  }    
 \cs_set_protected:Npn \@@_backend_bdcobject:nn #1 #2 % #1 eg. Span, #2: object name
   {}
 \cs_set_protected:Npn \@@_backend_bdcobject:n #1  % #1 eg. Span,
@@ -905,21 +952,22 @@
     \__kernel_backend_literal:n {pdf:code~ /#1~<<#2>>~BDC }
   }
 
-\cs_set_protected:Npn \@@_backend_bdc_shipout_contstream:ee #1 #2
-  {
-    \__kernel_backend_shipout_literal:e {pdf:code~ /#1~<<#2>>~BDC }
-  }
-  
-\cs_set_protected:Npn \@@_backend_bdc:nn #1 #2
+ \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2
   {
     \bool_if:NTF  \g__pdfmanagement_active_bool
       {\cs_gset_eq:NN \@@_backend_bdc:nn \@@_backend_bdc_contobj:nn}
       {\cs_gset_eq:NN \@@_backend_bdc:nn \@@_backend_bdc_contstream:nn}
       \@@_backend_bdc:nn {#1}{#2}
   }
-  
-\cs_set_eq:NN \@@_backend_bdc_shipout:ee \@@_backend_bdc_shipout_contstream:ee
 
+\bool_if:NT\l__kernel_delayed_shipout_bool
+  { 
+    \cs_set_protected:Npn \@@_backend_bdc_shipout_contstream:ee #1 #2
+      {
+        \__kernel_backend_shipout_literal:e {pdf:code~ /#1~<<#2>>~BDC }
+      }  
+    \cs_set_eq:NN \@@_backend_bdc_shipout:ee \@@_backend_bdc_shipout_contstream:ee
+  }
 \cs_set_protected:Npn \@@_backend_emc:
   {
     \__kernel_backend_literal:n {pdf:code~EMC}  %pdfbase
@@ -1005,20 +1053,23 @@
     \__kernel_backend_literal_page:n { /#1~<<#2>>~BDC }
   }
   
-\cs_set_protected:Npn \@@_backend_bdc_shipout_contstream:ee #1 #2
-  {
-    \__kernel_backend_shipout_literal_page:e { /#1~<<#2>>~BDC }
-  }  
-  
-\cs_set_protected:Npn \@@_backend_bdc:nn #1 #2
+ \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2
   {
     \bool_if:NTF  \g__pdfmanagement_active_bool
       {\cs_gset_eq:NN \@@_backend_bdc:nn \@@_backend_bdc_contobj:nn}
       {\cs_gset_eq:NN \@@_backend_bdc:nn \@@_backend_bdc_contstream:nn}
       \@@_backend_bdc:nn {#1}{#2}
   }
-\cs_set_eq:NN \@@_backend_bdc_shipout:ee \@@_backend_bdc_shipout_contstream:ee
 
+\bool_if:NT\l__kernel_delayed_shipout_bool
+  {  
+    \cs_set_protected:Npn \@@_backend_bdc_shipout_contstream:ee #1 #2
+      {
+        \__kernel_backend_shipout_literal_page:e { /#1~<<#2>>~BDC }
+      }    
+    \cs_set_eq:NN \@@_backend_bdc_shipout:ee \@@_backend_bdc_shipout_contstream:ee
+  }
+  
 \cs_set_protected:Npn \@@_backend_emc:
   {
     \__kernel_backend_literal_page:n { EMC }
@@ -1103,10 +1154,7 @@
    {
      \__kernel_backend_literal_page:n { /#1~<<#2>>~BDC }
    }
-\cs_set_protected:Npn \@@_backend_bdc_shipout_contstream:ee #1 #2
-   {
-     \__kernel_backend_shipout_literal_page:e { /#1~<<#2>>~BDC }
-   }   
+
 \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2
   {
     \bool_if:NTF  \g__pdfmanagement_active_bool
@@ -1114,7 +1162,14 @@
       {\cs_gset_eq:NN \@@_backend_bdc:nn \@@_backend_bdc_contstream:nn}
       \@@_backend_bdc:nn {#1}{#2}
   }
-\cs_set_eq:NN \@@_backend_bdc_shipout:ee \@@_backend_bdc_shipout_contstream:ee
+\bool_if:NT\l__kernel_delayed_shipout_bool
+  {  
+    \cs_set_protected:Npn \@@_backend_bdc_shipout_contstream:ee #1 #2
+       {
+         \__kernel_backend_shipout_literal_page:e { /#1~<<#2>>~BDC }
+       }     
+    \cs_set_eq:NN \@@_backend_bdc_shipout:ee \@@_backend_bdc_shipout_contstream:ee
+  }
   
 \cs_set_protected:Npn \@@_backend_emc:
   {

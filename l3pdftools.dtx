@@ -157,6 +157,8 @@
 %   allow to use the keyword \texttt{shipout} with the primitive
 %   \cs{special} and \cs{pdfliteral}. The content of \meta{dictionary content}
 %   is added in the stream. 
+%   
+%   The command requires current engines and is not defined if an to old engine is detected!
 % \end{function}
 % 
 % \begin{function}[added = 2020-07-03]
@@ -436,8 +438,24 @@
 %    \begin{macrocode}
 \cs_new_protected:Npn  \pdf_bdc:nn #1 #2 { \@@_backend_bdc:nn { #1 }{ #2 } }
 \cs_generate_variant:Nn \pdf_bdc:nn {ee}
+
+\msg_new:nnn {pdfmanagement}{delayed-shipout}
+ {
+   The~engine~is~too~old!\\
+   \tl_to_str:n{\pdf_bdc_shipout:ee}~can~not~be~used.
+ }
 \cs_new_protected:Npn  \pdf_bdc_shipout:ee #1 #2 
- { \@@_backend_bdc_shipout:ee { #1 }{ #2 } }
+  { 
+    \bool_if:NTF\l__kernel_delayed_shipout_bool
+      { 
+        \@@_backend_bdc_shipout:ee { #1 }{ #2 } 
+        \cs_gset_eq:NN \pdf_bdc_shipout:ee \@@_backend_bdc_shipout:ee
+      }
+      {
+        \msg_error:nn {pdfmanagement}{delayed-shipout}    
+        \cs_gset_eq:NN \pdf_bdc:ee  \use_none:nn
+      }        
+  }    
 \cs_new_protected:Npn  \pdf_bdcobject:nn #1 #2 { \@@_backend_bdcobject:nn { #1 }{ #2 } }
 \cs_new_protected:Npn  \pdf_bdcobject:n #1     { \@@_backend_bdcobject:n  { #1 } }
 \cs_new_protected:Npn  \pdf_bmc:n #1     { \@@_backend_bmc:n  { #1 } }
