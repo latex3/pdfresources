@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 this project uses date-based 'snapshot' version identifiers.
 
 ## [2023-08-20]
+Version: 2023-08-20, 0.95y
 
 ### Added 
  - l3pdftools: \pdf_bdc_shipout:ee which makes use of the new shipout keyword
