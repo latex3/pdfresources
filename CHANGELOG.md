@@ -8,9 +8,20 @@ this project uses date-based 'snapshot' version identifiers.
 ## [Unreleased]
 
 ### Added 
+ - l3pdftools: \pdf_bdc_shipout:ee which makes use of the new shipout keyword
+   of \special and \pdfliteral
  - key for the (not yet released) standard pdf/UA-2
+
+### Fixed
+ - expansion behaviour of \pdf_bdc:nn
+ - faulty error command in \pdf_string_from_unicode:nnN
  
+## Removed
+ - patches of the output routine. These are now provided by latex-lab
+  
 ## [2023-03-09]
+
+Version: 2023-03-09, 0.95x
 
 ### Fixed
  - regression data producer in xmp
