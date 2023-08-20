@@ -18,7 +18,6 @@ if options["target"] == "ctan" then
                 "l3ref-tmp.sty",
                 "firstaid/xcolor-patches-tmp-ltx.sty",
                 "firstaid/color-ltx.sty",
-                "firstaid/output-patches-tmp-ltx.dtx",
                 "firstaid/colorspace-patches-tmp-ltx.sty",
                 }
 else
@@ -26,7 +25,6 @@ else
                 "l3ref-tmp.sty",
                 "firstaid/xcolor-patches-tmp-ltx.sty",
                 "firstaid/color-ltx.sty",
-                "firstaid/output-patches-tmp-ltx.dtx",
                 "firstaid/colorspace-patches-tmp-ltx.sty",
                 "newpackages/new-bookmark.sty",
                 "newpackages/bkm-generic.def",
