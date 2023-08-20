@@ -85,45 +85,10 @@
 % for \cs{pdfliteral} and \cs{special}. When used the argument is not expanded
 % when the command is used but only when the page is shipped out. This allows for example
 % the tagging code to delay the page-wise numbering of MC-chunks until the page is 
-% actually built. For now we test the engine support and define for this a boolean:
+% actually built. For now we test the engine support. The boolean is setup 
+% in pdfmanagement-testphase.dtx.
 %    \begin{macrocode}
 %<*drivers>
-\bool_new:N\l__kernel_delayed_shipout_bool
-\sys_if_engine_luatex:T
- {
-   \int_compare:nNnF {\tex_luatexversion:D} > {116}
-    {
-      \bool_set_true:N\l__kernel_delayed_shipout_bool
-    }
- }
-\sys_if_engine_pdftex:T
- {
-   \fp_compare:nNnT{\int_use:N\tex_pdftexversion:D.\tex_pdftexrevision:D}>{140.24}
-    {
-      \bool_set_true:N\l__kernel_delayed_shipout_bool
-    }
- } 
-\sys_if_engine_ptex:T
- {
-   \int_compare:nNnT{\tex_epTeXversion:D} > {230213}
-    {
-      \bool_set_true:N\l__kernel_delayed_shipout_bool
-    }
- }  
-\sys_if_engine_uptex:T
- {
-   \int_compare:nNnT{\tex_epTeXversion:D} > {230213}
-    {
-      \bool_set_true:N\l__kernel_delayed_shipout_bool
-    }
- }   
-\sys_if_engine_xetex:T
- {
-   \fp_compare:nNnT{\int_use:N\tex_XeTeXversion:D\tex_XeTeXrevision:D} > {0.999994}
-    {
-      \bool_set_true:N\l__kernel_delayed_shipout_bool
-    }
- }    
 %    \end{macrocode}
 % 
 % The following commands provide the needed kernel backend support. This are basically
@@ -135,7 +100,7 @@
 %  The one shared function for all backends is access to the basic
 %  \tn{special} primitive. 
 %    \begin{macrocode}
-\bool_if:NT \l__kernel_delayed_shipout_bool
+\bool_if:NT \l__pdfmanagement_delayed_shipout_bool
  {
    \cs_new_protected:Npn \__kernel_backend_shipout_literal:e #1
      { \tex_special:D~shipout { #1} }
@@ -840,7 +805,7 @@
     \@@_backend_pdfmark:n{/#1~<<#2>>~/BDC}
   }
 
-\bool_if:NT\l__kernel_delayed_shipout_bool
+\bool_if:NT\l__pdfmanagement_delayed_shipout_bool
   {
     \cs_new_protected:Npn \@@_backend_bdc_shipout:ee #1 #2 % #1 eg. Span, #2: dict_content
       { 
@@ -873,7 +838,7 @@
 %
 \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: dict_content
   {}
-\bool_if:NT\l__kernel_delayed_shipout_bool
+\bool_if:NT\l__pdfmanagement_delayed_shipout_bool
   {  
     \cs_set_protected:Npn \@@_backend_shipout_bdc:ee #1 #2 % #1 eg. Span, #2: dict_content
       {}  
@@ -960,7 +925,7 @@
       \@@_backend_bdc:nn {#1}{#2}
   }
 
-\bool_if:NT\l__kernel_delayed_shipout_bool
+\bool_if:NT\l__pdfmanagement_delayed_shipout_bool
   { 
     \cs_set_protected:Npn \@@_backend_bdc_shipout_contstream:ee #1 #2
       {
@@ -1061,7 +1026,7 @@
       \@@_backend_bdc:nn {#1}{#2}
   }
 
-\bool_if:NT\l__kernel_delayed_shipout_bool
+\bool_if:NT\l__pdfmanagement_delayed_shipout_bool
   {  
     \cs_set_protected:Npn \@@_backend_bdc_shipout_contstream:ee #1 #2
       {
@@ -1162,7 +1127,7 @@
       {\cs_gset_eq:NN \@@_backend_bdc:nn \@@_backend_bdc_contstream:nn}
       \@@_backend_bdc:nn {#1}{#2}
   }
-\bool_if:NT\l__kernel_delayed_shipout_bool
+\bool_if:NT\l__pdfmanagement_delayed_shipout_bool
   {  
     \cs_set_protected:Npn \@@_backend_bdc_shipout_contstream:ee #1 #2
        {
