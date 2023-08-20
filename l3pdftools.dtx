@@ -270,11 +270,15 @@
 %    \end{macrocode}
 % \begin{macro}{\pdf_string_from_unicode:nnN}
 %    \begin{macrocode}
+\msg_new:nnn {pdfmanagement}{ unknown-convert}
+ {
+   Unknown~string~conversion~method~'#1'!
+ }
 \cs_new:Npn \pdf_string_from_unicode:nnN #1 #2 #3
   {
     \cs_if_exist_use:cF { @@_string_from_unicode_#1:nN }
       {
-        \__kernel_msg_error:nnn { pdf } { unknown-convert } {#1}
+        \msg_error:nnn { pdf } { unknown-convert } {#1}
         \use_none:nn
       }
     { #2 } #3
