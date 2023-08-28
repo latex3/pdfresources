@@ -5,6 +5,13 @@ first release 0.95a, 2021-02-23 will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 this project uses date-based 'snapshot' version identifiers.
 
+## [Unreleased]
+
+### Changed
+ - a SOURCE_DATE_EPOCH setting is honored. This requires a l3backend version from XXXX
+ - \pdfmeta_set_regression_data: not longer sets dates manually, but expects that if 
+   SOURCE_DATE_EPOCH is honored that it is used.
+ 
 ## [2023-08-20]
 Version: 2023-08-20, 0.95y
 

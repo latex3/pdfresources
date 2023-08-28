@@ -349,6 +349,9 @@
 % This sets various metadata to values needed by the \LaTeX{}
 % regression tests.
 % It also sets the seed for random functions.
+% If a current l3backend is used and \cs{c_sys_timestamp_str} is available, 
+% the command does not set dates, but 
+% assumes that the environment variable \verb+SOURCE_DATE_EPOCH+ is used.
 % \end{function}
 %
 %  \section{XMP-metadata}
@@ -2585,7 +2588,13 @@
   {
     \bool_if:NT\g_@@_xmp_bool
      {
-       \file_get_timestamp:nN{\jobname.log}\l_@@_xmp_currentdate_tl
+       \str_if_exist:NTF\c_sys_timestamp_str 
+        {          
+          \tl_set_eq:NN \l_@@_xmp_currentdate_tl \c_sys_timestamp_str
+        }
+        {
+          \file_get_timestamp:nN{\jobname.log}\l_@@_xmp_currentdate_tl
+        }
        \@@_xmp_date_split:VN\l_@@_xmp_currentdate_tl\l_@@_xmp_currentdate_seq
        \@@_xmp_build_packet:
        \exp_args:No
