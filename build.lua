@@ -1,6 +1,6 @@
 #!/usr/bin/env texlua
-packageversion="0.95y"
-packagedate="2023-08-20"
+packageversion="0.95z"
+packagedate="2023-08-29"
 
 local luatexstatus = status.list()
 
@@ -58,8 +58,7 @@ checkruns = 4
 -- packtdszip = true
 checkengines = {"pdftex","luatex","xetex"}
 
--- with tl2023 we exclue dvips tests for now
---
+
 
 checkconfigs = {"build", -- luatex, pdftex, xetex
                 "config-noxetex", --pdftex + luatex (std)
