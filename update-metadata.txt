@@ -1,0 +1,15 @@
+% this are tests that needs to be recreated if the xmp metadata changes. 
+ 
+  l3build save -eluatex,pdftex,xetex formtextfields colorprofile-standard annot embedstream formfield-old xform-preamble bdc-properties radiobuttons pageattr mixpageattr linkmargin metadata-new active-colon linktoc pgfpatches test-pdfA-4 linkbordercolor ismap pagesattr xform-appearance viewerpreferences thispageattr transition textfield disable-links tag-checkbox infodict ap-names pagelabels ocproperties annot-dict ocgcolorlinks checkbox pdffilelink colorprofile1 metadata-new-no-hyperref pdflscape embedfile xform destination-options infodict-new
+  
+  l3build save -e xetex pagelabels-log version-compare show annot-last dict_if_empty
+  
+  l3build save -eluatex,pdftex -c config-noxetex pdfa2b-test extgstate-patches test-new-transparent calculationsortorder metadata pgfpatches colorspace transparent-tikz
+  
+  l3build save -c config-luatex stop-link luacolor fontspec-spotcolor structure-destination catalogAF linkhook non-ascii-links calculate-textfield
+  
+  l3build save -c config-dvips nopdfmanage metadata-new
+  
+  l3build save -c config-pdftex structure-destination metadata-dates metadata-ansi linkhook stop-link catalogAF calculate-textfield
+  
+  l3build save -c config-xetex structure-destination metadata-newpage calculate-textfield linkhook stop-link catalogAF
