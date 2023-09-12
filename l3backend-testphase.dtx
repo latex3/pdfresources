@@ -158,21 +158,37 @@
 %    \begin{macrocode}
 %<@@=pdf>
 %<*drivers>
-\RequirePackage{l3ref-tmp}
-\cs_generate_variant:Nn \ref_label:nn {en}
-\cs_generate_variant:Nn \ref_value:nn {en}
-\cs_new_protected:Npn \@@_backend_ref_label:nn #1 #2
-  {
-     \@bsphack
-     \ref_label:nn{#1}{abspage}
-     \@esphack
-  }
-\cs_new:Npn \@@_backend_ref_value:nn #1 #2
-  {
-     \ref_value:nn{#1}{#2}
-  }
-\cs_generate_variant:Nn \@@_backend_ref_label:nn {en}
-\cs_generate_variant:Nn \@@_backend_ref_value:nn {en}
+\cs_if_exist:NTF \property_new:nnnn
+ {
+   \cs_new_protected:Npn \@@_backend_record_abspage:n #1
+     {
+        \@bsphack
+        \property_record:nn{#1}{abspage}
+        \@esphack
+     }
+   \cs_new:Npn \@@_backend_ref_abspage:n #1
+     {
+        \property_ref:nn{#1}{abspage}
+     }
+
+ }
+ { 
+   \RequirePackage{l3ref-tmp}
+   \cs_new_protected:Npn \@@_backend_record_abspage:n #1
+    %% \@@_backend_ref_label:nn #1 #2
+     {
+        \@bsphack
+        \ref_label:nn{#1}{abspage}
+        \@esphack
+     }
+   \cs_new:Npn \@@_backend_ref_abspage:n #1
+    %% \@@_backend_ref_value:nn #1 #2
+     {
+        \ref_value:nn{#1}{abspage}
+     }
+ } 
+\cs_generate_variant:Nn \@@_backend_record_abspage:n {e}
+\cs_generate_variant:Nn \@@_backend_ref_abspage:n {e}
 %</drivers>
 %    \end{macrocode}
 % avoid that destinations names are optimized with xelatex/dvipdfmx
@@ -407,10 +423,10 @@
   {
     %we need to know the page the resource should be added too.
     \int_gincr:N\g_@@_backend_resourceid_int
-    \@@_backend_ref_label:en { l3pdf\int_use:N\g_@@_backend_resourceid_int }{abspage}
+    \@@_backend_record_abspage:e { l3pdf\int_use:N\g_@@_backend_resourceid_int }
     \tl_set:Nx \l_@@_tmpa_tl
       {
-        \@@_backend_ref_value:en {l3pdf\int_use:N\g_@@_backend_resourceid_int}{abspage}
+        \@@_backend_ref_abspage:e {l3pdf\int_use:N\g_@@_backend_resourceid_int}
       }
     \pdfdict_if_exist:nF { g_@@_Core/backend_Page\l_@@_tmpa_tl}
       {
@@ -1060,10 +1076,10 @@
           { \@@_backend_object_ref:n { #2 } }
       }
       {
-        \@@_backend_ref_label:en{l3pdf\int_use:N\g_@@_backend_resourceid_int}{abspage}
+        \@@_backend_record_abspage:e {l3pdf\int_use:N\g_@@_backend_resourceid_int}
         \tl_set:Nx \l_@@_tmpa_tl
           {
-            \@@_backend_ref_value:en{l3pdf\int_use:N\g_@@_backend_resourceid_int}{abspage}
+            \@@_backend_ref_abspage:e{l3pdf\int_use:N\g_@@_backend_resourceid_int}
           }
         \pdfdict_if_exist:nF { g_@@_Core/backend_Page\l_@@_tmpa_tl/Resources/Properties }
           {
@@ -1090,10 +1106,10 @@
           { \@@_backend_object_last: }
       }
       {
-        \@@_backend_ref_label:en{l3pdf\int_use:N\g_@@_backend_resourceid_int}{abspage}
+        \@@_backend_record_abspage:e{l3pdf\int_use:N\g_@@_backend_resourceid_int}
         \tl_set:Nx \l_@@_tmpa_tl
           {
-            \@@_backend_ref_value:en{l3pdf\int_use:N\g_@@_backend_resourceid_int}{abspage}
+            \@@_backend_ref_abspage:e{l3pdf\int_use:N\g_@@_backend_resourceid_int}
           }
         \pdfdict_if_exist:nF { g_@@_Core/backend_Page\l_@@_tmpa_tl/Resources/Properties }
           {
