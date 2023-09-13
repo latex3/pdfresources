@@ -153,11 +153,18 @@
 % This uses the temporary l3ref-tmp.sty. It will
 % will be replaced by kernel code later.
 % It is only needed to get a reference for the absolute page counter.
-% This uses the counter from the
-% new lthooks/ltshipout package.
+% This uses the counter from the new lthooks/ltshipout package.
 %    \begin{macrocode}
 %<@@=pdf>
 %<*drivers>
+%    \end{macrocode}
+% l3ref-tmp is loaded until all files in latex-lab and tagpdf has been 
+% cleared:
+%    \begin{macrocode}
+\RequirePackage{l3ref-tmp}
+%    \end{macrocode}
+% 
+%    \begin{macrocode}
 \cs_if_exist:NTF \property_new:nnnn
  {
    \cs_new_protected:Npn \@@_backend_record_abspage:n #1
@@ -172,8 +179,7 @@
      }
 
  }
- { 
-   \RequirePackage{l3ref-tmp}
+ {    
    \cs_new_protected:Npn \@@_backend_record_abspage:n #1
     %% \@@_backend_ref_label:nn #1 #2
      {

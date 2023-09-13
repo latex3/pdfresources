@@ -912,9 +912,9 @@
 %^^A %% \l_@@_dest_box
 %^^A %%
 %^^A %% References (ref)
-%^^A %% *\@@_ref_label:nn
-%^^A %% *\@@_ref_if_exist:nn
-%^^A %% *\@@_ref_check:nn
+%^^A %% *\@@_property_record:nn
+%^^A %% *\@@_property_if_recorded:nn
+%^^A %% *\@@_property_ref_undefined_warn:nn,
 %^^A %% % helps to display key list messages
 %^^A %% \@@_clist_display:n
 %^^A %%
@@ -1157,6 +1157,7 @@
 %    \begin{macrocode}
 \cs_generate_variant:Nn\pdf_destination:nn {nf}
 \cs_generate_variant:Nn\pdf_object_ref:n {e}
+\cs_generate_variant:Nn\pdf_pageobject_ref:n {e}
 %    \end{macrocode}
 % \section{Overwriting/providing commands from hyperref}
 %  \pkg{hyperref} checks driver version, we need to suppress this during the development
@@ -1534,57 +1535,85 @@
 %    \end{macrocode}
 %
 % \section{Reference and label commands}
-% The code uses the l3ref-tmp package which
+% The code uses in older LaTeX the l3ref-tmp package which
 % must have been loaded as pdfmanagement is a requirement.
-% The commands use after the module prefix always |_ref|.
-%
-% At first a label command which add the space commands from LaTeX:
+% In newer LaTeX it uses the in-built property module.
+% 
 % \begin{macro}
 %  {
-%    \@@_ref_label:nn,
-%    \@@_ref_if_exist:nn,
-%    \@@_ref_check:nn,
-%    \@@_ref_value:nn
+%    \@@_property_record:nn,
+%    \@@_property_if_recorded:nn,
+%    \@@_property_ref_undefined_warn:nn,
+%    \@@_property_ref:nn
 %  }
 %    \begin{macrocode}
 %
-\cs_new_protected:Npn \@@_ref_label:nn #1 #2 %label/attributes
+\cs_if_exist:NTF \property_new:nnnn
   {
-    \@bsphack
-      \ref_label:nn{#1}{#2}
-    \@esphack
-  }
-\cs_generate_variant:Nn \@@_ref_label:nn {en}
 %    \end{macrocode}
-% This provides a condition which tests if a label/attribute combination is known
-%   \begin{macrocode}
-\prg_new_eq_conditional:NNn \@@_ref_if_exist:nn \ref_if_exist:nn { p , T , F,  TF }
-\prg_generate_conditional_variant:Nnn \@@_ref_if_exist:nn  {en}  { p , T , F, TF }
-%    \end{macrocode}
-% This checks if the label/attribute is known and issues a warning if not.
-% It then also triggers the standard rerun message.
+%  At first a label command which adds the space commands from LaTeX:
 %    \begin{macrocode}
-\cs_new_protected:Npn \@@_ref_check:nn #1 #2 %label/attribute
+    \cs_new_protected:Npn \@@_property_record:nn #1 #2 %label/attributes
+     {
+       \@bsphack
+         \property_record:nn{#1}{#2}
+       \@esphack
+     }
+%    \end{macrocode}
+% This provides a conditional which tests if a label/property combination is known
+%    \begin{macrocode}
+    \prg_new_eq_conditional:NNn 
+      \@@_property_if_recorded:nn \property_if_recorded:nn { T } 
+%    \end{macrocode}
+% This checks if the label/property is known and issues a warning if not.
+% It then also triggers the standard rerun message.
+%    \begin{macrocode}      
+    \cs_new_eq:NN \@@_property_ref_undefined_warn:nn \property_ref_undefined_warn:nn 
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+    \cs_new_eq:NN \@@_property_ref:nn \property_ref:nn
+  }
+%    \end{macrocode}
+% and now the same with the older l3ref-tmp. 
+% This can go once LaTeX has been released.
+%    \begin{macrocode}
   {
-    \@@_ref_if_exist:nnF {#1}{#2}
+    \cs_new_protected:Npn \@@_property_record:nn #1 #2 %label/attributes
       {
-        \protect\G@refundefinedtrue
-        \@latex@warning
+        \@bsphack
+          \ref_label:nn{#1}{#2}
+        \@esphack
+      }
+
+    \prg_new_eq_conditional:NNn \@@_property_if_recorded:nn \ref_if_exist:nn { p , T , F,  TF }
+
+    \cs_new_protected:Npn \@@_property_ref_undefined_warn:nn #1 #2 %label/attribute
+      {
+        \@@_property_if_recorded:nnF {#1}{#2}
           {
-            Reference~'\tl_to_str:n {#1}'~with~attribute~'\tl_to_str:n {#2}'~
-            on~page~\thepage~\space undefined
+            \protect\G@refundefinedtrue
+            \@latex@warning
+              {
+                Reference~'\tl_to_str:n {#1}'~with~attribute~'\tl_to_str:n {#2}'~
+                on~page~\thepage~\space undefined
+              }
           }
       }
+
+    \cs_new:Npn \@@_property_ref:nn #1 #2
+      {
+        \ref_value:nn{#1}{#2}
+      }
   }
-\cs_generate_variant:Nn \@@_ref_check:nn {en}
 %    \end{macrocode}
-% This retrieves a value, it is a simple wrapper around the \cs{ref_value:nn}
+% At last we generate a few variants. We use ee-variants as they already exist
+% in the module and once this is there it can go here.
 %    \begin{macrocode}
-\cs_new:Npn \@@_ref_value:nn #1 #2
-  {
-    \ref_value:nn{#1}{#2}
-  }
-\cs_generate_variant:Nn \@@_ref_value:nn {en}
+\cs_generate_variant:Nn \@@_property_record:nn {ee}  
+\prg_generate_conditional_variant:Nnn \@@_property_if_recorded:nn  {ee}  { p , T , F, TF }
+\cs_generate_variant:Nn \@@_property_ref_undefined_warn:nn {ee}
+\cs_generate_variant:Nn \@@_property_ref:nn {ee}
 %    \end{macrocode}
 % \end{macro}
 % \section{Variables}
@@ -4356,16 +4385,16 @@
     %\zref@labelbyprops{HyAnn@\the\HyAnn@Count}{abspage}%
     %\zref@labelbylist {HyAnn@\the\HyAnn@Count} {l3pdf}
     %\zref@refused{HyAnn@\the\HyAnn@Count}%
-    \@@_ref_label:en {HyAnn@\the\HyAnn@Count}{abspage}
-    \@@_ref_check:en {HyAnn@\the\HyAnn@Count}{abspage}
+    \@@_property_record:ee {HyAnn@\the\HyAnn@Count}{abspage}
+    \@@_property_ref_undefined_warn:ee {HyAnn@\the\HyAnn@Count}{abspage}
   }%
 \def\Fld@pageobjref
   {
-    \@@_ref_if_exist:enT {HyAnn@\the\HyAnn@Count}{abspage}
+    \@@_property_if_recorded:eeT {HyAnn@\the\HyAnn@Count}{abspage}
       {
-        /P~\pdf_pageobject_ref:n
+        /P~\pdf_pageobject_ref:e
           {
-            \@@_ref_value:en{HyAnn@\the\HyAnn@Count}{abspage}
+            \@@_property_ref:ee{HyAnn@\the\HyAnn@Count}{abspage}
           }
       }
   }
