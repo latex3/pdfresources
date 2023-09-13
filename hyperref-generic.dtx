@@ -1586,7 +1586,7 @@
         \@esphack
       }
 
-    \prg_new_eq_conditional:NNn \@@_property_if_recorded:nn \ref_if_exist:nn { p , T , F,  TF }
+    \prg_new_eq_conditional:NNn \@@_property_if_recorded:nn \ref_if_exist:nn { T }
 
     \cs_new_protected:Npn \@@_property_ref_undefined_warn:nn #1 #2 %label/attribute
       {
@@ -1611,7 +1611,7 @@
 % in the module and once this is there it can go here.
 %    \begin{macrocode}
 \cs_generate_variant:Nn \@@_property_record:nn {ee}  
-\prg_generate_conditional_variant:Nnn \@@_property_if_recorded:nn  {ee}  { p , T , F, TF }
+\prg_generate_conditional_variant:Nnn \@@_property_if_recorded:nn  {ee}  { T }
 \cs_generate_variant:Nn \@@_property_ref_undefined_warn:nn {ee}
 \cs_generate_variant:Nn \@@_property_ref:nn {ee}
 %    \end{macrocode}
