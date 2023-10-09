@@ -155,6 +155,11 @@
          package/xcolor/after
        }
        {\RequirePackage{xcolor-patches-tmp-ltx}}
+%    \end{macrocode}
+%  The patch must before color definitions are loaded, which will happen in 
+%  hooks in a newer xcolor:
+%    \begin{macrocode}
+    \DeclareHookRule{package/xcolor/after}{pdfmanagement-firstaid}{before}{xcolor}   
   }
 %    \end{macrocode}
 %
