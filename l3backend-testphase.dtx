@@ -56,29 +56,46 @@
 %    \begin{macrocode}
 %<drivers>\ProvidesExplFile
 %<*dvipdfmx>
-  {l3backend-testphase-dvipdfmx.def}{2023-08-29}{}
+  {l3backend-testphase-dvipdfmx.def}{2023-09-19}{}
   {LaTeX~PDF~management~testphase~bundle~backend~support: dvipdfmx}
 %</dvipdfmx>
 %<*dvips>
-  {l3backend-testphase-dvips.def}{2023-08-29}{}
+  {l3backend-testphase-dvips.def}{2023-09-19}{}
   {LaTeX~PDF~management~testphase~bundle~backend~support: dvips}
 %</dvips>
 %<*dvisvgm>
-  {l3backend-testphase-dvisvgm.def}{2023-08-29}{}
+  {l3backend-testphase-dvisvgm.def}{2023-09-19}{}
   {LaTeX~PDF~management~testphase~bundle~backend~support: dvisvgm}
 %</dvisvgm>
 %<*luatex>
-  {l3backend-testphase-luatex.def}{2023-08-29}{}
+  {l3backend-testphase-luatex.def}{2023-09-19}{}
   {LaTeX~PDF~management~testphase~bundle~backend~support: PDF output (LuaTeX)}
 %</luatex>
 %<*pdftex>
-  {l3backend-testphase-pdftex.def}{2023-08-29}{}
+  {l3backend-testphase-pdftex.def}{2023-09-19}{}
   {LaTeX~PDF~management~testphase~bundle~backend~support: PDF output (pdfTeX)}
 %</pdftex>
 %<*xdvipdfmx>
-  {l3backend-testphase-xetex.def}{2023-08-29}{}
+  {l3backend-testphase-xetex.def}{2023-09-19}{}
   {LaTeX~PDF~management~testphase~bundle~backend~support: XeTeX}
 %</xdvipdfmx>
+%    \end{macrocode}
+% \subsection{Variants}
+% We need to generate temporarly a few e-types variants of kernel backend commands. 
+% These can be removed once the kernel provides them.
+%    \begin{macrocode}
+%<@@=pdf>
+%<*luatex|pdftex>
+\cs_generate_variant:Nn \__kernel_backend_literal_page:n { e }
+%</luatex|pdftex>
+%<*dvipdfmx|xdvipdfmx>
+\cs_generate_variant:Nn \__kernel_backend_literal:n { e }
+\cs_generate_variant:Nn \@@_backend:n { e }
+%</dvipdfmx|xdvipdfmx>
+%<*dvips>
+\cs_generate_variant:Nn \__kernel_backend_postscript:n { e }
+\cs_generate_variant:Nn \@@_backend_pdfmark:n { e }
+%</dvips>
 %    \end{macrocode}
 % \subsection{Support for delayed literal and special}
 % Starting with TeXlive 2023 the engines support a \texttt{shipout} keyword
@@ -155,7 +172,6 @@
 % It is only needed to get a reference for the absolute page counter.
 % This uses the counter from the new lthooks/ltshipout package.
 %    \begin{macrocode}
-%<@@=pdf>
 %<*drivers>
 %    \end{macrocode}
 % l3ref-tmp is loaded until all files in latex-lab and tagpdf has been 
@@ -200,8 +216,8 @@
 % avoid that destinations names are optimized with xelatex/dvipdfmx
 % see https://tug.org/pipermail/dvipdfmx/2019-May/000002.html
 %    \begin{macrocode}
-%<*dvipdfmx|xdvipdfmx>
-    \__kernel_backend_literal:x { dvipdfmx:config~C~ 0x0010 }
+%<*dvipdfmx|xdvipdfmx>    
+    \__kernel_backend_literal:n { dvipdfmx:config~C~ 0x0010 }
 %</dvipdfmx|xdvipdfmx>
 %    \end{macrocode}
 % \begin{variable}{\g_@@_tmpa_prop, \l_@@_tmpa_tl, \l_@@_backend_tmpa_box }
@@ -455,7 +471,7 @@
             \prop_gput:Nnn \g_@@_tmpa_prop { ##1 }{ ##2 }
           }
       }
-    \exp_args:Nx \@@_backend_Page_primitive:n
+    \@@_backend_Page_primitive:e
       {
         \prop_map_function:NN \g_@@_tmpa_prop \pdfdict_item:ne
       }
@@ -566,7 +582,7 @@
   %issues the values stored in the global prop with dvi
 \cs_new_protected:Npn \@@_backend_ThisPage_gpush:n #1
   {
-    \exp_args:Nx \@@_backend_Page_primitive:n
+    \@@_backend_Page_primitive:e
       { \pdfdict_use:n { g_@@_Core/Page} }
   }
 %</dvipdfmx|xdvipdfmx>
@@ -605,8 +621,8 @@
   %issues the values stored in the global prop with dvi
 \cs_new_protected:Npn \@@_backend_ThisPage_gpush:n #1
   {
-    \exp_args:Nx \@@_backend_Page_primitive:n
-          { \pdfdict_use:n { g_@@_Core/Page} }
+    \@@_backend_Page_primitive:e
+      { \pdfdict_use:n { g_@@_Core/Page} }
   }
 %</dvips>
 %<*dvisvgm>
@@ -631,6 +647,9 @@
 \cs_new_protected:Npn \@@_backend_ThisPage_gpush:n #1
   {}
 %</dvisvgm>
+%<*drivers>
+\cs_generate_variant:Nn \@@_backend_Page_primitive:n { e }
+%</drivers>
 %    \end{macrocode}
 % \end{macro}
 %
@@ -752,12 +771,11 @@
   }
 \cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
   {
-   % this is not used for output, but there is a test if the resource is empty
-   \exp_args:Nnx
-   \prop_gput:cnn { \__kernel_pdfdict_name:n { g_@@_Core/Page/Resources/#1} }
+   % this is not used for output, but there is a test if the resource is empty   
+   \prop_gput:cne { \__kernel_pdfdict_name:n { g_@@_Core/Page/Resources/#1} }
      { \str_convert_pdfname:n {#2} }{ #3 }
    %objects are not filled with \pdf_object_write as this is not additive!
-    \@@_backend:x
+    \@@_backend:e
       {
         put~\@@_backend_object_ref:n {@@/Page/Resources/#1}<</#2~#3>>
       }
@@ -838,11 +856,11 @@
   
 \cs_set_protected:Npn \@@_backend_bdcobject:nn #1 #2 % #1 eg. Span, #2: object name
   {
-    \@@_backend_pdfmark:x{/#1~\@@_backend_object_ref:n{#2}~/BDC}
+    \@@_backend_pdfmark:e{/#1~\@@_backend_object_ref:n{#2}~/BDC}
   }
 \cs_set_protected:Npn \@@_backend_bdcobject:n #1  % #1 eg. Span,
   {
-    \@@_backend_pdfmark:x{/#1~\@@_backend_object_last:~/BDC}
+    \@@_backend_pdfmark:e{/#1~\@@_backend_object_last:~/BDC}
   }
 \cs_set_protected:Npn \@@_backend_emc:
   {
@@ -887,11 +905,11 @@
  \cs_set_protected:Npn \@@_backend_bdcobject:nn #1 #2 % #1 eg. Span, #2: object name
    {
      \int_gincr:N \g_@@_backend_name_int
-     \__kernel_backend_literal:x
+     \__kernel_backend_literal:e
        {
          pdf:code~/#1/l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC
        }
-     \__kernel_backend_literal:x
+     \__kernel_backend_literal:e
        {
          pdf:put~@resources~
            <<
@@ -906,11 +924,11 @@
  \cs_set_protected:Npn \@@_backend_bdcobject:n #1  % #1 eg. Span
    {
      \int_gincr:N \g_@@_backend_name_int
-     \__kernel_backend_literal:x
+     \__kernel_backend_literal:e
        {
          pdf:code~/\exp_not:n{#1}/l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC
        }
-     \__kernel_backend_literal:x
+     \__kernel_backend_literal:e
        {
          pdf:put~@resources~
            <<
@@ -967,7 +985,7 @@
       {
         \prop_if_empty:cF { \__kernel_pdfdict_name:n { g_@@_Core/Page/Resources/##1} }
           {
-            \__kernel_backend_literal:x
+            \__kernel_backend_literal:e
               {
                 pdf:put~@resources~
                   <</##1~\@@_backend_object_ref:n {@@/Page/Resources/##1}>>
@@ -981,17 +999,17 @@
 \cs_set_protected:Npn \@@_backend_bdcobject:nn #1 #2 % #1 eg. Span, #2: object name
   {
     \int_gincr:N \g_@@_backend_name_int
-    \exp_args:Nx\__kernel_backend_literal_page:n
+    \__kernel_backend_literal_page:e
       { /#1 ~ /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC }
     \bool_if:NTF \l_@@_backend_xform_bool
       {
-        \exp_args:Nnx\pdfdict_gput:nnn
+        \pdfdict_gput:nee
           { g_@@_Core/Xform/Resources/Properties }
           { l3pdf\int_use:N\g_@@_backend_name_int }
           { \@@_backend_object_ref:n { #2 } }
       }
       {
-        \exp_args:Nx \tex_latelua:D
+        \exp_args:Ne \tex_latelua:D
           {
             ltx.pdf.Page_Resources_Properties_gput
               (
@@ -1005,17 +1023,17 @@
 \cs_set_protected:Npn \@@_backend_bdcobject:n #1% #1 eg. Span
   {
     \int_gincr:N \g_@@_backend_name_int
-    \exp_args:Nx\__kernel_backend_literal_page:n
+    \__kernel_backend_literal_page:e
       { /\exp_not:n{#1} ~ /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC }
     \bool_if:NTF \l_@@_backend_xform_bool
       {
-        \exp_args:Nnx\pdfdict_gput:nnn %no handler needed
+        \pdfdict_gput:nee %no handler needed
           { g_@@_Core/Xform/Resources/Properties }
           { l3pdf\int_use:N\g_@@_backend_name_int }
           { \@@_backend_object_last: }
       }
       {
-        \exp_args:Nx \tex_latelua:D
+        \exp_args:Ne \tex_latelua:D
           {
             ltx.pdf.Page_Resources_Properties_gput
               (
@@ -1070,13 +1088,13 @@
 \cs_set_protected:Npn \@@_backend_bdcobject:nn #1 #2 % #1 eg. Span, #2: object name
   {
     \int_gincr:N \g_@@_backend_name_int
-    \exp_args:Nx\__kernel_backend_literal_page:n
+    \__kernel_backend_literal_page:e
       { /#1 ~ /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC }
     % code to set the property ....
     \int_gincr:N\g_@@_backend_resourceid_int
     \bool_if:NTF \l_@@_backend_xform_bool
       {
-        \exp_args:Nnxx\pdfdict_gput:nnn %no handler needed
+        \pdfdict_gput:nee %no handler needed
           { g_@@_Core/Xform/Resources/Properties }
           { l3pdf\int_use:N\g_@@_backend_resourceid_int }
           { \@@_backend_object_ref:n { #2 } }
@@ -1091,7 +1109,7 @@
           {
             \pdfdict_new:n { g_@@_Core/backend_Page\l_@@_tmpa_tl/Resources/Properties }
           }
-        \exp_args:Nnxx\pdfdict_gput:nnn
+        \pdfdict_gput:nee
           { g_@@_Core/backend_Page\l_@@_tmpa_tl/Resources/Properties }
           { l3pdf\int_use:N\g_@@_backend_resourceid_int }
           { \@@_backend_object_ref:n{#2} }
@@ -1100,13 +1118,13 @@
 \cs_set_protected:Npn \@@_backend_bdcobject:n #1% #1 eg. Span
   {
     \int_gincr:N \g_@@_backend_name_int
-    \exp_args:Nx\__kernel_backend_literal_page:n
+    \__kernel_backend_literal_page:e
       { /\exp_not:n{#1} ~ /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl BDC }
     % code to set the property ....
     \int_gincr:N\g_@@_backend_resourceid_int
     \bool_if:NTF \l_@@_backend_xform_bool
       {
-        \exp_args:Nnxx\pdfdict_gput:nnn
+        \pdfdict_gput:nee
           { g_@@_Core/Xform/Resources/Properties }
           { l3pdf\int_use:N\g_@@_backend_resourceid_int }
           { \@@_backend_object_last: }
@@ -1121,7 +1139,7 @@
           {
             \pdfdict_new:n { g_@@_Core/backend_Page\l_@@_tmpa_tl/Resources/Properties }
           }
-        \exp_args:Nnxx\pdfdict_gput:nnn
+        \pdfdict_gput:nee
           { g_@@_Core/backend_Page\l_@@_tmpa_tl/Resources/Properties }
           { l3pdf\int_use:N\g_@@_backend_resourceid_int }
           { \@@_backend_object_last: }
@@ -1174,7 +1192,7 @@
 
 \cs_new_protected:Npn \@@_backend_PageResources_gpush:n #1
   {
-     \exp_args:NNx \tex_global:D \tex_pdfpageresources:D
+     \exp_args:NNe \tex_global:D \tex_pdfpageresources:D
        {
          \prop_if_exist:cT
            { \__kernel_pdfdict_name:n { g_@@_Core/backend_Page#1/Resources/Properties } }
@@ -1227,7 +1245,7 @@
 \cs_new_protected:Npn \@@_backend_Names_gpush:nn #1 #2 %#1 name of name tree, #2 array content
   {
      \pdf_object_unnamed_write:nn {dict} {/Names [#2] }
-     \@@_backend:x {put~@names~<</#1~\pdf_object_ref_last: >>}
+     \@@_backend:e {put~@names~<</#1~\pdf_object_ref_last: >>}
   }
 %</dvipdfmx|xdvipdfmx>
 
@@ -1253,7 +1271,7 @@
 %<*dvips>
 \cs_new_protected:Npn  \@@_backend_NamesEmbeddedFiles_add:nn #1 #2
       {
-        \@@_backend_pdfmark:x
+        \@@_backend_pdfmark:e
           {
             /Name~#1~
             /FS~#2~
@@ -1528,7 +1546,7 @@
          \hook_gput_next_code:nn {shipout/background}
            {
              \mode_leave_vertical: %needed, the xform disappears without it.
-             \@@_backend:x
+             \@@_backend:e
                {
                  bxobj  ~ \@@_backend_xform_ref:n  { #1 }
                  \c_space_tl width  ~ \pdfxform_wd:n { #1 }
@@ -1536,38 +1554,37 @@
                  \c_space_tl depth  ~ \pdfxform_dp:n { #1 }
                }
              \box_use_drop:c { g_@@_backend_xform_#1_box }
-             \@@_backend:x {put ~ @resources ~<<#3>> }
-             \@@_backend:x
+             \@@_backend:e {put ~ @resources ~<<#3>> }
+             \@@_backend:e
                {
                  put~ @resources ~
                    <<
                      /ExtGState~ \pdf_object_ref:n { @@/Page/Resources/ExtGState }
                    >>
                }
-             \@@_backend:x
+             \@@_backend:e
                {
                  put~ @resources ~
                  <<
                    /Pattern~ \pdf_object_ref:n { @@/Page/Resources/Pattern }
                  >>
                }
-             \@@_backend:x
+             \@@_backend:e
                {
                  put~ @resources ~
                  <<
                    /Shading~ \pdf_object_ref:n { @@/Page/Resources/Shading }
                  >>
                }
-             \@@_backend:x
+             \@@_backend:e
                {
                  put~ @resources ~
                  <<
                    /ColorSpace~
                    \pdf_object_ref:n { @@/Page/Resources/ColorSpace }
                  >>
-               }
-             \exp_args:Nx
-             \@@_backend:x {exobj ~<<#2>>}
+               }             
+             \@@_backend:e {exobj ~<<#2>>}
            }
       }
 
@@ -1582,7 +1599,7 @@
      {
        \hbox_set:Nn \l_@@_backend_tmpa_box
          {
-           \@@_backend:x
+           \@@_backend:e
              {
                uxobj~ \@@_backend_xform_ref:n { #1 }
              }
@@ -1656,7 +1673,7 @@
     %\box_scale:Nnn \l_@@_backend_tmpa_box {1} {-1}
     \hbox_set:Nn\l_@@_backend_tmpb_box
       {
-        \__kernel_backend_postscript:x
+        \__kernel_backend_postscript:e
           {
             gsave~currentpoint~
             initclip~ % restore default clipping path (page device/whole page)
@@ -1684,7 +1701,7 @@
           }
        \str_if_eq:eeF{#1}{}
          {
-           \__kernel_backend_postscript:x
+           \__kernel_backend_postscript:e
              {
                product~(Ghostscript)~search~
                 {
@@ -1711,7 +1728,7 @@
   {
     \hbox_set:Nn \l_@@_backend_tmpa_box
       {
-        \__kernel_backend_postscript:x
+        \__kernel_backend_postscript:e
          {
            gsave~currentpoint~translate~1~-1~scale~
            mark~{ pdf.obj \int_use:c{c__pdf_backend_xform_ \tl_to_str:n {#1} _int }}~
@@ -1827,7 +1844,7 @@
 %<*xdvipdfmx|dvipdfmx>
 \cs_set_protected:Npn \@@_backend_structure_destination:nn #1#2
   {
-    \@@_backend:x
+    \@@_backend:e
       {
         dest ~ ( \exp_not:n {#1} )
         [
@@ -1853,7 +1870,7 @@
 %    \begin{macrocode}
     \exp_args:Ne \pdf_object_if_exist:nT { \l_pdf_current_structure_destination_tl }
       {
-        \@@_backend:x
+        \@@_backend:e
          {
           obj ~ @pdf.SDest.\exp_not:n{#1}
           [
@@ -1911,7 +1928,7 @@
 %    \begin{macrocode}
             \exp_args:Ne \pdf_object_if_exist:nT { \l_pdf_current_structure_destination_tl }
               {
-                \@@_backend:x
+                \@@_backend:e
                   {
                     obj ~ @pdf.SDest.\exp_not:n{#2}
                     [

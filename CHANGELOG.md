@@ -5,7 +5,17 @@ first release 0.95a, 2021-02-23 will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 this project uses date-based 'snapshot' version identifiers.
 
+ 
+## [2023-10-09]
+Version: 2023-10-09, 0.96a
+
+### Changed
+ - prepare for kernel switch to e-types 
+ - use properties instead of l3ref-tmp.sty if format is new enough
+
+
 ## [2023-08-29]
+Version: 2023-08-29, 0.95z
 
 ### Changed
  - a SOURCE_DATE_EPOCH setting is honored. This requires a l3backend version from XXXX

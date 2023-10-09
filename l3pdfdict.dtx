@@ -101,7 +101,7 @@
 % \end{function}
 %
 % \begin{function}[added = 2020-04-06]
-%   {\pdfdict_put:nnn, \pdfdict_gput:nnn}
+%   {\pdfdict_put:nnn, \pdfdict_gput:nnn,\pdfdict_gput:nee}
 %   \begin{syntax}
 %     \cs{pdfdict_put:nnn}  \Arg{local dictionary}  \Arg{name} \Arg{value} \\
 %     \cs{pdfdict_gput:nnn} \Arg{global dictionary} \Arg{name} \Arg{value}
@@ -429,7 +429,7 @@
   }
 
 \cs_set_eq:NN \pdfdict_put:nnn \@@_put:nnn
-\cs_generate_variant:Nn \pdfdict_put:nnn {nnx,nno}
+\cs_generate_variant:Nn \pdfdict_put:nnn {nnx,nno,nee}
 
 \cs_new_protected:Npn \@@_gput:nnn #1 #2 #3  %#1 global dict, #2 name, #3 value
   {
@@ -450,7 +450,7 @@
   }
 
 \cs_set_eq:NN \pdfdict_gput:nnn \@@_gput:nnn
-\cs_generate_variant:Nn \pdfdict_gput:nnn {nnx,nno}
+\cs_generate_variant:Nn \pdfdict_gput:nnn {nnx,nno,nee}
 %    \end{macrocode}
 % \end{macro}
 %
