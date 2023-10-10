@@ -12,7 +12,7 @@ Version: 2023-10-09, 0.96a
 ### Changed
  - prepare for kernel switch to e-types 
  - use properties instead of l3ref-tmp.sty if format is new enough
-
+ - improve xcolor firstaid patch
 
 ## [2023-08-29]
 Version: 2023-08-29, 0.95z
