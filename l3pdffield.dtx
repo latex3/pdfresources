@@ -287,7 +287,7 @@
 %
 %
 % \begin{verbatim}
-% \pdfmanagement_add:nnx{Catalog/AcroForm}{Fields}{<obj ref>}
+% \pdfmanagement_add:nne{Catalog/AcroForm}{Fields}{<obj ref>}
 % \end{verbatim}
 %
 % \end{function}
@@ -897,7 +897,7 @@
 % ,\dim_new:N
 % ,\endcsname
 % ,\exp_args:Ne
-% ,\exp_args:Nnx
+% ,\exp_args:Nne
 % ,\exp_args:NV
 % ,\group_begin:
 % ,\group_end:
@@ -910,7 +910,7 @@
 % ,\keys_set:nn
 % ,\mode_leave_vertical:
 % ,\msg_error:nnnn
-% ,\msg_error:nnx
+% ,\msg_error:nne
 % ,\msg_new:nnn
 % ,\msg_warning:nn
 % ,\msg_warning:nnn
@@ -922,23 +922,23 @@
 % ,\pdf_object_new:n
 % ,\pdf_object_ref:n
 % ,\pdf_object_ref_last:
-% ,\pdf_object_unnamed_write:nx
-% ,\pdf_object_write:nnx
+% ,\pdf_object_unnamed_write:ne
+% ,\pdf_object_write:nne
 % ,\pdf_string_from_unicode:nnN
 % ,\pdfannot_box_ref_last:
 % ,\pdfannot_dict_put:nnn
-% ,\pdfannot_dict_put:nnx
+% ,\pdfannot_dict_put:nne
 % ,\pdfannot_dict_remove:nn
 % ,\pdfannot_widget_box:nnn
 % ,\pdfdict_if_empty:nTF
 % ,\pdfdict_if_empty:nF
 % ,\pdfdict_new:n
 % ,\pdfdict_put:nnn
-% ,\pdfdict_put:nnx
+% ,\pdfdict_put:nne
 % ,\pdfdict_remove:nn
 % ,\pdfdict_use:n
 % ,\pdfmanagement_add:nnn
-% ,\pdfmanagement_add:nnx
+% ,\pdfmanagement_add:nne
 % ,\pdfmeta_standard_verify:nTF
 % ,\pdfmeta_standard_verify:nT
 % ,\pdfmeta_standard_verify:nF
@@ -948,7 +948,7 @@
 % ,\ProvidesExplPackage
 % ,\rule
 % ,\seq_gput_right:Nn
-% ,\seq_gput_right:cx
+% ,\seq_gput_right:ce
 % ,\seq_if_exist:NTF
 % ,\seq_if_exist:cTF
 % ,\seq_new:N
@@ -1169,7 +1169,7 @@
     \pdf_object_new:n {@@/field/Kids/#1}
     \tl_if_empty:NTF \l_@@_currentparent_tl
       {
-        \pdfmanagement_add:nnx
+        \pdfmanagement_add:nne
           { Catalog / AcroForm }
           { Fields }
           {\pdf_object_ref:n {@@/field/#1} }
@@ -1178,22 +1178,22 @@
         \exp_args:Ne
         \pdf_object_if_exist:nTF {@@/field/\l_@@_currentparent_tl}
           {
-            \pdfdict_put:nnx { l_@@/field }{Parent}
+            \pdfdict_put:nne { l_@@/field }{Parent}
               {\exp_args:Ne \pdf_object_ref:n{@@/field/\l_@@_currentparent_tl}}
-            \seq_gput_right:cx {g_@@_field/Kids/\l_@@_currentparent_tl _seq}
+            \seq_gput_right:ce {g_@@_field/Kids/\l_@@_currentparent_tl _seq}
               { \exp_args:Ne \pdf_object_ref:n{@@/field/#1}}
           }
           {
-            \msg_error:nnx {pdffield}{parent-field-missing}{\l_@@_currentparent_tl}
+            \msg_error:nne {pdffield}{parent-field-missing}{\l_@@_currentparent_tl}
           }
       }
     \seq_new:c {g_@@_field/Kids/#1_seq}
-    \pdfdict_put:nnx {l_@@/field}
+    \pdfdict_put:nne {l_@@/field}
       {Kids}
       {
         \pdf_object_ref:n {@@/field/Kids/#1}
       }
-    \pdfdict_put:nnx {l_@@/field}
+    \pdfdict_put:nne {l_@@/field}
       {Ff}
       {\bitset_to_arabic:N \l_@@_Ff_bitset }
     \pdfdict_if_empty:nF{l_@@/field/AA}
@@ -1201,29 +1201,29 @@
         \pdfmeta_standard_verify:nT
           {annot_widget_no_AA}
           {
-            \pdf_object_unnamed_write:nx {dict}{\pdfdict_use:n {l_@@/field/AA}}
-            \pdfdict_put:nnx
+            \pdf_object_unnamed_write:ne {dict}{\pdfdict_use:n {l_@@/field/AA}}
+            \pdfdict_put:nne
               {l_@@/field}
               {AA}
               {\pdf_object_ref_last:}
             \pdfdict_get:nnN {l_@@/field/AA}{C}\l_@@_tmpa_tl
             \quark_if_no_value:NF \l_@@_tmpa_tl
               {
-                \prop_gput:Nxx\g_@@_CO_sortkeys_prop
+                \prop_gput:Nee\g_@@_CO_sortkeys_prop
                   { \pdf_object_ref:n {@@/field/#1} }{ \l_@@_CO_sortkey_str }
-                \seq_gput_right:Nx\g_@@_CO_sortkeys_seq
+                \seq_gput_right:Ne\g_@@_CO_sortkeys_seq
                   { \pdf_object_ref:n {@@/field/#1} }
               }
           }
       }
     \hook_gput_code:nnn {shipout/lastpage}{pdffield} %xetex needs this ...
       {
-        \pdf_object_write:nnx {@@/field/Kids/#1} { array }
+        \pdf_object_write:nne {@@/field/Kids/#1} { array }
           {
             \seq_use:cn{g_@@_field/Kids/#1_seq}{~}
           }
       }
-    \pdf_object_write:nnx {@@/field/#1} { dict } { \pdfdict_use:n {l_@@/field} }
+    \pdf_object_write:nne {@@/field/#1} { dict } { \pdfdict_use:n {l_@@/field} }
   }
 
 \hook_gput_code:nnn {shipout/lastpage}{pdffield}
@@ -1239,7 +1239,7 @@
                 { \sort_return_swapped: }
                 { \sort_return_same: }
            }
-           \pdfmanagement_add:nnx
+           \pdfmanagement_add:nne
             { Catalog / AcroForm }
             { CO }
             { \seq_use:Nn \g_@@_CO_sortkeys_seq{~} }
@@ -1274,21 +1274,21 @@
         \bitset_set_false:Nn \l_@@_F_bitset {Invisible}
         \bitset_set_false:Nn \l_@@_F_bitset {NoView}
       }
-    \pdfannot_dict_put:nnx {widget}{F}{ \bitset_to_arabic:N \l_@@_F_bitset }
+    \pdfannot_dict_put:nne {widget}{F}{ \bitset_to_arabic:N \l_@@_F_bitset }
     \@@_tag_add_struct_parent:
     \tl_if_empty:NF \l_@@_currentparent_tl
       {
          \exp_args:Ne
          \pdf_object_if_exist:nTF { @@/field/\l_@@_currentparent_tl }
            {
-             \pdfannot_dict_put:nnx {widget}{Parent}
+             \pdfannot_dict_put:nne {widget}{Parent}
                {
                  \exp_args:Ne
                    \pdf_object_ref:n{@@/field/\l_@@_currentparent_tl}
                }
            }
            {
-               \msg_error:nnx { pdffield }{parent-field-missing}{\l_@@_currentparent_tl}
+               \msg_error:nne { pdffield }{parent-field-missing}{\l_@@_currentparent_tl}
            }
        }
     \mode_leave_vertical:
@@ -1303,19 +1303,19 @@
            { \l_@@_annot_dp_dim }
          \hfill
       }
-    \tl_gset:Nx \g_@@_annot_ref_last_tl { \pdfannot_box_ref_last: }
+    \tl_gset:Ne \g_@@_annot_ref_last_tl { \pdfannot_box_ref_last: }
     \exp_args:NV \@@_tag_add_objr:n \g_@@_annot_ref_last_tl
     \@@_tag_struct_end:
     \tl_if_empty:NF \l_@@_currentparent_tl
       {
         \seq_if_exist:cTF {g_@@_field/Kids/\l_@@_currentparent_tl _seq}
          {
-           \seq_gput_right:cx
+           \seq_gput_right:ce
              {g_@@_field/Kids/\l_@@_currentparent_tl _seq}
              { \g_@@_annot_ref_last_tl }
          }
          {
-           \msg_error:nnx { pdffield}{parent-field-missing}{\l_@@_currentparent_tl}
+           \msg_error:nne { pdffield}{parent-field-missing}{\l_@@_currentparent_tl}
          }
       }
   }
@@ -1357,14 +1357,14 @@
            {
              \bool_if:NT \l_@@_tag_bool
               {
-                \pdfannot_dict_put:nnx {widget}{StructParent}{ \tag_struct_parent_int: }
+                \pdfannot_dict_put:nne {widget}{StructParent}{ \tag_struct_parent_int: }
               }
            }
          \cs_set_protected:Npn \@@_tag_add_objr:n #1
            {
              \bool_if:NT \l_@@_tag_bool
                {
-                 \exp_args:Nnx
+                 \exp_args:Nne
                  \tag_struct_insert_annot:nn {#1}{ \tag_struct_parent_int: }
                }
            }
@@ -1437,7 +1437,7 @@
         \pdf_string_from_unicode:nnN {utf8/string-raw}{#1}\l_@@_tmpa_str
         \str_if_in:NnT \l_@@_tmpa_str {.}
           {
-            \msg_error:nnx {pdffield}{no-period}{\l_@@_tmpa_str}
+            \msg_error:nne {pdffield}{no-period}{\l_@@_tmpa_str}
           }
         \str_if_empty:NTF\l_@@_tmpa_str
           {
@@ -1445,7 +1445,7 @@
             \pdfdict_remove:nn { l_@@/field }{T}
           }
           {
-            \pdfdict_put:nnx { l_@@/field }{T}{(\l_@@_tmpa_str)}
+            \pdfdict_put:nne { l_@@/field }{T}{(\l_@@_tmpa_str)}
           }
       }
     ,T .value_required:n = true
@@ -1462,7 +1462,7 @@
           }
           {
             \pdf_string_from_unicode:nnN {utf16/hex}{#1}\l_@@_tmpa_str
-            \pdfdict_put:nnx { l_@@/field }{TU}{\l_@@_tmpa_str}
+            \pdfdict_put:nne { l_@@/field }{TU}{\l_@@_tmpa_str}
           }
       }
     ,TU .groups:n = {field}
@@ -1476,7 +1476,7 @@
           }
           {
             \pdf_string_from_unicode:nnN {utf16/hex}{#1}\l_@@_tmpa_str
-            \pdfdict_put:nnx { l_@@/field }{TM}{\l_@@_tmpa_str}
+            \pdfdict_put:nne { l_@@/field }{TM}{\l_@@_tmpa_str}
           }
       }
     ,TM .groups:n = {field}
@@ -1515,7 +1515,7 @@
          }
          {
            \@@_V_handler:nN{#1}\l_@@_tmpa_str
-           \pdfdict_put:nnx { l_@@/field }{V}{ \l_@@_tmpa_str }
+           \pdfdict_put:nne { l_@@/field }{V}{ \l_@@_tmpa_str }
          }
      }
     ,V .groups:n = {field}
@@ -1527,7 +1527,7 @@
          }
          {
            \@@_V_handler:nN{#1}\l_@@_tmpa_str
-           \pdfdict_put:nnx { l_@@/field }{DV}{ \l_@@_tmpa_str }
+           \pdfdict_put:nne { l_@@/field }{DV}{ \l_@@_tmpa_str }
          }
      }
     ,DV .groups:n = {field}
@@ -1538,7 +1538,7 @@
            \pdfdict_remove:nn { l_@@/field }{MaxLen}
          }
          {
-           \pdfdict_put:nnx { l_@@/field }{MaxLen}{ #1 }
+           \pdfdict_put:nne { l_@@/field }{MaxLen}{ #1 }
          }
       }
     ,MaxLen .groups:n = {field}
@@ -1549,7 +1549,7 @@
             \pdfdict_remove:nn { l_@@/field }{Lock}
           }
           {
-            \pdfdict_put:nnx { l_@@/field }{Lock}{ \pdf_object_ref:n{#1} }
+            \pdfdict_put:nne { l_@@/field }{Lock}{ \pdf_object_ref:n{#1} }
           }
       }
     ,Lock .groups:n = {field}
@@ -1560,7 +1560,7 @@
             \pdfdict_remove:nn { l_@@/field }{SV}
           }
           {
-            \pdfdict_put:nnx { l_@@/field }{SV}{ \pdf_object_ref:n{#1} }
+            \pdfdict_put:nne { l_@@/field }{SV}{ \pdf_object_ref:n{#1} }
           }
       }
     ,SV .groups:n = {field}
@@ -1571,7 +1571,7 @@
             \pdfdict_remove:nn { l_@@/field }{Opt}
           }
           {
-            \pdfdict_put:nnx { l_@@/field }{Opt}{ \pdf_object_ref:n{#1} }
+            \pdfdict_put:nne { l_@@/field }{Opt}{ \pdf_object_ref:n{#1} }
           }
       }
     ,Opt .groups:n = {field}
@@ -1582,7 +1582,7 @@
             \pdfdict_remove:nn { l_@@/field }{TI}
           }
           {
-            \pdfdict_put:nnx { l_@@/field }{TI}{ #1 }
+            \pdfdict_put:nne { l_@@/field }{TI}{ #1 }
           }
        }
     ,TI .groups:n = {field}
@@ -1593,7 +1593,7 @@
             \pdfdict_remove:nn { l_@@/field }{I}
           }
           {
-            \pdfdict_put:nnx { l_@@/field }{I}{ \pdf_object_ref:n{#1} }
+            \pdfdict_put:nne { l_@@/field }{I}{ \pdf_object_ref:n{#1} }
           }
       }
     ,I .groups:n = {field}
@@ -1648,7 +1648,7 @@
                  \pdfdict_remove:nn {l_@@/field/AA}{#1}
                }
                {
-                 \pdfdict_put:nnx {l_@@/field/AA}
+                 \pdfdict_put:nne {l_@@/field/AA}
                   {#1}
                   {<</S/JavaScript/JS\c_space_tl ##1>>}
                }
@@ -1675,7 +1675,7 @@
 
 \keys_define:nn {pdffield}
  {
-   sortkey .code:n = {\str_set:Nx \l_@@_CO_sortkey_str {\tl_to_str:n{#1}}}
+   sortkey .code:n = {\str_set:Ne \l_@@_CO_sortkey_str {\tl_to_str:n{#1}}}
  }
 %    \end{macrocode}
 % \end{macro}
@@ -1692,13 +1692,13 @@
            \pdfdict_remove:nn { l_@@/field }{DA}
          }
          {
-           \pdfdict_put:nnx { l_@@/field }{DA}{ (#1) }
+           \pdfdict_put:nne { l_@@/field }{DA}{ (#1) }
          }
       }
     ,DA .groups:n = {field}
     ,Q .choices:nn = {left,center,right}
      {
-       \pdfdict_put:nnx { l_@@/field }{Q}{ \int_eval:n{\l_keys_choice_int-1} }
+       \pdfdict_put:nne { l_@@/field }{Q}{ \int_eval:n{\l_keys_choice_int-1} }
      }
     ,Q / .code:n = { \pdfdict_remove:nn { l_@@/field }{Q} }
     ,Q .groups:n = {field}
@@ -1761,7 +1761,7 @@
  {
    \pdfxform_if_exist:nTF {  #1 }
      {
-       \pdfannot_dict_put:nnx {widget/AP}{#2}
+       \pdfannot_dict_put:nne {widget/AP}{#2}
          {
            \pdfxform_ref:n {#1}
          }
@@ -1785,7 +1785,7 @@
           \pdfannot_dict_remove:nn { widget }{AS}
         }
         {
-          \pdfannot_dict_put:nnx {widget}{AS}{\pdf_name_from_unicode_e:n{#1}}
+          \pdfannot_dict_put:nne {widget}{AS}{\pdf_name_from_unicode_e:n{#1}}
         }
     }
   ,AS .groups:n = annot
@@ -1847,7 +1847,7 @@
   {
     MK/R .choices:nn = {0,90,180,270}
      {
-       \pdfannot_dict_put:nnx {widget/MK}{R}{#1}
+       \pdfannot_dict_put:nne {widget/MK}{R}{#1}
      }
    ,MK/R / .code:n =
      {
@@ -1868,7 +1868,7 @@
         {
           \@@_color_set:nn {@@/tmp}{#1}
           \color_export:nnN{@@/tmp}{space-sep-rgb}\l_@@_tmpa_tl
-          \pdfannot_dict_put:nnx {widget/MK}{BC}{[\l_@@_tmpa_tl]}
+          \pdfannot_dict_put:nne {widget/MK}{BC}{[\l_@@_tmpa_tl]}
         }
      }
     ,MK/BC .groups:n = annot
@@ -1886,7 +1886,7 @@
         {
           \@@_color_set:nn {@@/tmp}{#1}
           \color_export:nnN{@@/tmp}{space-sep-rgb}\l_@@_tmpa_tl
-          \pdfannot_dict_put:nnx {widget/MK}{BG}{[\l_@@_tmpa_tl]}
+          \pdfannot_dict_put:nne {widget/MK}{BG}{[\l_@@_tmpa_tl]}
         }
      }
     ,MK/BG .groups:n = annot
@@ -1905,7 +1905,7 @@
         }
         {
           \pdf_string_from_unicode:nnN {utf8/string}{#1}\l_@@_tmpa_str
-          \pdfannot_dict_put:nnx {widget/MK}{CA}{\l_@@_tmpa_str}
+          \pdfannot_dict_put:nne {widget/MK}{CA}{\l_@@_tmpa_str}
         }
      }
     ,MK/CA .groups:n = annot
@@ -1923,7 +1923,7 @@
         }
         {
           \pdf_string_from_unicode:nnN {utf8/string}{#1}\l_@@_tmpa_str
-          \pdfannot_dict_put:nnx {widget/MK}{RC}{\l_@@_tmpa_str}
+          \pdfannot_dict_put:nne {widget/MK}{RC}{\l_@@_tmpa_str}
         }
      }
     ,MK/RC .groups:n = annot
@@ -1941,7 +1941,7 @@
         }
         {
           \pdf_string_from_unicode:nnN {utf8/string}{#1}\l_@@_tmpa_str
-          \pdfannot_dict_put:nnx {widget/MK}{AC}{\l_@@_tmpa_str}
+          \pdfannot_dict_put:nne {widget/MK}{AC}{\l_@@_tmpa_str}
         }
      }
     ,MK/AC .groups:n = annot
@@ -1966,7 +1966,7 @@
               \pdfannot_dict_remove:nn { widget/MK }{#1}
             }
             {
-              \pdfannot_dict_put:nnx {widget/MK}{#1}{##1}
+              \pdfannot_dict_put:nne {widget/MK}{#1}{##1}
             }
         }
       ,MK/#1 .groups:n = annot
@@ -2030,7 +2030,7 @@
                  \pdfannot_dict_remove:nn {widget/AA}{#1}
                }
                {
-                 \pdfannot_dict_put:nnx {widget/AA}
+                 \pdfannot_dict_put:nne {widget/AA}
                   {#1}
                   {<</S/JavaScript/JS\c_space_tl##1>>}
                }

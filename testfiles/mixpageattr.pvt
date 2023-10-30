@@ -8,7 +8,7 @@
 \usepackage{fancyhdr,zref-user}
 \pagestyle{fancy}
 \ExplSyntaxOn \makeatletter
-\lfoot{\pdfmanagement_add:nnx {Page} {Rotate}{\ifodd\c@page -90\else 90 \fi}}
+\lfoot{\pdfmanagement_add:nne {Page} {Rotate}{\ifodd\c@page -90\else 90 \fi}}
 \ExplSyntaxOff
 \usepackage{kantlipsum}
 \begin{document}
@@ -19,7 +19,7 @@ some text \kant
 \ExplSyntaxOn
 \begin{figure}%[p]
 \zlabel{a}\label{a}
-\pdfmanagement_add:nnx {ThisPage}{Rotate}{90}
+\pdfmanagement_add:nne {ThisPage}{Rotate}{90}
 \Huge
 code~is~on~page~\thepage\par
 float~is~on~page~\zpageref{a}\par

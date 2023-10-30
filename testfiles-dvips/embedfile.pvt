@@ -19,8 +19,8 @@ grüße
 \group_begin:
 \pdfdict_put:nnn  {l_pdffile/Filespec} {AFRelationship}{/Source}
 \pdf_string_from_unicode:nnN {utf16/string} {this~is~something~odd~with~öäü}\l_tmpa_str
-\pdfdict_put:nnx  {l_pdffile/Filespec} {Desc}{\l_tmpa_str}
-\pdfdict_put:nnx  {l_pdffile/Params} {ModDate}{(D:20200422135851Z)}
+\pdfdict_put:nne  {l_pdffile/Filespec} {Desc}{\l_tmpa_str}
+\pdfdict_put:nne  {l_pdffile/Params} {ModDate}{(D:20200422135851Z)}
 \pdffile_embed_file:nnn {testinput.txt}{grüße.txt}{example1}
 \group_end:
 
@@ -28,15 +28,15 @@ grüße
 \group_begin:
 \pdfdict_put:nnn  {l_pdffile/Filespec} {AFRelationship}{/Source}
 \pdf_string_from_unicode:nnN {utf16/string} {this~is~something~odd~with~öäü}\l_tmpa_str
-\pdfdict_put:nnx  {l_pdffile/Filespec} {Desc}{\l_tmpa_str}
-\pdfdict_put:nnx  {l_pdffile/Params} {ModDate}{(D:20200422155851+02'00')}
+\pdfdict_put:nne  {l_pdffile/Filespec} {Desc}{\l_tmpa_str}
+\pdfdict_put:nne  {l_pdffile/Params} {ModDate}{(D:20200422155851+02'00')}
 \pdffile_embed_file:nnn {grüße.txt}{echtegrüße.txt}{example2}
 \group_end:
 
 \group_begin:
 \pdfdict_put:nnn  {l_pdffile/Filespec} {AFRelationship}{/Source}
 \pdfdict_put:nnn  {l_pdffile/Filespec} {Desc}{(this~is~a~eps)}
-\pdfdict_put:nnx  {l_pdffile/Params} {ModDate}{(D:20200422135851Z)}
+\pdfdict_put:nne  {l_pdffile/Params} {ModDate}{(D:20200422135851Z)}
 \pdffile_embed_file:nnn {testinput.txt}{Some~txt~file}{example3}
 
 \pdfdict_put:nnn  {l_pdffile/Filespec} {AFRelationship}{/Data}
@@ -45,10 +45,10 @@ grüße
 
 
 
-\pdfmanagement_add:nnx{Catalog/Names}{EmbeddedFiles}{\pdf_object_ref:n{example1}}
-\pdfmanagement_add:nnx{Catalog/Names}{EmbeddedFiles}{\pdf_object_ref:n{example2}}
-\pdfmanagement_add:nnx{Catalog/Names}{EmbeddedFiles}{\pdf_object_ref:n{example3}}
-\pdfmanagement_add:nnx{Catalog/Names}{EmbeddedFiles}{\pdf_object_ref:n{example4}}
+\pdfmanagement_add:nne{Catalog/Names}{EmbeddedFiles}{\pdf_object_ref:n{example1}}
+\pdfmanagement_add:nne{Catalog/Names}{EmbeddedFiles}{\pdf_object_ref:n{example2}}
+\pdfmanagement_add:nne{Catalog/Names}{EmbeddedFiles}{\pdf_object_ref:n{example3}}
+\pdfmanagement_add:nne{Catalog/Names}{EmbeddedFiles}{\pdf_object_ref:n{example4}}
 
 %\prop_show:N \g__pdffile_file_embed_sources_prop
 %\seq_show:N \g__pdf_backend_EmbeddedFiles_seq

@@ -11,12 +11,11 @@
 \START
 % just to avoid to have to escape every space ...
 \ExplSyntaxOn
-\pdfannot_dict_put:nnn{widget}{Subtype}{/Widget}
-\pdfannot_dict_put:nnn{widget}{T}{(abc)}
-\pdfannot_dict_put:nnn{widget}{FT}{/Tx}
-\pdfannot_dict_put:nnn{widget}{MK}{<</BC[1~0~0]/BG[1~1~1]>>}
-\cs_generate_variant:Nn \pdfannot_box:nnnn {nnnx}
-xx\pdfannot_box:nnnx
+\pdfannot_dict_put:nnn{widget}{Subtype}{/Widget} 
+\pdfannot_dict_put:nnn{widget}{T}{(abc)} 
+\pdfannot_dict_put:nnn{widget}{FT}{/Tx} 
+\pdfannot_dict_put:nnn{widget}{MK}{<</BC[1~0~0]/BG[1~1~1]>>} 
+\cs_generate_variant:Nn \pdfannot_box:nnnn {nnne} xx\pdfannot_box:nnne 
           {1cm}
           {1cm}
           {0pt}

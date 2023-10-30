@@ -92,7 +92,7 @@
 %
 % \begin{verbatim}
 % Netto~\pdffield_textfield:n{name=netto}~
-% \pdf_object_unnamed_write:nx{stream}
+% \pdf_object_unnamed_write:ne{stream}
 %   {
 %     {}
 %     {
@@ -100,7 +100,7 @@
 %      event.value = 1.19*f_netto.value;
 %     }
 %   }
-% \tl_set:Nx\l_tmpa_tl{\pdf_object_ref_last:}
+% \tl_set:Ne\l_tmpa_tl{\pdf_object_ref_last:}
 % Brutto~\pdffield_textfield:n{name=brutto,AA/C={\l_tmpa_tl}}
 % \end{verbatim}
 %
@@ -388,8 +388,8 @@
 % ,\dim_set:N
 % ,\endcsname
 % ,\exp_args:Ne
-% ,\exp_args:Nnx
-% ,\exp_args:Nx
+% ,\exp_args:Nne
+% ,\exp_args:Ne
 % ,\fboxsep
 % ,\group_begin:
 % ,\group_end:
@@ -422,12 +422,12 @@
 % ,\pdf_object_ref:n
 % ,\pdf_object_ref_last:
 % ,\pdf_object_unnamed_write:nn
-% ,\pdf_object_unnamed_write:nx
+% ,\pdf_object_unnamed_write:ne
 % ,\pdf_object_write:nnn
 % ,\pdf_string_from_unicode:nnN
 % ,\pdfannot_box_ref_last:
 % ,\pdfannot_dict_put:nnn
-% ,\pdfannot_dict_put:nnx
+% ,\pdfannot_dict_put:nne
 % ,\pdfannot_dict_remove:nn
 % ,\pdfannot_widget_box:nnn
 % ,\pdfdict_if_empty:nTF
@@ -436,7 +436,7 @@
 % ,\pdfdict_put:nnn
 % ,\pdfdict_remove:nn
 % ,\pdfdict_use:n
-% ,\pdfdict_put:nnx
+% ,\pdfdict_put:nne
 % ,\pdfmanagement_add:nnn
 % ,\pdfmeta_standard_verify:nTF
 % ,\pdfxform_if_exist:nTF
@@ -608,7 +608,7 @@
         \cs_if_exist:cTF { @@_action_reset_#1: }
           {
             \use:c { @@_action_reset_#1: }
-            \pdfannot_dict_put:nnx{widget}
+            \pdfannot_dict_put:nne{widget}
              {A}
              {\tl_use:c { c_@@_action_reset_#1_tl } }
           }
@@ -626,7 +626,7 @@
         \cs_if_exist:cTF { @@_action_submit_#1: }
           {
             \use:c { @@_action_submit_#1: }
-            \pdfannot_dict_put:nnx{widget}
+            \pdfannot_dict_put:nne{widget}
              {A}
              {\tl_use:c { c_@@_action_submit_#1_tl } }
           }
@@ -641,8 +641,8 @@
     import .code:n =
       {
         \pdf_string_from_unicode:nnN {utf8/string}{#1}\l_@@_tmpa_str
-        \pdf_object_unnamed_write:nx {dict}{/Type/Action/S/ImportData/F\l_@@_tmpa_str}
-        \pdfannot_dict_put:nnx{widget}
+        \pdf_object_unnamed_write:ne {dict}{/Type/Action/S/ImportData/F\l_@@_tmpa_str}
+        \pdfannot_dict_put:nne{widget}
           {A}
           {\pdf_object_ref_last: }
       }
@@ -714,25 +714,25 @@
         \group_begin:
         \seq_clear:N \l_@@_action_Fields_seq
         \keys_set:nn { pdffield / action }{ #2 }
-        \pdf_object_unnamed_write:nx
+        \pdf_object_unnamed_write:ne
           { array }
           { \seq_use:Nn \l_@@_action_Fields_seq {~} }
         \tl_if_empty:NF \l_@@_action_next_tl
           {
-            \pdfdict_put:nnx {l_@@/ResetForm}{Next}{\l_@@_action_next_tl}
+            \pdfdict_put:nne {l_@@/ResetForm}{Next}{\l_@@_action_next_tl}
           }
-        \pdfdict_put:nnx
+        \pdfdict_put:nne
           { l_@@/ResetForm }
           { Fields }
           { \pdf_object_ref_last: }
-        \pdfdict_put:nnx
+        \pdfdict_put:nne
           { l_@@/ResetForm }
           { Flags }
           { \bitset_item:Nn\l_@@_Flags_bitset{Include/Exclude} }
-        \pdf_object_unnamed_write:nx
+        \pdf_object_unnamed_write:ne
           { dict }
           { \pdfdict_use:n{l_@@/ResetForm} }
-        \tl_const:cx { c_@@_action_reset_#1_tl } { \pdf_object_ref_last: }
+        \tl_const:ce { c_@@_action_reset_#1_tl } { \pdf_object_ref_last: }
         \cs_gset_eq:cN {@@_action_reset_#1:} \prg_do_nothing:
         \group_end:
       }
@@ -764,30 +764,30 @@
         \bitset_clear:N \l_@@_Flags_bitset
         \keys_set:nn {pdffield/action}{#2}
         \use:c{ @@_action_flags_\l_@@_action_export_tl :}
-        \pdfdict_put:nnx
+        \pdfdict_put:nne
           { l_@@/SubmitForm }
           { Flags }
           { \bitset_to_arabic:N \l_@@_Flags_bitset }
         \tl_if_empty:NF \l_@@_action_next_tl
           {
-            \pdfdict_put:nnx {l_@@/SubmitForm}{Next}{\l_@@_action_next_tl}
+            \pdfdict_put:nne {l_@@/SubmitForm}{Next}{\l_@@_action_next_tl}
           }
         \bool_if:NTF \l_@@_url_encode_bool
           { \pdf_string_from_unicode:nnN { utf8/URI }   {#3}\l_@@_tmpa_str }
           { \pdf_string_from_unicode:nnN { utf8/string }{#3}\l_@@_tmpa_str }
-        \pdf_object_unnamed_write:nx {dict}
+        \pdf_object_unnamed_write:ne {dict}
           {
             /FS/URL
             /F \l_@@_tmpa_str
           }
-        \pdfdict_put:nnx
+        \pdfdict_put:nne
           { l_@@/SubmitForm }
           { F }
           { \pdf_object_ref_last: }
-        \pdf_object_unnamed_write:nx
+        \pdf_object_unnamed_write:ne
           { dict }
           { \pdfdict_use:n{ l_@@/SubmitForm } }
-        \tl_const:cx { c_@@_action_submit_#1_tl } { \pdf_object_ref_last: }
+        \tl_const:ce { c_@@_action_submit_#1_tl } { \pdf_object_ref_last: }
         \cs_gset_eq:cN { @@_action_submit_#1: } \prg_do_nothing:
         \group_end:
       }

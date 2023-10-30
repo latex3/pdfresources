@@ -144,7 +144,7 @@
 %   This outputs the property list of the dictionary as a list of
 %   |/key value| pairs.
 %   This can be used e.g. when writing a dictionary object with
-%   \cs{pdf_object_write:nnx}
+%   \cs{pdf_object_write:nne}
 % \end{function}
 %
 % \begin{function}[updated = 2020-12-03]
@@ -285,7 +285,7 @@
   {
     \@@_if_exist:nTF { #1 }
       {
-        \msg_error:nnxx
+        \msg_error:nnee
           { pdfdict }
           { dict-already-defined }
           { \tl_to_str:n {#1} }
@@ -306,7 +306,7 @@
              }
            }
            {
-             \msg_error:nnx{pdfdict}{invalid-name}{\tl_to_str:n{#1}}
+             \msg_error:nne{pdfdict}{invalid-name}{\tl_to_str:n{#1}}
            }
        }
   }
@@ -419,7 +419,7 @@
       {
         \@@_if_exist:nTF  { #1 }
           {
-            \exp_args:Nnx \prop_put:cnn
+            \exp_args:Nne \prop_put:cnn
               { \@@_name:n { #1 } }{ \str_convert_pdfname:n { #2 } } { #3 }
           }
           {
@@ -429,7 +429,7 @@
   }
 
 \cs_set_eq:NN \pdfdict_put:nnn \@@_put:nnn
-\cs_generate_variant:Nn \pdfdict_put:nnn {nnx,nno,nee}
+\cs_generate_variant:Nn \pdfdict_put:nnn {nne,nno,nee,nnx}
 
 \cs_new_protected:Npn \@@_gput:nnn #1 #2 #3  %#1 global dict, #2 name, #3 value
   {
@@ -440,7 +440,7 @@
       {
         \@@_if_exist:nTF { #1 }
           {
-            \exp_args:Nnx \prop_gput:cnn
+            \exp_args:Nne \prop_gput:cnn
               { \@@_name:n { #1 } }{ \str_convert_pdfname:n { #2 } } { #3 }
           }
           {
@@ -450,7 +450,7 @@
   }
 
 \cs_set_eq:NN \pdfdict_gput:nnn \@@_gput:nnn
-\cs_generate_variant:Nn \pdfdict_gput:nnn {nnx,nno,nee}
+\cs_generate_variant:Nn \pdfdict_gput:nnn {nne,nno,nee,nnx}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -464,7 +464,7 @@
   {
     \@@_if_exist:nTF { #1 }
       {
-        \exp_args:Nnx \prop_get:cnN
+        \exp_args:Nne \prop_get:cnN
           { \@@_name:n { #1 } }
           { \str_convert_pdfname:n { #2 } } #3
       }
@@ -489,7 +489,7 @@
   {
     \@@_if_exist:nTF { #1 }
       {
-        \exp_args:Nnx \prop_remove:cn
+        \exp_args:Nne \prop_remove:cn
           { \@@_name:n  { #1 } }{ \str_convert_pdfname:n { #2 } }
       }
       {
@@ -502,7 +502,7 @@
   {
     \@@_if_exist:nTF  { #1 }
        {
-         \exp_args:Nnx \prop_gremove:cn
+         \exp_args:Nne \prop_gremove:cn
            { \@@_name:n  { #1 } }{ \str_convert_pdfname:n { #2 } }
        }
        {
@@ -537,7 +537,7 @@
   }
 \cs_new_protected:Npn \pdfdict_show:n #1
   {
-    \@@_show:Nn \msg_show:nnxxxx {#1}
+    \@@_show:Nn \msg_show:nneeee {#1}
   }
 %    \end{macrocode}
 % \end{macro}

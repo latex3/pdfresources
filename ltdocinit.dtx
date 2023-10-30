@@ -280,7 +280,7 @@
 %    \begin{macrocode}
 \NewDocumentCommand\AddToDocumentProperties{O{\@currname}mm}
   {
-    \exp_args:NNx
+    \exp_args:NNe
       \prop_gput:Nnn \g_@@_documentproperties_prop
         {
           \tl_if_blank:eTF {#1}{top-level/}{#1/} #2
@@ -333,7 +333,7 @@
   }
 \NewDocumentCommand\ShowDocumentProperties {}
   {
-    \msg_show:nnx {pdfmanagement}{show-properties}
+    \msg_show:nne {pdfmanagement}{show-properties}
       {
         \prop_map_function:NN \g_@@_documentproperties_prop \msg_show_item:nn
       }

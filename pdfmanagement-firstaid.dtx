@@ -314,21 +314,21 @@
   }
 
 \cs_generate_variant:Nn \tl_trim_spaces:n{V}
-\cs_generate_variant:Nn \pdfmanagement_add:nnn {nex}
+\cs_generate_variant:Nn \pdfmanagement_add:nnn {nee}
 \cs_new:Npn \@@_patch_pgfextgs:w  #1/#2<<#3>>#4\q_stop
   {
-    \tl_set:Nx\l_tmpa_tl{#2}
-      \pdfmanagement_add:nex
+    \tl_set:Ne\l_tmpa_tl{#2}
+      \pdfmanagement_add:nee
         {Page/Resources/ExtGState}{\tl_trim_spaces:V\l_tmpa_tl}{<<#3 #4>>}
   }
 \cs_new:Npn \@@_patch_pgfpatterns:w  #1/#2\space#3\q_stop
   {
-     \pdfmanagement_add:nex
+     \pdfmanagement_add:nee
         {Page/Resources/Pattern}{\tl_trim_spaces:n{#2}}{#3}
   }
 \cs_new:Npn \@@_patch_pgfcolorspaces:w  #1/#2[#3]#4\q_stop
   {
-    \pdfmanagement_add:nex
+    \pdfmanagement_add:nee
       {Page/Resources/ColorSpace}{\tl_trim_spaces:n{#2}}{[#3]}
   }
 

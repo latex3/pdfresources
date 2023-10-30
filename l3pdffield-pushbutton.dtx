@@ -82,8 +82,8 @@
 %  \group_begin:
 %  \tl_set:Nn\l_tmpa_tl{app.alert('Hello!~I\'m~Bär!',3,0);}
 %  \regex_replace_once:nnN{ä}{\x5Cu00E4}\l_tmpa_tl{}
-%  \pdf_object_unnamed_write:nx{stream}{{}{\exp_not:o{\l_tmpa_tl}}}
-%  \pdfannot_dict_put:nnx{widget}{A}{<</S/JavaScript /JS~\pdf_object_ref_last:>>}
+%  \pdf_object_unnamed_write:ne{stream}{{}{\exp_not:o{\l_tmpa_tl}}}
+%  \pdfannot_dict_put:nne{widget}{A}{<</S/JavaScript /JS~\pdf_object_ref_last:>>}
 %  \pdffield_pushbutton:n{name=bear,appearance=pdffield/bear,width=23pt,height=30pt,depth=10pt}
 %  \group_end:
 % \ExplSyntaxOff
@@ -93,9 +93,9 @@
 %^^A  \group_begin:
 %^^A  \tl_set:Nn\l_tmpa_tl{app.alert('Hello!~Im~Bär!',3,0);}
 %^^A  \regex_replace_once:nnN{ä}{\x5Cu00E4}\l_tmpa_tl{}
-%^^A  \pdf_object_unnamed_write:nx{stream}{{}{\exp_not:o{\l_tmpa_tl}}}
-%^^A  \pdf_object_unnamed_write:nx{dict}{/S/JavaScript /JS~\pdf_object_ref_last:}
-%^^A  \pdfannot_dict_put:nnx{widget}{A}{\pdf_object_ref_last:}
+%^^A  \pdf_object_unnamed_write:ne{stream}{{}{\exp_not:o{\l_tmpa_tl}}}
+%^^A  \pdf_object_unnamed_write:ne{dict}{/S/JavaScript /JS~\pdf_object_ref_last:}
+%^^A  \pdfannot_dict_put:nne{widget}{A}{\pdf_object_ref_last:}
 %^^A  \pdffield_pushbutton:n{name=bear,appearance=pdffield/bear,width=23pt,height=30pt,depth=10pt}
 %^^A  \group_end:%
 % \bigskip
@@ -318,8 +318,8 @@
 % ,\dim_set:N
 % ,\endcsname
 % ,\exp_args:Ne
-% ,\exp_args:Nnx
-% ,\exp_args:Nx
+% ,\exp_args:Nne
+% ,\exp_args:Ne
 % ,\fboxsep
 % ,\group_begin:
 % ,\group_end:
@@ -355,7 +355,7 @@
 % ,\pdf_string_from_unicode:nnN
 % ,\pdfannot_box_ref_last:
 % ,\pdfannot_dict_put:nnn
-% ,\pdfannot_dict_put:nnx
+% ,\pdfannot_dict_put:nne
 % ,\pdfannot_dict_remove:nn
 % ,\pdfannot_widget_box:nnn
 % ,\pdfdict_if_empty:nTF
@@ -442,7 +442,7 @@
 \cs_new_protected:Npn \@@_pushbutton_default_appearances:
   {
      \int_gincr:N \g_@@_pushbutton_cnt_int
-     \exp_args:Nx
+     \exp_args:Ne
      \pdffield_appearance:nn {pdffield/pushbutton/default-\int_use:N \g_@@_pushbutton_cnt_int}
        {
          \draw_begin:
@@ -517,7 +517,7 @@
           \draw_box_use:N \l_tmpa_box
          \draw_end:
        }
-    \exp_args:Nx
+    \exp_args:Ne
     \pdffield_appearance:nn {pdffield/pushbutton/defaultrollover-\int_use:N \g_@@_pushbutton_cnt_int}
        {
          \draw_begin:
@@ -591,7 +591,7 @@
           \draw_box_use:N \l_tmpa_box
          \draw_end:
        }
-     \exp_args:Nx
+     \exp_args:Ne
      \pdffield_appearance:nn {pdffield/pushbutton/defaultdown-\int_use:N \g_@@_pushbutton_cnt_int}
        {
          \draw_begin:
@@ -723,7 +723,7 @@
    \tl_if_empty:NT\l_@@_pushbutton_appearance_code_tl
       {
         \@@_pushbutton_default_appearances:
-        \exp_args:Nnx
+        \exp_args:Nne
          \keys_set:nn {pdffield}
            {
              appearance          = pdffield/pushbutton/default-\int_eval:n{ \g_@@_pushbutton_cnt_int},
@@ -751,7 +751,7 @@
       {
         \pdfxform_if_exist:nTF {  #1  }
            {
-            \pdfannot_dict_put:nnx {widget/AP}{#2}{\pdfxform_ref:n{#1}}
+            \pdfannot_dict_put:nne {widget/AP}{#2}{\pdfxform_ref:n{#1}}
            }
            {
               \msg_error:nnnn{pdffield}{appearance-missing}{#1}{#3}

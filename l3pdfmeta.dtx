@@ -644,7 +644,7 @@
       {
         \cs_if_exist:cTF {@@_standard_verify_handler_#1:nn}
           {
-            \exp_args:Nnnx
+            \exp_args:Nnne
             \use:c
               {@@_standard_verify_handler_#1:nn}
               { #2 }
@@ -756,7 +756,7 @@
      { \__pdf_backend_omit_charset:n {1} }  
     \pdfmeta_standard_verify:nnF { min_pdf_version }
      { \pdf_version: }
-     { \msg_warning:nnxxx {pdf}{wrong-pdfversion}
+     { \msg_warning:nneee {pdf}{wrong-pdfversion}
        {\pdf_version:}{low}
        {
         \pdfmeta_standard_item:n{type}
@@ -766,7 +766,7 @@
      }
     \pdfmeta_standard_verify:nnF { max_pdf_version }
      { \pdf_version: }
-     { \msg_warning:nnxxx {pdf}{wrong-pdfversion}
+     { \msg_warning:nneee {pdf}{wrong-pdfversion}
        {\pdf_version:}{high}
        {
         \pdfmeta_standard_item:n{type}
@@ -970,7 +970,7 @@
 % \end{verbatim}
 % \item Write a |/OutputIntent| dictionary for this
 % \begin{verbatim}
-% \pdf_object_unnamed_write:nx {dict}
+% \pdf_object_unnamed_write:ne {dict}
 %  {
 %    /Type /OutputIntent
 %    /S /GTS_PDFA1  % or GTS_PDFX or ISO_PDFE1 or ...
@@ -981,7 +981,7 @@
 % \end{verbatim}
 % \item Reference the dictionary in the catalog:
 % \begin{verbatim}
-% \pdfmanagement_add:nnx {Catalog}{OutputIntents}{\pdf_object_ref_last:}
+% \pdfmanagement_add:nne {Catalog}{OutputIntents}{\pdf_object_ref_last:}
 % \end{verbatim}
 % \end{enumerate}
 % But we need to do a bit more work, to get the interface right.
@@ -1085,7 +1085,7 @@
     \pdf_object_if_exist:nF { __color_icc_ #1 }
       {
         \pdf_object_new:n  { __color_icc_ #1 }
-        \pdf_object_write:nnx { __color_icc_ #1 } { fstream }
+        \pdf_object_write:nne { __color_icc_ #1 } { fstream }
          {
            {/N\c_space_tl
              \prop_item:cn{c_@@_colorprofile_#1}{N}
@@ -1098,8 +1098,8 @@
 \cs_new_protected:Npn \@@_write_outputintent:nn #1 #2 %#1 file name, #2 subtype
   {
     \group_begin:
-     \pdfdict_put:nnx {l_pdfmeta/outputintent}{S}{/\str_convert_pdfname:n{#2}}
-     \pdfdict_put:nnx {l_pdfmeta/outputintent}
+     \pdfdict_put:nne {l_pdfmeta/outputintent}{S}{/\str_convert_pdfname:n{#2}}
+     \pdfdict_put:nne {l_pdfmeta/outputintent}
        {DestOutputProfile}
        {\pdf_object_ref:n{ __color_icc_ #1 }}
      \clist_map_inline:nn { OutputConditionIdentifier, Info, RegistryName }
@@ -1110,12 +1110,12 @@
           \l_@@_tmpa_tl
           {
             \pdf_string_from_unicode:nVN {utf8/string}\l_@@_tmpa_tl\l_@@_tmpa_str
-            \pdfdict_put:nnx
+            \pdfdict_put:nne
               {l_pdfmeta/outputintent}{##1}{\l_@@_tmpa_str}
           }
        }
-     \pdf_object_unnamed_write:nx {dict}{\pdfdict_use:n {l_pdfmeta/outputintent} }
-     \pdfmanagement_add:nnx {Catalog}{OutputIntents}{\pdf_object_ref_last:}
+     \pdf_object_unnamed_write:ne {dict}{\pdfdict_use:n {l_pdfmeta/outputintent} }
+     \pdfmanagement_add:nne {Catalog}{OutputIntents}{\pdf_object_ref_last:}
     \group_end:
   }
 %    \end{macrocode}
@@ -1143,18 +1143,18 @@
 % Then we loop but take always the same profile.
 %    \begin{macrocode}
       {
-         \exp_args:NNx
+         \exp_args:NNe
          \prop_if_in:NnF
            \g_@@_outputintents_prop
            { \pdfmeta_standard_item:n { outputintent_A } }
            {
-             \exp_args:NNx
+             \exp_args:NNe
              \prop_gput:Nnn
                \g_@@_outputintents_prop
                { \pdfmeta_standard_item:n { outputintent_A } }
                { sRGB.icc }
            }
-         \exp_args:NNx
+         \exp_args:NNe
          \prop_get:NnN
            \g_@@_outputintents_prop
            { \pdfmeta_standard_item:n { outputintent_A } }
@@ -1191,8 +1191,8 @@
 %    \begin{macrocode}
 \hook_gput_code:nnn{pdfmanagement/add}{pdfmanagement}
   {
-   \pdfmanagement_add:nnx {Info}{Producer}{(\c_sys_engine_exec_str-\c_sys_engine_version_str)}
-   \pdfmanagement_add:nnx {Info}{Creator}{(LaTeX)}
+   \pdfmanagement_add:nne {Info}{Producer}{(\c_sys_engine_exec_str-\c_sys_engine_version_str)}
+   \pdfmanagement_add:nne {Info}{Creator}{(LaTeX)}
   }
 %    \end{macrocode}
 % \subsection{New document keys}
@@ -1390,7 +1390,7 @@
 \cs_new_protected:Npn \@@_xmp_date_get:nNN #1 #2 #3
   %#1 property, #2 tl var with PDF date, #3 seq for splitted date
   {
-    \tl_set:Nx #2 { \GetDocumentProperties{#1} }
+    \tl_set:Ne #2 { \GetDocumentProperties{#1} }
     \tl_if_blank:VTF #2
       {
         \seq_set_eq:NN #3 \l_@@_xmp_currentdate_seq
@@ -1408,8 +1408,8 @@
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_xmp_create_uuid:nN #1 #2
   {
-    \str_set:Nx#2 {\str_lowercase:f{\tex_mdfivesum:D{#1}}}
-    \str_set:Nx#2
+    \str_set:Ne#2 {\str_lowercase:f{\tex_mdfivesum:D{#1}}}
+    \str_set:Ne#2
       { uuid:
         \str_range:Nnn #2{1}{8}
         -\str_range:Nnn#2{9}{12}
@@ -1433,8 +1433,8 @@
     \group_begin:
      \text_declare_purify_equivalent:Nn \& {\tl_to_str:N & }
      \text_declare_purify_equivalent:Nn \texttilde {\c_tilde_str}
-     \tl_set:Nx \l_@@_tmpa_tl { \text_purify:n {#1} }
-     \str_gset:Nx \g_@@_tmpa_str { \tl_to_str:N \l_@@_tmpa_tl }
+     \tl_set:Ne \l_@@_tmpa_tl { \text_purify:n {#1} }
+     \str_gset:Ne \g_@@_tmpa_str { \tl_to_str:N \l_@@_tmpa_tl }
      \str_greplace_all:Nnn\g_@@_tmpa_str {&}{&amp;}
      \str_greplace_all:Nnn\g_@@_tmpa_str {<}{&lt;}
      \str_greplace_all:Nnn\g_@@_tmpa_str {>}{&gt;}
@@ -1478,8 +1478,8 @@
         \tl_set:Nn #3 {#1}
       }
       {
-        \tl_set:Nx #2 {\seq_item:Nn\l_@@_tmpa_seq{2}}
-        \tl_set:Nx #3 {\seq_item:Nn\l_@@_tmpa_seq{3}}
+        \tl_set:Ne #2 {\seq_item:Nn\l_@@_tmpa_seq{2}}
+        \tl_set:Ne #3 {\seq_item:Nn\l_@@_tmpa_seq{3}}
       }
   }
 \cs_generate_variant:Nn \@@_xmp_lang_get:nNN {eNN,VNN}
@@ -1503,7 +1503,7 @@
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_xmp_add_packet_chunk:n #1
   {
-    \tl_gput_right:Nx\g_@@_xmp_packet_tl
+    \tl_gput_right:Ne\g_@@_xmp_packet_tl
       {
         \@@_xmp_indent:  \exp_not:n{#1}
       }
@@ -1518,7 +1518,7 @@
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_xmp_add_packet_chunk:nN #1 #2
   {
-    \tl_put_right:Nx#2
+    \tl_put_right:Ne#2
       {
         \@@_xmp_indent:  \exp_not:n{#1}
       }
@@ -1690,8 +1690,8 @@
 % think if an error is needed for empty lang.
 % \end{NOTE}
 %    \begin{macrocode}
-   \tl_set:Nx \l_@@_xmp_doclang_tl  {\GetDocumentProperties{document/lang}}
-   \tl_set:Nx \l_@@_xmp_metalang_tl {\GetDocumentProperties{hyperref/pdfmetalang}}
+   \tl_set:Ne \l_@@_xmp_doclang_tl  {\GetDocumentProperties{document/lang}}
+   \tl_set:Ne \l_@@_xmp_metalang_tl {\GetDocumentProperties{hyperref/pdfmetalang}}
    \tl_if_blank:VT \l_@@_xmp_metalang_tl
     { \cs_set_eq:NN \l_@@_xmp_metalang_tl\l_@@_xmp_doclang_tl}
 %    \end{macrocode}
@@ -1768,17 +1768,17 @@
 \prop_new:N \g_@@_xmp_xmlns_prop
 %    \end{macrocode}
 % \end{variable}
-% \begin{macro}{\@@_xmp_xmlns_new:nn,\@@_xmp_xmlns_new:nx}
+% \begin{macro}{\@@_xmp_xmlns_new:nn,\@@_xmp_xmlns_new:ne}
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_xmp_xmlns_new:nn #1 #2
   {
     \prop_gput:Nnn \g_@@_xmp_xmlns_prop {#1}{#2}
-    \tl_gput_right:Nx \g_@@_xmp_xmlns_tl
+    \tl_gput_right:Ne \g_@@_xmp_xmlns_tl
       {
         \@@_xmp_indent:n{4} xmlns:\exp_not:n{#1="#2"}
       }
   }
-\cs_generate_variant:Nn \@@_xmp_xmlns_new:nn {nx}
+\cs_generate_variant:Nn \@@_xmp_xmlns_new:nn {ne}
 %    \end{macrocode}
 % \end{macro}
 % Now we fill the data. The list is more or less the same as in hyperxmp
@@ -1789,7 +1789,7 @@
 \@@_xmp_xmlns_new:nn {photoshop}{http://ns.adobe.com/photoshop/1.0/}
 \@@_xmp_xmlns_new:nn {xmp}      {http://ns.adobe.com/xap/1.0/}
 \@@_xmp_xmlns_new:nn {xmpMM}    {http://ns.adobe.com/xap/1.0/mm/}
-\@@_xmp_xmlns_new:nx {stEvt}
+\@@_xmp_xmlns_new:ne {stEvt}
   {http://ns.adobe.com/xap/1.0/sType/ResourceEvent\c_hash_str}
 \@@_xmp_xmlns_new:nn {pdfaid}   {http://www.aiim.org/pdfa/ns/id/}
 \@@_xmp_xmlns_new:nn {pdfuaid}  {http://www.aiim.org/pdfua/ns/id/}
@@ -1798,13 +1798,13 @@
 \@@_xmp_xmlns_new:nn {prism}    {http://prismstandard.org/namespaces/basic/3.0/}
 %\@@_xmp_xmlns_new:nn {jav}      {http://www.niso.org/schemas/jav/1.0/}
 %\@@_xmp_xmlns_new:nn {xmpTPg}   {http://ns.adobe.com/xap/1.0/t/pg/}
-\@@_xmp_xmlns_new:nx {stFnt}    {http://ns.adobe.com/xap/1.0/sType/Font\c_hash_str}
+\@@_xmp_xmlns_new:ne {stFnt}    {http://ns.adobe.com/xap/1.0/sType/Font\c_hash_str}
 \@@_xmp_xmlns_new:nn {Iptc4xmpCore}{http://iptc.org/std/Iptc4xmpCore/1.0/xmlns/}
 \@@_xmp_xmlns_new:nn {pdfaExtension}{http://www.aiim.org/pdfa/ns/extension/}
-\@@_xmp_xmlns_new:nx {pdfaSchema}{http://www.aiim.org/pdfa/ns/schema\c_hash_str}
-\@@_xmp_xmlns_new:nx {pdfaProperty}{http://www.aiim.org/pdfa/ns/property\c_hash_str}
-\@@_xmp_xmlns_new:nx {pdfaType} {http://www.aiim.org/pdfa/ns/type\c_hash_str}
-\@@_xmp_xmlns_new:nx {pdfaField}{http://www.aiim.org/pdfa/ns/field\c_hash_str}
+\@@_xmp_xmlns_new:ne {pdfaSchema}{http://www.aiim.org/pdfa/ns/schema\c_hash_str}
+\@@_xmp_xmlns_new:ne {pdfaProperty}{http://www.aiim.org/pdfa/ns/property\c_hash_str}
+\@@_xmp_xmlns_new:ne {pdfaType} {http://www.aiim.org/pdfa/ns/type\c_hash_str}
+\@@_xmp_xmlns_new:ne {pdfaField}{http://www.aiim.org/pdfa/ns/field\c_hash_str}
 %    \end{macrocode}
 
 % \subsection{Building the chunks: Extensions}
@@ -2191,14 +2191,14 @@
     \@@_xmp_date_get:nNN
       {document/creationdate}\l_@@_tmpa_tl\l_@@_tmpa_seq
     \@@_xmp_add_packet_line:nne{xmp}{CreateDate}{\@@_xmp_print_date:N\l_@@_tmpa_seq}
-    \pdfmanagement_add:nnx{Info}{CreationDate}{(\l_@@_tmpa_tl)}
+    \pdfmanagement_add:nne{Info}{CreationDate}{(\l_@@_tmpa_tl)}
 %    \end{macrocode}
 % ModifyDate
 %    \begin{macrocode}
     \@@_xmp_date_get:nNN
       {document/moddate}\l_@@_tmpa_tl\l_@@_tmpa_seq
     \@@_xmp_add_packet_line:nne{xmp}{ModifyDate}{\@@_xmp_print_date:N\l_@@_tmpa_seq}
-    \pdfmanagement_add:nnx{Info}{ModDate}{(\l_@@_tmpa_tl)}
+    \pdfmanagement_add:nne{Info}{ModDate}{(\l_@@_tmpa_tl)}
 %    \end{macrocode}
 % MetadataDate
 %    \begin{macrocode}
@@ -2273,7 +2273,7 @@
 %    \end{macrocode}
 % pdfdocumentid / xmpMM:DocumentID
 %    \begin{macrocode}
-    \str_set:Nx\l_@@_tmpa_str {\GetDocumentProperties{hyperref/pdfdocumentid}}
+    \str_set:Ne\l_@@_tmpa_str {\GetDocumentProperties{hyperref/pdfdocumentid}}
     \str_if_empty:NT \l_@@_tmpa_str
       {
         \@@_xmp_create_uuid:nN
@@ -2285,7 +2285,7 @@
 %    \end{macrocode}
 % pdfinstanceid / xmpMM:InstanceID
 %    \begin{macrocode}
-    \str_set:Nx\l_@@_tmpa_str {\GetDocumentProperties{hyperref/pdfinstanceid}}
+    \str_set:Ne\l_@@_tmpa_str {\GetDocumentProperties{hyperref/pdfinstanceid}}
     \str_if_empty:NT \l_@@_tmpa_str
       {
         \@@_xmp_create_uuid:nN
@@ -2473,7 +2473,7 @@
      {
        \@@_xmp_add_packet_open_attr:nnn
         {Iptc4xmpCore}{CreatorContactInfo}{rdf:parseType="Resource"}
-       \tl_gput_right:Nx\g_@@_xmp_packet_tl { \l_@@_xmp_iptc_data_tl }
+       \tl_gput_right:Ne\g_@@_xmp_packet_tl { \l_@@_xmp_iptc_data_tl }
        \@@_xmp_add_packet_close:nn
         {Iptc4xmpCore}{CreatorContactInfo}
     }
@@ -2552,7 +2552,7 @@
 % The page count is take from the previous run or from
 % pdfnumpages.
 %    \begin{macrocode}
-     \tl_set:Nx \l_@@_tmpa_tl { \GetDocumentProperties{hyperref/pdfnumpages} }
+     \tl_set:Ne \l_@@_tmpa_tl { \GetDocumentProperties{hyperref/pdfnumpages} }
      \@@_xmp_add_packet_line:nne
       {prism}{pageCount}
       {\tl_if_blank:VTF \l_@@_tmpa_tl {\PreviousTotalPages}{\l_@@_tmpa_tl}}
@@ -2599,7 +2599,7 @@
        \@@_xmp_build_packet:
        \exp_args:No
        \__pdf_backend_metadata_stream:n {\g_@@_xmp_packet_tl}
-        \pdfmanagement_add:nnx {Catalog} {Metadata}{\pdf_object_ref_last:}
+        \pdfmanagement_add:nne {Catalog} {Metadata}{\pdf_object_ref_last:}
        \bool_if:NT \g_@@_xmp_export_bool
         {
           \iow_open:Nn\g_tmpa_iow{\g_@@_xmp_export_str.xmpi}

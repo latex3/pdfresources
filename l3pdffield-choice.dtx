@@ -369,14 +369,14 @@
 % ,\pdf_object_ref:n
 % ,\pdf_object_ref_last:
 % ,\pdf_object_unnamed_write:nn
-% ,\pdf_object_unnamed_write:nx
-% ,\pdf_object_write:nnx
+% ,\pdf_object_unnamed_write:ne
+% ,\pdf_object_write:nne
 % ,\pdf_object_write:nnn
 % ,\pdf_string_from_unicode:nnN
 % ,\pdfannot_box_ref_last:
 % ,\pdfannot_dict_put:nnn
-% ,\pdfannot_dict_put:nnx
-% ,\pdfdict_put:nnx
+% ,\pdfannot_dict_put:nne
+% ,\pdfdict_put:nne
 % ,\pdfannot_dict_remove:nn
 % ,\pdfannot_widget_box:nnn
 % ,\pdfdict_if_empty:nTF
@@ -470,7 +470,7 @@
         \seq_map_indexed_inline:Nn \l_@@_choice_values_seq
           {
             \pdf_string_from_unicode:nnN{utf16/hex}{##2}\l_@@_tmpa_str
-            \tl_set:Nx \l_@@_tmpa_tl {\seq_item:Nn \l_@@_choice_displayvalues_seq {##1} }
+            \tl_set:Ne \l_@@_tmpa_tl {\seq_item:Nn \l_@@_choice_displayvalues_seq {##1} }
             \tl_if_empty:NTF \l_@@_tmpa_tl
               {
                 \seq_put_right:NV \l_@@_choice_opt_seq \l_@@_tmpa_str
@@ -478,12 +478,12 @@
               {
                 \exp_args:NnV
                 \pdf_string_from_unicode:nnN{utf16/hex}\l_@@_tmpa_tl\l_@@_tmpb_str
-                \seq_put_right:Nx \l_@@_choice_opt_seq
+                \seq_put_right:Ne \l_@@_choice_opt_seq
                   { [ \l_@@_tmpa_str\c_space_tl\l_@@_tmpb_str] }
               }
           }
-        \pdf_object_unnamed_write:nx {array}{\seq_use:Nn\l_@@_choice_opt_seq {~}}
-        \pdfdict_put:nnx { l_@@/field }{Opt}  { \pdf_object_ref_last: }
+        \pdf_object_unnamed_write:ne {array}{\seq_use:Nn\l_@@_choice_opt_seq {~}}
+        \pdfdict_put:nne { l_@@/field }{Opt}  { \pdf_object_ref_last: }
 %    \end{macrocode}
 % Now we handle the V value. If MultiSelect is set, we use the full
 % displayvalues seq, if not only the first value.
@@ -495,14 +495,14 @@
              {
                 \pdf_string_from_unicode:nnN{utf16/hex}{##1}\l_@@_tmpa_str
                 \tl_put_right:NV \l_@@_tmpa_tl \l_@@_tmpa_str
-                \pdfdict_put:nnx { l_@@/field }{V}  { [ \l_@@_tmpa_tl ] }
+                \pdfdict_put:nne { l_@@/field }{V}  { [ \l_@@_tmpa_tl ] }
              }
           }
           {
-            \tl_set:Nx \l_@@_tmpa_tl {\seq_item:Nn \l_@@_choice_defaultvalues_seq {1} }
+            \tl_set:Ne \l_@@_tmpa_tl {\seq_item:Nn \l_@@_choice_defaultvalues_seq {1} }
             \exp_args:NnV
               \pdf_string_from_unicode:nnN{utf16/hex}\l_@@_tmpa_tl\l_@@_tmpb_str
-            \pdfdict_put:nnx { l_@@/field }{V}  { \l_@@_tmpb_str }
+            \pdfdict_put:nne { l_@@/field }{V}  { \l_@@_tmpb_str }
           }
 %    \end{macrocode}
 % now we create the field and set it as parent for the following annotation.
@@ -605,7 +605,7 @@
      }
    ,top-index .code:n =
      {
-       \pdfdict_put:nnx {l_@@/field}{TI}{\int_eval:n{#1-1}}
+       \pdfdict_put:nne {l_@@/field}{TI}{\int_eval:n{#1-1}}
      }
   }
 %    \end{macrocode}

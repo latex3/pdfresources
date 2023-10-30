@@ -139,7 +139,7 @@
 %  \end{function}
 
 % \begin{function}[added = 2020-04-06,updated=2021-07-23]
-%   {\pdfmanagement_add:nnn,\pdfmanagement_add:nnx,\pdfmanagement_add:nxx,\pdfmanagement_add:xxx,
+%   {\pdfmanagement_add:nnn,\pdfmanagement_add:nne,\pdfmanagement_add:nee,\pdfmanagement_add:eee,
 %    \PDFManagementAdd}
 %   \begin{syntax}
 %     \cs{pdfmanagement_add:nnn} \Arg{resource path} \Arg{name} \Arg{value}
@@ -153,7 +153,7 @@
 % keys used in PDF dictionaries (see the l3pdfdict module) the name is escaped
 % with \cs{str_convert_pdfname:n} when stored.
 % \Arg{value} should be a valid PDF value for this Name in the
-% target dictionary. |\PDFManagementAdd| is a copy of |\pdfmanagement_add:xxx|
+% target dictionary. |\PDFManagementAdd| is a copy of |\pdfmanagement_add:eee|
 % and so expands all its arguments.
 %
 %
@@ -250,7 +250,7 @@
 %   normally sensible:
 %   \begin{verbatim}
 %    \str_set_convert:Nnnn \l_tmpa_str { Grüße }{ default } {utf16/string}
-%    \pdfmanagement_add:nnx {Info} {Title}{(\l_tmpa_str)}
+%    \pdfmanagement_add:nne {Info} {Title}{(\l_tmpa_str)}
 %   \end{verbatim}
 % \end{function}
 %
@@ -539,13 +539,13 @@
 %  \begin{verbatim}
 %  \pdf_object_new:n     {module/intent}
 %  \pdf_object_write:nnn {module/intent}{dict}{...}
-%  \pdfmanagement_add:nnx  {Catalog} {OutputIntents}{\pdf_object_ref:n {module/intent}}
+%  \pdfmanagement_add:nne  {Catalog} {OutputIntents}{\pdf_object_ref:n {module/intent}}
 %  \end{verbatim}
 %
 %  or
 %  \begin{verbatim}
 %  \pdf_object_unnamed_write:nn   {dict} { ... }
-%  \pdfmanagement_add:nnx  {Catalog} {OutputIntents}{\pdf_object_ref_last:}
+%  \pdfmanagement_add:nne  {Catalog} {OutputIntents}{\pdf_object_ref_last:}
 %  \end{verbatim}
 %
 %
@@ -582,7 +582,7 @@
 % the AP names (for appearance streams) use
 %
 % \begin{verbatim}
-% \pdfmanagement_add:nnx  { Catalog / Names / AP } {myAPname} {\pdf_object_ref_last:}
+% \pdfmanagement_add:nne  { Catalog / Names / AP } {myAPname} {\pdf_object_ref_last:}
 % \end{verbatim}
 %
 % Remarks:
@@ -723,13 +723,13 @@
           }
       }
       {
-        \msg_warning:nnx {pdfmanagement}{inactive}
+        \msg_warning:nne {pdfmanagement}{inactive}
           {\tl_to_str:n {\pdfmanagement_add:nnn}}
       }
   }
 
-\cs_generate_variant:Nn \pdfmanagement_add:nnn {nnx,nxx,xxx}
-\cs_set_eq:NN \PDFManagementAdd \pdfmanagement_add:xxx
+\cs_generate_variant:Nn \pdfmanagement_add:nnn {nne,nee,eee,nnx,nxx,xxx}
+\cs_set_eq:NN \PDFManagementAdd \pdfmanagement_add:eee
 %    \end{macrocode}
 % \subsection{Hooks -- shipout and end of run code}
 % Code is executed in three places: At shipout of every page,
@@ -831,7 +831,7 @@
                   { @@_handler/#1/#2_gput:n }
                   { \use:c {@@_handler/#1/#2_gput:n} {#3} } %special handler
                   {
-                    \exp_args:Nnx
+                    \exp_args:Nne
                     \prop_gput:cnn
                       { \__kernel_pdfdict_name:n { g__pdf_Core/#1 } }
                       { \str_convert_pdfname:n { #2 } }
@@ -846,11 +846,11 @@
   }
 
 
-\cs_generate_variant:Nn \@@_handler_gput:nnn {nxx}
+\cs_generate_variant:Nn \@@_handler_gput:nnn {nee}
 
 \cs_new_protected:Npn \@@_get:nnN  #1 #2 #3 %path,key,macro
   {
-    \exp_args:Nnx
+    \exp_args:Nne
     \prop_get:cnN
       { \__kernel_pdfdict_name:n { g__pdf_Core/#1 } }
       { \str_convert_pdfname:n {#2} } #3
@@ -869,7 +869,7 @@
                   { @@_handler/#1/#2_gremove: }
                   { \use:c {@@_handler/#1/#2_gremove:} } %special handler
                   {
-                    \exp_args:Nnx
+                    \exp_args:Nne
                     \prop_gremove:cn
                       { \__kernel_pdfdict_name:n { g__pdf_Core/#1 } }
                       { \str_convert_pdfname:n {#2} }
@@ -885,7 +885,7 @@
   {
     \pdfdict_if_exist:nTF { g__pdf_Core/#1 }
           {
-            \exp_args:Nnx
+            \exp_args:Nne
             \prop_gremove:cn
               { \__kernel_pdfdict_name:n { g__pdf_Core/#1 } }
               { \str_convert_pdfname:n{#2} }
@@ -931,7 +931,7 @@
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdfmanagement_show:n #1
   {
-    \@@_show:Nn \msg_show:nnxxxx {#1}
+    \@@_show:Nn \msg_show:nneeee {#1}
   }
 %    \end{macrocode}
 %    \begin{macrocode}
@@ -999,7 +999,7 @@
   {
     \pdfdict_if_empty:nF { g__pdf_Core/Pages}
       {
-        \exp_args:Nx \__pdf_backend_Pages_primitive:n
+        \exp_args:Ne \__pdf_backend_Pages_primitive:n
           {
             \pdfdict_use:n { g__pdf_Core/Pages}
           }
@@ -1279,10 +1279,10 @@
      { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/AA } }
      {
        \pdf_object_new:n  { @@/Catalog/AA }
-       \pdf_object_write:nnx
+       \pdf_object_write:nne
             { @@/Catalog/AA }{ dict }
             { \pdfdict_use:n { g__pdf_Core/Catalog/AA } }
-       \exp_args:Nnx
+       \exp_args:Nne
          \__pdf_backend_catalog_gput:nn
            {AA}
            {
@@ -1309,10 +1309,10 @@
     \seq_if_empty:cF { g_@@_/Catalog/AcroForm/Fields_seq }
       {
         \pdf_object_new:n  { @@/Catalog/AcroForm/Fields }
-        \pdf_object_write:nnx
+        \pdf_object_write:nne
             { @@/Catalog/AcroForm/Fields } { array }
             { \seq_use:cn { g_@@_/Catalog/AcroForm/Fields_seq } {~} }
-        \exp_args:Nnnx
+        \exp_args:Nnne
           \prop_gput:cnn %we have to use \prop here to avoid the handler ...
             { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/AcroForm } }
             { Fields }
@@ -1321,10 +1321,10 @@
     \seq_if_empty:cF { g_@@_/Catalog/AcroForm/CO_seq }
       {
         \pdf_object_new:n  { @@/Catalog/AcroForm/CO }
-        \pdf_object_write:nnx
+        \pdf_object_write:nne
             { @@/Catalog/AcroForm/CO } { array }
             { \seq_use:cn { g_@@_/Catalog/AcroForm/CO_seq } {~} }
-        \exp_args:Nnnx
+        \exp_args:Nnne
           \prop_gput:cnn %we have to use \prop here to avoid the handler ...
             { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/AcroForm } }
             { CO }
@@ -1333,10 +1333,10 @@
      \prop_if_empty:cF { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/AcroForm/DR/Font}}
        {
          \pdf_object_new:n { @@/Catalog/AcroForm/DR/Font }
-         \pdf_object_write:nnx
+         \pdf_object_write:nne
              { @@/Catalog/AcroForm/DR/Font } { dict }
              { \pdfdict_use:n { g__pdf_Core/Catalog/AcroForm/DR/Font } }
-         \exp_args:Nnnx
+         \exp_args:Nnne
            \prop_gput:cnn %we have to use \prop here to avoid the handler ...
              { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/AcroForm/DR } }
              { Font }
@@ -1345,10 +1345,10 @@
      \prop_if_empty:cF { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/AcroForm/DR}}
        {
          \pdf_object_new:n { @@/Catalog/AcroForm/DR }
-         \pdf_object_write:nnx
+         \pdf_object_write:nne
              { @@/Catalog/AcroForm/DR } { dict }
              { \pdfdict_use:n { g__pdf_Core/Catalog/AcroForm/DR } }
-         \exp_args:Nnnx
+         \exp_args:Nnne
            \prop_gput:cnn %we have to use \prop here to avoid the handler ...
              { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/AcroForm } }
              { DR }
@@ -1357,10 +1357,10 @@
      \prop_if_empty:cF { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/AcroForm} }
        {
          \pdf_object_new:n { @@/Catalog/AcroForm }
-         \pdf_object_write:nnx
+         \pdf_object_write:nne
              { @@/Catalog/AcroForm } { dict }
              { \pdfdict_use:n { g__pdf_Core/Catalog/AcroForm } }
-         \exp_args:Nnnx
+         \exp_args:Nnne
            \@@_handler_gput:nnn
              { Catalog }
              { AcroForm }
@@ -1381,10 +1381,10 @@
      { g_@@_/Catalog/AF_seq }
      {
        \pdf_object_new:n  { @@/Catalog/AF }
-       \pdf_object_write:nnx
+       \pdf_object_write:nne
             { @@/Catalog/AF } { array }
             { \seq_use:cn { g_@@_/Catalog/AF_seq } {~} }
-       \exp_args:Nnx
+       \exp_args:Nne
          \__pdf_backend_catalog_gput:nn
            {AF}
            {
@@ -1404,10 +1404,10 @@
      { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/MarkInfo } }
      {
        \pdf_object_new:n  { @@/Catalog/MarkInfo }
-       \pdf_object_write:nnx
+       \pdf_object_write:nne
           { @@/Catalog/MarkInfo } { dict }
           { \pdfdict_use:n { g__pdf_Core/Catalog/MarkInfo } }
-       \exp_args:Nnx
+       \exp_args:Nne
          \__pdf_backend_catalog_gput:nn
            {MarkInfo}
            {
@@ -1445,7 +1445,7 @@
       {
         \pdf_object_new:n  { @@/Catalog/OCProperties }
         \seq_gpop_left:cN { g_@@_/Catalog/OCProperties/Configs_seq} \l_@@_tmpa_tl
-        \pdf_object_write:nnx {@@/Catalog/OCProperties} {dict}
+        \pdf_object_write:nne {@@/Catalog/OCProperties} {dict}
            {
               /OCGs~[ \seq_use:cn { g_@@_/Catalog/OCProperties/OCGs_seq } {~} ]
               /D~\l_@@_tmpa_tl~
@@ -1455,7 +1455,7 @@
                   [ \seq_use:cn { g_@@_/Catalog/OCProperties/Configs_seq} {~} ]
                 }
            }
-        \exp_args:Nnx
+        \exp_args:Nne
           \__pdf_backend_catalog_gput:nn
             { OCProperties }
             { \__pdf_backend_object_ref:n {@@/Catalog/OCProperties} }
@@ -1474,10 +1474,10 @@
      { g_@@_/Catalog/OutputIntents_seq }
      {
        \pdf_object_new:n  { @@/Catalog/OutputIntents }
-       \pdf_object_write:nnx
+       \pdf_object_write:nne
             { @@/Catalog/OutputIntents } { array }
             { \seq_use:cn { g_@@_/Catalog/OutputIntents_seq } {~} }
-       \exp_args:Nnx
+       \exp_args:Nne
          \__pdf_backend_catalog_gput:nn
            {OutputIntents}
            {
@@ -1498,10 +1498,10 @@
      { g_@@_/Catalog/Requirements_seq }
      {
        \pdf_object_new:n  { @@/Catalog/Requirements }
-       \pdf_object_write:nnx
+       \pdf_object_write:nne
             { @@/Catalog/Requirements } { array }
             { \seq_use:cn { g_@@_/Catalog/Requirements_seq } {~} }
-       \exp_args:Nnx
+       \exp_args:Nne
          \__pdf_backend_catalog_gput:nn
            {Requirements}
            {
@@ -1522,10 +1522,10 @@
      { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/ViewerPreferences } }
      {
        \pdf_object_new:n  { @@/Catalog/ViewerPreferences }
-       \pdf_object_write:nnx
+       \pdf_object_write:nne
             { @@/Catalog/ViewerPreferences } { dict }
             { \pdfdict_use:n { g__pdf_Core/Catalog/ViewerPreferences } }
-       \exp_args:Nnx
+       \exp_args:Nne
          \__pdf_backend_catalog_gput:nn
            {ViewerPreferences}
            {
@@ -1571,12 +1571,12 @@
 \cs_new_protected:cpn { @@_handler/Catalog/Names/EmbeddedFiles_gput:n } #1
   {
     \int_gincr:N \g_@@_EmbeddedFiles_int
-    \exp_args:Nnx
+    \exp_args:Nne
     \prop_gput:cnn
       { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/Names/EmbeddedFiles }}
       { \@@_EmbeddedFiles_name: }
       { #1 }
-     \exp_args:Nx
+     \exp_args:Ne
      \__pdf_backend_NamesEmbeddedFiles_add:nn {\@@_EmbeddedFiles_name:} { #1 }
   }
 %    \end{macrocode}
@@ -1601,7 +1601,7 @@
              { \sort_return_swapped: }
              { \sort_return_same: }
          }
-       \exp_args:Nnx \__pdf_backend_Names_gpush:nn
+       \exp_args:Nne \__pdf_backend_Names_gpush:nn
          {#1}
          {
            \seq_use:Nn \l_@@_tmpa_seq {~}
@@ -1615,7 +1615,7 @@
 %    \begin{macrocode}
 \cs_new_protected:cpn {@@_handler/Catalog/?_show:}
   {
-    \iow_term:x
+    \iow_term:e
       {
         \iow_newline:
         The~Catalog~contains~in~the~top~level~the~single~value~entries
@@ -1627,7 +1627,7 @@
      {
        \seq_if_empty:cF {  g_@@_/Catalog/##1_seq }
          {
-           \iow_term:x
+           \iow_term:e
              {
                The~'##1'~array~contains~the~entries
                \seq_map_function:cN { g_@@_/Catalog/##1_seq } \msg_show_item:n
@@ -1638,7 +1638,7 @@
       {
         \prop_if_empty:cF { \__kernel_pdfdict_name:n { g__pdf_Core/Catalog/##1 } }
           {
-            \iow_term:x
+            \iow_term:e
               {
                 The~Catalog~subdirectory~'##1'~contains~the~single~value~entries
                 \prop_map_function:cN
@@ -1647,7 +1647,7 @@
               }
           }
       }
-    \tl_show:x {\tl_to_str:n{\pdfmanagement_show:n{Catalog}}}
+    \tl_show:e {\tl_to_str:n{\pdfmanagement_show:n{Catalog}}}
   }
 %    \end{macrocode}
 % \end{macro}

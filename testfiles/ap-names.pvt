@@ -8,10 +8,9 @@
 \begin{document}
 \START
 \ExplSyntaxOn
-\pdffield_appearance:nn{test/Yes}{XX}
-\pdffield_appearance:nn{test/Off}{YX}
-\pdfmanagement_add:nxx{Catalog/Names/AP}{girl}{\pdfxform_ref:n{test/Yes}}
-\pdfmanagement_add:nxx{Catalog/Names/AP}{boy}{\pdfxform_ref:n{test/Off}}
+\pdffield_appearance:nn{test/Yes}{XX} \pdffield_appearance:nn{test/Off}{YX} 
+\pdfmanagement_add:nee{Catalog/Names/AP}{girl}{\pdfxform_ref:n{test/Yes}} 
+\pdfmanagement_add:nee{Catalog/Names/AP}{boy}{\pdfxform_ref:n{test/Off}} 
 
 \pdffield_checkbox:n{name=test,width=3ex,height=1em,appearance=test,checked}
 \ExplSyntaxOff

@@ -446,7 +446,7 @@
     %we need to know the page the resource should be added too.
     \int_gincr:N\g_@@_backend_resourceid_int
     \@@_backend_record_abspage:e { l3pdf\int_use:N\g_@@_backend_resourceid_int }
-    \tl_set:Nx \l_@@_tmpa_tl
+    \tl_set:Ne \l_@@_tmpa_tl
       {
         \@@_backend_ref_abspage:e {l3pdf\int_use:N\g_@@_backend_resourceid_int}
       }
@@ -734,7 +734,7 @@
         \prop_if_empty:cF
           { \__kernel_pdfdict_name:n { g_@@_Core/Page/Resources/##1} }
           {
-            \pdf_object_write:nnx
+            \pdf_object_write:nne
               { @@/Page/Resources/##1 } { dict }
               { \pdfdict_use:n { g_@@_Core/Page/Resources/##1} }
           }
@@ -1101,7 +1101,7 @@
       }
       {
         \@@_backend_record_abspage:e {l3pdf\int_use:N\g_@@_backend_resourceid_int}
-        \tl_set:Nx \l_@@_tmpa_tl
+        \tl_set:Ne \l_@@_tmpa_tl
           {
             \@@_backend_ref_abspage:e{l3pdf\int_use:N\g_@@_backend_resourceid_int}
           }
@@ -1131,7 +1131,7 @@
       }
       {
         \@@_backend_record_abspage:e{l3pdf\int_use:N\g_@@_backend_resourceid_int}
-        \tl_set:Nx \l_@@_tmpa_tl
+        \tl_set:Ne \l_@@_tmpa_tl
           {
             \@@_backend_ref_abspage:e{l3pdf\int_use:N\g_@@_backend_resourceid_int}
           }
@@ -1358,13 +1358,13 @@
         #4
       }
     %store the dimensions
-    \tl_const:cx
+    \tl_const:ce
       { c_@@_backend_xform_wd_ \tl_to_str:n {#1} _tl }
       { \tex_the:D \box_wd:N \l_@@_backend_tmpa_box }
-    \tl_const:cx
+    \tl_const:ce
       { c_@@_backend_xform_ht_ \tl_to_str:n {#1} _tl }
       { \tex_the:D \box_ht:N \l_@@_backend_tmpa_box }
-    \tl_const:cx
+    \tl_const:ce
       { c_@@_backend_xform_dp_ \tl_to_str:n {#1} _tl }
       { \tex_the:D \box_dp:N \l_@@_backend_tmpa_box }
     %% do we need to test if #2 and #3 are empty??
@@ -1439,13 +1439,13 @@
         \prop_gclear:c { \__kernel_pdfdict_name:n { g_@@_Core/Xform/Resources/Properties } }
         #4
       }
-    \tl_const:cx
+    \tl_const:ce
       { c_@@_backend_xform_wd_ \tl_to_str:n {#1} _tl }
       { \tex_the:D \box_wd:N \l_@@_backend_tmpa_box }
-    \tl_const:cx
+    \tl_const:ce
       { c_@@_backend_xform_ht_ \tl_to_str:n {#1} _tl }
       { \tex_the:D \box_ht:N \l_@@_backend_tmpa_box }
-    \tl_const:cx
+    \tl_const:ce
       { c_@@_backend_xform_dp_ \tl_to_str:n {#1} _tl }
       { \tex_the:D \box_dp:N \l_@@_backend_tmpa_box }
     %% do we need to test if #2 and #3 are empty??
@@ -1531,13 +1531,13 @@
              \bool_set_true:N \l_@@_backend_xform_bool
              #4
            }
-         \tl_const:cx
+         \tl_const:ce
            { c_@@_backend_xform_wd_ \tl_to_str:n {#1} _tl }
            { \tex_the:D \box_wd:c { g_@@_backend_xform_#1_box } }
-         \tl_const:cx
+         \tl_const:ce
            { c_@@_backend_xform_ht_ \tl_to_str:n {#1} _tl }
            { \tex_the:D \box_ht:c { g_@@_backend_xform_#1_box } }
-         \tl_const:cx
+         \tl_const:ce
            { c_@@_backend_xform_dp_ \tl_to_str:n {#1} _tl }
            { \tex_the:D \box_dp:c { g_@@_backend_xform_#1_box } }
          \box_set_dp:cn  { g_@@_backend_xform_#1_box } { \c_zero_dim }
@@ -1644,27 +1644,27 @@
         #4
       }
    %store the dimensions
-    \tl_const:cx
+    \tl_const:ce
       { c_@@_backend_xform_wd_ \tl_to_str:n {#1} _tl }
       { \tex_the:D \box_wd:N \l_@@_backend_tmpa_box }
-    \tl_const:cx
+    \tl_const:ce
       { c_@@_backend_xform_ht_ \tl_to_str:n {#1} _tl }
       { \tex_the:D \box_ht:N \l_@@_backend_tmpa_box }
-    \tl_const:cx
+    \tl_const:ce
       { c_@@_backend_xform_dp_ \tl_to_str:n {#1} _tl }
       { \tex_the:D \box_dp:N \l_@@_backend_tmpa_box }
    %store content dimensions in DPI units (Dots) (code from issue 25)
-    \tl_set:Nx\l_@@_backend_xform_tmpwd_tl
+    \tl_set:Ne\l_@@_backend_xform_tmpwd_tl
       {
         \dim_to_decimal_in_sp:n{ \box_wd:N \l_@@_backend_tmpa_box }~
         65536~div~72.27~div~DVImag~mul~Resolution~mul~
       }
-    \tl_set:Nx\l_@@_backend_xform_tmpht_tl
+    \tl_set:Ne\l_@@_backend_xform_tmpht_tl
       {
         \dim_to_decimal_in_sp:n{ \box_ht:N \l_@@_backend_tmpa_box }~
         65536~div~72.27~div~DVImag~mul~VResolution~mul~
       }
-    \tl_set:Nx\l_@@_backend_xform_tmpdp_tl
+    \tl_set:Ne\l_@@_backend_xform_tmpdp_tl
       {
         \dim_to_decimal_in_sp:n{ \box_dp:N \l_@@_backend_tmpa_box }~
         65536~div~72.27~div~DVImag~mul~VResolution~mul~
@@ -2125,8 +2125,8 @@
     \__kernel_backend_literal:e{!~<</InstanceUUID~(InstanceUUID)>>~setpagedevice}
     \str_if_exist:NTF\c_sys_timestamp_str 
       {
-       \pdfmanagement_add:nnx{Info}{CreationDate}{(\c_sys_timestamp_str)}
-       \pdfmanagement_add:nnx{Info}{ModDate}{(\c_sys_timestamp_str)}     
+       \pdfmanagement_add:nne{Info}{CreationDate}{(\c_sys_timestamp_str)}
+       \pdfmanagement_add:nne{Info}{ModDate}{(\c_sys_timestamp_str)}     
       }
       {
        \pdfmanagement_add:nnn{Info}{CreationDate}{(D:20010101205959-00'00')}

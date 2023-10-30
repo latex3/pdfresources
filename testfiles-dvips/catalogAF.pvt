@@ -17,8 +17,8 @@
 \pdf_object_new:n   {filespec2}
 \pdf_object_write:nnn {filespec2}{dict} {/Type /Filespec /UF (example2.pdf)}
 
-\pdfmanagement_add:nnx { Catalog } {AF} {\pdf_object_ref:n {filespec1}}
-\pdfmanagement_add:nnx { Catalog } {AF} {\pdf_object_ref:n {filespec2}}
+\pdfmanagement_add:nne { Catalog } {AF} {\pdf_object_ref:n {filespec1}}
+\pdfmanagement_add:nne { Catalog } {AF} {\pdf_object_ref:n {filespec2}}
 \ExplSyntaxOff
 \begin{document}
 \START

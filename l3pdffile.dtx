@@ -182,7 +182,7 @@
 % in the |/Filespec| dictionary.
 %
 % \begin{verbatim}
-% \pdf_object_unnamed_write:nx {fstream}
+% \pdf_object_unnamed_write:ne {fstream}
 %   {
 %     {
 %       /Type /EmbeddedFile
@@ -196,7 +196,7 @@
 %     }
 %     {example-image.eps}
 %   }
-% \tl_set:Nx \l_my_fileobj_tl {\pdf_object_ref_last:}
+% \tl_set:Ne \l_my_fileobj_tl {\pdf_object_ref_last:}
 % \end{verbatim}
 %
 % \begin{itemize}
@@ -226,7 +226,7 @@
 % This name tree is a global resource and uncoordinated access can lead to
 % clashes and files that are not visible or inaccessible.
 % The access here is managed by the \pkg{l3pdfmanagement} module:\\[\smallskipamount]%
-% |\pdfmanagement_add:nnx{Catalog/Names}{EmbeddedFiles}{|\meta{objref}|}|
+% |\pdfmanagement_add:nne{Catalog/Names}{EmbeddedFiles}{|\meta{objref}|}|
 %
 % \subsection{Commands and tools of these module}
 % \begin{function}{file, file/Params, file/streamParams,file/Filespec}
@@ -323,7 +323,7 @@
 %   The stream should not be too long, at least PS imposes a size limit for strings.
 % \end{function}
 %
-% \begin{function}{\pdffile_filespec:nnn,\pdffile_filespec:nnx}
+% \begin{function}{\pdffile_filespec:nnn,\pdffile_filespec:nne}
 %   \begin{syntax}
 %     \cs{ pdffile_filespec:nnn }\Arg{object name}\Arg{file name}{stream object reference}
 %   \end{syntax}
@@ -380,11 +380,11 @@
 % \pdf_string_from_unicode:nnN {utf16/string}
 %    {this~is~an~odd~description~with~öäü}
 %    \l_tmpa_str
-% \pdfdict_put:nnx  {l_pdffile/Filespec} {Desc}{\l_tmpa_str}
+% \pdfdict_put:nne  {l_pdffile/Filespec} {Desc}{\l_tmpa_str}
 % %embeds testinput.txt and calls it grüße.txt
 % \pdffile_embed_file:nnn {testinput.txt}{grüße.txt}{mymodule/example1}
 % %reference it in the panel
-% \pdfmanagement_add:nnx
+% \pdfmanagement_add:nne
 %  {Catalog/Names}
 %  {EmbeddedFiles}
 %   {\pdf_object_ref:n{mymodule/example1}}
@@ -538,7 +538,7 @@
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdffile_embed_show:
   {
-    \msg_show:nnx
+    \msg_show:nne
      {pdffile}{show-files}
      {
        \prop_map_function:NN {\g_pdffile_embed_prop} \msg_show_item:nn
@@ -573,10 +573,10 @@
               \l_@@_ext_str
               \l_@@_tmpb_tl
               {
-                \tl_set:Nx #2 {/Subtype~\pdf_name_from_unicode_e:V \l_@@_tmpb_tl}
+                \tl_set:Ne #2 {/Subtype~\pdf_name_from_unicode_e:V \l_@@_tmpb_tl}
               }
               {
-                \msg_warning:nnx { pdffile }{ mimetype-missing} {#1}
+                \msg_warning:nne { pdffile }{ mimetype-missing} {#1}
                 \tl_clear:N #2
               }
           }
@@ -589,7 +589,7 @@
 %   e.g. result from \@@_mimetype_set:NN
 \cs_new_protected:Npn \@@_fstream_write:nN #1 #2
   {
-    \pdf_object_unnamed_write:nx { fstream }
+    \pdf_object_unnamed_write:ne { fstream }
       {
         {
           #2
@@ -614,7 +614,7 @@
 %   e.g. result from \@@_mimetype_set:NN
 \cs_new_protected:Npn \@@_stream_write:nN #1 #2
   {
-    \pdf_object_unnamed_write:nx { stream }
+    \pdf_object_unnamed_write:ne { stream }
       {
         {
           #2
@@ -646,9 +646,9 @@
       {
         \group_begin:
           \@@_filename_convert_to_print:nN  { #2 } \l_@@_tmpa_str
-          \pdfdict_put:nnx {l_pdffile/Filespec}{F} { \l_@@_tmpa_str }
-          \pdfdict_put:nnx {l_pdffile/Filespec}{UF}{ \l_@@_tmpa_str }
-          \pdf_object_write:nnx { #1 } { dict }
+          \pdfdict_put:nne {l_pdffile/Filespec}{F} { \l_@@_tmpa_str }
+          \pdfdict_put:nne {l_pdffile/Filespec}{UF}{ \l_@@_tmpa_str }
+          \pdf_object_write:nne { #1 } { dict }
             {
               \pdfdict_use:n { l_pdffile/Filespec}
               \tl_if_empty:nF { #3 }
@@ -670,9 +670,9 @@
       {
         \group_begin:
           \@@_filename_convert_to_print:nN  { #1 } \l_@@_tmpa_str
-          \pdfdict_put:nnx {l_pdffile/Filespec}{F} { \l_@@_tmpa_str }
-          \pdfdict_put:nnx {l_pdffile/Filespec}{UF}{ \l_@@_tmpa_str }
-          \pdf_object_unnamed_write:nx {dict}
+          \pdfdict_put:nne {l_pdffile/Filespec}{F} { \l_@@_tmpa_str }
+          \pdfdict_put:nne {l_pdffile/Filespec}{UF}{ \l_@@_tmpa_str }
+          \pdf_object_unnamed_write:ne {dict}
             {
               \pdfdict_use:n { l_pdffile/Filespec}
               \tl_if_empty:nF { #2 }
@@ -680,14 +680,14 @@
                   /EF <</F~#2 /UF~#2>>
                 }
             }
-        \tl_gset:Nx\g_@@_tmpa_tl{\pdf_object_ref_last:}    
+        \tl_gset:Ne\g_@@_tmpa_tl{\pdf_object_ref_last:}    
         \group_end:
         \tl_set_eq:NN#3\g_@@_tmpa_tl
       }
   }
 
 \cs_set_eq:NN \pdffile_filespec:nnn \@@_filespec_write:nnn
-\cs_generate_variant:Nn \pdffile_filespec:nnn {nnx}
+\cs_generate_variant:Nn \pdffile_filespec:nnn {nne,nnx}
 %#1 {source filename}
 %#2 {target filename}
 %#3 { filespec object name } (will internally get a prefix! ??)
@@ -712,14 +712,14 @@
                 \@@_fstream_write:VN
                   \l_pdffile_source_name_str
                   \l_@@_automimetype_tl
-                \tl_set:Nx \l_@@_embed_ref_tl { \pdf_object_ref_last: }
+                \tl_set:Ne \l_@@_embed_ref_tl { \pdf_object_ref_last: }
               }
               {
                 \msg_error:nnn { pdffile }{ file-not-found }{ #1 }
               }
 
            }
-        \prop_gput:Nnx
+        \prop_gput:Nne
            \g_pdffile_embed_prop
            { #3 }
            {
@@ -734,7 +734,7 @@
         \tl_if_blank:nTF { #2 }
           {
             \pdf_object_new:n   { #3 }
-            \exp_args:Nnnx
+            \exp_args:Nnne
               \@@_filespec_write:nnn
                 %#1 dict, #2 target file name, #3 object ref
                 { #3 }
@@ -743,7 +743,7 @@
           }
           {
             \pdf_object_new:n   { #3 }
-            \exp_args:Nnnx
+            \exp_args:Nnne
               \@@_filespec_write:nnn
                 %#1 dict, #2 target file name, #3 object ref
                 { #3 }
@@ -765,7 +765,7 @@
          \msg_error:nnn { pdffile }{ object-exists } { #3 }
       }
       {
-         \prop_gput:Nnx
+         \prop_gput:Nne
             \g_pdffile_embed_prop
             { #3 }
             {{stream}{}{\tl_if_blank:nTF {#2}{stream.txt}{\exp_not:n{#2}}}}
@@ -775,9 +775,9 @@
          \@@_stream_write:nN
            { #1 }
            \l_@@_automimetype_tl
-         \tl_set:Nx \l_@@_embed_ref_tl { \pdf_object_ref_last: }
+         \tl_set:Ne \l_@@_embed_ref_tl { \pdf_object_ref_last: }
          \pdf_object_new:n   { #3 }
-         \exp_args:Nnxx
+         \exp_args:Nnee
            \@@_filespec_write:nnn
              %#1 dict, #2 target file name, #3 object ref
              { #3 }
@@ -794,14 +794,14 @@
      \@@_stream_write:nN
        { #1 }
        \l_@@_automimetype_tl
-     \tl_set:Nx \l_@@_embed_ref_tl { \pdf_object_ref_last: }
-     \exp_args:Nxx
+     \tl_set:Ne \l_@@_embed_ref_tl { \pdf_object_ref_last: }
+     \exp_args:Nee
        \@@_filespec_write:nnN
          %#1 target file name, #2 object ref of stream, #3 object ref of filespec
          { \tl_if_blank:nTF {#2}{stream.txt}{\exp_not:n{#2}} }
          {\l_@@_embed_ref_tl}
          #3
-     \prop_gput:Nxx
+     \prop_gput:Nee
         \g_pdffile_embed_prop
         { #3 }
         {{stream}{}{\tl_if_blank:nTF {#2}{stream.txt}{\exp_not:n{#2}}}}         

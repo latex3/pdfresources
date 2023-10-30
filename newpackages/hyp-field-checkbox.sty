@@ -197,19 +197,19 @@
       \seq_new:c {g_hyp/checkbox/Field/Btn/#1/Kids_seq}
       \hook_gput_code:nnn {shipout/lastpage}{pdf} %xetex needs this ...
         {
-          \pdf_object_write:nx {hyp/checkbox/Field/Btn/#1/Kids} { \seq_use:cn{g_hyp/checkbox/Field/Btn/#1/Kids_seq}{~} }
+          \pdf_object_write:ne {hyp/checkbox/Field/Btn/#1/Kids} { \seq_use:cn{g_hyp/checkbox/Field/Btn/#1/Kids_seq}{~} }
         }
       \pdfdict_put:nnn {hyp/checkbox/Field}{FT}{/Btn}
       \pdfdict_put:nnn {hyp/checkbox/Field}{T}{(#1)}
       \pdfdict_put:nnn {hyp/checkbox/Field}{V}{/Off}  %should be configurable/in sync with /AS/DV
       \pdfdict_put:nnn {hyp/checkbox/Field}{DV}{/Off} %should be configurable/in sync with /AS/DV
-      \pdfdict_put:nnx {hyp/checkbox/Field}{Kids}{\pdf_object_ref:n {hyp/checkbox/Field/Btn/#1/Kids}}
+      \pdfdict_put:nne {hyp/checkbox/Field}{Kids}{\pdf_object_ref:n {hyp/checkbox/Field/Btn/#1/Kids}}
       \pdf_flag_clear:nn {hyp/checkbox/Field}{Radio}      %just in case
       \pdf_flag_clear:nn {hyp/checkbox/Field}{Pushbutton} %just in case
       \pdf_flag_set:nn {hyp/checkbox/Field}{NoExport}
-      \pdfdict_put:nnx {hyp/checkbox/Field}{Ff}{\pdf_flag_use:n{hyp/checkbox/Field}}
-      \pdf_object_write:nx {hyp/checkbox/Field/Btn/#1} { \pdfdict_use:n {hyp/checkbox/Field} }
-      \pdfmanagement_add:nnx { Catalog / AcroForm } { Fields }{\pdf_object_ref:n {hyp/checkbox/Field/Btn/#1} }
+      \pdfdict_put:nne {hyp/checkbox/Field}{Ff}{\pdf_flag_use:n{hyp/checkbox/Field}}
+      \pdf_object_write:ne {hyp/checkbox/Field/Btn/#1} { \pdfdict_use:n {hyp/checkbox/Field} }
+      \pdfmanagement_add:nne { Catalog / AcroForm } { Fields }{\pdf_object_ref:n {hyp/checkbox/Field/Btn/#1} }
       \group_end:
      }
   }
@@ -239,7 +239,7 @@
            }
          \hfill
         }
-    \seq_gput_right:cx {g_hyp/checkbox/Field/Btn/#1/Kids_seq}{ \pdfannot_box_ref_last:}
+    \seq_gput_right:ce {g_hyp/checkbox/Field/Btn/#1/Kids_seq}{ \pdfannot_box_ref_last:}
     \group_end:
   }
 % # form and field interface macros

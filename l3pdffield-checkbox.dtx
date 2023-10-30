@@ -486,14 +486,14 @@
    ,checked .choice:
    ,checked / false .code:n =
      {
-       \pdfdict_put:nnx { l_@@/field }{V} { /Off }
-       \pdfdict_put:nnx { l_@@/field }{DV}{ /Off }
+       \pdfdict_put:nne { l_@@/field }{V} { /Off }
+       \pdfdict_put:nne { l_@@/field }{DV}{ /Off }
        \pdfannot_dict_put:nnn {widget}{AS}{ /Off }
      }
    ,checked / true .code:n =
      {
-       \pdfdict_put:nnx { l_@@/field }{V} { /Yes }
-       \pdfdict_put:nnx { l_@@/field }{DV}{ /Yes }
+       \pdfdict_put:nne { l_@@/field }{V} { /Yes }
+       \pdfdict_put:nne { l_@@/field }{DV}{ /Yes }
        \pdfannot_dict_put:nnn {widget}{AS}{ /Yes }
      }
    ,checked .default:n = {true}
@@ -504,14 +504,14 @@
    ,__value .choice:
    ,__value / Off .code:n =
      {
-       \pdfdict_put:nnx { l_@@/field }{V} { /Off }
-       \pdfdict_put:nnx { l_@@/field }{DV}{ /Off }
+       \pdfdict_put:nne { l_@@/field }{V} { /Off }
+       \pdfdict_put:nne { l_@@/field }{DV}{ /Off }
        \pdfannot_dict_put:nnn {widget}{AS}{ /Off }
      }
    ,__value / Yes .code:n =
      {
-       \pdfdict_put:nnx { l_@@/field }{V} { /Yes }
-       \pdfdict_put:nnx { l_@@/field }{DV}{ /Yes }
+       \pdfdict_put:nne { l_@@/field }{V} { /Yes }
+       \pdfdict_put:nne { l_@@/field }{DV}{ /Yes }
        \pdfannot_dict_put:nnn {widget}{AS}{ /Yes }
      }
  }
@@ -542,14 +542,14 @@
         \pdf_object_if_exist:nF {@@/checkbox/AP/#1}
           {
             \pdf_object_new:n {@@/checkbox/AP/#1}
-            \pdf_object_write:nnx
+            \pdf_object_write:nne
               {@@/checkbox/AP/#1} { dict }
               {
                 /Yes ~ \pdfxform_ref:n { #1/Yes}
                 /Off ~ \pdfxform_ref:n { #1/Off}
               }
           }
-        \pdfannot_dict_put:nnx {widget/AP}{#2}{\pdf_object_ref:n{@@/checkbox/AP/#1}}
+        \pdfannot_dict_put:nne {widget/AP}{#2}{\pdf_object_ref:n{@@/checkbox/AP/#1}}
       }
       {
          \msg_error:nnnn{pdffield}{appearance-missing}{#1}{#3}
