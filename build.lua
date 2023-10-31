@@ -26,6 +26,7 @@ else
                 "firstaid/xcolor-patches-tmp-ltx.sty",
                 "firstaid/color-ltx.sty",
                 "firstaid/colorspace-patches-tmp-ltx.sty",
+                "firstaid/fontspec-luatex-tmp-ltx.sty",
                 "newpackages/new-bookmark.sty",
                 "newpackages/bkm-generic.def",
                 "newpackages/new-attachfile.sty",
