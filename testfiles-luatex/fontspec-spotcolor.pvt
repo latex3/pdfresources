@@ -12,9 +12,16 @@
     }
   \color_set:nnn{spotblue}{sepblue}{1}
   \color_set:nnn{cmykblue}{cmyk}{1,1,1,0.5}
+% \__fontspec_keys_define_code:nnn {fontspec} {Color}
+%             {
+%               \tl_set:Nn \l__fontspec_hexcol_tl {#1}
+%             }  
 \ExplSyntaxOff
+\definecolor{foo}{rgb}{0,0.75,0}
 \setmainfont{texgyretermes}[Color=cmykblue]
-\setsansfont{texgyretermes}[Color=spotblue,Opacity=0.2]
+\setsansfont{texgyreheros}[Color=red,Opacity=0.2]
+\setmonofont{texgyrecursor}[Color=foo]
 \begin{document}
-TTT \sffamily MMM
+TTT \sffamily MMM \ttfamily FFF} {\normalfont TTT} {\sffamily MMM} {\ttfamily 
+FFF} 
 \end{document}
