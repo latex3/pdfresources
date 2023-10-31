@@ -2292,7 +2292,7 @@
 \pdfdict_put:nnn {l_hyp/annot/A/GoToR}{Type}{/Action}
 \pdfdict_put:nnn {l_hyp/annot/A/GoToR}{S}{/GoToR}
 
-
+\cs_generate_variant:Nn \pdffile_embed_file:nnn {noe}
 \cs_new_protected:Npn \hyper@linkfile #1 #2 #3 % link text, filename, destname
   {
    \bool_if:NTF \l_@@_annot_GoToR_bool
@@ -2303,8 +2303,7 @@
           \pdf_object_if_exist:nF { @@_file_\tl_to_str:N \l_@@_filename_tmpa_tl }
             {
               \pdfdict_put:nne { l_pdffile/Filespec}{Subtype}{\pdf_name_from_unicode_e:n {application/pdf}}
-              \exp_args:Nnoe
-              \pdffile_embed_file:nnn
+              \pdffile_embed_file:noe
                 {}
                 {\l_@@_filename_tmpa_tl }
                 {@@_file_\tl_to_str:N \l_@@_filename_tmpa_tl }
@@ -2416,7 +2415,7 @@
 %    \begin{macrocode}
 \use:e
   { % filename, anchor text, linkname
-    \cs_set_protected:Npn \exp_not:N \@hyper@launch run \c_colon_str ##1 \exp_not:N \\ ##2 ##3
+    \cs_set_protected:Npn \exp_not:N \@hyper@launch run \c_colon_str #1 \exp_not:N \\ #2 #3
   }
   {
     \hyper@linklaunch {#1}{#2}{#3}
