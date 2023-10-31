@@ -103,13 +103,14 @@
    {
      \bool_if:NT \g_@@_firstaid_fontspec_bool
        {
-         \@ifpackagelater{fontspec}{2023-03-10}
-          {
-            \__fontspec_keys_define_code:nnn {fontspec} {Color}
-             {
-               \tl_set:Nn \l__fontspec_hexcol_tl {#1}
-             }
-          }{}
+         \declare@file@substitution{fontspec-luatex.sty}{fontspec-luatex-tmp-ltx.sty}
+         %\@ifpackagelater{fontspec}{2023-03-10}
+%          {
+%            \__fontspec_keys_define_code:nnn {fontspec} {Color}
+%             {
+%               \tl_set:Nn \l__fontspec_hexcol_tl {#1}
+%             }
+%          }{}
       }               
    }
 %    \end{macrocode}
