@@ -1,0 +1,35 @@
+\DocumentMetadata{}
+\input{regression-test}
+\documentclass{article}
+\usepackage{fontspec}
+\usepackage{xcolor}
+\makeatletter
+\newcommand\CURRNFSS{%
+  \TIMO
+  \typeout{\curr@fontshape:^^J\space\space\fontname\font}%
+  \OMIT
+}
+
+\begin{document}
+\START\OMIT 
+
+\fontspec[Color=red]{texgyreheros-regular.otf} Test \CURRNFSS 
+
+\fontspec[
+    Color=red,Opacity=0.5
+      ]{texgyreheros-regular.otf}
+Test
+\CURRNFSS
+
+\fontspec[
+    Color=00FF00,Opacity=0.8
+      ]{texgyreheros-regular.otf}
+Test
+\CURRNFSS
+
+\fontspec[
+    Color=00FF0044,Opacity=0.8
+      ]{texgyreheros-regular.otf}
+Test \CURRNFSS 
+
+\end{document}

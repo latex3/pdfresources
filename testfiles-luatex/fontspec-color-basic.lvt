@@ -1,0 +1,38 @@
+\DocumentMetadata{}
+\input{regression-test}
+\documentclass{article}
+\usepackage{fontspec}
+\usepackage{xcolor}
+
+\makeatletter
+\newcommand\CURRNFSS{%
+  \TIMO
+  \typeout{\curr@fontshape:^^J\space\space\fontname\font}%
+  \OMIT
+}
+
+\newcommand\MSG[1]{%
+  \TIMO
+  \typeout{#1}%
+  \OMIT
+}
+\makeatother
+\begin{document}
+
+\MSG{Loading a font with hex colour:}
+{\fontspec[Color=5500FF]{texgyreheros-regular.otf} text \CURRNFSS}
+
+\MSG{Loading a font by name (l3color+xcolor):}
+{\fontspec[Color=red]{texgyreheros-regular.otf} text \CURRNFSS}
+
+\MSG{Defining a new xcolor colour and using it:}
+\definecolor{Foo}{rgb}{0.3,0.4,0.5}
+{\fontspec[Color=Foo]{texgyreheros-regular.otf} text \CURRNFSS}
+
+\MSG{Defining a new l3color colour and using it:}
+\ExplSyntaxOn
+\color_set:nnn{Bar}{rgb}{0.5,0.4,0.3}
+\ExplSyntaxOff
+{\fontspec[Color=Bar]{texgyreheros-regular.otf} text \CURRNFSS}
+
+\end{document}
