@@ -5,7 +5,12 @@ first release 0.95a, 2021-02-23 will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 this project uses date-based 'snapshot' version identifiers.
 
- 
+## [2023-11-05]
+Version: 2023-11-05, 0.96b
+
+- switch to e-type 
+- correct fontspec firstaid and spotcolor support
+
 ## [2023-10-09]
 Version: 2023-10-09, 0.96a
 
