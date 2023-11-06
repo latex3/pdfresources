@@ -167,48 +167,22 @@
 % \end{macro} 
 
 % \subsection{Crossreferences}
-% This uses the temporary l3ref-tmp.sty. It will
-% will be replaced by kernel code later.
-% It is only needed to get a reference for the absolute page counter.
-% This uses the counter from the new lthooks/ltshipout package.
+% Commands to get a reference for the absolute page counter.
 %    \begin{macrocode}
 %<*drivers>
 %    \end{macrocode}
-% l3ref-tmp is loaded until all files in latex-lab and tagpdf has been 
-% cleared:
 %    \begin{macrocode}
-\RequirePackage{l3ref-tmp}
-%    \end{macrocode}
-% 
-%    \begin{macrocode}
-\cs_if_exist:NTF \property_new:nnnn
- {
-   \cs_new_protected:Npn \@@_backend_record_abspage:n #1
-     {
-        \@bsphack
-        \property_record:nn{#1}{abspage}
-        \@esphack
-     }
-   \cs_new:Npn \@@_backend_ref_abspage:n #1
-     {
-        \property_ref:nn{#1}{abspage}
-     }
+\cs_new_protected:Npn \@@_backend_record_abspage:n #1
+  {
+     \@bsphack
+     \property_record:nn{#1}{abspage}
+     \@esphack
+  }
+\cs_new:Npn \@@_backend_ref_abspage:n #1
+  {
+     \property_ref:nn{#1}{abspage}
+  }
 
- }
- {    
-   \cs_new_protected:Npn \@@_backend_record_abspage:n #1
-    %% \@@_backend_ref_label:nn #1 #2
-     {
-        \@bsphack
-        \ref_label:nn{#1}{abspage}
-        \@esphack
-     }
-   \cs_new:Npn \@@_backend_ref_abspage:n #1
-    %% \@@_backend_ref_value:nn #1 #2
-     {
-        \ref_value:nn{#1}{abspage}
-     }
- } 
 \cs_generate_variant:Nn \@@_backend_record_abspage:n {e}
 \cs_generate_variant:Nn \@@_backend_ref_abspage:n {e}
 %</drivers>
