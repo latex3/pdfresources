@@ -60,14 +60,24 @@ checkruns = 4
 checkengines = {"pdftex","luatex","xetex"}
 
 
-
-checkconfigs = {"build", -- luatex, pdftex, xetex
-                "config-noxetex", --pdftex + luatex (std)
-                "config-luatex",  -- luatex
-                "config-dvips",   -- latex + dvips
-                "config-pdftex",  -- pdftex
-                "config-xetex"    -- xetex
-                }
+if os.type == "windows" then
+  checkconfigs = {"build", -- luatex, pdftex, xetex
+                  "config-noxetex", --pdftex + luatex (std)
+                  "config-luatex",  -- luatex
+                  "config-dvips",   -- latex + dvips
+                  "config-pdftex",  -- pdftex
+                  "config-xetex"    -- xetex
+                  }
+else 
+-- exclude dvips tests if not on windows
+    checkconfigs = {"build", -- luatex, pdftex, xetex
+                  "config-noxetex", --pdftex + luatex (std)
+                  "config-luatex",  -- luatex
+                  -- "config-dvips",   -- latex + dvips
+                  "config-pdftex",  -- pdftex
+                  "config-xetex"    -- xetex
+                  }
+end                
 
 -- tagging
 tagfiles = {
