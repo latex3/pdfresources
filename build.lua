@@ -15,18 +15,15 @@ installfiles = {"*.sty","*.cls","*.def","*.lua","*.ltx"}
 
 if options["target"] == "ctan" then
   sourcefiles =  {"*.dtx","*.ins",
-                "l3ref-tmp.sty",
                 "firstaid/xcolor-patches-tmp-ltx.sty",
                 "firstaid/color-ltx.sty",
                 "firstaid/colorspace-patches-tmp-ltx.sty",
                 }
 else
  sourcefiles =  {"*.dtx","*.ins",
-                "l3ref-tmp.sty",
                 "firstaid/xcolor-patches-tmp-ltx.sty",
                 "firstaid/color-ltx.sty",
                 "firstaid/colorspace-patches-tmp-ltx.sty",
-                "firstaid/fontspec-luatex-tmp-ltx.sty",
                 "newpackages/new-bookmark.sty",
                 "newpackages/bkm-generic.def",
                 "newpackages/new-attachfile.sty",

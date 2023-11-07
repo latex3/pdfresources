@@ -913,8 +913,8 @@
 %^^A %%
 %^^A %% References (ref)
 %^^A %% *\@@_property_record:nn
-%^^A %% *\@@_property_if_recorded:nn
-%^^A %% *\@@_property_ref_undefined_warn:nn,
+%^^A %% *\property_if_recorded:nn
+%^^A %% *\property_ref_undefined_warn:nn,
 %^^A %% % helps to display key list messages
 %^^A %% \@@_clist_display:n
 %^^A %%
@@ -1535,85 +1535,28 @@
 %    \end{macrocode}
 %
 % \section{Reference and label commands}
-% The code uses in older LaTeX the l3ref-tmp package which
-% must have been loaded as pdfmanagement is a requirement.
-% In newer LaTeX it uses the in-built property module.
+% This uses the in-built property module.
 % 
 % \begin{macro}
 %  {
 %    \@@_property_record:nn,
-%    \@@_property_if_recorded:nn,
-%    \@@_property_ref_undefined_warn:nn,
-%    \@@_property_ref:nn
 %  }
 %    \begin{macrocode}
 %
-\cs_if_exist:NTF \property_new:nnnn
-  {
 %    \end{macrocode}
-%  At first a label command which adds the space commands from LaTeX:
+%  A label command which adds the space commands from LaTeX:
 %    \begin{macrocode}
-    \cs_new_protected:Npn \@@_property_record:nn #1 #2 %label/attributes
-     {
-       \@bsphack
-         \property_record:nn{#1}{#2}
-       \@esphack
-     }
+\cs_new_protected:Npn \@@_property_record:nn #1 #2 %label/attributes
+ {
+   \@bsphack
+     \property_record:nn{#1}{#2}
+   \@esphack
+ }
 %    \end{macrocode}
-% This provides a conditional which tests if a label/property combination is known
-%    \begin{macrocode}
-    \prg_new_eq_conditional:NNn 
-      \@@_property_if_recorded:nn \property_if_recorded:nn { T } 
-%    \end{macrocode}
-% This checks if the label/property is known and issues a warning if not.
-% It then also triggers the standard rerun message.
-%    \begin{macrocode}      
-    \cs_new_eq:NN \@@_property_ref_undefined_warn:nn \property_ref_undefined_warn:nn 
-%    \end{macrocode}
-%
-%    \begin{macrocode}
-    \cs_new_eq:NN \@@_property_ref:nn \property_ref:nn
-  }
-%    \end{macrocode}
-% and now the same with the older l3ref-tmp. 
-% This can go once LaTeX has been released.
-%    \begin{macrocode}
-  {
-    \cs_new_protected:Npn \@@_property_record:nn #1 #2 %label/attributes
-      {
-        \@bsphack
-          \ref_label:nn{#1}{#2}
-        \@esphack
-      }
-
-    \prg_new_eq_conditional:NNn \@@_property_if_recorded:nn \ref_if_exist:nn { T }
-
-    \cs_new_protected:Npn \@@_property_ref_undefined_warn:nn #1 #2 %label/attribute
-      {
-        \@@_property_if_recorded:nnF {#1}{#2}
-          {
-            \protect\G@refundefinedtrue
-            \@latex@warning
-              {
-                Reference~'\tl_to_str:n {#1}'~with~attribute~'\tl_to_str:n {#2}'~
-                on~page~\thepage~\space undefined
-              }
-          }
-      }
-
-    \cs_new:Npn \@@_property_ref:nn #1 #2
-      {
-        \ref_value:nn{#1}{#2}
-      }
-  }
-%    \end{macrocode}
-% At last we generate a few variants. We use ee-variants as they already exist
+% we generate a few variants. We use ee-variants as they already exist
 % in the module and once this is there it can go here.
 %    \begin{macrocode}
 \cs_generate_variant:Nn \@@_property_record:nn {ee}  
-\prg_generate_conditional_variant:Nnn \@@_property_if_recorded:nn  {ee}  { T }
-\cs_generate_variant:Nn \@@_property_ref_undefined_warn:nn {ee}
-\cs_generate_variant:Nn \@@_property_ref:nn {ee}
 %    \end{macrocode}
 % \end{macro}
 % \section{Variables}
@@ -4389,15 +4332,15 @@
     %\zref@labelbylist {HyAnn@\the\HyAnn@Count} {l3pdf}
     %\zref@refused{HyAnn@\the\HyAnn@Count}%
     \@@_property_record:ee {HyAnn@\the\HyAnn@Count}{abspage}
-    \@@_property_ref_undefined_warn:ee {HyAnn@\the\HyAnn@Count}{abspage}
+    \property_ref_undefined_warn:ee {HyAnn@\the\HyAnn@Count}{abspage}
   }%
 \def\Fld@pageobjref
   {
-    \@@_property_if_recorded:eeT {HyAnn@\the\HyAnn@Count}{abspage}
+    \property_if_recorded:eeT {HyAnn@\the\HyAnn@Count}{abspage}
       {
         /P~\pdf_pageobject_ref:e
           {
-            \@@_property_ref:ee{HyAnn@\the\HyAnn@Count}{abspage}
+            \property_ref:ee{HyAnn@\the\HyAnn@Count}{abspage}
           }
       }
   }
