@@ -961,6 +961,10 @@
 
 \RequirePackage{etoolbox} %why?
 %    \end{macrocode}
+% Temporary command definition, can be remove when hyperref is update too.
+%    \begin{macrocode}
+\long\def\Hy@ReturnAfterFi#1\fi{\fi#1}
+%    \end{macrocode}
 %    \begin{macrocode}
 \ExplSyntaxOn
 \file_input:n {hyperref-colorschemes.def}
@@ -4191,11 +4195,8 @@
 \prop_new:N   \g_@@_AcroForm_CoFields_prop
 \prop_new:N   \g_@@_AcroForm_Fields_prop
 
-\let\HyField@afields\ltx@empty
-\let\HyField@cofields\ltx@empty
-%% UF test for old pdftex removed
-%\let\HyField@AuxAddToFields\ltx@gobble
-%\let\HyField@AuxAddToCoFields\ltx@gobbletwo
+\let\HyField@afields\@empty
+\let\HyField@cofields\@empty
 \def\HyField@AfterAuxOpen{\Hy@AtBeginDocument}%
 
 % the value doesn't matter, but with a prop we avoid duplicates and it is
@@ -4231,7 +4232,7 @@
       {
         \pdfannot_box_ref_last:
       }
-    \ifx\Fld@calculate@code\ltx@empty
+    \ifx\Fld@calculate@code\@empty
     \else
       \begingroup
         \Hy@safe@activestrue
@@ -4318,16 +4319,16 @@
        }
   }
 \ExplSyntaxOff
-\let\@endForm\ltx@empty
-\let\HyAnn@AbsPageLabel\ltx@empty
-\let\Fld@pageobjref\ltx@empty
+\let\@endForm\@empty
+\let\HyAnn@AbsPageLabel\@empty
+\let\Fld@pageobjref\@empty
 
 \ExplSyntaxOn
 \newcount\HyAnn@Count
-\HyAnn@Count=\ltx@zero
+\HyAnn@Count=\z@
 \def\HyAnn@AbsPageLabel
   {
-    \global\advance\HyAnn@Count by\ltx@one
+    \global\advance\HyAnn@Count by\@ne
     %\zref@labelbyprops{HyAnn@\the\HyAnn@Count}{abspage}%
     %\zref@labelbylist {HyAnn@\the\HyAnn@Count} {l3pdf}
     %\zref@refused{HyAnn@\the\HyAnn@Count}%
@@ -4351,7 +4352,7 @@
 %% check if options are missing.
 \def\@TextField[#1]#2{% parameters, label
   \def\Fld@name{#2}%
-  \let\Fld@default\ltx@empty
+  \let\Fld@default\@empty
   \let\Fld@value\@empty
   \def\Fld@width{\DefaultWidthofText}%
   \def\Fld@height{%
@@ -4807,7 +4808,7 @@
     \else
       \expandafter
       \Hy@pstringdef\csname Hy@esc@\string#2\endcsname{#2}% probably string-hex
-      \ltx@ReturnAfterFi{%
+      \Hy@ReturnAfterFi{%
         \Hy@@escapeform#3\@nil
       }%
     \fi
@@ -5277,7 +5278,7 @@
   \endgroup
   \H@old@schapter{#1}%
 }
-\ltx@IfUndefined{@chapter}{}{%
+\@ifundefined{@chapter}{}{%
   \let\Hy@org@chapter\@chapter
   \def\@chapter{%
     \def\Hy@next{%
@@ -5287,7 +5288,7 @@
       }%
     }%
     \ifnum\c@secnumdepth>\m@ne
-      \ltx@IfUndefined{if@mainmatter}%
+      \@ifundefined{if@mainmatter}%
       \iftrue{\csname if@mainmatter\endcsname}%
         \let\Hy@next\relax
       \fi
