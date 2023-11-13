@@ -224,44 +224,29 @@
   {Initialize document metadata}
 %</header>
 %    \end{macrocode}
-% \cs{DocumentMetadata} will be defined by the kernel in short time.
-% So we define it and the keys here only if it is not already defined.
-%  \subsection{The keys for \cs{DocumentMetadata}}
-%  We define the keys first so that we can test if \cs{DocumentMetadata}
-%  exist (testing for the format date would be nice but would fail for the current
-%  latex-dev).
+%    \begin{macrocode}
+%<*package>
+%    \end{macrocode}
+% \subsection{Variables}
+% This variable definitions can be remove once latex-lab has been updated to
+% provide them too.
 %  \begin{variable}{\g_@@_firstaidoff_clist}
 %  A list to store the firstaid code which should be disabled
 %    \begin{macrocode}
-%<*package>
-\clist_new:N \g_@@_firstaidoff_clist
-%    \end{macrocode}
-% \end{variable}
+\clist_if_exist:NF \g_@@_firstaidoff_clist
+  { \clist_new:N \g_@@_firstaidoff_clist }
+%    \end{macrocode} 
 %  \begin{variable}{\g_@@_testphase_tl}
 %  a tl to store the testphase loading code so that we can load them at
 %  the end of the command.
 %    \begin{macrocode}
-\tl_new:N \g_@@_testphase_tl
+\tl_if_exist:NF \g_@@_testphase_tl
+ { \tl_new:N \g_@@_testphase_tl }
 %    \end{macrocode}
 % \end{variable}
-%    \begin{macrocode}
-\keys_define:nn { document / metadata }
-  {
-    ,testphase / new-or-1 .code:n =   
-      {
-        \tl_gput_right:Nn\g_@@_testphase_tl
-           {
-             \file_if_exist_input:nF {new-or-1-latex-lab-testphase.ltx}
-               {
-                \RequirePackage{output-patches-tmp-ltx}
-               }
-           }    
-      }
-  }
-%    \end{macrocode}
-%
 % \subsection{\cs{DeclareDocumentMetadata}}
-% We define the older alias \cs{DeclareDocumentMetadata}
+% \cs{DocumentMetadata} is defined by the kernel.
+% We only define the older alias \cs{DeclareDocumentMetadata}
 %
 % \begin{macro}{\DeclareDocumentMetadata}
 %    \begin{macrocode}
