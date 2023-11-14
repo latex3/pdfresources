@@ -1,9 +1,11 @@
-\PassOptionsToPackage{enable-debug,check-declarations}{expl3}
+\ExplSyntaxOn
+\debug_on:n { check-declarations , deprecation }
+\msg_redirect_module:nnn { pdf } { none } { warning }
+\ExplSyntaxOff
 \DocumentMetadata
  {
    pdfversion=2.0, %
    lang=de-DE,
-   uncompress
  }
 \input{regression-test}
 \documentclass{article}
