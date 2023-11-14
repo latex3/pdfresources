@@ -4,8 +4,10 @@
 % work with transparent and colorspace anyway ...
 % the patches looks ok, there are a few duplicates in the object
 % but nothing harmful
-\PassOptionsToPackage{enable-debug,check-declarations}{expl3}
-\RequirePackage{pdfmanagement-testphase}
+\ExplSyntaxOn
+\debug_on:n { check-declarations , deprecation }
+\msg_redirect_module:nnn { pdf } { none } { warning }
+\ExplSyntaxOff
 \DocumentMetadata {  }
 \input{regression-test}
 \documentclass{article}

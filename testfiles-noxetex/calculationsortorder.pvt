@@ -1,7 +1,10 @@
 % !Mode:: "TeX:DE:UTF-8:Main"
 % ok for pdftex and luatex. Perhaps some changes to avoid a two pass are possible/needed
 % fails with xetex because of the missing \pdf_link_last:
-\PassOptionsToPackage{enable-debug,check-declarations}{expl3}
+\ExplSyntaxOn
+\debug_on:n { check-declarations , deprecation }
+\msg_redirect_module:nnn { pdf } { none } { warning }
+\ExplSyntaxOff
 \DocumentMetadata {  }
 \input{regression-test}
 \documentclass{article}
