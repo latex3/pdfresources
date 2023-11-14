@@ -3,7 +3,10 @@
 % xetex doesn't use the hyperdestname provided by hyperref, but e.g.
 % /S/GoTo/D(0)
 % large borders in xetex are imho not our fault ...
-\PassOptionsToPackage{enable-debug,check-declarations}{expl3}
+\ExplSyntaxOn
+\debug_on:n { check-declarations , deprecation }
+\msg_redirect_module:nnn { pdf } { none } { warning }
+\ExplSyntaxOff
 \DocumentMetadata{uncompress}
 \input{regression-test}
 
