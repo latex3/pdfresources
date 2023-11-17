@@ -19,8 +19,8 @@ Bug reports and feedback are welcome and should be made at
 https://github.com/latex3/pdfresources
 
 ## Requirements 
-The package requires a LaTeX format 2022-06-01 or newer.
-It requires an L3 programming 2022-08-30 or newer.
+The package requires a current LaTeX format
+and L3 programming layer.
 
 ## Installation
 
