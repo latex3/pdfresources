@@ -11,6 +11,7 @@ Version: 2023-11-17, 0.96c
  - remove dependency to ltxcmds in the hyperref driver
  - correct a local/global assigment
  - remove l3ref-tmp.sty 
+ - l3pdffile.dtx: change mimetype of xml to application/xml
  
  
 ## [2023-11-05]
