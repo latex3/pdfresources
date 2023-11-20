@@ -1,0 +1,14 @@
+\ExplSyntaxOn
+\debug_on:n { check-declarations , deprecation }
+\msg_redirect_module:nnn { pdf } { none } { warning }
+\ExplSyntaxOff
+\DocumentMetadata{}
+\input{regression-test}
+\documentclass{article}
+\ExplSyntaxOn
+\__pdfmeta_xmp_schema_enable_pdfd:
+\ExplSyntaxOff
+\begin{document}
+\START 
+blabla
+\end{document}

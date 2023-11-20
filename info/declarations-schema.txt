@@ -1,0 +1,69 @@
+<rdf:li rdf:parseType="Resource">
+                  <pdfaSchema:schema>PDF Declarations Schema</pdfaSchema:schema>
+                  <pdfaSchema:prefix>pdfd</pdfaSchema:prefix>
+                  <pdfaSchema:namespaceURI>http://pdfa.org/declarations/</pdfaSchema:namespaceURI>
+                  <pdfaSchema:property>
+                     <rdf:Seq>
+                        <rdf:li rdf:parseType="Resource">
+                           <pdfaProperty:name>declarations</pdfaProperty:name>
+                           <pdfaProperty:valueType>Bag declaration</pdfaProperty:valueType>                        
+                           <pdfaProperty:category>external</pdfaProperty:category>
+                           <pdfaProperty:description>An unordered array of PDF Declaration entries, where each PDF Declaration representing a statement of conformance with an identified external standard or profile, along with optional information identifying the nature of the claim.</pdfaProperty:description>
+                        </rdf:li>
+                     </rdf:Seq>
+                  </pdfaSchema:property>
+                  <pdfaSchema:valueType>
+                     <rdf:Seq>
+                        <rdf:li rdf:parseType="Resource">
+                           <pdfaType:type>claim</pdfaType:type>                        
+                           <pdfaType:namespaceURI>http://pdfa.org/declarations/</pdfaType:namespaceURI>
+                           <pdfaType:prefix>pdfd</pdfaType:prefix>
+                           <pdfaType:description>A structure describing properties of an individual claim.</pdfaType:description>
+                           <pdfaType:field>
+                              <rdf:Seq>
+                                 <rdf:li rdf:parseType="Resource">
+                                    <pdfaField:name>claimReport</pdfaField:name>
+                                    <pdfaField:valueType>Text</pdfaField:valueType>
+                                    <pdfaField:description>A URL to a report containing details of the specific conformance claim. </pdfaField:description>                                    
+                                 </rdf:li>
+                                 <rdf:li rdf:parseType="Resource">
+                                    <pdfaField:name>claimCredentials</pdfaField:name>
+                                    <pdfaField:valueType>Text</pdfaField:valueType>
+                                    <pdfaField:description>The claimant's credentials.</pdfaField:description>                                    
+                                 </rdf:li>
+                                 <rdf:li rdf:parseType="Resource">
+                                    <pdfaField:name>claimDate</pdfaField:name>
+                                    <pdfaField:valueType>Text</pdfaField:valueType>
+                                    <pdfaField:description>A date identifying when the claim was made.</pdfaField:description>                                    
+                                 </rdf:li>
+                                 <rdf:li rdf:parseType="Resource">
+                                    <pdfaField:name>claimBy</pdfaField:name>
+                                    <pdfaField:valueType>Text</pdfaField:valueType>
+                                    <pdfaField:description>The name of the organization and/or individual and/or software making the claim.</pdfaField:description>                                    
+                                 </rdf:li>
+                              </rdf:Seq>
+                           </pdfaType:field>
+                        </rdf:li>
+                        <rdf:li rdf:parseType="Resource">
+                           <pdfaType:type>declaration</pdfaType:type>                        
+                           <pdfaType:namespaceURI>http://pdfa.org/declarations/</pdfaType:namespaceURI>
+                           <pdfaType:prefix>pdfd</pdfaType:prefix>
+                           <pdfaType:description>A structure describing a single PDF Declaration asserting conformance with an externally-identified standard or profile.</pdfaType:description>
+                           <pdfaType:field>
+                              <rdf:Seq>
+                                 <rdf:li rdf:parseType="Resource">
+                                    <pdfaField:name>conformsTo</pdfaField:name>
+                                    <pdfaField:valueType>Text</pdfaField:valueType>
+                                    <pdfaField:description>A property containing a URI specifying the standard or profile by the PDF Declaration. This property is intended to mirror the Dublin Core property dc:conformsTo.</pdfaField:description>                                    
+                                 </rdf:li>
+                                 <rdf:li rdf:parseType="Resource">
+                                    <pdfaField:name>claimData</pdfaField:name>
+                                    <pdfaField:valueType>Bag claim</pdfaField:valueType>
+                                    <pdfaField:description>An unordered array of claim data, where each claim identifies the nature of the claim.</pdfaField:description>                                    
+                                 </rdf:li>
+                              </rdf:Seq>
+                           </pdfaType:field>
+                        </rdf:li>
+                     </rdf:Seq>
+                  </pdfaSchema:valueType>
+               </rdf:li>

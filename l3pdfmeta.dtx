@@ -2129,6 +2129,83 @@
   }
 %    \end{macrocode}
 % \item[jav]: currently ignored
+% 
+% \item[declarations] The PDF Declarations mechanism allows creation and 
+% editing software to declare, via a PDF Declaration, a PDF file to be in 
+% conformance with a 3rd party specification or profile 
+% that may not be related to PDF technology. Their specification is for example
+% described in \url{https://pdfa.org/wp-content/uploads/2019/09/PDF-Declarations.pdf}.
+% 
+% If declarations are added to the XMP-metadata they need (for pdf/A compliancy) a
+% schema declaration. We do not add it by default but define here a command to enable
+% it. (This can be done in the document preamble as xmp is built only at the end.)
+% 
+% 
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_xmp_schema_enable_pdfd:
+ {
+  \@@_xmp_schema_new:nnn
+    {PDF~Declarations~Schema}
+    {pdfd}
+    {http://pdfa.org/declarations/}
+  \@@_xmp_property_new:nnnnn
+    {pdfd}
+    {declarations}
+    {Bag~declaration}
+    {external}
+    {An~unordered~array~of~PDF~Declaration~entries,~where~each~PDF~Declaration~representing~a~statement~of~conformance~with~ an~identified~external~standard~or~profile,~along~with~optional~information~identifying~the~nature~of~the~claim.}  
+%    \end{macrocode}
+% the values are complicated so we use the additions: method to add them.
+%    \begin{macrocode}
+  \cs_new_protected:cpn { __pdfmeta_xmp_schema_pdfd_additions: }
+    {
+      \@@_xmp_add_packet_open:nn{pdfaSchema}{valueType}
+        \@@_xmp_add_packet_open:nn{rdf}{Seq}
+          \@@_xmp_add_packet_open_attr:nnn{rdf}{li}{rdf:parseType="Resource"}
+            \@@_xmp_add_packet_line:nnn{pdfaType}{type}{claim}
+            \@@_xmp_add_packet_line:nnn{pdfaType}{namespaceURI}
+               {http://pdfa.org/declarations/}
+            \@@_xmp_add_packet_line:nnn{pdfaType}{prefix}{pdfd}
+            \@@_xmp_add_packet_line:nnn{pdfaType}{description}
+              {A~structure~describing~properties~of~an~individual claim.}
+            \@@_xmp_add_packet_open:nn{pdfaType}{field}
+             \@@_xmp_add_packet_open:nn{rdf}{Seq}
+              \@@_xmp_add_packet_field:nnn{claimReport}{Text}
+                {A~URL~to~a~report~containing~details~of~the~specific~conformance~claim.}
+              \@@_xmp_add_packet_field:nnn{claimCredentials}{Text}
+                {The~claimant's~credentials.}
+              \@@_xmp_add_packet_field:nnn{claimDate}{Text}
+                {A~date~identifying~when~the~claim~was~made.}
+              \@@_xmp_add_packet_field:nnn{claimBy}{Text}
+                {The~name~of~the~organization~and/or~individual~and/or~software~making~the~claim.}
+             \@@_xmp_add_packet_close:nn{rdf}{Seq}
+           \@@_xmp_add_packet_close:nn{pdfaType}{field}
+          \@@_xmp_add_packet_close:nn{rdf}{li}
+          \@@_xmp_add_packet_open_attr:nnn{rdf}{li}{rdf:parseType="Resource"}
+            \@@_xmp_add_packet_line:nnn{pdfaType}{type}{declaration}
+            \@@_xmp_add_packet_line:nnn{pdfaType}{namespaceURI}
+               {http://pdfa.org/declarations/}
+            \@@_xmp_add_packet_line:nnn{pdfaType}{prefix}{pdfd}
+            \@@_xmp_add_packet_line:nnn{pdfaType}{description}
+              {A~structure~describing~a~single~PDF~ Declaration~asserting~conformance~with~ an~externally-identified~standard~or~ profile.}
+            \@@_xmp_add_packet_open:nn{pdfaType}{field}
+             \@@_xmp_add_packet_open:nn{rdf}{Seq}
+              \@@_xmp_add_packet_field:nnn{conformsTo}{Text}
+                {A~property~containing~a~URI~specifying~the~standard~or~profile~by~the~PDF~Declaration.~This~property~is~ intended~to~mirror~the~Dublin~Core~property~dc:conformsTo.}
+              \@@_xmp_add_packet_field:nnn{claimData}{Bag~claim}
+                {An~unordered~array~of~claim~data,~where~each~claim~identifies~the~nature~of~the~claim.}
+             \@@_xmp_add_packet_close:nn{rdf}{Seq}
+           \@@_xmp_add_packet_close:nn{pdfaType}{field}
+          \@@_xmp_add_packet_close:nn{rdf}{li}      
+        \@@_xmp_add_packet_close:nn{rdf}{Seq}
+      \@@_xmp_add_packet_close:nn{pdfaSchema}{valueType}
+    }  
+%    \end{macrocode}
+% the schema should be added only once so disable it after use:
+%    \begin{macrocode}
+   \cs_gset_eq:NN \@@_xmp_schema_enable_pdfd: \prg_do_nothing: 
+ }
+%    \end{macrocode}
 %
 % \end{description}
 % \subsection{The actual user / document data}
