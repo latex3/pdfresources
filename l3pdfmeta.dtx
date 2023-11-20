@@ -557,6 +557,31 @@
 % With this command a xmlns name space can be added.
 % \end{function}
 %
+% With the two following commands PDF declarations can be added to the XMP metadata
+% (see \url{https://pdfa.org/wp-content/uploads/2019/09/PDF-Declarations.pdf}).
+% \begin{function}{\pdfmeta_xmp_add_declaration:n,\pdfmeta_xmp_add_declaration:e}
+% \begin{syntax}
+% \cs{pdfmeta_xmp_add_declaration:n}\Arg{uri}
+% \end{syntax}
+% This add a PDF declaration with the required |conformsTo| property to the XMP metadata. 
+% \meta{uri} should not be empty and is a URI specifying 
+% the standard or profile referred to by the PDF
+% Declaration. If the uri contains a hash, use \cs{c_hash_str} to excape it
+% and use the \texttt{e} variant to expand it.
+% \end{function}
+% 
+% \begin{function}{\pdfmeta_xmp_add_declaration:nnnnn,\pdfmeta_xmp_add_declaration:ennnn}
+% \begin{syntax}
+% \cs{pdfmeta_xmp_add_declaration:nnnnn}\Arg{uri}\Arg{By}\Arg{Date}\Arg{Credentials}\Arg{Report}
+% \end{syntax}
+% This add a PDF declaration to the XMP metadata similar 
+% to \cs{\pdfmeta_xmp_add_declaration:n}. 
+% With \meta{By}, \meta{Date}, \meta{Credentials}, \meta{Report} the optional 
+% fields |claimBy| (text), |claimDate| (iso date), |claimCredentials| (text) and 
+% |claimReport| (uri) of the |claimData| property can be given.
+% If  \cs{pdfmeta_xmp_add_declaration:nnnnn} is used twice with the same \meta{uri}
+% argument the |claimData| are concatenated. There is no check if the |claimData| are identical. 
+% \end{function}
 % \end{documentation}
 %
 % \begin{implementation}
@@ -1735,6 +1760,7 @@
         \@@_xmp_build_pdf:
         \@@_xmp_build_xmpRights:
         \@@_xmp_build_standards: %pdfaid,pdfxid,pdfuaid
+        \@@_xmp_build_pdfd:
         \@@_xmp_build_dc:
         \@@_xmp_build_photoshop:
         \@@_xmp_build_xmp:
@@ -2319,8 +2345,56 @@
 %    \end{macrocode}
 % \end{macro}
 %
-
-% \subsubsection{Photoshop}
+% \subsection{Declarations}
+% See \url{https://pdfa.org/wp-content/uploads/2019/09/PDF-Declarations.pdf}
+% 
+% \begin{variable}{\g_@@_xmp_pdfd_data_prop}
+% This holds the data for declarations.
+%    \begin{macrocode}
+\prop_new:N \g_@@_xmp_pdfd_data_prop
+%    \end{macrocode}
+% \end{variable}
+% the main building command used in the xmp generation
+% \begin{macro}{\@@_xmp_build_pdfd:}
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_xmp_build_pdfd:
+  {
+    \prop_if_empty:NF\g_@@_xmp_pdfd_data_prop
+      {
+        \@@_xmp_add_packet_open:nn{pdfd}{declarations}
+        \@@_xmp_add_packet_open:nn{rdf}{Bag}  
+          \prop_map_inline:Nn \g_@@_xmp_pdfd_data_prop
+            {
+              \@@_xmp_build_pdfd_claim:nn{##1}{##2}
+            }      
+        \@@_xmp_add_packet_close:nn{rdf}{Bag}
+        \@@_xmp_add_packet_close:nn{pdfd}{declarations}
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\@@_xmp_build_pdfd_claim:nn}
+% This build the xml for one claim. If there is no
+% claimData only the conformsTo is output.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_xmp_build_pdfd_claim:nn #1#2
+ {
+    \@@_xmp_add_packet_open_attr:nnn{rdf}{li}{rdf:parseType="Resource"}
+      \@@_xmp_add_packet_line:nnn{pdfd}{conformsTo}{#1}      
+      \tl_if_empty:nF {#2}
+       {
+         \@@_xmp_add_packet_open:nn{pdfd}{claimData}  
+          \@@_xmp_add_packet_open:nn{rdf}{Bag}  
+            #2
+          \@@_xmp_add_packet_close:nn{rdf}{Bag}  
+         \@@_xmp_add_packet_close:nn{pdfd}{claimData}  
+       }
+    \@@_xmp_add_packet_close:nn{rdf}{li}   
+ }  
+%    \end{macrocode}
+% \end{macro}
+% 
+% \subsection{Photoshop}
 % \begin{macro}{\@@_xmp_build_photoshop:}
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_xmp_build_photoshop:
@@ -2710,6 +2784,46 @@
       {\@@_xmp_xmlns_new:nn {#1}{#2}}
   }
 %    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{\pdfmeta_xmp_add_declaration:n,\pdfmeta_xmp_add_declaration:e}
+%    \begin{macrocode}
+\cs_new_protected:Npn \pdfmeta_xmp_add_declaration:n #1 %conformsTo uri
+ {
+   \@@_xmp_schema_enable_pdfd:
+   \prop_gput:Nnn\g_@@_xmp_pdfd_data_prop{#1}{}
+ }
+\cs_generate_variant:Nn \pdfmeta_xmp_add_declaration:n {e}
+%    \end{macrocode}
+
+% \begin{macro}{\pdfmeta_xmp_add_declaration:nnnnn,\pdfmeta_xmp_add_declaration:ennnn}
+%    \begin{macrocode}
+\cs_new_protected:Npn \pdfmeta_xmp_add_declaration:nnnnn #1#2#3#4#5
+ %#1=conformsTo uri, #2 claimBy, #3 claimDate #4 claimCredentials #4 claimReport
+ {
+   \@@_xmp_schema_enable_pdfd:
+   \tl_set:Nn \l_@@_tmpa_tl
+     {
+       \@@_xmp_add_packet_open_attr:nnn{rdf}{li}{rdf:parseType="Resource"}
+       \@@_xmp_add_packet_line:nnn{pdfd}{claimBy}{#2} 
+       \@@_xmp_add_packet_line:nnn{pdfd}{claimDate}{#3} 
+       \@@_xmp_add_packet_line:nnn{pdfd}{claimCredentials}{#4} 
+       \@@_xmp_add_packet_line:nnn{pdfd}{claimReport}{#5} 
+       \@@_xmp_add_packet_close:nn{rdf}{li}      
+     } 
+   \prop_get:NnNT \g_@@_xmp_pdfd_data_prop {#1}\l_@@_tmpb_tl
+    {
+      \tl_concat:NNN \l_@@_tmpa_tl \l_@@_tmpa_tl \l_@@_tmpb_tl
+    }
+   \prop_gput:Nno\g_@@_xmp_pdfd_data_prop{#1}
+       {
+         \l_@@_tmpa_tl
+       }        
+ }
+\cs_generate_variant:Nn\pdfmeta_xmp_add_declaration:nnnnn {e}
+%    \end{macrocode}
+
+%
 % \end{macro}
 %    \begin{macrocode}
 %</package>

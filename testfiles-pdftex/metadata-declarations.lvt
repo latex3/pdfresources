@@ -1,0 +1,27 @@
+\ExplSyntaxOn
+\debug_on:n { check-declarations , deprecation }
+\msg_redirect_module:nnn { pdf } { none } { warning }
+\ExplSyntaxOff
+\DocumentMetadata{}
+\input{regression-test}
+\DocumentMetadata{debug={xmp-export}}
+
+\documentclass{article}
+\ExplSyntaxOn
+\pdfmeta_xmp_add_declaration:e
+ {https://pdfa.org/declarations\c_hash_str iso32005}
+
+\pdfmeta_xmp_add_declaration:ennnn
+ {https://pdfa.org/declarations\c_hash_str wcag21A}{}{2023-11-20}{}{}
+
+\pdfmeta_xmp_add_declaration:nnnnn
+  {https://github.com/TikZlings/no-duck-harmed}{Ulrike~Fischer}{2023-11-20}{Bär}{https://github.com/u-fischer/bearwear}
+\pdfmeta_xmp_add_declaration:nnnnn
+  {https://github.com/TikZlings/no-duck-harmed}{Ulrike~Fischer}{2023-11-20}{Paulo}{https://github.com/cereda/sillypage}
+\ExplSyntaxOff
+\START
+\SHOWFILE{\jobname.xmpi}
+\OMIT
+\begin{document}
+text
+\end{document}
