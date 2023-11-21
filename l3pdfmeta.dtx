@@ -458,6 +458,33 @@
 % It is up to the author to ensure and validate
 % that the document actually follows the standard.
 %
+% \subsubsection{Declarations}
+% PDF knows beside standards also a more generic method to declare conformance
+% to some specification by adding a declaration, 
+% see \url{https://pdfa.org/wp-content/uploads/2019/09/PDF-Declarations.pdf}).
+% Such declarations can be added as a simple url which identify the specification or
+% with additional details regarding date and credentials. An example would be
+% 
+% \begin{verbatim}
+% \DocumentMetadata{}
+% \documentclass{article}
+% \ExplSyntaxOn
+% \pdfmeta_xmp_add_declaration:e {https://pdfa.org/declarations\c_hash_str iso32005}
+% \pdfmeta_xmp_add_declaration:ennnn
+%  {https://pdfa.org/declarations\c_hash_str wcag21A}{}{2023-11-20}{}{}
+% \pdfmeta_xmp_add_declaration:nnnnn
+%   {https://github.com/TikZlings/no-duck-harmed}
+%   {Ulrike~Fischer}{2023-11-20}{Bär}{https://github.com/u-fischer/bearwear}
+% \pdfmeta_xmp_add_declaration:nnnnn
+%  {https://github.com/TikZlings/no-duck-harmed}
+%  {Ulrike~Fischer}{2023-11-20}{Paulo}{https://github.com/cereda/sillypage}
+% \ExplSyntaxOff
+% \begin{document}
+%  text
+% \end{document} 
+% 
+% \end{verbatim}
+% 
 % \subsubsection{Dates}
 % \begin{itemize}
 % \item

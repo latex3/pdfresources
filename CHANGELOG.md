@@ -8,7 +8,7 @@ this project uses date-based 'snapshot' version identifiers.
 ## [Unreleased]
 
 ### Added
- - 2023-11-20: l3pdfmeta.dtx: support for PDF declarations in XMP metadata.
+ - 2023-11-20: l3pdfmeta.dtx: support for PDF declarations in XMP metadata, issue #58
  
 ## [2023-11-17]
 Version: 2023-11-17, 0.96c
