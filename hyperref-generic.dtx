@@ -615,7 +615,15 @@
 %  the link type, so the link is for example no longer colored. It also removes the
 %  implicit grouping of the content.
 %
-%
+%  \DescribeHypkey{nested-links}%
+%  
+%  Links are sometimes nested. E.g. if a section heading contains a reference
+%  it can lead to nested links in the table of contents or if |\nameref| is used. 
+%  That is not forbidden and normally work as expected: If the link area overlap 
+%  normally the inner link is \enquote{on top} and chosen at a click. 
+%  But it is not always actually wanted, so with the |nested-links| (a boolean key)
+%  it is possible to disable such nested links. 
+%  
 %  \section{Draftmode}
 %  pdftex and other engines knows a
 %  draftmode which can be set with |\pdfdraftmode=1|
@@ -797,7 +805,7 @@
 %
 %\section{Assorted key descriptions}\label{sec:keydesc}
 %The following gives a few details to some keys that are perhaps not
-%completly described in the manual, or are a bit different in this driver.
+%completely described in the manual, or are a bit different in this driver.
 %The list is alphabetic.
 %
 % \DescribeHypkey{bookmarkstype} This key takes as value the extension of a list
@@ -1972,7 +1980,7 @@
   }
 %    \end{macrocode}
 % \end{macro}
-% \section {Core Hyperref Commands}
+% \section{Core Hyperref Commands}
 % Every \pkg{hyperref} has to define eight core command:
 % \begin{verbatim}
 % \hyper@anchor
@@ -1987,7 +1995,46 @@
 %
 % This driver defines for consistency also
 % |\hyper@linklaunch| for Launch and |\hyper@linknamed| for Named.
+% 
+% \subsection{Link level}
+% Links can be nested. Inner links need perhaps special handling, e.g.
+% to deactivate the link, or to change the border, or in the case of 
+% tagging to add some additional structure to handle the parent-child rules.
+% We therefore add a global counter which is increased at the begin of 
+% link and decreased at the end. 
+% \begin{macro}{g_@@_linknestlevel_int}
+%    \begin{macrocode}
+\int_new:N \g_@@_linknestlevel_int
+%    \end{macrocode}
+% \end{macro}
+% 
+%    \begin{macrocode}
+\prg_new_conditional:Npnn \@@_if_outer_link: {TF}
+ {
+   \int_compare:nNnTF { \g_@@_linknestlevel_int } > {1}
+     { \prg_return_false:  }
+     { \prg_return_true: }
+ }
+%    \end{macrocode}
+
+%    \begin{macrocode}
+\cs_new:Npn \@@_check_link_nesting:TF #1 #2
+ {
+   \use_i:nn {#1}{#2}
+ }
+%    \end{macrocode}
 %
+%    \begin{macrocode}
+\keys_define:nn { hyp / setup }
+  { 
+    nested-links .choice:,
+    nested-links / true .code:n = 
+     { \cs_set_eq:NN \@@_check_link_nesting:TF \use_i:nn },
+    nested-links / false .code:n = 
+     { \cs_set_eq:NN \@@_check_link_nesting:TF \@@_if_outer_link:TF },  
+    nested-links .default:n = {true}
+  }
+%    \end{macrocode}
 % \subsection{ Anchors / destinations}
 % The first three commands are needed for \enquote{anchors}. At first
 % the internal commands to create a destination. It uses
@@ -2157,27 +2204,41 @@
   {
     \bool_if:NTF \l_@@_annot_GoTo_bool
       {
-        \Hy@VerboseLinkStart{#1}{#2}
-        \group_begin:
-        \tl_set:Nn \l_hyp_current_dest_name_tl {#2}
-        \hook_use:n {hyp/link/#1}
-        \@@_link_goto_begin:nw {#2}#3\Hy@xspace@end
-        \@@_link_goto_end:
-        \group_end:
-        \Hy@VerboseLinkStop
+        \int_gincr:N\g_@@_linknestlevel_int
+        \@@_check_link_nesting:TF
+          {
+            \Hy@VerboseLinkStart{#1}{#2}
+            \group_begin:
+            \tl_set:Nn \l_hyp_current_dest_name_tl {#2}
+            \hook_use:n {hyp/link/#1}
+            \@@_link_goto_begin:nw {#2}#3\Hy@xspace@end
+            \@@_link_goto_end:
+            \group_end:
+            \Hy@VerboseLinkStop
+          } 
+          {
+            \group_begin: #3\group_end:
+          }
+        \int_gdecr:N\g_@@_linknestlevel_int
       }
       {{\let\protect\relax#3}}
   }
-
 \cs_new_protected:Npn \hyper@linkstart #1 #2 %#1 context, #2=destination name
   {
     \bool_if:NT \l_@@_annot_GoTo_bool
       {
-        \Hy@VerboseLinkStart{#1}{#2}% only for debug
-        \group_begin:
-        \tl_set:Nn \l_hyp_current_dest_name_tl {#2}
-        \hook_use:n {hyp/link/#1}
-        \@@_link_goto_begin:nw {#2}
+        \int_gincr:N\g_@@_linknestlevel_int
+        \@@_check_link_nesting:TF
+          {
+            \Hy@VerboseLinkStart{#1}{#2}% only for debug
+            \group_begin:
+            \tl_set:Nn \l_hyp_current_dest_name_tl {#2}
+            \hook_use:n {hyp/link/#1}
+            \@@_link_goto_begin:nw {#2}
+          } 
+          {
+            \group_begin:          
+          } 
       }
   }
 
@@ -2185,9 +2246,16 @@
   {
     \bool_if:NT \l_@@_annot_GoTo_bool
       {
-        \@@_link_goto_end:
-        \group_end:
-        \Hy@VerboseLinkStop
+        \@@_check_link_nesting:TF
+          {
+            \@@_link_goto_end:
+            \group_end:
+            \Hy@VerboseLinkStop
+          }
+          {
+            \group_end:
+          }  
+        \int_gdecr:N\g_@@_linknestlevel_int
       }
   }
 %    \end{macrocode}
@@ -2203,31 +2271,39 @@
   {
     \bool_if:NTF \l_@@_annot_URI_bool
       {
-        \group_begin:
-         \@@_text_pdfstring:eoN
-           { #2}
-           { \l_@@_text_enc_uri_print_tl }
-           \l_@@_uri_tmpa_tl
-         \pdfdict_put:nno{l_hyp/annot/A/URI}{URI}{\l_@@_uri_tmpa_tl}
-         \bool_if:NT \l_@@_href_url_ismap_bool
+        \int_gincr:N\g_@@_linknestlevel_int
+        \@@_check_link_nesting:TF
+          {
+           \group_begin:
+            \@@_text_pdfstring:eoN
+              { #2}
+              { \l_@@_text_enc_uri_print_tl }
+              \l_@@_uri_tmpa_tl
+            \pdfdict_put:nno{l_hyp/annot/A/URI}{URI}{\l_@@_uri_tmpa_tl}
+            \bool_if:NT \l_@@_href_url_ismap_bool
+              {
+               \pdfdict_put:nnn{l_hyp/annot/A/URI}{IsMap}{true}
+              }
+            \cs_set_eq:NN \# \c_hash_str
+            \cs_set_eq:NN \% \c_percent_str
+            \Hy@safe@activestrue
+            \mode_leave_vertical:
+            \pdfannot_dict_put:nne {link/URI}{A}{<<\pdfdict_use:n {l_hyp/annot/A/URI}>>}
+            \pdfannot_link:nen { URI }
+              {
+              }
+              {
+                \let\protect\relax
+                #1
+                \Hy@xspace@end
+                \Hy@VerboseLinkStop %where is the start??
+              }
+            \group_end:
+           } 
            {
-            \pdfdict_put:nnn{l_hyp/annot/A/URI}{IsMap}{true}
+             \group_begin: #1 \group_end:
            }
-         \cs_set_eq:NN \# \c_hash_str
-         \cs_set_eq:NN \% \c_percent_str
-         \Hy@safe@activestrue
-         \mode_leave_vertical:
-         \pdfannot_dict_put:nne {link/URI}{A}{<<\pdfdict_use:n {l_hyp/annot/A/URI}>>}
-         \pdfannot_link:nen { URI }
-           {
-           }
-           {
-             \let\protect\relax
-             #1
-             \Hy@xspace@end
-             \Hy@VerboseLinkStop %where is the start??
-           }
-         \group_end:
+         \int_gdecr:N\g_@@_linknestlevel_int
       }
       {{\let\protect\relax#1}}
   }
@@ -2244,57 +2320,65 @@
   {
    \bool_if:NTF \l_@@_annot_GoToR_bool
      {
-        \group_begin:
-        \tl_set:Ne \l_@@_filename_tmpa_tl { \text_expand:n { #2 } }
-        \exp_args:Ne
-          \pdf_object_if_exist:nF { @@_file_\tl_to_str:N \l_@@_filename_tmpa_tl }
-            {
-              \pdfdict_put:nne { l_pdffile/Filespec}{Subtype}{\pdf_name_from_unicode_e:n {application/pdf}}
-              \pdffile_embed_file:noe
-                {}
-                {\l_@@_filename_tmpa_tl }
-                {@@_file_\tl_to_str:N \l_@@_filename_tmpa_tl }
-            }
-        \pdfdict_put:nne
-           {l_hyp/annot/A/GoToR}
-           {F}
-           {\pdf_object_ref:e {@@_file_\tl_to_str:N \l_@@_filename_tmpa_tl}}
-        \@@_text_pdfstring:nnN
-          { #3 }
-          { \l_@@_text_enc_dest_print_tl }
-          \l_@@_dest_name_tmpa_tl
-        \tl_if_blank:eTF {#3}
+        \int_gincr:N\g_@@_linknestlevel_int
+        \@@_check_link_nesting:TF
           {
-            \pdfdict_put:nne {l_hyp/annot/A/GoToR}{D}
+            \group_begin:
+            \tl_set:Ne \l_@@_filename_tmpa_tl { \text_expand:n { #2 } }
+            \exp_args:Ne
+              \pdf_object_if_exist:nF { @@_file_\tl_to_str:N \l_@@_filename_tmpa_tl }
+                {
+                  \pdfdict_put:nne { l_pdffile/Filespec}{Subtype}{\pdf_name_from_unicode_e:n {application/pdf}}
+                  \pdffile_embed_file:noe
+                    {}
+                    {\l_@@_filename_tmpa_tl }
+                    {@@_file_\tl_to_str:N \l_@@_filename_tmpa_tl }
+                }
+            \pdfdict_put:nne
+               {l_hyp/annot/A/GoToR}
+               {F}
+               {\pdf_object_ref:e {@@_file_\tl_to_str:N \l_@@_filename_tmpa_tl}}
+            \@@_text_pdfstring:nnN
+              { #3 }
+              { \l_@@_text_enc_dest_print_tl }
+              \l_@@_dest_name_tmpa_tl
+            \tl_if_blank:eTF {#3}
               {
-               [
-                 \int_eval:n
-                  { \int_max:nn {0}{ 0\l_@@_href_pdf_page_tl - 1 }}
-                 /\l_@@_dest_pdfremotestartview_tl
-               ]
+                \pdfdict_put:nne {l_hyp/annot/A/GoToR}{D}
+                  {
+                   [
+                     \int_eval:n
+                      { \int_max:nn {0}{ 0\l_@@_href_pdf_page_tl - 1 }}
+                     /\l_@@_dest_pdfremotestartview_tl
+                   ]
+                  }
               }
-          }
-          {
-            \pdfdict_put:nno {l_hyp/annot/A/GoToR}{D}{\l_@@_dest_name_tmpa_tl}
-          }
-        \mode_leave_vertical:
+              {
+                \pdfdict_put:nno {l_hyp/annot/A/GoToR}{D}{\l_@@_dest_name_tmpa_tl}
+              }
+            \mode_leave_vertical:
 %    \end{macrocode}
 % We use an extra object here, as ghostscript doesn't like the
 % object reference in the dict
 % \url{https://chat.stackexchange.com/transcript/message/57361080#57361080}
 %    \begin{macrocode}
-        \pdf_object_unnamed_write:ne{dict}{\pdfdict_use:n {l_hyp/annot/A/GoToR}}
-        \pdfannot_dict_put:nne {link/GoToR}{A}{\pdf_object_ref_last:}
-        \pdfannot_link:nnn %expansion??
-          { GoToR }
+            \pdf_object_unnamed_write:ne{dict}{\pdfdict_use:n {l_hyp/annot/A/GoToR}}
+            \pdfannot_dict_put:nne {link/GoToR}{A}{\pdf_object_ref_last:}
+            \pdfannot_link:nnn %expansion??
+              { GoToR }
+              {
+              }
+              {
+               \let\protect\relax
+                #1\Hy@xspace@end
+                \Hy@VerboseLinkStop %where is the start??
+              }
+            \group_end:
+          }  
           {
+            \group_begin: #1 \group_end:
           }
-          {
-           \let\protect\relax
-            #1\Hy@xspace@end
-            \Hy@VerboseLinkStop %where is the start??
-          }
-        \group_end:
+        \int_gdecr:N\g_@@_linknestlevel_int
      }
      {{\let\protect\relax#1}}
   }
@@ -2312,47 +2396,53 @@
   {
    \bool_if:NTF \l_@@_annot_Launch_bool
      {
-        \group_begin:
-          \@@_text_pdfstring:nnN
-            { #1 }
-            { \l_@@_text_enc_file_print_tl }
-            \l_@@_filename_tmpa_tl
-          \pdfdict_put:nno {l_hyp/annot/A/Launch}{F}{\l_@@_filename_tmpa_tl}
-          \@@_text_pdfstring:noN
-            { #3 }
-            { \l_@@_text_enc_para_print_tl }
-            \l_@@_para_tmpa_tl
-          \bool_if:nTF
-            {
-              \str_if_eq_p:Vn \l_@@_para_tmpa_tl {()}
-              ||
-              \pdf_version_compare_p:Nn > {1.9}
-            }
-            {
-              \pdfdict_remove:nn {l_hyp/annot/A/Launch}{Win}
-            }
-            {
-              \pdfdict_put:nne 
-                {l_hyp/annot/A/Launch}
-                {Win}
-                {<</P \l_@@_para_tmpa_tl /F \l_@@_filename_tmpa_tl >>}
-            }
-          \mode_leave_vertical:
-          \pdfannot_dict_put:nne {link/Launch}{A}{<<\pdfdict_use:n {l_hyp/annot/A/Launch}>>}
-          \pdfannot_link:nen
-            { Launch }
-            {
-  %            /A
-%              <<
-%                \pdfdict_use:n {l_hyp/annot/A/Launch}
-%              >>
-            }
-            {
-              \let\protect\relax
-              #2\Hy@xspace@end
-              \Hy@VerboseLinkStop %where is the start??
-            }
-        \group_end:
+        \int_gincr:N\g_@@_linknestlevel_int
+        \@@_check_link_nesting:TF
+          {
+           \group_begin:
+             \@@_text_pdfstring:nnN
+               { #1 }
+               { \l_@@_text_enc_file_print_tl }
+               \l_@@_filename_tmpa_tl
+             \pdfdict_put:nno {l_hyp/annot/A/Launch}{F}{\l_@@_filename_tmpa_tl}
+             \@@_text_pdfstring:noN
+               { #3 }
+               { \l_@@_text_enc_para_print_tl }
+               \l_@@_para_tmpa_tl
+             \bool_if:nTF
+               {
+                 \str_if_eq_p:Vn \l_@@_para_tmpa_tl {()}
+                 ||
+                 \pdf_version_compare_p:Nn > {1.9}
+               }
+               {
+                 \pdfdict_remove:nn {l_hyp/annot/A/Launch}{Win}
+               }
+               {
+                 \pdfdict_put:nne 
+                   {l_hyp/annot/A/Launch}
+                   {Win}
+                   {<</P \l_@@_para_tmpa_tl /F \l_@@_filename_tmpa_tl >>}
+               }
+             \mode_leave_vertical:
+             \pdfannot_dict_put:nne {link/Launch}{A}{<<\pdfdict_use:n {l_hyp/annot/A/Launch}>>}
+             \pdfannot_link:nen
+               { Launch }
+               {
+     %            /A
+   %              <<
+   %                \pdfdict_use:n {l_hyp/annot/A/Launch}
+   %              >>
+               }
+               {
+                 \let\protect\relax
+                 #2\Hy@xspace@end
+                 \Hy@VerboseLinkStop %where is the start??
+               }
+           \group_end:
+          }
+          { \group_begin: #2 \group_end: }
+        \int_gdecr:N\g_@@_linknestlevel_int
       }
       {{\let\protect\relax#2}}
   }
@@ -2380,31 +2470,37 @@
   {
     \bool_if:NTF \l_@@_annot_Named_bool
       {
-         \group_begin:
-         \pdfmeta_standard_verify:nnTF {named_actions}{#1}
-           {
-             \mode_leave_vertical:
-             \pdfdict_put:nne {l_hyp/annot/A/Named}{N}
-               {\pdf_name_from_unicode_e:n{#1}}
-             \pdfannot_dict_put:nne {link/Named}{A}{<<\pdfdict_use:n {l_hyp/annot/A/Named}>>}
-             \pdfannot_link:nnn { Named }
+         \int_gincr:N\g_@@_linknestlevel_int
+         \@@_check_link_nesting:TF
+          {
+            \group_begin:
+            \pdfmeta_standard_verify:nnTF {named_actions}{#1}
               {
-%                /A
-%                  <<
-%                    \pdfdict_use:n { l_hyp/annot/A/Named }
-%                  >>
+                \mode_leave_vertical:
+                \pdfdict_put:nne {l_hyp/annot/A/Named}{N}
+                  {\pdf_name_from_unicode_e:n{#1}}
+                \pdfannot_dict_put:nne {link/Named}{A}{<<\pdfdict_use:n {l_hyp/annot/A/Named}>>}
+                \pdfannot_link:nnn { Named }
+                 {
+   %                /A
+   %                  <<
+   %                    \pdfdict_use:n { l_hyp/annot/A/Named }
+   %                  >>
+                 }
+                 {
+                   #2
+                   \Hy@xspace@end
+                   \Hy@VerboseLinkStop
+                 }
               }
               {
+                \msg_warning:nnn { hyp } { pdfa-no-named-action }{#1}
                 #2
-                \Hy@xspace@end
-                \Hy@VerboseLinkStop
               }
-           }
-           {
-             \msg_warning:nnn { hyp } { pdfa-no-named-action }{#1}
-             #2
-           }
-        \group_end:
+           \group_end:
+          } 
+          { \group_begin: #2 \group_end: }
+        \int_gdecr:N\g_@@_linknestlevel_int
       }
       {{\let\protect\relax#2}}
   }
