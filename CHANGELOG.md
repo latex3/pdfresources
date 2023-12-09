@@ -7,10 +7,17 @@ this project uses date-based 'snapshot' version identifiers.
 
 ## [Unreleased]
 
+### Removed
+
+ - l3bitset is now provided by l3kernel.
+ 
 ### Added
  - 2023-11-20: l3pdfmeta.dtx: support for PDF declarations in XMP metadata, issue #58
  - hyperref-generic.dtx: nested-links key to suppress nested links.
  
+### Changed
+ - key family in hyperref-generic is now hyp and not hyp/setup
+  
 ## [2023-11-17]
 Version: 2023-11-17, 0.96c
 

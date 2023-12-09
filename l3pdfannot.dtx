@@ -441,7 +441,8 @@
 % bitset for it.
 %    \begin{macrocode}
 %<*package>
-\RequirePackage{l3bitset}
+\cs_if_exist:NF \bitset_new:Nn
+  { \RequirePackage { l3bitset } }
 \bitset_new:Nn \l_pdfannot_F_bitset
   {
     Invisible      = 1,
