@@ -602,7 +602,7 @@
 % \cs{pdfmeta_xmp_add_declaration:nnnnn}\Arg{uri}\Arg{By}\Arg{Date}\Arg{Credentials}\Arg{Report}
 % \end{syntax}
 % This add a PDF declaration to the XMP metadata similar 
-% to \cs{\pdfmeta_xmp_add_declaration:n}. 
+% to \cs{pdfmeta_xmp_add_declaration:n}. 
 % With \meta{By}, \meta{Date}, \meta{Credentials}, \meta{Report} the optional 
 % fields |claimBy| (text), |claimDate| (iso date), |claimCredentials| (text) and 
 % |claimReport| (uri) of the |claimData| property can be given.
@@ -2822,7 +2822,7 @@
  }
 \cs_generate_variant:Nn \pdfmeta_xmp_add_declaration:n {e}
 %    \end{macrocode}
-
+% \end{macro}
 % \begin{macro}{\pdfmeta_xmp_add_declaration:nnnnn,\pdfmeta_xmp_add_declaration:ennnn}
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdfmeta_xmp_add_declaration:nnnnn #1#2#3#4#5
@@ -2849,9 +2849,8 @@
  }
 \cs_generate_variant:Nn\pdfmeta_xmp_add_declaration:nnnnn {e}
 %    \end{macrocode}
-
-%
 % \end{macro}
+% 
 %    \begin{macrocode}
 %</package>
 %    \end{macrocode}
