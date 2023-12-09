@@ -5,7 +5,8 @@ first release 0.95a, 2021-02-23 will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 this project uses date-based 'snapshot' version identifiers.
 
-## [Unreleased]
+## [2023-11-17]
+Version: 2023-12-09, 0.96d
 
 ### Removed
 
@@ -13,7 +14,7 @@ this project uses date-based 'snapshot' version identifiers.
  
 ### Added
  - 2023-11-20: l3pdfmeta.dtx: support for PDF declarations in XMP metadata, issue #58
- - hyperref-generic.dtx: nested-links key to suppress nested links.
+ - hyperref-generic.dtx: option nested-links key to suppress nested links.
  
 ### Changed
  - key family in hyperref-generic is now hyp and not hyp/setup

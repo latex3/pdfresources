@@ -1,6 +1,6 @@
 #!/usr/bin/env texlua
-packageversion="0.96c"
-packagedate="2023-11-17"
+packageversion="0.96d"
+packagedate="2023-12-09"
 
 local luatexstatus = status.list()
 
