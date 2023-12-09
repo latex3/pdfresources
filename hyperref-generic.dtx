@@ -1229,15 +1229,15 @@
 \cs_set_protected:Npn \hypersetup #1
   {
      %\kvsetkeys{Hyp} {#1}
-     \keys_set:nn { hyp / setup }{ #1 }
+     \keys_set:nn { hyp }{ #1 }
   }
 % TODO for now unknown keys should only give warnings.
-\keys_define:nn { hyp / setup }
+\keys_define:nn { hyp }
   {
     unknown .code:n =
     {
       \msg_warning:nneee { hyp } { unknown-key }
-      { hyp~/~setup }{ \l_keys_key_str } { #1 }
+      { hyp }{ \l_keys_key_str } { #1 }
     }
   }
 %    \end{macrocode}
@@ -1246,7 +1246,7 @@
 % chapters and sections and with \cs{phantomsection}. The following key allows
 % to force a specific name for the destination so that it can be used by bookmarks.
 %    \begin{macrocode}
-\keys_define:nn { hyp / setup }
+\keys_define:nn { hyp }
   {
     next-anchor .code:n =
     {
@@ -1282,7 +1282,7 @@
     ,destination .tl_set:N = \l_@@_href_pdf_destination_tl
     ,pdfremotestartview .code:n =
       {
-        \keys_set:nn { hyp / setup }
+        \keys_set:nn { hyp }
           { pdfremotestartview = #1 }
       }
     ,page .code:n =
@@ -1301,7 +1301,7 @@
          {
            \pdfdict_put:nnn{l_hyp/annot/A}{Next}{#1}
            \tl_set:Nn \Hy@href@nextactionraw {/Next~#1}
-           \keys_set:nn {hyp / setup }{ pdfnewwindow = true}
+           \keys_set:nn {hyp }{ pdfnewwindow = true}
          }
      }
     ,afrelationship .code:n =
@@ -1312,7 +1312,7 @@
 
   }
 
-\keys_define:nn { hyp / setup }
+\keys_define:nn { hyp }
   {
     ,href / urlencode .bool_set:N =  \l_@@_href_url_encode_bool
     ,href / urlencode .default:n  = {true}
@@ -1475,7 +1475,7 @@
 \hook_new:n{hyp/link/cite}
 %\color_set:nnn {hyp/color/cite}{HTML}{2E7E2A}
 %\color_set:nn  {hyp/color/citeborder}{hyp/color/cite!60!white}
-\keys_define:nn { hyp / setup }
+\keys_define:nn { hyp }
   {
     ,citecolor .code:n = {\@@_color_set:ne {hyp/color/cite}{#1}\@@_citecolor_hook_init:}
     ,citebordercolor
@@ -1485,7 +1485,7 @@
  {
    \hook_gput_code:nnn { hyp/link/cite }{hyp/cite}
      {
-       \keys_set:nn { hyp / setup }
+       \keys_set:nn { hyp }
          {
            linkcolor      = hyp/color/cite
          }
@@ -1496,7 +1496,7 @@
  {
    \hook_gput_code:nnn { hyp/link/cite }{hyp/citeborder}
      {
-       \keys_set:nn { hyp / setup }
+       \keys_set:nn { hyp }
          {
            linkbordercolor      = hyp/color/citeborder
          }
@@ -2025,7 +2025,7 @@
 %    \end{macrocode}
 %
 %    \begin{macrocode}
-\keys_define:nn { hyp / setup }
+\keys_define:nn { hyp }
   { 
     nested-links .choice:,
     nested-links / true .code:n = 
@@ -2613,7 +2613,7 @@
 % \begin{hypkey}{colorlinks}
 % This key also resets the border and borderstyle.
 %    \begin{macrocode}
-\keys_define:nn { hyp / setup }
+\keys_define:nn { hyp }
   {
     ,colorlinks .meta:n =
       {
@@ -2635,14 +2635,14 @@
 %    \begin{macrocode}
 \seq_map_inline:Nn \c_@@_annot_types_seq
   {
-     \keys_define:nn { hyp / setup }
+     \keys_define:nn { hyp }
        {
          ,color#1 .bool_set:c = { l_hyp_annot_color#1_bool }
          ,#1color .code:n =     { \@@_color_set:ne {hyp/color/#1}{##1} }
        }
   }
 
-\keys_define:nn { hyp / setup }
+\keys_define:nn { hyp }
   {
     ,allcolors .meta:n =
       {
@@ -2664,7 +2664,7 @@
 % or cmyk (unusual). This can be set with the |bordercolormodel| key:
 %\begin{hypkey}{bordercolormodel}
 %    \begin{macrocode}
-\keys_define:nn { hyp / setup }
+\keys_define:nn { hyp }
   {
     ,bordercolormodel .choices:nn =
      {rgb,cmyk}
@@ -2676,7 +2676,7 @@
 %    \begin{macrocode}
 \prop_map_inline:Nn \c_@@_map_hyp_annot_prop
   {
-    \keys_define:nn { hyp / setup }
+    \keys_define:nn { hyp }
       {
         #1bordercolor .code:n =
           {
@@ -2701,7 +2701,7 @@
       }
   }
 
-\keys_define:nn { hyp / setup }
+\keys_define:nn { hyp }
   {
     ,allbordercolors .meta:n =
       {
@@ -2721,7 +2721,7 @@
 %    \begin{macrocode}
 \prop_map_inline:Nn \c_@@_map_hyp_annot_prop
   {
-    \keys_define:nn { hyp / setup }
+    \keys_define:nn { hyp }
       {
         #1border .code:n =
           {
@@ -2740,7 +2740,7 @@
           }
       }
   }
-\keys_define:nn { hyp / setup }
+\keys_define:nn { hyp }
   {
     ,pdfborder  .code:n =
       {
@@ -2774,7 +2774,7 @@
 %    \begin{macrocode}
 \prop_map_inline:Nn \c_@@_map_hyp_annot_prop
   {
-    \keys_define:nn { hyp / setup }
+    \keys_define:nn { hyp }
       {
         #1borderstyle .code:n =
           {
@@ -2793,7 +2793,7 @@
           }
       }
   }
-\keys_define:nn { hyp / setup }
+\keys_define:nn { hyp }
   {
     ,pdfborderstyle  .code:n =
       {
@@ -2946,7 +2946,7 @@
   { \pdf_version_compare_p:Nn > {1.4} }
   { \str_if_eq_p:ee{\pdf_version_major:}{-1} }
   {
-     \keys_define:nn { hyp / setup }
+     \keys_define:nn { hyp }
        {
          ,_ocgcolorlinks .meta:n =
             {
@@ -2960,7 +2960,7 @@
        }
   }
   {
-    \keys_define:nn { hyp / setup }
+    \keys_define:nn { hyp }
       {
         ,_ocgcolorlinks .code:n =
           {
@@ -2972,7 +2972,7 @@
       }
   }
 
-\keys_define:nn { hyp / setup }
+\keys_define:nn { hyp }
   {
     ,ocgcolorlinks .choice:
     ,ocgcolorlinks / true .meta:n =
@@ -2995,13 +2995,13 @@
       { \pdf_version_compare_p:Nn > {1.4} }
       { \str_if_eq_p:ee{\pdf_version_major:}{-1} }
       {
-        \keys_define:nn { hyp / setup }
+        \keys_define:nn { hyp }
           {
             ,ocgcolor#1 .bool_set:c = { l_hyp_annot_ocgcolor#1_bool }
           }
       }
       {
-        \keys_define:nn { hyp / setup }
+        \keys_define:nn { hyp }
           {
             ,ocgcolor#1 .code:n=
               {
@@ -3021,7 +3021,7 @@
 %    \begin{macrocode}
 \prop_map_inline:Nn \c_@@_map_hyp_annot_prop
   {
-    \keys_define:nn { hyp / setup }
+    \keys_define:nn { hyp }
       {
         ,#1highlight .choices:nn =
           { /I, /N, /O, /P}
@@ -3050,7 +3050,7 @@
   }
 
 
-\keys_define:nn { hyp / setup }
+\keys_define:nn { hyp }
   {
     ,pdfhighlight .choices:nn =
       { /I, /N, /O, /P}
@@ -3087,7 +3087,7 @@
 % This key disable all appearance keys. The link themselves are still there.
 % \begin{hypkey}{hidelinks,hidelink,hideurl,hidefile,hiderun,hidemenu}
 %    \begin{macrocode}
-\keys_define:nn { hyp / setup }
+\keys_define:nn { hyp }
   {
     hidelinks .meta:n =
       {
@@ -3100,7 +3100,7 @@
 
 \seq_map_inline:Nn \c_@@_annot_types_seq
   {
-    \keys_define:nn { hyp / setup }
+    \keys_define:nn { hyp }
       {
         hide#1 .meta:n =
           {
@@ -3117,20 +3117,20 @@
 % This define the key for the color schemes and sets the default colors.
 % \begin{hypkey}{colorscheme}
 %    \begin{macrocode}
-\keys_define:nn { hyp / setup }
+\keys_define:nn { hyp }
   {
     colorscheme .code:n =
       {
         \prop_map_inline:cn { c_@@_colorscheme_#1_prop }
           {
-            \keys_set:nn { hyp /setup }
+            \keys_set:nn { hyp  }
               {
                  ##1 = ##2
               }
           }
       }
   }
-\keys_set:nn { hyp / setup } {colorscheme=phelype}
+\keys_set:nn { hyp } {colorscheme=phelype}
 %    \end{macrocode}
 % \end{hypkey}
 %
@@ -3140,7 +3140,7 @@
 % The following are ignored (with or without warnings)
 % \begin{hypkey}{unicode,pdfencoding,pdfversion}
 %    \begin{macrocode}
-\keys_define:nn { hyp / setup }
+\keys_define:nn { hyp }
   {
     ,unicode     .code:n = {}
     ,pdfencoding .code:n = {}
@@ -3158,12 +3158,12 @@
 %
 % \begin{hypkey}{verbose,debug,draft,final}
 %    \begin{macrocode}
-\keys_define:nn { hyp / setup }
+\keys_define:nn { hyp }
  {
    ,verbose   .legacy_if_set:n  = {Hy@verbose}
    ,debug     .legacy_if_set:n  = {Hy@verbose}
  }
-\keys_define:nn { hyp / setup }
+\keys_define:nn { hyp }
   {
    ,draft .code:n =
      {
@@ -3182,7 +3182,7 @@
 %   pageanchor,linktoc,linktocpage,plainpages,localanchorname,
 %   linkfileprefix}
 %    \begin{macrocode}
-\keys_define:nn { hyp / setup }
+\keys_define:nn { hyp }
  {
    ,extension .tl_set:N = \XR@ext
    ,extension .initial:n= pdf
@@ -3194,7 +3194,7 @@
    ,plainpages   .legacy_if_set:n = {Hy@plainpages}
  }
 
-\keys_define:nn { hyp / setup }
+\keys_define:nn { hyp }
  {
    ,linktoc .choices:nn = { none, section, all, page }
      {
@@ -3220,7 +3220,7 @@
 %    \begin{macrocode}
 \prop_map_inline:Nn \c_@@_map_hyp_annot_prop
   {
-    \keys_define:nn { hyp / setup }
+    \keys_define:nn { hyp }
      {
        ,#1 .bool_set:c = {l_@@_annot_#2_bool}
      }
@@ -3229,7 +3229,7 @@
 % \end{hypkey}
 %
 %    \begin{macrocode}
-\keys_define:nn { hyp / setup }
+\keys_define:nn { hyp }
  {
    ,baseurl       .code:n =
      {
@@ -3787,7 +3787,7 @@
 % \begin{hypkey}{pdfview}
 % Destination keys. pdfview is a bit more complicated so extra.
 %    \begin{macrocode}
-\keys_define:nn { hyp / setup }
+\keys_define:nn { hyp }
   {
     ,pdfview .code:n =
       {
@@ -3877,7 +3877,7 @@
 % \begin{hypkey}{pdflang}
 % |pdflang| should be deprecated.
 %    \begin{macrocode}
-\keys_define:nn { hyp / setup }
+\keys_define:nn { hyp }
   {
    ,pdflang       .code:n =
           {
@@ -3903,7 +3903,7 @@
 \regex_set:Nn\l_@@_optlang_regex {\A\[([A-Za-z\-]+)\](.*)}
 \cs_new_protected:Npn \@@_setup_info_key:nn #1 #2
   {
-    \keys_define:nn { hyp / setup }
+    \keys_define:nn { hyp }
       {
         pdf#1  .code:n =
           {
@@ -3990,7 +3990,7 @@
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_setup_info_date_key:nn #1 #2
   {
-    \keys_define:nn { hyp / setup }
+    \keys_define:nn { hyp }
       {
         pdf#1  .code:n =
           {
@@ -4023,7 +4023,7 @@
 
 \@@_setup_info_date_key:nn {creationdate}  {CreationDate}
 \@@_setup_info_date_key:nn {moddate}  {ModDate}
-\keys_define:nn { hyp / setup }
+\keys_define:nn { hyp }
       {
         pdfmetadate  .code:n = { \@@_store_metadata:nn {pdfmetadate}{#1} }
       }
@@ -4032,12 +4032,12 @@
 % \begin{hypkey}{pdftrapped}
 % Trapped is a bit curious, it has an value "unknown", and one can't suppress it ...
 %    \begin{macrocode}
-\keys_define:nn { hyp / setup }
+\keys_define:nn { hyp }
   {
     ,pdftrapped .code:n =
       {
         \exp_args:Nne
-          \keys_set:nn { hyp / setup } { _pdftrapped = \str_uppercase:n { #1 } }
+          \keys_set:nn { hyp } { _pdftrapped = \str_uppercase:n { #1 } }
       }
     ,_pdftrapped  .choices:nn = {TRUE,FALSE,UNKNOWN}
        {
@@ -4065,7 +4065,7 @@
 % \begin{hypkey}{pdfinfo}
 %  pdfinfo allows to set the info keys with keyval ...
 %    \begin{macrocode}
-\keys_define:nn { hyp / setup }
+\keys_define:nn { hyp }
   {
     pdfinfo .code:n =
       {
@@ -4076,10 +4076,10 @@
 % \end{hypkey}
 % Now we set some default values
 %    \begin{macrocode}
-\keys_set:nn { hyp / setup} {pdfcreator = LaTeX~with~hyperref}
-\keys_set:nn { hyp / setup} {pdfauthor  = }
-\keys_set:nn { hyp / setup} {pdftitle   = }
-\keys_set:nn { hyp / setup} {pdfsubject  = }
+\keys_set:nn { hyp} {pdfcreator = LaTeX~with~hyperref}
+\keys_set:nn { hyp} {pdfauthor  = }
+\keys_set:nn { hyp} {pdftitle   = }
+\keys_set:nn { hyp} {pdfsubject  = }
 %    \end{macrocode}
 %
 % \subsection{hyperxmp keys}
@@ -4128,7 +4128,7 @@
    ,pdfdate
   }
   {
-    \keys_define:nn { hyp / setup }
+    \keys_define:nn { hyp }
       {
         #1 .code:n= { \@@_store_metadata:nn {#1}{##1}}
       }
@@ -4139,7 +4139,7 @@
 % \subsection{Transitions}
 %  pdfpageduration sets the duration a page is shown in full screen mode.
 %    \begin{macrocode}
-\keys_define:nn { hyp / setup }
+\keys_define:nn { hyp }
   {
     pdfpageduration .code:n =
      {
@@ -4184,7 +4184,7 @@
 % opaque   & true or false, only relevant for Fly style
 % \end{tabular}
 %    \begin{macrocode}
-\keys_define:nn { hyp / setup }
+\keys_define:nn { hyp }
   {
     pdfpagetransition .code:n =
      {
@@ -4276,7 +4276,7 @@
 %
 % Finally we process the package option list, to get most keys working
 %    \begin{macrocode}
-\keys_set_known:nv{hyp/setup}{opt@hyperref.sty}
+\keys_set_known:nv{ hyp }{opt@hyperref.sty}
 %    \end{macrocode}
 %
 %  Unfinished
