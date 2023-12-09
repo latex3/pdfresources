@@ -18,7 +18,8 @@ Version: 2023-12-09, 0.96d
  
 ### Changed
  - key family in hyperref-generic is now hyp and not hyp/setup
-  
+ - do not use pdfuaid:rev with pdf/UA-1
+   
 ## [2023-11-17]
 Version: 2023-11-17, 0.96c
 
