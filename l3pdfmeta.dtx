@@ -1271,8 +1271,17 @@
     {
      \AddToDocumentProperties [document]{pdfstandard-UA}{{1}{}}
     },
+%    \end{macrocode}
+% currently it is not possible to merge requirements - these need some thoughts as
+% every standard has some common keys like the name or the yes. 
+% We therefore add some requirements manually.
+%    \begin{macrocode}
    _pdfstandard / UA-2 .code:n =
-    {\AddToDocumentProperties [document]{pdfstandard-UA}{{2}{2024}}},    
+    {
+      \AddToDocumentProperties [document]{pdfstandard-UA}{{2}{2024}}
+      \AddToHook{begindocument/before}
+       {\prop_gput:Nnn \g__pdfmeta_standard_prop {Trailer_no_Info}{}}
+    },    
    xmp  .bool_gset:N = \g_@@_xmp_bool
  }
 %    \end{macrocode}
