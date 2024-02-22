@@ -10,6 +10,7 @@ this project uses date-based 'snapshot' version identifiers.
 ### Changed
  - date of UA-2 is now 2024
  - tagpdf-base is now required
+ - xmp metadata use x-default for the main language for better compability with some viewers
 
 ## [2023-12-09]
 Version: 2023-12-09, 0.96d
