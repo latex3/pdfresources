@@ -5,12 +5,13 @@ first release 0.95a, 2021-02-23 will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 this project uses date-based 'snapshot' version identifiers.
 
-## [Unreleased]
+## [2024-02-22]
 
 ### Changed
  - date of UA-2 is now 2024
  - tagpdf-base is now required
  - xmp metadata use x-default for the main language for better compability with some viewers
+ - suppress info dictionary with pdf/ua-2
 
 ## [2023-12-09]
 Version: 2023-12-09, 0.96d
