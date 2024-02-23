@@ -5,8 +5,5 @@ rem l3build save -cconfig-luatex -e\2 \1
 rem l3build save -cconfig-noxetex -e\2 \1
 
 
-l3build save -c config-noxetex pdfa2b-test metadata
-l3build save -c config-luatex structure-destination
-l3build save -c config-dvips catalog-remove metadata-new show
-l3build save -c config-pdftex metadata-ansi structure-destination
-l3build save -c config-xetex structure-destination 
+l3build save -e xetex test-pdfA-4 show metadata-new metadata-new-no-hyperref infodict-new catalog-remove
+l3build save -e luatex test-pdfA-4 show metadata-new metadata-new-no-hyperref infodict-new catalog-remove

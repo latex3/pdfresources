@@ -2,7 +2,7 @@
 %
 %% File: l3pdfmeta.dtx
 %
-% Copyright (C) 2018-2023 The LaTeX Project
+% Copyright (C) 2018-2024 The LaTeX Project
 %
 % It may be distributed and/or modified under the conditions of the
 % LaTeX Project Public License (LPPL), either version 1.3c of this
@@ -49,7 +49,7 @@
 %    }^^A
 % }
 %
-% \date{Version 0.96d, released 2023-12-09}
+% \date{Version 0.96e, released 2024-02-22}
 %
 % \maketitle
 % \begin{documentation}
@@ -618,7 +618,7 @@
 %    \begin{macrocode}
 %<@@=pdfmeta>
 %<*header>
-\ProvidesExplPackage{l3pdfmeta}{2023-12-09}{0.96d}
+\ProvidesExplPackage{l3pdfmeta}{2024-02-22}{0.96e}
   {PDF-Standards---LaTeX PDF management testphase bundle}
 %</header>
 %    \end{macrocode}
@@ -1271,8 +1271,17 @@
     {
      \AddToDocumentProperties [document]{pdfstandard-UA}{{1}{}}
     },
+%    \end{macrocode}
+% currently it is not possible to merge requirements - these need some thoughts as
+% every standard has some common keys like the name or the yes. 
+% We therefore add some requirements manually.
+%    \begin{macrocode}
    _pdfstandard / UA-2 .code:n =
-    {\AddToDocumentProperties [document]{pdfstandard-UA}{{2}{2024}}},    
+    {
+      \AddToDocumentProperties [document]{pdfstandard-UA}{{2}{2024}}
+      \AddToHook{begindocument/before}
+       {\prop_gput:Nnn \g__pdfmeta_standard_prop {Trailer_no_Info}{}}
+    },    
    xmp  .bool_gset:N = \g_@@_xmp_bool
  }
 %    \end{macrocode}
