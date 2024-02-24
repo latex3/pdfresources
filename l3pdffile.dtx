@@ -645,8 +645,9 @@
       }
       {
         \group_begin:
-          \@@_filename_convert_to_print:nN  { #2 } \l_@@_tmpa_str
+          \pdf_string_from_unicode:nnN {utf8/string}{#2}\l_@@_tmpa_str
           \pdfdict_put:nne {l_pdffile/Filespec}{F} { \l_@@_tmpa_str }
+          \@@_filename_convert_to_print:nN  { #2 } \l_@@_tmpa_str          
           \pdfdict_put:nne {l_pdffile/Filespec}{UF}{ \l_@@_tmpa_str }
           \pdf_object_write:nne { #1 } { dict }
             {
@@ -669,8 +670,9 @@
       }
       {
         \group_begin:
-          \@@_filename_convert_to_print:nN  { #1 } \l_@@_tmpa_str
+          \pdf_string_from_unicode:nnN {utf8/string}{#1}\l__pdffile_tmpa_str
           \pdfdict_put:nne {l_pdffile/Filespec}{F} { \l_@@_tmpa_str }
+          \@@_filename_convert_to_print:nN  { #1 } \l_@@_tmpa_str
           \pdfdict_put:nne {l_pdffile/Filespec}{UF}{ \l_@@_tmpa_str }
           \pdf_object_unnamed_write:ne {dict}
             {
