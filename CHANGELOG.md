@@ -8,7 +8,8 @@ this project uses date-based 'snapshot' version identifiers.
 ## [Unreleased]
 
 ### Changed
- - format of /F in filespec: use utf8/string for better compability with zugferd.
+ - format of /F in filespec: use utf8/string for better compability with ZUGFeRD processor.
+ - added /Contents entry to URI and GoTo links for better UA support.
 
 ## [2024-02-22]
 
