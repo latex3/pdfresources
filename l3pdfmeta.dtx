@@ -552,7 +552,12 @@
 % The keys |pdfcopyright| and |pdflicenseurl| work similar as in \pkg{hyperxmp}.
 % But differently to \pkg{hyperxmp} the code doesn't set the |xmpRights:Marked|
 % property, as I have some doubts that one deduce its value simply
-% by checking if the other keys have been used; if needed it should be added manually.
+% by checking if the other keys have been used; if needed it can be added by 
+% using one of these settings (true means with copyright, false means public domain).
+% \begin{verbatim}
+% \AddToDocumentProperties[document]{copyright}{true}
+% \AddToDocumentProperties[document]{copyright}{false}
+% \end{verbatim}
 %
 % \subsection{PDF related data}
 % The PDF producer is for all engines by default built from the engine
@@ -2616,6 +2621,16 @@
       {xmpRights}
       {WebStatement}
       {\GetDocumentProperties{hyperref/pdflicenseurl}}
+    \@@_xmp_add_packet_line:nne
+      {xmpRights}
+      {Marked}
+      {
+       \str_case:en {\GetDocumentProperties{document/copyright}}
+        { 
+          {true}{True}
+          {false}{False}
+        }
+      }      
   }
 %    \end{macrocode}
 % \end{macro}
