@@ -68,8 +68,7 @@
 
 %<@@=pdfmanagement>
 \clist_map_inline:nn 
-  {pgf,transparent,xmp,pdflscape,xcolor,color,
-   beamer,output,colorspace,fontspec,luacolor}
+  {pgf,xmp,xcolor,color,output,colorspace,luacolor}
   {
     \bool_new:c       { g_@@_firstaid_#1_bool }
     \bool_gset_true:c { g_@@_firstaid_#1_bool }
@@ -93,93 +92,6 @@
                 Get~at~least~version~#2.}
 
 %    \end{macrocode}
-% \subsection{Fontspec}
-% When using luaLaTeX opacity is broken (issue \#30) as
-% fontspec/luaotfload doesn't use the pdfmanagement but write to ExtGState directly
-% To repair this some new lua code is needed. It also needs a new fontspec
-% and a change in the color key. 
-%    \begin{macrocode}
-\sys_if_engine_luatex:T
-   {
-     \bool_if:NT \g_@@_firstaid_fontspec_bool
-       {
-         \AddToHook{package/fontspec/after}
-          {
-            \@ifpackagelater{fontspec}{2023-11-05}
-               {\typeout{PDF~Management:~fontspec~firstaid~ignored}}
-               {
-                 \def\c__fontspec_opacity_tl{}
-                 \__fontspec_keys_define_code:nnn {fontspec} {Color}
-                   {
-                     \color_if_exist:nTF {#1}
-                       {
-                         \tl_set:Nn \l__fontspec_hexcol_tl {#1}
-                       }
-                       {
-                         \cs_if_exist:cTF { \token_to_str:N \color@ #1 }
-                           {
-                             \convertcolorspec{named}{#1}{HTML}\l__fontspec_hexcol_tl
-                           }
-                           {
-                             \int_compare:nTF { \tl_count:n {#1} == 6 }
-                               { \tl_set:Nn \l__fontspec_hexcol_tl {#1} }
-                               {
-                                 \int_compare:nTF { \tl_count:n {#1} == 8 }
-                                   { \fontspec_parse_colour:viii #1 }
-                                   {
-                                     \bool_if:NF \l__fontspec_firsttime_bool
-                                       { \__fontspec_warning:nx {bad-colour} {#1} }
-                                   }
-                               }
-                           }
-                       }
-                   }
-%    \end{macrocode}
-% add a comma
-%    \begin{macrocode}
-                 \__fontspec_keys_define_code:nnn {fontspec} {Opacity}
-                  {
-                    \int_set:Nn \l__fontspec_tmp_int {255}
-                    \__fontspec_int_mult_truncate:Nn \l__fontspec_tmp_int { #1 }
-                    \tl_if_eq:NNF \l__fontspec_opacity_tl \c__fontspec_opacity_tl
-                      {
-                        \bool_if:NF \l__fontspec_firsttime_bool
-                        { \__fontspec_warning:nx {opa-twice} {#1} }
-                      }
-                    \tl_set:Nx \l__fontspec_opacity_tl
-                      {
-                      ,
-                        \int_compare:nT { \l__fontspec_tmp_int <= "F } {0} % zero pad
-                        \int_to_hex:n { \l__fontspec_tmp_int }
-                      }
-                  }
-%    \end{macrocode}
-% and a brace
-%    \begin{macrocode}
-                \cs_set:Nn \__fontspec_get_features:n
-                  {
-                    \__fontspec_init_fontface:
-                    \__fontspec_keys_set_known:nxN {fontspec-renderer} {\l__fontspec_fontfeat_clist,#1}
-                      \l__fontspec_keys_leftover_clist
-                    \__fontspec_keys_set_known:nxN {fontspec} {\l__fontspec_keys_leftover_clist} \l__fontspec_keys_leftover_clist
-                    \keys_set:nV {fontspec-opentype} \l__fontspec_keys_leftover_clist
-
-                    \tl_if_empty:NF \l__fontspec_mapping_tl
-                      { \__fontspec_update_featstr:n { mapping = \l__fontspec_mapping_tl } }
-
-                    \str_if_eq:eeF { \l__fontspec_hexcol_tl \l__fontspec_opacity_tl }
-                                     { \c__fontspec_hexcol_tl \c__fontspec_opacity_tl }
-                      { \__fontspec_update_featstr:n { color = {\l__fontspec_hexcol_tl\l__fontspec_opacity_tl } } }
-                  }                                    
-               } 
-      }               
-   }
-  } 
-%    \end{macrocode}
-
-% \subsection{\pkg{beamer}}
-% \pkg{beamer} made use of the now unsupported syntax |linkbordercolor={.5 .5 .5}|.
-% This has been changed so the patch has been removed.
 % 
 % \subsection{\pkg{color}}
 %
@@ -395,38 +307,6 @@
       {Page/Resources/ColorSpace}{\tl_trim_spaces:n{#2}}{[#3]}
   }
 
-%    \end{macrocode}
-% \subsection{\pkg{transparent}}
-% We check if the new version is used and issue a warning otherwise
-%    \begin{macrocode}
-\bool_if:NT \g_@@_firstaid_transparent_bool
- {
-  \AddToHook{package/transparent/after}
-    {
-     \@ifpackagelater{transparent}{2022-10-27}{}
-       {
-         \msg_warning:nnnn{pdfmanagement}{firstaid-too-old}
-         {transparent}
-         {1.5~from~2022-10-27}
-       }
-    }
- }
-%    \end{macrocode}
-% \subsection{\pkg{pdflscape}}
-% We check if the new version is used and issue a warning otherwise
-%    \begin{macrocode}
-\bool_if:NT \g_@@_firstaid_pdflscape_bool
- {
-  \AddToHook{package/pdflscape/after}
-    {
-     \@ifpackagelater{pdflscape}{2022-10-27}{}
-       {
-         \msg_warning:nnnn{pdfmanagement}{firstaid-too-old}
-         {pdflscape}
-         {0.13~from~2022-10-27}
-       }
-    }
- }
 %    \end{macrocode}
 %
 % \subsection{xmp}

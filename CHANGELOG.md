@@ -9,6 +9,9 @@ this project uses date-based 'snapshot' version identifiers.
 ### Added
  - l3pdfmeta.dtx: interface for xmpRights:Marked.
 
+### Changed
+ - removed unneeded firstaids for fontspec, transparent and pdflscape
+ 
 ## [2024-03-01]
 
 ### Changed
