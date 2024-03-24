@@ -1286,6 +1286,15 @@
       \AddToDocumentProperties [document]{pdfstandard-UA}{{2}{2024}}
       \AddToHook{begindocument/before}
        {\prop_gput:Nnn \g__pdfmeta_standard_prop {Trailer_no_Info}{}}
+      \AddToHook{begindocument/before}
+       {
+         \pdfmeta_xmp_add_declaration:ennnn
+           {http://pdfa.org/declarations\c_hash_str
+            wtpdf-reuse1.0}{LaTeX~Project}{2024-02-20}{}{}
+         \pdfmeta_xmp_add_declaration:ennnn
+           {http://pdfa.org/declarations\c_hash_str
+             wtpdf-accessibility1.0}{LaTeX~Project}{2024-02-20}{}{}
+       }        
     },    
    xmp  .bool_gset:N = \g_@@_xmp_bool
  }

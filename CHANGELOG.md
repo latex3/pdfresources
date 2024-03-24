@@ -8,6 +8,7 @@ this project uses date-based 'snapshot' version identifiers.
 ## [Unreleased]
 ### Added
  - l3pdfmeta.dtx: interface for xmpRights:Marked.
+ - l3pdfmeta.dtx: add wtpdf declations if ua-2 is used.
 
 ### Changed
  - removed unneeded firstaids for fontspec, transparent and pdflscape
