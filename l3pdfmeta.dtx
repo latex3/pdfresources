@@ -602,7 +602,9 @@
 % and use the \texttt{e} variant to expand it.
 % \end{function}
 % 
-% \begin{function}{\pdfmeta_xmp_add_declaration:nnnnn,\pdfmeta_xmp_add_declaration:ennnn}
+% \begin{function}{\pdfmeta_xmp_add_declaration:nnnnn,
+%  \pdfmeta_xmp_add_declaration:ennnn,
+%  \pdfmeta_xmp_add_declaration:eeenn}
 % \begin{syntax}
 % \cs{pdfmeta_xmp_add_declaration:nnnnn}\Arg{uri}\Arg{By}\Arg{Date}\Arg{Credentials}\Arg{Report}
 % \end{syntax}
@@ -1288,12 +1290,8 @@
        {\prop_gput:Nnn \g__pdfmeta_standard_prop {Trailer_no_Info}{}}
       \AddToHook{begindocument/before}
        {
-         \pdfmeta_xmp_add_declaration:ennnn
-           {http://pdfa.org/declarations\c_hash_str
-            wtpdf-reuse1.0}{LaTeX~Project}{2024-02-20}{}{}
-         \pdfmeta_xmp_add_declaration:ennnn
-           {http://pdfa.org/declarations\c_hash_str
-             wtpdf-accessibility1.0}{LaTeX~Project}{2024-02-20}{}{}
+         \@@_xmp_wtpdf_accessibility_declaration:
+         \@@_xmp_wtpdf_reuse_declaration:
        }        
     },    
    xmp  .bool_gset:N = \g_@@_xmp_bool
@@ -2893,7 +2891,36 @@
          \l_@@_tmpa_tl
        }        
  }
-\cs_generate_variant:Nn\pdfmeta_xmp_add_declaration:nnnnn {e}
+\cs_generate_variant:Nn\pdfmeta_xmp_add_declaration:nnnnn {e,eee}
+%    \end{macrocode}
+% \end{macro}
+% 
+% \subsection{Default declarations}
+% The two declarations will be required quite often with ua-2, so we
+% provide some interface.
+
+% \begin{macro}{\@@_xmp_wtpdf_reuse_declaration:,\@@_xmp_wtpdf_accessibility_declaration:}
+%    \begin{macrocode}
+\cs_new:Npn \@@_xmp_iso_today:
+  {
+    \c_sys_year_int-
+    \int_compare:nNnT {\c_sys_month_int} < {10}{0} \c_sys_month_int -
+    \int_compare:nNnT {\c_sys_day_int}   < {10}{0} \c_sys_day_int
+  }
+\cs_new_protected:Npn \@@_xmp_wtpdf_reuse_declaration:
+ {
+   \pdfmeta_xmp_add_declaration:eeenn
+      {http://pdfa.org/declarations\c_hash_str wtpdf-reuse1.0}
+      {LaTeX~Project}
+      {\@@_xmp_iso_today:}{}{}
+ }     
+\cs_new_protected:Npn \@@_xmp_wtpdf_accessibility_declaration:
+ {
+   \pdfmeta_xmp_add_declaration:ennnn
+     {http://pdfa.org/declarations\c_hash_str wtpdf-accessibility1.0}
+     {LaTeX~Project}
+     {\@@_xmp_iso_today:}{}{}
+ }    
 %    \end{macrocode}
 % \end{macro}
 % 
