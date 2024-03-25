@@ -3,7 +3,7 @@
 6 0 obj
 <<
 /Type /Metadata /Subtype /XML
-/Length 11559     
+/Length 16352     
 >>
 stream
 <?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?>
@@ -28,7 +28,8 @@ stream
     xmlns:pdfaSchema="http://www.aiim.org/pdfa/ns/schema#"
     xmlns:pdfaProperty="http://www.aiim.org/pdfa/ns/property#"
     xmlns:pdfaType="http://www.aiim.org/pdfa/ns/type#"
-    xmlns:pdfaField="http://www.aiim.org/pdfa/ns/field#">
+    xmlns:pdfaField="http://www.aiim.org/pdfa/ns/field#"
+    xmlns:pdfd="http://pdfa.org/declarations/">
    <pdfaExtension:schemas>
     <rdf:Bag>
      <rdf:li rdf:parseType="Resource">
@@ -196,12 +197,107 @@ stream
        </rdf:Seq>
       </pdfaSchema:property>
      </rdf:li>
+     <rdf:li rdf:parseType="Resource">
+      <pdfaSchema:schema>PDF Declarations Schema</pdfaSchema:schema>
+      <pdfaSchema:prefix>pdfd</pdfaSchema:prefix>
+      <pdfaSchema:namespaceURI>http://pdfa.org/declarations/</pdfaSchema:namespaceURI>
+      <pdfaSchema:property>
+       <rdf:Seq>
+        <rdf:li rdf:parseType="Resource">
+         <pdfaProperty:name>declarations</pdfaProperty:name>
+         <pdfaProperty:valueType>Bag declaration</pdfaProperty:valueType>
+         <pdfaProperty:category>external</pdfaProperty:category>
+         <pdfaProperty:description>An unordered array of PDF Declaration entries, where each PDF Declaration representing a statement of conformance with an identified external standard or profile, along with optional information identifying the nature of the claim.</pdfaProperty:description>
+        </rdf:li>
+       </rdf:Seq>
+      </pdfaSchema:property>
+      <pdfaSchema:valueType>
+       <rdf:Seq>
+        <rdf:li rdf:parseType="Resource">
+         <pdfaType:type>claim</pdfaType:type>
+         <pdfaType:namespaceURI>http://pdfa.org/declarations/</pdfaType:namespaceURI>
+         <pdfaType:prefix>pdfd</pdfaType:prefix>
+         <pdfaType:description>A structure describing properties of an individualclaim.</pdfaType:description>
+         <pdfaType:field>
+          <rdf:Seq>
+           <rdf:li rdf:parseType="Resource">
+            <pdfaField:name>claimReport</pdfaField:name>
+            <pdfaField:valueType>Text</pdfaField:valueType>
+            <pdfaField:description>A URL to a report containing details of the specific conformance claim.</pdfaField:description>
+           </rdf:li>
+           <rdf:li rdf:parseType="Resource">
+            <pdfaField:name>claimCredentials</pdfaField:name>
+            <pdfaField:valueType>Text</pdfaField:valueType>
+            <pdfaField:description>The claimant's credentials.</pdfaField:description>
+           </rdf:li>
+           <rdf:li rdf:parseType="Resource">
+            <pdfaField:name>claimDate</pdfaField:name>
+            <pdfaField:valueType>Text</pdfaField:valueType>
+            <pdfaField:description>A date identifying when the claim was made.</pdfaField:description>
+           </rdf:li>
+           <rdf:li rdf:parseType="Resource">
+            <pdfaField:name>claimBy</pdfaField:name>
+            <pdfaField:valueType>Text</pdfaField:valueType>
+            <pdfaField:description>The name of the organization and/or individual and/or software making the claim.</pdfaField:description>
+           </rdf:li>
+          </rdf:Seq>
+         </pdfaType:field>
+        </rdf:li>
+        <rdf:li rdf:parseType="Resource">
+         <pdfaType:type>declaration</pdfaType:type>
+         <pdfaType:namespaceURI>http://pdfa.org/declarations/</pdfaType:namespaceURI>
+         <pdfaType:prefix>pdfd</pdfaType:prefix>
+         <pdfaType:description>A structure describing a single PDF Declaration asserting conformance with an externally-identified standard or profile.</pdfaType:description>
+         <pdfaType:field>
+          <rdf:Seq>
+           <rdf:li rdf:parseType="Resource">
+            <pdfaField:name>conformsTo</pdfaField:name>
+            <pdfaField:valueType>Text</pdfaField:valueType>
+            <pdfaField:description>A property containing a URI specifying the standard or profile by the PDF Declaration. This property is intended to mirror the Dublin Core property dc:conformsTo.</pdfaField:description>
+           </rdf:li>
+           <rdf:li rdf:parseType="Resource">
+            <pdfaField:name>claimData</pdfaField:name>
+            <pdfaField:valueType>Bag claim</pdfaField:valueType>
+            <pdfaField:description>An unordered array of claim data, where each claim identifies the nature of the claim.</pdfaField:description>
+           </rdf:li>
+          </rdf:Seq>
+         </pdfaType:field>
+        </rdf:li>
+       </rdf:Seq>
+      </pdfaSchema:valueType>
+     </rdf:li>
     </rdf:Bag>
    </pdfaExtension:schemas>
    <pdf:Producer>pdftex-NN.NN.NN</pdf:Producer>
    <pdf:PDFVersion>2.0</pdf:PDFVersion>
    <pdfuaid:part>2</pdfuaid:part>
    <pdfuaid:rev>2024</pdfuaid:rev>
+   <pdfd:declarations>
+    <rdf:Bag>
+     <rdf:li rdf:parseType="Resource">
+      <pdfd:conformsTo>http://pdfa.org/declarations#wtpdf-accessibility1.0</pdfd:conformsTo>
+      <pdfd:claimData>
+       <rdf:Bag>
+        <rdf:li rdf:parseType="Resource">
+         <pdfd:claimBy>LaTeX Project</pdfd:claimBy>
+         <pdfd:claimDate>2016-05-20</pdfd:claimDate>
+        </rdf:li>
+       </rdf:Bag>
+      </pdfd:claimData>
+     </rdf:li>
+     <rdf:li rdf:parseType="Resource">
+      <pdfd:conformsTo>http://pdfa.org/declarations#wtpdf-reuse1.0</pdfd:conformsTo>
+      <pdfd:claimData>
+       <rdf:Bag>
+        <rdf:li rdf:parseType="Resource">
+         <pdfd:claimBy>LaTeX Project</pdfd:claimBy>
+         <pdfd:claimDate>2016-05-20</pdfd:claimDate>
+        </rdf:li>
+       </rdf:Bag>
+      </pdfd:claimData>
+     </rdf:li>
+    </rdf:Bag>
+   </pdfd:declarations>
    <dc:title>
     <rdf:Alt>
      <rdf:li xml:lang="x-default">default title</rdf:li>
@@ -468,29 +564,29 @@ endobj
 xref
 0 20
 0000000002 65535 f 
-0000012094 00000 n 
+0000016887 00000 n 
 0000000003 00000 f 
 0000000004 00000 f 
 0000000000 00000 f 
-0000011810 00000 n 
+0000016603 00000 n 
 0000000015 00000 n 
-0000012031 00000 n 
-0000011662 00000 n 
-0000011915 00000 n 
-0000011972 00000 n 
-0000023261 00000 n 
-0000023418 00000 n 
-0000012141 00000 n 
-0000012414 00000 n 
-0000021257 00000 n 
-0000021478 00000 n 
-0000023476 00000 n 
-0000023572 00000 n 
-0000023608 00000 n 
+0000016824 00000 n 
+0000016455 00000 n 
+0000016708 00000 n 
+0000016765 00000 n 
+0000028054 00000 n 
+0000028211 00000 n 
+0000016934 00000 n 
+0000017207 00000 n 
+0000026050 00000 n 
+0000026271 00000 n 
+0000028269 00000 n 
+0000028365 00000 n 
+0000028401 00000 n 
 trailer
 << /Size 20
 /Root 19 0 R
 /ID [<9BD18DF3359C1216B83ADB4AA401CC9A> <9BD18DF3359C1216B83ADB4AA401CC9A>] >>
 startxref
-23780
+28573
 %%EOF
