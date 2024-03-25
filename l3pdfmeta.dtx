@@ -1294,8 +1294,35 @@
          \@@_xmp_wtpdf_reuse_declaration:
        }        
     },    
-   xmp  .bool_gset:N = \g_@@_xmp_bool
+   xmp  .choice:,
+   xmp / true  .code:n = { \bool_gset_true:N \g_@@_xmp_bool },
+   xmp / false .code:n = { \bool_gset_false:N \g_@@_xmp_bool},
+   xmp .default:n = true,
+%    \end{macrocode}
+% These keys allow to disable or force the wtpdf declarations. 
+% Currently the content can not be changed and once they have been disabled there
+% are gone. This will perhaps change.
+%    \begin{macrocode}
+   xmp / wtpdf .code:n = 
+    {
+      \keys_set:nn {@@/xmp}{#1}
+    },
  }
+\keys_define:nn {@@/xmp}
+ {
+   reuse .choice:,
+   reuse / true .code:n = \@@_xmp_wtpdf_reuse_declaration:,
+   reuse / false .code:n =
+    {
+      \cs_set_eq:NN \@@_xmp_wtpdf_reuse_declaration: \prg_do_nothing:
+    },
+   accessibility .choice:, 
+   accessibility / true .code:n = \@@_xmp_wtpdf_accessibility_declaration:, 
+   accessibility /false .code:n = 
+    {
+      \cs_set_eq:NN \@@_xmp_wtpdf_accessibility_declaration: \prg_do_nothing:
+    },  
+  } 
 %    \end{macrocode}
 % XMP debugging option
 %    \begin{macrocode}
@@ -2903,9 +2930,9 @@
 %    \begin{macrocode}
 \cs_new:Npn \@@_xmp_iso_today:
   {
-    \c_sys_year_int-
-    \int_compare:nNnT {\c_sys_month_int} < {10}{0} \c_sys_month_int -
-    \int_compare:nNnT {\c_sys_day_int}   < {10}{0} \c_sys_day_int
+    \int_use:N\c_sys_year_int-
+    \int_compare:nNnT {\c_sys_month_int} < {10}{0} \int_use:N\c_sys_month_int -
+    \int_compare:nNnT {\c_sys_day_int}   < {10}{0} \int_use:N\c_sys_day_int
   }
 \cs_new_protected:Npn \@@_xmp_wtpdf_reuse_declaration:
  {
