@@ -5,7 +5,9 @@ first release 0.95a, 2021-02-23 will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 this project uses date-based 'snapshot' version identifiers.
 
-## [Unreleased]
+## [2024-03-26]
+Version: 2024-03-26, 0.96g
+
 ### Added
  - l3pdfmeta.dtx: interface for xmpRights:Marked.
  - l3pdfmeta.dtx: add wtpdf declations if ua-2 is used.
@@ -14,12 +16,14 @@ this project uses date-based 'snapshot' version identifiers.
  - removed unneeded firstaids for fontspec, transparent and pdflscape
  
 ## [2024-03-01]
+Version: 2024-03-01, 0.96f
 
 ### Changed
  - format of /F in filespec: use utf8/string for better compability with ZUGFeRD processor.
  - added /Contents entry to URI and GoTo links for better UA support.
 
 ## [2024-02-22]
+Version: 2024-02-22, 0.96e
 
 ### Changed
  - date of UA-2 is now 2024
