@@ -671,7 +671,7 @@
           {
             ltx.@@.object["@@/Page/Resources/#1"]
             =
-            "\@@_backend_object_ref:n{@@/Page/Resources/#1}"
+            "\pdf_object_ref:n{@@/Page/Resources/#1}"
           }
       }
    }
@@ -751,7 +751,7 @@
    %objects are not filled with \pdf_object_write as this is not additive!
     \@@_backend:e
       {
-        put~\@@_backend_object_ref:n {@@/Page/Resources/#1}<</#2~#3>>
+        put~\pdf_object_ref:n {@@/Page/Resources/#1}<</#2~#3>>
       }
   }
 
@@ -830,7 +830,7 @@
   
 \cs_set_protected:Npn \@@_backend_bdcobject:nn #1 #2 % #1 eg. Span, #2: object name
   {
-    \@@_backend_pdfmark:e{/#1~\@@_backend_object_ref:n{#2}~/BDC}
+    \@@_backend_pdfmark:e{/#1~\pdf_object_ref:n{#2}~/BDC}
   }
 \cs_set_protected:Npn \@@_backend_bdcobject:n #1  % #1 eg. Span,
   {
@@ -890,7 +890,7 @@
              /Properties~
                <<
                  /l3pdf\int_use:N\g_@@_backend_name_int\c_space_tl
-                 \@@_backend_object_ref:n { #2 }
+                 \pdf_object_ref:n { #2 }
                >>
            >>
        }
@@ -962,7 +962,7 @@
             \__kernel_backend_literal:e
               {
                 pdf:put~@resources~
-                  <</##1~\@@_backend_object_ref:n {@@/Page/Resources/##1}>>
+                  <</##1~\pdf_object_ref:n {@@/Page/Resources/##1}>>
               }
           }
       }
@@ -980,7 +980,7 @@
         \pdfdict_gput:nee
           { g_@@_Core/Xform/Resources/Properties }
           { l3pdf\int_use:N\g_@@_backend_name_int }
-          { \@@_backend_object_ref:n { #2 } }
+          { \pdf_object_ref:n { #2 } }
       }
       {
         \exp_args:Ne \tex_latelua:D
@@ -989,7 +989,7 @@
               (
                 tex.count["g_shipout_readonly_int"],
                 "l3pdf\int_use:N\g_@@_backend_name_int",
-                "\@@_backend_object_ref:n { #2 }"
+                "\pdf_object_ref:n { #2 }"
               )
           }
       }
@@ -1071,7 +1071,7 @@
         \pdfdict_gput:nee %no handler needed
           { g_@@_Core/Xform/Resources/Properties }
           { l3pdf\int_use:N\g_@@_backend_resourceid_int }
-          { \@@_backend_object_ref:n { #2 } }
+          { \pdf_object_ref:n { #2 } }
       }
       {
         \@@_backend_record_abspage:e {l3pdf\int_use:N\g_@@_backend_resourceid_int}
@@ -1086,7 +1086,7 @@
         \pdfdict_gput:nee
           { g_@@_Core/backend_Page\l_@@_tmpa_tl/Resources/Properties }
           { l3pdf\int_use:N\g_@@_backend_resourceid_int }
-          { \@@_backend_object_ref:n{#2} }
+          { \pdf_object_ref:n{#2} }
       }
   }
 \cs_set_protected:Npn \@@_backend_bdcobject:n #1% #1 eg. Span
