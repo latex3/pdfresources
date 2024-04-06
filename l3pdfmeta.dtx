@@ -1187,14 +1187,20 @@
   {
     \pdfmeta_standard_verify:nTF {outputintent_A}
       {
-         \prop_map_inline:Nn \g_@@_outputintents_prop
-           {
-             \@@_embed_colorprofile:n
-               {#2}
-             \@@_write_outputintent:nn
-               {#2}
-               {#1}
+        \prop_if_exist:cTF {c_@@_colorprofile_#2}
+          {  
+            \prop_map_inline:Nn \g_@@_outputintents_prop
+              {
+                \@@_embed_colorprofile:n
+                 {#2}
+                \@@_write_outputintent:nn
+                 {#2}
+                 {#1}
+              }   
            }
+          {
+            \typeout{colorprofile~#2~unknown}
+          }  
       }
 %    \end{macrocode}
 % If an output intent is required for pdf/A we need to ensure, that the key of
@@ -1218,14 +1224,20 @@
            \g_@@_outputintents_prop
            { \pdfmeta_standard_item:n { outputintent_A } }
            \l_@@_tmpb_tl
-         \exp_args:NV \@@_embed_colorprofile:n \l_@@_tmpb_tl
-         \prop_map_inline:Nn \g_@@_outputintents_prop
-           {
-             \exp_args:NV
-             \@@_write_outputintent:nn
-               \l_@@_tmpb_tl
-               { #1 }
-           }
+         \prop_if_exist:cTF {c_@@_colorprofile_\l_@@_tmpb_tl}
+          {                  
+            \exp_args:NV \@@_embed_colorprofile:n \l_@@_tmpb_tl
+            \prop_map_inline:Nn \g_@@_outputintents_prop
+              {
+                \exp_args:NV
+                 \@@_write_outputintent:nn
+                   \l_@@_tmpb_tl
+                   { #1 }
+              }
+          }
+          {
+            \typeout{colorprofile~\l_@@_tmpb_tl\c_space_tl unknown}
+          }    
        }
    }
 %    \end{macrocode}
