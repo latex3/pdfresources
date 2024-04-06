@@ -1187,20 +1187,20 @@
   {
     \pdfmeta_standard_verify:nTF {outputintent_A}
       {
-        \prop_if_exist:cTF {c_@@_colorprofile_#2}
-          {  
-            \prop_map_inline:Nn \g_@@_outputintents_prop
-              {
-                \@@_embed_colorprofile:n
-                 {#2}
-                \@@_write_outputintent:nn
-                 {#2}
-                 {#1}
-              }   
+        \prop_map_inline:Nn \g_@@_outputintents_prop
+           {
+             \prop_if_exist:cTF {c_@@_colorprofile_#2}
+               {  
+                 \@@_embed_colorprofile:n
+                  {#2}
+                 \@@_write_outputintent:nn
+                  {#2}
+                  {#1}
+               } 
+               {
+                \msg_warning:nnn{pdfmeta}{colorprofile-undefined}{#2}
+               }  
            }
-          {
-            \msg_warning:nnn{pdfmeta}{colorprofile-undefined}{#2}
-          }  
       }
 %    \end{macrocode}
 % If an output intent is required for pdf/A we need to ensure, that the key of
