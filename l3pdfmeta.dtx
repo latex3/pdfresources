@@ -1199,7 +1199,7 @@
               }   
            }
           {
-            \typeout{colorprofile~#2~unknown}
+            \msg_warning:nnn{pdfmeta}{colorprofile-undefined}{#2}
           }  
       }
 %    \end{macrocode}
@@ -1236,7 +1236,7 @@
               }
           }
           {
-            \typeout{colorprofile~\l_@@_tmpb_tl\c_space_tl unknown}
+            \msg_warning:nne{pdfmeta}{colorprofile-undefined}{\l_@@_tmpb_tl}
           }    
        }
    }
@@ -1364,6 +1364,7 @@
 % \subsection{Messages}
 %    \begin{macrocode}
 \msg_new:nnn{pdfmeta}{namespace-defined}{The~xmlns~namespace~`#1`~is~already~declared}
+\msg_new:nnn{pdfmeta}{colorprofile-undefined}{The~colorprofile~`#1`~is~unknown}
 %    \end{macrocode}
 % \subsection{Some helper commands}
 % \subsubsection{Generate a BOM}
