@@ -7,9 +7,8 @@
 \ExplSyntaxOff
 \DocumentMetadata
  {
-   pdfversion=2.0, %not so good with pdftex ...
-   testphase=tagpdf,
-   testphase=new-or-1
+   pdfversion=2.0, 
+   testphase=phase-II,
  }
 \input{regression-test}
 \documentclass{article}
@@ -17,10 +16,7 @@
 \stockwidth    = 210mm
 
 \usepackage{hyperref}
-\ExplSyntaxOn
-\tl_set:Nn \l_pdf_current_structure_destination_tl { __tag/struct/\g__tag_struct_stack_current_tl }
-\pdf_activate_structure_destination:
-\ExplSyntaxOff
+
 \begin{document}
 some text
 
