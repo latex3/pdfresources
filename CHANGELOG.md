@@ -13,7 +13,8 @@ this project uses date-based 'snapshot' version identifiers.
 ### Changed 
  - use \pdf_object_ref:n instead of backend command as preparation of l3kernel changes
    regarding object storing.
-
+ - support for structure destination if indexed objects are used
+   
 ## [2024-03-26]
 Version: 2024-03-26, 0.96g
 

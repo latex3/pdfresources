@@ -1757,14 +1757,22 @@
 % that if structure destinations are used, they should be used always. So we define
 % alternative commands which can be activated by mapping them to the standard backend commands.
 %
+% The needed code differ depending on if structure objects use standard or indexed object names.
+% At the end we will probably always use indexed objects, but for now we offer
+% both options.
+%  
 % \begin{macro}{\l_pdf_current_structure_destination_tl}
 %
-% This commands holds the name of the structure object to use in the next command
+% This command holds the name of the structure object to use in the following commands
 % which creates a destination. The code which activates structure destinations
 % must also ensure that it has a sensible, expandable content. \pkg{tagpdf} for example
 % will define it as
 % \begin{verbatim}
 % \tl_set:Nn \l_pdf_current_structure_destination_tl { __tag/struct/\g__tag_struct_stack_current_tl }
+% \end{verbatim} 
+% or if indexed structure object names are used
+% \begin{verbatim}
+% \tl_set:Nn \l_pdf_current_structure_destination_tl { {__tag/struct}{\g__tag_struct_stack_current_tl} }
 % \end{verbatim}
 %    \begin{macrocode}
 %<*drivers>
@@ -1778,19 +1786,28 @@
 % \__pdf_backend_destination:nn       -> \__pdf_backend_structure_destination:nn
 % \__pdf_backend_destination:nnnn -> \__pdf_backend_structure_destination:nnnn
 % \__pdf_backend_link_begin_goto:nnw  -> \__pdf_backend_link_begin_structure_goto:nnw
+% \__pdf_backend_destination:nn       -> \__pdf_backend_indexed_structure_destination:nn
+% \__pdf_backend_destination:nnnn -> \__pdf_backend_indexed_structure_destination:nnnn
+% \__pdf_backend_link_begin_goto:nnw  -> \__pdf_backend_indexed_link_begin_structure_goto:nnw 
 % \end{verbatim}
 %
 % Activating means mapping them onto the original commands. Be aware that not
 % all engines and compilation routes support structure destinations, for them
 % the command will be a no-op.
 %
-% \begin{macro}{\pdf_activate_structure_destination:}
+% \begin{macro}{\pdf_activate_structure_destination:,\pdf_activate_indexed_structure_destination:}
 %    \begin{macrocode}
 %<*drivers>
 \cs_new_protected:Npn \pdf_activate_structure_destination:
  {
-   \cs_gset_eq:NN \@@_backend_destination:nn \@@_backend_structure_destination:nn
-   \cs_gset_eq:NN \@@_backend_destination:nnnn \@@_backend_structure_destination:nnnn
+   \cs_gset_eq:NN \@@_backend_destination:nn       \@@_backend_structure_destination:nn
+   \cs_gset_eq:NN \@@_backend_destination:nnnn     \@@_backend_structure_destination:nnnn
+   \cs_gset_eq:NN \@@_backend_link_begin_goto:nnw  \@@_backend_link_begin_structure_goto:nnw
+ }
+\cs_new_protected:Npn \pdf_activate_indexed_structure_destination:
+ {
+   \cs_gset_eq:NN \@@_backend_destination:nn       \@@_backend_indexed_structure_destination:nn
+   \cs_gset_eq:NN \@@_backend_destination:nnnn     \@@_backend_indexed_structure_destination:nnnn
    \cs_gset_eq:NN \@@_backend_link_begin_goto:nnw  \@@_backend_link_begin_structure_goto:nnw
  }
 %</drivers>
@@ -1804,13 +1821,17 @@
 %    \begin{macrocode}
 %<*drivers>
 \cs_set_eq:NN \@@_backend_structure_destination:nn       \@@_backend_destination:nn
-\cs_set_eq:NN \@@_backend_structure_destination:nnnn \@@_backend_destination:nnnn
+\cs_set_eq:NN \@@_backend_structure_destination:nnnn     \@@_backend_destination:nnnn
 \cs_set_eq:NN \@@_backend_link_begin_structure_goto:nnw  \@@_backend_link_begin_goto:nnw
+\cs_set_eq:NN \@@_backend_indexed_structure_destination:nn       \@@_backend_destination:nn
+\cs_set_eq:NN \@@_backend_indexed_structure_destination:nnnn     \@@_backend_destination:nnnn
 %</drivers>
 %    \end{macrocode}
-% \begin{macro}{\@@_backend_structure_destination:nn}
-% This command is the backend command to create a destination.
-% It should in parallel create also a structure destination.
+% \begin{macro}{\@@_backend_structure_destination:nn,
+%  \@@_backend_structure_destination:nnnn,
+%  \@@_backend_link_begin_structure_goto:nnw}
+% These commands are the backend commands to create a destination.
+% which create also a structure destination.
 % At first xetex/dvipdfmx.
 % The structure destination is an array, so we use obj for it
 % so that we can reference it:
@@ -1935,7 +1956,6 @@
   }
 %</xdvipdfmx|dvipdfmx>
 %    \end{macrocode}
-% \end{macro}
 % Now pdftex. We only redefine for version 1.40 revision 24 or later.
 %    \begin{macrocode}
 %<*pdftex>
@@ -2082,6 +2102,252 @@
   }
 %</luatex>
 %    \end{macrocode}
+% \end{macro}
+
+% \begin{macro}{\@@_backend_indexed_structure_destination:nn,
+% \@@_backend_indexed_structure_destination:nnnn}
+% This are the indexed variants of the commands to create a destination
+% and a structure destination.
+% At first xetex/dvipdfmx.
+% The structure destination is an array, so we use obj for it
+% so that we can reference it:
+%    \begin{macrocode}
+%<*xdvipdfmx|dvipdfmx>
+\cs_set_protected:Npn \@@_backend_indexed_structure_destination:nn #1#2
+  {
+    \@@_backend:e
+      {
+        dest ~ ( \exp_not:n {#1} )
+        [
+          @thispage
+          \str_case:nnF {#2}
+            {
+              { xyz }   { /XYZ ~ @xpos ~ @ypos ~ null }
+              { fit }   { /Fit }
+              { fitb }  { /FitB }
+              { fitbh } { /FitBH }
+              { fitbv } { /FitBV ~ @xpos }
+              { fith }  { /FitH ~ @ypos }
+              { fitv }  { /FitV ~ @xpos }
+              { fitr }  { /Fit }
+            }
+            { /XYZ ~ @xpos ~ @ypos ~ \fp_eval:n { (#2) / 100 } }
+        ]
+      }
+%    \end{macrocode}
+% We do not test anymore if the structure object exist. The object of the structure destination
+% gets the name \texttt{@pdf.Sdest.\meta{destname}}, where \meta{destname} is the
+% name of the standard destination so that we can reference it in the GoTo links.
+%    \begin{macrocode}
+        \@@_backend:e
+         {
+          obj ~ @pdf.SDest.\exp_not:n{#1}
+          [
+            \exp_after:wN \pdf_object_ref_indexed:nn  \l_pdf_current_structure_destination_tl 
+            \str_case:nnF {#2}
+              {
+                { xyz }   { /XYZ ~ @xpos ~ @ypos ~ null }
+                { fit }   { /Fit }
+                { fitb }  { /FitB }
+                { fitbh } { /FitBH }
+                { fitbv } { /FitBV ~ @xpos }
+                { fith }  { /FitH ~ @ypos }
+                { fitv }  { /FitV ~ @xpos }
+                { fitr }  { /Fit }
+              }
+              { /XYZ ~ @xpos ~ @ypos ~ \fp_eval:n { (#2) / 100 } }
+          ]
+        }     
+  }
+%    \end{macrocode}
+% The second destination command is for the boxed destination. Here we need to define
+% an new auxiliary command:
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_backend_indexed_structure_destination_aux:nnnn #1#2#3#4
+  {
+    \vbox_to_zero:n
+      {
+        \__kernel_kern:n {#4}
+        \hbox:n
+          {
+            \@@_backend:n { obj ~ @pdf_ #2 _llx ~ @xpos }
+            \@@_backend:n { obj ~ @pdf_ #2 _lly ~ @ypos }
+          }
+        \tex_vss:D
+      }
+    \__kernel_kern:n {#1}
+    \vbox_to_zero:n
+      {
+        \__kernel_kern:n { -#3 }
+        \hbox:n
+          {
+            \@@_backend:n
+              {
+                dest ~ (#2)
+                [
+                  @thispage
+                  /FitR ~
+                    @pdf_ #2 _llx ~ @pdf_ #2 _lly ~
+                    @xpos ~ @ypos
+                ]
+              }
+%    \end{macrocode}
+% Here we add the structure destination to the same box
+%    \begin{macrocode}
+             \@@_backend:e
+               {
+                 obj ~ @pdf.SDest.\exp_not:n{#2}
+                 [
+                   \exp_after:wN \pdf_object_ref_indexed:nn  \l_pdf_current_structure_destination_tl             
+                   /FitR ~
+                     @pdf_ #2 _llx ~ @pdf_ #2 _lly ~
+                     @xpos ~ @ypos
+                 ]
+               }
+          }
+        \tex_vss:D
+      }
+    \__kernel_kern:n { -#1 }
+  }
+%    \end{macrocode}
+% And now we redefine the destination command:
+%    \begin{macrocode}
+\cs_set_protected:Npn \@@_backend_indexed_structure_destination:nnnn #1#2#3#4
+  {
+    \exp_args:Ne \@@_backend_indexed_structure_destination_aux:nnnn
+      { \dim_eval:n {#2} } {#1} {#3} {#4}
+  }
+%    \end{macrocode}
+%</xdvipdfmx|dvipdfmx>
+%    \end{macrocode}
+% Now pdftex. We only redefine for version 1.40 revision 24 or later.
+%    \begin{macrocode}
+%<*pdftex>
+\bool_lazy_and:nnT
+  { \int_compare_p:nNn {\tex_pdftexversion:D } > {139} }
+  { \int_compare_p:nNn {\tex_pdftexrevision:D } > {23} }
+  {
+    \cs_set_protected:Npn \@@_backend_indexed_structure_destination:nn #1#2
+      {
+        \tex_pdfdest:D
+           name {#1}
+           \str_case:nnF {#2}
+             {
+               { xyz }   { xyz }
+               { fit }   { fit }
+               { fitb }  { fitb }
+               { fitbh } { fitbh }
+               { fitbv } { fitbv }
+               { fith }  { fith }
+               { fitv }  { fitv }
+               { fitr }  { fitr }
+             }
+             { xyz ~ zoom \fp_eval:n { #2 * 10 } }
+           \scan_stop:
+            \tex_pdfdest:D
+               struct~
+               \exp_after:wN \__kernel_pdf_object_id_indexed:nn \l_pdf_current_structure_destination_tl ~
+               name {#1}
+               \str_case:nnF {#2}
+                 {
+                   { xyz }   { xyz }
+                   { fit }   { fit }
+                   { fitb }  { fitb }
+                   { fitbh } { fitbh }
+                   { fitbv } { fitbv }
+                   { fith }  { fith }
+                   { fitv }  { fitv }
+                   { fitr }  { fitr }
+                 }
+                 { xyz ~ zoom \fp_eval:n { #2 * 10 } }
+               \scan_stop:          
+      }
+    \cs_set_protected:Npn \@@_backend_indexed_structure_destination:nnnn #1#2#3#4
+      {
+       \tex_pdfdest:D
+        name {#1}
+        fitr ~
+        width  \dim_eval:n {#2} ~
+        height \dim_eval:n {#3} ~
+        depth  \dim_eval:n {#4} \scan_stop:
+       \tex_pdfdest:D
+         struct~
+         \exp_after:wN \__kernel_pdf_object_id_indexed:nn \l_pdf_current_structure_destination_tl ~
+         name {#1}
+         fitr ~
+         width  \dim_eval:n {#2} ~
+         height \dim_eval:n {#3} ~
+         depth  \dim_eval:n {#4} \scan_stop:
+     }
+  }
+%</pdftex>
+%    \end{macrocode}
+% luatex is quite similar to pdftex. Mostly the test for the version is different
+%    \begin{macrocode}
+%<*luatex>
+ \int_compare:nNnT {\directlua{tex.print(status.list()["development_id"])} } > {7468}
+  {
+    \cs_set_protected:Npn \@@_backend_indexed_structure_destination:nn #1#2
+      {
+        \tex_pdfextension:D dest
+           name {#1}
+           \str_case:nnF {#2}
+             {
+               { xyz }   { xyz }
+               { fit }   { fit }
+               { fitb }  { fitb }
+               { fitbh } { fitbh }
+               { fitbv } { fitbv }
+               { fith }  { fith }
+               { fitv }  { fitv }
+               { fitr }  { fitr }
+             }
+             { xyz ~ zoom \fp_eval:n { #2 * 10 } }
+           \scan_stop:
+         \tex_pdfextension:D dest
+            struct~
+             \exp_after:wN \__kernel_pdf_object_id_indexed:nn \l_pdf_current_structure_destination_tl ~
+            name {#1}
+            \str_case:nnF {#2}
+              {
+                { xyz }   { xyz }
+                { fit }   { fit }
+                { fitb }  { fitb }
+                { fitbh } { fitbh }
+                { fitbv } { fitbv }
+                { fith }  { fith }
+                { fitv }  { fitv }
+                { fitr }  { fitr }
+              }
+              { xyz ~ zoom \fp_eval:n { #2 * 10 } }
+            \scan_stop:       
+      }
+    \cs_set_protected:Npn \@@_backend_indexed_structure_destination:nnnn #1#2#3#4
+      {
+       \tex_pdfextension:D dest
+        name {#1}
+        fitr ~
+        width  \dim_eval:n {#2} ~
+        height \dim_eval:n {#3} ~
+        depth  \dim_eval:n {#4} \scan_stop:
+       \tex_pdfextension:D dest
+         struct~
+         \exp_after:wN \__kernel_pdf_object_id_indexed:nn \l_pdf_current_structure_destination_tl~
+         name {#1}
+         fitr ~
+         width  \dim_eval:n {#2} ~
+         height \dim_eval:n {#3} ~
+         depth  \dim_eval:n {#4} \scan_stop:
+     }
+    \cs_set_protected:Npn \@@_backend_link_begin_structure_goto:nnw #1#2
+      {
+        \@@_backend_link_begin:nnnw {#1} { goto~struct~name~{#2}~name } {#2}
+      }
+  }
+%</luatex>
+%    \end{macrocode}
+% \end{macro}
+
 % \subsection{Settings for regression tests}
 % When doing pdf based regression tests some meta data in the pdf should have
 % fixed values to get identical pdf's. We define here the backend dependant
