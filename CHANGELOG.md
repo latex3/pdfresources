@@ -14,6 +14,9 @@ this project uses date-based 'snapshot' version identifiers.
  - use \pdf_object_ref:n instead of backend command as preparation of l3kernel changes
    regarding object storing.
  - support for structure destination if indexed objects are used
+ 
+### Added 
+ - force EmbeddedFiles name tree with standard A-4F
    
 ## [2024-03-26]
 Version: 2024-03-26, 0.96g

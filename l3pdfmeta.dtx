@@ -190,6 +190,8 @@
 %  a test for at least the PDF-format will be added in future.
 % \item[|Catalog_no_OCProperties|] don't add |/OCProperties| to the catalog
 % {\em l3pdfmeta removes this entry at the end of the document}
+% \item[|Catalog_EmbeddedFiles|] ensure that an |EmbeddedFiles| name tree is
+% in the catalog. This is required for PDF/A-4f.
 % \item[|annot_widget_no_AA|] (rule 6.6.2-1)
 %  no AA dictionary in widget annotation,
 %  this will e.g. be checked by the new hyperref driver.
@@ -1013,9 +1015,48 @@
   { g_@@_standard_pdf/A-4_prop }{conformance}
 \prop_gremove:cn
   { g_@@_standard_pdf/A-4_prop }{max_pdf_version}
+  
+%A-4f ==============
+\prop_new:c { g_@@_standard_pdf/A-4F_prop }
+\prop_gset_eq:cc
+  { g_@@_standard_pdf/A-4F_prop }
+  { g_@@_standard_pdf/A-4_prop }
+\prop_gput:cnn
+  { g_@@_standard_pdf/A-4F_prop }{conformance}{F}
+% containsEmbeddedFiles == true ISO 19005-4:2020, Clause: 6.9, Test number: 5 
+\prop_gput:cnn
+  { g_@@_standard_pdf/A-4F_prop }{Catalog_EmbeddedFiles}{}  
 %    \end{macrocode}
 % \end{variable}
 %
+% \subsubsection{Embedded Files}
+% Standard 4-AF is needed if we add AF files for 
+% tagging but it also requires an EmbeddedFiles name tree, 
+% so we test at the end if the name tree is empty and add a small readme if
+% yes
+%    \begin{macrocode}
+\AddToHook{begindocument/end}
+{
+  \pdfmeta_standard_verify:nF{Catalog_EmbeddedFiles}
+   {
+    \tl_gput_right:Nn\g__kernel_pdfmanagement_end_run_code_tl
+     { 
+       \bool_if:NT \g__pdfmanagement_active_bool
+        {
+         \pdfdict_if_empty:nT { g__pdf_Core/Catalog/Names/EmbeddedFiles }
+          {
+            \group_begin: 
+            \pdfdict_put:nne {l_pdffile/Filespec} {Desc}{(note~about~PDF/A-4F)}
+            \pdfdict_put:nnn { l_pdffile/Filespec }{AFRelationship} { /Unspecified }
+            \pdffile_embed_stream:nnN {PDF~standard~A-4F~requires~a~file}{readme.txt}\l_@@_tmpa_tl
+            \exp_args:Nne \__pdf_backend_Names_gpush:nn{EmbeddedFiles}{(readme)~\l_@@_tmpa_tl} 
+            \group_end:
+          }
+       }  
+     }
+   }   
+}    
+%    \end{macrocode}
 % \subsubsection{Colorprofiles and Outputintents}
 % The following provides a minimum of interface to add a color profile
 % and an outputintent need for PDF/A for now. There will be need to extend it later,
