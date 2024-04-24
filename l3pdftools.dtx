@@ -155,10 +155,14 @@
 %   command is \emph{used}, but only at \emph{shipout}. 
 %   This requires new engines which
 %   allow to use the keyword \texttt{shipout} with the primitive
-%   \cs{special} and \cs{pdfliteral}. The content of \meta{dictionary content}
-%   is added in the stream. 
+%   \cs{special} and \cs{pdfliteral}. Also differently to \cs{pdf_bdc:ee} 
+%   the content of \meta{dictionary content} is added inline in the stream
+%   with most engines (not on the dvips + ps2pdf route).
+%   This means that this command can also be used if such an inline dictionary is preferred.
 %   
-%   The command requires current engines and is not defined if an to old engine is detected!
+%   The command requires current engines and 
+%   is not defined if an too old engine is detected!
+%   
 % \end{function}
 % 
 % \begin{function}[added = 2020-07-03]
