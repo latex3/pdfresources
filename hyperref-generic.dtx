@@ -486,7 +486,8 @@
 %   would arise it would possible to change this.
 %  \subsection{Changed behaviour}
 %   \begin{description}
-%   \item[colorlinks] |colorlinks| will as before disable the |pdfborder|, but it is possible
+%   \item[colorlinks] |colorlinks| or |colorlinks=true| will as before disable the |pdfborder| 
+%   (|colorlinks=false| will leave the pdfborder untouched), but it is possible
 %    to use the key in the document at any time, or to reenable the border if wanted.
 %    Internally |colorlinks| \& friends will no longer define/undefine
 %    |\Hy@colorlink|, but instead use the hooks provided by the \pkg{l3pdfannot} package.
@@ -2652,7 +2653,8 @@
 %    \begin{macrocode}
 \keys_define:nn { hyp }
   {
-    ,colorlinks .meta:n =
+    ,colorlinks .choice:
+    ,colorlinks / true  .meta:n =
       {
         ,pdfborder={0~0~0}
         ,pdfborderstyle=
@@ -2662,6 +2664,14 @@
         ,colormenu =#1
         ,colorfile =#1
         }
+    ,colorlinks / false  .meta:n =
+      {
+        ,colorurl  =#1
+        ,colorlink =#1
+        ,colorrun  =#1
+        ,colormenu =#1
+        ,colorfile =#1
+        }        
     ,colorlinks .default:n = {true}
   }
 %    \end{macrocode}
