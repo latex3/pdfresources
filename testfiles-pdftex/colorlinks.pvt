@@ -1,0 +1,15 @@
+% from issue #69
+\ExplSyntaxOn
+\debug_on:n { check-declarations , deprecation }
+\msg_redirect_module:nnn { pdf } { none } { warning }
+\ExplSyntaxOff
+\DocumentMetadata
+ {}
+\input{regression-test}
+\documentclass{book}
+\usepackage{hyperref}
+\hypersetup{colorlinks      = false}
+\begin{document}
+\START
+    \url{https://www.example.com}
+\end{document}
