@@ -8,7 +8,9 @@ this project uses date-based 'snapshot' version identifiers.
 
 ### Fixed 
  - l3pdfmeta: adapted wtpdf declaration uri to corrected version.
-
+ - colorlinks=false no longer resets pdfborder (issue #69)
+ - added support to omit CidSet with luatex
+ 
 ## [2024-04-09]
 Version: 2024-04-09, 0.96h
 

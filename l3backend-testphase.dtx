@@ -2528,6 +2528,23 @@
 %    \end{macrocode}
 % \end{macro}
 % 
+%  With luatex it is for some standards also necessary to suppress the CidSet
+%  entry in the fonts (with xetex there seem to be no problem. 
+% \begin{macro}{\@@_backend_omit_cidset:n}
+% The option to omit /Charset exists already for quite some time for the two 
+% engines.
+%    \begin{macrocode}
+%<*xdvipdfmx|dvipdfmx|dvips|dvisvgm|pdftex>
+\cs_new_protected:Npn \@@_backend_omit_cidset:n #1 {} %#1 number
+%</xdvipdfmx|dvipdfmx|dvips|dvisvgm>
+%<*luatex>
+\cs_new_protected:Npn \@@_backend_omit_cidset:n #1 %#1 number
+  {
+    \tex_pdfvariable:D omitcidset  = #1 \scan_stop:
+  } 
+%</luatex>
+%    \end{macrocode}
+% \end{macro}
  
 %
 % \subsection{lua code for lualatex}
