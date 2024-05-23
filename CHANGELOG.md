@@ -4,7 +4,7 @@ first release 0.95a, 2021-02-23 will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 this project uses date-based 'snapshot' version identifiers.
-## [Unreleased]
+## [2024-05-23]
 
 ### Fixed 
  - l3pdfmeta: adapted wtpdf declaration uri to corrected version.
