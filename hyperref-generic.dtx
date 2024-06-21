@@ -150,7 +150,7 @@
 %
 %  \section{\enquote{Metadata}}
 %
-%  \enquote{Metadata}, informations about the document, are stored in a PDF in two
+%  \enquote{Metadata}, information about the document, are stored in a PDF in two
 %  places: The |/Info| dictionary and the XMP-metadata. \pkg{hyperref} only handles the
 %  |/Info| dictionary. The XMP-metadata  are added by code from \pkg{l3pdfmeta}.
 %  (without the pdfmanagement the XMP-metadata can be added with packages like \pkg{pdfx} and
@@ -170,7 +170,7 @@
 %  this had to patch an number of internal \pkg{hyperref} commands---which is a problem
 %  if the internal commands change (as happens with this new driver)
 %  \item \pkg {hyperref} (and also \pkg{hyperxmp})
-%  tries to deduce some datas from document commands like
+%  tries to deduce some data from document commands like
 %  \cs{title} or \cs{author}---something that worked reasonably well when only
 %  some standard classes with well-known definitions of these command existed,
 %  but gets problematic with classes and packages which define
@@ -190,7 +190,7 @@
 %
 %  \item It is possible to store titles in more than one language. If the value begins with
 %  an \enquote{optional argument} which represents a language tag, the value is taken
-%  as a comma list and splitted. The first value is used for the Info dictionary,
+%  as a comma list and split. The first value is used for the Info dictionary,
 %  the others are used in the XMP-metadata. Commas in a title must then be
 %  protected with braces:
 %
@@ -506,7 +506,7 @@
 %   and |citebordercolor|   has been reduced. A package like \pkg{hyperref}
 %   can't keep track of such semantic
 %   contexts like cite, acronym, glossaries and special references and maintain keys for
-%   them. The keys are not completly dropped as this would affect packages like
+%   them. The keys are not completely dropped as this would affect packages like
 %   \pkg{natbib}, but they have been separated and are no longer affected by
 %   group keys like |allcolors|  but must be set individually instead.
 %
@@ -768,7 +768,7 @@
 %  location. So |0 -100 200 400| will give a \enquote{box} of width 200bp,
 %  height 400bp and depth 100dp that the destination should encompass.
 %  Missing numbers will be set to 0. But one should be aware that is it is quite
-%  unpredicable how viewers which support |FitR| handles zero sizes.
+%  unpredictable how viewers which support |FitR| handles zero sizes.
 %
 %  \item |pdfstartview| and |pdfremotestartview| will pass
 %  the values as absolute coordinates.
@@ -818,7 +818,7 @@
 % key of the annotation array and in similar keys is set. It does not affect
 % the text and graphics colors in the page stream.
 % Possible choices are |rgb| (three numbers in the array) and |cmyk| (four numbers).
-% While the PDF reference allows four numbers, PDF readers don't necessarly handle
+% While the PDF reference allows four numbers, PDF readers don't necessarily handle
 % this correctly, so the value can be wrong.
 %
 % \DescribeHypkey{destlabel} This is a boolean key. Currently it must be set
@@ -849,7 +849,7 @@
 % /Subtype/Link/A<</S/GoToR /F  (mwe2.dvi)>>
 % /Subtype/Link/A<</S/GoToR /F  (mwe3.dvi)>>
 % \end{verbatim}
-% Typically PDF viewer can handle only GoToR annotions pointing to a PDF.
+% Typically PDF viewer can handle only GoToR annotations pointing to a PDF.
 % So normally the default value |pdf| of this key should not be changed.
 % \DescribeHypkey{nesting}\label{key:nesting}%
 % This key is useless in PDF context. The boolean is only used in
@@ -1456,7 +1456,7 @@
 \pdfstringdefDisableCommands{\let\hrefpdf\@@_secondoftwowithopt:wnn}
 \pdfstringdefDisableCommands{\let\hrefrun\@@_secondoftwowithopt:wnn}
 %    \end{macrocode}
-% \section{Compability commands}
+% \section{Compatibility commands}
 % \subsection{Metadata}
 % A number of values should be accessible from other packages. Until now
 % packages like \pkg{hyperxmp} used variables like \cs{@pdfauthor}. As they are
@@ -2188,7 +2188,7 @@
 %    \end{macrocode}
 %
 % Now the three \pkg{hyperref} commands.
-% The splitted commands \cs{hyper@linkstart} and \cs{hyper@linkend} are used for
+% The split commands \cs{hyper@linkstart} and \cs{hyper@linkend} are used for
 % footnotemarks, toc and natbib-cites.
 % \begin{function}{\hyper@link}
 % \begin{syntax}
@@ -5204,7 +5204,7 @@
  }
 \ExplSyntaxOff
 \ExplSyntaxOn
-% Does an appeareance dict make sense here?
+% Does an appearance dict make sense here?
 \def\PDFForm@Text
   {
     /Subtype/Widget
