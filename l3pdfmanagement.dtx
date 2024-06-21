@@ -70,7 +70,7 @@
 % They unify a number of primitives like the pdftex
 % registers and commands \cs{pdfcatalog}, \cs{pdfpageattr},
 % \cs{pdfpagesattr}, \cs{pdfinfo}, \cs{pdfpageresources}
-% and similar commands of the other backends in a backend independant way.
+% and similar commands of the other backends in a backend independent way.
 %
 % The supported backends are pdflatex, lualatex, (x)dvipdfmx (latex, xelatex
 % and---starting in texlive 2021--lualatex)
@@ -180,12 +180,12 @@
 %   \begin{syntax}
 %     \cs{pdfmanagement_show:n}  \Arg{resource path}
 %   \end{syntax}
-%   This shows the content of the dictionary targetted by
+%   This shows the content of the dictionary targeted by
 %   \Arg{resource path} in the log and on the terminal if possible.
 %
 %   It is not reliable for page resources as these are filled at shipout.
 %
-%   It also doesn't show necessarly all the content.
+%   It also doesn't show necessarily all the content.
 %   For example most backends add automatically
 %   entries to the Info dictionary.
 % \end{function}
@@ -207,7 +207,7 @@
 %   can't be removed (but should ever a use case appear it could be added).
 % \end{function}
 %
-% \subsection{Description of the resource pathes}
+% \subsection{Description of the resource paths}
 % \subsubsection{Info: The Info dictionary}
 % \begin{NOTE}{UF}
 % path: Info
@@ -367,7 +367,7 @@
 % pages of different sizes. But you must be careful with the values.
 % If you set e.g. with pdflatex \cs{pdfpageheight} to 300bp you get a mediabox of
 % |0 0 595 300|, but pdflatex measure from the top and will also move
-% the reference point up, so effectivly
+% the reference point up, so effectively
 % you get the \emph{upper} third of the page. If you set the \texttt{/MediaBox}
 % to |0 0 595 300| with \cs{pdfmanagement_add:nnn} you get the \emph{lower} third.
 % In general it is better to use only the primitive commands to avoid confusing
@@ -398,7 +398,7 @@
 %     \cs{pdfmanagement_add:nnn} \{Page/Resources/\meta{resource}\} \Arg{name} \Arg{value}
 %   \end{syntax}
 %   Adds |/|\meta{name} \meta{value} to the page resource \meta{resource}.
-%   \meta{resource} can be |ExtGState|, |ColorSpace|, |Pattern| oder |Shading|.
+%   \meta{resource} can be |ExtGState|, |ColorSpace|, |Pattern| or |Shading|.
 %   The values are always stored globally. The content is written to the pdf
 %   at the end of the compilation, so values can be added until then.
 %   \meta{name} should be a valid pdf name without the leading slash,
@@ -434,7 +434,7 @@
 % Entries to the top level of the catalog can be added with\\
 % |\pdfmanagement_add:nnn {Catalog}|\Arg{Name}\Arg{Value}.
 % Entries to subdictionaries by using in the first
-% argument one of the pathes described later.
+% argument one of the paths described later.
 % The entries in the catalog have varying requirements regarding the
 % PDF management. Some entries (like \texttt{/Lang}) are simple values
 % where new values should
@@ -495,7 +495,7 @@
 %   \par\medskip
 %
 %   \paragraph{Simple entries in subdictionaries of the catalog}
-%   The following resource pathes have been predeclared and allow to
+%   The following resource paths have been predeclared and allow to
 %   add values to the respective subdictionaries of the catalog. The
 %   names of the dictionaries follow the naming and location of the dictionaries
 %   in the PDF reference.
@@ -824,7 +824,7 @@
         \pdfdict_if_exist:nTF { g__pdf_Core/#1 }
           {
             \cs_if_exist:cTF
-              { @@_handler/#1/?_gput:nn } %general, name independant handler
+              { @@_handler/#1/?_gput:nn } %general, name independent handler
               { \use:c {@@_handler/#1/?_gput:nn} {#2} {#3} }
               {
                 \cs_if_exist:cTF
@@ -862,7 +862,7 @@
     \pdfdict_if_exist:nTF { g__pdf_Core/#1 }
           {
             \cs_if_exist:cTF
-              { @@_handler/#1/?_gremove:n } %general, name independant handler
+              { @@_handler/#1/?_gremove:n } %general, name independent handler
               { \use:c {@@_handler/#1/?_gremove:n} {#2} }
               {
                 \cs_if_exist:cTF
@@ -899,7 +899,7 @@
 \cs_new_protected:Npn \@@_show:Nn #1#2
   {
     \cs_if_exist:cTF
-      { @@_handler/#2/?_show: } %general, name independant handler
+      { @@_handler/#2/?_show: } %general, name independent handler
       { \use:c {@@_handler/#2/?_show:} }
       {
         \prop_if_exist:cTF { \__kernel_pdfdict_name:n { g__pdf_Core/#2 } }

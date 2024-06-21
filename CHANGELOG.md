@@ -23,7 +23,7 @@ Version: 2024-03-26, 0.96g
 
 ### Added
  - l3pdfmeta.dtx: interface for xmpRights:Marked.
- - l3pdfmeta.dtx: add wtpdf declations if ua-2 is used.
+ - l3pdfmeta.dtx: add wtpdf declarations if ua-2 is used.
 
 ### Changed
  - removed unneeded firstaids for fontspec, transparent and pdflscape
@@ -32,7 +32,7 @@ Version: 2024-03-26, 0.96g
 Version: 2024-03-01, 0.96f
 
 ### Changed
- - format of /F in filespec: use utf8/string for better compability with ZUGFeRD processor.
+ - format of /F in filespec: use utf8/string for better compatibility with ZUGFeRD processor.
  - added /Contents entry to URI and GoTo links for better UA support.
 
 ## [2024-02-22]
@@ -41,7 +41,7 @@ Version: 2024-02-22, 0.96e
 ### Changed
  - date of UA-2 is now 2024
  - tagpdf-base is now required
- - xmp metadata use x-default for the main language for better compability with some viewers
+ - xmp metadata use x-default for the main language for better compatibility with some viewers
  - suppress info dictionary with pdf/ua-2
 
 ## [2023-12-09]
@@ -63,7 +63,7 @@ Version: 2023-12-09, 0.96d
 Version: 2023-11-17, 0.96c
 
  - remove dependency to ltxcmds in the hyperref driver
- - correct a local/global assigment
+ - correct a local/global assignment
  - remove l3ref-tmp.sty 
  - l3pdffile.dtx: change mimetype of xml to application/xml
  
