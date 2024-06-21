@@ -45,7 +45,7 @@
 %    }^^A
 % }
 %
-% \date{Version 0.96h, released 2024-04-09}
+% \date{Version 0.96i, released 2024-05-23}
 %
 % \maketitle
 %
@@ -56,27 +56,27 @@
 %    \begin{macrocode}
 %<drivers>\ProvidesExplFile
 %<*dvipdfmx>
-  {l3backend-testphase-dvipdfmx.def}{2024-04-09}{}
+  {l3backend-testphase-dvipdfmx.def}{2024-05-23}{}
   {LaTeX~PDF~management~testphase~bundle~backend~support: dvipdfmx}
 %</dvipdfmx>
 %<*dvips>
-  {l3backend-testphase-dvips.def}{2024-04-09}{}
+  {l3backend-testphase-dvips.def}{2024-05-23}{}
   {LaTeX~PDF~management~testphase~bundle~backend~support: dvips}
 %</dvips>
 %<*dvisvgm>
-  {l3backend-testphase-dvisvgm.def}{2024-04-09}{}
+  {l3backend-testphase-dvisvgm.def}{2024-05-23}{}
   {LaTeX~PDF~management~testphase~bundle~backend~support: dvisvgm}
 %</dvisvgm>
 %<*luatex>
-  {l3backend-testphase-luatex.def}{2024-04-09}{}
+  {l3backend-testphase-luatex.def}{2024-05-23}{}
   {LaTeX~PDF~management~testphase~bundle~backend~support: PDF output (LuaTeX)}
 %</luatex>
 %<*pdftex>
-  {l3backend-testphase-pdftex.def}{2024-04-09}{}
+  {l3backend-testphase-pdftex.def}{2024-05-23}{}
   {LaTeX~PDF~management~testphase~bundle~backend~support: PDF output (pdfTeX)}
 %</pdftex>
 %<*xdvipdfmx>
-  {l3backend-testphase-xetex.def}{2024-04-09}{}
+  {l3backend-testphase-xetex.def}{2024-05-23}{}
   {LaTeX~PDF~management~testphase~bundle~backend~support: XeTeX}
 %</xdvipdfmx>
 %    \end{macrocode}
@@ -2528,6 +2528,23 @@
 %    \end{macrocode}
 % \end{macro}
 % 
+%  With luatex it is for some standards also necessary to suppress the CidSet
+%  entry in the fonts (with xetex there seem to be no problem. 
+% \begin{macro}{\@@_backend_omit_cidset:n}
+% The option to omit /Charset exists already for quite some time for the two 
+% engines.
+%    \begin{macrocode}
+%<*xdvipdfmx|dvipdfmx|dvips|dvisvgm|pdftex>
+\cs_new_protected:Npn \@@_backend_omit_cidset:n #1 {} %#1 number
+%</xdvipdfmx|dvipdfmx|dvips|dvisvgm|pdftex>
+%<*luatex>
+\cs_new_protected:Npn \@@_backend_omit_cidset:n #1 %#1 number
+  {
+    \tex_pdfvariable:D omitcidset  = #1 \scan_stop:
+  } 
+%</luatex>
+%    \end{macrocode}
+% \end{macro}
  
 %
 % \subsection{lua code for lualatex}

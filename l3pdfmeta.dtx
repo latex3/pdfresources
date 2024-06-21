@@ -49,7 +49,7 @@
 %    }^^A
 % }
 %
-% \date{Version 0.96h, released 2024-04-09}
+% \date{Version 0.96i, released 2024-05-23}
 %
 % \maketitle
 % \begin{documentation}
@@ -205,6 +205,10 @@
 % \item[|no_CharSet|] CharSet is deprecated is pdf 2.0 and should not
 % be used in A-4. l3pdfmeta will therefore suppress it for the 
 % engines pdftex and luatex (the other engines have no suitable option)
+% \item[|omit_CID|] This avoids with PDF/A-2 and newer a failure
+% because of with missing CID identifications 
+% (e.g. from rule ISO 19005-2:2011, Clause: 6.2.11.4.2)
+% It has only with luatex an effect.
 % \item[|Trailer_no_Info|] The \texttt{Info} dictionary
 % has been deprecated since quite some time. Metadata should be set with
 % XMP-data instead. In PDF A-4 now the \texttt{Info} dictionary
@@ -627,7 +631,7 @@
 %    \begin{macrocode}
 %<@@=pdfmeta>
 %<*header>
-\ProvidesExplPackage{l3pdfmeta}{2024-04-09}{0.96h}
+\ProvidesExplPackage{l3pdfmeta}{2024-05-23}{0.96i}
   {PDF-Standards---LaTeX PDF management testphase bundle}
 %</header>
 %    \end{macrocode}
@@ -814,7 +818,9 @@
     \pdfmeta_standard_verify:nF { Trailer_no_Info }
      { \__pdf_backend_omit_info:n {1} }
     \pdfmeta_standard_verify:nF { no_CharSet }
-     { \__pdf_backend_omit_charset:n {1} }  
+     { \__pdf_backend_omit_charset:n {1} }
+    \pdfmeta_standard_verify:nF { omit_CID }
+     { \__pdf_backend_omit_cidset:n {1} }         
     \pdfmeta_standard_verify:nnF { min_pdf_version }
      { \pdf_version: }
      { \msg_warning:nneee {pdf}{wrong-pdfversion}
@@ -930,7 +936,9 @@
   { embed_content}
 \prop_gput:cnn
   { g_@@_standard_pdf/A-2B_prop }{max_pdf_version}{1.7}
-%A-2u ==============
+\prop_gput:cnn
+  { g_@@_standard_pdf/A-2B_prop }{omit_CID}{}
+  %A-2u ==============
 \prop_new:c { g_@@_standard_pdf/A-2U_prop }
 \prop_gset_eq:cc
   { g_@@_standard_pdf/A-2U_prop }
@@ -2991,14 +2999,14 @@
 \cs_new_protected:Npn \@@_xmp_wtpdf_reuse_declaration:
  {
    \pdfmeta_xmp_add_declaration:eeenn
-      {http://pdfa.org/declarations\c_hash_str wtpdf-reuse1.0}
+      {http://pdfa.org/declarations/wtpdf\c_hash_str reuse1.0}
       {LaTeX~Project}
       {\@@_xmp_iso_today:}{}{}
  }     
 \cs_new_protected:Npn \@@_xmp_wtpdf_accessibility_declaration:
  {
    \pdfmeta_xmp_add_declaration:ennnn
-     {http://pdfa.org/declarations\c_hash_str wtpdf-accessibility1.0}
+     {http://pdfa.org/declarations/wtpdf\c_hash_str accessibility1.0}
      {LaTeX~Project}
      {\@@_xmp_iso_today:}{}{}
  }    

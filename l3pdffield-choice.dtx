@@ -49,7 +49,7 @@
 %    }^^A
 % }
 %
-% \date{Version 0.96h, released 2024-04-09}
+% \date{Version 0.96i, released 2024-05-23}
 %
 % \maketitle
 % \begin{documentation}
@@ -77,11 +77,11 @@
 % This means that various data will have to be set, and the sorting matters.
 % The module here will assume that the various values are stored in sequences:
 %
-% \ExplSyntaxOn
+% \begin{verbatim}
 % \seq_const_from_clist:Nn \c_my_values_seq {hippo,duck,bear}
 % \seq_const_from_clist:Nn \c_my_displayvalues_seq {Sieglinde,,Bär}
-% \seq_const_from_clist:Nn \c_my_defaultvalues_seq {duck,Bär} %check if export or altname ...
-% \ExplSyntaxOff
+% \seq_const_from_clist:Nn \c_my_defaultvalues_seq {duck,Bär} 
+% \end{verbatim}
 %
 % Only the first sequence is required.
 % Empty values in the display sequence are possible, then the normal value is used.
@@ -103,9 +103,12 @@
 %
 %
 % \subsection{Appearance}
-% hm ....
+% By default the fields use a grey background as appearance, another appearance 
+% can be defined with |\pdffield_appearance:nn| (described in the documentation of
+% l3pdffield) or directly with |\pdfxform_new:nnn| (in l3pdfxfom)
+% and then used with the |appearance| as in other form fields.
 %
-% \bigskip
+% 
 % \subsection{Commands}
 % \begin{function}{\pdffield_choice:n}
 % \begin{syntax}
@@ -114,9 +117,9 @@
 % This creates a choice field.
 % The list of allowed keys is described below.
 % The \meta{key val list} should at least set the name,
-% without it the default |choice| is used. Choice fields with the same
+% without it the default |choice| is used. Choice fields with the same name
 % belong to the same field and if changed, the others are changed accordingly.
-% The default appearance ...
+% As default appearance we reuse the text appearance: a simple gray background.
 %
 % The first choice field setups the field and so should setup values and field flags.
 % \end{function}
@@ -443,7 +446,7 @@
 %     ,\l_@@_choice_opt_seq
 %  }
 % variables to hold the value, the default value, and display variants. The opt
-% set will be used to build the content of opt
+% seq will be used to build the content of opt
 %    \begin{macrocode}
 \seq_new:N  \l_@@_choice_values_seq
 \seq_new:N  \l_@@_choice_defaultvalues_seq
