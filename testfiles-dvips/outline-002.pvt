@@ -1,0 +1,35 @@
+\ExplSyntaxOn
+\debug_on:n { check-declarations , deprecation }
+\ExplSyntaxOff
+
+\DocumentMetadata{}
+\input{regression-test}
+\documentclass{article}
+\begin{document}
+\START
+Page 1
+
+\ExplSyntaxOn
+\bool_set_false:N\l_pdfoutline_open_bool
+\pdf_destination:nn{test}{fit}
+\pdfoutline_goto:nnn {0}  {test}{level1}
+\pdfoutline_goto:nnn {1}  {test}{level2}
+\pdfoutline_goto:nnn {1} {test}{level3}
+\pdfoutline_goto:nnn {1} {test}{level4}
+
+\bool_set_true:N\l_pdfoutline_open_bool
+\pdfoutline_goto:nnn {-10}  {test}{level1}
+\pdfoutline_goto:nnn {1}  {test}{level2}
+\pdfoutline_goto:nnn {1} {test}{level3}
+\pdfoutline_goto:nnn {1} {test}{level4}
+
+\int_set:Nn\l_pdfoutline_open_int {2}
+\bool_set_true:N\l_pdfoutline_open_bool
+\pdfoutline_goto:nnn {-10}  {test}{level1}
+\pdfoutline_goto:nnn {1}  {test}{level2}
+\pdfoutline_goto:nnn {1} {test}{level3}
+\pdfoutline_goto:nnn {1} {test}{level4}
+\ExplSyntaxOff
+
+
+\end{document} 

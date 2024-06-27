@@ -2545,8 +2545,134 @@
 %</luatex>
 %    \end{macrocode}
 % \end{macro}
- 
-%
+% \subsection{Outline backend}
+%<*dvips>
+\cs_new_protected:Npn \__pdf_backend_action:nnnnnnn #1#2#3#4#5#6#7
+% #1 level (ignored), #2 kid count, #3 open? #4 color (space separated values), #5 flag, #6 action, #7 title,    
+  {  
+    \__pdf_backend_pdfmark:e 
+      {
+        /Title~(\exp_not:n{#7})~
+        /Count~\bool_if:nF{#3}{-}#2~
+        \tl_if_blank:nF { #4 }{/C~[#4]}
+        /F~#5
+        /Action <<\exp_not:n{#6}>>
+        /OUT
+      }          
+  }
+\cs_new_protected:Npn \__pdf_backend_goto:nnnnnnn #1#2#3#4#5#6#7
+% #1 level (ignored), #2 kid count, #3 open? #4 color (space separated values), #5 flag, #6 action, #7 title,    
+  {  
+    \__pdf_backend_pdfmark:e 
+      {
+        /Title~(\exp_not:n{#7})~
+        /Count~\bool_if:nF{#3}{-}#2~
+        \tl_if_blank:nF { #4 }{/C~[#4]}
+        /F~#5
+        /Action/GoTo/Dest(\exp_not:n{#6})~cvn
+        /OUT
+      }          
+  }
+%</dvips> 
+%<*pdftex>
+\cs_new_protected:Npn \@@_backend_action:nnnnnnn #1#2#3#4#5#6#7
+% #1 level (ignored), #2 kid count, #3 open? #4 color (space separated values), #5 flag, #6 action, #7 title,    
+  {
+    \tex_pdfoutline:D~attr 
+      {
+        /F~#5~
+        \tl_if_blank:nF { #4 }{/C~[#4]}
+      }~
+      user~{<<\exp_not:n{#6}>>}~
+      count~\bool_if:nF{#3}{-}#2~
+      {\exp_not:n{#7}}
+  }
+\cs_new_protected:Npn \@@_backend_goto:nnnnnnn #1#2#3#4#5#6#7
+% #1 level (ignored), #2 kid count, #3 open? #4 color (space separated values), #5 flag, #6 destination, #7 title,    
+  {
+    \tex_pdfoutline:D~attr 
+      {
+        /F~#5~
+        \tl_if_blank:nF { #4 }{/C~[#4]}
+      }~
+      \tag_if_active:TF
+       {goto~struct~name~{#6}~name~{#6}}
+       {goto~name~{#6}}~
+      count~\bool_if:nF{#3}{-}#2~
+      {\exp_not:n{#7}}
+  }
+%</pdftex> 
+%<*luatex>
+\cs_new_protected:Npn \__pdf_backend_action:nnnnnnn #1#2#3#4#5#6#7
+% #1 level (ignored), #2 kid count, #3 open? #4 color (space separated values), #5 flag, #6 action, #7 title,       
+  {
+    \tex_pdfextension:D~outline~attr 
+      {
+        /F~#5~
+        \tl_if_blank:nF { #4 }{/C~[#4]}
+      }~
+      user~{<<\exp_not:n{#6}>>}~
+      count~\bool_if:nF{#3}{-}#2~
+      {\exp_not:n{#7}}
+   } 
+\cs_new_protected:Npn \__pdf_backend_goto:nnnnnnn #1#2#3#4#5#6#7
+% #1 level (ignored), #2 kid count, #3 open? #4 color (space separated values), #5 flag, #6 destination, #7 title,    
+  {
+    \tex_pdfextension:D~outline~attr 
+      {
+        /F~#5~
+        \tl_if_blank:nF { #4 }{/Color~[#4]}
+      }~
+      \tag_if_active:TF
+       {goto~struct~name~{#6}~name~{#6}}
+       {goto~name~{#6}}~
+      count~\bool_if:nF{#3}{-}#2~
+      {\exp_not:n{#7}}
+  }
+%</luatex>
+%<*xdvipdfmx|dvipdfmx>
+\cs_new_protected:Npn \__pdf_backend_action:nnnnnnn #1#2#3#4#5#6#7
+% #1 level, #2 kid count (ignored), #3 open? #4 color (space separated values), #5 flag, #6 action, #7 title,       
+  {
+    \tex_special:D 
+     {
+       pdf:out~
+       [\bool_if:nF{#3}{-}]~#1~
+       << 
+         /A<<\exp_not:n{#6}>>~
+         /Title~(\exp_not:n{#7})~
+         /F~#5~
+         \tl_if_blank:nF { #4 }{/C~[#4]}
+       >>
+     }        
+  } 
+\cs_new_protected:Npn \__pdf_backend_goto:nnnnnnn #1#2#3#4#5#6#7
+% #1 level, #2 kid count (ignored), #3 open? #4 color (space separated values), #5 flag, #6 destination, #7 title,       
+  {
+    \tex_special:D 
+     {
+       pdf:out~
+       [\bool_if:nF{#3}{-}]~#1~
+       << 
+         /A
+           <<
+             /S/GoTo/D(\exp_not:n{#6})
+             \tag_if_active:T
+              {
+                /SD~@pdf.SDest.#6
+              }
+           >>~
+         /Title~(\exp_not:n{#7})~
+         /F~#5~
+         \tl_if_blank:nF { #4 }{/C~[#4]}
+       >>
+     }        
+  }      
+%</xdvipdfmx|dvipdfmx>
+%<*dvisvgm>
+\cs_new_protected:Npn \__pdf_backend_action:nnnnnnn #1#2#3#4#5#6#7{}
+\cs_new_protected:Npn \__pdf_backend_goto:nnnnnnn #1#2#3#4#5#6#7 {}
+%</dvisvgm>
 % \subsection{lua code for lualatex}
 %    \begin{macrocode}
 %<*lua>

@@ -1,0 +1,46 @@
+\ExplSyntaxOn
+\debug_on:n { check-declarations , deprecation }
+\ExplSyntaxOff
+
+\DocumentMetadata{}
+\input{regression-test}
+\documentclass{article}
+\begin{document}
+\START
+Page 1
+
+\ExplSyntaxOn
+\pdf_destination:nn{test}{fit}
+\pdfoutline_goto:nnn {-10}{test}{level-10}
+\pdfoutline_goto:nnn {0}  {test}{level0}
+\pdfoutline_goto:nnn {1}  {test}{level1}
+\pdfoutline_goto:nnn {10} {test}{level10}
+\pdfoutline_goto:nnn {-1} {test}{level-1}
+\pdfoutline_goto:nnn {-1} {test2}{level-1,Page2}
+
+\pdfoutline_action:nnn{5}{/S/Named/N/FirstPage}{named}
+
+
+{\pdfoutline_goto:nnn {-1} {test}{grouped}}
+
+\pdfoutline_goto:nnn {0} {test}{aftergrouped}
+
+{
+ \bool_set_false:N\l_pdfoutline_bool
+ \pdfoutline_goto:nnn {-10} {test}{hidden}
+} 
+
+\bitset_set_true:Nn\l_pdfoutline_F_bitset {italic}
+\pdfoutline_goto:nnn {0} {test}{italic}
+
+\tl_set:Nn\l_pdfoutline_color_tl {red!70!green}
+\pdfoutline_goto:nnn {0} {test2}{green-italic-page2}
+\ExplSyntaxOff
+
+\newpage 
+
+Page 2 
+\ExplSyntaxOn
+\pdf_destination:nn{test2}{fith}
+\ExplSyntaxOff
+\end{document} 

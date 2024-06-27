@@ -9,6 +9,7 @@ this project uses date-based 'snapshot' version identifiers.
 
 ### Added
 
+ - new module l3pdfoutline for bookmark support
  - added a verification 'omit_CID' used by PDF/a-2 and newer with luatex.
 
 ## [2024-05-23]
