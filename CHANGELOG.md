@@ -4,13 +4,20 @@ first release 0.95a, 2021-02-23 will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 this project uses date-based 'snapshot' version identifiers.
+
+## [Unreleased]
+
+### Added
+
+ - added a verification 'omit_CID' used by PDF/a-2 and newer with luatex.
+
 ## [2024-05-23]
+Version: 2024-05-23, 0.96i
 
 ### Fixed 
  - l3pdfmeta: adapted wtpdf declaration uri to corrected version.
  - colorlinks=false no longer resets pdfborder (issue #69)
  - added support to omit CidSet with luatex
- - added a verification omit_CID used by PDF/a-2 and newer.
  
 ## [2024-04-09]
 Version: 2024-04-09, 0.96h
@@ -31,7 +38,7 @@ Version: 2024-03-26, 0.96g
 
 ### Added
  - l3pdfmeta.dtx: interface for xmpRights:Marked.
- - l3pdfmeta.dtx: add wtpdf declations if ua-2 is used.
+ - l3pdfmeta.dtx: add wtpdf declarations if ua-2 is used.
 
 ### Changed
  - removed unneeded firstaids for fontspec, transparent and pdflscape
@@ -40,7 +47,7 @@ Version: 2024-03-26, 0.96g
 Version: 2024-03-01, 0.96f
 
 ### Changed
- - format of /F in filespec: use utf8/string for better compability with ZUGFeRD processor.
+ - format of /F in filespec: use utf8/string for better compatibility with ZUGFeRD processor.
  - added /Contents entry to URI and GoTo links for better UA support.
 
 ## [2024-02-22]
@@ -49,7 +56,7 @@ Version: 2024-02-22, 0.96e
 ### Changed
  - date of UA-2 is now 2024
  - tagpdf-base is now required
- - xmp metadata use x-default for the main language for better compability with some viewers
+ - xmp metadata use x-default for the main language for better compatibility with some viewers
  - suppress info dictionary with pdf/ua-2
 
 ## [2023-12-09]
@@ -71,7 +78,7 @@ Version: 2023-12-09, 0.96d
 Version: 2023-11-17, 0.96c
 
  - remove dependency to ltxcmds in the hyperref driver
- - correct a local/global assigment
+ - correct a local/global assignment
  - remove l3ref-tmp.sty 
  - l3pdffile.dtx: change mimetype of xml to application/xml
  

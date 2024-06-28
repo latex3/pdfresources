@@ -436,7 +436,7 @@
 % User data should normally be declared in the preamble (or even in the
 % |\DocumentMetadata| command), and consist of rather simple text; |&| can be entered
 % as |\&| (but directly |&| will normally work too),
-% babel shorthands should not be used. Some datas are interpreted as comma lists,
+% babel shorthands should not be used. Some data are interpreted as comma lists,
 % in this cases commas which are part of the text should be protected by braces.
 % In some cases a text in brackets like |[en]| is interpreted as language tag,
 % if they are part of a text they should be protected by braces too.
@@ -604,7 +604,7 @@
 % This add a PDF declaration with the required |conformsTo| property to the XMP metadata. 
 % \meta{uri} should not be empty and is a URI specifying 
 % the standard or profile referred to by the PDF
-% Declaration. If the uri contains a hash, use \cs{c_hash_str} to excape it
+% Declaration. If the uri contains a hash, use \cs{c_hash_str} to escape it
 % and use the \texttt{e} variant to expand it.
 % \end{function}
 % 
@@ -1185,7 +1185,7 @@
 % The commands embed the profile, and write the dictionary and add it to
 % the catalog. The first command should perhaps be moved to l3color
 % as it needs such profiles too. We used named objects so that we can
-% check if the profile is already there. This is not full proof if pathes are
+% check if the profile is already there. This is not foolproof if paths are
 % used.
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_embed_colorprofile:n #1%#1 file name
@@ -1539,7 +1539,7 @@
 %
 % \begin{variable}{\l_@@_xmp_currentdate_tl,\l_@@_xmp_currentdate_seq}
 % The tl var contains the date of the log-file in PDF format,
-% the seq the result splitted with the regex.
+% the seq the result split with the regex.
 %    \begin{macrocode}
 \tl_new:N  \l_@@_xmp_currentdate_tl
 \seq_new:N \l_@@_xmp_currentdate_seq
@@ -1550,7 +1550,7 @@
 % This checks a document property and if empty uses the current date.
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_xmp_date_get:nNN #1 #2 #3
-  %#1 property, #2 tl var with PDF date, #3 seq for splitted date
+  %#1 property, #2 tl var with PDF date, #3 seq for split date
   {
     \tl_set:Ne #2 { \GetDocumentProperties{#1} }
     \tl_if_blank:VTF #2
@@ -2312,7 +2312,7 @@
 % that may not be related to PDF technology. Their specification is for example
 % described in \url{https://pdfa.org/wp-content/uploads/2019/09/PDF-Declarations.pdf}.
 % 
-% If declarations are added to the XMP-metadata they need (for pdf/A compliancy) a
+% If declarations are added to the XMP-metadata they need (for pdf/A compliance) a
 % schema declaration. We do not add it by default but define here a command to enable
 % it. (This can be done in the document preamble as xmp is built only at the end.)
 % 
