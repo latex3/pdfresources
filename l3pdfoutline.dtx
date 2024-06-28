@@ -151,7 +151,7 @@
 % it is possible to build the outline directly while compiling the document and
 % one doesn't have to use the \texttt{aux} or to delay code until the end of the document.
 %
-% When using \pdfTeX{}, \luaTeX{} or the \texttt{dvips} backend, a count must be given
+% When using \pdfTeX{}, lua\TeX{} or the \texttt{dvips} backend, a count must be given
 % in the primitive which describes the number of direct children of the outline. 
 % The backend then collects (recursively) following items until all children are found 
 % and then goes up a level again. 
@@ -165,7 +165,7 @@
 % stores it for every bookmark in a command. When the
 % \texttt{.aux} file is read in again at the end of the document, it decodes
 % content and attributes again and so can process the outline commands 
-% for \pdfTeX{} and \luaTeX{} directly in the
+% for \pdfTeX{} and lua\TeX{} directly in the
 % first compilation. With the \texttt{dvips} backend it creates a \texttt{.ps} file
 % which is then read in at the next compilation.
 % 
@@ -276,7 +276,7 @@
 %
 % \begin{function}[EXP]{\pdfoutline_parent_ref:n}
 % \begin{syntax}
-%  \cs{\pdfoutline_parent_ref:n}\Arg{id}
+%  \cs{pdfoutline_parent_ref:n}\Arg{id}
 % \end{syntax}
 % This retrieves the parent of the bookmark with id \meta{id}. 
 % If the bookmark is at the root level the value is 1. 
@@ -373,6 +373,7 @@
 %    \end{macrocode}
 % \end{variable} 
 % 
+% \begin{variable}{\g_@@_current_level_int}
 % This holds the (relative) level. It starts at 1 as dvipdfmx counts this way.
 %    \begin{macrocode}
 \int_new:N   \g_@@_current_level_int
@@ -645,8 +646,6 @@
 % \begin{macro}{\pdfoutline_parent_ref:n}
 %    \begin{macrocode}
 \cs_new:Npn \pdfoutline_parent_ref:n #1 { \intarray_item:Nn\g_@@_parent_id_intarray{#1} }
-%    \end{macrocode}
-% \end{macro}
 %</package>
 %    \end{macrocode}
 % \end{macro}
