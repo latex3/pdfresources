@@ -1,0 +1,17 @@
+\ExplSyntaxOn
+\debug_on:n { check-declarations , deprecation }
+\ExplSyntaxOff
+\DocumentMetadata{testphase=bookmark}
+
+\documentclass{book}
+\input{regression-test}
+\makeatletter
+\let\@@end\@@@end
+\tracingstats=0
+\makeatother
+\usepackage[destlabel=true]{hyperref}
+\begin{document}
+\START
+\chapter{Test}
+\label{sec:chap}
+\end{document}

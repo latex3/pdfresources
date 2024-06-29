@@ -4,10 +4,5 @@ rem l3build save -cconfig-dvips \1
 rem l3build save -cconfig-luatex -e\2 \1
 rem l3build save -cconfig-noxetex -e\2 \1
 
- l3build save -e xetex active-colon linkmargin ismap
-  l3build save -e luatex active-colon linkmargin ismap
-  l3build save ocgcolorlinks linkbordercolor disable-links destination-options
-  l3build save -c config-luatex linkhook structure-destination
-  l3build save -c config-dvips linkhook disable-links destination-options
-  l3build save -c config-pdftex structure-destination linkhook nested-links
-  l3build save -c config-xetex linkhook structure-destination
+l3build save -e xetex destination-options textfield linktoc formfield-old a-4f annot tag-checkbox pagesattr xform-appearance disable-links pdffilelink show active-colon colorprofile-standard transition bdc-shipout metadata-new radiobuttons metadata-new-no-hyperref pgfpatches checkbox embedfile test-pdfA-4 u-standard linkmargin formtextfields xform infodict-new ap-names embedstream ocgcolorlinks pageattr colorprofile1 mixpageattr linkbordercolor pagelabels xform-preamble ismap thispageattr annot-dict pdflscape bdc-properties infodict
+    l3build save -e luatex destination-options textfield linktoc formfield-old a-4f annot tag-checkbox pagesattr xform-appearance disable-links pdffilelink show active-colon colorprofile-standard transition bdc-shipout metadata-new radiobuttons metadata-new-no-hyperref pgfpatches checkbox embedfile test-pdfA-4 u-standard linkmargin formtextfields xform infodict-new ap-names embedstream ocgcolorlinks pageattr colorprofile1 mixpageattr linkbordercolor pagelabels xform-preamble ismap thispageattr annot-dict pdflscape bdc-properties infodict
