@@ -1,0 +1,21 @@
+\ExplSyntaxOn
+\debug_on:n { check-declarations , deprecation }
+\ExplSyntaxOff
+
+\DocumentMetadata{testphase=bookmark}
+\input{regression-test}
+\documentclass{article}
+\usepackage{hyperref}
+\begin{document}
+\START
+test uri
+
+\bookmark[uri=https://www.example.com]{uri simple}
+
+\bookmark[uri=https://www.example.com\#abc]{uri with hash}
+
+\bookmark[uri=https://www.example.com\%abc]{uri with percent}
+
+\bookmark[uri=https://www.köln.de]{uri with non-ascii char}
+
+\end{document} 

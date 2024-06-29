@@ -63,7 +63,8 @@ if os.type == "windows" then
                   "config-luatex",  -- luatex
                   "config-dvips",   -- latex + dvips
                   "config-pdftex",  -- pdftex
-                  "config-xetex"    -- xetex
+                  "config-xetex",    -- xetex
+                  "config-bookmark" -- temporarly!!!
                   }
 else 
 -- exclude dvips tests if not on windows
@@ -72,7 +73,8 @@ else
                   "config-luatex",  -- luatex
                   -- "config-dvips",   -- latex + dvips
                   "config-pdftex",  -- pdftex
-                  "config-xetex"    -- xetex
+                  "config-xetex",    -- xetex
+                  "config-bookmark" -- temporarly!!!
                   }
 end                
 

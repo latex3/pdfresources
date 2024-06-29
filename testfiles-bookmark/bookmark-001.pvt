@@ -1,0 +1,36 @@
+\ExplSyntaxOn
+\debug_on:n { check-declarations , deprecation }
+\sys_gset_rand_seed:n{1000}
+\ExplSyntaxOff
+\DocumentMetadata{testphase={phase-III,bookmark},xmp=false,pdfversion=2.0}
+\input{regression-test}
+\documentclass{article}
+\usepackage{hyperref}
+\begin{document}
+\START
+\section{abc}
+\bookmark[level=2]{level-2}
+\bookmark[level=-10,dest=section.1]{level-10}
+\bookmark[level=0,dest=section.1]{level0}
+\bookmark[level=1,dest=section.1]{level1}
+\bookmark[level=10,dest=section.1]{level10}
+\bookmark[level=-1,dest=section.1]{level-1}
+\bookmark[level=-1,page=2]{level-1,Page2}
+
+\bookmark[level=5,named=N/FirstPage]{named}
+
+
+{\bookmark[level=-1,dest=section.1]{grouped}}
+
+\bookmark[level=0,dest=section.1]{aftergrouped}
+
+\bookmark[level=0,dest=section.1,italic]{italic}
+
+\bookmark[level=0,dest=section.1,color=red!70!green]{green-italic-page2}
+\ExplSyntaxOff
+
+\newpage 
+
+Page 2 
+
+\end{document}
