@@ -11,6 +11,8 @@ this project uses date-based 'snapshot' version identifiers.
 
  - added a verification 'omit_CID' used by PDF/a-2 and newer with luatex.
  - warnings if pdfversion does not fit ua-1 and ua-2
+ - generic driver: 
+   expand values of pdfauthor and similiar to allow the use of commands
 
 ## [2024-05-23]
 Version: 2024-05-23, 0.96i

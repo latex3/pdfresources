@@ -1578,6 +1578,7 @@
 % \begin{variable}
 %  {
 %    \l_@@_tmpa_tl,
+%    \l_@@_tmpb_tl,
 %    \l_@@_tmpa_seq,
 %    \l_@@_tmpa_int,
 %    \l_@@_tmpa_box,
@@ -1586,6 +1587,7 @@
 %    \begin{macrocode}
 \box_new:N \l_@@_tmpa_box
 \tl_new:N  \l_@@_tmpa_tl
+\tl_new:N  \l_@@_tmpb_tl
 \seq_new:N \l_@@_tmpa_seq
 \int_new:N \l_@@_tmpa_int
 \str_new:N \l_@@_tmpa_str
@@ -1939,6 +1941,7 @@
   {
     \@@_text_pdfstring:noN  { #1 }{ \l_@@_text_enc_info_print_tl } #2
   }
+\cs_generate_variant:Nn \@@_text_pdfstring_info:nN {eN} 
 %    \end{macrocode}
 % \end{macro}
 %
@@ -3945,6 +3948,7 @@
 % but we allow to set an empty value.
 % If the value begin with an optional argument, we assume a multilanguage clist and
 % use only the first value.
+% The values are expanded with \cs{text_purify:n}
 %    \begin{macrocode}
 \regex_new:N\l_@@_optlang_regex
 \regex_set:Nn\l_@@_optlang_regex {\A\[([A-Za-z\-]+)\](.*)}
@@ -3954,7 +3958,10 @@
       {
         pdf#1  .code:n =
           {
-            \tl_if_blank:nTF {##1}
+            \tl_set:Ne\l_@@_tmpa_tl {\text_purify:n{##1}}
+            \@@_store_metadata:ne {pdf#1}{\l_@@_tmpa_tl}            
+            \tl_show:N\l_@@_tmpa_tl
+            \tl_if_empty:NTF \l_@@_tmpa_tl
               {
                 \str_case:nnF { #1 }
                  {
@@ -3974,45 +3981,44 @@
                  }
               }
               {
-                \tl_set:Ne\l_@@_tmpa_tl {\clist_item:nn{##1}{1}}
+                \tl_set:Ne\l_@@_tmpb_tl {\clist_item:en{\l_@@_tmpa_tl}{1}}                
                 \exp_args:NNV
-                 \regex_extract_once:NnN \l_@@_optlang_regex \l_@@_tmpa_tl\l_@@_tmpa_seq
+                 \regex_extract_once:NnN \l_@@_optlang_regex \l_@@_tmpb_tl\l_@@_tmpa_seq
                 \seq_if_empty:NTF\l_@@_tmpa_seq
                  {
-                   \@@_text_pdfstring_info:nN {##1}\l_@@_tmpa_str
+                   \@@_text_pdfstring_info:eN {\l_@@_tmpa_tl}\l_@@_tmpa_str
                  }
-                 {
-                   \exp_args:Ne
-                   \@@_text_pdfstring_info:nN {\seq_item:Nn \l_@@_tmpa_seq{3}}\l_@@_tmpa_str
+                 {                   
+                   \@@_text_pdfstring_info:eN {\seq_item:Nn \l_@@_tmpa_seq{3}}\l_@@_tmpa_str
                  }
                 \str_if_eq:VnF\l_@@_tmpa_str{<FEFF>}
                   {
                     \pdfmanagement_add:nne {Info}{#2}{\l_@@_tmpa_str}
                   }
-              }
-             \@@_store_metadata:nn {pdf#1}{##1}
+              }             
           }
       }
     \keys_define:nn { hyp / info }
       {
         #2  .code:n =
           {
+            \tl_set:Ne\l_@@_tmpa_tl {\text_purify:n{##1}}
+            \@@_store_metadata:ee {pdf\str_lowercase:n{#1}}{\l_@@_tmpa_tl}
             \tl_if_blank:nTF {##1}
               {
                 \pdfmanagement_remove:nn {Info}{#2}
               }
               {
-                \@@_text_pdfstring_info:nN {##1}\l_@@_tmpa_str
+                \@@_text_pdfstring_info:eN {\l_@@_tmpa_tl}\l_@@_tmpa_str
                 \str_if_eq:VnF\l_@@_tmpa_str{<FEFF>}
                   {
                     \pdfmanagement_add:nne {Info}{#2}{\l_@@_tmpa_str}
                   }
-              }
-            \exp_args:Ne \@@_store_metadata:nn {pdf\str_lowercase:n{#1}}{##1}
+              }            
           }
         ,unknown .code:n =
-         {
-            \@@_text_pdfstring_info:nN {##1}\l_@@_tmpa_str
+         {            
+            \@@_text_pdfstring_info:eN {\text_purify:n{##1}}\l_@@_tmpa_str
             \str_if_eq:VnF\l_@@_tmpa_str{<FEFF>}
               {
                 \exp_args:Nno
