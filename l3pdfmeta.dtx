@@ -1338,6 +1338,15 @@
    _pdfstandard / UA-1 .code:n =
     {
      \AddToDocumentProperties [document]{pdfstandard-UA}{{1}{}}
+     \AddToHook{begindocument/before}
+       {
+         \pdf_version_compare:NnF < {2.0}
+           {
+             \msg_warning:nneee 
+              {pdf}{wrong-pdfversion}
+              {\pdf_version:}{high}{UA-1}                  
+           }  
+       }          
     },
 %    \end{macrocode}
 % currently it is not possible to merge requirements - these need some thoughts as
@@ -1353,6 +1362,12 @@
        {
          \@@_xmp_wtpdf_accessibility_declaration:
          \@@_xmp_wtpdf_reuse_declaration:
+         \pdf_version_compare:NnT < {2.0}
+           {
+             \msg_warning:nneee 
+              {pdf}{wrong-pdfversion}
+              {\pdf_version:}{low}{UA-2}                  
+           }  
        }        
     },    
    xmp  .choice:,
@@ -2111,6 +2126,12 @@
    {Integer}
    {internal}
    {Year~of~standard}
+\@@_xmp_property_new:nnnnn
+   {pdfaid}
+   {rev}
+   {Integer}
+   {internal}
+   {Revision~year~of~standard}   
 %    \end{macrocode}
 % \end{macro}
 %  \item[pdfuaid] here we need (?) to declare the property 

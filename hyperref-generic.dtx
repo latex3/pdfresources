@@ -1527,11 +1527,15 @@
  {
    \define@key{BKM}{color}
      {
-       \__hyp_color_set:ne {__hyp/tmpa}{#1}
-       \color_export:nVN
-         {__hyp/tmpa}
-         \g__hyp_bordercolormodel_str
-         \BKM@color
+      \tl_if_blank:nTF {#1}
+        { \cs_set_eq:NN\BKM@color\@empty }
+        { 
+          \__hyp_color_set:ne {__hyp/tmpa}{#1}
+          \color_export:nVN
+            {__hyp/tmpa}
+            \g__hyp_bordercolormodel_str
+            \BKM@color
+        }    
      }
  }
 \legacy_if:nT { Hy@bookmarks }

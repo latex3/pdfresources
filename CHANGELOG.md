@@ -12,7 +12,12 @@ this project uses date-based 'snapshot' version identifiers.
  - new module l3pdfoutline for bookmark support
  - new latex-lab module bookmark for bookmark support
  - added a verification 'omit_CID' used by PDF/a-2 and newer with luatex.
+ - warnings if pdfversion does not fit ua-1 and ua-2
 
+### Fixed
+ - add xmp-resource for pdfaid:rev (tagging-project issue#375)
+ - empty color in \bookmarksetup https://github.com/ho-tex/bookmark/issues/11
+ 
 ## [2024-05-23]
 Version: 2024-05-23, 0.96i
 
