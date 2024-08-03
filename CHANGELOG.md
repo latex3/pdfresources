@@ -14,6 +14,7 @@ this project uses date-based 'snapshot' version identifiers.
 
 ### Fixed
  - add xmp-resource for pdfaid:rev (tagging-project issue#375)
+ - empty color in \bookmarksetup https://github.com/ho-tex/bookmark/issues/11
  
 ## [2024-05-23]
 Version: 2024-05-23, 0.96i

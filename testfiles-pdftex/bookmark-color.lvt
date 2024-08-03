@@ -1,0 +1,28 @@
+%from https://github.com/ho-tex/bookmark/issues/11
+\ExplSyntaxOn
+\debug_on:n { check-declarations , deprecation }
+\msg_redirect_module:nnn { pdf } { none } { warning }
+\ExplSyntaxOff
+\DocumentMetadata
+ {
+   pdfversion=2.0, %
+   lang=de-DE,
+   uncompress
+ }
+\input{regression-test}
+\documentclass{article}
+\usepackage{xcolor}
+\usepackage{bookmark}
+\begin{document}
+\START \showoutput
+\bookmarksetup{
+  color={blue}
+}
+
+\section{First section}
+
+\bookmarksetup{color={}}
+
+\section{First section}
+
+\end{document}
