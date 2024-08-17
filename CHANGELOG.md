@@ -5,7 +5,7 @@ first release 0.95a, 2021-02-23 will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 this project uses date-based 'snapshot' version identifiers.
 
-## [Unreleased]
+## [2024-08-17]
 
 ### Added
 
@@ -15,6 +15,7 @@ this project uses date-based 'snapshot' version identifiers.
 ### Fixed
  - add xmp-resource for pdfaid:rev (tagging-project issue#375)
  - empty color in \bookmarksetup https://github.com/ho-tex/bookmark/issues/11
+ - unneeded warning with bookmarks=false, https://github.com/latex3/hyperref/issues/352
  
 ## [2024-05-23]
 Version: 2024-05-23, 0.96i
