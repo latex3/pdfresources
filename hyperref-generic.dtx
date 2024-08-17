@@ -1538,12 +1538,18 @@
         }    
      }
  }
-\legacy_if:nT { Hy@bookmarks }
+\legacy_if:nTF { Hy@bookmarks }
   {
     \AddToHook{begindocument/before}[hyperref/bookmark]
      {
        \RequirePackage{bookmark}
-     }
+     }     
+  }
+%    \end{macrocode}
+% empty hook chunk to ensure that the chunk exists.
+%    \begin{macrocode}
+  {
+    \AddToHook{begindocument/before}[hyperref/bookmark]{}
   }
 \legacy_if:nT {Hy@draft}
   {
