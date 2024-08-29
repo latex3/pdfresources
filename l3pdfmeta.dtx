@@ -938,6 +938,11 @@
   { g_@@_standard_pdf/A-2B_prop }{max_pdf_version}{1.7}
 \prop_gput:cnn
   { g_@@_standard_pdf/A-2B_prop }{omit_CID}{}
+% OCG layers are allowed (with restrictions)  
+\prop_gremove:cn
+  { g_@@_standard_pdf/A-2B_prop }
+  { Catalog_no_OCProperties }
+  
   %A-2u ==============
 \prop_new:c { g_@@_standard_pdf/A-2U_prop }
 \prop_gset_eq:cc
