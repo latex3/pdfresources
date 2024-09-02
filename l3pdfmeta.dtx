@@ -190,6 +190,8 @@
 %  a test for at least the PDF-format will be added in future.
 % \item[|Catalog_no_OCProperties|] don't add |/OCProperties| to the catalog
 % {\em l3pdfmeta removes this entry at the end of the document}
+% \item[|Catalog_OCProperties_no_AS|] 
+% do not use |/AS| optional content configuration dictionary.
 % \item[|Catalog_EmbeddedFiles|] ensure that an |EmbeddedFiles| name tree is
 % in the catalog. This is required for PDF/A-4f.
 % \item[|annot_widget_no_AA|] (rule 6.6.2-1)
@@ -887,7 +889,10 @@
     %
     %===============
     % Rule 6.1.13-1 CosDocument, isOptionalContentPresent == false
-      ,Catalog_no_OCProperties =
+    ,Catalog_no_OCProperties =
+    % Rule 6.9-4 The AS key shall not appear in any optional content configuration dictionary.
+    % actually only starting with A-2 but doesn't harm here either
+    ,Catalog_OCProperties_no_AS=  
     %===============
     % Rule 6.6.1-1: PDAction, S == "GoTo" || S == "GoToR" || S == "Thread"
     %               || S == "URI" || S == "Named" || S == "SubmitForm"
@@ -1028,7 +1033,8 @@
   { g_@@_standard_pdf/A-4_prop }{conformance}
 \prop_gremove:cn
   { g_@@_standard_pdf/A-4_prop }{max_pdf_version}
-  
+\prop_gremove:cn
+  { g_@@_standard_pdf/A-4_prop }{Catalog_OCProperties_no_AS} 
 %A-4f ==============
 \prop_new:c { g_@@_standard_pdf/A-4F_prop }
 \prop_gset_eq:cc

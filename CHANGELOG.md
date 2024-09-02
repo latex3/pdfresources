@@ -7,6 +7,9 @@ this project uses date-based 'snapshot' version identifiers.
 
 ## [Unreleased]
 
+### Added
+ - l3pdfmeta.dtx: add standard test `Catalog_no_OCProperties_AS`, (issue#77)
+ 
 ### Fixed
  - l3pdfmeta.dtx: remove Catalog_no_OCProperties from pdf/a-2b onwards (issue#77)
 
