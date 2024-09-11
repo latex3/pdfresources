@@ -197,11 +197,12 @@
 %   stream.  The \meta{token list variable} is assigned locally.
 % \end{function}
 % 
-% \begin{function}{\ShowDocumentProperties}
+% \begin{function}{\ShowDocumentProperties,\LogDocumentProperties}
 % \begin{syntax}
-%  \cs{ShowDocumentProperties}
+%  \cs{ShowDocumentProperties}\\
+%  \cs{LogDocumentProperties}
 % \end{syntax}
-% This show the current content of the container.
+% This shows/logs the current content of the container.
 % \end{function}
 %
 % \begin{thebibliography}{9}
@@ -320,6 +321,13 @@
 \NewDocumentCommand\ShowDocumentProperties {}
   {
     \msg_show:nne {pdfmanagement}{show-properties}
+      {
+        \prop_map_function:NN \g_@@_documentproperties_prop \msg_show_item:nn
+      }
+  }
+\NewDocumentCommand\LogDocumentProperties {}
+  {
+    \msg_log:nne {pdfmanagement}{show-properties}
       {
         \prop_map_function:NN \g_@@_documentproperties_prop \msg_show_item:nn
       }
