@@ -7,6 +7,9 @@ this project uses date-based 'snapshot' version identifiers.
 
 ## [Unreleased]
 
+### Added
+ - ltdocinit.dtx: add \LogDocumentProperties
+
 ### Fixed 
  - colorspace-patches-tmp-ltx.sty: fixes hook use, issue #78
  
