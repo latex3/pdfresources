@@ -7,6 +7,35 @@ this project uses date-based 'snapshot' version identifiers.
 
 ## [Unreleased]
 
+### Changed
+
+ - generic driver: 
+   expand values of pdfauthor and similar to allow the use of commands
+
+
+## [2024-09-13]
+Version: 2024-09-02 v0.96l
+
+### Added
+ - ltdocinit.dtx: add \LogDocumentProperties
+ - l3pdfmeta: Support additions of external schemas like ZUGferd with
+   \pdfmeta_xmp_schema_new:nnn \pdfmeta_xmp_property_new:nnnnn
+
+### Fixed 
+ - colorspace-patches-tmp-ltx.sty: fixes hook use, issue #78
+ 
+## [2024-09-02]
+Version: 2024-09-02 v0.96k
+
+### Added
+ - l3pdfmeta.dtx: add standard test `Catalog_no_OCProperties_AS`, (issue#77)
+ 
+### Fixed
+ - l3pdfmeta.dtx: remove Catalog_no_OCProperties from pdf/a-2b onwards (issue#77)
+
+## [2024-08-17]
+Version: 2024-08-17 v0.96j
+
 ### Added
 
  - new module l3pdfoutline for bookmark support
@@ -17,6 +46,7 @@ this project uses date-based 'snapshot' version identifiers.
 ### Fixed
  - add xmp-resource for pdfaid:rev (tagging-project issue#375)
  - empty color in \bookmarksetup https://github.com/ho-tex/bookmark/issues/11
+ - unneeded warning with bookmarks=false, https://github.com/latex3/hyperref/issues/352
  
 ## [2024-05-23]
 Version: 2024-05-23, 0.96i
