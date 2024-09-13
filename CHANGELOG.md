@@ -9,6 +9,8 @@ this project uses date-based 'snapshot' version identifiers.
 
 ### Added
  - ltdocinit.dtx: add \LogDocumentProperties
+ - l3pdfmeta: Support additions of external schemas like ZUGferd with
+   \pdfmeta_xmp_schema_new:nnn \pdfmeta_xmp_property_new:nnnnn
 
 ### Fixed 
  - colorspace-patches-tmp-ltx.sty: fixes hook use, issue #78
