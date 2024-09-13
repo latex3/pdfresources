@@ -49,7 +49,7 @@
 %    }^^A
 % }
 %
-% \date{Version 0.96i, released 2024-05-23}
+% \date{Version 0.96l, released 2024-09-13}
 %
 % \maketitle
 % \begin{documentation}
@@ -190,6 +190,8 @@
 %  a test for at least the PDF-format will be added in future.
 % \item[|Catalog_no_OCProperties|] don't add |/OCProperties| to the catalog
 % {\em l3pdfmeta removes this entry at the end of the document}
+% \item[|Catalog_OCProperties_no_AS|] 
+% do not use |/AS| optional content configuration dictionary.
 % \item[|Catalog_EmbeddedFiles|] ensure that an |EmbeddedFiles| name tree is
 % in the catalog. This is required for PDF/A-4f.
 % \item[|annot_widget_no_AA|] (rule 6.6.2-1)
@@ -592,7 +594,8 @@
 % \begin{syntax}
 % \cs{pdfmeta_xmp_xmlns_new:nn}\Arg{prefix}\Arg{uri}
 % \end{syntax}
-% With this command a xmlns name space can be added.
+% With this command a xmlns name space can be added. The \meta{uri}
+% argument is expanded, a hash can be input with |\c_hash_str|.
 % \end{function}
 %
 % With the two following commands PDF declarations can be added to the XMP metadata
@@ -622,6 +625,38 @@
 % If  \cs{pdfmeta_xmp_add_declaration:nnnnn} is used twice with the same \meta{uri}
 % argument the |claimData| are concatenated. There is no check if the |claimData| are identical. 
 % \end{function}
+% 
+% The following two commands can be used to extend the schema declarations in
+% the XMP metadata. This is for example needed to implement a standard like ZUGferd/Factur X
+% for invoices. A schema declaration should be added only once but as this task
+% is probably not needed frequently only light guards are there to avoid duplicated entries.
+%  
+% \begin{function}{\pdfmeta_xmp_schema_new:nnn}
+% \begin{syntax}
+% \cs{pdfmeta_xmp_schema_new:nnn}\Arg{text}\Arg{prefix}\Arg{uri}
+% \end{syntax}
+% \meta{text} is some string describing the schema, e.g. |PDF/A~Identification~Schema|,
+% \meta{prefix} is the unique prefix used by the schema. This prefix
+% must be declared first with |\pdfmeta_xmp_xmlns_new:nn|. If a schema with this prefix
+% has already been declared, it will currently be ignored with a warning. 
+% The \meta{uri} is expanded, so a
+% hash can for example be given as |\c_hash_str|. 
+% \end{function}
+
+% \begin{function}{\pdfmeta_xmp_property_new:nnnnn}
+% \begin{syntax}
+% \cs{pdfmeta_xmp_property_new:nnnnn}\Arg{schema prefix}\Arg{name}\Arg{type}\Arg{category}\Arg{description}
+% \end{syntax}
+% If the new property already exists in the schema
+% (as identified by the combination of \meta{schema prefix}
+% and \meta{name} the property is silently ignore. 
+% \meta{schema prefix} is the prefix declared with the previous command.
+% schema, e.g. |PDF/A~Identification~Schema|,
+% \meta{name} is a short string that identifies the property, e.g. |xmpMM| or |year|. It must be
+% unique in the properties of a schema. \meta{type} is e.g. |URI| or |Integer| or |Text|, 
+% \meta{category} is e.g. |internal| or |external|, \meta{description} is a free description string. 
+% \end{function}
+% 
 % \end{documentation}
 %
 % \begin{implementation}
@@ -631,7 +666,7 @@
 %    \begin{macrocode}
 %<@@=pdfmeta>
 %<*header>
-\ProvidesExplPackage{l3pdfmeta}{2024-05-23}{0.96i}
+\ProvidesExplPackage{l3pdfmeta}{2024-09-13}{0.96l}
   {PDF-Standards---LaTeX PDF management testphase bundle}
 %</header>
 %    \end{macrocode}
@@ -887,7 +922,10 @@
     %
     %===============
     % Rule 6.1.13-1 CosDocument, isOptionalContentPresent == false
-      ,Catalog_no_OCProperties =
+    ,Catalog_no_OCProperties =
+    % Rule 6.9-4 The AS key shall not appear in any optional content configuration dictionary.
+    % actually only starting with A-2 but doesn't harm here either
+    ,Catalog_OCProperties_no_AS=  
     %===============
     % Rule 6.6.1-1: PDAction, S == "GoTo" || S == "GoToR" || S == "Thread"
     %               || S == "URI" || S == "Named" || S == "SubmitForm"
@@ -938,6 +976,11 @@
   { g_@@_standard_pdf/A-2B_prop }{max_pdf_version}{1.7}
 \prop_gput:cnn
   { g_@@_standard_pdf/A-2B_prop }{omit_CID}{}
+% OCG layers are allowed (with restrictions)  
+\prop_gremove:cn
+  { g_@@_standard_pdf/A-2B_prop }
+  { Catalog_no_OCProperties }
+  
   %A-2u ==============
 \prop_new:c { g_@@_standard_pdf/A-2U_prop }
 \prop_gset_eq:cc
@@ -1023,7 +1066,8 @@
   { g_@@_standard_pdf/A-4_prop }{conformance}
 \prop_gremove:cn
   { g_@@_standard_pdf/A-4_prop }{max_pdf_version}
-  
+\prop_gremove:cn
+  { g_@@_standard_pdf/A-4_prop }{Catalog_OCProperties_no_AS} 
 %A-4f ==============
 \prop_new:c { g_@@_standard_pdf/A-4F_prop }
 \prop_gset_eq:cc
@@ -1427,7 +1471,8 @@
 %    \end{macrocode}
 % \subsection{Messages}
 %    \begin{macrocode}
-\msg_new:nnn{pdfmeta}{namespace-defined}{The~xmlns~namespace~`#1`~is~already~declared}
+\msg_new:nnn{pdfmeta}{xmp-defined}{The~XMP~#1~`#2`~is~already~declared}
+\msg_new:nnn{pdfmeta}{xmp-undefined}{The~XMP~#1~`#2`~is~undefined}
 \msg_new:nnn{pdfmeta}{colorprofile-undefined}{The~colorprofile~`#1`~is~unknown}
 %    \end{macrocode}
 % \subsection{Some helper commands}
@@ -1959,7 +2004,7 @@
 \prop_new:N \g_@@_xmp_xmlns_prop
 %    \end{macrocode}
 % \end{variable}
-% \begin{macro}{\@@_xmp_xmlns_new:nn,\@@_xmp_xmlns_new:ne}
+% \begin{macro}{\@@_xmp_xmlns_new:nn}
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_xmp_xmlns_new:nn #1 #2
   {
@@ -1969,7 +2014,6 @@
         \@@_xmp_indent:n{4} xmlns:\exp_not:n{#1="#2"}
       }
   }
-\cs_generate_variant:Nn \@@_xmp_xmlns_new:nn {ne}
 %    \end{macrocode}
 % \end{macro}
 % Now we fill the data. The list is more or less the same as in hyperxmp
@@ -1980,7 +2024,7 @@
 \@@_xmp_xmlns_new:nn {photoshop}{http://ns.adobe.com/photoshop/1.0/}
 \@@_xmp_xmlns_new:nn {xmp}      {http://ns.adobe.com/xap/1.0/}
 \@@_xmp_xmlns_new:nn {xmpMM}    {http://ns.adobe.com/xap/1.0/mm/}
-\@@_xmp_xmlns_new:ne {stEvt}
+\@@_xmp_xmlns_new:nn {stEvt}
   {http://ns.adobe.com/xap/1.0/sType/ResourceEvent\c_hash_str}
 \@@_xmp_xmlns_new:nn {pdfaid}   {http://www.aiim.org/pdfa/ns/id/}
 \@@_xmp_xmlns_new:nn {pdfuaid}  {http://www.aiim.org/pdfua/ns/id/}
@@ -1989,13 +2033,13 @@
 \@@_xmp_xmlns_new:nn {prism}    {http://prismstandard.org/namespaces/basic/3.0/}
 %\@@_xmp_xmlns_new:nn {jav}      {http://www.niso.org/schemas/jav/1.0/}
 %\@@_xmp_xmlns_new:nn {xmpTPg}   {http://ns.adobe.com/xap/1.0/t/pg/}
-\@@_xmp_xmlns_new:ne {stFnt}    {http://ns.adobe.com/xap/1.0/sType/Font\c_hash_str}
+\@@_xmp_xmlns_new:nn {stFnt}    {http://ns.adobe.com/xap/1.0/sType/Font\c_hash_str}
 \@@_xmp_xmlns_new:nn {Iptc4xmpCore}{http://iptc.org/std/Iptc4xmpCore/1.0/xmlns/}
 \@@_xmp_xmlns_new:nn {pdfaExtension}{http://www.aiim.org/pdfa/ns/extension/}
-\@@_xmp_xmlns_new:ne {pdfaSchema}{http://www.aiim.org/pdfa/ns/schema\c_hash_str}
-\@@_xmp_xmlns_new:ne {pdfaProperty}{http://www.aiim.org/pdfa/ns/property\c_hash_str}
-\@@_xmp_xmlns_new:ne {pdfaType} {http://www.aiim.org/pdfa/ns/type\c_hash_str}
-\@@_xmp_xmlns_new:ne {pdfaField}{http://www.aiim.org/pdfa/ns/field\c_hash_str}
+\@@_xmp_xmlns_new:nn {pdfaSchema}{http://www.aiim.org/pdfa/ns/schema\c_hash_str}
+\@@_xmp_xmlns_new:nn {pdfaProperty}{http://www.aiim.org/pdfa/ns/property\c_hash_str}
+\@@_xmp_xmlns_new:nn {pdfaType} {http://www.aiim.org/pdfa/ns/type\c_hash_str}
+\@@_xmp_xmlns_new:nn {pdfaField}{http://www.aiim.org/pdfa/ns/field\c_hash_str}
 %    \end{macrocode}
 
 % \subsection{Building the chunks: Extensions}
@@ -2022,42 +2066,61 @@
 \cs_new_protected:Npn \@@_xmp_schema_new:nnn #1 #2 #3
   %#1 name #2 prefix, #3 text
   {
-    \seq_put_right:Nn \l_@@_xmp_schema_seq { #2 }
-    \tl_new:c { g_@@_xmp_schema_#2_tl }
-    \tl_new:c { g_@@_xmp_schema_#2_properties_tl }
-    \tl_gput_right:cn { g_@@_xmp_schema_#2_tl }
+    \tl_if_exist:cTF { g_@@_xmp_schema_#2_tl }
       {
-        \@@_xmp_add_packet_open_attr:nnn{rdf}{li}{rdf:parseType="Resource"}
-         \@@_xmp_add_packet_line:nnn {pdfaSchema}{schema}{#1}
-         \@@_xmp_add_packet_line:nnn {pdfaSchema}{prefix}{#2}
-         \@@_xmp_add_packet_line:nnn {pdfaSchema}{namespaceURI}{#3}
-         \@@_xmp_add_packet_open:nn {pdfaSchema}{property}
-          \@@_xmp_add_packet_open:nn{rdf}{Seq}
-              \tl_use:c { g_@@_xmp_schema_#2_properties_tl }
-          \@@_xmp_add_packet_close:nn{rdf}{Seq}
-         \@@_xmp_add_packet_close:nn {pdfaSchema}{property}
-        \cs_if_exist_use:c {@@_xmp_schema_#2_additions:}
-        \@@_xmp_add_packet_close:nn{rdf}{li}
+       \msg_warning:nnnn{pdfmeta}{xmp-defined}{schema}{#2}
       }
+      {
+        \seq_put_right:Nn \l_@@_xmp_schema_seq { #2 }
+        \tl_new:c { g_@@_xmp_schema_#2_tl }
+        \tl_new:c { g_@@_xmp_schema_#2_properties_tl }
+        \tl_gput_right:cn { g_@@_xmp_schema_#2_tl }
+          {
+            \@@_xmp_add_packet_open_attr:nnn{rdf}{li}{rdf:parseType="Resource"}
+             \@@_xmp_add_packet_line:nnn {pdfaSchema}{schema}{#1}
+             \@@_xmp_add_packet_line:nnn {pdfaSchema}{prefix}{#2}
+             \@@_xmp_add_packet_line:nnn {pdfaSchema}{namespaceURI}{#3}
+             \@@_xmp_add_packet_open:nn {pdfaSchema}{property}
+              \@@_xmp_add_packet_open:nn{rdf}{Seq}
+                  \tl_use:c { g_@@_xmp_schema_#2_properties_tl }
+              \@@_xmp_add_packet_close:nn{rdf}{Seq}
+             \@@_xmp_add_packet_close:nn {pdfaSchema}{property}
+            \cs_if_exist_use:c {@@_xmp_schema_#2_additions:}
+            \@@_xmp_add_packet_close:nn{rdf}{li}
+          }
+      } 
   }
 %    \end{macrocode}
 % \end{macro}
-
-% \begin{macro}{\@@_xmp_property_new:nnn}
+% 
+%
+%
+% \begin{macro}{\@@_xmp_property_new:nnnnn}
 %  This adds a property to a schema.
 %    \begin{macrocode}
+\prop_new:N\g_@@_xmp_schema_property_prop
 \cs_new_protected:Npn \@@_xmp_property_new:nnnnn #1 #2 #3 #4 #5 %
     %#1 schema #2 name, #3 type, #4 category #5 description
   {
-    \tl_gput_right:cn { g_@@_xmp_schema_#1_properties_tl }
+    \tl_if_exist:cTF { g_@@_xmp_schema_#1_properties_tl }
+     {
+       \prop_get:NeNF \g_@@_xmp_schema_property_prop {#1:#2}\l_@@_tmpa_tl
+        {
+          \prop_gput:Nee \g_@@_xmp_schema_property_prop {#1:#2}{#3}
+          \tl_gput_right:cn { g_@@_xmp_schema_#1_properties_tl }
+            {
+              \@@_xmp_add_packet_open:nn {rdf}{li~rdf:parseType="Resource"}
+                \@@_xmp_add_packet_line:nnn {pdfaProperty}{name}{#2}
+                \@@_xmp_add_packet_line:nnn {pdfaProperty}{valueType}{#3}
+                \@@_xmp_add_packet_line:nnn {pdfaProperty}{category}{#4}
+                \@@_xmp_add_packet_line:nnn {pdfaProperty}{description}{#5}
+              \@@_xmp_add_packet_close:nn{rdf}{li}
+           }
+        }
+      }
       {
-        \@@_xmp_add_packet_open:nn {rdf}{li~rdf:parseType="Resource"}
-          \@@_xmp_add_packet_line:nnn {pdfaProperty}{name}{#2}
-          \@@_xmp_add_packet_line:nnn {pdfaProperty}{valueType}{#3}
-          \@@_xmp_add_packet_line:nnn {pdfaProperty}{category}{#4}
-          \@@_xmp_add_packet_line:nnn {pdfaProperty}{description}{#5}
-        \@@_xmp_add_packet_close:nn{rdf}{li}
-     }
+        \msg_warning:nnnn{pdfmeta}{xmp-undefined}{schema}{#1}
+      }
   }
 %    \end{macrocode}
 % \end{macro}
@@ -2126,6 +2189,12 @@
    {Integer}
    {internal}
    {Year~of~standard}
+\@@_xmp_property_new:nnnnn
+   {pdfaid}
+   {rev}
+   {Integer}
+   {internal}
+   {Revision~year~of~standard}   
 %    \end{macrocode}
 % \end{macro}
 %  \item[pdfuaid] here we need (?) to declare the property 
@@ -2335,7 +2404,7 @@
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_xmp_schema_enable_pdfd:
  {
-  \@@_xmp_xmlns_new:ne {pdfd}{http://pdfa.org/declarations/} 
+  \@@_xmp_xmlns_new:nn {pdfd}{http://pdfa.org/declarations/} 
   \@@_xmp_schema_new:nnn
     {PDF~Declarations~Schema}
     {pdfd}
@@ -2955,9 +3024,20 @@
 \cs_new_protected:Npn \pdfmeta_xmp_xmlns_new:nn #1 #2
   {
     \prop_if_in:NnTF \g_@@_xmp_xmlns_prop {#1}
-      {\msg_warning:nnn{pdfmeta}{namespace-defined}{#1}}
+      {\msg_warning:nnnn{pdfmeta}{xmp-defined}{xmlns~namespace}{#1}}
       {\@@_xmp_xmlns_new:nn {#1}{#2}}
   }
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\pdfmeta_xmp_schema_new:nnn}
+%    \begin{macrocode}
+\cs_set_eq:NN \pdfmeta_xmp_schema_new:nnn \@@_xmp_schema_new:nnn
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{\pdfmeta_xmp_property_new:nnnnn}
+%    \begin{macrocode}
+\cs_set_eq:NN \pdfmeta_xmp_property_new:nnnnn \@@_xmp_property_new:nnnnn
 %    \end{macrocode}
 % \end{macro}
 % 

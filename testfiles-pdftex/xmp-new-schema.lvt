@@ -1,0 +1,71 @@
+\ExplSyntaxOn
+\debug_on:n { check-declarations }
+\sys_gset_rand_seed:n{1000}
+\ExplSyntaxOff
+
+\DocumentMetadata{%
+	%pdfstandard=A-4f,
+	pdfversion=2.0,
+	lang=en,
+    debug={xmp-export}
+}
+\input{regression-test}
+\documentclass{article}
+
+\begin{document}
+blub
+\START
+\SHOWFILE{xmp-new-schema.xmpi}
+\ExplSyntaxOn
+
+
+\pdfmeta_xmp_xmlns_new:nn {fx}{
+urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0\c_hash_str
+}
+
+\pdfmeta_xmp_xmlns_new:nn {fx}{
+urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0\c_hash_str
+}
+
+\pdfmeta_xmp_schema_new:nnn
+  {Factur-X~PDFA~Extension~Schema}
+  {fx}
+  {urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0\c_hash_str}
+
+%test duplicate
+\pdfmeta_xmp_schema_new:nnn
+  {duplicate}
+  {fx}
+  {urn:factur-x:duplicate}
+
+\pdfmeta_xmp_property_new:nnnnn
+  {fx}
+  {DocumentFileName}
+  {Text}
+  {external}
+  {name~of~the~embedded~XML~invoice~file}
+
+\pdfmeta_xmp_property_new:nnnnn
+  {fx}
+  {DocumentFileName}
+  {Text}
+  {external}
+  {duplicate}
+  
+
+\pdfmeta_xmp_property_new:nnnnn
+  {fx}
+  {DocumentType}
+  {Text}
+  {external}
+  {INVOICE}
+
+\pdfmeta_xmp_property_new:nnnnn
+  {fxunknown}
+  {DocumentFileName}
+  {Text}
+  {external}
+  {name~of~the~embedded~XML~invoice~file}
+\ExplSyntaxOff
+
+\end{document}

@@ -82,7 +82,7 @@
 %    }^^A
 % }
 %
-% \date{Version 0.96i, released 2024-05-23}
+% \date{Version 0.96l, released 2024-09-13}
 %
 % \maketitle
 % \begin{documentation}
@@ -211,7 +211,7 @@
 %
 %  \item |pdflang| is deprecated. Instead \cs{DocumentMetadata} should be used:
 %  \begin{verbatim}
-%  \cs{DocumentMetadata}{lang=de-DE}
+%  \DocumentMetadata{lang=de-DE}
 %  \end{verbatim}
 %
 %  The value can be retrieved as |document/lang|.
@@ -965,7 +965,7 @@
 %<@@=hyp>
 %    \end{macrocode}
 %    \begin{macrocode}
-\ProvidesFile{hgeneric-testphase.def}[2024-05-23 v0.96i %
+\ProvidesFile{hgeneric-testphase.def}[2024-09-13 v0.96l %
   generic Hyperref driver for the LaTeX PDF management testphase bundle]
 
 \RequirePackage{etoolbox} %why?
@@ -1527,19 +1527,29 @@
  {
    \define@key{BKM}{color}
      {
-       \__hyp_color_set:ne {__hyp/tmpa}{#1}
-       \color_export:nVN
-         {__hyp/tmpa}
-         \g__hyp_bordercolormodel_str
-         \BKM@color
+      \tl_if_blank:nTF {#1}
+        { \cs_set_eq:NN\BKM@color\@empty }
+        { 
+          \__hyp_color_set:ne {__hyp/tmpa}{#1}
+          \color_export:nVN
+            {__hyp/tmpa}
+            \g__hyp_bordercolormodel_str
+            \BKM@color
+        }    
      }
  }
-\legacy_if:nT { Hy@bookmarks }
+\legacy_if:nTF { Hy@bookmarks }
   {
     \AddToHook{begindocument/before}[hyperref/bookmark]
      {
        \RequirePackage{bookmark}
-     }
+     }     
+  }
+%    \end{macrocode}
+% empty hook chunk to ensure that the chunk exists.
+%    \begin{macrocode}
+  {
+    \AddToHook{begindocument/before}[hyperref/bookmark]{}
   }
 \legacy_if:nT {Hy@draft}
   {

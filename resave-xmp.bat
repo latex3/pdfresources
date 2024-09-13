@@ -1,0 +1,13 @@
+REM tests to resave if xmp changes.
+
+  l3build save formtextfields disable-links ocgcolorlinks colorprofile1 checkbox pagesattr pageattr ismap transition infodict tag-checkbox xform annot active-colon radiobuttons linkmargin thispageattr viewerpreferences bdc-properties pdffilelink ocproperties embedfile xform-appearance infodict-new test-pdfA-4 pdflscape metadata-new pgfpatches mixpageattr textfield xform-preamble ap-names formfield-old pagelabels metadata-new-no-hyperref annot-dict colorprofile-standard destination-options linkbordercolor linktoc embedstream a-4f
+  l3build save -e xetex pagelabels-log dict_if_empty version-compare show annot-last
+  l3build save -c config-noxetex transparent-tikz colorspace test-new-transparent pdfa2b-test calculationsortorder metadata pgfpatches extgstate-patches
+  l3build save -c config-luatex linkhook fontspec-spotcolor calculate-textfield fontspec-color-model non-ascii-links structure-destination stop-link catalogAF luacolor
+  l3build save -c config-dvips metadata-new nopdfmanage structure-destination
+  l3build save -c config-pdftex catalogAF metadata-dates structure-destination calculate-textfield metadata-declarations metadata-declaration-schema ua-2-info colorlinks linkhook stop-link metadata-ansi
+  l3build save -c config-xetex stop-link linkhook calculate-textfield catalogAF structure-destination metadata-newpage
+
+ l3build save -e luatex viewerpreferences pdflscape ismap destination-options embedstream mixpageattr annot embedfile formfield-old ocproperties a-4f pagelabels radiobuttons checkbox textfield transition linkbordercolor thispageattr formtextfields bdc-properties infodict-new ocgcolorlinks linktoc colorprofile-standard annot-dict metadata-new-no-hyperref test-pdfA-4 metadata-new xform-preamble infodict xform colorprofile1 pageattr active-colon disable-links pdffilelink ap-names xform-appearance linkmargin pagesattr pgfpatches tag-checkbox
+ l3build save -e xetex viewerpreferences pdflscape ismap destination-options embedstream mixpageattr annot embedfile formfield-old ocproperties a-4f pagelabels radiobuttons checkbox textfield transition linkbordercolor thispageattr formtextfields bdc-properties infodict-new ocgcolorlinks linktoc colorprofile-standard annot-dict metadata-new-no-hyperref test-pdfA-4 metadata-new xform-preamble infodict xform colorprofile1 pageattr active-colon disable-links pdffilelink ap-names xform-appearance linkmargin pagesattr pgfpatches tag-checkbox
+ l3build save -c config-noxetex -e pdftex calculationsortorder pdfa2b-test metadata transparent-tikz colorspace extgstate-patches test-new-transparent pgfpatches
