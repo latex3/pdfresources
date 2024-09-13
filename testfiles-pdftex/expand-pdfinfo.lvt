@@ -1,0 +1,21 @@
+\ExplSyntaxOn
+\debug_on:n { check-declarations }
+\sys_gset_rand_seed:n{1000}
+\ExplSyntaxOff
+
+\DocumentMetadata{%
+	%pdfstandard=A-4f,
+	pdfversion=2.0,
+	lang=en,
+    debug={xmp-export}
+}
+\input{regression-test}
+\documentclass{article}
+\usepackage{hyperref}
+\newcommand\mypdfauthors{Bär,Duck,Surikato}
+\hypersetup{pdfauthor=\mypdfauthors}
+\begin{document}
+\START
+\SHOWFILE{\jobname.xmpi}
+blub
+\end{document}
