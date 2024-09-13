@@ -1471,7 +1471,8 @@
 %    \end{macrocode}
 % \subsection{Messages}
 %    \begin{macrocode}
-\msg_new:nnn{pdfmeta}{namespace-defined}{The~#1~`#2`~is~already~declared}
+\msg_new:nnn{pdfmeta}{xmp-defined}{The~XMP~#1~`#2`~is~already~declared}
+\msg_new:nnn{pdfmeta}{xmp-undefined}{The~XMP~#1~`#2`~is~undefined}
 \msg_new:nnn{pdfmeta}{colorprofile-undefined}{The~colorprofile~`#1`~is~unknown}
 %    \end{macrocode}
 % \subsection{Some helper commands}
@@ -2067,7 +2068,7 @@
   {
     \tl_if_exist:cTF { g_@@_xmp_schema_#2_tl }
       {
-       \msg_warning:nnnn{pdfmeta}{namespace-defined}{schema}{#2}
+       \msg_warning:nnnn{pdfmeta}{xmp-defined}{schema}{#2}
       }
       {
         \seq_put_right:Nn \l_@@_xmp_schema_seq { #2 }
@@ -2101,19 +2102,25 @@
 \cs_new_protected:Npn \@@_xmp_property_new:nnnnn #1 #2 #3 #4 #5 %
     %#1 schema #2 name, #3 type, #4 category #5 description
   {
-    \prop_get:NeNF \g_@@_xmp_schema_property_prop {#1:#2}\l_@@_tmpa_tl
+    \tl_if_exist:cTF { g_@@_xmp_schema_#1_properties_tl }
      {
-       \prop_gput:Nee \g_@@_xmp_schema_property_prop {#1:#2}{#3}
-       \tl_gput_right:cn { g_@@_xmp_schema_#1_properties_tl }
-         {
-           \@@_xmp_add_packet_open:nn {rdf}{li~rdf:parseType="Resource"}
-             \@@_xmp_add_packet_line:nnn {pdfaProperty}{name}{#2}
-             \@@_xmp_add_packet_line:nnn {pdfaProperty}{valueType}{#3}
-             \@@_xmp_add_packet_line:nnn {pdfaProperty}{category}{#4}
-             \@@_xmp_add_packet_line:nnn {pdfaProperty}{description}{#5}
-           \@@_xmp_add_packet_close:nn{rdf}{li}
+       \prop_get:NeNF \g_@@_xmp_schema_property_prop {#1:#2}\l_@@_tmpa_tl
+        {
+          \prop_gput:Nee \g_@@_xmp_schema_property_prop {#1:#2}{#3}
+          \tl_gput_right:cn { g_@@_xmp_schema_#1_properties_tl }
+            {
+              \@@_xmp_add_packet_open:nn {rdf}{li~rdf:parseType="Resource"}
+                \@@_xmp_add_packet_line:nnn {pdfaProperty}{name}{#2}
+                \@@_xmp_add_packet_line:nnn {pdfaProperty}{valueType}{#3}
+                \@@_xmp_add_packet_line:nnn {pdfaProperty}{category}{#4}
+                \@@_xmp_add_packet_line:nnn {pdfaProperty}{description}{#5}
+              \@@_xmp_add_packet_close:nn{rdf}{li}
+           }
         }
-     }
+      }
+      {
+        \msg_warning:nnnn{pdfmeta}{xmp-undefined}{schema}{#1}
+      }
   }
 %    \end{macrocode}
 % \end{macro}
@@ -3017,7 +3024,7 @@
 \cs_new_protected:Npn \pdfmeta_xmp_xmlns_new:nn #1 #2
   {
     \prop_if_in:NnTF \g_@@_xmp_xmlns_prop {#1}
-      {\msg_warning:nnnn{pdfmeta}{namespace-defined}{xmlns~namespace}{#1}}
+      {\msg_warning:nnnn{pdfmeta}{xmp-defined}{xmlns~namespace}{#1}}
       {\@@_xmp_xmlns_new:nn {#1}{#2}}
   }
 %    \end{macrocode}
