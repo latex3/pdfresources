@@ -5,7 +5,16 @@ first release 0.95a, 2021-02-23 will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 this project uses date-based 'snapshot' version identifiers.
 
+## [Unreleased]
+
+### Changed
+
+ - generic driver: 
+   expand values of pdfauthor and similar to allow the use of commands
+
+
 ## [2024-09-13]
+Version: 2024-09-02 v0.96l
 
 ### Added
  - ltdocinit.dtx: add \LogDocumentProperties
@@ -31,8 +40,6 @@ Version: 2024-08-17 v0.96j
 
  - added a verification 'omit_CID' used by PDF/a-2 and newer with luatex.
  - warnings if pdfversion does not fit ua-1 and ua-2
- - generic driver: 
-   expand values of pdfauthor and similiar to allow the use of commands
 
 ### Fixed
  - add xmp-resource for pdfaid:rev (tagging-project issue#375)
