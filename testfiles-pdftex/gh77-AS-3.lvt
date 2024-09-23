@@ -4,9 +4,10 @@
 \begin{document}
 \START
 \ExplSyntaxOn
-\pdfmeta_standard_verify:nTF{Catalog_OCProperties_no_AS}{\show\USEAS}{\show\NOAS}
+\pdfmeta_standard_verify:nTF{Catalog_OCProperties_no_AS}
+ {\iow_log:n{USEAS}}{\iow_log:n{NOAS}}
 
-\pdfmeta_standard_verify:nTF{Catalog_no_OCProperties}{\show\USEOCG}{\show\NOOCG}
-\ExplSyntaxOff
+\pdfmeta_standard_verify:nTF{Catalog_no_OCProperties}
+ {\iow_log:n{USEOCG}}{\iow_log:n{NOOCG}}\ExplSyntaxOff
 x
 \end{document}

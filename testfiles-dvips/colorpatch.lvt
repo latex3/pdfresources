@@ -12,6 +12,7 @@
 \definecolor{testrgb}{rgb}{0.5,0.5,0.6}
 \definecolor{testRGB}{RGB}{100,100,100}
 \definecolor{testcmyk}{cmyk}{0.5,0.5,0.6,0.4}
+\DefineNamedColor{named}{testcmyk}{cmyk}{0.5,0.5,0.6,0.4}
 \definecolor{anteater}{named}{testcmyk}
 \definecolor{duck}{named}{GreenYellow}
 \begin{document}
@@ -20,26 +21,26 @@ abc
 \ExplSyntaxOn
 \TEST{show~rgb}
  {
-   \color_show:n{testrgb}
+   \color_log:n{testrgb}
  }
 \TEST{show~RGB}
  {
-   \color_show:n{testRGB}
+   \color_log:n{testRGB}
  }
 
 \TEST{show~cmyk}
  {
-   \color_show:n{testcmyk}
+   \color_log:n{testcmyk}
  }
 
 \TEST{show~named~copy~cmyk}
  {
-   \color_show:n{anteater}
+   \color_log:n{anteater}
  }
 
 \TEST{show~named~dvipsnam.def}
  {
-   \color_show:n{duck}
+   \color_log:n{duck}
  }
 \ExplSyntaxOff
 

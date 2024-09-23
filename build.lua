@@ -32,7 +32,7 @@ else
 end
 
 checkruns = 4
-
+recordstatus=true
 
 
   specialformats = specialformats or {}
