@@ -11,7 +11,9 @@ this project uses date-based 'snapshot' version identifiers.
 
  - generic driver: 
    expand values of pdfauthor and similar to allow the use of commands
-
+   
+### Fixed
+ - color-ltx.sty: adapted \color@endgroup to change in LaTeX format.
 
 ## [2024-09-13]
 Version: 2024-09-02 v0.96l
