@@ -2177,7 +2177,7 @@
 %  \item[pdfaid] properties part and conformance are declared by hyperxmp, but
 %  no here as already in http://www.aiim.org/pdfa/ns/id/. But we declare
 %  year so that it can be used also with older A-standards.
-%   \begin{macro}{pdfaid~(schema)}
+%   \begin{macro}[no-user-doc]{pdfaid~(schema)}
 %    \begin{macrocode}
 \@@_xmp_schema_new:nnn
    {PDF/A~Identification~Schema}
@@ -2199,7 +2199,7 @@
 % \end{macro}
 %  \item[pdfuaid] here we need (?) to declare the property 
 %  \enquote{part} and \enquote{rev}.
-% \begin{macro}{pdfuaid~(schema)}
+% \begin{macro}[no-user-doc]{pdfuaid~(schema)}
 %    \begin{macrocode}
 \@@_xmp_schema_new:nnn
    {PDF/UA~Universal~Accessibility~Schema}
@@ -2226,7 +2226,7 @@
 %
 % \item[pdfxid] we set this so that we
 % can add the pdf/X version for pdf/X-4 and higher
-% \begin{macro}{pdfxid~(schema)}
+% \begin{macro}[no-user-doc]{pdfxid~(schema)}
 %    \begin{macrocode}
 \@@_xmp_schema_new:nnn
     {PDF/X~ID~Schema}
@@ -2242,7 +2242,7 @@
 % \end{macro}
 
 %\item[Prism]
-% \begin{macro}{prism~(schema)}
+% \begin{macro}[no-user-doc]{prism~(schema)}
 %    \begin{macrocode}
 \@@_xmp_schema_new:nnn
   {PRISM~Basic~Metadata}
@@ -2341,6 +2341,7 @@
 %    \end{macrocode}
 % \end{macro}
 % \item[iptc]
+% \begin{macro}[no-user-doc]{iptc (schema)}
 %    \begin{macrocode}
 \@@_xmp_schema_new:nnn
   {IPTC~Core~Schema}
@@ -2388,6 +2389,7 @@
     \@@_xmp_add_packet_close:nn{pdfaSchema}{valueType}
   }
 %    \end{macrocode}
+% \end{macro}
 % \item[jav]: currently ignored
 % 
 % \item[declarations] The PDF Declarations mechanism allows creation and 
@@ -2474,8 +2476,8 @@
 % \subsubsection{pdf}
 % This builds pdf related the data with the (prefix \enquote{pdf}).
 %
-% \begin{macro}{\@@_xmp_build_pdf:}
-% \begin{macro}{
+% \begin{macro}[int]{\@@_xmp_build_pdf:}
+% \begin{macro}[int]{
 %   Producer/pdfproducer,
 %   PDFversion}
 %    \begin{macrocode}
@@ -2503,8 +2505,8 @@
 % \subsubsection{xmp}
 % This builds the data with the (prefix \enquote{xmp}).
 %
-% \begin{macro}{\@@_xmp_build_xmp:}
-% \begin{macro}{
+% \begin{macro}[int]{\@@_xmp_build_xmp:}
+% \begin{macro}[int]{
 %   CreatorTool/pdfcreator,
 %   BaseUrl/baseurl}
 %    \begin{macrocode}
@@ -2698,8 +2700,8 @@
 %
 % \subsection{Rest of dublin Core data}
 %
-% \begin{macro}{\@@_xmp_build_dc:}
-% \begin{macro}{
+% \begin{macro}[int]{\@@_xmp_build_dc:}
+% \begin{macro}[int]{
 %  dc:creator/pdfauthor,
 %  dc:subject/pdfkeywords,
 %  dc:type/pdftype,
@@ -2878,8 +2880,8 @@
 % \end{macro}
 %
 % \subsection{Prism}
-% \begin{macro}{\@@_xmp_build_prism:}
-% \begin{macro}
+% \begin{macro}[int]{\@@_xmp_build_prism:}
+% \begin{macro}[int]
 %  {
 %   complianceProfile,
 %   prism:subtitle/pdfsubtitle,
