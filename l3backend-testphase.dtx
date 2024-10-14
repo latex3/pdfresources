@@ -1766,7 +1766,7 @@
 % At the end we will probably always use indexed objects, but for now we offer
 % both options.
 %  
-% \begin{macro}{\l_pdf_current_structure_destination_tl}
+% \begin{variable}[no-user-doc]{\l_pdf_current_structure_destination_tl}
 %
 % This command holds the name of the structure object to use in the following commands
 % which creates a destination. The code which activates structure destinations
@@ -1784,7 +1784,7 @@
 \tl_new:N   \l_pdf_current_structure_destination_tl
 %</drivers>
 %    \end{macrocode}
-% \end{macro}
+% \end{variable}
 %
 % We will define alternatives for three backend commands:
 % \begin{verbatim}
@@ -1800,7 +1800,7 @@
 % all engines and compilation routes support structure destinations, for them
 % the command will be a no-op.
 %
-% \begin{macro}{\pdf_activate_structure_destination:,\pdf_activate_indexed_structure_destination:}
+% \begin{macro}[no-user-doc]{\pdf_activate_structure_destination:,\pdf_activate_indexed_structure_destination:}
 %    \begin{macrocode}
 %<*drivers>
 \cs_new_protected:Npn \pdf_activate_structure_destination:

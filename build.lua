@@ -74,6 +74,8 @@ else
                   "config-pdftex",  -- pdftex
                   "config-xetex"    -- xetex
                   }
+-- exclude only record status works again                  
+excludetests = {"show","catalog-remove"}                   
 end                
 
 -- tagging
