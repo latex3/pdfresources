@@ -81,7 +81,7 @@
 %</xdvipdfmx>
 %    \end{macrocode}
 % \subsection{Variants}
-% We need to generate temporarily a few e-types variants of kernel backend commands. 
+% We need to generate temporarily a few e-types variants of kernel backend commands.
 % These can be removed once the kernel provides them.
 %    \begin{macrocode}
 %<@@=pdf>
@@ -101,13 +101,13 @@
 % Starting with TeXlive 2023 the engines support a \texttt{shipout} keyword
 % for \cs{pdfliteral} and \cs{special}. When used the argument is not expanded
 % when the command is used but only when the page is shipped out. This allows for example
-% the tagging code to delay the page-wise numbering of MC-chunks until the page is 
-% actually built. For now we test the engine support. The boolean is setup 
+% the tagging code to delay the page-wise numbering of MC-chunks until the page is
+% actually built. For now we test the engine support. The boolean is setup
 % in pdfmanagement-testphase.dtx.
 %    \begin{macrocode}
 %<*drivers>
 %    \end{macrocode}
-% 
+%
 % The following commands provide the needed kernel backend support. This are basically
 % copies of similar commands of l3backend-basics.
 % \begin{macro}
@@ -115,7 +115,7 @@
 %     \__kernel_backend_shipout_literal:e
 %   }
 %  The one shared function for all backends is access to the basic
-%  \tn{special} primitive. 
+%  \tn{special} primitive.
 %    \begin{macrocode}
 \bool_if:NT \l__pdfmanagement_delayed_shipout_bool
  {
@@ -124,7 +124,7 @@
 %</drivers>
 %    \end{macrocode}
 % \end{macro}
-% 
+%
 %    \begin{macrocode}
 %<*luatex|pdftex>
 %    \end{macrocode}
@@ -138,7 +138,7 @@
   \cs_new_protected:Npn \__kernel_backend_shipout_literal_pdf:e #1
     {
 %<*luatex>
-      \tex_pdfextension:D ~ literal ~ shipout ~ 
+      \tex_pdfextension:D ~ literal ~ shipout ~
 %</luatex>
 %<*pdftex>
       \tex_pdfliteral:D ~ shipout ~
@@ -149,22 +149,22 @@
 % \end{macro}
 %
 % \begin{macro}{\__kernel_backend_shipout_literal_page:e}
-%  Page literals are pretty simple. 
+%  Page literals are pretty simple.
 %    \begin{macrocode}
   \cs_new_protected:Npn \__kernel_backend_shipout_literal_page:e #1
     {
 %<*luatex>
-      \tex_pdfextension:D ~ literal ~ shipout ~ 
+      \tex_pdfextension:D ~ literal ~ shipout ~
 %</luatex>
 %<*pdftex>
       \tex_pdfliteral:D ~ shipout ~
 %</pdftex>
         page { #1 }
     }
-%</luatex|pdftex> 
+%</luatex|pdftex>
 %<drivers> }
 %    \end{macrocode}
-% \end{macro} 
+% \end{macro}
 
 % \subsection{Crossreferences}
 % Commands to get a reference for the absolute page counter.
@@ -190,7 +190,7 @@
 % avoid that destinations names are optimized with xelatex/dvipdfmx
 % see https://tug.org/pipermail/dvipdfmx/2019-May/000002.html
 %    \begin{macrocode}
-%<*dvipdfmx|xdvipdfmx>    
+%<*dvipdfmx|xdvipdfmx>
     \__kernel_backend_literal:n { dvipdfmx:config~C~ 0x0010 }
 %</dvipdfmx|xdvipdfmx>
 %    \end{macrocode}
@@ -745,7 +745,7 @@
   }
 \cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
   {
-   % this is not used for output, but there is a test if the resource is empty   
+   % this is not used for output, but there is a test if the resource is empty
    \prop_gput:cne { \__kernel_pdfdict_name:n { g_@@_Core/Page/Resources/#1} }
      { \str_convert_pdfname:n {#2} }{ #3 }
    %objects are not filled with \pdf_object_write as this is not additive!
@@ -802,7 +802,7 @@
 %  create the bdc/emc marker and store the properties.
 % \cs{@@_backend_PageResources_gpush:n} outputs the /Properties and/or the other
 % resources for the current page.
-% 
+%
 %  pdftex and luatex (and perhaps dvips ...) need to know if there are in a
 % xform stream ...
 %    \begin{macrocode}
@@ -833,12 +833,12 @@
 \bool_if:NT\l__pdfmanagement_delayed_shipout_bool
   {
     \cs_new_protected:Npn \@@_backend_bdc_shipout:ee #1 #2 % #1 eg. Span, #2: dict_content
-      { 
+      {
         \__kernel_backend_shipout_literal:e
           {ps: SDict ~ begin ~ mark /#1~<<#2>>~/BDC ~ pdfmark ~ end }
       }
-  }      
-  
+  }
+
 \cs_set_protected:Npn \@@_backend_bdcobject:nn #1 #2 % #1 eg. Span, #2: object name
   {
     \@@_backend_pdfmark:e{/#1~\pdf_object_ref:n{#2}~/BDC}
@@ -865,12 +865,12 @@
   {}
 \cs_set_eq:NN \@@_backend_bdc_contobj:nn    \@@_backend_bdc:nn
 \cs_set_eq:NN \@@_backend_bdc_contstream:nn \@@_backend_bdc:nn
-  
+
 \bool_if:NT\l__pdfmanagement_delayed_shipout_bool
-  {  
+  {
     \cs_set_protected:Npn \@@_backend_shipout_bdc:ee #1 #2 % #1 eg. Span, #2: dict_content
-      {}  
-  }    
+      {}
+  }
 \cs_set_protected:Npn \@@_backend_bdcobject:nn #1 #2 % #1 eg. Span, #2: object name
   {}
 \cs_set_protected:Npn \@@_backend_bdcobject:n #1  % #1 eg. Span,
@@ -954,11 +954,11 @@
   }
 
 \bool_if:NT\l__pdfmanagement_delayed_shipout_bool
-  { 
+  {
     \cs_set_protected:Npn \@@_backend_bdc_shipout_contstream:ee #1 #2
       {
         \__kernel_backend_shipout_literal:e {pdf:code~ /#1~<<#2>>~BDC }
-      }  
+      }
     \cs_set_eq:NN \@@_backend_bdc_shipout:ee \@@_backend_bdc_shipout_contstream:ee
   }
 \cs_set_protected:Npn \@@_backend_emc:
@@ -1052,14 +1052,14 @@
 \cs_set_eq:NN \@@_backend_bdc:nn \@@_backend_bdc_contstream:nn
 
 \bool_if:NT\l__pdfmanagement_delayed_shipout_bool
-  {  
+  {
     \cs_set_protected:Npn \@@_backend_bdc_shipout_contstream:ee #1 #2
       {
         \__kernel_backend_shipout_literal_page:e { /#1~<<#2>>~BDC }
-      }    
+      }
     \cs_set_eq:NN \@@_backend_bdc_shipout:ee \@@_backend_bdc_shipout_contstream:ee
   }
-  
+
 \cs_set_protected:Npn \@@_backend_emc:
   {
     \__kernel_backend_literal_page:n { EMC }
@@ -1149,19 +1149,19 @@
    }
 %    \end{macrocode}
 % \changes{v0.96n}{2024/10/23}{Use inline dictionaries in bdc always.}
-% We use by default the direct BDC. 
+% We use by default the direct BDC.
 %    \begin{macrocode}
 \cs_set_eq:NN \@@_backend_bdc:nn \@@_backend_bdc_contstream:nn
 
 \bool_if:NT\l__pdfmanagement_delayed_shipout_bool
-  {  
+  {
     \cs_set_protected:Npn \@@_backend_bdc_shipout_contstream:ee #1 #2
        {
          \__kernel_backend_shipout_literal_page:e { /#1~<<#2>>~BDC }
-       }     
+       }
     \cs_set_eq:NN \@@_backend_bdc_shipout:ee \@@_backend_bdc_shipout_contstream:ee
   }
-  
+
 \cs_set_protected:Npn \@@_backend_emc:
   {
     \__kernel_backend_literal_page:n { EMC }
@@ -1200,7 +1200,7 @@
 %</pdftex>
 %    \end{macrocode}
 % \end{macro}
-% 
+%
 % \subsection{\enquote{Catalog} \& subdirectories (pdfcatalog) }
 % The backend command is already in the driver:
 % \cs{@@_backend_catalog_gput:nn}
@@ -1572,7 +1572,7 @@
                    /ColorSpace~
                    \pdf_object_ref:n { @@/Page/Resources/ColorSpace }
                  >>
-               }             
+               }
              \@@_backend:e {exobj ~<<#2>>}
            }
       }
@@ -1776,7 +1776,7 @@
 % The needed code differ depending on if structure objects use standard or indexed object names.
 % At the end we will probably always use indexed objects, but for now we offer
 % both options.
-%  
+%
 % \begin{variable}[no-user-doc]{\l_pdf_current_structure_destination_tl}
 %
 % This command holds the name of the structure object to use in the following commands
@@ -1785,7 +1785,7 @@
 % will define it as
 % \begin{verbatim}
 % \tl_set:Nn \l_pdf_current_structure_destination_tl { __tag/struct/\g__tag_struct_stack_current_tl }
-% \end{verbatim} 
+% \end{verbatim}
 % or if indexed structure object names are used
 % \begin{verbatim}
 % \tl_set:Nn \l_pdf_current_structure_destination_tl { {__tag/struct}{\g__tag_struct_stack_current_tl} }
@@ -1804,7 +1804,7 @@
 % \__pdf_backend_link_begin_goto:nnw  -> \__pdf_backend_link_begin_structure_goto:nnw
 % \__pdf_backend_destination:nn       -> \__pdf_backend_indexed_structure_destination:nn
 % \__pdf_backend_destination:nnnn -> \__pdf_backend_indexed_structure_destination:nnnn
-% \__pdf_backend_link_begin_goto:nnw  -> \__pdf_backend_indexed_link_begin_structure_goto:nnw 
+% \__pdf_backend_link_begin_goto:nnw  -> \__pdf_backend_indexed_link_begin_structure_goto:nnw
 % \end{verbatim}
 %
 % Activating means mapping them onto the original commands. Be aware that not
@@ -2119,7 +2119,7 @@
 %</luatex>
 %    \end{macrocode}
 % \end{macro}
-% 
+%
 % \begin{macro}{\@@_backend_indexed_structure_destination:nn,
 % \@@_backend_indexed_structure_destination:nnnn}
 % This are the indexed variants of the commands to create a destination
@@ -2159,7 +2159,7 @@
          {
           obj ~ @pdf.SDest.\exp_not:n{#1}
           [
-            \exp_after:wN \pdf_object_ref_indexed:nn  \l_pdf_current_structure_destination_tl 
+            \exp_after:wN \pdf_object_ref_indexed:nn  \l_pdf_current_structure_destination_tl
             \str_case:nnF {#2}
               {
                 { xyz }   { /XYZ ~ @xpos ~ @ypos ~ null }
@@ -2173,7 +2173,7 @@
               }
               { /XYZ ~ @xpos ~ @ypos ~ \fp_eval:n { (#2) / 100 } }
           ]
-        }     
+        }
   }
 %    \end{macrocode}
 %
@@ -2215,7 +2215,7 @@
                {
                  obj ~ @pdf.SDest.\exp_not:n{#2}
                  [
-                   \exp_after:wN \pdf_object_ref_indexed:nn  \l_pdf_current_structure_destination_tl             
+                   \exp_after:wN \pdf_object_ref_indexed:nn  \l_pdf_current_structure_destination_tl
                    /FitR ~
                      @pdf_ #2 _llx ~ @pdf_ #2 _lly ~
                      @xpos ~ @ypos
@@ -2234,7 +2234,7 @@
     \exp_args:Ne \@@_backend_indexed_structure_destination_aux:nnnn
       { \dim_eval:n {#2} } {#1} {#3} {#4}
   }
-%</xdvipdfmx|dvipdfmx>  
+%</xdvipdfmx|dvipdfmx>
 %    \end{macrocode}
 %
 % Now pdftex. We only redefine for version 1.40 revision 24 or later.
@@ -2277,7 +2277,7 @@
                    { fitr }  { fitr }
                  }
                  { xyz ~ zoom \fp_eval:n { #2 * 10 } }
-               \scan_stop:          
+               \scan_stop:
       }
     \cs_set_protected:Npn \@@_backend_indexed_structure_destination:nnnn #1#2#3#4
       {
@@ -2337,7 +2337,7 @@
                 { fitr }  { fitr }
               }
               { xyz ~ zoom \fp_eval:n { #2 * 10 } }
-            \scan_stop:       
+            \scan_stop:
       }
     \cs_set_protected:Npn \@@_backend_indexed_structure_destination:nnnn #1#2#3#4
       {
@@ -2379,15 +2379,15 @@
     \AddToHook{begindocument}{\pdfmanagement_add:nnn{Info}{Producer}{(pdfTeX+dvips)}}
     \__kernel_backend_literal:e{!~<</DocumentUUID~(DocumentUUID)>>~setpagedevice}
     \__kernel_backend_literal:e{!~<</InstanceUUID~(InstanceUUID)>>~setpagedevice}
-    \str_if_exist:NTF\c_sys_timestamp_str 
+    \str_if_exist:NTF\c_sys_timestamp_str
       {
        \pdfmanagement_add:nne{Info}{CreationDate}{(\c_sys_timestamp_str)}
-       \pdfmanagement_add:nne{Info}{ModDate}{(\c_sys_timestamp_str)}     
+       \pdfmanagement_add:nne{Info}{ModDate}{(\c_sys_timestamp_str)}
       }
       {
        \pdfmanagement_add:nnn{Info}{CreationDate}{(D:20010101205959-00'00')}
        \pdfmanagement_add:nnn{Info}{ModDate}{(D:20010101205959-00'00')}
-      }     
+      }
 %</dvips>
 %<*dvipdfmx>
     \pdfmanagement_add:nnn{Info}{Producer}{(dvipdfmx)}
@@ -2420,7 +2420,7 @@
      ]}
 %</luatex>
 %<*drivers>
-    \str_if_exist:NF\c_sys_timestamp_str 
+    \str_if_exist:NF\c_sys_timestamp_str
       {
        \pdfmanagement_add:nnn{Info}{CreationDate}{(D:20010101205959-00'00')}
        \pdfmanagement_add:nnn{Info}{ModDate}{(D:20010101205959-00'00')}
@@ -2474,14 +2474,14 @@
 %    \end{macrocode}
 %
 % \subsection{Suppressing deprecated PDF features}
-% 
+%
 % \texttt{/ProcSet}, \texttt{/CharSet} and the \texttt{/Info} dictionary
 % are deprecated in PDF 2.0. For the pdf/A-4 standard they must be suppressed.
 % Not every engine is able to do this, but for pdfTeX and luatex we define suitable
-% backend command. \texttt{/ProcSet} is suppressed automatically 
-% for pdf version 2.0 starting with in texlive 2023. 
+% backend command. \texttt{/ProcSet} is suppressed automatically
+% for pdf version 2.0 starting with in texlive 2023.
 % \begin{macro}{\@@_backend_omit_charset:n}
-% The option to omit /Charset exists already for quite some time for the two 
+% The option to omit /Charset exists already for quite some time for the two
 % engines.
 %    \begin{macrocode}
 %<*xdvipdfmx|dvipdfmx|dvips|dvisvgm>
@@ -2491,19 +2491,19 @@
 \cs_new_protected:Npn \@@_backend_omit_charset:n #1 %#1 number
   {
     \tex_pdfomitcharset:D = #1 \scan_stop:
-  } 
+  }
 %</pdftex>
 %<*luatex>
 \cs_new_protected:Npn \@@_backend_omit_charset:n #1 %#1 number
   {
     \tex_pdfvariable:D omitcharset  = #1 \scan_stop:
-  } 
+  }
 %</luatex>
 %    \end{macrocode}
 % \end{macro}
-% 
+%
 % \begin{macro}{\@@_backend_omit_info:n}
-% The option to suppress the info dictionary will be available in 
+% The option to suppress the info dictionary will be available in
 % texlive 2023.
 %    \begin{macrocode}
 %<*xdvipdfmx|dvipdfmx|dvips|dvisvgm>
@@ -2517,11 +2517,11 @@
     \cs_new_protected:Npn \@@_backend_omit_info:n #1 %#1 number
      {
        \pdfomitinfodict = #1 \scan_stop:
-     } 
+     }
   }
   {
     \cs_new_protected:Npn \@@_backend_omit_info:n #1 {}%#1 number
-     
+
   }
 %</pdftex>
 %<*luatex>
@@ -2533,16 +2533,16 @@
      }
   }
   {
-    \cs_new_protected:Npn \@@_backend_omit_info:n #1 {} %#1 number   
-  }    
+    \cs_new_protected:Npn \@@_backend_omit_info:n #1 {} %#1 number
+  }
 %</luatex>
 %    \end{macrocode}
 % \end{macro}
-% 
+%
 %  With luatex it is for some standards also necessary to suppress the CidSet
-%  entry in the fonts (with xetex there seem to be no problem. 
+%  entry in the fonts (with xetex there seem to be no problem.
 % \begin{macro}{\@@_backend_omit_cidset:n}
-% The option to omit /Charset exists already for quite some time for the two 
+% The option to omit /Charset exists already for quite some time for the two
 % engines.
 %    \begin{macrocode}
 %<*xdvipdfmx|dvipdfmx|dvips|dvisvgm|pdftex>
@@ -2552,11 +2552,11 @@
 \cs_new_protected:Npn \@@_backend_omit_cidset:n #1 %#1 number
   {
     \tex_pdfvariable:D omitcidset  = #1 \scan_stop:
-  } 
+  }
 %</luatex>
 %    \end{macrocode}
 % \end{macro}
- 
+
 %
 % \subsection{lua code for lualatex}
 %    \begin{macrocode}
@@ -2682,5 +2682,5 @@ end
 %</lua>
 %    \end{macrocode}
 % \end{implementation}
-% 
+%
 % \PrintIndex

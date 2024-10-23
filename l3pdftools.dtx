@@ -125,8 +125,8 @@
 % core management code has been activated. This means that the behaviour
 % of the command is different then. The \cs{pdf_bdcobject:..} should only be used
 % if the management is active.
-% 
-% 
+%
+%
 % \begin{function}[updated = 2024-10-23]
 %   {
 %     \pdf_bdc:nn, \pdf_bdc:ee
@@ -137,12 +137,12 @@
 %   This command adds a BDC marked content operator to the current page stream.
 %   \meta{tag} is the tag of this operator (without the leading slash),
 %   \meta{dictionary content} is the content of the second argument.
-%   With the exception of the dvips backend, 
+%   With the exception of the dvips backend,
 %   the dictionary content is added inline in the stream. Such an inline BDC
 %   is typically better for ActualText additions as some PDF reader ignore
 %   entries given in properties.
 % \end{function}
-% 
+%
 % \begin{function}[added = 2023-08-18]
 %   {
 %     \pdf_bdc_shipout:ee
@@ -153,21 +153,21 @@
 %    This command adds a BDC marked content operator to the current page stream.
 %   \meta{tag} is the tag of this operator (without the leading slash),
 %   \meta{dictionary content} is the content of the second argument.
-%   
-%   Differently to \cs{pdf_bdc:ee} the arguments are not expanded when the 
-%   command is \emph{used}, but only at \emph{shipout}. 
+%
+%   Differently to \cs{pdf_bdc:ee} the arguments are not expanded when the
+%   command is \emph{used}, but only at \emph{shipout}.
 %   This requires new engines which
 %   allow to use the keyword \texttt{shipout} with the primitive
-%   \cs{special} and \cs{pdfliteral}. Also similar to \cs{pdf_bdc:ee} 
+%   \cs{special} and \cs{pdfliteral}. Also similar to \cs{pdf_bdc:ee}
 %   the content of \meta{dictionary content} is added inline in the stream
 %   with most engines (not on the dvips + ps2pdf route).
 %   This means that this command can also be used if such an inline dictionary is preferred.
-%   
-%   The command requires current engines and 
+%
+%   The command requires current engines and
 %   is not defined if an too old engine is detected!
-%   
+%
 % \end{function}
-% 
+%
 % \begin{function}[added = 2020-07-03]
 %   {
 %     \pdf_bdcobject:nn
@@ -447,20 +447,20 @@
 \cs_new_protected:Npn  \pdf_bdc:nn #1 #2 { \@@_backend_bdc:nn { #1 }{ #2 } }
 \cs_generate_variant:Nn \pdf_bdc:nn {ee}
 
-\cs_new_protected:Npn  \pdf_bdc_property:nn #1 #2 
+\cs_new_protected:Npn  \pdf_bdc_property:nn #1 #2
   { \@@_backend_bdc_contobj:nn { #1 }{ #2 } }
-\cs_new_protected:Npn  \pdf_bdc_shipout:ee #1 #2 
-  { 
+\cs_new_protected:Npn  \pdf_bdc_shipout:ee #1 #2
+  {
     \bool_if:NTF\l__pdfmanagement_delayed_shipout_bool
-      { 
-        \@@_backend_bdc_shipout:ee { #1 }{ #2 } 
+      {
+        \@@_backend_bdc_shipout:ee { #1 }{ #2 }
         \cs_gset_eq:NN \pdf_bdc_shipout:ee \@@_backend_bdc_shipout:ee
       }
       {
-        \msg_error:nn {pdfmanagement}{delayed-shipout}    
+        \msg_error:nn {pdfmanagement}{delayed-shipout}
         \cs_gset_eq:NN \pdf_bdc_shipout:ee  \use_none:nn
-      }        
-  }    
+      }
+  }
 \cs_new_protected:Npn  \pdf_bdcobject:nn #1 #2 { \@@_backend_bdcobject:nn { #1 }{ #2 } }
 \cs_new_protected:Npn  \pdf_bdcobject:n #1     { \@@_backend_bdcobject:n  { #1 } }
 \cs_new_protected:Npn  \pdf_bmc:n #1     { \@@_backend_bmc:n  { #1 } }
