@@ -120,26 +120,29 @@
 % Entries to the /Properties dictionary in the page resources can
 % be added with dvips only through side-effects: if a BDC-mark is created
 % dvips/ghostscript will automatically create the necessary objects and names.
-% To get a sensible abstraction the code does the same for the other backends if the
+% To get a sensible abstraction the code does for some of the following
+% command the same for the other backends if the
 % core management code has been activated. This means that the behaviour
 % of the command is different then. The \cs{pdf_bdcobject:..} should only be used
 % if the management is active.
-% \begin{function}[updated = 2020-07-03]
+% 
+% 
+% \begin{function}[updated = 2024-10-23]
 %   {
 %     \pdf_bdc:nn, \pdf_bdc:ee
 %   }
 %   \begin{syntax}
 %     \cs{pdf_bdc:nn} \Arg{tag} \Arg{dictionary content}
 %   \end{syntax}
-%    This command adds a BDC marked content operator to the current page stream.
+%   This command adds a BDC marked content operator to the current page stream.
 %   \meta{tag} is the tag of this operator (without the leading slash),
 %   \meta{dictionary content} is the content of the second argument.
-%   If the PDF resource management is active an dictionary object with the
-%   content is created and referenced with a name in the BDC operator.
-%   Without the resource management the content is used directly. It then
-%   depends on the backend how it is handled: with dvips a name is used
-%   while the pdfmode engines and dvipdfmx write the content into the stream.
+%   With the exception of the dvips backend, 
+%   the dictionary content is added inline in the stream. Such an inline BDC
+%   is typically better for ActualText additions as some PDF reader ignore
+%   entries given in properties.
 % \end{function}
+% 
 % \begin{function}[added = 2023-08-18]
 %   {
 %     \pdf_bdc_shipout:ee
@@ -155,7 +158,7 @@
 %   command is \emph{used}, but only at \emph{shipout}. 
 %   This requires new engines which
 %   allow to use the keyword \texttt{shipout} with the primitive
-%   \cs{special} and \cs{pdfliteral}. Also differently to \cs{pdf_bdc:ee} 
+%   \cs{special} and \cs{pdfliteral}. Also similar to \cs{pdf_bdc:ee} 
 %   the content of \meta{dictionary content} is added inline in the stream
 %   with most engines (not on the dvips + ps2pdf route).
 %   This means that this command can also be used if such an inline dictionary is preferred.
@@ -434,6 +437,7 @@
 %
 % \subsubsection{BDC  operator commands}
 % \begin{macro}{\pdf_bdc:nn,\pdf_bdc:ee}
+% \begin{macro}{\pdf_bdc_property:nn}
 % \begin{macro}{\pdf_bdc_shipout:ee}
 % \begin{macro}{\pdf_bdcobject:nn}
 % \begin{macro}{\pdf_bdcobject:n}
@@ -443,6 +447,8 @@
 \cs_new_protected:Npn  \pdf_bdc:nn #1 #2 { \@@_backend_bdc:nn { #1 }{ #2 } }
 \cs_generate_variant:Nn \pdf_bdc:nn {ee}
 
+\cs_new_protected:Npn  \pdf_bdc_property:nn #1 #2 
+  { \@@_backend_bdc_contobj:nn { #1 }{ #2 } }
 \cs_new_protected:Npn  \pdf_bdc_shipout:ee #1 #2 
   { 
     \bool_if:NTF\l__pdfmanagement_delayed_shipout_bool

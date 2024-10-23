@@ -802,23 +802,33 @@
 %  create the bdc/emc marker and store the properties.
 % \cs{@@_backend_PageResources_gpush:n} outputs the /Properties and/or the other
 % resources for the current page.
-%    \begin{macrocode}
-% pdftex and luatex (and perhaps dvips ...) need to know if there are in a
+% 
+%  pdftex and luatex (and perhaps dvips ...) need to know if there are in a
 % xform stream ...
+%    \begin{macrocode}
 %<*drivers>
 \bool_new:N \l_@@_backend_xform_bool
 %</drivers>
-%<*dvips>
+%    \end{macrocode}
+%
 % dvips is easy: create an object, and reference it in the bdc
 % ghostscript will then automatically replace it by a name
 % and add the name to the /Properties dict
 % special variant von accsupp
 % https://chat.stackexchange.com/transcript/message/50831812#50831812
+%    \begin{macrocode}
+%<*dvips>
 %
 \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: dict_content
   {
     \@@_backend_pdfmark:n{/#1~<<#2>>~/BDC}
   }
+%    \end{macrocode}
+% There is not difference here between inline and property BDC, it is always
+% a property:
+%    \begin{macrocode}
+\cs_set_eq:NN \@@_backend_bdc_contobj:nn    \@@_backend_bdc:nn
+\cs_set_eq:NN \@@_backend_bdc_contstream:nn \@@_backend_bdc:nn
 
 \bool_if:NT\l__pdfmanagement_delayed_shipout_bool
   {
@@ -853,6 +863,9 @@
 %
 \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2 % #1 eg. Span, #2: dict_content
   {}
+\cs_set_eq:NN \@@_backend_bdc_contobj:nn    \@@_backend_bdc:nn
+\cs_set_eq:NN \@@_backend_bdc_contstream:nn \@@_backend_bdc:nn
+  
 \bool_if:NT\l__pdfmanagement_delayed_shipout_bool
   {  
     \cs_set_protected:Npn \@@_backend_shipout_bdc:ee #1 #2 % #1 eg. Span, #2: dict_content
@@ -869,7 +882,7 @@
 \cs_new_protected:Npn \@@_backend_PageResources_gpush:n #1 {}
 
 %</dvisvgm>
-
+%
 % xetex has to create the entries in the /Properties manually
 % (like the other backends)
 % use pdfbase special
@@ -1032,14 +1045,11 @@
   {
     \__kernel_backend_literal_page:n { /#1~<<#2>>~BDC }
   }
-  
- \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2
-  {
-    \bool_if:NTF  \g__pdfmanagement_active_bool
-      {\cs_gset_eq:NN \@@_backend_bdc:nn \@@_backend_bdc_contobj:nn}
-      {\cs_gset_eq:NN \@@_backend_bdc:nn \@@_backend_bdc_contstream:nn}
-      \@@_backend_bdc:nn {#1}{#2}
-  }
+
+%    \end{macrocode}
+% \changes{v0.96n}{2024/10/23}{Use inline dictionaries in bdc always.}
+%    \begin{macrocode}
+\cs_set_eq:Npn \@@_backend_bdc:nn \@@_backend_bdc_contstream:nn
 
 \bool_if:NT\l__pdfmanagement_delayed_shipout_bool
   {  
@@ -1057,9 +1067,12 @@
 
 \cs_new_protected:Npn \@@_backend_PageResources_gpush:n #1 {}
 %</luatex>
-%<*pdftex>
-% pdflatex is the most complicated as it has to go through the aux ...
+%    \end{macrocode}
+% pdflatex is the most complicated if we want to use properties
+% as it has to go through the aux ...
 % the push command is extended to take other resources too
+%    \begin{macrocode}
+%<*pdftex>
 \cs_set_protected:Npn \@@_backend_bdcobject:nn #1 #2 % #1 eg. Span, #2: object name
   {
     \int_gincr:N \g_@@_backend_name_int
@@ -1134,14 +1147,12 @@
    {
      \__kernel_backend_literal_page:n { /#1~<<#2>>~BDC }
    }
+%    \end{macrocode}
+% \changes{v0.96n}{2024/10/23}{Use inline dictionaries in bdc always.}
+% We use by default the direct BDC. 
+%    \begin{macrocode}
+\cs_set_eq:Npn \@@_backend_bdc:nn \@@_backend_bdc_contstream:nn
 
-\cs_set_protected:Npn \@@_backend_bdc:nn #1 #2
-  {
-    \bool_if:NTF  \g__pdfmanagement_active_bool
-      {\cs_gset_eq:NN \@@_backend_bdc:nn \@@_backend_bdc_contobj:nn}
-      {\cs_gset_eq:NN \@@_backend_bdc:nn \@@_backend_bdc_contstream:nn}
-      \@@_backend_bdc:nn {#1}{#2}
-  }
 \bool_if:NT\l__pdfmanagement_delayed_shipout_bool
   {  
     \cs_set_protected:Npn \@@_backend_bdc_shipout_contstream:ee #1 #2
