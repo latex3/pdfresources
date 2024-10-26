@@ -1,6 +1,6 @@
 #!/usr/bin/env texlua
-packageversion="0.96l"
-packagedate="2024-09-13"
+packageversion="0.96m"
+packagedate="2024-09-29"
 
 local luatexstatus = status.list()
 
@@ -32,7 +32,7 @@ else
 end
 
 checkruns = 4
-
+recordstatus=true
 
 
   specialformats = specialformats or {}
@@ -76,6 +76,8 @@ else
                   "config-xetex",    -- xetex
                   "config-bookmark" -- temporarly!!!
                   }
+-- exclude only record status works again                  
+excludetests = {"show","catalog-remove"}                   
 end                
 
 -- tagging

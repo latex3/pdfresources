@@ -6,7 +6,7 @@
 \input{regression-test}
 \documentclass{article}
 \ExplSyntaxOn
-\AddToHook{shipout/lastpage}{\tl_show:N\g__pdfmeta_xmp_packet_tl}
+\AddToHook{shipout/lastpage}{\tl_log:N\g__pdfmeta_xmp_packet_tl}
 \ExplSyntaxOff
 \begin{document}
 
