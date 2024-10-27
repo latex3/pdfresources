@@ -456,22 +456,21 @@
 %   \end{hypkey}
 %
 %  \subsection{Public interfaces}
-%  The |colorlinks| and |ocgcolorlinks| and related keys are
-%  using these booleans:
-%  \begin{verbatim}
-%     \l_hyp_annot_colorlink_bool,
-%     \l_hyp_annot_colorurl_bool,
-%     \l_hyp_annot_colorfile_bool,
-%     \l_hyp_annot_colorrun_bool,
-%     \l_hyp_annot_colormenu_bool,
-%     \l_hyp_annot_ocgcolorlink_bool,
-%     \l_hyp_annot_ocgcolorurl_bool,
-%     \l_hyp_annot_ocgcolorfile_bool,
-%     \l_hyp_annot_ocgcolorrun_bool,
-%     \l_hyp_annot_ocgcolormenu_bool,
-%  \end{verbatim}
-%
-%   They are both inserting hook code in the |pdfannot/link/|\meta{type}|/begin|
+%  
+%  \begin{variable}
+%   {\l_hyp_annot_colorlink_bool,
+%  \l_hyp_annot_colorurl_bool,
+%  \l_hyp_annot_colorfile_bool,
+%  \l_hyp_annot_colorrun_bool,
+%  \l_hyp_annot_colormenu_bool,
+%  \l_hyp_annot_ocgcolorlink_bool,
+%  \l_hyp_annot_ocgcolorurl_bool,
+%  \l_hyp_annot_ocgcolorfile_bool,
+%  \l_hyp_annot_ocgcolorrun_bool,
+%  \l_hyp_annot_ocgcolormenu_bool
+%   }
+%  These boolean are used by the |colorlinks| and |ocgcolorlinks| and related keys.
+%  These keys insert hook code in the |pdfannot/link/|\meta{type}|/begin|
 %   and |pdfannot/link/|\meta{type}|/end| hooks. \meta{type} is one of
 %   |GoTo|, |URI|, |GoToR|, |Named| or |Launch|.
 %
@@ -484,6 +483,7 @@
 %
 %   The border colors aren't saved in color names currently, but if the need
 %   would arise it would possible to change this.
+%   \end{variable}
 %  \subsection{Changed behaviour}
 %   \begin{description}
 %   \item[colorlinks] |colorlinks| or |colorlinks=true| will as before disable the |pdfborder| 
@@ -1860,7 +1860,7 @@
 % replaced if some more generic PDF string command/module exists.
 % All commands here use the \enquote{submodule} name \texttt{text}.
 % At first a hook for user additions:
-% \begin{macro}{hyp/text/pdfstring}
+% \begin{macro}[no-user-doc]{hyp/text/pdfstring}
 %    \begin{macrocode}
 \hook_new:n {hyp/text/pdfstring}
 %    \end{macrocode}
@@ -1995,7 +1995,7 @@
 % The code has to define |\Hy@PutCatalog| as we can't yet
 % change code in hyperref. The switch for draftmode has been removed.
 %
-% \begin{macro}
+% \begin{macro}[no-user-doc]
 %   {
 %     \@@_PageLabels_gpush:,
 %     \Hy@PutCatalog,
@@ -2127,7 +2127,7 @@
 % to create also a structured destination.
 % We don't use the cmd hook, as we want the same hook for both start commands.
 % We make the current dest name available so that the hook code can use it.
-%  \begin{macro}
+%  \begin{macro}[no-user-doc]
 %    {
 %      \hyper@anchor,
 %      \hyper@anchorstart,
