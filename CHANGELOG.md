@@ -8,7 +8,7 @@ this project uses date-based 'snapshot' version identifiers.
 ## [Unreleased]
 
 ### Changed
- - \pdf_bdc:nn creates inline dictionaries if the engine support this.
+ - \pdf_bdc:nn now creates by default inline dictionaries if the engine support this.
 
 ## [2024-09-29]
 Version: 2024-09-29 v0.96m
