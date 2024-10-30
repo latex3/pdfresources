@@ -1713,7 +1713,9 @@
 % So we use sockets. The first argument is the target (url or destination),
 % For GoTo we also pass the text as argument.
 % The sockets should put something into the relevant annotation dictionaries.
-% %    \begin{macrocode}
+% \changes{v0.96o}{2024-10-27}{moved dictionary command into socket so that
+% it can be fully replaced.}
+%    \begin{macrocode}
 \tl_new:N\l_@@_link_Contents_tl
 \socket_new:nn {hyp/link/GoTo/Contents}{2}
 \socket_new:nn {hyp/link/URI/Contents}{1}

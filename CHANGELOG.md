@@ -5,7 +5,13 @@ first release 0.95a, 2021-02-23 will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 this project uses date-based 'snapshot' version identifiers.
 
+## [Unreleased]
+### Changed 
+ - hyp/link/GoTo/Contents and hyp/link/URI/Contents now fill also the dictionary entry. 
+   This allows to replace it fully.
+
 ## [2024-10-27]
+Version: 2024-10-27 v0.96n
 
 ### Changed
  - \pdf_bdc:nn now creates by default inline dictionaries if the engine support this.
