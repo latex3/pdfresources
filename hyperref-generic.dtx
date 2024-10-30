@@ -2283,6 +2283,7 @@
             \Hy@VerboseLinkStart{#1}{#2}% only for debug
             \group_begin:
             \tl_set:Nn \l_hyp_current_dest_name_tl {#2}
+            \socket_use:nnn{hyp/link/GoTo/Contents}{#2}{}
             \hook_use:n {hyp/link/#1}
             \@@_link_goto_begin:nw {#2}
           } 
