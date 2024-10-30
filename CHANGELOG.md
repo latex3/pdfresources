@@ -6,9 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 this project uses date-based 'snapshot' version identifiers.
 
 ## [Unreleased]
+### Changed 
+ - hyp/link/GoTo/Contents and hyp/link/URI/Contents now fill also the dictionary entry. 
+   This allows to replace it fully.
+ - hyp/link/GoTo/Contents socket has been added to \hyper@linkstart too.  
+
+## [2024-10-27]
+Version: 2024-10-27 v0.96n
 
 ### Changed
- - \pdf_bdc:nn creates inline dictionaries if the engine support this.
+ - \pdf_bdc:nn now creates by default inline dictionaries if the engine support this.
 
 ## [2024-09-29]
 Version: 2024-09-29 v0.96m
