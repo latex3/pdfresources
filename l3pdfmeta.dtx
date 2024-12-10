@@ -1100,7 +1100,11 @@
             \group_begin: 
             \pdfdict_put:nne {l_pdffile/Filespec} {Desc}{(note~about~PDF/A-4F)}
             \pdfdict_put:nnn { l_pdffile/Filespec }{AFRelationship} { /Unspecified }
-            \pdffile_embed_stream:nnN {PDF~standard~A-4F~requires~a~file}{readme.txt}\l_@@_tmpa_tl
+            \pdffile_embed_stream:nnN 
+              {The~document~was~declared~to~be~of~type~PDF/A-4f~but~hasn't~any~attachments.~ 
+               LaTeX~therefore~added~this~dummy~file.}
+              {readme.txt}
+              \l_@@_tmpa_tl
             \exp_args:Nne \__pdf_backend_Names_gpush:nn{EmbeddedFiles}{(readme)~\l_@@_tmpa_tl} 
             \group_end:
           }
