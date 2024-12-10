@@ -10,7 +10,8 @@ this project uses date-based 'snapshot' version identifiers.
  - hyp/link/GoTo/Contents and hyp/link/URI/Contents now fill also the dictionary entry. 
    This allows to replace it fully.
  - hyp/link/GoTo/Contents socket has been added to \hyper@linkstart too.  
-
+ - content and name of dummy PDF/A-4F attachment.
+ 
 ## [2024-10-27]
 Version: 2024-10-27 v0.96n
 
