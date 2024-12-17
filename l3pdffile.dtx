@@ -205,6 +205,12 @@
 % has to be added explicitly as there is no sensible way
 % to retrieve this automatically.
 % \item The mimetype (in the |/Subtype|) should be properly escaped.
+% So for example
+% \begin{verbatim}
+% \pdfdict_put:nne{l_pdffile}{Subtype}{/application\string#2Fx-tex}
+% \end{verbatim}
+% But while it is possible to set the subtype like this, it is normally better
+% to rely on the file extension and to let the code autodetect the subtype.
 % This module contains a property list with maps a number of file extensions
 % to mimetypes and the commands try to detect and fill the mimetype automatically.
 % \item The dictionary can contain additional keys (|/Filter|, |/DecodeParms|),

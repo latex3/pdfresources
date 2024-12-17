@@ -2986,6 +2986,7 @@
 % We don't try to get the byte count. So we can put everything
 % in the |shipout/lastpage| hook
 %    \begin{macrocode}
+\hook_new:n { pdfmeta/xmp }
 \AddToHook{shipout/lastpage}
   {
     \bool_if:NT\g_@@_xmp_bool
@@ -2998,6 +2999,7 @@
           \file_get_timestamp:nN{\jobname.log}\l_@@_xmp_currentdate_tl
         }
        \@@_xmp_date_split:VN\l_@@_xmp_currentdate_tl\l_@@_xmp_currentdate_seq
+       \hook_use:n { pdfmeta/xmp }
        \@@_xmp_build_packet:
        \exp_args:No
        \__pdf_backend_metadata_stream:n {\g_@@_xmp_packet_tl}
