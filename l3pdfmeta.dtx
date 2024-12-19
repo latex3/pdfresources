@@ -182,12 +182,17 @@
 % \item[|no_embed_content|]    no |/EF| key in filespec, no |/Type/EmbeddedFiles|.
 %  \emph{This will be checked in future by \pkg{l3pdffiles}
 %  for the files it embeds.}
-%  The restrictment is set for only PDF/A-1b.
-%  PDF/A-2b and PDF/A3-b lifted this restriction: PDF/A-2b allows
+%  The restriction is set only for PDF/A-1 versions.
+%  PDF/A-2 and PDF/A-3 lifted this restriction: PDF/A-2 allows
 %  to embed other PDF documents conforming to either PDF/A-1 or PDF/A-2,
-%  and PDF/A-3 allows any embedded files. I don't see a way to test the
-%  PDF/A-2b requirement so currently it will simply allow everything. Perhaps
+%  and PDF/A-3 and PDF/A-4F allows any embedded files. 
+%  
+% \item[|only_pdfa_embed_content|] 
+%  This is set for PDF/A-2a, PDF/A-2b, PDF/A-2u and PDF/A-4. 
+%  I don't see a way to test the
+%  PDF/A-2 requirement so currently it will simply allow everything. Perhaps
 %  a test for at least the PDF-format will be added in future.
+%  
 % \item[|Catalog_no_OCProperties|] don't add |/OCProperties| to the catalog
 % {\em l3pdfmeta removes this entry at the end of the document}
 % \item[|Catalog_OCProperties_no_AS|] 
@@ -971,7 +976,10 @@
 % embedding files is allowed (with restrictions)
 \prop_gremove:cn
   { g_@@_standard_pdf/A-2B_prop }
-  { embed_content}
+  { no_embed_content }
+\prop_gput:cn
+  { g_@@_standard_pdf/A-2B_prop }
+  { only_pdfa_embed_content }
 \prop_gput:cnn
   { g_@@_standard_pdf/A-2B_prop }{max_pdf_version}{1.7}
 \prop_gput:cnn
@@ -1017,10 +1025,10 @@
   { g_@@_standard_pdf/A-3B_prop }{year}{2012}
 \prop_gput:cnn
   { g_@@_standard_pdf/A-3B_prop }{level}{3}
-% embedding files is allowed (with restrictions)
+% embedding files is allowed 
 \prop_gremove:cn
   { g_@@_standard_pdf/A-3B_prop }
-  { embed_content}
+  { only_pdfa_embed_content }
 %A-3u ==============
 \prop_new:c { g_@@_standard_pdf/A-3U_prop }
 \prop_gset_eq:cc
@@ -1062,6 +1070,9 @@
   { g_@@_standard_pdf/A-4_prop }{no_CharSet}{}
 \prop_gput:cnn
   { g_@@_standard_pdf/A-4_prop }{Trailer_no_Info}{}
+\prop_gput:cn
+  { g_@@_standard_pdf/A-4_prop }
+  { only_pdfa_embed_content }  
 \prop_gremove:cn
   { g_@@_standard_pdf/A-4_prop }{conformance}
 \prop_gremove:cn
@@ -1078,6 +1089,10 @@
 % containsEmbeddedFiles == true ISO 19005-4:2020, Clause: 6.9, Test number: 5 
 \prop_gput:cnn
   { g_@@_standard_pdf/A-4F_prop }{Catalog_EmbeddedFiles}{}  
+% can contain any file  
+\prop_gremove:cn
+  { g_@@_standard_pdf/A-4_prop }
+  { only_pdfa_embed_content }    
 %    \end{macrocode}
 % \end{variable}
 %
@@ -1113,6 +1128,30 @@
    }   
 }    
 %    \end{macrocode}
+% Before writing the xml we check if there are embedded files we know of. For A-4 we adjust
+% the standard to A-4F is needed.
+%    \begin{macrocode}
+\AddToHook{pdfmeta/xmp}
+ {
+    \pdfmeta_standard_verify:nF{no_embed_content}
+      {
+        \bool_lazy_and:nnT 
+          { ! \int_if_zero_p:N \g_pdffile_embed_pdfa_int } 
+          { ! \int_if_zero_p:N \g_pdffile_embed_nonpdfa_int }
+          { 
+            % not allowed warning
+          }  
+      }
+    \pdfmeta_standard_verify:nF {only_pdfa_embed_content}
+      {
+        \int_if_zero:NF \g_pdffile_embed_nonpdfa_int          
+          { 
+            % not allowed warning, change standard
+          }  
+      }  
+ }
+%    \end{macrocode}
+%
 % \subsubsection{Colorprofiles and Outputintents}
 % The following provides a minimum of interface to add a color profile
 % and an outputintent need for PDF/A for now. There will be need to extend it later,
