@@ -685,6 +685,15 @@
 \msg_new:nnn  {pdf }{wrong-pdfversion}
   {PDF~version~#1~is~too~#2~for~standard~'#3'.}
 %    \end{macrocode}
+% Messages for embedded files
+%    \begin{macrocode}
+\msg_new:nnn  {pdf }{validation-failure}
+  {
+    PDF~standard~validation~failure.\\
+    #1
+  }
+%    \end{macrocode}
+%
 % \begin{variable}{\l_@@_tmpa_tl,\l_@@_tmpb_tl,\l_@@_tmpa_str,
 %  \g_@@tmpa_str,\l_@@_tmpa_seq,\l_@@_tmpb_seq}
 %    \begin{macrocode}
@@ -1139,14 +1148,41 @@
           { ! \int_if_zero_p:n { \g_pdffile_embed_pdfa_int } } 
           { ! \int_if_zero_p:n { \g_pdffile_embed_nonpdfa_int } }
           { 
-            \yyyy% not allowed warning
+            \prop_get:NnNT\g_@@_standard_prop { name }\l_@@_tmpa_tl            
+             {
+               \msg_warning:nne { pdf } { validation-failure }
+                 {
+                   Embedded~files~detected.\iow_newline:
+                   This~is~not~allowed~in~standard~\l_@@_tmpa_tl
+                 }                          
+             } 
           }  
       }
     \pdfmeta_standard_verify:nF {only_pdfa_embed_content}
       {
         \int_if_zero:nF  { \g_pdffile_embed_nonpdfa_int }         
           { 
-            \xxx% not allowed warning, change standard
+           \prop_get:NnNT\g_@@_standard_prop { name }\l_@@_tmpa_tl
+             {
+               \str_if_eq:VnTF {\l_@@_tmpa_tl} { pdf/A-4 } 
+                {
+                  \prop_gset_eq:cc
+                    { g_@@_standard_prop }
+                    { g_@@_standard_pdf/A-4F_prop }
+                  \msg_warning:nne { pdf } { validation-failure }
+                   {
+                     Embedded~non-PDF~files~detected.\iow_newline:
+                     Switching~standard~from~PDF/A-4~to~PDF/A-4F 
+                   }
+                }
+                {
+                  \msg_warning:nne { pdf } { validation-failure }
+                   {
+                     Embedded~non-PDF~files~detected.\iow_newline:
+                     This~is~not~allowed~in~standard~\l_@@_tmpa_tl
+                   }              
+                }
+             }
           }  
       }  
  }
