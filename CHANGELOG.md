@@ -12,6 +12,10 @@ this project uses date-based 'snapshot' version identifiers.
  - hyp/link/GoTo/Contents socket has been added to \hyper@linkstart too.  
  - content and name of dummy PDF/A-4F attachment.
  - added testphase=latest key
+
+### Added 
+ - l3pdfmeta: standard verification tests for embedded test
+ - l3pdffile: counts embedded files for verification tests.
  
 ## [2024-10-27]
 Version: 2024-10-27 v0.96n
