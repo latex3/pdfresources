@@ -1,0 +1,24 @@
+\ExplSyntaxOn
+\sys_gset_rand_seed:n {42}
+\debug_on:n { check-declarations , deprecation }
+\msg_redirect_module:nnn { pdf } { none } { warning }
+\ExplSyntaxOff
+\DocumentMetadata
+ {
+   pdfversion=2.0, %
+   pdfstandard=a-4,
+   testphase=latest,
+   debug=xmp-export
+ }
+
+\input{regression-test}
+\documentclass{article}
+\tagpdfsetup{math/mathml/sources=}
+\START
+\SHOWFILE{\jobname.xmpi}
+\OMIT
+\begin{document}
+\TIMO
+$a=b$
+some text
+\end{document} 
