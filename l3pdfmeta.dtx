@@ -1138,15 +1138,15 @@
     \pdfmeta_standard_verify:nF{no_embed_content}
       {
         \bool_lazy_and:nnT 
-          { ! \int_if_zero_p:N \g_pdffile_embed_pdfa_int } 
-          { ! \int_if_zero_p:N \g_pdffile_embed_nonpdfa_int }
+          { ! \int_if_zero_p:n { \g_pdffile_embed_pdfa_int } } 
+          { ! \int_if_zero_p:n { \g_pdffile_embed_nonpdfa_int } }
           { 
             % not allowed warning
           }  
       }
     \pdfmeta_standard_verify:nF {only_pdfa_embed_content}
       {
-        \int_if_zero:NF \g_pdffile_embed_nonpdfa_int          
+        \int_if_zero:nF  { \g_pdffile_embed_nonpdfa_int }         
           { 
             % not allowed warning, change standard
           }  
