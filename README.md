@@ -1,6 +1,6 @@
 # LaTeX PDF management testphase bundle
 
-Version: 0.96n, 2024-10-27
+Version: 0.96o, 2024-12-20
 
 This package is used during a test phase to load the new PDF management code
 of LaTeX.
