@@ -684,8 +684,8 @@
 \cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
   {
     \pdfdict_gput:nnn {g_@@_Core/Page/Resources/#1} { #2 }{ #3 }
-    \tex_latelua:D{ltx.@@.Page.Resources.#1=true}
-    \tex_latelua:D
+    \tex_directlua:D{ltx.@@.Page.Resources.#1=true}
+    \tex_directlua:D
       {
         ltx.pdf.Page_Resources_gpush(tex.count["g_shipout_readonly_int"])
       }
