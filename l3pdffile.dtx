@@ -49,7 +49,7 @@
 %    }^^A
 % }
 %
-% \date{Version 0.96n, released 2024-10-27}
+% \date{Version 0.96o, released 2024-12-20}
 %
 % \maketitle
 % \begin{documentation}
@@ -205,6 +205,12 @@
 % has to be added explicitly as there is no sensible way
 % to retrieve this automatically.
 % \item The mimetype (in the |/Subtype|) should be properly escaped.
+% So for example
+% \begin{verbatim}
+% \pdfdict_put:nne{l_pdffile}{Subtype}{/application\string#2Fx-tex}
+% \end{verbatim}
+% But while it is possible to set the subtype like this, it is normally better
+% to rely on the file extension and to let the code autodetect the subtype.
 % This module contains a property list with maps a number of file extensions
 % to mimetypes and the commands try to detect and fill the mimetype automatically.
 % \item The dictionary can contain additional keys (|/Filter|, |/DecodeParms|),
@@ -337,9 +343,10 @@
 %
 %  \begin{verbatim}
 %  \pdf_object_new:n {module/filespec/A} % a new filespec object
-%  \pdf_object_ref:n {module/filespec/A}       % a reference
-%  \pdf_object_unnamed_write:nn { stream }{ {...}{content} } %writing the stream
-%  % filling and writing the filespec dictionary:
+%  \pdf_object_ref:n {module/filespec/A} % reference it somewhere, e.g. in AF
+%  % now write the stream
+%  \pdf_object_unnamed_write:nn { stream }{ {...}{content} }
+%  % and fill and write the filespec dictionary:
 %  \pdffile_filespec:nnn {module/filespec/A}{A.xml}{\pdf_object_ref_last:}
 %  \end{verbatim}
 %
@@ -354,6 +361,24 @@
 %   The extension should start with a period, the mimetype should be given
 %   as plain text (it will be escaped internally). Extensions with two periods
 %   are not supported.
+% \end{variable}
+%
+% \begin{variable} {\g_pdffile_embed_pdfa_int,\g_pdffile_embed_nonpdfa_int}
+% These two integers hold the number of embedded files  in PDF/A format
+% and non-PDF/A format and can be used for a rough test for the requirements
+% in l3pdfmeta  |no_embed_content| (both should be zero)
+% and |only_pdfa_embed_content| (the second should be zero).
+% The commands |\pdffile_embed_stream:...| and |\pdffile_embed_file:...|
+% increase the integers. As the code can currently not detect if an embedded
+% file follows a PDF/A standard it simply goes by the extension: files embedded
+% as |.pdf| increase the first integer.
+%
+% |\pdffile_filespec:nnn| does \emph{not} increase the integers,
+% if this command is used it lies in the responsability of the
+% author to adjust the integers.
+%
+% The integers are public so that user
+% can query and adjust the values, e.g. in tests for a standard compliancy.
 % \end{variable}
 %
 % \begin{variable}{\l_pdffile_source_name_str}
@@ -398,7 +423,7 @@
 %
 %    \begin{macrocode}
 %<*header>
-\ProvidesExplPackage{l3pdffile}{2024-10-27}{0.96n}
+\ProvidesExplPackage{l3pdffile}{2024-12-20}{0.96o}
   {embedding and referencing files in PDF---LaTeX PDF management testphase bundle}
 \RequirePackage{l3pdftools}  %temporarily!!
 %</header>
@@ -438,6 +463,8 @@
      #1
   }
 %    \end{macrocode}
+%
+% \subsection{Variables}
 % \begin{variable}
 %   {
 %     \l_@@_tmpa_tl,
@@ -484,6 +511,28 @@
     ,.xml = application/xml
   }
 %    \end{macrocode}
+%
+% \begin{variable} {\g_pdffile_embed_pdfa_int,\g_pdffile_embed_nonpdfa_int}
+% These two integers hold the number of embedded files  in PDF/A format
+% and non-PDF/A format and can be used for a rough test for the requirements
+% in l3pdfmeta  |no_embed_content| (both should be zero)
+% and |only_pdfa_embed_content| (the second should be zero).
+% The commands |\pdffile_embed_stream:...| and |\pdffile_embed_file:...|
+% increase the integers. As the code can currently not detect if an embedded
+% file follows a PDF/A standard it simply goes by the extension: files embedded
+% as |.pdf| increase the first integer.
+%
+% |\pdffile_filespec:nnn| does \emph{not} increase the integers,
+% if this command is used it lies in the responsability of the
+% author to adjust the integers.
+%
+% The integers are public so that user
+% can query and adjust the values, e.g. in tests for a standard compliancy.
+%    \begin{macrocode}
+\int_new:N\g_pdffile_embed_pdfa_int
+\int_new:N\g_pdffile_embed_nonpdfa_int
+%    \end{macrocode}
+% \end{variable}
 % \begin{variable}
 %  {
 %   \l_pdffile_source_name_str
@@ -550,43 +599,54 @@
 % \begin{macro}{\pdffile_embed_file:nnn, \pdffile_embed_stream:nnn, \pdffile_embed_stream:nnN}
 % At first a command to set the mimetype. It either uses the current value
 % in the file dictionary, or tries to guess it from the extension.
-% \begin{macro}{\@@_mimetype_set:nN,\@@_mimetype_set:VN}
+%
+% \begin{macro}{\@@_mimetype_set:nNN,\@@_mimetype_set:VNN}
 % \begin{macro}{\@@_fstream_write:nN, \@@_fstream_write:VN}
 % \begin{macro}{\@@_stream_write:nN, \@@_stream_write:VN}
 %    \begin{macrocode}
 %#1 file name,
 %#2 tl to return the (printed) value for the guessed mimetype
-\cs_new_protected:Npn \@@_mimetype_set:nN #1 #2
+%#3 tl to return the file extension (that is a string)
+\cs_new_protected:Npn \@@_mimetype_set:nNN #1 #2 #3
   {
     \file_parse_full_name:nNNN
           {#1}
           \l_@@_tmpa_str %unused
           \l_@@_tmpb_str %unused
           \l_@@_ext_str
-        %check if Subtype has been set
-        \pdfdict_get:nnN { l_pdffile}{Subtype}\l_@@_tmpa_tl
-        %if not look up in the prop:
-        \quark_if_no_value:NT \l_@@_tmpa_tl
+    %check if Subtype has been set
+    \pdfdict_get:nnN { l_pdffile}{Subtype}\l_@@_tmpa_tl
+    %if not look up in the prop:
+    \quark_if_no_value:NT \l_@@_tmpa_tl
+      {
+        \prop_get:NVNTF
+          \g_pdffile_mimetypes_prop
+          \l_@@_ext_str
+          \l_@@_tmpb_tl
           {
-            \prop_get:NVNTF
-              \g_pdffile_mimetypes_prop
-              \l_@@_ext_str
-              \l_@@_tmpb_tl
-              {
-                \tl_set:Ne #2 {/Subtype~\pdf_name_from_unicode_e:V \l_@@_tmpb_tl}
-              }
-              {
-                \msg_warning:nne { pdffile }{ mimetype-missing} {#1}
-                \tl_clear:N #2
-              }
+            \tl_set:Ne #2 {/Subtype~\pdf_name_from_unicode_e:V \l_@@_tmpb_tl}
           }
-    }
+          {
+            \msg_warning:nne { pdffile }{ mimetype-missing} {#1}
+            \tl_clear:N #2
+          }
+      }
+     \tl_set_eq:NN #3 \l_@@_ext_str
+   }
 
-\cs_generate_variant:Nn \@@_mimetype_set:nN {VN}
+\cs_generate_variant:Nn \@@_mimetype_set:nNN {VNN}
+
+% #1 tl containing a file extension
+\cs_new_protected:Npn \@@_count_embed:N #1
+  {
+    \str_if_eq:VnTF #1 {.pdf}
+     {\int_gincr:N \g_pdffile_embed_pdfa_int }
+     {\int_gincr:N \g_pdffile_embed_nonpdfa_int }
+  }
 
 %#1 file name,
 %#2 tl, should be empty or contain /Subtype /mimetype
-%   e.g. result from \@@_mimetype_set:NN
+%   e.g. result from \@@_mimetype_set:nNN
 \cs_new_protected:Npn \@@_fstream_write:nN #1 #2
   {
     \pdf_object_unnamed_write:ne { fstream }
@@ -611,7 +671,7 @@
 
 %#1 file content
 %#2 tl, should be empty or contain /Subtype /mimtype
-%   e.g. result from \@@_mimetype_set:NN
+%   e.g. result from \@@_mimetype_set:nNN
 \cs_new_protected:Npn \@@_stream_write:nN #1 #2
   {
     \pdf_object_unnamed_write:ne { stream }
@@ -647,7 +707,7 @@
         \group_begin:
           \pdf_string_from_unicode:nnN {utf8/string}{#2}\l_@@_tmpa_str
           \pdfdict_put:nne {l_pdffile/Filespec}{F} { \l_@@_tmpa_str }
-          \@@_filename_convert_to_print:nN  { #2 } \l_@@_tmpa_str          
+          \@@_filename_convert_to_print:nN  { #2 } \l_@@_tmpa_str
           \pdfdict_put:nne {l_pdffile/Filespec}{UF}{ \l_@@_tmpa_str }
           \pdf_object_write:nne { #1 } { dict }
             {
@@ -682,7 +742,7 @@
                   /EF <</F~#2 /UF~#2>>
                 }
             }
-        \tl_gset:Ne\g_@@_tmpa_tl{\pdf_object_ref_last:}    
+        \tl_gset:Ne\g_@@_tmpa_tl{\pdf_object_ref_last:}
         \group_end:
         \tl_set_eq:NN#3\g_@@_tmpa_tl
       }
@@ -708,9 +768,11 @@
           {
             \file_get_full_name:nNTF {#1} \l_pdffile_source_name_str
               {
-                \@@_mimetype_set:VN
+                \@@_mimetype_set:VNN
                   \l_pdffile_source_name_str
                   \l_@@_automimetype_tl
+                  \l_@@_tmpa_tl
+                \@@_count_embed:N \l_@@_tmpa_tl
                 \@@_fstream_write:VN
                   \l_pdffile_source_name_str
                   \l_@@_automimetype_tl
@@ -772,8 +834,9 @@
             { #3 }
             {{stream}{}{\tl_if_blank:nTF {#2}{stream.txt}{\exp_not:n{#2}}}}
          \tl_if_blank:nTF {#2}
-          { \@@_mimetype_set:nN {stream.txt}\l_@@_automimetype_tl}
-          { \@@_mimetype_set:nN { #2 } \l_@@_automimetype_tl }
+          { \@@_mimetype_set:nNN {stream.txt}\l_@@_automimetype_tl \l_@@_tmpa_tl}
+          { \@@_mimetype_set:nNN { #2 } \l_@@_automimetype_tl \l_@@_tmpa_tl }
+         \@@_count_embed:N \l_@@_tmpa_tl
          \@@_stream_write:nN
            { #1 }
            \l_@@_automimetype_tl
@@ -791,8 +854,9 @@
 \cs_new_protected:Npn \pdffile_embed_stream:nnN #1 #2 #3
   {
      \tl_if_blank:nTF {#2}
-      { \@@_mimetype_set:nN {stream.txt}\l_@@_automimetype_tl}
-      { \@@_mimetype_set:nN { #2 } \l_@@_automimetype_tl }
+      { \@@_mimetype_set:nNN {stream.txt}\l_@@_automimetype_tl \l_@@_tmpa_tl}
+      { \@@_mimetype_set:nNN { #2 } \l_@@_automimetype_tl \l_@@_tmpa_tl }
+     \@@_count_embed:N\l_@@_tmpa_tl
      \@@_stream_write:nN
        { #1 }
        \l_@@_automimetype_tl
@@ -806,9 +870,9 @@
      \prop_gput:Nee
         \g_pdffile_embed_prop
         { #3 }
-        {{stream}{}{\tl_if_blank:nTF {#2}{stream.txt}{\exp_not:n{#2}}}}         
+        {{stream}{}{\tl_if_blank:nTF {#2}{stream.txt}{\exp_not:n{#2}}}}
   }
-  
+
 
 %    \end{macrocode}
 % \end{macro}

@@ -57,7 +57,7 @@
 %    }^^A
 % }
 %
-% \date{Version 0.96n, released 2024-10-27}
+% \date{Version 0.96o, released 2024-12-20}
 %
 % \maketitle
 % \begin{documentation}
@@ -347,7 +347,10 @@
 %     \cs{pdfmanagement_add:nnn} \{ThisPage\} \Arg{name} \Arg{value}
 %   \end{syntax}
 %   Adds |/|\meta{name} \meta{value} at \emph{shipout} to the page dictionary of the
-%   current page. Current page means here the \emph{shipout} page.
+%   current page. Current page means here the \emph{shipout} page. \emph{shipout} means
+%   at the end of the \texttt{shipout/background} hook. Code that wants to set a value
+%   in a shipout hook should use the \texttt{shipout/background} hook too. Other hooks
+%   are either too early or too late.%
 %   It is always stored globally.
 %   If \Arg{name} has already a value set in the \texttt{Page}
 %   dictionary it will be overwritten for this page.
@@ -632,7 +635,7 @@
 %<@@=pdfmanagement>
 %<*header>
 %
-\ProvidesExplPackage{l3pdfmanagement}{2024-10-27}{0.96n}
+\ProvidesExplPackage{l3pdfmanagement}{2024-12-20}{0.96o}
   {Management of core PDF dictionaries (LaTeX PDF management testphase bundle)}
 %</header>
 %    \end{macrocode}

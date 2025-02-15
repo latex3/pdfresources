@@ -6,11 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 this project uses date-based 'snapshot' version identifiers.
 
 ## [Unreleased]
+
+- l3backend-testphase: use \directlua for the page resources, issue #85
+
+## [2024-12-20]
+Version: 2024-12-20 v0.96o
+
 ### Changed 
  - hyp/link/GoTo/Contents and hyp/link/URI/Contents now fill also the dictionary entry. 
    This allows to replace it fully.
  - hyp/link/GoTo/Contents socket has been added to \hyper@linkstart too.  
+ - content and name of dummy PDF/A-4F attachment.
+ - added testphase=latest key
 
+### Added 
+ - l3pdfmeta: standard verification tests for embedded test, A-4 will switch to A-4F is embedded files are detected
+ - l3pdffile: counts embedded files for verification tests.
+ 
 ## [2024-10-27]
 Version: 2024-10-27 v0.96n
 

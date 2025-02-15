@@ -48,7 +48,7 @@
 %    }^^A
 % }
 %
-% \date{Version 0.96n, released 2024-10-27}
+% \date{Version 0.96o, released 2024-12-20}
 %
 % \maketitle
 % \begin{documentation}
@@ -432,7 +432,7 @@
 %    \begin{macrocode}
 %<@@=pdfannot>
 %<*header>
-\ProvidesExplPackage{l3pdfannot}{2024-10-27}{0.96n}
+\ProvidesExplPackage{l3pdfannot}{2024-12-20}{0.96o}
   {PDF-annotations}
 \RequirePackage{l3pdfdict}
 %</header>
@@ -612,8 +612,11 @@
 %
 % \subsection{Interruption of links}
 %    \begin{macrocode}
-\cs_new_protected:Nn \pdfannot_link_off: { \__pdf_backend_link_off: }
-\cs_new_protected:Nn \pdfannot_link_on:  { \__pdf_backend_link_on: }
+\cs_if_free:NT \pdfannot_link_off:
+ {
+  \cs_new_protected:Nn \pdfannot_link_off: { \__pdf_backend_link_off: }
+  \cs_new_protected:Nn \pdfannot_link_on:  { \__pdf_backend_link_on: }
+ } 
 %    \end{macrocode}
 %
 %

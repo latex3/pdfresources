@@ -45,7 +45,7 @@
 %    }^^A
 % }
 %
-% \date{Version 0.96n, released 2024-10-27}
+% \date{Version 0.96o, released 2024-12-20}
 %
 % \maketitle
 %
@@ -56,27 +56,27 @@
 %    \begin{macrocode}
 %<drivers>\ProvidesExplFile
 %<*dvipdfmx>
-  {l3backend-testphase-dvipdfmx.def}{2024-10-27}{}
+  {l3backend-testphase-dvipdfmx.def}{2024-12-20}{}
   {LaTeX~PDF~management~testphase~bundle~backend~support: dvipdfmx}
 %</dvipdfmx>
 %<*dvips>
-  {l3backend-testphase-dvips.def}{2024-10-27}{}
+  {l3backend-testphase-dvips.def}{2024-12-20}{}
   {LaTeX~PDF~management~testphase~bundle~backend~support: dvips}
 %</dvips>
 %<*dvisvgm>
-  {l3backend-testphase-dvisvgm.def}{2024-10-27}{}
+  {l3backend-testphase-dvisvgm.def}{2024-12-20}{}
   {LaTeX~PDF~management~testphase~bundle~backend~support: dvisvgm}
 %</dvisvgm>
 %<*luatex>
-  {l3backend-testphase-luatex.def}{2024-10-27}{}
+  {l3backend-testphase-luatex.def}{2024-12-20}{}
   {LaTeX~PDF~management~testphase~bundle~backend~support: PDF output (LuaTeX)}
 %</luatex>
 %<*pdftex>
-  {l3backend-testphase-pdftex.def}{2024-10-27}{}
+  {l3backend-testphase-pdftex.def}{2024-12-20}{}
   {LaTeX~PDF~management~testphase~bundle~backend~support: PDF output (pdfTeX)}
 %</pdftex>
 %<*xdvipdfmx>
-  {l3backend-testphase-xetex.def}{2024-10-27}{}
+  {l3backend-testphase-xetex.def}{2024-12-20}{}
   {LaTeX~PDF~management~testphase~bundle~backend~support: XeTeX}
 %</xdvipdfmx>
 %    \end{macrocode}
@@ -684,8 +684,8 @@
 \cs_new_protected:Npn \@@_backend_PageResources_gput:nnn #1 #2 #3
   {
     \pdfdict_gput:nnn {g_@@_Core/Page/Resources/#1} { #2 }{ #3 }
-    \tex_latelua:D{ltx.@@.Page.Resources.#1=true}
-    \tex_latelua:D
+    \tex_directlua:D{ltx.@@.Page.Resources.#1=true}
+    \tex_directlua:D
       {
         ltx.pdf.Page_Resources_gpush(tex.count["g_shipout_readonly_int"])
       }
@@ -1282,8 +1282,11 @@
 % the link. We add here backend support for this.
 %    \begin{macrocode}
 %<*drivers>
-\cs_new_protected:Npn \@@_backend_link_off:{}
-\cs_new_protected:Npn \@@_backend_link_on: {}
+\cs_if_free:NT \@@_backend_link_off:
+ {
+   \cs_new_protected:Npn \@@_backend_link_off:{}
+   \cs_new_protected:Npn \@@_backend_link_on: {}
+ }  
 %</drivers>
 %<*pdftex>
 \cs_if_exist:NT \pdfrunninglinkoff

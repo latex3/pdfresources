@@ -47,7 +47,7 @@
 %    }^^A
 % }
 %
-% \date{Version 0.96n, released 2024-10-27}
+% \date{Version 0.96o, released 2024-12-20}
 %
 % \maketitle
 % \begin{documentation}
@@ -55,7 +55,7 @@
 % \section{\pkg{ltdocinit} documentation}
 % This small module defined \cs{DocumentMetadata} but the definition  
 % has been moved to latex-lab. The documentation can be found in 
-% \texttt{documentmetadata-support-doc-.pdf}
+% \texttt{documentmetadata-support-doc.pdf}
 %
 % \cs{DocumentMetadata} is also used to
 % activate the new PDF management code and it loads
@@ -81,72 +81,20 @@
 % This is an older alias for \cs{DocumentMetadata}
 % \end{function}
 %
-% Additionally to the keys described in \texttt{documentmetadata-support-doc-.pdf}
+% Additionally to the keys described in \texttt{documentmetadata-support-doc.pdf}
 % the following keys/values are implemented
 %
 % \begin{description}
 %
-%    \item[\texttt{pdfstandard}] Choice key to set the pdf standard.
-%    
-%      Starting with version 0.95s it is also possible to use the values
-%      |X-4|, |X-4p|, |X-5g|, |X-5n|, |X-5pg|, |X-6|, |X-6n|, |X-6p|, |UA-1|, for
-%      a PDF/X and PDF/UA standard. These keys set \emph{only} the relevant
-%      XMP-metadata. In version 0.95z support for |UA-2| has been added but
-%      note that |UA-2| hasn't been released yet. It should be used only together
-%      with pdf version 2.0.
-%      
-%      Beside this |A-1b|, |A-2a|, |A-2b|, |A-2u|, |A-3a|, |A-3b|, |A-3u| and |A-4|
-%      are accepted as values for A-standards. The casing is irrelevant, |a-1b| works too.
-%      Note that using these
-%      key doesn't mean that the document actually follows the standard. \LaTeX{}
-%      can neither ensure nor check all requirements of a standard, and not everything
-%      it can do theoretically has already been implemented.
-%      For A-standard a color profile is included and the
-%      \texttt{/OutputIntent} is set and javascript action in hyperref are suppressed.
-%      The |u| variants do not force unicode,
-%      but they will pass the information to hyperref. The |a| variants
-%      do \emph{not} enforce (or even test) a tagged pdf yet.
-%      More information can be found in the documentation
-%      of \pkg{l3pdfmeta}.
-%
-%      |pdfstandard| can be used more than once to set overlapping standards, e.g:\\
-%      |pdfstandard=A-2b,pdfstandard=X-4,pdfstandard=UA-1|
-%
-%    \item[\texttt{xmp}] A boolean, if set to false no XMP metadata are added to the PDF.
-%    The default is true. Details are described in the documentation of \pkg{l3pdfmeta}.
-%
 %    \item[\texttt{testphase}] This key is used to load testphase code. The values it accepts
 %    and their effect will change over time, when testphase packages are added or
-%    removed or when the code is moved into the kernel. New value here are
+%    removed or when the code is moved into the kernel. A new value here is
 %     \begin{description}
-%    \item[\texttt{new-or-1}] This patches a few commands related
-%    to the output routing. They are needed for the tagging
-%    of paragraphs, for the tagging of header and footer and 
-%    to allow the PDF management to insert code which avoids that
-%    links happening at page breaks spills into the header and footer. 
-%    This code is also loaded be the following values.
-%    \item[\texttt{new-or}] This loads more changes to the output routine required for the 
-%    tagging. It is not compatible with every class! The code is also loaded by the 
-%    \texttt{phase-II} value.
+%      \item[latest] This loads all existing modules.
 %    \end{description}
+%    
 %    The |testphase| key can only be used in the first \cs{DocumentMetadata}.
 %
-%    \item[\texttt{debug}] This key activates some debug options. It takes a list of key-values
-%    as value. Currently the following keys are known:
-%     \begin{description}
-%     \item[\texttt{para}] with the default and only value |show|. It will activate the |paratagging-show|
-%       option of \pkg{tagpdf},
-%     \item[\texttt{log}]  with the values as described in the documentation \pkg{tagpdf},
-%     \item[\texttt{uncompress}] which does the same as |uncompress| as main key
-%     \item[\texttt{pdfmanagement}] a boolean which allows to deactivate the pdfmanagement.
-%     This should only be done for debugging! 
-%     \item[\texttt{firstaidoff}] This accepts a comma lists of keywords and disables the patches
-%       related to them. More information can be found in the documentation of
-%       \pkg{pdfmanagement-firstaid}.
-%     \item[\texttt{xmp-export}] This will export the XMP-metadata to a file \verb+\jobname.xmpi+.
-%     with \texttt{debug=\{xmp-export=filename\}} the file name can be changed. 
-%     More information can be found in the documentation of \pkg{l3pdfmeta}.  
-%    \end{description}
 % \end{description}
 %
 % \subsection{Container for document properties}
@@ -221,7 +169,7 @@
 %    \begin{macrocode}
 %<@@=pdfmanagement>
 %<*header>
-\ProvidesExplPackage{ltdocinit}{2024-10-27}{0.96n}
+\ProvidesExplPackage{ltdocinit}{2024-12-20}{0.96o}
   {Initialize document metadata}
 %</header>
 %    \end{macrocode}
@@ -246,6 +194,27 @@
  { \tl_new:N \g_@@_testphase_tl }
 %    \end{macrocode}
 % \end{variable}
+% \subsection{New, temporary testphase keys}
+% TODO: remove after 2025-06-01 release
+% 
+%    \begin{macrocode}
+\msg_new:nnn { meta } { testphase-latest-loading-temp }
+   {
+     Loading~testphase~modules\\
+     #1
+   }
+\keys_define:nn { document / metadata }
+  {
+    ,testphase / latest .code:n =
+     {
+       \keys_set:nn 
+        {document / metadata}
+        {testphase={phase-III,title,table,math,firstaid}}
+       \msg_note:nnn { meta } { testphase-latest-loading-temp } 
+        { phase-III,~title,~table,~math,~firstaid }
+     }           
+  }
+%    \end{macrocode}
 % \subsection{\cs{DeclareDocumentMetadata}}
 % \cs{DocumentMetadata} is defined by the kernel.
 % We only define the older alias \cs{DeclareDocumentMetadata}

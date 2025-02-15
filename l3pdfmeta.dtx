@@ -49,7 +49,7 @@
 %    }^^A
 % }
 %
-% \date{Version 0.96n, released 2024-10-27}
+% \date{Version 0.96o, released 2024-12-20}
 %
 % \maketitle
 % \begin{documentation}
@@ -182,15 +182,20 @@
 % \item[|no_embed_content|]    no |/EF| key in filespec, no |/Type/EmbeddedFiles|.
 %  \emph{This will be checked in future by \pkg{l3pdffiles}
 %  for the files it embeds.}
-%  The restrictment is set for only PDF/A-1b.
-%  PDF/A-2b and PDF/A3-b lifted this restriction: PDF/A-2b allows
+%  The restriction is set only for PDF/A-1 versions.
+%  PDF/A-2 and PDF/A-3 lifted this restriction: PDF/A-2 allows
 %  to embed other PDF documents conforming to either PDF/A-1 or PDF/A-2,
-%  and PDF/A-3 allows any embedded files. I don't see a way to test the
-%  PDF/A-2b requirement so currently it will simply allow everything. Perhaps
+%  and PDF/A-3 and PDF/A-4F allows any embedded files.
+%
+% \item[|only_pdfa_embed_content|]
+%  This is set for PDF/A-2a, PDF/A-2b, PDF/A-2u and PDF/A-4.
+%  I don't see a way to test the
+%  PDF/A-2 requirement so currently it will simply allow everything. Perhaps
 %  a test for at least the PDF-format will be added in future.
+%
 % \item[|Catalog_no_OCProperties|] don't add |/OCProperties| to the catalog
 % {\em l3pdfmeta removes this entry at the end of the document}
-% \item[|Catalog_OCProperties_no_AS|] 
+% \item[|Catalog_OCProperties_no_AS|]
 % do not use |/AS| optional content configuration dictionary.
 % \item[|Catalog_EmbeddedFiles|] ensure that an |EmbeddedFiles| name tree is
 % in the catalog. This is required for PDF/A-4f.
@@ -205,10 +210,10 @@
 % \item[|tagged|] that is set in A-2a and A-3a and means that the pdf must be
 % tagged. This is currently neither tested not enforced somewhere.
 % \item[|no_CharSet|] CharSet is deprecated is pdf 2.0 and should not
-% be used in A-4. l3pdfmeta will therefore suppress it for the 
+% be used in A-4. l3pdfmeta will therefore suppress it for the
 % engines pdftex and luatex (the other engines have no suitable option)
 % \item[|omit_CID|] This avoids with PDF/A-2 and newer a failure
-% because of with missing CID identifications 
+% because of with missing CID identifications
 % (e.g. from rule ISO 19005-2:2011, Clause: 6.2.11.4.2)
 % It has only with luatex an effect.
 % \item[|Trailer_no_Info|] The \texttt{Info} dictionary
@@ -219,7 +224,7 @@
 % it should only contain the \texttt{/ModDate} entry. In
 % texlive 2023 the engines pdftex and luatex have primitives
 % to suppress the dictionary
-% and l3pdfmeta will make use of it. 
+% and l3pdfmeta will make use of it.
 % \end{description}
 %
 % \subsubsection{Tests with values and special handlers}
@@ -357,8 +362,8 @@
 % This sets various metadata to values needed by the \LaTeX{}
 % regression tests.
 % It also sets the seed for random functions.
-% If a current l3backend is used and \cs{c_sys_timestamp_str} is available, 
-% the command does not set dates, but 
+% If a current l3backend is used and \cs{c_sys_timestamp_str} is available,
+% the command does not set dates, but
 % assumes that the environment variable \verb+SOURCE_DATE_EPOCH+ is used.
 % \end{function}
 %
@@ -468,11 +473,11 @@
 %
 % \subsubsection{Declarations}
 % PDF knows beside standards also a more generic method to declare conformance
-% to some specification by adding a declaration, 
+% to some specification by adding a declaration,
 % see \url{https://pdfa.org/wp-content/uploads/2019/09/PDF-Declarations.pdf}).
 % Such declarations can be added as a simple url which identify the specification or
 % with additional details regarding date and credentials. An example would be
-% 
+%
 % \begin{verbatim}
 % \DocumentMetadata{}
 % \documentclass{article}
@@ -489,10 +494,10 @@
 % \ExplSyntaxOff
 % \begin{document}
 %  text
-% \end{document} 
-% 
+% \end{document}
+%
 % \end{verbatim}
-% 
+%
 % \subsubsection{Dates}
 % \begin{itemize}
 % \item
@@ -560,7 +565,7 @@
 % The keys |pdfcopyright| and |pdflicenseurl| work similar as in \pkg{hyperxmp}.
 % But differently to \pkg{hyperxmp} the code doesn't set the |xmpRights:Marked|
 % property, as I have some doubts that one deduce its value simply
-% by checking if the other keys have been used; if needed it can be added by 
+% by checking if the other keys have been used; if needed it can be added by
 % using one of these settings (true means with copyright, false means public domain).
 % \begin{verbatim}
 % \AddToDocumentProperties[document]{copyright}{true}
@@ -604,33 +609,33 @@
 % \begin{syntax}
 % \cs{pdfmeta_xmp_add_declaration:n}\Arg{uri}
 % \end{syntax}
-% This add a PDF declaration with the required |conformsTo| property to the XMP metadata. 
-% \meta{uri} should not be empty and is a URI specifying 
+% This add a PDF declaration with the required |conformsTo| property to the XMP metadata.
+% \meta{uri} should not be empty and is a URI specifying
 % the standard or profile referred to by the PDF
 % Declaration. If the uri contains a hash, use \cs{c_hash_str} to escape it
 % and use the \texttt{e} variant to expand it.
 % \end{function}
-% 
+%
 % \begin{function}{\pdfmeta_xmp_add_declaration:nnnnn,
 %  \pdfmeta_xmp_add_declaration:ennnn,
 %  \pdfmeta_xmp_add_declaration:eeenn}
 % \begin{syntax}
 % \cs{pdfmeta_xmp_add_declaration:nnnnn}\Arg{uri}\Arg{By}\Arg{Date}\Arg{Credentials}\Arg{Report}
 % \end{syntax}
-% This add a PDF declaration to the XMP metadata similar 
-% to \cs{pdfmeta_xmp_add_declaration:n}. 
-% With \meta{By}, \meta{Date}, \meta{Credentials}, \meta{Report} the optional 
-% fields |claimBy| (text), |claimDate| (iso date), |claimCredentials| (text) and 
+% This add a PDF declaration to the XMP metadata similar
+% to \cs{pdfmeta_xmp_add_declaration:n}.
+% With \meta{By}, \meta{Date}, \meta{Credentials}, \meta{Report} the optional
+% fields |claimBy| (text), |claimDate| (iso date), |claimCredentials| (text) and
 % |claimReport| (uri) of the |claimData| property can be given.
 % If  \cs{pdfmeta_xmp_add_declaration:nnnnn} is used twice with the same \meta{uri}
-% argument the |claimData| are concatenated. There is no check if the |claimData| are identical. 
+% argument the |claimData| are concatenated. There is no check if the |claimData| are identical.
 % \end{function}
-% 
+%
 % The following two commands can be used to extend the schema declarations in
 % the XMP metadata. This is for example needed to implement a standard like ZUGferd/Factur X
 % for invoices. A schema declaration should be added only once but as this task
 % is probably not needed frequently only light guards are there to avoid duplicated entries.
-%  
+%
 % \begin{function}{\pdfmeta_xmp_schema_new:nnn}
 % \begin{syntax}
 % \cs{pdfmeta_xmp_schema_new:nnn}\Arg{text}\Arg{prefix}\Arg{uri}
@@ -638,9 +643,9 @@
 % \meta{text} is some string describing the schema, e.g. |PDF/A~Identification~Schema|,
 % \meta{prefix} is the unique prefix used by the schema. This prefix
 % must be declared first with |\pdfmeta_xmp_xmlns_new:nn|. If a schema with this prefix
-% has already been declared, it will currently be ignored with a warning. 
+% has already been declared, it will currently be ignored with a warning.
 % The \meta{uri} is expanded, so a
-% hash can for example be given as |\c_hash_str|. 
+% hash can for example be given as |\c_hash_str|.
 % \end{function}
 
 % \begin{function}{\pdfmeta_xmp_property_new:nnnnn}
@@ -649,14 +654,14 @@
 % \end{syntax}
 % If the new property already exists in the schema
 % (as identified by the combination of \meta{schema prefix}
-% and \meta{name} the property is silently ignore. 
+% and \meta{name} the property is silently ignore.
 % \meta{schema prefix} is the prefix declared with the previous command.
 % schema, e.g. |PDF/A~Identification~Schema|,
 % \meta{name} is a short string that identifies the property, e.g. |xmpMM| or |year|. It must be
-% unique in the properties of a schema. \meta{type} is e.g. |URI| or |Integer| or |Text|, 
-% \meta{category} is e.g. |internal| or |external|, \meta{description} is a free description string. 
+% unique in the properties of a schema. \meta{type} is e.g. |URI| or |Integer| or |Text|,
+% \meta{category} is e.g. |internal| or |external|, \meta{description} is a free description string.
 % \end{function}
-% 
+%
 % \end{documentation}
 %
 % \begin{implementation}
@@ -666,7 +671,7 @@
 %    \begin{macrocode}
 %<@@=pdfmeta>
 %<*header>
-\ProvidesExplPackage{l3pdfmeta}{2024-10-27}{0.96n}
+\ProvidesExplPackage{l3pdfmeta}{2024-12-20}{0.96o}
   {PDF-Standards---LaTeX PDF management testphase bundle}
 %</header>
 %    \end{macrocode}
@@ -680,6 +685,15 @@
 \msg_new:nnn  {pdf }{wrong-pdfversion}
   {PDF~version~#1~is~too~#2~for~standard~'#3'.}
 %    \end{macrocode}
+% Messages for embedded files
+%    \begin{macrocode}
+\msg_new:nnn  {pdf }{validation-failure}
+  {
+    PDF~standard~validation~failure.\\
+    #1
+  }
+%    \end{macrocode}
+%
 % \begin{variable}{\l_@@_tmpa_tl,\l_@@_tmpb_tl,\l_@@_tmpa_str,
 %  \g_@@tmpa_str,\l_@@_tmpa_seq,\l_@@_tmpb_seq}
 %    \begin{macrocode}
@@ -855,7 +869,7 @@
     \pdfmeta_standard_verify:nF { no_CharSet }
      { \__pdf_backend_omit_charset:n {1} }
     \pdfmeta_standard_verify:nF { omit_CID }
-     { \__pdf_backend_omit_cidset:n {1} }         
+     { \__pdf_backend_omit_cidset:n {1} }
     \pdfmeta_standard_verify:nnF { min_pdf_version }
      { \pdf_version: }
      { \msg_warning:nneee {pdf}{wrong-pdfversion}
@@ -894,6 +908,7 @@
 %   \g_@@_standard_pdf/A-3B_prop ,
 %   \g_@@_standard_pdf/A-3U_prop ,
 %   \g_@@_standard_pdf/A-4_prop ,
+%   \g_@@_standard_pdf/A-4F_prop ,
 %   }
 %     \begin{macrocode}
 \prop_new:c { g_@@_standard_pdf/A-1B_prop }
@@ -925,7 +940,7 @@
     ,Catalog_no_OCProperties =
     % Rule 6.9-4 The AS key shall not appear in any optional content configuration dictionary.
     % actually only starting with A-2 but doesn't harm here either
-    ,Catalog_OCProperties_no_AS=  
+    ,Catalog_OCProperties_no_AS=
     %===============
     % Rule 6.6.1-1: PDAction, S == "GoTo" || S == "GoToR" || S == "Thread"
     %               || S == "URI" || S == "Named" || S == "SubmitForm"
@@ -971,16 +986,20 @@
 % embedding files is allowed (with restrictions)
 \prop_gremove:cn
   { g_@@_standard_pdf/A-2B_prop }
-  { embed_content}
+  { no_embed_content }
+\prop_gput:cnn
+  { g_@@_standard_pdf/A-2B_prop }
+  { only_pdfa_embed_content }
+  {}
 \prop_gput:cnn
   { g_@@_standard_pdf/A-2B_prop }{max_pdf_version}{1.7}
 \prop_gput:cnn
   { g_@@_standard_pdf/A-2B_prop }{omit_CID}{}
-% OCG layers are allowed (with restrictions)  
+% OCG layers are allowed (with restrictions)
 \prop_gremove:cn
   { g_@@_standard_pdf/A-2B_prop }
   { Catalog_no_OCProperties }
-  
+
   %A-2u ==============
 \prop_new:c { g_@@_standard_pdf/A-2U_prop }
 \prop_gset_eq:cc
@@ -1017,10 +1036,10 @@
   { g_@@_standard_pdf/A-3B_prop }{year}{2012}
 \prop_gput:cnn
   { g_@@_standard_pdf/A-3B_prop }{level}{3}
-% embedding files is allowed (with restrictions)
+% embedding files is allowed
 \prop_gremove:cn
   { g_@@_standard_pdf/A-3B_prop }
-  { embed_content}
+  { only_pdfa_embed_content }
 %A-3u ==============
 \prop_new:c { g_@@_standard_pdf/A-3U_prop }
 \prop_gset_eq:cc
@@ -1062,12 +1081,14 @@
   { g_@@_standard_pdf/A-4_prop }{no_CharSet}{}
 \prop_gput:cnn
   { g_@@_standard_pdf/A-4_prop }{Trailer_no_Info}{}
+\prop_gput:cnn
+  { g_@@_standard_pdf/A-4_prop }{only_pdfa_embed_content}{}
 \prop_gremove:cn
   { g_@@_standard_pdf/A-4_prop }{conformance}
 \prop_gremove:cn
   { g_@@_standard_pdf/A-4_prop }{max_pdf_version}
 \prop_gremove:cn
-  { g_@@_standard_pdf/A-4_prop }{Catalog_OCProperties_no_AS} 
+  { g_@@_standard_pdf/A-4_prop }{Catalog_OCProperties_no_AS}
 %A-4f ==============
 \prop_new:c { g_@@_standard_pdf/A-4F_prop }
 \prop_gset_eq:cc
@@ -1075,15 +1096,18 @@
   { g_@@_standard_pdf/A-4_prop }
 \prop_gput:cnn
   { g_@@_standard_pdf/A-4F_prop }{conformance}{F}
-% containsEmbeddedFiles == true ISO 19005-4:2020, Clause: 6.9, Test number: 5 
+% containsEmbeddedFiles == true ISO 19005-4:2020, Clause: 6.9, Test number: 5
 \prop_gput:cnn
-  { g_@@_standard_pdf/A-4F_prop }{Catalog_EmbeddedFiles}{}  
+  { g_@@_standard_pdf/A-4F_prop }{Catalog_EmbeddedFiles}{}
+% can contain any file
+\prop_gremove:cn
+  { g_@@_standard_pdf/A-4F_prop }{only_pdfa_embed_content}
 %    \end{macrocode}
 % \end{variable}
 %
 % \subsubsection{Embedded Files}
-% Standard 4-AF is needed if we add AF files for 
-% tagging but it also requires an EmbeddedFiles name tree, 
+% Standard 4-AF is needed if we add AF files for
+% tagging but it also requires an EmbeddedFiles name tree,
 % so we test at the end if the name tree is empty and add a small readme if
 % yes
 %    \begin{macrocode}
@@ -1092,23 +1116,78 @@
   \pdfmeta_standard_verify:nF{Catalog_EmbeddedFiles}
    {
     \tl_gput_right:Nn\g__kernel_pdfmanagement_end_run_code_tl
-     { 
+     {
        \bool_if:NT \g__pdfmanagement_active_bool
         {
          \pdfdict_if_empty:nT { g__pdf_Core/Catalog/Names/EmbeddedFiles }
           {
-            \group_begin: 
+            \group_begin:
             \pdfdict_put:nne {l_pdffile/Filespec} {Desc}{(note~about~PDF/A-4F)}
             \pdfdict_put:nnn { l_pdffile/Filespec }{AFRelationship} { /Unspecified }
-            \pdffile_embed_stream:nnN {PDF~standard~A-4F~requires~a~file}{readme.txt}\l_@@_tmpa_tl
-            \exp_args:Nne \__pdf_backend_Names_gpush:nn{EmbeddedFiles}{(readme)~\l_@@_tmpa_tl} 
+            \pdffile_embed_stream:nnN
+              {The~document~was~declared~to~be~of~type~PDF/A-4f~but~hasn't~any~attachments.~
+               LaTeX~therefore~added~this~dummy~file.}
+              {pdf-A4f.txt}
+              \l_@@_tmpa_tl
+            \exp_args:Nne \__pdf_backend_Names_gpush:nn{EmbeddedFiles}{(pdf-A4f)~\l_@@_tmpa_tl}
             \group_end:
           }
-       }  
+       }
      }
-   }   
-}    
+   }
+}
 %    \end{macrocode}
+% Before writing the xml we check if there are embedded files we know of. For A-4 we adjust
+% the standard to A-4F is needed.
+%    \begin{macrocode}
+\AddToHook{pdfmeta/xmp}
+ {
+    \pdfmeta_standard_verify:nF{no_embed_content}
+      {
+        \bool_lazy_or:nnT
+          { ! \int_if_zero_p:n { \g_pdffile_embed_pdfa_int } }
+          { ! \int_if_zero_p:n { \g_pdffile_embed_nonpdfa_int } }
+          {
+            \prop_get:NnNT\g_@@_standard_prop { name }\l_@@_tmpa_tl
+             {
+               \msg_warning:nne { pdf } { validation-failure }
+                 {
+                   Embedded~files~detected.\iow_newline:
+                   This~is~not~allowed~in~standard~\l_@@_tmpa_tl
+                 }
+             }
+          }
+      }
+    \pdfmeta_standard_verify:nF {only_pdfa_embed_content}
+      {
+        \int_if_zero:nF  { \g_pdffile_embed_nonpdfa_int }
+          {
+           \prop_get:NnNT\g_@@_standard_prop { name }\l_@@_tmpa_tl
+             {
+               \str_if_eq:VnTF {\l_@@_tmpa_tl} { pdf/A-4 }
+                {
+                  \prop_gset_eq:cc
+                    { g_@@_standard_prop }
+                    { g_@@_standard_pdf/A-4F_prop }
+                  \msg_warning:nne { pdf } { validation-failure }
+                   {
+                     Embedded~non-PDF~files~detected.\iow_newline:
+                     Switching~standard~from~PDF/A-4~to~PDF/A-4F
+                   }
+                }
+                {
+                  \msg_warning:nne { pdf } { validation-failure }
+                   {
+                     Embedded~non-PDF~files~detected.\iow_newline:
+                     This~is~not~allowed~in~standard~\l_@@_tmpa_tl
+                   }
+                }
+             }
+          }
+      }
+ }
+%    \end{macrocode}
+%
 % \subsubsection{Colorprofiles and Outputintents}
 % The following provides a minimum of interface to add a color profile
 % and an outputintent need for PDF/A for now. There will be need to extend it later,
@@ -1283,16 +1362,16 @@
         \prop_map_inline:Nn \g_@@_outputintents_prop
            {
              \prop_if_exist:cTF {c_@@_colorprofile_#2}
-               {  
+               {
                  \@@_embed_colorprofile:n
                   {#2}
                  \@@_write_outputintent:nn
                   {#2}
                   {#1}
-               } 
+               }
                {
                 \msg_warning:nnn{pdfmeta}{colorprofile-undefined}{#2}
-               }  
+               }
            }
       }
 %    \end{macrocode}
@@ -1318,7 +1397,7 @@
            { \pdfmeta_standard_item:n { outputintent_A } }
            \l_@@_tmpb_tl
          \prop_if_exist:cTF {c_@@_colorprofile_\l_@@_tmpb_tl}
-          {                  
+          {
             \exp_args:NV \@@_embed_colorprofile:n \l_@@_tmpb_tl
             \prop_map_inline:Nn \g_@@_outputintents_prop
               {
@@ -1330,7 +1409,7 @@
           }
           {
             \msg_warning:nne{pdfmeta}{colorprofile-undefined}{\l_@@_tmpb_tl}
-          }    
+          }
        }
    }
 %    \end{macrocode}
@@ -1386,15 +1465,15 @@
        {
          \pdf_version_compare:NnF < {2.0}
            {
-             \msg_warning:nneee 
+             \msg_warning:nneee
               {pdf}{wrong-pdfversion}
-              {\pdf_version:}{high}{UA-1}                  
-           }  
-       }          
+              {\pdf_version:}{high}{UA-1}
+           }
+       }
     },
 %    \end{macrocode}
 % currently it is not possible to merge requirements - these need some thoughts as
-% every standard has some common keys like the name or the yes. 
+% every standard has some common keys like the name or the yes.
 % We therefore add some requirements manually.
 %    \begin{macrocode}
    _pdfstandard / UA-2 .code:n =
@@ -1408,22 +1487,22 @@
          \@@_xmp_wtpdf_reuse_declaration:
          \pdf_version_compare:NnT < {2.0}
            {
-             \msg_warning:nneee 
+             \msg_warning:nneee
               {pdf}{wrong-pdfversion}
-              {\pdf_version:}{low}{UA-2}                  
-           }  
-       }        
-    },    
+              {\pdf_version:}{low}{UA-2}
+           }
+       }
+    },
    xmp  .choice:,
    xmp / true  .code:n = { \bool_gset_true:N \g_@@_xmp_bool },
    xmp / false .code:n = { \bool_gset_false:N \g_@@_xmp_bool},
    xmp .default:n = true,
 %    \end{macrocode}
-% These keys allow to disable or force the wtpdf declarations. 
+% These keys allow to disable or force the wtpdf declarations.
 % Currently the content can not be changed and once they have been disabled there
 % are gone. This will perhaps change.
 %    \begin{macrocode}
-   xmp / wtpdf .code:n = 
+   xmp / wtpdf .code:n =
     {
       \keys_set:nn {@@/xmp}{#1}
     },
@@ -1436,13 +1515,13 @@
     {
       \cs_set_eq:NN \@@_xmp_wtpdf_reuse_declaration: \prg_do_nothing:
     },
-   accessibility .choice:, 
-   accessibility / true .code:n = \@@_xmp_wtpdf_accessibility_declaration:, 
-   accessibility /false .code:n = 
+   accessibility .choice:,
+   accessibility / true .code:n = \@@_xmp_wtpdf_accessibility_declaration:,
+   accessibility /false .code:n =
     {
       \cs_set_eq:NN \@@_xmp_wtpdf_accessibility_declaration: \prg_do_nothing:
-    },  
-  } 
+    },
+  }
 %    \end{macrocode}
 % XMP debugging option
 %    \begin{macrocode}
@@ -1900,7 +1979,7 @@
                 {
                   \@@_xmp_add_packet_line_attr:nneV
                    {rdf}{li}{xml:lang="\l_@@_tmpa_tl" }\l_@@_tmpb_tl
-                }  
+                }
             }
          \@@_xmp_add_packet_close:nn{rdf}{#3}
         \@@_xmp_add_packet_close:nn {#1}{#2}
@@ -2088,11 +2167,11 @@
             \cs_if_exist_use:c {@@_xmp_schema_#2_additions:}
             \@@_xmp_add_packet_close:nn{rdf}{li}
           }
-      } 
+      }
   }
 %    \end{macrocode}
 % \end{macro}
-% 
+%
 %
 %
 % \begin{macro}{\@@_xmp_property_new:nnnnn}
@@ -2161,7 +2240,7 @@
 %  Renditionclass declared by hyperxmp.
 %  Properties InstanceID and OriginalDocumentID declared by pdfx (pdfx.xmp)
 %  With the exception of OriginalDocumentID all are already allowed and
-%  predefined. 
+%  predefined.
 %    \begin{macrocode}
 \@@_xmp_schema_new:nnn
    {XMP~Media~Management~Schema}
@@ -2194,10 +2273,10 @@
    {rev}
    {Integer}
    {internal}
-   {Revision~year~of~standard}   
+   {Revision~year~of~standard}
 %    \end{macrocode}
 % \end{macro}
-%  \item[pdfuaid] here we need (?) to declare the property 
+%  \item[pdfuaid] here we need (?) to declare the property
 %  \enquote{part} and \enquote{rev}.
 % \begin{macro}[no-user-doc]{pdfuaid~(schema)}
 %    \begin{macrocode}
@@ -2216,7 +2295,7 @@
    {rev}
    {Integer}
    {internal}
-   {Revision~of~ISO~14289~standard}   
+   {Revision~of~ISO~14289~standard}
 %    \end{macrocode}
 % \end{macro}
 % \item[pdfx] According to [1] not an allowed schema, but it seems
@@ -2391,22 +2470,22 @@
 %    \end{macrocode}
 % \end{macro}
 % \item[jav]: currently ignored
-% 
-% \item[declarations] The PDF Declarations mechanism allows creation and 
-% editing software to declare, via a PDF Declaration, a PDF file to be in 
-% conformance with a 3rd party specification or profile 
+%
+% \item[declarations] The PDF Declarations mechanism allows creation and
+% editing software to declare, via a PDF Declaration, a PDF file to be in
+% conformance with a 3rd party specification or profile
 % that may not be related to PDF technology. Their specification is for example
 % described in \url{https://pdfa.org/wp-content/uploads/2019/09/PDF-Declarations.pdf}.
-% 
+%
 % If declarations are added to the XMP-metadata they need (for pdf/A compliance) a
 % schema declaration. We do not add it by default but define here a command to enable
 % it. (This can be done in the document preamble as xmp is built only at the end.)
-% 
-% 
+%
+%
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_xmp_schema_enable_pdfd:
  {
-  \@@_xmp_xmlns_new:nn {pdfd}{http://pdfa.org/declarations/} 
+  \@@_xmp_xmlns_new:nn {pdfd}{http://pdfa.org/declarations/}
   \@@_xmp_schema_new:nnn
     {PDF~Declarations~Schema}
     {pdfd}
@@ -2416,7 +2495,7 @@
     {declarations}
     {Bag~declaration}
     {external}
-    {An~unordered~array~of~PDF~Declaration~entries,~where~each~PDF~Declaration~representing~a~statement~of~conformance~with~ an~identified~external~standard~or~profile,~along~with~optional~information~identifying~the~nature~of~the~claim.}  
+    {An~unordered~array~of~PDF~Declaration~entries,~where~each~PDF~Declaration~representing~a~statement~of~conformance~with~ an~identified~external~standard~or~profile,~along~with~optional~information~identifying~the~nature~of~the~claim.}
 %    \end{macrocode}
 % the values are complicated so we use the additions: method to add them.
 %    \begin{macrocode}
@@ -2459,14 +2538,14 @@
                 {An~unordered~array~of~claim~data,~where~each~claim~identifies~the~nature~of~the~claim.}
              \@@_xmp_add_packet_close:nn{rdf}{Seq}
            \@@_xmp_add_packet_close:nn{pdfaType}{field}
-          \@@_xmp_add_packet_close:nn{rdf}{li}      
+          \@@_xmp_add_packet_close:nn{rdf}{li}
         \@@_xmp_add_packet_close:nn{rdf}{Seq}
       \@@_xmp_add_packet_close:nn{pdfaSchema}{valueType}
-    }  
+    }
 %    \end{macrocode}
 % the schema should be added only once so disable it after use:
 %    \begin{macrocode}
-   \cs_gset_eq:NN \@@_xmp_schema_enable_pdfd: \prg_do_nothing: 
+   \cs_gset_eq:NN \@@_xmp_schema_enable_pdfd: \prg_do_nothing:
  }
 %    \end{macrocode}
 %
@@ -2564,26 +2643,26 @@
   {
     \@@_xmp_add_packet_line:nne {pdfaid}{part}{\pdfmeta_standard_item:n{level}}
     \@@_xmp_add_packet_line:nne
-      {pdfaid}{conformance}{\pdfmeta_standard_item:n{conformance}}  
-    \int_compare:nNnTF {0\pdfmeta_standard_item:n{level}}<{4}  
+      {pdfaid}{conformance}{\pdfmeta_standard_item:n{conformance}}
+    \int_compare:nNnTF {0\pdfmeta_standard_item:n{level}}<{4}
      {\@@_xmp_add_packet_line:nne {pdfaid}{year} {\pdfmeta_standard_item:n{year}}}
      {\@@_xmp_add_packet_line:nne {pdfaid}{rev}  {\pdfmeta_standard_item:n{year}}}
     \@@_xmp_add_packet_line:nne
       {pdfxid}{GTS_PDFXVersion}{\GetDocumentProperties{document/pdfstandard-X}}
-    \pdfmanagement_get_documentproperties:nNT {document/pdfstandard-UA}\l_@@_tmpa_tl  
-     { 
+    \pdfmanagement_get_documentproperties:nNT {document/pdfstandard-UA}\l_@@_tmpa_tl
+     {
        \@@_xmp_add_packet_line:nne
-        {pdfuaid}{part}{\exp_last_unbraced:No\use_i:nn \l_@@_tmpa_tl}          
+        {pdfuaid}{part}{\exp_last_unbraced:No\use_i:nn \l_@@_tmpa_tl}
       \@@_xmp_add_packet_line:nne
-        {pdfuaid}{rev}{\exp_last_unbraced:No\use_ii:nn \l_@@_tmpa_tl}            
-     } 
+        {pdfuaid}{rev}{\exp_last_unbraced:No\use_ii:nn \l_@@_tmpa_tl}
+     }
   }
 %    \end{macrocode}
 % \end{macro}
 %
 % \subsection{Declarations}
 % See \url{https://pdfa.org/wp-content/uploads/2019/09/PDF-Declarations.pdf}
-% 
+%
 % \begin{variable}{\g_@@_xmp_pdfd_data_prop}
 % This holds the data for declarations.
 %    \begin{macrocode}
@@ -2598,11 +2677,11 @@
     \prop_if_empty:NF\g_@@_xmp_pdfd_data_prop
       {
         \@@_xmp_add_packet_open:nn{pdfd}{declarations}
-        \@@_xmp_add_packet_open:nn{rdf}{Bag}  
+        \@@_xmp_add_packet_open:nn{rdf}{Bag}
           \prop_map_inline:Nn \g_@@_xmp_pdfd_data_prop
             {
               \@@_xmp_build_pdfd_claim:nn{##1}{##2}
-            }      
+            }
         \@@_xmp_add_packet_close:nn{rdf}{Bag}
         \@@_xmp_add_packet_close:nn{pdfd}{declarations}
       }
@@ -2616,20 +2695,20 @@
 \cs_new_protected:Npn \@@_xmp_build_pdfd_claim:nn #1#2
  {
     \@@_xmp_add_packet_open_attr:nnn{rdf}{li}{rdf:parseType="Resource"}
-      \@@_xmp_add_packet_line:nnn{pdfd}{conformsTo}{#1}      
+      \@@_xmp_add_packet_line:nnn{pdfd}{conformsTo}{#1}
       \tl_if_empty:nF {#2}
        {
-         \@@_xmp_add_packet_open:nn{pdfd}{claimData}  
-          \@@_xmp_add_packet_open:nn{rdf}{Bag}  
+         \@@_xmp_add_packet_open:nn{pdfd}{claimData}
+          \@@_xmp_add_packet_open:nn{rdf}{Bag}
             #2
-          \@@_xmp_add_packet_close:nn{rdf}{Bag}  
-         \@@_xmp_add_packet_close:nn{pdfd}{claimData}  
+          \@@_xmp_add_packet_close:nn{rdf}{Bag}
+         \@@_xmp_add_packet_close:nn{pdfd}{claimData}
        }
-    \@@_xmp_add_packet_close:nn{rdf}{li}   
- }  
+    \@@_xmp_add_packet_close:nn{rdf}{li}
+ }
 %    \end{macrocode}
 % \end{macro}
-% 
+%
 % \subsection{Photoshop}
 % \begin{macro}{\@@_xmp_build_photoshop:}
 %    \begin{macrocode}
@@ -2808,11 +2887,11 @@
       {Marked}
       {
        \str_case:en {\GetDocumentProperties{document/copyright}}
-        { 
+        {
           {true}{True}
           {false}{False}
         }
-      }      
+      }
   }
 %    \end{macrocode}
 % \end{macro}
@@ -2982,18 +3061,20 @@
 % We don't try to get the byte count. So we can put everything
 % in the |shipout/lastpage| hook
 %    \begin{macrocode}
+\hook_new:n { pdfmeta/xmp }
 \AddToHook{shipout/lastpage}
   {
     \bool_if:NT\g_@@_xmp_bool
      {
-       \str_if_exist:NTF\c_sys_timestamp_str 
-        {          
+       \str_if_exist:NTF\c_sys_timestamp_str
+        {
           \tl_set_eq:NN \l_@@_xmp_currentdate_tl \c_sys_timestamp_str
         }
         {
           \file_get_timestamp:nN{\jobname.log}\l_@@_xmp_currentdate_tl
         }
        \@@_xmp_date_split:VN\l_@@_xmp_currentdate_tl\l_@@_xmp_currentdate_seq
+       \hook_use:n { pdfmeta/xmp }
        \@@_xmp_build_packet:
        \exp_args:No
        \__pdf_backend_metadata_stream:n {\g_@@_xmp_packet_tl}
@@ -3036,13 +3117,13 @@
 \cs_set_eq:NN \pdfmeta_xmp_schema_new:nnn \@@_xmp_schema_new:nnn
 %    \end{macrocode}
 % \end{macro}
-% 
+%
 % \begin{macro}{\pdfmeta_xmp_property_new:nnnnn}
 %    \begin{macrocode}
 \cs_set_eq:NN \pdfmeta_xmp_property_new:nnnnn \@@_xmp_property_new:nnnnn
 %    \end{macrocode}
 % \end{macro}
-% 
+%
 % \begin{macro}{\pdfmeta_xmp_add_declaration:n,\pdfmeta_xmp_add_declaration:e}
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdfmeta_xmp_add_declaration:n #1 %conformsTo uri
@@ -3062,12 +3143,12 @@
    \tl_set:Nn \l_@@_tmpa_tl
      {
        \@@_xmp_add_packet_open_attr:nnn{rdf}{li}{rdf:parseType="Resource"}
-       \@@_xmp_add_packet_line:nnn{pdfd}{claimBy}{#2} 
-       \@@_xmp_add_packet_line:nnn{pdfd}{claimDate}{#3} 
-       \@@_xmp_add_packet_line:nnn{pdfd}{claimCredentials}{#4} 
-       \@@_xmp_add_packet_line:nnn{pdfd}{claimReport}{#5} 
-       \@@_xmp_add_packet_close:nn{rdf}{li}      
-     } 
+       \@@_xmp_add_packet_line:nnn{pdfd}{claimBy}{#2}
+       \@@_xmp_add_packet_line:nnn{pdfd}{claimDate}{#3}
+       \@@_xmp_add_packet_line:nnn{pdfd}{claimCredentials}{#4}
+       \@@_xmp_add_packet_line:nnn{pdfd}{claimReport}{#5}
+       \@@_xmp_add_packet_close:nn{rdf}{li}
+     }
    \prop_get:NnNT \g_@@_xmp_pdfd_data_prop {#1}\l_@@_tmpb_tl
     {
       \tl_concat:NNN \l_@@_tmpa_tl \l_@@_tmpa_tl \l_@@_tmpb_tl
@@ -3075,12 +3156,12 @@
    \prop_gput:Nno\g_@@_xmp_pdfd_data_prop{#1}
        {
          \l_@@_tmpa_tl
-       }        
+       }
  }
 \cs_generate_variant:Nn\pdfmeta_xmp_add_declaration:nnnnn {e,eee}
 %    \end{macrocode}
 % \end{macro}
-% 
+%
 % \subsection{Default declarations}
 % The two declarations will be required quite often with ua-2, so we
 % provide some interface.
@@ -3099,17 +3180,17 @@
       {http://pdfa.org/declarations/wtpdf\c_hash_str reuse1.0}
       {LaTeX~Project}
       {\@@_xmp_iso_today:}{}{}
- }     
+ }
 \cs_new_protected:Npn \@@_xmp_wtpdf_accessibility_declaration:
  {
    \pdfmeta_xmp_add_declaration:ennnn
      {http://pdfa.org/declarations/wtpdf\c_hash_str accessibility1.0}
      {LaTeX~Project}
      {\@@_xmp_iso_today:}{}{}
- }    
+ }
 %    \end{macrocode}
 % \end{macro}
-% 
+%
 %    \begin{macrocode}
 %</package>
 %    \end{macrocode}
