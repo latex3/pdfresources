@@ -1282,8 +1282,11 @@
 % the link. We add here backend support for this.
 %    \begin{macrocode}
 %<*drivers>
-\cs_new_protected:Npn \@@_backend_link_off:{}
-\cs_new_protected:Npn \@@_backend_link_on: {}
+\cs_if_free:NT \@@_backend_link_off:
+ {
+   \cs_new_protected:Npn \@@_backend_link_off:{}
+   \cs_new_protected:Npn \@@_backend_link_on: {}
+ }  
 %</drivers>
 %<*pdftex>
 \cs_if_exist:NT \pdfrunninglinkoff

@@ -612,8 +612,11 @@
 %
 % \subsection{Interruption of links}
 %    \begin{macrocode}
-\cs_new_protected:Nn \pdfannot_link_off: { \__pdf_backend_link_off: }
-\cs_new_protected:Nn \pdfannot_link_on:  { \__pdf_backend_link_on: }
+\cs_if_free:NT \pdfannot_link_off:
+ {
+  \cs_new_protected:Nn \pdfannot_link_off: { \__pdf_backend_link_off: }
+  \cs_new_protected:Nn \pdfannot_link_on:  { \__pdf_backend_link_on: }
+ } 
 %    \end{macrocode}
 %
 %
