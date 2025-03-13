@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 this project uses date-based 'snapshot' version identifiers.
 
 ## [2025-02-15]
+Version: 2025-02-15 v0.96p
 
 - l3backend-testphase: use \directlua for the page resources, issue #85
 
