@@ -248,24 +248,28 @@
         \DeclareHookRule{shipout/lastpage}{tagging-setup}{before}{tagpdf} 
       }     
     ,tagging-setup .code:n = 
-      {  
-        \RequirePackage{tagpdf}
-        \keys_set:nn { document / metadata }{ testphase=latest }              
-        \tagpdfsetup{#1}
+      { 
+        \RequirePackage{tagpdf} 
+        \keys_set:nn { document / metadata }{ testphase=latest }  
+        \keys_set_groups:nnn{__tag/setup}{load}{#1}
+        \AddToHook{class/before}
+         {\keys_set_exclude_groups:nnn {__tag/setup}{load}{#1}}
       }     
-   }  
-\keys_define:nn { __tag/setup } 
+ }
+\keys_define:nn{__tag/setup}
  {
-   modules .code:n =  
-    {
+   ,modules .code:n =  
+     {
       \tl_gclear:N\g_@@_testphase_tl 
       \keys_set:nn { document / metadata }{testphase={phase-II,#1}} 
-    }  
-  ,extra-modules .code:n = 
-    {
-      \keys_set:nn { document / metadata }{testphase={#1}}    
-    } 
- }                
+     }
+   ,modules .groups:n = { load }    
+   ,extra-modules .code:n = 
+     {
+       \keys_set:nn { document / metadata }{testphase={#1}}    
+     }
+   ,extra-modules .groups:n = { load }  
+ }                 
 %    \end{macrocode}
 % \subsection{\cs{DeclareDocumentMetadata}}
 % \cs{DocumentMetadata} is defined by the kernel.
