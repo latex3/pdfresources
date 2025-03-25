@@ -210,10 +210,62 @@
        \keys_set:nn 
         {document / metadata}
         {testphase={phase-III,title,table,math,firstaid}}
-       \msg_note:nnn { meta } { testphase-latest-loading-temp } 
-        { phase-III,~title,~table,~math,~firstaid }
+       \tl_gput_right:Nn\g_@@_testphase_tl 
+        {
+          \msg_note:nnn { meta } { testphase-latest-loading-temp } 
+           { phase-III,~title,~table,~math,~firstaid }
+        }   
      }           
-  }
+    ,tagging .choice:,
+    ,tagging / on .code:n = 
+      {
+        \keys_set:nn { document / metadata }{ testphase=latest }
+      }  
+    ,tagging / off .code:n = 
+      {
+        \keys_set:nn { document / metadata }{ testphase=latest }
+        \AddToHook{class/before}
+         {
+           \tagpdfsetup{activate/mc=false,activate/tree=false,
+                        activate/struct=false,activate/socket=false,
+                        para/tagging=false,math/setup=}
+           \AddToDocumentProperties [document]{tagging}{inactive}
+           \AddToDocumentProperties [document]{tagging/para}{inactive}
+           % perhaps, need to test
+           %\tag_suspend:n {global}
+           %\cs_set_eq:NN\tag_suspend:n\use_none:n
+           %\cs_set_eq:NN\tag_resume:n \use_none:n
+           %\cs_new_protected:Npn \tag_mc_begin:n #1 { \__tag_whatsits: \int_gincr:N \c@g__tag_MCID_abs_int }
+           %\cs_new_protected:Nn \tag_mc_end:{ \__tag_whatsits: }
+           %\cs_new_protected:Npn \tag_struct_begin:n #1 {\int_gincr:N \c@g__tag_struct_abs_int}
+           %\cs_new_protected:Npn \tag_struct_end:{}
+         }
+      }  
+    ,tagging / draft .code:n = 
+      {
+        \keys_set:nn { document / metadata }{ testphase=latest }
+        \AddToHook{shipout/lastpage}[tagging-setup]{\tagpdfsetup{activate/tree=false}}
+        \DeclareHookRule{shipout/lastpage}{tagging-setup}{before}{tagpdf} 
+      }     
+    ,tagging-setup .code:n = 
+      {  
+        \RequirePackage{tagpdf}
+        \keys_set:nn { document / metadata }{ testphase=latest }              
+        \tagpdfsetup{#1}
+      }     
+   }  
+\keys_define:nn { __tag/setup } 
+ {
+   modules .code:n =  
+    {
+      \tl_gclear:N\g_@@_testphase_tl 
+      \keys_set:nn { document / metadata }{testphase={phase-II,#1}} 
+    }  
+  ,extra-modules .code:n = 
+    {
+      \keys_set:nn { document / metadata }{testphase={#1}}    
+    } 
+ }                
 %    \end{macrocode}
 % \subsection{\cs{DeclareDocumentMetadata}}
 % \cs{DocumentMetadata} is defined by the kernel.
