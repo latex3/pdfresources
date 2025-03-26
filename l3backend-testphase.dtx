@@ -45,7 +45,7 @@
 %    }^^A
 % }
 %
-% \date{Version 0.96p, released 2025-02-15}
+% \date{Version 0.96q, released 2025-03-26}
 %
 % \maketitle
 %
@@ -56,27 +56,27 @@
 %    \begin{macrocode}
 %<drivers>\ProvidesExplFile
 %<*dvipdfmx>
-  {l3backend-testphase-dvipdfmx.def}{2025-02-15}{}
+  {l3backend-testphase-dvipdfmx.def}{2025-03-26}{}
   {LaTeX~PDF~management~testphase~bundle~backend~support: dvipdfmx}
 %</dvipdfmx>
 %<*dvips>
-  {l3backend-testphase-dvips.def}{2025-02-15}{}
+  {l3backend-testphase-dvips.def}{2025-03-26}{}
   {LaTeX~PDF~management~testphase~bundle~backend~support: dvips}
 %</dvips>
 %<*dvisvgm>
-  {l3backend-testphase-dvisvgm.def}{2025-02-15}{}
+  {l3backend-testphase-dvisvgm.def}{2025-03-26}{}
   {LaTeX~PDF~management~testphase~bundle~backend~support: dvisvgm}
 %</dvisvgm>
 %<*luatex>
-  {l3backend-testphase-luatex.def}{2025-02-15}{}
+  {l3backend-testphase-luatex.def}{2025-03-26}{}
   {LaTeX~PDF~management~testphase~bundle~backend~support: PDF output (LuaTeX)}
 %</luatex>
 %<*pdftex>
-  {l3backend-testphase-pdftex.def}{2025-02-15}{}
+  {l3backend-testphase-pdftex.def}{2025-03-26}{}
   {LaTeX~PDF~management~testphase~bundle~backend~support: PDF output (pdfTeX)}
 %</pdftex>
 %<*xdvipdfmx>
-  {l3backend-testphase-xetex.def}{2025-02-15}{}
+  {l3backend-testphase-xetex.def}{2025-03-26}{}
   {LaTeX~PDF~management~testphase~bundle~backend~support: XeTeX}
 %</xdvipdfmx>
 %    \end{macrocode}
@@ -2382,15 +2382,8 @@
     \AddToHook{begindocument}{\pdfmanagement_add:nnn{Info}{Producer}{(pdfTeX+dvips)}}
     \__kernel_backend_literal:e{!~<</DocumentUUID~(DocumentUUID)>>~setpagedevice}
     \__kernel_backend_literal:e{!~<</InstanceUUID~(InstanceUUID)>>~setpagedevice}
-    \str_if_exist:NTF\c_sys_timestamp_str
-      {
-       \pdfmanagement_add:nne{Info}{CreationDate}{(\c_sys_timestamp_str)}
-       \pdfmanagement_add:nne{Info}{ModDate}{(\c_sys_timestamp_str)}
-      }
-      {
-       \pdfmanagement_add:nnn{Info}{CreationDate}{(D:20010101205959-00'00')}
-       \pdfmanagement_add:nnn{Info}{ModDate}{(D:20010101205959-00'00')}
-      }
+    \pdfmanagement_add:nne{Info}{CreationDate}{(\c_sys_timestamp_str)}
+    \pdfmanagement_add:nne{Info}{ModDate}{(\c_sys_timestamp_str)}
 %</dvips>
 %<*dvipdfmx>
     \pdfmanagement_add:nnn{Info}{Producer}{(dvipdfmx)}
@@ -2422,16 +2415,11 @@
        <2350CAD05F8A7AF0AA4058486855344F>~
      ]}
 %</luatex>
+%    \end{macrocode}
+% Embedded files should also have a fix date.
+%    \begin{macrocode}
 %<*drivers>
-    \str_if_exist:NF\c_sys_timestamp_str
-      {
-       \pdfmanagement_add:nnn{Info}{CreationDate}{(D:20010101205959-00'00')}
-       \pdfmanagement_add:nnn{Info}{ModDate}{(D:20010101205959-00'00')}
-       \AddToDocumentProperties[document]{creationdate}{D:20010101205959-00'00'}
-       \AddToDocumentProperties[document]{moddate}{D:20010101205959-00'00'}
-       \AddToDocumentProperties[hyperref]{pdfmetadate}{D:20010101205959-00'00'}
-       \AddToDocumentProperties[hyperref]{pdfdate}{D:20010101205959-00'00'}
-      }
+    \pdfdict_put:nne  {l_pdffile/Params} {ModDate}{(\c_sys_timestamp_str)}
     \AddToDocumentProperties[hyperref]{pdfinstanceid}{uuid:0a57c455-157a-4141-8c19-6237d832fc80}
     \AddToDocumentProperties[hyperref]{pdfproducer}{\c_sys_engine_exec_str-NN.NN.NN}
    }

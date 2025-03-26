@@ -49,7 +49,7 @@
 %    }^^A
 % }
 %
-% \date{Version 0.96p, released 2025-02-15}
+% \date{Version 0.96q, released 2025-03-26}
 %
 % \maketitle
 % \begin{documentation}
@@ -191,7 +191,7 @@
 %         <<
 %           /ModDate  ~ (\file_timestamp:n{example-image.eps})
 %           /Size     ~  \file_size:n {example-image.eps}
-%           /CheckSum ~ (\file_mdfive_hash:n {example-image.eps})
+%           /CheckSum ~ <\file_mdfive_hash:n {example-image.eps}>
 %          >>
 %     }
 %     {example-image.eps}
@@ -252,7 +252,7 @@
 % l\_pdffile       & Type     & /EmbeddedFile\\
 % l\_pdffile/Params& Size     & |\file_size:n{\l_pdffile_source_name_str}|\\
 % l\_pdffile/Params& ModDate  & |(\file_timestamp:n {\l_pdffile_source_name_str})|\\
-% l\_pdffile/Params& CheckSum & |(\file_mdfive_hash:n{\l_pdffile_source_name_str})|\\
+% l\_pdffile/Params& CheckSum & |<\file_mdfive_hash:n{\l_pdffile_source_name_str}>|\\
 % l\_pdffile/streamParams&    &  a /ModDate entry with year/month/date \\
 %                        &    & (used with \cs{pdffile_embed_stream:nnn})\\
 % l\_pdffile/Filespec & Type  & /Filespec\\
@@ -423,7 +423,7 @@
 %
 %    \begin{macrocode}
 %<*header>
-\ProvidesExplPackage{l3pdffile}{2025-02-15}{0.96p}
+\ProvidesExplPackage{l3pdffile}{2025-03-26}{0.96q}
   {embedding and referencing files in PDF---LaTeX PDF management testphase bundle}
 \RequirePackage{l3pdftools}  %temporarily!!
 %</header>
@@ -555,7 +555,7 @@
 \pdfdict_put:nnn { l_pdffile/Params }
   {Size}     { \file_size:n { \l_pdffile_source_name_str } }
 \pdfdict_put:nnn { l_pdffile/Params }
-  {CheckSum} { (\file_mdfive_hash:n { \l_pdffile_source_name_str }) }
+  {CheckSum} { <\file_mdfive_hash:n { \l_pdffile_source_name_str }> }
 \pdfdict_new:n { l_pdffile/streamParams }
 \pdfdict_put:nnn { l_pdffile/streamParams }
   {ModDate}  {
