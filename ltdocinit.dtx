@@ -53,8 +53,8 @@
 % \begin{documentation}
 %
 % \section{\pkg{ltdocinit} documentation}
-% This small module defined \cs{DocumentMetadata} but the definition  
-% has been moved to latex-lab. The documentation can be found in 
+% This small module defined \cs{DocumentMetadata} but the definition
+% has been moved to latex-lab. The documentation can be found in
 % \texttt{documentmetadata-support-doc.pdf}
 %
 % \cs{DocumentMetadata} is also used to
@@ -64,7 +64,7 @@
 % which can't be detected automatically like |dvipdfmx|,
 % must be set in the first \cs{DocumentMetadata}.
 %
-% 
+%
 % Here only a few newer keys are defined and the older \cs{DeclareDocumentMetadata}
 % is provided.
 %
@@ -92,7 +92,7 @@
 %     \begin{description}
 %      \item[latest] This loads all existing modules.
 %    \end{description}
-%    
+%
 %    The |testphase| key can only be used in the first \cs{DocumentMetadata}.
 %
 % \end{description}
@@ -144,7 +144,7 @@
 %   container, then leaves the \meta{true code} in the input
 %   stream.  The \meta{token list variable} is assigned locally.
 % \end{function}
-% 
+%
 % \begin{function}{\ShowDocumentProperties,\LogDocumentProperties}
 % \begin{syntax}
 %  \cs{ShowDocumentProperties}\\
@@ -184,7 +184,7 @@
 %    \begin{macrocode}
 \clist_if_exist:NF \g_@@_firstaidoff_clist
   { \clist_new:N \g_@@_firstaidoff_clist }
-%    \end{macrocode} 
+%    \end{macrocode}
 % \end{variable}
 %  \begin{variable}{\g_@@_testphase_tl}
 %  a tl to store the testphase loading code so that we can load them at
@@ -196,7 +196,7 @@
 % \end{variable}
 % \subsection{New, temporary testphase keys}
 % TODO: remove after 2025-06-01 release
-% 
+%
 %    \begin{macrocode}
 \msg_new:nnn { meta } { testphase-latest-loading-temp }
    {
@@ -207,21 +207,21 @@
   {
     ,testphase / latest .code:n =
      {
-       \keys_set:nn 
+       \keys_set:nn
         {document / metadata}
         {testphase={phase-III,title,table,math,firstaid}}
-       \tl_gput_right:Nn\g_@@_testphase_tl 
+       \tl_gput_right:Nn\g_@@_testphase_tl
         {
-          \msg_note:nnn { meta } { testphase-latest-loading-temp } 
+          \msg_note:nnn { meta } { testphase-latest-loading-temp }
            { phase-III,~title,~table,~math,~firstaid }
-        }   
-     }           
+        }
+     }
     ,tagging .choice:,
-    ,tagging / on .code:n = 
+    ,tagging / on .code:n =
       {
         \keys_set:nn { document / metadata }{ testphase=latest }
-      }  
-    ,tagging / off .code:n = 
+      }
+    ,tagging / off .code:n =
       {
         \keys_set:nn { document / metadata }{ testphase=latest }
         \AddToHook{class/before}
@@ -240,36 +240,36 @@
            %\cs_new_protected:Npn \tag_struct_begin:n #1 {\int_gincr:N \c@g__tag_struct_abs_int}
            %\cs_new_protected:Npn \tag_struct_end:{}
          }
-      }  
-    ,tagging / draft .code:n = 
+      }
+    ,tagging / draft .code:n =
       {
         \keys_set:nn { document / metadata }{ testphase=latest }
         \AddToHook{shipout/lastpage}[tagging-setup]{\tagpdfsetup{activate/tree=false}}
-        \DeclareHookRule{shipout/lastpage}{tagging-setup}{before}{tagpdf} 
-      }     
-    ,tagging-setup .code:n = 
-      { 
-        \RequirePackage{tagpdf} 
-        \keys_set:nn { document / metadata }{ testphase=latest }  
+        \DeclareHookRule{shipout/lastpage}{tagging-setup}{before}{tagpdf}
+      }
+    ,tagging-setup .code:n =
+      {
+        \tl_gclear:N\g_@@_testphase_tl
+        \keys_set:nn { document / metadata }{ testphase=latest }
         \keys_set_groups:nnn{__tag/setup}{load}{#1}
         \AddToHook{class/before}
          {\keys_set_exclude_groups:nnn {__tag/setup}{load}{#1}}
-      }     
+      }
  }
 \keys_define:nn{__tag/setup}
  {
-   ,modules .code:n =  
+   ,modules .code:n =
      {
-      \tl_gclear:N\g_@@_testphase_tl 
-      \keys_set:nn { document / metadata }{testphase={phase-II,#1}} 
+      \tl_gclear:N\g_@@_testphase_tl
+      \keys_set:nn { document / metadata }{testphase={phase-II,#1}}
      }
-   ,modules .groups:n = { load }    
-   ,extra-modules .code:n = 
+   ,modules .groups:n = { load }
+   ,extra-modules .code:n =
      {
-       \keys_set:nn { document / metadata }{testphase={#1}}    
+       \keys_set:nn { document / metadata }{testphase={#1}}
      }
-   ,extra-modules .groups:n = { load }  
- }                 
+   ,extra-modules .groups:n = { load }
+ }
 %    \end{macrocode}
 % \subsection{\cs{DeclareDocumentMetadata}}
 % \cs{DocumentMetadata} is defined by the kernel.
