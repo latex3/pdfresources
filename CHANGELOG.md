@@ -7,7 +7,17 @@ this project uses date-based 'snapshot' version identifiers.
 
 ## [Unreleased]
 
+### Changed
+
 - handle ModDate of embedded files in regression-tests.
+
+### Added
+
+-  temporary: tagging and tagging-setup key
+
+### Fixed 
+
+-  CheckSum in embedded files, issue #87
 
 ## [2025-02-15]
 Version: 2025-02-15 v0.96p
