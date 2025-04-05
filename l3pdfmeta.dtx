@@ -1463,6 +1463,7 @@
      \AddToDocumentProperties [document]{pdfstandard-UA}{{1}{}}
      \AddToHook{begindocument/before}
        {
+         \prop_gput:Nnn \g__pdfmeta_standard_prop {omit_CID}{}
          \pdf_version_compare:NnF < {2.0}
            {
              \msg_warning:nneee
