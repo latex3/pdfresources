@@ -1719,6 +1719,7 @@
 \tl_new:N\l_@@_link_Contents_tl
 \socket_new:nn {hyp/link/GoTo/Contents}{2}
 \socket_new:nn {hyp/link/URI/Contents}{1}
+\socket_new:nn {hyp/link/GoToR/Contents}{1}
 \socket_new_plug:nnn {hyp/link/GoTo/Contents}{default}
   {
     \@@_text_pdfstring:eoN
@@ -1728,6 +1729,15 @@
     \pdfannot_dict_put:nne {link/GoTo}{Contents}
       {\l_@@_link_Contents_tl}
   }
+\socket_new_plug:nnn {hyp/link/GoToR/Contents}{default}
+  {
+    \@@_text_pdfstring:eoN
+      { Open~file~#1  }
+      { \l_@@_text_enc_info_print_tl }
+      \l_@@_link_Contents_tl
+    \pdfannot_dict_put:nne {link/GoToR}{Contents}
+      {\l_@@_link_Contents_tl}
+  }  
 \socket_new_plug:nnn {hyp/link/URI/Contents}{default}
   {
     \@@_text_pdfstring:eoN
@@ -1738,6 +1748,7 @@
       {\l_@@_link_Contents_tl}
   }
 \socket_assign_plug:nn{hyp/link/GoTo/Contents}{default}
+\socket_assign_plug:nn{hyp/link/GoToR/Contents}{default}
 \socket_assign_plug:nn{hyp/link/URI/Contents}{default}
 %    \end{macrocode}
 % \begin{variable}{\l_@@_dest_pdfview_tl}
@@ -2397,6 +2408,10 @@
               { #3 }
               { \l_@@_text_enc_dest_print_tl }
               \l_@@_dest_name_tmpa_tl
+%    \end{macrocode}
+% This socket adds something to the /Contents key.
+%    \begin{macrocode}
+            \socket_use:nn{hyp/link/GoToR/Contents}{#2}              
             \tl_if_blank:eTF {#3}
               {
                 \pdfdict_put:nne {l_hyp/annot/A/GoToR}{D}
