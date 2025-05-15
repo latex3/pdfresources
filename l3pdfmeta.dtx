@@ -1443,21 +1443,45 @@
 \keys_define:nn { document / metadata }
  {
    _pdfstandard / X-4 .code:n =
-    {\AddToDocumentProperties [document]{pdfstandard-X}{PDF/X-4}},
+    {
+      \AddToDocumentProperties [document]{pdfstandard-X}{PDF/X-4}
+      \@@_xmp_add_pdfxid:
+    },
    _pdfstandard / X-4p .code:n =
-    {\AddToDocumentProperties [document]{pdfstandard-X}{PDF/X-4p}},
+    {
+      \AddToDocumentProperties [document]{pdfstandard-X}{PDF/X-4p}
+      \@@_xmp_add_pdfxid:
+    },
    _pdfstandard / X-5g .code:n =
-    {\AddToDocumentProperties [document]{pdfstandard-X}{PDF/X-5g}},
+    {
+      \AddToDocumentProperties [document]{pdfstandard-X}{PDF/X-5g}
+      \@@_xmp_add_pdfxid:
+    },
    _pdfstandard / X-5n .code:n =
-    {\AddToDocumentProperties [document]{pdfstandard-X}{PDF/X-5n}},
+    {
+      \AddToDocumentProperties [document]{pdfstandard-X}{PDF/X-5n}
+      \@@_xmp_add_pdfxid:
+    },
    _pdfstandard / X-5pg .code:n =
-    {\AddToDocumentProperties [document]{pdfstandard-X}{PDF/X-5pg}},
+    {
+      \AddToDocumentProperties [document]{pdfstandard-X}{PDF/X-5pg}
+      \@@_xmp_add_pdfxid:
+    },
    _pdfstandard / X-6 .code:n =
-    {\AddToDocumentProperties [document]{pdfstandard-X}{PDF/X-6p}},
+    {
+      \AddToDocumentProperties [document]{pdfstandard-X}{PDF/X-6p}
+      \@@_xmp_add_pdfxid:
+    },
    _pdfstandard / X-6n .code:n =
-    {\AddToDocumentProperties [document]{pdfstandard-X}{PDF/X-6n}},
+    {
+      \AddToDocumentProperties [document]{pdfstandard-X}{PDF/X-6n}
+      \@@_xmp_add_pdfxid:
+    },
    _pdfstandard / X-6p .code:n =
-    {\AddToDocumentProperties [document]{pdfstandard-X}{PDF/X-6p}},
+    {
+      \AddToDocumentProperties [document]{pdfstandard-X}{PDF/X-6p}
+      \@@_xmp_add_pdfxid:
+    },
    _pdfstandard / UA-1 .code:n =
     {
      \AddToDocumentProperties [document]{pdfstandard-UA}{{1}{}}
@@ -2097,6 +2121,8 @@
 %    \end{macrocode}
 % \end{macro}
 % Now we fill the data. The list is more or less the same as in hyperxmp
+% The pdfxid entry is only added if an X standard is used, see issue \#50
+% and the schema below.
 %    \begin{macrocode}
 \@@_xmp_xmlns_new:nn {pdf}      {http://ns.adobe.com/pdf/1.3/}
 \@@_xmp_xmlns_new:nn {xmpRights}{http://ns.adobe.com/xap/1.0/rights/}
@@ -2109,7 +2135,7 @@
 \@@_xmp_xmlns_new:nn {pdfaid}   {http://www.aiim.org/pdfa/ns/id/}
 \@@_xmp_xmlns_new:nn {pdfuaid}  {http://www.aiim.org/pdfua/ns/id/}
 \@@_xmp_xmlns_new:nn {pdfx}     {http://ns.adobe.com/pdfx/1.3/}
-\@@_xmp_xmlns_new:nn {pdfxid}   {http://www.npes.org/pdfx/ns/id/}
+%\@@_xmp_xmlns_new:nn {pdfxid}   {http://www.npes.org/pdfx/ns/id/}
 \@@_xmp_xmlns_new:nn {prism}    {http://prismstandard.org/namespaces/basic/3.0/}
 %\@@_xmp_xmlns_new:nn {jav}      {http://www.niso.org/schemas/jav/1.0/}
 %\@@_xmp_xmlns_new:nn {xmpTPg}   {http://ns.adobe.com/xap/1.0/t/pg/}
@@ -2305,19 +2331,24 @@
 % Ignored as only relevant for older pdf/X version not supported by the pdfmanagement.
 %
 % \item[pdfxid] we set this so that we
-% can add the pdf/X version for pdf/X-4 and higher
+% can add the pdf/X version for pdf/X-4 and higher. This is only set if
+% a pdf/X standard is used, see issue \#50
 % \begin{macro}[no-user-doc]{pdfxid~(schema)}
 %    \begin{macrocode}
-\@@_xmp_schema_new:nnn
-    {PDF/X~ID~Schema}
-    {pdfxid}
-    {http://www.npes.org/pdfx/ns/id/}
-\@@_xmp_property_new:nnnnn
-    {pdfxid}
-    {GTS_PDFXVersion}
-    {Text}
-    {internal}
-    {ID~of~PDF/X~standard}
+\cs_new_protected:Npn \@@_xmp_add_pdfxid:
+ {
+  \@@_xmp_xmlns_new:nn {pdfxid}   {http://www.npes.org/pdfx/ns/id/}
+  \@@_xmp_schema_new:nnn
+      {PDF/X~ID~Schema}
+      {pdfxid}
+      {http://www.npes.org/pdfx/ns/id/}
+  \@@_xmp_property_new:nnnnn
+      {pdfxid}
+      {GTS_PDFXVersion}
+      {Text}
+      {internal}
+      {ID~of~PDF/X~standard}
+ }
 %    \end{macrocode}
 % \end{macro}
 
