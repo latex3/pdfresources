@@ -5,12 +5,13 @@ first release 0.95a, 2021-02-23 will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 this project uses date-based 'snapshot' version identifiers.
 
-## [Unreleased]
+## [2025-05-15]
 
 ### Fixed
  - set omit_CID in pdf/UA-1
- - switch to pdfannot prefix for link backend commands
- - add tagging support for gotor links
+ - switch to pdfannot prefix for link backend commands (follow change in l3kernel)
+ - add tagging support for GoToR links (tagging issue #835)
+ - add pdfxid namespace and schema only if needed (issue #50)
  
 ## [2025-03-26]
 Version: 2025-03-26 v0.96q
