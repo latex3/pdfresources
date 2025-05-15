@@ -48,7 +48,7 @@
 %    }^^A
 % }
 %
-% \date{Version 0.96q, released 2025-03-26}
+% \date{Version 0.96r, released 2025-05-15}
 %
 % \maketitle
 % \begin{documentation}
@@ -432,7 +432,7 @@
 %    \begin{macrocode}
 %<@@=pdfannot>
 %<*header>
-\ProvidesExplPackage{l3pdfannot}{2025-03-26}{0.96q}
+\ProvidesExplPackage{l3pdfannot}{2025-05-15}{0.96r}
   {PDF-annotations}
 \RequirePackage{l3pdfdict}
 %</header>
@@ -465,7 +465,7 @@
 % \subsection{Annotations / backend}
 % The backend commands are in l3backend:
 % \cs{__pdf_backend_annotation:nnnn} and \cs{__pdf_backend_annotation_last:}
-% \cs{__pdf_backend_link_begin_user:nnw}, etc
+% \cs{__pdfannot_backend_link_begin_user:nnw}, etc
 % \end{NOTE}
 %
 % \subsection{ General Annotations }
@@ -614,8 +614,8 @@
 %    \begin{macrocode}
 \cs_if_free:NT \pdfannot_link_off:
  {
-  \cs_new_protected:Nn \pdfannot_link_off: { \__pdf_backend_link_off: }
-  \cs_new_protected:Nn \pdfannot_link_on:  { \__pdf_backend_link_on: }
+  \cs_new_protected:Nn \pdfannot_link_off: { \__pdfannot_backend_link_off: }
+  \cs_new_protected:Nn \pdfannot_link_on:  { \__pdfannot_backend_link_on: }
  } 
 %    \end{macrocode}
 %
@@ -630,7 +630,7 @@
     \hook_use:n { pdfannot/link/#1/before}
     \mode_leave_vertical:
     \exp_args:Nee %xetex needs expansion
-    \__pdf_backend_link_begin_user:nnw
+    \__pdfannot_backend_link_begin_user:nnw
       {
          \pdfdict_if_exist:nT { l_@@/link/#1 }
           {
@@ -644,7 +644,7 @@
     \hook_use:n { pdfannot/link/#1/begin}
     #3
     \hook_use:n { pdfannot/link/#1/end}
-    \__pdf_backend_link_end:
+    \__pdfannot_backend_link_end:
     \bool_gset_true:N \g_@@_use_lastlink_bool
     \hook_use:n { pdfannot/link/#1/after}
   }
@@ -661,7 +661,7 @@
     \hook_use:n { pdfannot/link/#1/before}
     \mode_leave_vertical:
     \exp_args:Nee %xetex needs expansion
-      \__pdf_backend_link_begin_user:nnw
+      \__pdfannot_backend_link_begin_user:nnw
         {
            \pdfdict_if_exist:nT { l_@@/link/#1 }
             {
@@ -676,7 +676,7 @@
 \cs_new_protected:Nn \pdfannot_link_end:n %#1 type, e.g. url
   {
     \hook_use:n { pdfannot/link/#1/end}
-    \__pdf_backend_link_end:
+    \__pdfannot_backend_link_end:
     \bool_gset_true:N \g_@@_use_lastlink_bool
     \hook_use:n { pdfannot/link/#1/after}
   }
@@ -691,7 +691,7 @@
     \hook_use:n { pdfannot/link/GoTo/before} %the backend add it too
     \mode_leave_vertical:
     \exp_args:Nee %xetex needs expansion
-    \__pdf_backend_link_begin_goto:nnw
+    \__pdfannot_backend_link_begin_goto:nnw
       {
         \pdfdict_use:n { l_@@/link/GoTo}
       }
@@ -704,7 +704,7 @@
 \cs_new_protected:Nn \pdfannot_link_goto_end:
   {
     \hook_use:n { pdfannot/link/GoTo/end}
-    \__pdf_backend_link_end:
+    \__pdfannot_backend_link_end:
     \bool_gset_true:N \g_@@_use_lastlink_bool
      \hook_use:n { pdfannot/link/GoTo/after}
   }
@@ -712,14 +712,14 @@
 % \end{macro}
 % \begin{macro}[EXP]{\pdfannot_link_ref_last:, \pdfannot_ref_last:}
 %    \begin{macrocode}
-\cs_new:Nn \pdfannot_link_ref_last: { \__pdf_backend_link_last: }
+\cs_new:Nn \pdfannot_link_ref_last: { \__pdfannot_backend_link_last: }
 %    \end{macrocode}
 %    \begin{macrocode}
 \cs_new:Npn \pdfannot_ref_last:
   {
     \bool_if:NTF \g_@@_use_lastlink_bool
       {
-        \__pdf_backend_link_last:
+        \__pdfannot_backend_link_last:
       }
       {
         \__pdf_backend_annotation_last:
@@ -731,7 +731,7 @@
 %    \begin{macrocode}
 \cs_new_protected:Npn \pdfannot_link_margin:n #1
   {
-    \__pdf_backend_link_margin:n { #1 }
+    \__pdfannot_backend_link_margin:n { #1 }
   }
 %    \end{macrocode}
 % \end{macro}

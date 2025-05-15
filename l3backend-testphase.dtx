@@ -45,7 +45,7 @@
 %    }^^A
 % }
 %
-% \date{Version 0.96q, released 2025-03-26}
+% \date{Version 0.96r, released 2025-05-15}
 %
 % \maketitle
 %
@@ -56,27 +56,27 @@
 %    \begin{macrocode}
 %<drivers>\ProvidesExplFile
 %<*dvipdfmx>
-  {l3backend-testphase-dvipdfmx.def}{2025-03-26}{}
+  {l3backend-testphase-dvipdfmx.def}{2025-05-15}{}
   {LaTeX~PDF~management~testphase~bundle~backend~support: dvipdfmx}
 %</dvipdfmx>
 %<*dvips>
-  {l3backend-testphase-dvips.def}{2025-03-26}{}
+  {l3backend-testphase-dvips.def}{2025-05-15}{}
   {LaTeX~PDF~management~testphase~bundle~backend~support: dvips}
 %</dvips>
 %<*dvisvgm>
-  {l3backend-testphase-dvisvgm.def}{2025-03-26}{}
+  {l3backend-testphase-dvisvgm.def}{2025-05-15}{}
   {LaTeX~PDF~management~testphase~bundle~backend~support: dvisvgm}
 %</dvisvgm>
 %<*luatex>
-  {l3backend-testphase-luatex.def}{2025-03-26}{}
+  {l3backend-testphase-luatex.def}{2025-05-15}{}
   {LaTeX~PDF~management~testphase~bundle~backend~support: PDF output (LuaTeX)}
 %</luatex>
 %<*pdftex>
-  {l3backend-testphase-pdftex.def}{2025-03-26}{}
+  {l3backend-testphase-pdftex.def}{2025-05-15}{}
   {LaTeX~PDF~management~testphase~bundle~backend~support: PDF output (pdfTeX)}
 %</pdftex>
 %<*xdvipdfmx>
-  {l3backend-testphase-xetex.def}{2025-03-26}{}
+  {l3backend-testphase-xetex.def}{2025-05-15}{}
   {LaTeX~PDF~management~testphase~bundle~backend~support: XeTeX}
 %</xdvipdfmx>
 %    \end{macrocode}
@@ -1279,51 +1279,21 @@
 %  \subsubsection{Additional annotation commands}
 % Starting with texlive 2021 pdftex and luatex offer commands to interrupt
 % a link. That can for example be used to exclude the header and footer from
-% the link. We add here backend support for this.
+% the link. The backend support is now in l3kernel. We only provide the user command.
 %    \begin{macrocode}
-%<*drivers>
-\cs_if_free:NT \@@_backend_link_off:
- {
-   \cs_new_protected:Npn \@@_backend_link_off:{}
-   \cs_new_protected:Npn \@@_backend_link_on: {}
- }  
-%</drivers>
 %<*pdftex>
 \cs_if_exist:NT \pdfrunninglinkoff
  {
-   \cs_set_protected:Npn \@@_backend_link_off:
+   \cs_set_protected:Npn \__pdfannot_backend_link_off:
     {
       \pdfrunninglinkoff
     }
-   \cs_set_protected:Npn \@@_backend_link_on:
+   \cs_set_protected:Npn \__pdfannot_backend_link_on:
     {
       \pdfrunninglinkon
     }
  }
 %</pdftex>
-%<*luatex>
-\int_compare:nNnT {\tex_luatexversion:D } > {112}
- {
-   \cs_set_protected:Npn \@@_backend_link_off:
-    {
-      \pdfextension linkstate 1
-    }
-   \cs_set_protected:Npn \@@_backend_link_on:
-    {
-      \pdfextension linkstate 0
-    }
- }
-%</luatex>
-%<*dvipdfmx|xdvipdfmx>
-  \cs_set_protected:Npn \@@_backend_link_off:
-    {
-     \@@_backend:n { nolink }
-    }
-   \cs_set_protected:Npn \@@_backend_link_on:
-    {
-      \@@_backend:n { link }
-    }
-%</dvipdfmx|xdvipdfmx>
 %    \end{macrocode}
 %
 %  \subsubsection{Form XObject / backend }
@@ -1804,10 +1774,10 @@
 % \begin{verbatim}
 % \__pdf_backend_destination:nn       -> \__pdf_backend_structure_destination:nn
 % \__pdf_backend_destination:nnnn -> \__pdf_backend_structure_destination:nnnn
-% \__pdf_backend_link_begin_goto:nnw  -> \__pdf_backend_link_begin_structure_goto:nnw
+% \__pdfannot_backend_link_begin_goto:nnw  -> \__pdf_backend_link_begin_structure_goto:nnw
 % \__pdf_backend_destination:nn       -> \__pdf_backend_indexed_structure_destination:nn
 % \__pdf_backend_destination:nnnn -> \__pdf_backend_indexed_structure_destination:nnnn
-% \__pdf_backend_link_begin_goto:nnw  -> \__pdf_backend_indexed_link_begin_structure_goto:nnw
+% \__pdfannot_backend_link_begin_goto:nnw  -> \__pdf_backend_indexed_link_begin_structure_goto:nnw
 % \end{verbatim}
 %
 % Activating means mapping them onto the original commands. Be aware that not
@@ -1821,13 +1791,13 @@
  {
    \cs_gset_eq:NN \@@_backend_destination:nn       \@@_backend_structure_destination:nn
    \cs_gset_eq:NN \@@_backend_destination:nnnn     \@@_backend_structure_destination:nnnn
-   \cs_gset_eq:NN \@@_backend_link_begin_goto:nnw  \@@_backend_link_begin_structure_goto:nnw
+   \cs_gset_eq:NN \__pdfannot_backend_link_begin_goto:nnw  \__pdfannot_backend_link_begin_structure_goto:nnw
  }
 \cs_new_protected:Npn \pdf_activate_indexed_structure_destination:
  {
    \cs_gset_eq:NN \@@_backend_destination:nn       \@@_backend_indexed_structure_destination:nn
    \cs_gset_eq:NN \@@_backend_destination:nnnn     \@@_backend_indexed_structure_destination:nnnn
-   \cs_gset_eq:NN \@@_backend_link_begin_goto:nnw  \@@_backend_link_begin_structure_goto:nnw
+   \cs_gset_eq:NN \__pdfannot_backend_link_begin_goto:nnw  \__pdfannot_backend_link_begin_structure_goto:nnw
  }
 %</drivers>
 %    \end{macrocode}
@@ -1841,14 +1811,14 @@
 %<*drivers>
 \cs_set_eq:NN \@@_backend_structure_destination:nn       \@@_backend_destination:nn
 \cs_set_eq:NN \@@_backend_structure_destination:nnnn     \@@_backend_destination:nnnn
-\cs_set_eq:NN \@@_backend_link_begin_structure_goto:nnw  \@@_backend_link_begin_goto:nnw
+\cs_set_eq:NN \__pdfannot_backend_link_begin_structure_goto:nnw  \__pdfannot_backend_link_begin_goto:nnw
 \cs_set_eq:NN \@@_backend_indexed_structure_destination:nn       \@@_backend_destination:nn
 \cs_set_eq:NN \@@_backend_indexed_structure_destination:nnnn     \@@_backend_destination:nnnn
 %</drivers>
 %    \end{macrocode}
 % \begin{macro}{\@@_backend_structure_destination:nn,
 %  \@@_backend_structure_destination:nnnn,
-%  \@@_backend_link_begin_structure_goto:nnw}
+%  \__pdfannot_backend_link_begin_structure_goto:nnw}
 % These commands are the backend commands to create a destination.
 % which create also a structure destination.
 % At first xetex/dvipdfmx.
@@ -1969,9 +1939,9 @@
 %    \end{macrocode}
 % At last the goto link.
 %    \begin{macrocode}
-\cs_set_protected:Npn \@@_backend_link_begin_structure_goto:nnw #1#2
+\cs_set_protected:Npn \__pdfannot_backend_link_begin_structure_goto:nnw #1#2
   {
-    \@@_backend_link_begin:n { #1 /Subtype /Link /A << /S /GoTo /D ( #2 ) /SD~@pdf.SDest.#2  >> }
+    \__pdfannot_backend_link_begin:n { #1 /Subtype /Link /A << /S /GoTo /D ( #2 ) /SD~@pdf.SDest.#2  >> }
   }
 %</xdvipdfmx|dvipdfmx>
 %    \end{macrocode}
@@ -2042,9 +2012,9 @@
              depth  \dim_eval:n {#4} \scan_stop:
          }
      }
-    \cs_set_protected:Npn \@@_backend_link_begin_structure_goto:nnw #1#2
+    \cs_set_protected:Npn \__pdfannot_backend_link_begin_structure_goto:nnw #1#2
       {
-        \@@_backend_link_begin:nnnw {#1} { goto~struct~name~{#2}~name } {#2}
+        \__pdfannot_backend_link_begin:nnnw {#1} { goto~struct~name~{#2}~name } {#2}
       }
   }
 %</pdftex>
@@ -2114,9 +2084,9 @@
              depth  \dim_eval:n {#4} \scan_stop:
          }
      }
-    \cs_set_protected:Npn \@@_backend_link_begin_structure_goto:nnw #1#2
+    \cs_set_protected:Npn \__pdfannot_backend_link_begin_structure_goto:nnw #1#2
       {
-        \@@_backend_link_begin:nnnw {#1} { goto~struct~name~{#2}~name } {#2}
+        \__pdfannot_backend_link_begin:nnnw {#1} { goto~struct~name~{#2}~name } {#2}
       }
   }
 %</luatex>
@@ -2359,9 +2329,9 @@
          height \dim_eval:n {#3} ~
          depth  \dim_eval:n {#4} \scan_stop:
      }
-    \cs_set_protected:Npn \@@_backend_link_begin_structure_goto:nnw #1#2
+    \cs_set_protected:Npn \__pdfannot_backend_link_begin_structure_goto:nnw #1#2
       {
-        \@@_backend_link_begin:nnnw {#1} { goto~struct~name~{#2}~name } {#2}
+        \__pdfannot_backend_link_begin:nnnw {#1} { goto~struct~name~{#2}~name } {#2}
       }
   }
 %</luatex>
