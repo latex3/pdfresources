@@ -9,6 +9,8 @@ this project uses date-based 'snapshot' version identifiers.
 
 ### Fixed
  - set omit_CID in pdf/UA-1
+ - switch to pdfannot prefix for link backend commands
+ - add tagging support for gotor links
  
 ## [2025-03-26]
 Version: 2025-03-26 v0.96q
