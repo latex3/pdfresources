@@ -257,7 +257,7 @@
 % \pdffield_radio:n
 %   {
 %     group   = A,        % required, can also be given as name=A or T=A
-%     value   = button2   % required,  export value of this button
+%     value   = button2,  % required,  export value of this button
 %     default             % this button is default of the group,
 %   }
 % \pdffield_radio:n
@@ -818,6 +818,7 @@
      }
      \bool_if:NT\l_@@_radio_default_bool
       {
+        \mode_leave_vertical:
         \@@_property_record:Vn\l_@@_fieldID_tl{pdfradioindex}
       }
 
