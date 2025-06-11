@@ -11,6 +11,9 @@ this project uses date-based 'snapshot' version identifiers.
  - l3pdffield-radiobutton:
   added missing \leavevmode, issue #89
 
+### Changed
+ - l3pdfmeta: UA-2 no longer removes the info dictionary. This is only a should requirement and it makes some validator happier if it is there.
+ 
 ## [2025-05-15]
 
 ### Fixed
