@@ -315,14 +315,11 @@
 %</pdftex>
 %<*luatex>
 %luatex: does it in lua
-\sys_if_engine_luatex:T
+\cs_new_protected:Npn \@@_backend_Pages_primitive:n #1
   {
-    \cs_new_protected:Npn \@@_backend_Pages_primitive:n #1
+    \tex_directlua:D
       {
-        \tex_directlua:D
-          {
-            pdf.setpagesattributes( \@@_backend_luastring:n { #1 } )
-          }
+        pdf.setpagesattributes( \@@_backend_luastring:n { #1 } )
       }
   }
 %</luatex>
