@@ -13,7 +13,10 @@ this project uses date-based 'snapshot' version identifiers.
 
 ### Changed
  - l3pdfmeta: UA-2 no longer removes the info dictionary. This is only a should requirement and it makes some validator happier if it is there.
- 
+
+ - lua uses now lualinksplit.lua for link annotation. This can be disabled
+   by removing the callback linksplit from the pre_shipout_filter
+   
 ## [2025-05-15]
 
 ### Fixed
