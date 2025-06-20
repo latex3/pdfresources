@@ -1293,6 +1293,15 @@
 %</pdftex>
 %    \end{macrocode}
 %
+%  \subsubsection{Split links}
+%  With luatex we use luacode to handle link annotations. This allows us
+%  to retrieve the annotations as needed by the tagging code.
+%  
+%    \begin{macrocode}
+%<*luatex>
+\lua_load_module:n{lualinksplit}
+%</luatex>
+%    \end{macrocode}
 %  \subsubsection{Form XObject / backend }
 %  \begin{macro}{ \@@_backend_xform_new:nnnn }
 %  \begin{arguments}

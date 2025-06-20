@@ -1,0 +1,26 @@
+\DocumentMetadata{pdfversion=2.0}
+\input{regression-test}
+
+\documentclass{article}
+\usepackage{hyperref,lipsum}
+\NewSocketPlug{build/column/footnotes}{lualinksplit}{%
+  \setbox\footins=\vbox{\pdfextension linkstate-2\unvbox\footins}%
+}
+\AssignSocketPlug{build/column/footnotes}{lualinksplit}
+\begin{document}
+\START
+\showoutput
+\section{First section}\label{sec:one}
+Some \footnote{A footnote with a very long link: \hyperref[sec:three]{\lipsum\lipsum}}content, more in the \hyperref[sec:two]{second\vadjust{\newpage}\\ distributed\\section}
+
+\clearpage
+\section{Second section}\label{sec:two}
+Some content, more in the \hyperref[sec:one]{first section}
+
+\clearpage
+\section{Third section}\label{sec:three}
+Referred to by the footnote.
+
+\clearpage
+\END
+\end{document} 
