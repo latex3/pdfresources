@@ -18,6 +18,7 @@ if options["target"] == "ctan" then
                 "firstaid/xcolor-patches-tmp-ltx.sty",
                 "firstaid/color-ltx.sty",
                 "firstaid/colorspace-patches-tmp-ltx.sty",
+                "lualinksplit.lua"
                 }
 else
  sourcefiles =  {"*.dtx","*.ins",
@@ -28,6 +29,7 @@ else
                 "newpackages/bkm-generic.def",
                 "newpackages/new-attachfile.sty",
                 "newpackages/atfi-generic.def",
+                "lualinksplit.lua"
                 }
 end
 

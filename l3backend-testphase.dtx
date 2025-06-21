@@ -315,14 +315,11 @@
 %</pdftex>
 %<*luatex>
 %luatex: does it in lua
-\sys_if_engine_luatex:T
+\cs_new_protected:Npn \@@_backend_Pages_primitive:n #1
   {
-    \cs_new_protected:Npn \@@_backend_Pages_primitive:n #1
+    \tex_directlua:D
       {
-        \tex_directlua:D
-          {
-            pdf.setpagesattributes( \@@_backend_luastring:n { #1 } )
-          }
+        pdf.setpagesattributes( \@@_backend_luastring:n { #1 } )
       }
   }
 %</luatex>
@@ -1296,6 +1293,21 @@
 %</pdftex>
 %    \end{macrocode}
 %
+%  \subsubsection{Split links}
+%  With luatex we use luacode to handle link annotations. This allows us
+%  to retrieve the annotations as needed by the tagging code.
+%  It also allow to prevent that link areas spill over into unwanted regions like
+%  footnotes. See the documentation in lualinksplit.lua for more details.
+%  We therefore add a plug for the build/column/footnotes.
+%    \begin{macrocode}
+%<*luatex>
+\lua_load_module:n{lualinksplit}
+\NewSocketPlug{build/column/footnotes}{lualinksplit}{%
+  \setbox\footins=\vbox{\pdfextension linkstate-2\unvbox\footins}%
+}
+\AssignSocketPlug{build/column/footnotes}{lualinksplit}
+%</luatex>
+%    \end{macrocode}
 %  \subsubsection{Form XObject / backend }
 %  \begin{macro}{ \@@_backend_xform_new:nnnn }
 %  \begin{arguments}

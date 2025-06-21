@@ -1,0 +1,26 @@
+\DocumentMetadata{pdfversion=2.0,uncompress}
+\input{regression-test}
+
+\documentclass{article}
+\usepackage{hyperref}
+\directlua{
+  luatexbase.add_to_callback('linksplit', function(start_link, position)
+    start_link.link_attr = start_link.link_attr .. ' /Position /' .. position
+    texio.write_nl(position .. " link part has object id " .. start_link.objnum)
+  end, 'sample')
+}
+\begin{document}
+\START
+\showoutput
+\section{First section}\label{sec:one}
+Some content, more in the \hyperref[sec:two]{second\vadjust{\newpage}\\ distributed\\section}
+
+\clearpage
+\section{Second section}\label{sec:two}
+Some content, more in the \hyperref[sec:one]{first section}
+Hello
+
+\clearpage
+\END
+\end{document} 
+

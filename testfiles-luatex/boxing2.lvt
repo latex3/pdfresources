@@ -1,0 +1,32 @@
+% based on latex3/latex2e#1551
+\DocumentMetadata{pdfversion=2.0}
+\input{regression-test}
+
+\documentclass{article}
+\usepackage[breaklinks=true]{hyperref}
+\textheight=50mm
+\title{}
+\author{}
+\makeatletter
+\AddToHook{cmd/@make@specialcolbox/before}{%
+  \setbox\@outputbox \vbox {%
+    \boxmaxdepth \@maxdepth
+    \pdflinkadjustlevel -1\relax
+    \unvbox \@outputbox
+  }%
+}
+\makeatother
+\begin{document}
+\hsize=40mm
+\parindent=0pt
+\null\vskip30mm
+\START
+\showoutput
+
+Some multiline text with a rather long, breaking url \url{https://tex.stackexchange.com/questions/731156/the-bottom-margin-of-bibliography-frame-is-too-narrow}.
+\enlargethispage{1sp}
+
+\clearpage
+\END
+\end{document} 
+
