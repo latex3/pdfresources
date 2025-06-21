@@ -451,15 +451,8 @@
   { \@@_backend_bdc_contobj:nn { #1 }{ #2 } }
 \cs_new_protected:Npn  \pdf_bdc_shipout:ee #1 #2
   {
-    \bool_if:NTF\l__pdfmanagement_delayed_shipout_bool
-      {
-        \@@_backend_bdc_shipout:ee { #1 }{ #2 }
-        \cs_gset_eq:NN \pdf_bdc_shipout:ee \@@_backend_bdc_shipout:ee
-      }
-      {
-        \msg_error:nn {pdfmanagement}{delayed-shipout}
-        \cs_gset_eq:NN \pdf_bdc_shipout:ee  \use_none:nn
-      }
+    \@@_backend_bdc_shipout:ee { #1 }{ #2 }
+    \cs_gset_eq:NN \pdf_bdc_shipout:ee \@@_backend_bdc_shipout:ee
   }
 \cs_new_protected:Npn  \pdf_bdcobject:nn #1 #2 { \@@_backend_bdcobject:nn { #1 }{ #2 } }
 \cs_new_protected:Npn  \pdf_bdcobject:n #1     { \@@_backend_bdcobject:n  { #1 } }

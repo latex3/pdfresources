@@ -406,69 +406,17 @@
 %</package>
 %    \end{macrocode}
 %
-% \subsection{Loading the core files.}
-% This loads the core files. The backend should not be loaded
+% \subsection{Loading the core file}
+% This loads the core file. The backend should not be loaded
 % to allow to set it in the document.
 %    \begin{macrocode}
 %<*header>
 \ProvidesExplFile{pdfmanagement-testphase.ltx}{2025-05-15}{0.96r}
   {PDF~management~code~(testphase)}
+%</header>  
 %    \end{macrocode}
-% We define a boolean for the new delayed shipout. This is temporary. At some
-% time we can request the new engines!
 %    \begin{macrocode}
-\bool_new:N\l__pdfmanagement_delayed_shipout_bool
-\msg_new:nnn {pdfmanagement}{delayed-shipout}
-  {
-    The~engine~is~too~old!\\
-    \tl_to_str:n{\pdf_bdc_shipout:ee}~can~not~be~used.
-  }
-\sys_if_engine_luatex:T
- {
-   \int_compare:nNnT {\tex_luatexversion:D} > {116}
-    {
-      \bool_set_true:N\l__pdfmanagement_delayed_shipout_bool
-    }
- }
-\sys_if_engine_pdftex:T
- {
-   \fp_compare:nNnT{\int_use:N\tex_pdftexversion:D.\tex_pdftexrevision:D}>{140.24}
-    {
-      \bool_set_true:N\l__pdfmanagement_delayed_shipout_bool
-    }
- } 
-\sys_if_engine_ptex:T
- {
-   \int_compare:nNnT{\tex_epTeXversion:D} > {230213}
-    {
-      \bool_set_true:N\l__pdfmanagement_delayed_shipout_bool
-    }
- }  
-\sys_if_engine_uptex:T
- {
-   \int_compare:nNnT{\tex_epTeXversion:D} > {230213}
-    {
-      \bool_set_true:N\l__pdfmanagement_delayed_shipout_bool
-    }
- }   
-\sys_if_engine_xetex:T
- {
-   \fp_compare:nNnT{\int_use:N\tex_XeTeXversion:D\tex_XeTeXrevision:D} > {0.999994}
-    {
-      \bool_set_true:N\l__pdfmanagement_delayed_shipout_bool
-    }
- }      
-%</header>
 %<*package>
-%\RequirePackage{l3pdfdict}       % needed by l3pdfmanagement
-%\RequirePackage{l3pdfmanagement} % loads the core code with the boolean
-%\RequirePackage{ltdocinit}       % DocumentMetadata,
-%can perhaps be combined or made optional ...
-%\RequirePackage{l3pdfannot}
-%\RequirePackage{l3pdfxform-beta}
-%\RequirePackage{l3pdfmeta}       %
-%\RequirePackage{l3pdftools}
-%\RequirePackage{l3pdffile}
 \RequirePackage{tagpdf-base}
 \input{pdfmanagement-testphase.ltx}
 %</package>
