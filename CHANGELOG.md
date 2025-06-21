@@ -12,10 +12,9 @@ this project uses date-based 'snapshot' version identifiers.
   added missing \leavevmode, issue #89
 
 ### Changed
- - l3pdfmeta: UA-2 no longer removes the info dictionary. This is only a should requirement and it makes some validator happier if it is there.
+ - l3pdfmeta: UA-2 no longer removes the info dictionary. This is only a "should" requirement and it makes some validator happier if it is there.
 
- - lua uses now lualinksplit.lua for link annotation. This can be disabled
-   by removing the callback linksplit from the pre_shipout_filter
+ - lua uses now lualinksplit.lua for link annotations, see lualinksplit.lua for documentation. 
    
 ## [2025-05-15]
 
