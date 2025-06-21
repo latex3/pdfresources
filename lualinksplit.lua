@@ -13,8 +13,49 @@
 --  and all files in that bundle must be distributed together.
 
 --[[
-This implements splitted links with lua. To disable the code remove
-'linksplit' from the 'pre_shipout_filter' callback.
+This reimplements split links/multiline links with lua. 
+To disable the code remove 'linksplit' from the 'pre_shipout_filter' callback.
+
+It also changes the working of the linkstate extension which is used in luatex 
+by \pdfannot_link_on: and \pdfannot_link_off: 
+
+The original pdftex and luatex implementations only know on and off for multiline links. 
+In LuaTeX linkstate 1 is off and linkstate 0 is on. 
+This implementation does never actually turn multiline links off, but instead allows 
+for multiple separate "link contexts". 
+So a link started at linkstate 0 only continues while linkstate 0 is in effect but 
+gets suspended if linkstate is set to 1 (similar to the original). 
+But a link started in linkstate 1 (which does very weird things in the original 
+implementation) just works as a normal multiline link while linkstate 1 is in effect, 
+but gets suspended when the linkstate switches to 0. This usually leads to the same results, 
+unless you start multiline links in linkstate 1 in which case it is less broken.
+
+It also allows to use even more linkstates, effectively allowing each positive number 
+to define a new independent link context. Links in footnotes can be supported by switching the
+linkstate in a build/column/footnotes socket plug and then assigning this plug:
+
+\NewSocketPlug{build/column/footnotes}{lualinksplit}{%
+  \setbox\footins=\vbox{\pdfextension linkstate-2\unvbox\footins}%
+}
+
+Packages like footmisc that switch this plug should add a link state too if needed.
+
+linkstate 2 for footnotes just means that in footnotes links started in footnotes continue, 
+but links from the main document (0) and header and footer (1) are suspended.
+
+Due to the way the implementation works in pdfTeX link settings are weirdly global: 
+They only get set when the box is shipped out, but then stay active until they get changed 
+again. That leads to odd situations if you change them in the middle of a hbox and 
+the box ends with different links then it started. 
+Normally when you set this you only want to set it for the current box though, 
+so most of that never actually happens. 
+
+Therefore the implementation here allows negative numbers which are the same as the 
+positive numbers but only affect the box they get shipped out in. 
+So -2 is the same as 2 except that it automatically resets at the end of the box.
+
+The kernel currently uses the values 0 (main), 1 (header/footer) and 2 (footnotes). 
+
 --]]
 
 local traverse = node.traverse
