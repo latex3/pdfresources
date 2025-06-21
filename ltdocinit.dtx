@@ -116,10 +116,10 @@
 % using the container. The label |document| is reserved.
 % \end{function}
 %
-% \begin{function}[updated=2022-10-09]{\GetDocumentProperties,\pdfmanagement_get_documentproperties:n}
+% \begin{function}[updated=2025-06-21]{\GetDocumentProperty,\pdfmanagement_get_documentproperty:n}
 % \begin{syntax}
-%  \cs{GetDocumentProperties}\Arg{label/property}\\
-%  \cs{pdfmanagement_get_documentproperties:n}\Arg{label/property}
+%  \cs{GetDocumentProperty}\Arg{label/property}\\
+%  \cs{pdfmanagement_get_documentproperty:n}\Arg{label/property}
 % \end{syntax}
 % Expands to the \meta{value} corresponding to \meta{label/property}
 % in the container. If \meta{label/property} is missing,
@@ -127,11 +127,13 @@
 % The result is returned within \cs{exp_not:n}, which means
 % that the \meta{value} does not expand further
 % when appearing in an x-type argument expansion.
+% The older names \cs{GetDocumentProperties} and \cs{pdfmanagement_get_documentproperties:n}
+% are still provided for compability. 
 % \end{function}
 %
-% \begin{function}[added=2022-10-09,TF]{\pdfmanagement_get_documentproperties:nN}
+% \begin{function}[updated=2025-06-21,TF]{\pdfmanagement_get_documentproperty:nN}
 % \begin{syntax}
-%  \cs{pdfmanagement_get_documentproperties:nNTF}\Arg{label/property} \meta{token list variable}\\
+%  \cs{pdfmanagement_get_documentproperty:nNTF}\Arg{label/property} \meta{token list variable}\\
 %  ~~~~ \Arg{true code} \Arg{false code}
 % \end{syntax}
 %   If the \meta{label/property} is not present in the document properties
@@ -143,6 +145,8 @@
 %   \meta{token list variable} without removing it from the
 %   container, then leaves the \meta{true code} in the input
 %   stream.  The \meta{token list variable} is assigned locally.
+%   The older name \cs{pdfmanagement_get_documentproperty:nN}
+%   is still provided for compability. 
 % \end{function}
 %
 % \begin{function}{\ShowDocumentProperties,\LogDocumentProperties}
@@ -301,30 +305,34 @@
   }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\GetDocumentProperties}
+% \begin{macro}[EXP]{\GetDocumentProperty,\GetDocumentProperties}
 %    \begin{macrocode}
-\NewExpandableDocumentCommand\GetDocumentProperties{m}
+\cs_new:Npn\GetDocumentProperty #1
   {
     \prop_item:Nn \g_@@_documentproperties_prop {#1}
   }
+\cs_new_eq:NN\GetDocumentProperties\GetDocumentProperty
 %    \end{macrocode}
 % \end{macro}
 % For uses in modules (e.g. l3pdfmeta)
 % we provide an expl3 version without the xparse overhead:
 %
-% \begin{macro}[EXP]{\pdfmanagement_get_documentproperties:n}
+% \begin{macro}[EXP]{\pdfmanagement_get_documentproperty:n}
 %    \begin{macrocode}
-\cs_new:Npn\pdfmanagement_get_documentproperties:n #1
+\cs_new:Npn\pdfmanagement_get_documentproperty:n #1
   {
     \prop_item:Nn \g_@@_documentproperties_prop {#1}
   }
+\cs_new_eq:NN 
+  \pdfmanagement_get_documentproperties:n 
+  \pdfmanagement_get_documentproperty:n  
 %    \end{macrocode}
 % \end{macro}
 % The following allows to retrieve the values with branching.
-% \begin{macro}[added=2022-10-09]{\pdfmanagement_get_documentproperties:nNTF}
+% \begin{macro}[added=2025-06-21]{\pdfmanagement_get_documentproperty:nNTF}
 %    \begin{macrocode}
 \prg_new_protected_conditional:Npnn
-  \pdfmanagement_get_documentproperties:nN #1#2 { T , F , TF }
+  \pdfmanagement_get_documentproperty:nN #1#2 { T , F , TF }
     {
      \prop_get:NnNTF \g_@@_documentproperties_prop  {#1} #2
        {
@@ -334,6 +342,10 @@
         \prg_return_false:
        }
     }
+\prg_new_eq_conditional:NNn   
+  \pdfmanagement_get_documentproperties:nN  
+  \pdfmanagement_get_documentproperty:nN
+  { T , F , TF }
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ShowDocumentProperties}

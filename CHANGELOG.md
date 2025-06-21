@@ -17,6 +17,9 @@ this project uses date-based 'snapshot' version identifiers.
  - lua uses now lualinksplit.lua for link annotations, see lualinksplit.lua for documentation. 
  
  - remove engine test for delayed shipout.
+ 
+### Added
+ - \GetDocumentProperty (to replace the grammatically wrong \GetDocumentProperties) 
    
 ## [2025-05-15]
 
