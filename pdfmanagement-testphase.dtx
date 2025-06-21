@@ -396,17 +396,6 @@
 %<*package>
 \ProvidesExplPackage{pdfmanagement-testphase}{2025-05-15}{0.96r}
   {LaTeX PDF management testphase bundle}
-\providecommand\IfFormatAtLeastTF{\@ifl@t@r\fmtversion}
-\IfFormatAtLeastTF{2020-10-01}{}{
- \PackageWarning{pdfmanagement-testphase}
-   {This~package~needs~LaTeX~2020-10-01~or~newer.
-    \MessageBreak Loading~is~aborted.}{}
- \DeclareOption { debug }{}
- \newcommand\DeclareDocumentMetadata[1]{}
- \newcommand\DocumentMetadata[1]{}
- \ProcessOptions\relax
- }
-\IfFormatAtLeastTF{2020-10-01}{}{\endinput}
 
 \DeclareOption { debug }
   {
