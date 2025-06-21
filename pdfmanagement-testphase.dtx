@@ -405,6 +405,64 @@
 \ProcessOptions\relax
 %</package>
 %    \end{macrocode}
+%<*standalone>
+\ProvidesExplPackage{pdfmanagement}{2025-05-15}{0.96r}
+  {LaTeX PDF management testphase bundle}
+
+\IfDocumentMetadataT
+ {
+ 
+ }
+\IfDocumentMetadataT
+ {
+   \endinput 
+ }
+
+\RequirePackage{tagpdf-base}
+\input{pdfmanagement-testphase.ltx}
+
+\keys_define:nn { document / metadata }
+  {
+    backend .choices:nn =
+      { dvipdfmx , dvips , dvisvgm , luatex , pdftex , pdfmode , xdvipdfmx , xetex }
+      {
+        \sys_load_backend:n {#1}
+      },
+    backend .groups:n = { init } ,
+  }
+
+\keys_define:nn { document / metadata }
+  {
+    ,pdfversion .code:n =
+      {
+        \pdf_version_gset:n { #1 }
+        \AddToDocumentProperties[document]{pdfversion}{#1}
+      }
+    ,uncompress .code:n =
+      {
+        \pdf_uncompress:
+      }
+    ,uncompress .value_forbidden:n = true
+    ,lang .code:n =
+      {
+        \pdfmanagement_add:nnn {Catalog} {Lang}{(#1)}
+        \AddToDocumentProperties[document]{lang}{#1}
+      }
+    ,pdfstandard .code:n =
+      {
+        \clist_map_inline:nn{#1}
+         {           
+           \keys_set:ne {document / metadata} {_pdfstandard=\str_uppercase:n{##1}}
+         }  
+      }
+   }         
+%</standalone>
+%    \end{macrocode}
+%    \begin{macrocode}
+%<*standaloneend>
+%xxxx
+%</standaloneend>
+%    \end{macrocode}
 %
 % \subsection{Loading the core file}
 % This loads the core file. The backend should not be loaded
