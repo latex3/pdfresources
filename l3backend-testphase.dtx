@@ -1296,10 +1296,16 @@
 %  \subsubsection{Split links}
 %  With luatex we use luacode to handle link annotations. This allows us
 %  to retrieve the annotations as needed by the tagging code.
-%  
+%  It also allow to prevent that link areas spill over into unwanted regions like
+%  footnotes. See the documentation in lualinksplit.lua for more details.
+%  We therefore add a plug for the build/column/footnotes.
 %    \begin{macrocode}
 %<*luatex>
 \lua_load_module:n{lualinksplit}
+\NewSocketPlug{build/column/footnotes}{lualinksplit}{%
+  \setbox\footins=\vbox{\pdfextension linkstate-2\unvbox\footins}%
+}
+\AssignSocketPlug{build/column/footnotes}{lualinksplit}
 %</luatex>
 %    \end{macrocode}
 %  \subsubsection{Form XObject / backend }
