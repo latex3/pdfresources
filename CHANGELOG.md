@@ -10,9 +10,12 @@ this project uses date-based 'snapshot' version identifiers.
 ### Fixed
  - l3pdffield-radiobutton:
   added missing \leavevmode, issue #89
+ - \@@Listbox definition in hyperref-generic 
 
 ### Changed
  - l3pdfmeta: UA-2 no longer removes the info dictionary. This is only a "should" requirement and it makes some validator happier if it is there.
+ 
+ - l3pdfmeta: ensure that all standards are defined there too.
 
  - lua uses now lualinksplit.lua for link annotations, see lualinksplit.lua for documentation. 
  
