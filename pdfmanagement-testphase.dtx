@@ -57,32 +57,32 @@
 %  It will disappear when the code is integrated into the \LaTeX{} format.}
 %
 %  \medskip
-%  \noindent When using \LaTeX-2022-06-01  or newer, the 
-%  PDF management code is loaded if you use \cs{DocumentMetadata} before
+%  \noindent The PDF management code is loaded 
+%  automatically if you use \cs{DocumentMetadata} before
 %  \cs{documentclass}. 
 %
 % \begin{verbatim}
-% \DocumentMetadata      % load activate the PDF management (with options)
+% \DocumentMetadata      % loads also the PDF management
 %     {
-%       % options
+%       % options, see documentmetadata-support.pdf
 %     }
 %
 %  \documentclass {...}
 % \end{verbatim}
 % 
-% In older \LaTeX{} is has to be loaded explicitly:
 % 
+% It is also possible to load the PDF as package, e.g. in a class. 
+%  
 % \begin{verbatim}
-% \RequirePackage{pdfmanagement-testphase}
-% \DocumentMetadata      % load activate the PDF management (with options)
-%     {
-%       % options
-%     }
-%
-%  \documentclass {...}
+%  \RequirePackage{pdfmanagement}
 % \end{verbatim}
-%  Note that the activation has to happen before the \cs{documentclass} declaration.
-%  Because of this, the package needs loading with \cs{RequirePackage}.
+%  
+%  If the PDF management has already been loaded, e.g. in \cs{DocumentMetadata}
+%  this will do nothing. The package has one option, \texttt{backend} that allows
+%  to set a special backend like \texttt{dvipdfmx}. It will do nothing if the backend
+%  code has already been loaded. 
+%  
+%  Note that PDF management should be loaded as early as possible. 
 %
 %
 % \section*{Feedback wanted!}
@@ -94,17 +94,17 @@
 % effect on other formats is needed too.
 %
 % \section{Introduction}
-% The \LaTeX{} format currently contains nearly no code specific to the now quite
-% central output format, PDF. It also offers nearly no interfaces to important PDF related
+% The \LaTeX{} format contained for a long time nearly no code specific to the now quite
+% central output format, PDF. It also offered nearly no interfaces to important PDF related
 % primitive commands for package writers.
 %
 % Important tasks like supporting PDF standards,
 % creating links, adding special colors, managing the content of
 % central PDF-directories or even simple tasks like setting the PDF version
-% are delegated to external packages which have to recourse to
+% were delegated to external packages which had to recourse to
 % the primitive low-level commands in their code.
 %
-% This is problematic for three reasons:
+% This was problematic for three reasons:
 % \begin{itemize}
 %\item At first using primitives directly can lead to clashes and duplicate
 % settings with conflicting values---nothing prevent packages to add for example
@@ -125,15 +125,15 @@
 % PDF related structures are missing and difficult to add.
 % \end{itemize}
 %
-% Despite the potential problems, until now the number of conflicts were
-% small and could be resolved in an ad-hoc fashion. But the future plans for
+% Despite the potential problems, the number of conflicts were
+% small and could be resolved in an ad-hoc fashion. But the plans for
 % \LaTeX{} regarding support for tagged PDF and
-% PDF standards mean that much more PDF specific code will have to be
+% PDF standards mean that much more PDF specific code has to be
 % written by the kernel directly and this can not be done without proper,
 % well-defined and well-behaving interfaces and hooks.
 %
 % Some first steps for better support of PDF related commands have been done
-% with the \pkg{l3pdf} package which has now been integrated as a module
+% with the \pkg{l3pdf} package which has then been integrated as a module
 % into \pkg{l3kernel}.
 % It offers backend independent commands to create
 % PDF objects and destination, to set the compress level and the PDF version.
@@ -141,7 +141,7 @@
 % The PDF management bundle extends this to more PDF related areas
 % and provides interfaces to them in a backend independent way.
 %
-% The new PDF management has three main objectives
+% The PDF management has three main objectives
 % connected with the problems identified above:
 % \begin{itemize}
 % \item For commands with \enquote{clash potential} it implements commands to
@@ -150,7 +150,7 @@
 % \item It implements commands for a variety of PDF related tasks
 % and supports a well-defined set of backends.
 %
-% \item If sensible this commands are enhanced by hooks from the new
+% \item If sensible this commands are enhanced by hooks from the 
 % \LaTeX{} hook system. This has been e.g.\ done for annotations in the
 % \pkg{l3pdfannot} bundle.
 % \end{itemize}
@@ -170,18 +170,12 @@
 % \pkg{pdfx} and more.
 %
 % So while the goal is to integrate the code into the \LaTeX{} format directly,
-% this can not be done immediately without conflicts with existing documents and packages.
+% this can not be done immediately without conflicts with existing documents 
+% and packages.
 %
-% As an intermediary step the package \pkg{pdfmanagement-testphase} has been
-% created which loads the code manually.
-% With it package authors and users can test the new code, give feedback
-% and packages can be adapted.
-%
-% Loading the package will only \emph{load} the modules,
-% to \emph{activate} the core PDF management the trigger command
-% \cs{DocumentMetadata} has to be used too.
-% The loading and activation has to be done
-% \emph{before} the \cs{documentclass} command.
+% The code is there not loaded by the kernel but only if the trigger command
+% \cs{DocumentMetadata} is used, or if the package \texttt{pdfmanagement}
+% is loaded manually.
 %
 %
 % We hope that this setup will allow packages writers and users to test the
@@ -190,7 +184,7 @@
 %
 % \section{Backend support}
 % The supported backends are pdflatex, lualatex, (x)dvipdfmx (latex, xelatex,
-% dvilualatex (in texlive 2021))
+% dvilualatex 
 % and dvips with ps2pdf (not completely yet). dvips with distiller could work too
 % but is untested.
 %
@@ -207,15 +201,13 @@
 % will still be needed in some cases.
 %
 % \section{Use}\label{sec:use}
-% The package should be loaded before \cs{documentclass}. To activate
-% the resource management it should be followed by
-% \cs{DocumentMetadata}\marg{key-val}.
+% The PDF management should be loaded as early as possible.
+% When using \cs{DocumentMetadata}, various PDF related options can
+% be set in the key-val argument.
 % The options of \cs{DocumentMetadata} are described in the documentation of
-% \pkg{ltdocinit}.
+% \pkg{ltdocinit} and in \pkg{documentmetadata-support}.
 %
 % \begin{verbatim}
-% \RequirePackage{pdfmanagement-testphase} % load the package
-%                                          % not needed with LaTeX 2022-06-01
 % \DocumentMetadata % activates the PDF management interface
 %     {
 %        %options
@@ -223,20 +215,25 @@
 % \documentclass {...}
 % \end{verbatim}
 %
-% The PDF management can be deactivated either setting in the \texttt{debug} key
-% the key
-% \texttt{pdfmanagement} to \texttt{false} or by commenting out
-% the whole \cs{DocumentMetadata} declaration.
-%
-% To test if the PDF management is active the predicate
-% \cs{pdfmanagement_if_active:TF} can be used, see the documentation of \pkg{l3pdfmanagement}.
-%
+% When loading the PDF management as package, options can be set with \cs{SetKeys}:
+% 
+% \begin{verbatim}
+% \RequirePackage{pdfmanagement} %loads the PDF management interface
+% \SetKeys[document/metadata]{
+%        %options
+%     }
+% \documentclass {...}
+% \end{verbatim} 
+% 
+% To test if the PDF management has been loaded
+% \cs{IfPDFManagementActiveTF} can be used.
+% 
 % \section{Requirements}
 % The new PDF management is developed parallel to the \LaTeX{} format
 % and should be updated together with the format. 
 % In some places, e.g. when writing strings to the pdf it assumes that
-% the file is utf8 encoded -- ascii will naturally work too, but legacy 8bit encodings are
-% not supported.
+% the file is utf8 encoded -- ascii will naturally work too, 
+% but legacy 8bit encodings are not supported.
 %
 % \section{Modules}
 % The bundle contains a number of modules. The majority of the modules don't
@@ -290,7 +287,7 @@
 % \end{description}
 % \section{Incompabilities}
 %
-% As described in section~\ref{sec:change}, if activated
+% As described in section~\ref{sec:change}, 
 % the new PDF management takes over the management of core PDF dictionaries.
 % All packages
 % that bypass the PDF management and access these dictionaries with primitives like
@@ -328,9 +325,8 @@
 % \cs{pdfinfo} and \cs{pdfcatalog}. The needed changes are not many, but can
 % not be done by external patches.
 %
-% It is also one goal of the pdfmanagement project to
-% offer support for standards natively. The code is under development,
-% see the documentation of \pkg{l3pdfmeta}.
+% The PDF management offers support for standards natively. It also writes XMP-metadata
+% See the documentation of \pkg{l3pdfmeta} for details.
 %
 % \subsection{hyperxmp}
 % \pkg{hyperxmp} uses \cs{pdfcatalog} to insert the \texttt{/MetaData} reference
@@ -351,15 +347,13 @@
 % This can be disabled by using |debug={firstaidoff=pgf}| in \cs{DocumentMetadata}
 %
 % \subsection{transparent}
-% The package \pkg{transparent} is incompatible. A replacement has been written
-% (\pkg{transparent-ltx}) and is loaded automatically. It requires a very recent
-% L3 programming layer!
-% This can be disabled by using |debug={firstaidoff=transparent}| in \cs{DocumentMetadata}
+% The package \pkg{transparent} is compatible if the PDF management is loaded with
+% \cs{DocumentMetadata}. 
+% 
 % \subsection{pdflscape}
-% The package \pkg{pdflscape} is incompatible. A replacement has been written
-% (\pkg{pdflscape-ltx}) and is loaded automatically.
-% This can be disabled by using |debug={firstaidoff=pdflscape}| in \cs{DocumentMetadata}
-%
+% The package \pkg{pdflscape} is compatible if the PDF management is loaded with
+% \cs{DocumentMetadata}. 
+% 
 % \subsection{colorspace}
 % The package is incompatible. Some patches
 % have been added to \pkg{pdfmanagement-firstaid}.
@@ -370,9 +364,6 @@
 % Tools needed to be able to write a replacement
 % to replace these packages have been developed in the \pkg{l3pdffile} package.
 % Full replacements for the packages don't exist yet.
-%
-% \subsection{tagpdf}
-% The development code is compatible and will be uploaded in time.
 %
 % \subsection{ocgx2, animate, media9}
 % These package all make use of low-level PDF command and will
