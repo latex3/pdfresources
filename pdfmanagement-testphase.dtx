@@ -410,51 +410,32 @@
 \ProvidesExplPackage{pdfmanagement}{2025-05-15}{0.96r}
   {LaTeX PDF management testphase bundle}
 %    \end{macrocode}
-% Package options are a selection of keys.
+% The only package option is for the backend. Other options can be
+% set after loading the package with \verb+\SetKeys[document/metadata]+
 %    \begin{macrocode}
-\tl_new:N \l__pdfmanagement_options_tl  
+
 \DeclareKeys[pdfmanagement]
  {
    backend .code:n = 
     { 
-      \IfPDFManagementActiveF
-       { \tl_put_left:Nn \l__pdfmanagement_options_tl{backend=#1,}}
+      \str_if_exist:NTF \c_sys_backend_str
+       {
+        \PackageWarning{pdfmanagement}
+         {
+           backend~is~already~loaded.\MessageBreak
+           'backend=#1'~ignored.
+         }  
+       }
+       { 
+         \tl_new:N  \l__pdfmanagement_backend_tl  
+         \tl_set:Nn \l__pdfmanagement_backend_tl {#1}
+       }
     },
    backend .usage = load,
-   uncompress .code:n = 
-    {
-     \IfPDFManagementActiveTF
-       { \pdf_uncompress: }
-       {\tl_put_right:Nn \l__pdfmanagement_options_tl{uncompress,}}
-    },
-   uncompress .usage = preamble,
-   pdfversion .code:n = 
-    {
-      \IfPDFManagementActiveTF
-       {
-        \keys_set:ne {document / metadata} { pdfversion=#1} 
-       }
-       {\tl_put_right:Nn \l__pdfmanagement_options_tl{pdfversion=#1,}}
-    },
-   pdfversion .usage = preamble,
-   pdfstandard .code:n = 
-    {
-      \IfPDFManagementActiveTF
-       {
-         \keys_set:ne {document / metadata} { pdfstandard={#1}}         
-       }
-       {                    
-         \tl_put_right:Nn \l__pdfmanagement_options_tl{ pdfstandard= {#1},}                  
-       }  
-    },
-   pdfstandard .usage=preamble
  }  
 \ProcessKeyOptions[pdfmanagement]
-\IfDocumentMetadataT
- {
-   \keys_set:no { document / metadata } { \l__pdfmanagement_options_tl }
- }
-\IfDocumentMetadataT
+
+\IfPDFManagementActiveT
  {
    \endinput 
  }
@@ -462,52 +443,18 @@
 \RequirePackage{tagpdf-base}
 \input{pdfmanagement-testphase.ltx}
 \bool_gset_true:N \g_@@_active_bool
-\keys_define:nn { document / metadata }
-  {
-    backend .choices:nn =
-      { dvipdfmx , dvips , dvisvgm , luatex , pdftex , pdfmode , xdvipdfmx , xetex }
-      {
-        \sys_load_backend:n {#1}
-      },
-    backend .groups:n = { init } ,
-  }
-
-\keys_define:nn { document / metadata }
-  {
-    ,pdfversion .code:n =
-      {
-        \pdf_version_gset:n { #1 }
-        \AddToDocumentProperties[document]{pdfversion}{#1}
-      }
-    ,uncompress .code:n =
-      {
-        \pdf_uncompress:
-      }
-    ,uncompress .value_forbidden:n = true
-    ,lang .code:n =
-      {
-        \pdfmanagement_add:nnn {Catalog} {Lang}{(#1)}
-        \AddToDocumentProperties[document]{lang}{#1}
-      }
-    ,pdfstandard .code:n =
-      {
-        \clist_map_inline:nn{#1}
-         {           
-           \keys_set:ne {document / metadata} {_pdfstandard=\str_uppercase:n{##1}}
-         }  
-      }
-   }
 %    \end{macrocode}
 % the backend key must be processed first.
 %    \begin{macrocode}
-\keys_set_groups:nnoN 
-  { document / metadata } { init } 
-  { \l__pdfmanagement_options_tl }\l__pdfmanagement_options_tl
-\sys_ensure_backend:
+\tl_if_exist:NTF \l_@@_backend_tl
+  {
+    \exp_args:No \sys_load_backend:n { \l_@@_backend_tl }
+  }  
+  {
+    \sys_ensure_backend:
+  } 
 \file_input:n {l3backend-testphase-\c_sys_backend_str.def}
-\hook_use_once:n {pdfmanagement/add}
-\keys_set:no { document / metadata } { \l__pdfmanagement_options_tl }
-            
+\hook_use_once:n {pdfmanagement/add}           
 %</standalone>
 %    \end{macrocode}
 %
