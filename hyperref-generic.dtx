@@ -4693,11 +4693,11 @@
   \HyField@PDFChoices{#1}
   \mode_leave_vertical:
   \HyAnn@AbsPageLabel
-  \Hy@escapeform\PDFForm@List
-  \pdf_link_user:nnn
-       {widget} %perhaps we need more types??
-       {\PDFForm@List}
-       {\MakeChoiceField{\Fld@width}{\Fld@height}}
+  \Hy@escapeform\PDFForm@List  
+  \pdfannot_box:nnnn
+   {\Fld@width}{\Fld@height}{0pt}
+   {\PDFForm@List}
+  \MakeChoiceField{\Fld@width}{\Fld@height}  
   \HyField@AddToFields
  }
 
