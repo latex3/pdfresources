@@ -1442,6 +1442,26 @@
 %    \begin{macrocode}
 \keys_define:nn { document / metadata }
  {
+   _pdfstandard .choices:nn =
+      {A-1B,A-2A,A-2B,A-2U,A-3A,A-3B,A-3U,A-4}
+      {
+        \prop_gset_eq:Nc \g__pdfmeta_standard_prop { g__pdfmeta_standard_pdf/#1 _prop }
+        \AddToDocumentProperties [document]{pdfstandard}{#1}
+      }, 
+   _pdfstandard / A-4F .code:n =
+      {
+        \prop_gset_eq:Nc \g__pdfmeta_standard_prop { g__pdfmeta_standard_pdf/A-4F_prop }
+        \AddToDocumentProperties [document]{pdfstandard}{A-4F}
+      },
+   _pdfstandard / A-4E .code:n =
+      {
+        \prop_gset_eq:Nc \g__pdfmeta_standard_prop { g__pdfmeta_standard_pdf/A-4E_prop }
+        \AddToDocumentProperties [document]{pdfstandard}{A-4E}
+      },
+   _pdfstandard / unknown .code:n =
+      {
+        \msg_error:nnn{pdf}{unknown-standard}{#1}
+      },      
    _pdfstandard / X-4 .code:n =
     {
       \AddToDocumentProperties [document]{pdfstandard-X}{PDF/X-4}
