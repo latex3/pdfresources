@@ -25,6 +25,10 @@ this project uses date-based 'snapshot' version identifiers.
  
  - ltdocinit: removed temporary key definitions.
  
+ - removed keyword testphase from the files
+ 
+ - PDF management is now always active when loaded. 
+ 
 ### Added
  - \GetDocumentProperty (to replace the grammatically wrong \GetDocumentProperties) 
    

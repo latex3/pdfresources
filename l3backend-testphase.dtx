@@ -935,10 +935,8 @@
 
 \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2
   {
-    \bool_if:NTF  \g__pdfmanagement_active_bool
-      {\cs_gset_eq:NN \@@_backend_bdc:nn \@@_backend_bdc_contobj:nn}
-      {\cs_gset_eq:NN \@@_backend_bdc:nn \@@_backend_bdc_contstream:nn}
-      \@@_backend_bdc:nn {#1}{#2}
+    \cs_gset_eq:NN \@@_backend_bdc:nn \@@_backend_bdc_contobj:nn
+    \@@_backend_bdc:nn {#1}{#2}
   }
 
 \cs_set_protected:Npn \@@_backend_bdc_shipout_contstream:ee #1 #2

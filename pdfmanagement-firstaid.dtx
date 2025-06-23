@@ -233,14 +233,8 @@
           \pgfutil@setuppdfresources
         \def\pgfutil@setuppdfresources
           {
-            \pdfmanagement_if_active:TF
-              {
-                \@@_pgf_sys_setuppdfresources_plain:
-              }
-              {
-                \@@_pgfori_pgfutil@setuppdfresources
-              }
-         }
+            \@@_pgf_sys_setuppdfresources_plain:
+          }
      }
   }
 %\def\pgfutil@addpdfresource@extgs#1{\pgf@sys@addpdfresource@extgs@plain{#1}}
