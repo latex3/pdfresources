@@ -19,7 +19,11 @@ this project uses date-based 'snapshot' version identifiers.
 
  - lua uses now lualinksplit.lua for link annotations, see lualinksplit.lua for documentation. 
  
- - remove engine test for delayed shipout.
+ - removed engine test for delayed shipout.
+ 
+ - ltdocinit: removed deprecated command \DeclareDocumentMetadata
+ 
+ - ltdocinit: removed temporary key definitions.
  
 ### Added
  - \GetDocumentProperty (to replace the grammatically wrong \GetDocumentProperties) 
