@@ -1,6 +1,6 @@
 # LaTeX PDF management bundle
 
-Version: 0.96r, 2025-05-15
+Version: 0.96s, 2025-06-23
 
 This package is used to load the new PDF management code
 of LaTeX.
