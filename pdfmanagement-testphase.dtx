@@ -455,8 +455,6 @@
         \pdfmanagement_add:nnn {Catalog} {Lang}{(#1)}
         \AddToDocumentProperties[document]{lang}{#1}
       }
-    %,xmpmeta .bool_gset:N = \g_pdfmeta_xmp_bool %see pdfmeta unused and undefined for now!
-    % this uses internal command from pdfmeta, it should probably move there ...
     ,pdfstandard .code:n =
       {
         \clist_map_inline:nn{#1}
