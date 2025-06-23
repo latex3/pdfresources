@@ -143,9 +143,16 @@ and all files in that bundle must be distributed together.
   {
     \file {hgeneric-testphase.def}
       {
-       \from{hyperref-generic.dtx}{package}
+       \from{hyperref-generic.dtx}{headertestphase,package}
       }
   }
+\generate
+  {
+    \file {hgeneric.def}
+      {
+       \from{hyperref-generic.dtx}{header,package}
+      }
+  }  
 \generate
   {
     \file {hyperref-colorschemes.def}
