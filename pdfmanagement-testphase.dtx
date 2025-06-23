@@ -347,12 +347,10 @@
 % This can be disabled by using |debug={firstaidoff=pgf}| in \cs{DocumentMetadata}
 %
 % \subsection{transparent}
-% The package \pkg{transparent} is compatible if the PDF management is loaded with
-% \cs{DocumentMetadata}. 
+% The package \pkg{transparent} is compatible. 
 % 
 % \subsection{pdflscape}
-% The package \pkg{pdflscape} is compatible if the PDF management is loaded with
-% \cs{DocumentMetadata}. 
+% The package \pkg{pdflscape} is compatible. 
 % 
 % \subsection{colorspace}
 % The package is incompatible. Some patches
@@ -434,6 +432,39 @@
 \RequirePackage{tagpdf-base}
 \input{pdfmanagement-testphase.ltx}
 \bool_gset_true:N \g_@@_active_bool
+\RequirePackage{pdfmanagement-firstaid}
+
+%    \end{macrocode}
+% These keys are only defined in documentmetadata-support, so need to be copied:
+% 
+%    \begin{macrocode}
+\keys_define:nn { document / metadata }
+  {
+    ,pdfversion .code:n =
+      {
+        \pdf_version_gset:n { #1 }
+        \AddToDocumentProperties[document]{pdfversion}{#1}
+      }
+    ,uncompress .code:n =
+      {
+        \pdf_uncompress:
+      }
+    ,uncompress .value_forbidden:n = true
+    ,lang .code:n =
+      {
+        \pdfmanagement_add:nnn {Catalog} {Lang}{(#1)}
+        \AddToDocumentProperties[document]{lang}{#1}
+      }
+    %,xmpmeta .bool_gset:N = \g_pdfmeta_xmp_bool %see pdfmeta unused and undefined for now!
+    % this uses internal command from pdfmeta, it should probably move there ...
+    ,pdfstandard .code:n =
+      {
+        \clist_map_inline:nn{#1}
+         {           
+           \keys_set:ne {document / metadata} {_pdfstandard=\str_uppercase:n{##1}}
+         }  
+      }
+   }   
 %    \end{macrocode}
 % the backend key must be processed first.
 %    \begin{macrocode}
