@@ -1,6 +1,6 @@
 % \iffalse meta-comment
 %
-%% File: pdfmanagement-testphase.dtx
+%% File: pdfmanagement.dtx
 %
 % Copyright (C) 2019-2025 The LaTeX Project
 %
@@ -11,7 +11,7 @@
 %
 %    https://www.latex-project.org/lppl.txt
 %
-% This file is part of the "LaTeX PDF management testphase bundle" (The Work in LPPL)
+% This file is part of the "LaTeX PDF management bundle" (The Work in LPPL)
 % and all files in that bundle must be distributed together.
 %
 % -----------------------------------------------------------------------
@@ -26,7 +26,7 @@
 \DocumentMetadata{pdfstandard=A-2b}
 \documentclass{l3doc}
 \usepackage{tabularx,array,booktabs}
-\hypersetup{pdfauthor=The LaTeX Project,pdftitle=LaTeX PDF management testphase bundle}
+\hypersetup{pdfauthor=The LaTeX Project,pdftitle=LaTeX PDF management bundle}
 \newcommand\potentialclash{\noindent\llap{\dbend\ }}
 \raggedbottom
 \begin{document}
@@ -36,7 +36,7 @@
 % \fi
 %
 %
-% \title{The \LaTeX{} PDF management testphase bundle}
+% \title{The \LaTeX{} PDF management bundle}
 %
 % \author{^^A
 %  The \LaTeX{} Project\thanks
@@ -282,7 +282,7 @@
 %
 % \item[l3pdffield]  Commands for form fields. Currently it only provides commands
 % for checkboxes. It must be loaded explicitly as with
-% |\usepackage{l3pdffield-testphase}|.
+% |\usepackage{l3pdffield}|.
 %
 % \end{description}
 % \section{Incompabilities}
@@ -336,14 +336,14 @@
 %
 % For some time some patch code was provided by the bundle to keep \pkg{hyperxmp}
 % working but starting with version  0.95s XMP-metadata are handled directly
-% by the \pkg{pdfmanagement-testphase} bundle (see the documentation of \pkg{l3pdfmeta})
+% by the \pkg{pdfmanagement} bundle (see the documentation of \pkg{l3pdfmeta})
 % and the patch code has been removed and the loading of
 % \pkg{hyperxmp} has been disabled.
 %
 % \subsection{tikz/pgf}
 % \pkg{pgf} writes to the page resources too and so is incompatible. The needed
 % changes are rather small and will be done in coordination with the maintainer.
-% Until this works, \pkg{pdfmanagement-testphase} will load the patches automatically.
+% Until this works, the PDF management will load the patches automatically.
 % This can be disabled by using |debug={firstaidoff=pgf}| in \cs{DocumentMetadata}
 %
 % \subsection{transparent}
@@ -384,7 +384,7 @@
 %<@@=pdfmanagement>
 %<*package>
 \ProvidesExplPackage{pdfmanagement-testphase}{2025-05-15}{0.96r}
-  {LaTeX PDF management testphase bundle}
+  {LaTeX PDF management bundle}
 
 \DeclareOption { debug }
   {
@@ -397,7 +397,7 @@
 %<*standalone>
 %    \begin{macrocode}
 \ProvidesExplPackage{pdfmanagement}{2025-05-15}{0.96r}
-  {LaTeX PDF management testphase bundle}
+  {LaTeX PDF management bundle}
 %    \end{macrocode}
 % The only package option is for the backend. Other options can be
 % set after loading the package with \verb+\SetKeys[document/metadata]+
@@ -430,7 +430,7 @@
  }
 
 \RequirePackage{tagpdf-base}
-\input{pdfmanagement-testphase.ltx}
+\input{pdfmanagement.ltx}
 \bool_gset_true:N \g_@@_active_bool
 \RequirePackage{pdfmanagement-firstaid}
 
@@ -483,14 +483,14 @@
 % to allow to set it in the document.
 %    \begin{macrocode}
 %<*header>
-\ProvidesExplFile{pdfmanagement-testphase.ltx}{2025-05-15}{0.96r}
-  {PDF~management~code~(testphase)}
+\ProvidesExplFile{pdfmanagement.ltx}{2025-05-15}{0.96r}
+  {PDF~management~code}
 %</header>  
 %    \end{macrocode}
 %    \begin{macrocode}
 %<*package>
 \RequirePackage{tagpdf-base}
-\input{pdfmanagement-testphase.ltx}
+\input{pdfmanagement.ltx}
 %</package>
 %    \end{macrocode}
 % \end{implementation}
