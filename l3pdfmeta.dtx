@@ -23,10 +23,11 @@
 % for those people who are interested.
 %
 %<*driver>
-\DocumentMetadata{}
+\DocumentMetadata{tagging=on,pdfstandard=ua-2}
 \documentclass[full]{l3doc}
-% \usepackage{latex-lab-testphase-l3doc} % tagging errors
-
+\usepackage{latex-lab-testphase-l3doc} %
+% see issue https://github.com/latex3/tagging-project/issues/925
+\EditInstance{blockenv}{displayblock}{inner-instance =}
 \usepackage{array,booktabs}
 \hypersetup{pdfauthor=The LaTeX Project,pdftitle=l3pdfmeta (LaTeX PDF management bundle)}
 
