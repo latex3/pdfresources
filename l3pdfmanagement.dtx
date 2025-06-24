@@ -23,14 +23,16 @@
 % for those people who are interested.
 %
 %<*driver>
-\DocumentMetadata{pdfstandard=A-2b}
+\DocumentMetadata{tagging=on,pdfstandard=ua-2}
 \documentclass[full]{l3doc}
+\usepackage{latex-lab-testphase-l3doc}
+
 \usepackage{tabularx}
 \usepackage{array,booktabs}
 \hypersetup{pdfauthor=The LaTeX Project,pdftitle=l3pdfmanagement (LaTeX PDF management bundle)}
 
 \providecommand\potentialclash{\noindent\llap{\dbend\ }}
-
+\pdfextension glyphtounicode{char7f}{2621} 
 % Fixing footnotes in  functions and variables: this should be in l3doc!
 \newcommand\fixfootnote[2]{\footnotemark
   \AddToHookNext{env/#1/after}{\footnotetext{#2}}}
