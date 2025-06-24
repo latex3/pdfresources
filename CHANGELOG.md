@@ -31,7 +31,9 @@ this project uses date-based 'snapshot' version identifiers.
  
 ### Added
  - \GetDocumentProperty (to replace the grammatically wrong \GetDocumentProperties) 
-   
+ - new package pdfmanagment that allows to load the pdfmanagement without using \DocumentMetadata
+ - new package l3pdffield that replaces l3pdffield-testphase
+    
 ## [2025-05-15]
 
 ### Fixed
