@@ -11,7 +11,7 @@
 %
 %    http://www.latex-project.org/lppl.txt
 %
-% This file is part of the "LaTeX PDF management testphase bundle" (The Work in LPPL)
+% This file is part of the "LaTeX PDF management bundle" (The Work in LPPL)
 % and all files in that bundle must be distributed together.
 %
 % -----------------------------------------------------------------------
@@ -23,10 +23,13 @@
 % for those people who are interested.
 %
 %<*driver>
-\DocumentMetadata{pdfstandard=A-2b}
+\DocumentMetadata{tagging=on,pdfstandard=ua-2}
 \documentclass[full]{l3doc}
+\usepackage{latex-lab-testphase-l3doc} %
+% see issue https://github.com/latex3/tagging-project/issues/925
+\EditInstance{blockenv}{displayblock}{inner-instance =}
 \usepackage{array,booktabs}
-\hypersetup{pdfauthor=The LaTeX Project,pdftitle=l3pdfmeta (LaTeX PDF management testphase bundle)}
+\hypersetup{pdfauthor=The LaTeX Project,pdftitle=l3pdfmeta (LaTeX PDF management bundle)}
 
 \begin{document}
   \DocInput{\jobname.dtx}
@@ -37,7 +40,7 @@
 % \title{^^A
 %   The \pkg{l3pdfmeta} module\\ PDF standards  ^^A
 %   \\
-%   \LaTeX{} PDF management testphase bundle
+%   \LaTeX{} PDF management bundle
 % }
 %
 % \author{^^A
@@ -49,7 +52,7 @@
 %    }^^A
 % }
 %
-% \date{Version 0.96r, released 2025-05-15}
+% \date{Version 0.96s, released 2025-06-23}
 %
 % \maketitle
 % \begin{documentation}
@@ -671,8 +674,8 @@
 %    \begin{macrocode}
 %<@@=pdfmeta>
 %<*header>
-\ProvidesExplPackage{l3pdfmeta}{2025-05-15}{0.96r}
-  {PDF-Standards---LaTeX PDF management testphase bundle}
+\ProvidesExplPackage{l3pdfmeta}{2025-06-23}{0.96s}
+  {PDF-Standards---LaTeX PDF management bundle}
 %</header>
 %    \end{macrocode}
 % Message for unknown standards
@@ -1116,23 +1119,20 @@
   \pdfmeta_standard_verify:nF{Catalog_EmbeddedFiles}
    {
     \tl_gput_right:Nn\g__kernel_pdfmanagement_end_run_code_tl
-     {
-       \bool_if:NT \g__pdfmanagement_active_bool
+     {      
+       \pdfdict_if_empty:nT { g__pdf_Core/Catalog/Names/EmbeddedFiles }
         {
-         \pdfdict_if_empty:nT { g__pdf_Core/Catalog/Names/EmbeddedFiles }
-          {
-            \group_begin:
-            \pdfdict_put:nne {l_pdffile/Filespec} {Desc}{(note~about~PDF/A-4F)}
-            \pdfdict_put:nnn { l_pdffile/Filespec }{AFRelationship} { /Unspecified }
-            \pdffile_embed_stream:nnN
-              {The~document~was~declared~to~be~of~type~PDF/A-4f~but~hasn't~any~attachments.~
-               LaTeX~therefore~added~this~dummy~file.}
-              {pdf-A4f.txt}
-              \l_@@_tmpa_tl
-            \exp_args:Nne \__pdf_backend_Names_gpush:nn{EmbeddedFiles}{(pdf-A4f)~\l_@@_tmpa_tl}
-            \group_end:
-          }
-       }
+          \group_begin:
+          \pdfdict_put:nne {l_pdffile/Filespec} {Desc}{(note~about~PDF/A-4F)}
+          \pdfdict_put:nnn { l_pdffile/Filespec }{AFRelationship} { /Unspecified }
+          \pdffile_embed_stream:nnN
+            {The~document~was~declared~to~be~of~type~PDF/A-4f~but~hasn't~any~attachments.~
+             LaTeX~therefore~added~this~dummy~file.}
+            {pdf-A4f.txt}
+            \l_@@_tmpa_tl
+          \exp_args:Nne \__pdf_backend_Names_gpush:nn{EmbeddedFiles}{(pdf-A4f)~\l_@@_tmpa_tl}
+          \group_end:
+        }     
      }
    }
 }
@@ -1442,6 +1442,26 @@
 %    \begin{macrocode}
 \keys_define:nn { document / metadata }
  {
+   _pdfstandard .choices:nn =
+      {A-1B,A-2A,A-2B,A-2U,A-3A,A-3B,A-3U,A-4}
+      {
+        \prop_gset_eq:Nc \g__pdfmeta_standard_prop { g__pdfmeta_standard_pdf/#1 _prop }
+        \AddToDocumentProperties [document]{pdfstandard}{#1}
+      }, 
+   _pdfstandard / A-4F .code:n =
+      {
+        \prop_gset_eq:Nc \g__pdfmeta_standard_prop { g__pdfmeta_standard_pdf/A-4F_prop }
+        \AddToDocumentProperties [document]{pdfstandard}{A-4F}
+      },
+   _pdfstandard / A-4E .code:n =
+      {
+        \prop_gset_eq:Nc \g__pdfmeta_standard_prop { g__pdfmeta_standard_pdf/A-4E_prop }
+        \AddToDocumentProperties [document]{pdfstandard}{A-4E}
+      },
+   _pdfstandard / unknown .code:n =
+      {
+        \msg_error:nnn{pdf}{unknown-standard}{#1}
+      },      
    _pdfstandard / X-4 .code:n =
     {
       \AddToDocumentProperties [document]{pdfstandard-X}{PDF/X-4}
@@ -1500,12 +1520,16 @@
 % currently it is not possible to merge requirements - these need some thoughts as
 % every standard has some common keys like the name or the yes.
 % We therefore add some requirements manually.
+% 
 %    \begin{macrocode}
    _pdfstandard / UA-2 .code:n =
     {
       \AddToDocumentProperties [document]{pdfstandard-UA}{{2}{2024}}
-      \AddToHook{begindocument/before}
-       {\prop_gput:Nnn \g__pdfmeta_standard_prop {Trailer_no_Info}{}}
+%    \end{macrocode}
+% 2025-06-11 \verb+Trailer_no_Info+ is only a should not a shall in UA-2 so we do not force it.
+%    \begin{macrocode}
+      %\AddToHook{begindocument/before}
+       %{\prop_gput:Nnn \g__pdfmeta_standard_prop {Trailer_no_Info}{}}
       \AddToHook{begindocument/before}
        {
          \@@_xmp_wtpdf_accessibility_declaration:

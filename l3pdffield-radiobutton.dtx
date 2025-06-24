@@ -1,6 +1,6 @@
 % \iffalse meta-comment
 %
-%% File: l3pdfpdffield-radiobutton.dtx
+%% File: l3pdffield-radiobutton.dtx
 %
 % Copyright (C) 2021-2025 The LaTeX Project
 %
@@ -11,7 +11,7 @@
 %
 %    http://www.latex-project.org/lppl.txt
 %
-% This file is part of the "LaTeX PDF management testphase bundle" (The Work in LPPL)
+% This file is part of the "LaTeX PDF management bundle" (The Work in LPPL)
 % and all files in that bundle must be distributed together.
 %
 % -----------------------------------------------------------------------
@@ -23,12 +23,14 @@
 % for those people who are interested.
 %
 %<*driver>
-\DocumentMetadata{}
+\DocumentMetadata{} %no tagging, parent-child problems, no ua-2 yet, labels of widgets missing.
 \documentclass[full]{l3doc}
+% \usepackage{latex-lab-testphase-l3doc} % errors
+
 \usepackage{array,booktabs}
-\usepackage{l3pdffield-testphase,bearwear,tikzlings,tikzducks}
+\usepackage{l3pdffield,bearwear,tikzlings,tikzducks}
 \hypersetup{pdfauthor=The LaTeX Project,
- pdftitle=l3pdffield (LaTeX PDF management testphase bundle)}
+ pdftitle=l3pdffield (LaTeX PDF management bundle)}
 \begin{document}
   \DocInput{\jobname.dtx}
 \end{document}
@@ -71,7 +73,7 @@
 % \ExplSyntaxOff
 % \title{^^A
 %   The \pkg{l3pdffield-radiobutton} module\\ Commands to create radio form fields   ^^A
-%   \\ \LaTeX{} PDF management testphase bundle
+%   \\ \LaTeX{} PDF management bundle
 % }
 %
 % \author{^^A
@@ -83,7 +85,7 @@
 %    }^^A
 % }
 %
-% \date{Version 0.96r, released 2025-05-15}
+% \date{Version 0.96s, released 2025-06-23}
 %
 % \maketitle
 % \begin{documentation}
@@ -257,7 +259,7 @@
 % \pdffield_radio:n
 %   {
 %     group   = A,        % required, can also be given as name=A or T=A
-%     value   = button2   % required,  export value of this button
+%     value   = button2,  % required,  export value of this button
 %     default             % this button is default of the group,
 %   }
 % \pdffield_radio:n
@@ -818,6 +820,7 @@
      }
      \bool_if:NT\l_@@_radio_default_bool
       {
+        \mode_leave_vertical:
         \@@_property_record:Vn\l_@@_fieldID_tl{pdfradioindex}
       }
 

@@ -11,7 +11,7 @@
 %
 %    http://www.latex-project.org/lppl.txt
 %
-% This file is part of the "LaTeX PDF management testphase bundle" (The Work in LPPL)
+% This file is part of the "LaTeX PDF management bundle" (The Work in LPPL)
 % and all files in that bundle must be distributed together.
 %
 % -----------------------------------------------------------------------
@@ -23,10 +23,11 @@
 % for those people who are interested.
 %
 %<*driver>
-\DocumentMetadata{pdfstandard=A-2b}
+\DocumentMetadata{tagging=on,pdfstandard=ua-2}
 \documentclass[full]{l3doc}
+\usepackage{latex-lab-testphase-l3doc}
 \usepackage{array,booktabs}
-\hypersetup{pdfauthor=The LaTeX Project,pdftitle=l3pdftools (LaTeX PDF management testphase bundle)}
+\hypersetup{pdfauthor=The LaTeX Project,pdftitle=l3pdftools (LaTeX PDF management bundle)}
 
 \providecommand\potentialclash{\noindent\llap{\dbend\ }}
 \begin{document}
@@ -37,7 +38,7 @@
 %
 % \title{^^A
 %   The \pkg{l3pdftools} module\\ temporary collection of pdf related commands ^^A
-%   \\ LaTeX PDF management testphase bundle
+%   \\ LaTeX PDF management bundle
 % }
 %
 % \author{^^A
@@ -49,7 +50,7 @@
 %    }^^A
 % }
 %
-% \date{Version 0.96r, released 2025-05-15}
+% \date{Version 0.96s, released 2025-06-23}
 %
 % \maketitle
 % \begin{documentation}
@@ -238,8 +239,8 @@
 %
 %    \begin{macrocode}
 %<*header>
-\ProvidesExplPackage{l3pdftools}{2025-05-15}{0.96r}
-  {candidate commands for l3pdf---LaTeX PDF management testphase bundle}
+\ProvidesExplPackage{l3pdftools}{2025-06-23}{0.96s}
+  {candidate commands for l3pdf---LaTeX PDF management bundle}
 %</header>
 %    \end{macrocode}
 %
@@ -451,15 +452,8 @@
   { \@@_backend_bdc_contobj:nn { #1 }{ #2 } }
 \cs_new_protected:Npn  \pdf_bdc_shipout:ee #1 #2
   {
-    \bool_if:NTF\l__pdfmanagement_delayed_shipout_bool
-      {
-        \@@_backend_bdc_shipout:ee { #1 }{ #2 }
-        \cs_gset_eq:NN \pdf_bdc_shipout:ee \@@_backend_bdc_shipout:ee
-      }
-      {
-        \msg_error:nn {pdfmanagement}{delayed-shipout}
-        \cs_gset_eq:NN \pdf_bdc_shipout:ee  \use_none:nn
-      }
+    \@@_backend_bdc_shipout:ee { #1 }{ #2 }
+    \cs_gset_eq:NN \pdf_bdc_shipout:ee \@@_backend_bdc_shipout:ee
   }
 \cs_new_protected:Npn  \pdf_bdcobject:nn #1 #2 { \@@_backend_bdcobject:nn { #1 }{ #2 } }
 \cs_new_protected:Npn  \pdf_bdcobject:n #1     { \@@_backend_bdcobject:n  { #1 } }

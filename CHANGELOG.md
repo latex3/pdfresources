@@ -5,6 +5,35 @@ first release 0.95a, 2021-02-23 will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 this project uses date-based 'snapshot' version identifiers.
 
+## [2025-06-23]
+
+### Fixed
+ - l3pdffield-radiobutton:
+  added missing \leavevmode, issue #89
+ - \@@Listbox definition in hyperref-generic 
+
+### Changed
+ - l3pdfmeta: UA-2 no longer removes the info dictionary. This is only a "should" requirement and it makes some validator happier if it is there.
+ 
+ - l3pdfmeta: ensure that all standards are defined there too.
+
+ - lua uses now lualinksplit.lua for link annotations, see lualinksplit.lua for documentation. 
+ 
+ - removed engine test for delayed shipout.
+ 
+ - ltdocinit: removed deprecated command \DeclareDocumentMetadata
+ 
+ - ltdocinit: removed temporary key definitions.
+ 
+ - removed keyword testphase from the files
+ 
+ - PDF management is now always active when loaded. 
+ 
+### Added
+ - \GetDocumentProperty (to replace the grammatically wrong \GetDocumentProperties) 
+ - new package pdfmanagment that allows to load the pdfmanagement without using \DocumentMetadata
+ - new package l3pdffield that replaces l3pdffield-testphase
+    
 ## [2025-05-15]
 
 ### Fixed

@@ -23,8 +23,9 @@
 % for those people who are interested.
 %
 %<*driver>
-\DocumentMetadata{pdfstandard=A-2b}
+\DocumentMetadata{tagging=on,pdfstandard=ua-2}
 \documentclass[full]{l3doc}
+\usepackage{latex-lab-testphase-l3doc}
 \usepackage{array,booktabs}
 \hypersetup{pdfauthor=The LaTeX Project,pdftitle=ltdocinit (LaTeX PDF management testphase bundle)}
 
@@ -47,13 +48,13 @@
 %    }^^A
 % }
 %
-% \date{Version 0.96r, released 2025-05-15}
+% \date{Version 0.96s, released 2025-06-23}
 %
 % \maketitle
 % \begin{documentation}
 %
 % \section{\pkg{ltdocinit} documentation}
-% This small module defined \cs{DocumentMetadata} but the definition
+% This small module previously defined \cs{DocumentMetadata} but the definition
 % has been moved to latex-lab. The documentation can be found in
 % \texttt{documentmetadata-support-doc.pdf}
 %
@@ -65,37 +66,10 @@
 % must be set in the first \cs{DocumentMetadata}.
 %
 %
-% Here only a few newer keys are defined and the older \cs{DeclareDocumentMetadata}
-% is provided.
-%
 % The module also defines commands to store document properties in a global container.
 %
 % This module will slowly disappear.
 %
-% \subsection{\cs{DocumentMetadata}/\cs{DeclareDocumentMetadata}}
-%
-% \begin{function}{\DeclareDocumentMetadata}
-% \begin{syntax}
-%  \cs{DeclareDocumentMetadata}\Arg{key-value list} (deprecated)
-% \end{syntax}
-% This is an older alias for \cs{DocumentMetadata}
-% \end{function}
-%
-% Additionally to the keys described in \texttt{documentmetadata-support-doc.pdf}
-% the following keys/values are implemented
-%
-% \begin{description}
-%
-%    \item[\texttt{testphase}] This key is used to load testphase code. The values it accepts
-%    and their effect will change over time, when testphase packages are added or
-%    removed or when the code is moved into the kernel. A new value here is
-%     \begin{description}
-%      \item[latest] This loads all existing modules.
-%    \end{description}
-%
-%    The |testphase| key can only be used in the first \cs{DocumentMetadata}.
-%
-% \end{description}
 %
 % \subsection{Container for document properties}
 %
@@ -116,10 +90,10 @@
 % using the container. The label |document| is reserved.
 % \end{function}
 %
-% \begin{function}[updated=2022-10-09]{\GetDocumentProperties,\pdfmanagement_get_documentproperties:n}
+% \begin{function}[updated=2025-06-21]{\GetDocumentProperty,\pdfmanagement_get_documentproperty:n}
 % \begin{syntax}
-%  \cs{GetDocumentProperties}\Arg{label/property}\\
-%  \cs{pdfmanagement_get_documentproperties:n}\Arg{label/property}
+%  \cs{GetDocumentProperty}\Arg{label/property}\\
+%  \cs{pdfmanagement_get_documentproperty:n}\Arg{label/property}
 % \end{syntax}
 % Expands to the \meta{value} corresponding to \meta{label/property}
 % in the container. If \meta{label/property} is missing,
@@ -127,11 +101,13 @@
 % The result is returned within \cs{exp_not:n}, which means
 % that the \meta{value} does not expand further
 % when appearing in an x-type argument expansion.
+% The older names \cs{GetDocumentProperties} and \cs{pdfmanagement_get_documentproperties:n}
+% are still provided for compability. 
 % \end{function}
 %
-% \begin{function}[added=2022-10-09,TF]{\pdfmanagement_get_documentproperties:nN}
+% \begin{function}[updated=2025-06-21,TF]{\pdfmanagement_get_documentproperty:nN}
 % \begin{syntax}
-%  \cs{pdfmanagement_get_documentproperties:nNTF}\Arg{label/property} \meta{token list variable}\\
+%  \cs{pdfmanagement_get_documentproperty:nNTF}\Arg{label/property} \meta{token list variable}\\
 %  ~~~~ \Arg{true code} \Arg{false code}
 % \end{syntax}
 %   If the \meta{label/property} is not present in the document properties
@@ -143,6 +119,8 @@
 %   \meta{token list variable} without removing it from the
 %   container, then leaves the \meta{true code} in the input
 %   stream.  The \meta{token list variable} is assigned locally.
+%   The older name \cs{pdfmanagement_get_documentproperty:nN}
+%   is still provided for compability. 
 % \end{function}
 %
 % \begin{function}{\ShowDocumentProperties,\LogDocumentProperties}
@@ -169,7 +147,7 @@
 %    \begin{macrocode}
 %<@@=pdfmanagement>
 %<*header>
-\ProvidesExplPackage{ltdocinit}{2025-05-15}{0.96r}
+\ProvidesExplPackage{ltdocinit}{2025-06-23}{0.96s}
   {Initialize document metadata}
 %</header>
 %    \end{macrocode}
@@ -186,100 +164,7 @@
   { \clist_new:N \g_@@_firstaidoff_clist }
 %    \end{macrocode}
 % \end{variable}
-%  \begin{variable}{\g_@@_testphase_tl}
-%  a tl to store the testphase loading code so that we can load them at
-%  the end of the command.
-%    \begin{macrocode}
-\tl_if_exist:NF \g_@@_testphase_tl
- { \tl_new:N \g_@@_testphase_tl }
-%    \end{macrocode}
-% \end{variable}
-% \subsection{New, temporary testphase keys}
-% TODO: remove after 2025-06-01 release
 %
-%    \begin{macrocode}
-\msg_new:nnn { meta } { testphase-latest-loading-temp }
-   {
-     Loading~testphase~modules\\
-     #1
-   }
-\keys_define:nn { document / metadata }
-  {
-    ,testphase / latest .code:n =
-     {
-       \keys_set:nn
-        {document / metadata}
-        {testphase={phase-III,title,table,math,firstaid}}
-       \tl_gput_right:Nn\g_@@_testphase_tl
-        {
-          \msg_note:nnn { meta } { testphase-latest-loading-temp }
-           { phase-III,~title,~table,~math,~firstaid }
-        }
-     }
-    ,tagging .choice:,
-    ,tagging / on .code:n =
-      {
-        \keys_set:nn { document / metadata }{ testphase=latest }
-      }
-    ,tagging / off .code:n =
-      {
-        \keys_set:nn { document / metadata }{ testphase=latest }
-        \AddToHook{class/before}
-         {
-           \tagpdfsetup{activate/mc=false,activate/tree=false,
-                        activate/struct=false,activate/socket=false,
-                        para/tagging=false,math/setup=}
-           \AddToDocumentProperties [document]{tagging}{inactive}
-           \AddToDocumentProperties [document]{tagging/para}{inactive}
-           % perhaps, need to test
-           %\tag_suspend:n {global}
-           %\cs_set_eq:NN\tag_suspend:n\use_none:n
-           %\cs_set_eq:NN\tag_resume:n \use_none:n
-           %\cs_new_protected:Npn \tag_mc_begin:n #1 { \__tag_whatsits: \int_gincr:N \c@g__tag_MCID_abs_int }
-           %\cs_new_protected:Nn \tag_mc_end:{ \__tag_whatsits: }
-           %\cs_new_protected:Npn \tag_struct_begin:n #1 {\int_gincr:N \c@g__tag_struct_abs_int}
-           %\cs_new_protected:Npn \tag_struct_end:{}
-         }
-      }
-    ,tagging / draft .code:n =
-      {
-        \keys_set:nn { document / metadata }{ testphase=latest }
-        \AddToHook{shipout/lastpage}[tagging-setup]{\tagpdfsetup{activate/tree=false}}
-        \DeclareHookRule{shipout/lastpage}{tagging-setup}{before}{tagpdf}
-      }
-    ,tagging-setup .code:n =
-      {
-        \tl_gclear:N\g_@@_testphase_tl
-        \keys_set:nn { document / metadata }{ testphase=latest }
-        \keys_set_groups:nnn{__tag/setup}{load}{#1}
-        \AddToHook{class/before}
-         {\keys_set_exclude_groups:nnn {__tag/setup}{load}{#1}}
-      }
- }
-\keys_define:nn{__tag/setup}
- {
-   ,modules .code:n =
-     {
-      \tl_gclear:N\g_@@_testphase_tl
-      \keys_set:nn { document / metadata }{testphase={phase-II,#1}}
-     }
-   ,modules .groups:n = { load }
-   ,extra-modules .code:n =
-     {
-       \keys_set:nn { document / metadata }{testphase={#1}}
-     }
-   ,extra-modules .groups:n = { load }
- }
-%    \end{macrocode}
-% \subsection{\cs{DeclareDocumentMetadata}}
-% \cs{DocumentMetadata} is defined by the kernel.
-% We only define the older alias \cs{DeclareDocumentMetadata}
-%
-% \begin{macro}{\DeclareDocumentMetadata}
-%    \begin{macrocode}
-\NewCommandCopy\DeclareDocumentMetadata\DocumentMetadata
-%    \end{macrocode}
-% \end{macro}
 %
 % \subsection{Container for document Properties}
 % The container for the document properties is a prop
@@ -301,30 +186,34 @@
   }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\GetDocumentProperties}
+% \begin{macro}[EXP]{\GetDocumentProperty,\GetDocumentProperties}
 %    \begin{macrocode}
-\NewExpandableDocumentCommand\GetDocumentProperties{m}
+\cs_new:Npn\GetDocumentProperty #1
   {
     \prop_item:Nn \g_@@_documentproperties_prop {#1}
   }
+\cs_new_eq:NN\GetDocumentProperties\GetDocumentProperty
 %    \end{macrocode}
 % \end{macro}
 % For uses in modules (e.g. l3pdfmeta)
 % we provide an expl3 version without the xparse overhead:
 %
-% \begin{macro}[EXP]{\pdfmanagement_get_documentproperties:n}
+% \begin{macro}[EXP]{\pdfmanagement_get_documentproperty:n}
 %    \begin{macrocode}
-\cs_new:Npn\pdfmanagement_get_documentproperties:n #1
+\cs_new:Npn\pdfmanagement_get_documentproperty:n #1
   {
     \prop_item:Nn \g_@@_documentproperties_prop {#1}
   }
+\cs_new_eq:NN 
+  \pdfmanagement_get_documentproperties:n 
+  \pdfmanagement_get_documentproperty:n  
 %    \end{macrocode}
 % \end{macro}
 % The following allows to retrieve the values with branching.
-% \begin{macro}[added=2022-10-09]{\pdfmanagement_get_documentproperties:nNTF}
+% \begin{macro}[added=2025-06-21]{\pdfmanagement_get_documentproperty:nNTF}
 %    \begin{macrocode}
 \prg_new_protected_conditional:Npnn
-  \pdfmanagement_get_documentproperties:nN #1#2 { T , F , TF }
+  \pdfmanagement_get_documentproperty:nN #1#2 { T , F , TF }
     {
      \prop_get:NnNTF \g_@@_documentproperties_prop  {#1} #2
        {
@@ -334,6 +223,10 @@
         \prg_return_false:
        }
     }
+\prg_new_eq_conditional:NNn   
+  \pdfmanagement_get_documentproperties:nN  
+  \pdfmanagement_get_documentproperty:nN
+  { T , F , TF }
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ShowDocumentProperties}

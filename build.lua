@@ -1,6 +1,6 @@
 #!/usr/bin/env texlua
-packageversion="0.96r"
-packagedate="2025-05-15"
+packageversion="0.96s"
+packagedate="2025-06-23"
 
 local luatexstatus = status.list()
 
@@ -10,7 +10,7 @@ local luatexstatus = status.list()
 bundle  = ""
 module  = "pdfmanagement-testphase"
 
-typesetexe="pdflatex"
+typesetexe="lualatex"
 installfiles = {"*.sty","*.cls","*.def","*.lua","*.ltx"}
 
 if options["target"] == "ctan" then
@@ -18,6 +18,7 @@ if options["target"] == "ctan" then
                 "firstaid/xcolor-patches-tmp-ltx.sty",
                 "firstaid/color-ltx.sty",
                 "firstaid/colorspace-patches-tmp-ltx.sty",
+                "lualinksplit.lua"
                 }
 else
  sourcefiles =  {"*.dtx","*.ins",
@@ -28,6 +29,7 @@ else
                 "newpackages/bkm-generic.def",
                 "newpackages/new-attachfile.sty",
                 "newpackages/atfi-generic.def",
+                "lualinksplit.lua"
                 }
 end
 

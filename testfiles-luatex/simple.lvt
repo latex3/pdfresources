@@ -1,0 +1,20 @@
+\DocumentMetadata{pdfversion=2.0}
+\input{regression-test}
+
+\documentclass{article}
+\usepackage{hyperref}
+\begin{document}
+\START
+\showoutput
+\section{First section}\label{sec:one}
+Some content, more in the \hyperref[sec:two]{second\vadjust{\newpage}\\ distributed\\section}
+
+\clearpage
+\section{Second section}\label{sec:two}
+Some content, more in the \hyperref[sec:one]{first section}
+Hello
+
+\clearpage
+\END
+\end{document} 
+

@@ -2,7 +2,7 @@
 
 File: pdfmanagement-testphase.ins
 
-Copyright (C) 2019-2021 The LaTeX Project
+Copyright (C) 2019-2025 The LaTeX Project
 
 It may be distributed and/or modified under the conditions of the
 LaTeX Project Public License (LPPL), either version 1.3c of this
@@ -11,7 +11,7 @@ of this license is in the file
 
    https://www.latex-project.org/lppl.txt
 
-This file is part of the "LaTeX PDF management testphase bundle" (The Work in LPPL)
+This file is part of the "LaTeX PDF management bundle" (The Work in LPPL)
 and all files in that bundle must be distributed together.
 
 The released version of this bundle is available from CTAN.
@@ -34,7 +34,7 @@ for those people who are interested.
 \let\MetaPrefix\relax
 \preamble
 
-Copyright (C) 2019-2021 The LaTeX Project
+Copyright (C) 2019-2025 The LaTeX Project
 
 It may be distributed and/or modified under the conditions of
 the LaTeX Project Public License (LPPL), either version 1.3c of
@@ -43,7 +43,7 @@ version of this license is in the file:
 
    https://www.latex-project.org/lppl.txt
 
-This file is part of the "LaTeX PDF management testphase bundle" (The Work in LPPL)
+This file is part of the "LaTeX PDF management bundle" (The Work in LPPL)
 and all files in that bundle must be distributed together.
 
 \endpreamble
@@ -62,35 +62,13 @@ and all files in that bundle must be distributed together.
       }%
   }
 
-%\generate{\file{ltdocinit.sty}
-%  {
-%    \from{ltdocinit.dtx}            {header,package}
-%  }
-%}
-%\generate{\file{l3pdfdict.sty}
-%  {
-%    \from{l3pdfdict.dtx}            {header,package}
-%  }
-%}
-%
-%\generate{\file{l3pdfmanagement.sty}
-%  {
-%    \from{l3pdfmanagement.dtx}            {header,package}
-%  }
-%}
-%
-%\generate{\file{l3pdfmeta.sty}
-%  {
-%    \from{l3pdfmeta.dtx}            {header,package}
-%  }
-%}
-%
-%\generate{\file{l3pdftools.sty}
-%  {
-%    \from{l3pdftools.dtx}            {header,package}
-%  }
-%}
-
+\generate
+  {%
+    \file{pdfmanagement.sty}
+      {%
+        \from{pdfmanagement-testphase.dtx}{standalone}
+      }%
+  }
 \generate
   {%
     \file{pdfmanagement-firstaid.sty}
@@ -99,33 +77,18 @@ and all files in that bundle must be distributed together.
       }%
   }
 
-%\generate
-%  {%
-%    \file{l3pdfannot.sty}
-%      {%
-%        \from{l3pdfannot.dtx}{header,package}
-%      }%
-%  }
-%
-%\generate
-%  {%
-%    \file{l3pdfxform-beta.sty}
-%      {%
-%        \from{l3pdfxform.dtx}{header,package}
-%      }%
-%  }
-%
-%\generate
-%  {%
-%    \file{l3pdffile.sty}
-%      {%
-%        \from{l3pdffile.dtx}{header,package}
-%      }%
-%  }
 
 \generate
   {%
     \file{l3pdffield-testphase.sty}
+      {%
+        \from{l3pdffield.dtx}{wrapper}
+      }%
+  }
+
+\generate
+  {%
+    \file{l3pdffield.sty}
       {%
         \from{l3pdffield.dtx}{package}
         \from{l3pdffield-checkbox.dtx}{package}
@@ -188,9 +151,16 @@ and all files in that bundle must be distributed together.
   {
     \file {hgeneric-testphase.def}
       {
-       \from{hyperref-generic.dtx}{package}
+       \from{hyperref-generic.dtx}{headertestphase,package}
       }
   }
+\generate
+  {
+    \file {hgeneric.def}
+      {
+       \from{hyperref-generic.dtx}{header,package}
+      }
+  }  
 \generate
   {
     \file {hyperref-colorschemes.def}
@@ -201,7 +171,7 @@ and all files in that bundle must be distributed together.
 
 \generate
   {
-    \file {pdfmanagement-testphase.ltx}
+    \file {pdfmanagement.ltx}
       {
        \from{pdfmanagement-testphase.dtx}{header}
        \from{l3pdfdict.dtx}{package}

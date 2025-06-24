@@ -11,7 +11,7 @@
 %
 %    https://www.latex-project.org/lppl.txt
 %
-% This file is part of the "LaTeX PDF management testphase bundle" (The Work in LPPL)
+% This file is part of the "LaTeX PDF management bundle" (The Work in LPPL)
 % and all files in that bundle must be distributed together.
 %
 % -----------------------------------------------------------------------
@@ -24,7 +24,9 @@
 %
 %
 %<*driver>
-\documentclass[full,kernel]{l3doc}
+\DocumentMetadata{} %no tagging yet, as the arguments environment errors
+\documentclass[full]{l3doc}
+%\usepackage{latex-lab-testphase-l3doc}
 \begin{document}
   \DocInput{\jobname.dtx}
 \end{document}
@@ -33,7 +35,7 @@
 %
 % \title{^^A
 %   The \textsf{l3backend-testphase} package\\ Additional backend PDF features^^A
-%   \\ \LaTeX{} PDF management testphase bundle
+%   \\ \LaTeX{} PDF management bundle
 % }
 %
 % \author{^^A
@@ -45,7 +47,7 @@
 %    }^^A
 % }
 %
-% \date{Version 0.96r, released 2025-05-15}
+% \date{Version 0.96s, released 2025-06-23}
 %
 % \maketitle
 %
@@ -56,28 +58,28 @@
 %    \begin{macrocode}
 %<drivers>\ProvidesExplFile
 %<*dvipdfmx>
-  {l3backend-testphase-dvipdfmx.def}{2025-05-15}{}
-  {LaTeX~PDF~management~testphase~bundle~backend~support: dvipdfmx}
+  {l3backend-testphase-dvipdfmx.def}{2025-06-23}{0.96s}
+  {LaTeX~PDF~management~bundle~backend~support: dvipdfmx}
 %</dvipdfmx>
 %<*dvips>
-  {l3backend-testphase-dvips.def}{2025-05-15}{}
-  {LaTeX~PDF~management~testphase~bundle~backend~support: dvips}
+  {l3backend-testphase-dvips.def}{2025-06-23}{0.96s}
+  {LaTeX~PDF~management~bundle~backend~support: dvips}
 %</dvips>
 %<*dvisvgm>
-  {l3backend-testphase-dvisvgm.def}{2025-05-15}{}
-  {LaTeX~PDF~management~testphase~bundle~backend~support: dvisvgm}
+  {l3backend-testphase-dvisvgm.def}{2025-06-23}{0.96s}
+  {LaTeX~PDF~management~bundle~backend~support: dvisvgm}
 %</dvisvgm>
 %<*luatex>
-  {l3backend-testphase-luatex.def}{2025-05-15}{}
-  {LaTeX~PDF~management~testphase~bundle~backend~support: PDF output (LuaTeX)}
+  {l3backend-testphase-luatex.def}{2025-06-23}{0.96s}
+  {LaTeX~PDF~management~bundle~backend~support: PDF output (LuaTeX)}
 %</luatex>
 %<*pdftex>
-  {l3backend-testphase-pdftex.def}{2025-05-15}{}
-  {LaTeX~PDF~management~testphase~bundle~backend~support: PDF output (pdfTeX)}
+  {l3backend-testphase-pdftex.def}{2025-06-23}{0.96s}
+  {LaTeX~PDF~management~bundle~backend~support: PDF output (pdfTeX)}
 %</pdftex>
 %<*xdvipdfmx>
-  {l3backend-testphase-xetex.def}{2025-05-15}{}
-  {LaTeX~PDF~management~testphase~bundle~backend~support: XeTeX}
+  {l3backend-testphase-xetex.def}{2025-06-23}{0.96s}
+  {LaTeX~PDF~management~bundle~backend~support: XeTeX}
 %</xdvipdfmx>
 %    \end{macrocode}
 % \subsection{Variants}
@@ -117,10 +119,8 @@
 %  The one shared function for all backends is access to the basic
 %  \tn{special} primitive.
 %    \begin{macrocode}
-\bool_if:NT \l__pdfmanagement_delayed_shipout_bool
- {
-   \cs_new_protected:Npn \__kernel_backend_shipout_literal:e #1
-     { \tex_special:D~shipout { #1} }
+\cs_new_protected:Npn \__kernel_backend_shipout_literal:e #1
+  { \tex_special:D~shipout { #1} }
 %</drivers>
 %    \end{macrocode}
 % \end{macro}
@@ -135,34 +135,33 @@
 %   Note that this is still inside the text (\texttt{BT} \dots \texttt{ET}
 %   block).
 %    \begin{macrocode}
-  \cs_new_protected:Npn \__kernel_backend_shipout_literal_pdf:e #1
-    {
+\cs_new_protected:Npn \__kernel_backend_shipout_literal_pdf:e #1
+  {
 %<*luatex>
-      \tex_pdfextension:D ~ literal ~ shipout ~
+    \tex_pdfextension:D ~ literal ~ shipout ~
 %</luatex>
 %<*pdftex>
-      \tex_pdfliteral:D ~ shipout ~
+    \tex_pdfliteral:D ~ shipout ~
 %</pdftex>
-        { #1 }
-    }
+      { #1 }
+  }
 %    \end{macrocode}
 % \end{macro}
 %
 % \begin{macro}{\__kernel_backend_shipout_literal_page:e}
 %  Page literals are pretty simple.
 %    \begin{macrocode}
-  \cs_new_protected:Npn \__kernel_backend_shipout_literal_page:e #1
-    {
+\cs_new_protected:Npn \__kernel_backend_shipout_literal_page:e #1
+  {
 %<*luatex>
-      \tex_pdfextension:D ~ literal ~ shipout ~
+    \tex_pdfextension:D ~ literal ~ shipout ~
 %</luatex>
 %<*pdftex>
-      \tex_pdfliteral:D ~ shipout ~
+    \tex_pdfliteral:D ~ shipout ~
 %</pdftex>
-        page { #1 }
-    }
+      page { #1 }
+  }
 %</luatex|pdftex>
-%<drivers> }
 %    \end{macrocode}
 % \end{macro}
 
@@ -315,14 +314,11 @@
 %</pdftex>
 %<*luatex>
 %luatex: does it in lua
-\sys_if_engine_luatex:T
+\cs_new_protected:Npn \@@_backend_Pages_primitive:n #1
   {
-    \cs_new_protected:Npn \@@_backend_Pages_primitive:n #1
+    \tex_directlua:D
       {
-        \tex_directlua:D
-          {
-            pdf.setpagesattributes( \@@_backend_luastring:n { #1 } )
-          }
+        pdf.setpagesattributes( \@@_backend_luastring:n { #1 } )
       }
   }
 %</luatex>
@@ -830,13 +826,10 @@
 \cs_set_eq:NN \@@_backend_bdc_contobj:nn    \@@_backend_bdc:nn
 \cs_set_eq:NN \@@_backend_bdc_contstream:nn \@@_backend_bdc:nn
 
-\bool_if:NT\l__pdfmanagement_delayed_shipout_bool
+\cs_new_protected:Npn \@@_backend_bdc_shipout:ee #1 #2 % #1 eg. Span, #2: dict_content
   {
-    \cs_new_protected:Npn \@@_backend_bdc_shipout:ee #1 #2 % #1 eg. Span, #2: dict_content
-      {
-        \__kernel_backend_shipout_literal:e
-          {ps: SDict ~ begin ~ mark /#1~<<#2>>~/BDC ~ pdfmark ~ end }
-      }
+    \__kernel_backend_shipout_literal:e
+      {ps: SDict ~ begin ~ mark /#1~<<#2>>~/BDC ~ pdfmark ~ end }
   }
 
 \cs_set_protected:Npn \@@_backend_bdcobject:nn #1 #2 % #1 eg. Span, #2: object name
@@ -866,11 +859,8 @@
 \cs_set_eq:NN \@@_backend_bdc_contobj:nn    \@@_backend_bdc:nn
 \cs_set_eq:NN \@@_backend_bdc_contstream:nn \@@_backend_bdc:nn
 
-\bool_if:NT\l__pdfmanagement_delayed_shipout_bool
-  {
-    \cs_set_protected:Npn \@@_backend_shipout_bdc:ee #1 #2 % #1 eg. Span, #2: dict_content
-      {}
-  }
+\cs_set_protected:Npn \@@_backend_shipout_bdc:ee #1 #2 % #1 eg. Span, #2: dict_content
+  {}
 \cs_set_protected:Npn \@@_backend_bdcobject:nn #1 #2 % #1 eg. Span, #2: object name
   {}
 \cs_set_protected:Npn \@@_backend_bdcobject:n #1  % #1 eg. Span,
@@ -945,22 +935,18 @@
     \__kernel_backend_literal:n {pdf:code~ /#1~<<#2>>~BDC }
   }
 
- \cs_set_protected:Npn \@@_backend_bdc:nn #1 #2
+\cs_set_protected:Npn \@@_backend_bdc:nn #1 #2
   {
-    \bool_if:NTF  \g__pdfmanagement_active_bool
-      {\cs_gset_eq:NN \@@_backend_bdc:nn \@@_backend_bdc_contobj:nn}
-      {\cs_gset_eq:NN \@@_backend_bdc:nn \@@_backend_bdc_contstream:nn}
-      \@@_backend_bdc:nn {#1}{#2}
+    \cs_gset_eq:NN \@@_backend_bdc:nn \@@_backend_bdc_contobj:nn
+    \@@_backend_bdc:nn {#1}{#2}
   }
 
-\bool_if:NT\l__pdfmanagement_delayed_shipout_bool
+\cs_set_protected:Npn \@@_backend_bdc_shipout_contstream:ee #1 #2
   {
-    \cs_set_protected:Npn \@@_backend_bdc_shipout_contstream:ee #1 #2
-      {
-        \__kernel_backend_shipout_literal:e {pdf:code~ /#1~<<#2>>~BDC }
-      }
-    \cs_set_eq:NN \@@_backend_bdc_shipout:ee \@@_backend_bdc_shipout_contstream:ee
+    \__kernel_backend_shipout_literal:e {pdf:code~ /#1~<<#2>>~BDC }
   }
+\cs_set_eq:NN \@@_backend_bdc_shipout:ee \@@_backend_bdc_shipout_contstream:ee
+
 \cs_set_protected:Npn \@@_backend_emc:
   {
     \__kernel_backend_literal:n {pdf:code~EMC}  %pdfbase
@@ -1051,14 +1037,11 @@
 %    \begin{macrocode}
 \cs_set_eq:NN \@@_backend_bdc:nn \@@_backend_bdc_contstream:nn
 
-\bool_if:NT\l__pdfmanagement_delayed_shipout_bool
+\cs_set_protected:Npn \@@_backend_bdc_shipout_contstream:ee #1 #2
   {
-    \cs_set_protected:Npn \@@_backend_bdc_shipout_contstream:ee #1 #2
-      {
-        \__kernel_backend_shipout_literal_page:e { /#1~<<#2>>~BDC }
-      }
-    \cs_set_eq:NN \@@_backend_bdc_shipout:ee \@@_backend_bdc_shipout_contstream:ee
+    \__kernel_backend_shipout_literal_page:e { /#1~<<#2>>~BDC }
   }
+\cs_set_eq:NN \@@_backend_bdc_shipout:ee \@@_backend_bdc_shipout_contstream:ee
 
 \cs_set_protected:Npn \@@_backend_emc:
   {
@@ -1153,14 +1136,12 @@
 %    \begin{macrocode}
 \cs_set_eq:NN \@@_backend_bdc:nn \@@_backend_bdc_contstream:nn
 
-\bool_if:NT\l__pdfmanagement_delayed_shipout_bool
-  {
-    \cs_set_protected:Npn \@@_backend_bdc_shipout_contstream:ee #1 #2
-       {
-         \__kernel_backend_shipout_literal_page:e { /#1~<<#2>>~BDC }
-       }
-    \cs_set_eq:NN \@@_backend_bdc_shipout:ee \@@_backend_bdc_shipout_contstream:ee
-  }
+\cs_set_protected:Npn \@@_backend_bdc_shipout_contstream:ee #1 #2
+   {
+     \__kernel_backend_shipout_literal_page:e { /#1~<<#2>>~BDC }
+   }
+\cs_set_eq:NN \@@_backend_bdc_shipout:ee \@@_backend_bdc_shipout_contstream:ee
+
 
 \cs_set_protected:Npn \@@_backend_emc:
   {
@@ -1296,6 +1277,21 @@
 %</pdftex>
 %    \end{macrocode}
 %
+%  \subsubsection{Split links}
+%  With luatex we use luacode to handle link annotations. This allows us
+%  to retrieve the annotations as needed by the tagging code.
+%  It also allow to prevent that link areas spill over into unwanted regions like
+%  footnotes. See the documentation in lualinksplit.lua for more details.
+%  We therefore add a plug for the build/column/footnotes.
+%    \begin{macrocode}
+%<*luatex>
+\lua_load_module:n{lualinksplit}
+\NewSocketPlug{build/column/footnotes}{lualinksplit}{%
+  \setbox\footins=\vbox{\pdfextension linkstate-2\unvbox\footins}%
+}
+\AssignSocketPlug{build/column/footnotes}{lualinksplit}
+%</luatex>
+%    \end{macrocode}
 %  \subsubsection{Form XObject / backend }
 %  \begin{macro}{ \@@_backend_xform_new:nnnn }
 %  \begin{arguments}

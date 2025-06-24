@@ -11,7 +11,7 @@
 %
 %    http://www.latex-project.org/lppl.txt
 %
-% This file is part of the "LaTeX PDF management testphase bundle" (The Work in LPPL)
+% This file is part of the "LaTeX PDF management bundle" (The Work in LPPL)
 % and all files in that bundle must be distributed together.
 %
 % -----------------------------------------------------------------------
@@ -23,14 +23,16 @@
 % for those people who are interested.
 %
 %<*driver>
-\DocumentMetadata{pdfstandard=A-2b}
+\DocumentMetadata{tagging=on,pdfstandard=ua-2}
 \documentclass[full]{l3doc}
+\usepackage{latex-lab-testphase-l3doc}
+
 \usepackage{tabularx}
 \usepackage{array,booktabs}
-\hypersetup{pdfauthor=The LaTeX Project,pdftitle=l3pdfmanagement (LaTeX PDF management testphase bundle)}
+\hypersetup{pdfauthor=The LaTeX Project,pdftitle=l3pdfmanagement (LaTeX PDF management bundle)}
 
 \providecommand\potentialclash{\noindent\llap{\dbend\ }}
-
+\pdfextension glyphtounicode{char7f}{2621} 
 % Fixing footnotes in  functions and variables: this should be in l3doc!
 \newcommand\fixfootnote[2]{\footnotemark
   \AddToHookNext{env/#1/after}{\footnotetext{#2}}}
@@ -45,7 +47,7 @@
 %
 % \title{^^A
 %   The \pkg{l3pdfmanagement} module\\ Managing central PDF resources ^^A
-%   \\\LaTeX{} PDF management testphase bundle
+%   \\\LaTeX{} PDF management bundle
 % }
 %
 % \author{^^A
@@ -57,7 +59,7 @@
 %    }^^A
 % }
 %
-% \date{Version 0.96r, released 2025-05-15}
+% \date{Version 0.96s, released 2025-06-23}
 %
 % \maketitle
 % \begin{documentation}
@@ -635,8 +637,8 @@
 %<@@=pdfmanagement>
 %<*header>
 %
-\ProvidesExplPackage{l3pdfmanagement}{2025-05-15}{0.96r}
-  {Management of core PDF dictionaries (LaTeX PDF management testphase bundle)}
+\ProvidesExplPackage{l3pdfmanagement}{2025-06-23}{0.96s}
+  {Management of core PDF dictionaries (LaTeX PDF management bundle)}
 %</header>
 %    \end{macrocode}
 % \subsection{Messages}
@@ -685,50 +687,41 @@
 % \end{variable}
 
 % \begin{variable}{\g_@@_active_bool}
-% This boolean will control the activation of the management code.
-% It is used in the hooks, and in some backend files.
-% % \cs{DocumentMetadata} should set it to true
+% This boolean will controlled the activation of the management code.
+% It is now a noop and always true.
 %    \begin{macrocode}
 \bool_new:N \g_@@_active_bool
+\bool_gset_true:N \g_@@_active_bool
 %    \end{macrocode}
 % \end{variable}
 % A user predicate to test if the management code is active
 %    \begin{macrocode}
 \prg_new_conditional:Npnn \@@_if_active:  { p , T , F , TF }
   {
-    \bool_if:NTF \g_@@_active_bool
-      { \prg_return_true:  }
-      { \prg_return_false: }
+    \prg_return_true:  
   }
 \prg_set_eq_conditional:NNn
   \pdfmanagement_if_active: \@@_if_active: { p , T , F , TF }
 
-\cs_set_eq:NN \IfPDFManagementActiveTF\pdfmanagement_if_active:TF
+\cs_set_eq:NN \IfPDFManagementActiveTF\use_i:nn
 %    \end{macrocode}
 % We use a hook, to collect value added before the backend is ready.
 %    \begin{macrocode}
 \hook_new:n {pdfmanagement/add}
 \cs_new_protected:Npn \pdfmanagement_add:nnn #1 #2 #3
   {
-    \@@_if_active:TF
-      {
-        \pdfdict_if_exist:nTF { g__pdf_Core/#1 }
-          {
-            \hook_gput_code:nnn
-              {pdfmanagement/add}
-              {pdfmanagement}
-              {
-                \@@_handler_gput:nnn { #1 }{ #2 }{ #3 }
-              }
-          }
-          {
-            \msg_error:nnn{pdfmanagement}{unknown-dict}{#1}
-          }
-      }
-      {
-        \msg_warning:nne {pdfmanagement}{inactive}
-          {\tl_to_str:n {\pdfmanagement_add:nnn}}
-      }
+     \pdfdict_if_exist:nTF { g__pdf_Core/#1 }
+       {
+         \hook_gput_code:nnn
+           {pdfmanagement/add}
+           {pdfmanagement}
+           {
+             \@@_handler_gput:nnn { #1 }{ #2 }{ #3 }
+           }
+       }
+       {
+         \msg_error:nnn{pdfmanagement}{unknown-dict}{#1}
+       }
   }
 
 \cs_generate_variant:Nn \pdfmanagement_add:nnn {nne,nee,eee,nnx,nxx,xxx}
@@ -758,22 +751,16 @@
 %    \begin{macrocode}
 \tl_gset:Nn \g__kernel_pdfmanagement_thispage_shipout_code_tl
   {
-     \bool_if:NT \g_@@_active_bool
-       {
-         \exp_args:NV \__pdf_backend_ThisPage_gpush:n      { \g_shipout_readonly_int }
-         \exp_args:NV \__pdf_backend_PageResources_gpush:n { \g_shipout_readonly_int }
-       }
+    \exp_args:NV \__pdf_backend_ThisPage_gpush:n      { \g_shipout_readonly_int }
+    \exp_args:NV \__pdf_backend_PageResources_gpush:n { \g_shipout_readonly_int }
   }
 
 \tl_gset:Nn \g__kernel_pdfmanagement_end_run_code_tl
   {
-    \bool_if:NT \g_@@_active_bool
-       {
-         \__pdf_backend_PageResources_obj_gpush:          %ExtGState etc
-         \@@_Pages_gpush:            %pagesattr
-         \@@_Info_gpush:             %pdfinfo
-         \@@_Catalog_gpush:
-       }
+    \__pdf_backend_PageResources_obj_gpush:          %ExtGState etc
+    \@@_Pages_gpush:            %pagesattr
+    \@@_Info_gpush:             %pdfinfo
+    \@@_Catalog_gpush:
   }
 %    \end{macrocode}
 % \subsection{Naming convention}
@@ -1032,10 +1019,7 @@
 \cs_new_protected:cpn { @@_handler/ThisPage/?_gput:nn } #1 #2
   {
     \prop_gput:cnn  { \__kernel_pdfdict_name:n { g__pdf_Core/ThisPage } }{ #1 } { #2 }
-    \bool_if:NT \g_@@_active_bool
-      {
-        \__pdf_backend_ThisPage_gput:nn { #1 }{ #2 }
-      }
+    \__pdf_backend_ThisPage_gput:nn { #1 }{ #2 }
   }
 
 \cs_new_protected:cpn { @@_handler/ThisPage/?_gremove:n } #1
