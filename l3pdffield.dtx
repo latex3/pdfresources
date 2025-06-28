@@ -2,7 +2,7 @@
 %
 %% File: l3pdffield.dtx
 %
-% Copyright (C) 2021-2024 The LaTeX Project
+% Copyright (C) 2021-2025 The LaTeX Project
 %
 % It may be distributed and/or modified under the conditions of the
 % LaTeX Project Public License (LPPL), either version 1.3c of this
@@ -11,7 +11,7 @@
 %
 %    http://www.latex-project.org/lppl.txt
 %
-% This file is part of the "LaTeX PDF management testphase bundle" (The Work in LPPL)
+% This file is part of the "LaTeX PDF management bundle" (The Work in LPPL)
 % and all files in that bundle must be distributed together.
 %
 % -----------------------------------------------------------------------
@@ -23,12 +23,14 @@
 % for those people who are interested.
 %
 %<*driver>
-\DocumentMetadata{}
-\documentclass{l3doc}
-\usepackage{array,booktabs,caption}
-\usepackage{l3pdffield-testphase,tikz}
+\DocumentMetadata{tagging=on,pdfstandard=ua-2}
+\documentclass[full]{l3doc}
+\usepackage{latex-lab-testphase-l3doc}
+
+\usepackage{array,booktabs}
+\usepackage{l3pdffield,tikz}
 \hypersetup{pdfauthor=The LaTeX Project,
- pdftitle=l3pdffield (LaTeX PDF management testphase bundle)}
+ pdftitle=l3pdffield (LaTeX PDF management bundle)}
 \begin{document}
   \DocInput{\jobname.dtx}
 \end{document}
@@ -57,7 +59,7 @@
 % \providecommand\hook[1]{\texttt{#1}}
 % \title{^^A
 %   The \pkg{l3pdffield} module\\ Commands to create form fields   ^^A
-%   \\ \LaTeX{} PDF management testphase bundle
+%   \\ \LaTeX{} PDF management bundle
 % }
 %
 % \author{^^A
@@ -69,7 +71,7 @@
 %    }^^A
 % }
 %
-% \date{Version 0.96o, released 2024-12-20}
+% \date{Version 0.96s, released 2025-06-23}
 %
 % \maketitle
 % \begin{documentation}
@@ -78,13 +80,13 @@
 % \url{https://github.com/latex3/hyperref/issues/94}}. This package is a first step
 % towards the goal to review and improve the code of form fields.
 %
-% Like the \pkg{pdfmanagement-testphase} package itself it is a temporary package:
+% It is a temporary package:
 % the definite home of the code is not yet decided, and during the development
 % changes in the interfaces are possible.
 %
 % The package itself is currently loaded with
 % \begin{verbatim}
-% \usepackage{l3pdffield-testphase}
+% \usepackage{l3pdffield}
 % \end{verbatim}
 %
 % The source code is split into various submodules. All code is combined in the
@@ -137,7 +139,7 @@
 % \DocumentMetadata{} 
 % \documentclass{article}
 % \usepackage{hyperref}
-% \usepackage{l3pdffield-testphase}
+% \usepackage{l3pdffield}
 % \begin{document}
 % \Form
 % \end{verbatim}
@@ -972,7 +974,7 @@
 %<*package>
 %<@@=pdffield>
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesExplPackage{l3pdffield-testphase}{2024-12-20}{0.96o}%
+\ProvidesExplPackage{l3pdffield}{2025-06-23}{0.96s}%
   {form fields}
 %    \end{macrocode}
 % \subsection{hyperref specific command}
@@ -2163,6 +2165,14 @@
 % \end{macro}
 %    \begin{macrocode}
 %</package>
+%    \end{macrocode}
+%    \begin{macrocode}
+%<*wrapper>
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesExplPackage{l3pdffield-testphase}{2025-06-23}{0.96s}%
+  {form fields}
+\RequirePackage{l3pdffield}
+%</wrapper>  
 %    \end{macrocode}
 %\end{implementation}
 %

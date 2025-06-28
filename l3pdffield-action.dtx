@@ -1,8 +1,8 @@
 % \iffalse meta-comment
 %
-%% File: l3pdfpdffield-action.dtx
+%% File: l3pdffield-action.dtx
 %
-% Copyright (C) 2021-2024 The LaTeX Project
+% Copyright (C) 2021-2025 The LaTeX Project
 %
 % It may be distributed and/or modified under the conditions of the
 % LaTeX Project Public License (LPPL), either version 1.3c of this
@@ -11,7 +11,7 @@
 %
 %    http://www.latex-project.org/lppl.txt
 %
-% This file is part of the "LaTeX PDF management testphase bundle" (The Work in LPPL)
+% This file is part of the "LaTeX PDF management bundle" (The Work in LPPL)
 % and all files in that bundle must be distributed together.
 %
 % -----------------------------------------------------------------------
@@ -23,12 +23,14 @@
 % for those people who are interested.
 %
 %<*driver>
-\DocumentMetadata{}
+\DocumentMetadata{tagging=on} %no ua-2 currently, as labels/contents for widgets are missing
 \documentclass[full]{l3doc}
+\usepackage{latex-lab-testphase-l3doc}
+
 \usepackage{array,booktabs,siunitx}
-\usepackage{l3pdffield-testphase,bearwear}
+\usepackage{l3pdffield,bearwear}
 \hypersetup{pdfauthor=The LaTeX Project,
- pdftitle=l3pdffield (LaTeX PDF management testphase bundle)}
+ pdftitle=l3pdffield (LaTeX PDF management bundle)}
 \begin{document}
   \DocInput{\jobname.dtx}
 \end{document}
@@ -37,7 +39,7 @@
 % \providecommand\hook[1]{\texttt{#1}}
 % \title{^^A
 %   The \pkg{l3pdffield-action} module\\ Commands to handle actions of form fields   ^^A
-%   \\ \LaTeX{} PDF management testphase bundle
+%   \\ \LaTeX{} PDF management bundle
 % }
 %
 % \author{^^A
@@ -49,7 +51,7 @@
 %    }^^A
 % }
 %
-% \date{Version 0.96o, released 2024-12-20}
+% \date{Version 0.96s, released 2025-06-23}
 %
 % \maketitle
 % \begin{documentation}

@@ -2,7 +2,7 @@
 %
 %% File: hyperref-generic.dtx
 %
-% Copyright (C) 2021-2024 The LaTeX Project
+% Copyright (C) 2021-2025 The LaTeX Project
 %
 % It may be distributed and/or modified under the conditions of the
 % LaTeX Project Public License (LPPL), either version 1.3c of this
@@ -11,7 +11,7 @@
 %
 %    http://www.latex-project.org/lppl.txt
 %
-% This file is part of the "LaTeX PDF management testphase bundle" (The Work in LPPL)
+% This file is part of the "LaTeX PDF management bundle" (The Work in LPPL)
 % and all files in that bundle must be distributed together.
 %
 % The released version of this bundle is available from CTAN.
@@ -25,11 +25,12 @@
 % for those people who are interested.
 %
 %<*driver>
-\DocumentMetadata{pdfstandard=A-2b}
+\DocumentMetadata{}                     %no tagging yes, errors
 \documentclass{l3doc}
+%\usepackage{latex-lab-testphase-l3doc} %errors currently
 \usepackage{tabularx,array,booktabs}
 \hypersetup{pdfauthor=The LaTeX Project,
-  pdftitle=generic hyperref driver (LaTeX PDF management testphase bundle)}
+  pdftitle=generic hyperref driver (LaTeX PDF management bundle)}
 \premulticols=4cm
 \begin{document}
   \DocInput{\jobname.dtx}
@@ -82,11 +83,12 @@
 %    }^^A
 % }
 %
-% \date{Version 0.96o, released 2024-12-20}
+% \date{Version 0.96s, released 2025-06-23}
 %
 % \maketitle
 % \begin{documentation}
-% This module generates a generic driver for \pkg{hyperref} meant to be used
+% This module generates a generic driver \texttt{hgeneric.def}/\texttt{hgeneric-testphase.def}
+% for \pkg{hyperref} meant to be used
 % with the new \LaTeX{} PDF management code. It is loaded automatically
 % if the PDF management code is active. The name of the driver will change after
 % the testphase.
@@ -961,13 +963,23 @@
 % \begin{implementation}
 %  \part{\pkg{hyperref-generic} driver implementation}
 %    \begin{macrocode}
-%<*package>
 %<@@=hyp>
 %    \end{macrocode}
 %    \begin{macrocode}
-\ProvidesFile{hgeneric-testphase.def}[2024-12-20 v0.96o %
-  generic Hyperref driver for the LaTeX PDF management testphase bundle]
-
+%<*headertestphase>
+\ProvidesFile{hgeneric-testphase.def}[2025-06-23 v0.96s %
+  generic Hyperref driver for the LaTeX PDF management bundle]
+%</headertestphase>  
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%<*header>
+\ProvidesFile{hgeneric.def}[2025-06-23 v0.96s %
+  generic Hyperref driver for the LaTeX PDF management bundle]
+%</header>  
+%    \end{macrocode}
+%    \begin{macrocode}
+%<*package>
 \RequirePackage{etoolbox} %why?
 %    \end{macrocode}
 % Temporary command definition, can be remove when hyperref is update too.
@@ -1007,10 +1019,10 @@
       { missing-resource-management }
       { The~PDF~resource~management~is~required~for~this~hyperref~driver! }
       {
-         Activate~it~with \\
-         \tl_to_str:n{\RequirePackage{pdfmanagement-testphase}}\\
+         Activate~it~with \\        
          \tl_to_str:n{\DocumentMetadata{<options>}}\\
-         before~\tl_to_str:n{\documentclass}
+         before~\tl_to_str:n{\documentclass} or \\
+         \RequirePackage{pdfmanagement}
       }
    }
 %    \end{macrocode}
@@ -1719,6 +1731,7 @@
 \tl_new:N\l_@@_link_Contents_tl
 \socket_new:nn {hyp/link/GoTo/Contents}{2}
 \socket_new:nn {hyp/link/URI/Contents}{1}
+\socket_new:nn {hyp/link/GoToR/Contents}{1}
 \socket_new_plug:nnn {hyp/link/GoTo/Contents}{default}
   {
     \@@_text_pdfstring:eoN
@@ -1728,6 +1741,15 @@
     \pdfannot_dict_put:nne {link/GoTo}{Contents}
       {\l_@@_link_Contents_tl}
   }
+\socket_new_plug:nnn {hyp/link/GoToR/Contents}{default}
+  {
+    \@@_text_pdfstring:eoN
+      { Open~file~#1  }
+      { \l_@@_text_enc_info_print_tl }
+      \l_@@_link_Contents_tl
+    \pdfannot_dict_put:nne {link/GoToR}{Contents}
+      {\l_@@_link_Contents_tl}
+  }  
 \socket_new_plug:nnn {hyp/link/URI/Contents}{default}
   {
     \@@_text_pdfstring:eoN
@@ -1738,6 +1760,7 @@
       {\l_@@_link_Contents_tl}
   }
 \socket_assign_plug:nn{hyp/link/GoTo/Contents}{default}
+\socket_assign_plug:nn{hyp/link/GoToR/Contents}{default}
 \socket_assign_plug:nn{hyp/link/URI/Contents}{default}
 %    \end{macrocode}
 % \begin{variable}{\l_@@_dest_pdfview_tl}
@@ -2397,6 +2420,10 @@
               { #3 }
               { \l_@@_text_enc_dest_print_tl }
               \l_@@_dest_name_tmpa_tl
+%    \end{macrocode}
+% This socket adds something to the /Contents key.
+%    \begin{macrocode}
+            \socket_use:nn{hyp/link/GoToR/Contents}{#2}              
             \tl_if_blank:eTF {#3}
               {
                 \pdfdict_put:nne {l_hyp/annot/A/GoToR}{D}
@@ -4678,11 +4705,11 @@
   \HyField@PDFChoices{#1}
   \mode_leave_vertical:
   \HyAnn@AbsPageLabel
-  \Hy@escapeform\PDFForm@List
-  \pdf_link_user:nnn
-       {widget} %perhaps we need more types??
-       {\PDFForm@List}
-       {\MakeChoiceField{\Fld@width}{\Fld@height}}
+  \Hy@escapeform\PDFForm@List  
+  \pdfannot_box:nnnn
+   {\Fld@width}{\Fld@height}{0pt}
+   {\PDFForm@List}
+  \MakeChoiceField{\Fld@width}{\Fld@height}  
   \HyField@AddToFields
  }
 
@@ -5516,7 +5543,6 @@
 \expandafter\def\csname Parent3\endcsname{}
 \expandafter\def\csname Parent4\endcsname{}
 %%
-%% End of file 'hgeneric-testphase.def'.
 %</package>
 %    \end{macrocode}
 %    \begin{macrocode}
