@@ -2019,19 +2019,26 @@
 % entry as some viewers need that.  So if the language is equal to the
 % main language we use that. This assumes that the user hasn't marked
 % every entry as some other language!
+% x-default has to be the first entry, see issue \#92, 
+% so we have to go through the list twice.
 %    \begin{macrocode}
-               \tl_if_eq:eeTF{\l_@@_tmpa_tl}{\l_@@_xmp_metalang_tl}
+               \tl_if_eq:eeT{\l_@@_tmpa_tl}{\l_@@_xmp_metalang_tl}
                  {
                    \@@_xmp_add_packet_line_attr:nneV
                     {rdf}{li}{xml:lang="x-default" }\l_@@_tmpb_tl
                    \@@_xmp_add_packet_line_attr:nneV
                     {rdf}{li}{xml:lang="\l_@@_tmpa_tl" }\l_@@_tmpb_tl 
                  }
+             }
+           \clist_map_inline:nn {#4}
+             {
+               \@@_xmp_lang_get:nNN {##1}\l_@@_tmpa_tl\l_@@_tmpb_tl 
+               \tl_if_eq:eeF{\l_@@_tmpa_tl}{\l_@@_xmp_metalang_tl}                             
                  {
                    \@@_xmp_add_packet_line_attr:nneV
                     {rdf}{li}{xml:lang="\l_@@_tmpa_tl" }\l_@@_tmpb_tl
                  }             
-            }
+             }
          \@@_xmp_add_packet_close:nn{rdf}{#3}
         \@@_xmp_add_packet_close:nn {#1}{#2}
      }
