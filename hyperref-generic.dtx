@@ -4373,17 +4373,18 @@
 \keys_set_known:nv{ hyp }{opt@hyperref.sty}
 %    \end{macrocode}
 %
-%  Unfinished
+%  Unfinished, from here on @@ notation is disabled
 %% Form field code
 %    \begin{macrocode}
+%<@@=>
 \NewDocumentCommand \MakeFieldObject { m m }
   {
     \pdfxform_new:nnn { #2 }{} { #1 }
   }
 
 
-\prop_new:N   \g_@@_AcroForm_CoFields_prop
-\prop_new:N   \g_@@_AcroForm_Fields_prop
+\prop_new:N   \g__hyp_AcroForm_CoFields_prop
+\prop_new:N   \g__hyp_AcroForm_Fields_prop
 
 \let\HyField@afields\@empty
 \let\HyField@cofields\@empty
@@ -4393,14 +4394,14 @@
 % clearly faster than removing them from a sequence
 \def\HyField@AuxAddToFields#1
   {
-    \prop_gput:Nnn \g_@@_AcroForm_Fields_prop {#1}{F}
+    \prop_gput:Nnn \g__hyp_AcroForm_Fields_prop {#1}{F}
   }%
 
 %fields with empty key get a value too -- lets hope that
 %this give the expected behaviour
 \def\HyField@AuxAddToCoFields #1 #2
   {
-    \prop_gput:Nnn \g_@@_AcroForm_CoFields_prop {a#1}{#2}
+    \prop_gput:Nnn \g__hyp_AcroForm_CoFields_prop {a#1}{#2}
   }
 
 \Hy@AtBeginDocument
@@ -4464,36 +4465,36 @@
     \pdf@ifdraftmode{}
       {
         \Hy@FormObjects
-        \prop_map_inline:Nn \g_@@_AcroForm_Fields_prop
+        \prop_map_inline:Nn \g__hyp_AcroForm_Fields_prop
           {
             \pdfmanagement_add:nne { Catalog / AcroForm } { Fields }{##1}
             %\pdfmanagement_show:n { Catalog / AcroForm }
           }
-        \prop_if_empty:NF \g_@@_AcroForm_CoFields_prop
+        \prop_if_empty:NF \g__hyp_AcroForm_CoFields_prop
           {
-            \prop_map_inline:Nn \g_@@_AcroForm_CoFields_prop
+            \prop_map_inline:Nn \g__hyp_AcroForm_CoFields_prop
               {
-                \seq_put_right:Nn \l_@@_tmpa_seq {##1}
+                \seq_put_right:Nn \l__hyp_tmpa_seq {##1}
               }
-            \seq_sort:Nn \l_@@_tmpa_seq
+            \seq_sort:Nn \l__hyp_tmpa_seq
               {
                 \str_compare:nNnTF {##1} > {##2}
                   { \sort_return_swapped: }
                   { \sort_return_same: }
               }
-            \seq_map_inline:Nn \l_@@_tmpa_seq
+            \seq_map_inline:Nn \l__hyp_tmpa_seq
              {
                 \pdfmanagement_add:nne { Catalog / AcroForm }
                   { CO }
                   {
-                    \prop_item:Nn \g_@@_AcroForm_CoFields_prop {##1}
+                    \prop_item:Nn \g__hyp_AcroForm_CoFields_prop {##1}
                   }
              }
           }
        \pdfmanagement_add:nne {Catalog / AcroForm/DR/Font }
-         {ZaDb} {\pdf_object_ref:n {@@/Font/ZaDb} }
+         {ZaDb} {\pdf_object_ref:n {__hyp/Font/ZaDb} }
        \pdfmanagement_add:nne {Catalog / AcroForm/DR/Font }
-         {Helv} {\pdf_object_ref:n {@@/Font/Helv} }
+         {Helv} {\pdf_object_ref:n {__hyp/Font/Helv} }
        \pdfmanagement_add:nne {Catalog /AcroForm}
          {DA}{(/Helv~10~Tf~0~g)}
        \pdfmeta_standard_verify:nTF {form_no_NeedAppearance}
@@ -4519,10 +4520,7 @@
 \def\HyAnn@AbsPageLabel
   {
     \global\advance\HyAnn@Count by\@ne
-    %\zref@labelbyprops{HyAnn@\the\HyAnn@Count}{abspage}%
-    %\zref@labelbylist {HyAnn@\the\HyAnn@Count} {l3pdf}
-    %\zref@refused{HyAnn@\the\HyAnn@Count}%
-    \@@_property_record:ee {HyAnn@\the\HyAnn@Count}{abspage}
+    \__hyp_property_record:ee {HyAnn@\the\HyAnn@Count}{abspage}
     \property_ref_undefined_warn:ee {HyAnn@\the\HyAnn@Count}{abspage}
   }%
 \prg_generate_conditional_variant:Nnn \property_if_recorded:nn {ee} {T}
@@ -4536,8 +4534,6 @@
           }
       }
   }
-\ExplSyntaxOff
-\ExplSyntaxOn
 %% check if the attr should be set through
 %% hooks.
 %% check if options are missing.
@@ -4650,10 +4646,8 @@
 
 \def\@@Radio#1{%
   \Fld@listcount=0~%
-  %\show\Fld@default
   \EdefEscapeName\Fld@default{\Fld@default}%
   \clist_map_variable:nNn { #1 } \@curropt
-  %\@for\@curropt:=#1\do
    {%
     \expandafter\Fld@checkequals\@curropt==\\%
     \EdefEscapeName\@currValue{\@currValue}%
@@ -4662,9 +4656,9 @@
     \leavevmode
     \HyAnn@AbsPageLabel
     \Hy@escapeform\PDFForm@Radio
-    \pdfxform_if_exist:nF { @@_xform_Ding }
+    \pdfxform_if_exist:nF { __hyp_xform_Ding }
       {
-        \pdfxform_new:nnn { @@_xform_Ding } {}
+        \pdfxform_new:nnn { __hyp_xform_Ding } {}
          {
            \group_begin:
            \fontfamily{pzd}
@@ -4686,8 +4680,8 @@
          <<
          /N
           <<
-          /\@currValue\c_space_tl \pdfxform_ref:n {@@_xform_Ding}
-          %/Off \c_space_tl \pdfxform_ref:n {@@_xform_DingOff} %hm
+          /\@currValue\c_space_tl \pdfxform_ref:n {__hyp_xform_Ding}
+          %/Off \c_space_tl \pdfxform_ref:n {__hyp_xform_DingOff} %hm
           >>
          >>
       }
@@ -4775,13 +4769,13 @@
     \Hy@escapeform\PDFForm@Submit
     \hbox_set:Nn \l_tmpa_box { \MakeButtonField {#2}}
     \pdfxform_if_exist:nF
-     { @@_xform_Submit }
+     { __hyp_xform_Submit }
      {
-       \pdfxform_new:nnn { @@_xform_Submit }{}
+       \pdfxform_new:nnn { __hyp_xform_Submit }{}
         {
           \fbox{\color_select:n{yellow}\textsf{Submit}}
         }
-       \pdfxform_new:nnn { @@_xform_SubmitP }{}
+       \pdfxform_new:nnn { __hyp_xform_SubmitP }{}
         {
           \fbox{\color_select:n{yellow}\textsf{SubmitP}}
         }
@@ -4793,8 +4787,8 @@
       {
         \PDFForm@Submit
         /AP<<
-          /N~\pdfxform_ref:n {@@_xform_Submit}~
-          /D~\pdfxform_ref:n {@@_xform_SubmitP}
+          /N~\pdfxform_ref:n {__hyp_xform_Submit}~
+          /D~\pdfxform_ref:n {__hyp_xform_SubmitP}
          >>
        }
       \HyField@AddToFields
@@ -4858,10 +4852,10 @@
           \mode_leave_vertical:
           \HyAnn@AbsPageLabel
           \Hy@escapeform\PDFForm@Check
-          \pdfxform_if_exist:nF { @@_xform_CheckMarkYes }
+          \pdfxform_if_exist:nF { __hyp_xform_CheckMarkYes }
              {
                \pdfxform_new:nnn
-                {@@_xform_CheckMarkYes}{}
+                {__hyp_xform_CheckMarkYes}{}
                 {
                   \group_begin:
                   \fontfamily{pzd}
@@ -4873,7 +4867,7 @@
                   \group_end:
                 }
                \pdfxform_new:nnn
-                {@@_xform_CheckMarkOff}{}
+                {__hyp_xform_CheckMarkOff}{}
                 {
                   \group_begin:
                   \fontfamily{pzd}
@@ -4894,16 +4888,13 @@
         }
     \group_end:
   }
-\ExplSyntaxOff
-
 %hm. Should a luatex driver use type1 fonts in fields????
-\ExplSyntaxOn
 \def\Hy@FormObjects
   {
-    \pdf_object_new:n   {@@/Encoding/pdfdoc }
-    \pdf_object_new:n   {@@/Font/ZaDb }
-    \pdf_object_new:n   {@@/Font/Helv }
-    \pdf_object_write:nne {@@/Encoding/pdfdoc } { dict }
+    \pdf_object_new:n   {__hyp/Encoding/pdfdoc }
+    \pdf_object_new:n   {__hyp/Font/ZaDb }
+    \pdf_object_new:n   {__hyp/Font/Helv }
+    \pdf_object_write:nne {__hyp/Encoding/pdfdoc } { dict }
       {
         /Type/Encoding
         /Differences[
@@ -4945,20 +4936,20 @@
           /uacute/ucircumflex/udieresis/yacute/thorn/ydieresis
          ]
       }
-    \pdf_object_write:nnn {@@/Font/ZaDb } { dict }
+    \pdf_object_write:nnn {__hyp/Font/ZaDb } { dict }
       {
         /Type/Font
         /Subtype/Type1
         /Name/ZaDb
         /BaseFont/ZapfDingbats
       }
-    \pdf_object_write:nne {@@/Font/Helv } { dict }
+    \pdf_object_write:nne {__hyp/Font/Helv } { dict }
       {
         /Type/Font
         /Subtype/Type1
         /Name/Helv
         /BaseFont/Helvetica
-        /Encoding~\pdf_object_ref:n { @@/Encoding/pdfdoc }
+        /Encoding~\pdf_object_ref:n { __hyp/Encoding/pdfdoc }
       }
   \global\let\Hy@FormObjects\relax
   }
@@ -5078,7 +5069,6 @@
         {/AA<<\Fld@X@additionalactions>>}
     }
  }
-\ExplSyntaxOff
 \def\Fld@annotnames{%
   /T(\Fld@name)%
   \ifx\Fld@altname\relax
@@ -5090,7 +5080,7 @@
     /TM(\Fld@mappingname)%
   \fi
 }
-\ExplSyntaxOn
+
 \def\PDFForm@Check
   {
     /Subtype/Widget
@@ -5105,8 +5095,8 @@
      <<
       /N
         <<
-          /Yes~\pdfxform_ref:n{@@_xform_CheckMarkYes}
-          /Off~\pdfxform_ref:n{@@_xform_CheckMarkOff}
+          /Yes~\pdfxform_ref:n{__hyp_xform_CheckMarkYes}
+          /Off~\pdfxform_ref:n{__hyp_xform_CheckMarkOff}
         >>
     >>
   /MK<<
@@ -5142,8 +5132,7 @@
     }
   \Fld@additionalactions
 }
-\ExplSyntaxOff
-\ExplSyntaxOn
+
    \def\PDFForm@Push
      {
        /Subtype/Widget
@@ -5249,8 +5238,7 @@
    \fi
    \Fld@additionalactions
  }
-\ExplSyntaxOff
-\ExplSyntaxOn
+
 % Does an appearance dict make sense here?
 \def\PDFForm@Text
   {
@@ -5546,6 +5534,7 @@
 %</package>
 %    \end{macrocode}
 %    \begin{macrocode}
+%<@@=hyp>
 %<*colorscheme>
 % collected from https://tex.stackexchange.com/questions/525261/better-default-colors-for-hyperref-links
 % cite color ignored, as it doesn't fit ... should be done by cite packages ?
