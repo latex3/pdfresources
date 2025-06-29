@@ -5,6 +5,12 @@ first release 0.95a, 2021-02-23 will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 this project uses date-based 'snapshot' version identifiers.
 
+## [2025-06-29]
+
+### Fixed
+ - faulty @@-expansion in hyperref-generic
+ - dc:title and dc:creator handling, issue #92
+ 
 ## [2025-06-23]
 
 ### Fixed

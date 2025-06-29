@@ -52,7 +52,7 @@
 %    }^^A
 % }
 %
-% \date{Version 0.96s, released 2025-06-23}
+% \date{Version 0.96t, released 2025-06-29}
 %
 % \maketitle
 % \begin{documentation}
@@ -674,7 +674,7 @@
 %    \begin{macrocode}
 %<@@=pdfmeta>
 %<*header>
-\ProvidesExplPackage{l3pdfmeta}{2025-06-23}{0.96s}
+\ProvidesExplPackage{l3pdfmeta}{2025-06-29}{0.96t}
   {PDF-Standards---LaTeX PDF management bundle}
 %</header>
 %    \end{macrocode}
@@ -2013,23 +2013,32 @@
          \@@_xmp_add_packet_open:nn {rdf}{#3}
           \clist_map_inline:nn {#4}
             {
-              \@@_xmp_lang_get:nNN {##1}\l_@@_tmpa_tl\l_@@_tmpb_tl
+              \@@_xmp_lang_get:nNN {##1}\l_@@_tmpa_tl\l_@@_tmpb_tl              
 %    \end{macrocode}
 % change 2024-02-22. There should be if possible a x-default
 % entry as some viewers need that.  So if the language is equal to the
 % main language we use that. This assumes that the user hasn't marked
 % every entry as some other language!
+% x-default has to be the first entry, see issue \#92, 
+% so we have to go through the list twice.
 %    \begin{macrocode}
-              \tl_if_eq:eeTF{\l_@@_tmpa_tl}{\l_@@_xmp_metalang_tl}
-                {
-                  \@@_xmp_add_packet_line_attr:nneV
-                   {rdf}{li}{xml:lang="x-default" }\l_@@_tmpb_tl
-                }
-                {
-                  \@@_xmp_add_packet_line_attr:nneV
-                   {rdf}{li}{xml:lang="\l_@@_tmpa_tl" }\l_@@_tmpb_tl
-                }
-            }
+               \tl_if_eq:eeT{\l_@@_tmpa_tl}{\l_@@_xmp_metalang_tl}
+                 {
+                   \@@_xmp_add_packet_line_attr:nneV
+                    {rdf}{li}{xml:lang="x-default" }\l_@@_tmpb_tl
+                   \@@_xmp_add_packet_line_attr:nneV
+                    {rdf}{li}{xml:lang="\l_@@_tmpa_tl" }\l_@@_tmpb_tl 
+                 }
+             }
+           \clist_map_inline:nn {#4}
+             {
+               \@@_xmp_lang_get:nNN {##1}\l_@@_tmpa_tl\l_@@_tmpb_tl 
+               \tl_if_eq:eeF{\l_@@_tmpa_tl}{\l_@@_xmp_metalang_tl}                             
+                 {
+                   \@@_xmp_add_packet_line_attr:nneV
+                    {rdf}{li}{xml:lang="\l_@@_tmpa_tl" }\l_@@_tmpb_tl
+                 }             
+             }
          \@@_xmp_add_packet_close:nn{rdf}{#3}
         \@@_xmp_add_packet_close:nn {#1}{#2}
      }
@@ -2853,7 +2862,7 @@
 %    \end{macrocode}
 % pdfauthor/dc:creator
 %    \begin{macrocode}
-    \@@_xmp_add_packet_list:nnne {dc}{creator}{Seq}
+    \@@_xmp_add_packet_list_simple:nnne {dc}{creator}{Seq}
        { \GetDocumentProperties{hyperref/pdfauthor} }
     \int_compare:nNnT {0\pdfmeta_standard_item:n{level}}={1}
        { \pdfmanagement_remove:nn{Info}{Author} }
@@ -2866,7 +2875,7 @@
 %    \end{macrocode}
 % pdfkeywords/dc:subject
 %    \begin{macrocode}
-    \@@_xmp_add_packet_list:nnne {dc}{subject}{Bag}
+    \@@_xmp_add_packet_list_simple:nnne {dc}{subject}{Bag}
        { \GetDocumentProperties{hyperref/pdfkeywords} }
     \int_compare:nNnT {0\pdfmeta_standard_item:n{level}}={1}
        { \pdfmanagement_remove:nn{Info}{Keywords} }
@@ -2883,7 +2892,7 @@
 %    \end{macrocode}
 % pdfpublisher/dc:publisher
 %    \begin{macrocode}
-   \@@_xmp_add_packet_list:nnne {dc}{publisher}{Bag}
+   \@@_xmp_add_packet_list_simple:nnne {dc}{publisher}{Bag}
      { \GetDocumentProperties{hyperref/pdfpublisher} }
 %    \end{macrocode}
 % pdfsubject/dc:description
