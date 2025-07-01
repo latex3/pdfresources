@@ -261,9 +261,9 @@
 %
 %
 % \section{Commands}
-% \begin{function}{\pdffield_field:nn,\pdffield_field:Vn}
+% \begin{function}{\pdffield_field:nn}
 % \begin{syntax}
-%  \cs{pdffield_field:nn}\Arg{key val list}\Arg{field ID}
+%  \cs{pdffield_field:nn} \Arg{key val list} \Arg{field ID}
 % \end{syntax}
 % This creates a new field. \meta{field ID} will be used to create and
 % reference the needed objects but it is not the direct object name, so
@@ -294,9 +294,9 @@
 %
 % \end{function}
 %
-% \begin{function}{\pdffield_annot:n,\pdffield_annot:V}
+% \begin{function}{\pdffield_annot:n}
 % \begin{syntax}
-%  \cs{pdffield_annot:n}\Arg{key val list}
+%  \cs{pdffield_annot:n} \Arg{key val list}
 % \end{syntax}
 % This creates a new field annotation.
 % It is a widget annotation box created with \cs{pdfannot_widget_box:nnn}, and
@@ -317,7 +317,7 @@
 
 % \begin{function}{\pdffield_appearance:nn}
 % \begin{syntax}
-%  \cs{pdffield_appearance:nn}\Arg{name}\Arg{content}
+%  \cs{pdffield_appearance:nn} \Arg{name} \Arg{content}
 % \end{syntax}
 % This is a small wrapper around \cs{pdfxform_new:nnn} (which could be used too)
 % to create an appearance. To avoid name clashes \meta{name} should start with
@@ -326,7 +326,7 @@
 %
 % \begin{function}{\pdffield_setup:n}
 % \begin{syntax}
-%  \cs{pdffield_setup:n}\Arg{key-val}
+%  \cs{pdffield_setup:n} \Arg{key val list}
 % \end{syntax}
 % This command allows to preset some field settings.
 % \end{function}
@@ -334,10 +334,10 @@
 %
 % \begin{function}{create-style}
 % \begin{syntax}
-%  |create-style| = \Arg{name}\Arg{key-val}
+%  |create-style| = \Arg{name}\Arg{key val list}
 % \end{syntax}
 % This defines a style which can then be used with the |style| key.
-% \Arg{key-val} can be an arbitrary collection of the keys of the module.
+% \Arg{key val list} can be an arbitrary collection of the keys of the module.
 % \end{function}
 %
 % \begin{function}{style}
@@ -349,21 +349,21 @@
 %
 % \begin{function}{preset-checkbox}
 % \begin{syntax}
-% |preset-checkbox|=\Arg{key-val}
+% |preset-checkbox| = \Arg{key val list}
 % \end{syntax}
 % This allows to set default keys for a checkbox.
 % \end{function}
 %
 % \begin{function}{preset-radio}
 % \begin{syntax}
-% |preset-radio|=\Arg{key-val}
+% |preset-radio| = \Arg{key val list}
 % \end{syntax}
 % This allows to set default keys for a radio button.
 % \end{function}
 %
 % \begin{function}{preset-textfield}
 % \begin{syntax}
-% |preset-textfield|=\Arg{key-val}
+% |preset-textfield| = \Arg{key val list}
 % \end{syntax}
 % This allows to set default keys for a text field.
 % \end{function}
@@ -372,8 +372,8 @@
 %
 % \begin{function}{value,default}
 % \begin{syntax}
-% |value|  =\Arg{value}\\
-% |default|=\Arg{value}
+% |value| = \Arg{value}\\
+% |default| = \Arg{value}
 % \end{syntax}
 % These two keys pass the value to a handler which can be redefined.
 % Their exact behaviour depends on field type. Please check their documentation.

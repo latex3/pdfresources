@@ -100,9 +100,9 @@
 % in this case it is needed to check not only if the requirement is
 % in the standard but also if the user value is in the allowed list.
 %
-% \begin{function}[EXP,pTF]{\pdfmeta_standard_verify:n}
+% \begin{function}[EXP,TF]{\pdfmeta_standard_verify:n}
 % \begin{syntax}
-% \cs{pdfmeta_standard_verify:n}\Arg{requirement}
+% \cs{pdfmeta_standard_verify:nTF} \Arg{requirement} \Arg{true code} \Arg{false code}
 % \end{syntax}
 %
 % This checks if \meta{requirement} is listed in the standard.
@@ -117,7 +117,7 @@
 %
 % \begin{function}[TF]{\pdfmeta_standard_verify:nn}
 % \begin{syntax}
-% \cs{pdfmeta_standard_verify:nn}\Arg{requirement}\Arg{value}
+% \cs{pdfmeta_standard_verify:nnTF} \Arg{requirement} \Arg{value} \Arg{true code} \Arg{false code}
 % \end{syntax}
 %
 % This checks if \meta{requirement} is listed in the standard,
@@ -136,7 +136,7 @@
 %
 % \begin{function}[EXP]{\pdfmeta_standard_item:n}
 % \begin{syntax}
-% \cs{pdfmeta_standard_item:n}\Arg{requirement}
+% \cs{pdfmeta_standard_item:n} \Arg{requirement}
 % \end{syntax}
 % This retrieves the value of \meta{requirement} and leaves it in the input.
 % If the requirement isn't in the standard the result is empty,
@@ -147,13 +147,13 @@
 %
 % \begin{function}{\pdfmeta_standard_get:nN}
 % \begin{syntax}
-% \cs{pdfmeta_standard_get:nN}\Arg{requirement} \meta{tl var}
+% \cs{pdfmeta_standard_get:nN} \Arg{requirement} \meta{tl var}
 % \end{syntax}
 % This retrieves the value of \meta{requirement} and stores
-% it in the \meta{token list variable}.
+% it in the \meta{tl var}.
 % If the \meta{requirement} is not found the special
 % value |\q_no_value| is used.
-% The  \meta{token list variable} is assigned locally.
+% The  \meta{tl var} is assigned locally.
 % \end{function}
 %
 %
@@ -593,14 +593,14 @@
 %
 % \begin{function}{\pdfmeta_xmp_add:n}
 % \begin{syntax}
-% \cs{pdfmeta_xmp_add:n}\Arg{XML}
+% \cs{pdfmeta_xmp_add:n} \Arg{XML}
 % \end{syntax}
 % With this command additional XML code can be added to the Metadata.
 % The content is added unchanged, and not sanitized.
 % \end{function}
 % \begin{function}{\pdfmeta_xmp_xmlns_new:nn}
 % \begin{syntax}
-% \cs{pdfmeta_xmp_xmlns_new:nn}\Arg{prefix}\Arg{uri}
+% \cs{pdfmeta_xmp_xmlns_new:nn} \Arg{prefix} \Arg{uri}
 % \end{syntax}
 % With this command a xmlns name space can be added. The \meta{uri}
 % argument is expanded, a hash can be input with |\c_hash_str|.
@@ -610,7 +610,7 @@
 % (see \url{https://pdfa.org/wp-content/uploads/2019/09/PDF-Declarations.pdf}).
 % \begin{function}{\pdfmeta_xmp_add_declaration:n,\pdfmeta_xmp_add_declaration:e}
 % \begin{syntax}
-% \cs{pdfmeta_xmp_add_declaration:n}\Arg{uri}
+% \cs{pdfmeta_xmp_add_declaration:n} \Arg{uri}
 % \end{syntax}
 % This add a PDF declaration with the required |conformsTo| property to the XMP metadata.
 % \meta{uri} should not be empty and is a URI specifying
@@ -623,7 +623,8 @@
 %  \pdfmeta_xmp_add_declaration:ennnn,
 %  \pdfmeta_xmp_add_declaration:eeenn}
 % \begin{syntax}
-% \cs{pdfmeta_xmp_add_declaration:nnnnn}\Arg{uri}\Arg{By}\Arg{Date}\Arg{Credentials}\Arg{Report}
+% \cs{pdfmeta_xmp_add_declaration:nnnnn} \\
+% ~~~~\Arg{uri} \Arg{By} \Arg{Date} \Arg{Credentials} \Arg{Report}
 % \end{syntax}
 % This add a PDF declaration to the XMP metadata similar
 % to \cs{pdfmeta_xmp_add_declaration:n}.
@@ -641,7 +642,7 @@
 %
 % \begin{function}{\pdfmeta_xmp_schema_new:nnn}
 % \begin{syntax}
-% \cs{pdfmeta_xmp_schema_new:nnn}\Arg{text}\Arg{prefix}\Arg{uri}
+% \cs{pdfmeta_xmp_schema_new:nnn} \Arg{text} \Arg{prefix} \Arg{uri}
 % \end{syntax}
 % \meta{text} is some string describing the schema, e.g. |PDF/A~Identification~Schema|,
 % \meta{prefix} is the unique prefix used by the schema. This prefix
@@ -653,7 +654,8 @@
 
 % \begin{function}{\pdfmeta_xmp_property_new:nnnnn}
 % \begin{syntax}
-% \cs{pdfmeta_xmp_property_new:nnnnn}\Arg{schema prefix}\Arg{name}\Arg{type}\Arg{category}\Arg{description}
+% \cs{pdfmeta_xmp_property_new:nnnnn} \Arg{schema prefix} \\
+% ~~~~\Arg{name} \Arg{type} \Arg{category} \Arg{description}
 % \end{syntax}
 % If the new property already exists in the schema
 % (as identified by the combination of \meta{schema prefix}

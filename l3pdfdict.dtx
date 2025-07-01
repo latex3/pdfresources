@@ -93,8 +93,8 @@
 % \begin{function}[added = 2020-06-16,updated = 2020-12-03]
 %   {\pdfdict_set_eq:nn,\pdfdict_gset_eq:nn}
 %   \begin{syntax}
-%     \cs{pdfdict_set_eq:nn}  \Arg{local dictionary name_1} \Arg{dictionary name_2}\\
-%     \cs{pdfdict_gset_eq:nn} \Arg{global dictionary name_1}\Arg{dictionary name_2}
+%     \cs{pdfdict_set_eq:nn}  \Arg{local dictionary name_1}  \Arg{dictionary name_2}\\
+%     \cs{pdfdict_gset_eq:nn} \Arg{global dictionary name_1} \Arg{dictionary name_2}
 %   \end{syntax}
 % This functions copy \meta{dictionary name_2} into
 % \meta{local/global dictionary name_1} locally or globally. If the
@@ -103,7 +103,10 @@
 % \end{function}
 %
 % \begin{function}[added = 2020-04-06]
-%   {\pdfdict_put:nnn, \pdfdict_gput:nnn,\pdfdict_gput:nee}
+%   {
+%     \pdfdict_put:nnn,\pdfdict_put:nne,\pdfdict_put:nee,
+%     \pdfdict_gput:nnn,\pdfdict_gput:nne,\pdfdict_gput:nee
+%   }
 %   \begin{syntax}
 %     \cs{pdfdict_put:nnn}  \Arg{local dictionary}  \Arg{name} \Arg{value} \\
 %     \cs{pdfdict_gput:nnn} \Arg{global dictionary} \Arg{name} \Arg{value}
@@ -174,13 +177,13 @@
 % \begin{function}[added = 2020-07-06]
 %   {\pdfdict_get:nnN }
 %   \begin{syntax}
-%     \cs{pdfdict_get:nnN} \Arg{dictionary}  \Arg{name} \meta{tl var}
+%     \cs{pdfdict_get:nnN} \Arg{dictionary} \Arg{name} \meta{tl var}
 %   \end{syntax}
 %   Recovers the \meta{value} stored by \cs{pdfdict_put:nnn} or
 %   \cs{pdfdict_gput:nnn}
 %   for \meta{name} and places this in the \meta{token list
 %   variable}. If \meta{name} is not found
-%   then the \meta{token list variable} is set
+%   then the \meta{tl var} is set
 %   to the special marker \cs{q_no_value}. \meta{name} is first converted
 %   with \cs{str_convert_pdfname:n}.  The \meta{token list
 %   variable} is set within the current \TeX{} group.
