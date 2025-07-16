@@ -9,6 +9,7 @@ this project uses date-based 'snapshot' version identifiers.
 
 ### Fixed
  - load pdfmanagement-firstaid in pdfmanagement.sty after backend has been set.
+ - use \draw_set_linewidth:n instead of \draw_linewidth:n in pushbutton code.
 
 ## [2025-06-29]
 
