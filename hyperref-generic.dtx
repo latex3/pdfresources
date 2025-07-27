@@ -3399,7 +3399,7 @@
        \pdf_version_compare:NnTF > {1.6}
          {
            \pdfmanagement_add:nnn {Catalog / ViewerPreferences }
-             { PrintDuplex } { /#1 }
+             { Duplex } { /#1 }
          }
          {
            \msg_warning:nnee
@@ -3411,7 +3411,7 @@
      }%
    ,pdfduplex /  .code:n =
      {
-       \pdfmanagement_remove:nn {Catalog / ViewerPreferences } { PrintDuplex }
+       \pdfmanagement_remove:nn {Catalog / ViewerPreferences } { Duplex }
      }
    ,pdfduplex / unknown .code:n =
      {
