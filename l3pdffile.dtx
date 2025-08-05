@@ -392,11 +392,16 @@
 % \begin{variable} {\g_pdffile_embed_prop}
 % This property holds a list of embedded files. It is used by the following
 % show command. The keys are the object names, the argument holds a key word,
-% the source file name and the target file name.
+% the source file name and the target file name. It stores a file only if the 
+% boolean \cs{l_pdffile_embed_show_bool} is true when the file is embedded.
 % \end{variable}
-%
+% \begin{variable} {\l_pdffile_embed_show_bool}
+% This boolean is used to decided if a file should be stored in the
+% property or not. As storing can be slow if there are many files, it is false by 
+% default.
+% \end{variable}
 % \begin{function}{\pdffile_embed_show:}
-% This shows the embedded files with their source and target name.
+% This shows the stored embedded files with their source and target name.
 % \end{function}
 %
 % \subsection{Example}
@@ -577,13 +582,14 @@
   {AFRelationship} { /Unspecified }
 
 %    \end{macrocode}
-% \begin{variable}{\g_pdffile_embed_prop}
+% \begin{variable}{\g_pdffile_embed_prop,\l_pdffile_embed_show_bool}
 % we record here the relation\\%
 % \meta{object name} $\Rightarrow$
 %  \Arg{file/stream or empty}\Arg{sourcename}\Arg{targetname}
-%
+%  if the boolean is true%
 %    \begin{macrocode}
-\prop_new:N \g_pdffile_embed_prop
+\prop_new_linked:N \g_pdffile_embed_prop
+\bool_new:N \l_pdffile_embed_show_bool
 %    \end{macrocode}
 % \end{variable}
 % \begin{macro}{\pdffile_embed_show:}
@@ -786,18 +792,21 @@
               }
 
            }
-        \prop_gput:Nne
-           \g_pdffile_embed_prop
-           { #3 }
-           {
-             { \tl_if_blank:nTF { #1 } {filespec}{file} }
-             {\l_pdffile_source_name_str}
-             {
-               \tl_if_blank:nTF { #2 }
-                 { \l_pdffile_source_name_str }
-                 { \tl_to_str:n{#2}}
-             }
-           }
+        \bool_if:NT\l_pdffile_embed_show_bool   
+         {
+           \prop_gput:Nne
+              \g_pdffile_embed_prop
+              { #3 }
+              {
+                { \tl_if_blank:nTF { #1 } {filespec}{file} }
+                {\l_pdffile_source_name_str}
+                {
+                  \tl_if_blank:nTF { #2 }
+                    { \l_pdffile_source_name_str }
+                    { \tl_to_str:n{#2}}
+                }
+              }
+          } 
         \tl_if_blank:nTF { #2 }
           {
             \pdf_object_new:n   { #3 }
@@ -832,10 +841,13 @@
          \msg_error:nnn { pdffile }{ object-exists } { #3 }
       }
       {
-         \prop_gput:Nne
-            \g_pdffile_embed_prop
-            { #3 }
-            {{stream}{}{\tl_if_blank:nTF {#2}{stream.txt}{\exp_not:n{#2}}}}
+        \bool_if:NT\l_pdffile_embed_show_bool
+         {
+           \prop_gput:Nne
+              \g_pdffile_embed_prop
+              { #3 }
+              {{stream}{}{\tl_if_blank:nTF {#2}{stream.txt}{\exp_not:n{#2}}}}
+         }   
          \tl_if_blank:nTF {#2}
           { \@@_mimetype_set:nNN {stream.txt}\l_@@_automimetype_tl \l_@@_tmpa_tl}
           { \@@_mimetype_set:nNN { #2 } \l_@@_automimetype_tl \l_@@_tmpa_tl }
@@ -870,10 +882,13 @@
          { \tl_if_blank:nTF {#2}{stream.txt}{\exp_not:n{#2}} }
          {\l_@@_embed_ref_tl}
          #3
-     \prop_gput:Nee
-        \g_pdffile_embed_prop
-        { #3 }
-        {{stream}{}{\tl_if_blank:nTF {#2}{stream.txt}{\exp_not:n{#2}}}}
+     \bool_if:NT \l_pdffile_embed_show_bool    
+      {
+        \prop_gput:Nee
+           \g_pdffile_embed_prop
+           { #3 }
+           {{stream}{}{\tl_if_blank:nTF {#2}{stream.txt}{\exp_not:n{#2}}}}
+      }  
   }
 
 
