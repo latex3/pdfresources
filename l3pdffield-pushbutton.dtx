@@ -57,7 +57,7 @@
 %    }^^A
 % }
 %
-% \date{Version 0.96t, released 2025-06-29}
+% \date{Version 0.96u, released 2025-07-15}
 %
 % \maketitle
 % \begin{documentation}
@@ -440,7 +440,8 @@
 \color_set:nn {pdffield/push/bordertop}{yellow!5!white}
 \color_set:nn {pdffield/push/borderbot}{black!50!white}
 \color_set:nn {pdffield/push/fill}{black!20!white}
-
+\cs_if_exist:NF \draw_set_linewidth:n 
+ { \cs_set_eq:NN\draw_set_linewidth:n \draw_linewidth:n }
 \cs_new_protected:Npn \@@_pushbutton_default_appearances:
   {
      \int_gincr:N \g_@@_pushbutton_cnt_int
@@ -451,7 +452,7 @@
          \color_set:nn {pdffield/push/text}{.}
          \dim_set:Nn \l_@@_pushbutton_totalht_dim
            {\l_@@_annot_ht_dim + \l_@@_annot_dp_dim}
-         \draw_linewidth:n {\l_@@_pushbutton_linewidth_dim}
+         \draw_set_linewidth:n {\l_@@_pushbutton_linewidth_dim}
          \draw_path_rectangle_corners:nn
             {0.5\l_@@_pushbutton_linewidth_dim,0.5\l_@@_pushbutton_linewidth_dim}
             {
@@ -525,7 +526,7 @@
          \draw_begin:
          \dim_set:Nn \l_@@_pushbutton_totalht_dim
            {\l_@@_annot_ht_dim + \l_@@_annot_dp_dim}
-         \draw_linewidth:n {\l_@@_pushbutton_linewidth_dim}
+         \draw_set_linewidth:n {\l_@@_pushbutton_linewidth_dim}
          \draw_path_rectangle_corners:nn
             {0.5\l_@@_pushbutton_linewidth_dim,0.5\l_@@_pushbutton_linewidth_dim}
             {
@@ -599,7 +600,7 @@
          \draw_begin:
          \dim_set:Nn \l_@@_pushbutton_totalht_dim
            {\l_@@_annot_ht_dim + \l_@@_annot_dp_dim}
-         \draw_linewidth:n {\l_@@_pushbutton_linewidth_dim}
+         \draw_set_linewidth:n {\l_@@_pushbutton_linewidth_dim}
          \draw_path_rectangle_corners:nn
             {0.5\l_@@_pushbutton_linewidth_dim,0.5\l_@@_pushbutton_linewidth_dim}
             {

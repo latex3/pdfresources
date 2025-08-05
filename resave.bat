@@ -1,5 +1,1 @@
-  l3build save tag-checkbox
-  l3build save -c config-luatex structure-destination a4-embedtest
-  l3build save -c config-dvips structure-destination
-  l3build save -c config-pdftex structure-destination
-  l3build save -c config-xetex structure-destination
+l3build check --show-saves -c config-xetex stop-link linkhook metadata-newpage calculate-textfield catalogAF structure-destination

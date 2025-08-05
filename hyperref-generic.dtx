@@ -83,7 +83,7 @@
 %    }^^A
 % }
 %
-% \date{Version 0.96t, released 2025-06-29}
+% \date{Version 0.96u, released 2025-07-15}
 %
 % \maketitle
 % \begin{documentation}
@@ -967,14 +967,14 @@
 %    \end{macrocode}
 %    \begin{macrocode}
 %<*headertestphase>
-\ProvidesFile{hgeneric-testphase.def}[2025-06-29 v0.96t %
+\ProvidesFile{hgeneric-testphase.def}[2025-07-15 v0.96u %
   generic Hyperref driver for the LaTeX PDF management bundle]
 %</headertestphase>  
 %    \end{macrocode}
 %
 %    \begin{macrocode}
 %<*header>
-\ProvidesFile{hgeneric.def}[2025-06-29 v0.96t %
+\ProvidesFile{hgeneric.def}[2025-07-15 v0.96u %
   generic Hyperref driver for the LaTeX PDF management bundle]
 %</header>  
 %    \end{macrocode}
@@ -3399,7 +3399,7 @@
        \pdf_version_compare:NnTF > {1.6}
          {
            \pdfmanagement_add:nnn {Catalog / ViewerPreferences }
-             { PrintDuplex } { /#1 }
+             { Duplex } { /#1 }
          }
          {
            \msg_warning:nnee
@@ -3411,7 +3411,7 @@
      }%
    ,pdfduplex /  .code:n =
      {
-       \pdfmanagement_remove:nn {Catalog / ViewerPreferences } { PrintDuplex }
+       \pdfmanagement_remove:nn {Catalog / ViewerPreferences } { Duplex }
      }
    ,pdfduplex / unknown .code:n =
      {

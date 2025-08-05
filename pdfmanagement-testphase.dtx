@@ -50,7 +50,7 @@
 %    }^^A
 % }
 %
-% \date{Version 0.96t, released 2025-06-29}
+% \date{Version 0.96u, released 2025-07-15}
 %
 % \maketitle
 % \begin{documentation}
@@ -386,7 +386,7 @@
 %    \begin{macrocode}
 %<@@=pdfmanagement>
 %<*package>
-\ProvidesExplPackage{pdfmanagement-testphase}{2025-06-29}{0.96t}
+\ProvidesExplPackage{pdfmanagement-testphase}{2025-07-15}{0.96u}
   {LaTeX PDF management bundle}
 
 \DeclareOption { debug }
@@ -399,7 +399,7 @@
 %    \end{macrocode}
 %<*standalone>
 %    \begin{macrocode}
-\ProvidesExplPackage{pdfmanagement}{2025-06-29}{0.96t}
+\ProvidesExplPackage{pdfmanagement}{2025-07-15}{0.96u}
   {LaTeX PDF management bundle}
 %    \end{macrocode}
 % The only package option is for the backend. Other options can be
@@ -434,7 +434,7 @@
 
 \RequirePackage{tagpdf-base}
 \input{pdfmanagement.ltx}
-\RequirePackage{pdfmanagement-firstaid}
+
 
 %    \end{macrocode}
 % These keys are only defined in documentmetadata-support, so need to be copied:
@@ -476,7 +476,12 @@
     \sys_ensure_backend:
   } 
 \file_input:n {l3backend-testphase-\c_sys_backend_str.def}
-\hook_use_once:n {pdfmanagement/add}           
+\hook_use_once:n {pdfmanagement/add} 
+%    \end{macrocode}
+% firstaid should be loaded only after the backend has been set as
+% it can contain backend dependant code.
+%    \begin{macrocode}
+\RequirePackage{pdfmanagement-firstaid}     
 %</standalone>
 %    \end{macrocode}
 %
@@ -485,7 +490,7 @@
 % to allow to set it in the document.
 %    \begin{macrocode}
 %<*header>
-\ProvidesExplFile{pdfmanagement.ltx}{2025-06-29}{0.96t}
+\ProvidesExplFile{pdfmanagement.ltx}{2025-07-15}{0.96u}
   {PDF~management~code}
 %</header>  
 %    \end{macrocode}
