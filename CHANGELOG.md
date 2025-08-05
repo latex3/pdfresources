@@ -5,27 +5,31 @@ first release 0.95a, 2021-02-23 will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 this project uses date-based 'snapshot' version identifiers.
 
-## [Unreleased]
-## Changed
- - make storing files for \pdffile_embed_show: optional, issue #96
+## [2025-08-05]
+Version: 2025-08-05 v0.96v
+
+### Changed
+ - make storing files for \pdffile_embed_show: optional to improve speed, issue #96
 
 ### Fixed
   - hyperref-generic: correct key, PrintDuplex should be Duplex.
   
 ## [2025-07-15]
+Version: 2025-07-15 v0.96u
 
 ### Fixed
  - load pdfmanagement-firstaid in pdfmanagement.sty after backend has been set.
  - use \draw_set_linewidth:n instead of \draw_linewidth:n in pushbutton code.
->>>>>>> 3469e73f740639c61fc3425eabfae82d14f3f0be
 
 ## [2025-06-29]
+Version: 2025-06-29 v0.96t
 
 ### Fixed
  - faulty @@-expansion in hyperref-generic
  - dc:title and dc:creator handling, issue #92
  
 ## [2025-06-23]
+Version: 2025-06-23 v0.96s
 
 ### Fixed
  - l3pdffield-radiobutton:
@@ -55,6 +59,7 @@ this project uses date-based 'snapshot' version identifiers.
  - new package l3pdffield that replaces l3pdffield-testphase
     
 ## [2025-05-15]
+Version: 2025-05-15 v0.96r
 
 ### Fixed
  - set omit_CID in pdf/UA-1
