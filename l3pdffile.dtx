@@ -264,7 +264,7 @@
 % \end{table}
 % \begin{function}{\pdffile_embed_file:nnn}
 %   \begin{syntax}
-%     \cs{pdffile_embed_file:nnn} \Arg{source filename} \Arg{target filename} \Arg{object name }
+%     \cs{pdffile_embed_file:nnn} \Arg{source filename} \Arg{target filename} \Arg{object name}
 %   \end{syntax}
 %   This commands embeds the file \meta{source filename} in the PDF,
 %   and creates a |/Filespec| dictionary object named \meta{object name}.
@@ -308,7 +308,7 @@
 % \begin{function}{\pdffile_embed_stream:nnn,\pdffile_embed_stream:nnN}
 %   \begin{syntax}
 %     \cs{pdffile_embed_stream:nnn} \Arg{content} \Arg{target filename} \Arg{object name}\\
-%     \cs{pdffile_embed_stream:nnN} \Arg{content} \Arg{target filename} \Arg{tl var}
+%     \cs{pdffile_embed_stream:nnN} \Arg{content} \Arg{target filename} \meta{tl var}
 %   \end{syntax}
 %   This commands embeds the \meta{content} in the PDF in a stream objects and
 %   creates either a |/Filespec| dictionary object named \meta{object name}, or stores
@@ -334,7 +334,7 @@
 %
 % \begin{function}{\pdffile_filespec:nnn,\pdffile_filespec:nne}
 %   \begin{syntax}
-%     \cs{ pdffile_filespec:nnn }\Arg{object name}\Arg{file name}{stream object reference}
+%     \cs{ pdffile_filespec:nnn }\Arg{object name} \Arg{file name} \Arg{stream object reference}
 %   \end{syntax}
 %  The previous commands are fine if stream and filespec dictionary can be created together.
 %  But there are cases where the |filespec| dictionary should be referenced when the
@@ -377,11 +377,11 @@
 % as |.pdf| increase the first integer.
 %
 % |\pdffile_filespec:nnn| does \emph{not} increase the integers,
-% if this command is used it lies in the responsability of the
+% if this command is used it lies in the responsibility of the
 % author to adjust the integers.
 %
-% The integers are public so that user
-% can query and adjust the values, e.g. in tests for a standard compliancy.
+% The integers are public so that users
+% can query and adjust the values, e.g. in tests for standard compliance.
 % \end{variable}
 %
 % \begin{variable}{\l_pdffile_source_name_str}
@@ -531,11 +531,11 @@
 % as |.pdf| increase the first integer.
 %
 % |\pdffile_filespec:nnn| does \emph{not} increase the integers,
-% if this command is used it lies in the responsability of the
+% if this command is used it lies in the responsibility of the
 % author to adjust the integers.
 %
-% The integers are public so that user
-% can query and adjust the values, e.g. in tests for a standard compliancy.
+% The integers are public so that users
+% can query and adjust the values, e.g. in tests for standard compliance.
 %    \begin{macrocode}
 \int_new:N\g_pdffile_embed_pdfa_int
 \int_new:N\g_pdffile_embed_nonpdfa_int
