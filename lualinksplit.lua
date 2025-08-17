@@ -181,7 +181,7 @@ local function pop_link(linkstacks, linkstate, level, head, node)
       else
         free(node)
       end
-      tex.error(string.format("Link startet on level %i ended on level %i", top.level, level))
+      tex.error(string.format("Link started on level %i ended on level %i", top.level, level))
     end
     free(top.node_template)
     stack[link_count] = nil

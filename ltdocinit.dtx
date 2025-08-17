@@ -93,7 +93,7 @@
 % \begin{function}[updated=2025-06-21]{\GetDocumentProperty,\pdfmanagement_get_documentproperty:n}
 % \begin{syntax}
 %  \cs{GetDocumentProperty}\Arg{label/property}\\
-%  \cs{pdfmanagement_get_documentproperty:n}\Arg{label/property}
+%  \cs{pdfmanagement_get_documentproperty:n} \Arg{label/property}
 % \end{syntax}
 % Expands to the \meta{value} corresponding to \meta{label/property}
 % in the container. If \meta{label/property} is missing,
@@ -102,25 +102,25 @@
 % that the \meta{value} does not expand further
 % when appearing in an x-type argument expansion.
 % The older names \cs{GetDocumentProperties} and \cs{pdfmanagement_get_documentproperties:n}
-% are still provided for compability. 
+% are still provided for compatibility. 
 % \end{function}
 %
 % \begin{function}[updated=2025-06-21,TF]{\pdfmanagement_get_documentproperty:nN}
 % \begin{syntax}
-%  \cs{pdfmanagement_get_documentproperty:nNTF}\Arg{label/property} \meta{token list variable}\\
+%  \cs{pdfmanagement_get_documentproperty:nNTF} \Arg{label/property} \meta{tl var}\\
 %  ~~~~ \Arg{true code} \Arg{false code}
 % \end{syntax}
 %   If the \meta{label/property} is not present in the document properties
 %   container, leaves the \meta{false code} in the input stream.
 %   The value of the
-%   \meta{token list variable} is not defined in this case and should
+%   \meta{tl var} is not defined in this case and should
 %   not be relied upon.  If the \meta{label/property} is present in the
 %   container, stores the corresponding \meta{value} in the
-%   \meta{token list variable} without removing it from the
+%   \meta{tl var} without removing it from the
 %   container, then leaves the \meta{true code} in the input
-%   stream.  The \meta{token list variable} is assigned locally.
+%   stream.  The \meta{tl var} is assigned locally.
 %   The older name \cs{pdfmanagement_get_documentproperty:nN}
-%   is still provided for compability. 
+%   is still provided for compatibility. 
 % \end{function}
 %
 % \begin{function}{\ShowDocumentProperties,\LogDocumentProperties}
