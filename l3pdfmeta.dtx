@@ -170,7 +170,8 @@
 %  reference it in a /Outputintent and that all output intents reference
 %  the same colorprofile. The value stores the subtype.
 %  {\em This requirement is detected and fulfilled by \pkg{l3pdfmeta} if the
-%   provided interface in \cs{DocumentMetadata} is used, see below}.
+%   provided interface in \cs{DocumentMetadata} or \verb+\SetKeys[document/metadata]+ 
+%   is used, see below}.
 %
 % \item[|annot_flags|] in annotations the |Print| flag should be true,
 %  |Hidden|, |Invisible|, |NoView| should be false.
@@ -243,7 +244,8 @@
 %  As PDF A-1 is based on PDF 1.4 and PDF A-2 and A-3 are based
 %  on PDF 1.7 \pkg{l3pdfmeta} also sets these versions also as requirements.
 %  These requirements are checked by \pkg{l3pdfmeta} when the version is set with
-%  \cs{DocumentMetadata} and a warning is issued (but the version is
+%  \cs{DocumentMetadata} or \verb+\SetKeys[document/metadata]+ 
+%  and a warning is issued (but the version is
 %  not changed). More checks are only needed if the version is changed later.
 %
 %
@@ -254,7 +256,8 @@
 %  PDF 2.0 leads to a failure in a validator like verapdf so the maximal
 %  version should be PDF 1.7.
 %  This requirement is checked by \pkg{l3pdfmeta} when the version is set with
-%  \cs{DocumentMetadata} and a warning is issued (but the version is
+%  \cs{DocumentMetadata} or \verb+\SetKeys[document/metadata]+ 
+%  and a warning is issued (but the version is
 %  not changed). More checks are only needed if the version is changed later.
 %
 % \item[|named_actions|]    this requirement restricts the list of
@@ -322,6 +325,23 @@
 %
 %    }
 % \end{verbatim}
+% 
+% or
+% \begin{verbatim}
+%  \RequirePackage{pdfmanagement}
+%  \Setkeys[document/metadata]
+%    {
+%      %other options for example pdfstandard
+%       colorprofiles=
+%        {
+%          A = sRGB.icc, %or a or longer GTS_PDFA1 = sRGB.icc
+%          X = FOGRA39L_coated.icc, % or x or longer GTS_PDFX
+%          ISO_PDFE1 = whatever.icc
+%        }
+%
+%    }
+% \end{verbatim}
+ 
 %
 % |sRGB.icc| and |FOGRA39L_coated.icc| (from the \pkg{colorprofiles} package
 % are predefined and will work directly\footnote{The \texttt{dvips} route
@@ -338,7 +358,7 @@
 % color profile, the setting is changed to the equivalent of
 %
 % \begin{verbatim}
-%  \DocumentMetadata
+%  \SetKeys[document/metadata]
 %    {
 %      %other options
 %       pdfstandard=A-2b,
