@@ -671,31 +671,18 @@
 %
 %\subsection{Creating the field}
 % We need to retrieve the index of the default through a
-% label, so we need an ref attribute or with newer LaTeX
-% a property:
+% label, so we need a property:
 %
 %    \begin{macrocode}
-\cs_if_exist:NTF \property_new:nnnn
- {
-   \property_new:nnnn {pdfradioindex}{now}
-     {0}
-     {
-       \int_use:N\l_@@_radio_value_num_int
-     }
-   \cs_new_eq:NN \@@_property_record:nn \property_record:nn
-   \cs_new_eq:NN \@@_property_ref:nn    \property_ref:nn  
- }
- {
-   \ref_attribute_gset:nnnn {pdfradioindex}{0}{now}
-    {
-     \int_use:N\l_@@_radio_value_num_int
-    }
-   \cs_new_eq:NN \@@_property_record:nn \ref_label:nn
-   \cs_new_eq:NN \@@_property_ref:nn    \ref_value:nn  
- } 
- 
- \cs_generate_variant:Nn \@@_property_record:nn {V}
- \cs_generate_variant:Nn \@@_property_ref:nn {V}
+
+\property_new:nnnn {pdfradioindex}{now}
+  {0}
+  {
+    \int_use:N\l_@@_radio_value_num_int
+  }
+
+\cs_generate_variant:Nn \property_record:nn {V}
+\cs_generate_variant:Nn \property_ref:nn {V}
   
 %    \end{macrocode}
 % A field should be created if the name doesn't exist yet
@@ -721,8 +708,8 @@
 %    \end{macrocode}
 % The default value is retrieved through a label:
 %    \begin{macrocode}
-        \pdfdict_put:nne { l_@@/field }{V}  { /\@@_property_ref:nn{#1}{pdfradioindex} }
-        \pdfdict_put:nne { l_@@/field }{DV} { /\@@_property_ref:nn{#1}{pdfradioindex} }
+        \pdfdict_put:nne { l_@@/field }{V}  { /\property_ref:nn{#1}{pdfradioindex} }
+        \pdfdict_put:nne { l_@@/field }{DV} { /\property_ref:nn{#1}{pdfradioindex} }
 %    \end{macrocode}
 % now we create the field and set it as parent for the following annotation.
 %    \begin{macrocode}
@@ -821,7 +808,7 @@
      \bool_if:NT\l_@@_radio_default_bool
       {
         \mode_leave_vertical:
-        \@@_property_record:Vn\l_@@_fieldID_tl{pdfradioindex}
+        \property_record:Vn\l_@@_fieldID_tl{pdfradioindex}
       }
 
 %    \end{macrocode}
@@ -829,9 +816,9 @@
 %    \begin{macrocode}
    \int_compare:nNnTF { \l_@@_radio_value_num_int } =
        {
-         \@@_property_ref:Vn\l_@@_fieldID_tl{pdfradioindex}
+         \property_ref:Vn\l_@@_fieldID_tl{pdfradioindex}
        }
-     { \pdfannot_dict_put:nne {widget}{AS}{/\@@_property_ref:Vn\l_@@_fieldID_tl{pdfradioindex}} }
+     { \pdfannot_dict_put:nne {widget}{AS}{/\property_ref:Vn\l_@@_fieldID_tl{pdfradioindex}} }
      { \pdfannot_dict_put:nne {widget}{AS}{/Off} }
 %    \end{macrocode}
 % Now we set the appearances, if no key has been use we take the default.
