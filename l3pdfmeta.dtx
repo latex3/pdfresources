@@ -902,7 +902,7 @@
      { \__pdf_backend_omit_cidset:n {1} }
     \pdfmeta_standard_verify:nnF { min_pdf_version }
      { \pdf_version: }
-     { \msg_error:nneee {pdf}{wrong-pdfversion}
+     { \msg_warning:nneee {pdf}{wrong-pdfversion} %TODO make error
        {\pdf_version:}{low}
        {
         \pdfmeta_standard_item:n{type}
@@ -912,7 +912,7 @@
      }
     \pdfmeta_standard_verify:nnF { max_pdf_version }
      { \pdf_version: }
-     { \msg_error:nneee {pdf}{wrong-pdfversion}
+     { \msg_warning:nneee {pdf}{wrong-pdfversion}
        {\pdf_version:}{high}
        {
         \pdfmeta_standard_item:n{type}
@@ -1561,7 +1561,7 @@
          \prop_gput:Nnn \g__pdfmeta_standard_prop {omit_CID}{}
          \pdf_version_compare:NnF < {2.0}
            {
-             \msg_error:nneee
+             \msg_warning:nneee %TODO make an error
               {pdf}{wrong-pdfversion}
               {\pdf_version:}{high}{UA-1}
            }
@@ -1591,7 +1591,7 @@
          \@@_xmp_wtpdf_reuse_declaration:
          \pdf_version_compare:NnT < {2.0}
            {
-             \msg_error:nneee
+             \msg_warning:nneee %TODO make an error
               {pdf}{wrong-pdfversion}
               {\pdf_version:}{low}{UA-2}
            }
