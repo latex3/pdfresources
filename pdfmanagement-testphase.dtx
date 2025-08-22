@@ -85,6 +85,19 @@
 %  to set a special backend like \texttt{dvipdfmx}. It will do nothing if the backend
 %  code has already been loaded. 
 %  
+%  Other options, e.g., the PDF standard or the PDF version should then be set with a \cs{SetKeys} command:
+%  
+%  \begin{verbatim}
+%  \RequirePackage{pdfmanagement}
+%  \SetKeys[document/metadata]
+%    {
+%      pdfversion=2.0,
+%      lang=de,
+%      xmp=false,
+%      ...
+%    }  
+%  \end{verbatim}
+%  
 %  Note that PDF management should be loaded as early as possible. 
 %
 %

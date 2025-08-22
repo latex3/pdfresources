@@ -170,7 +170,7 @@
 %  reference it in a /Outputintent and that all output intents reference
 %  the same colorprofile. The value stores the subtype.
 %  {\em This requirement is detected and fulfilled by \pkg{l3pdfmeta} if the
-%   provided interface in \cs{DocumentMetadata} or \verb+\SetKeys[document/metadata]+ 
+%   provided interface in \cs{DocumentMetadata} or \verb+\SetKeys[document/metadata]+
 %   is used, see below}.
 %
 % \item[|annot_flags|] in annotations the |Print| flag should be true,
@@ -243,10 +243,12 @@
 %  a validator like verapdf: The A-4 standard should use PDF 2.0.
 %  As PDF A-1 is based on PDF 1.4 and PDF A-2 and A-3 are based
 %  on PDF 1.7 \pkg{l3pdfmeta} also sets these versions also as requirements.
-%  These requirements are checked by \pkg{l3pdfmeta} when the version is set with
-%  \cs{DocumentMetadata} or \verb+\SetKeys[document/metadata]+ 
-%  and a warning is issued (but the version is
-%  not changed). More checks are only needed if the version is changed later.
+%  UA-2 requires PDF 2.0.
+%  These requirements are checked by \pkg{l3pdfmeta} when the standard is set with
+%  \cs{DocumentMetadata} or \verb+\SetKeys[document/metadata]+
+%  and the version is if needed changed. At the begin of the document another
+%  check is done and error is issued if the version doesn't fit as this means that
+%  the document has used conflicting standard and version setting.
 %
 %
 % \item[|max_pdf_version|]  stores the maximal PDF version.
@@ -255,10 +257,11 @@
 %  The check is currently relevant only for the A-1 to A-3 standards:
 %  PDF 2.0 leads to a failure in a validator like verapdf so the maximal
 %  version should be PDF 1.7.
-%  This requirement is checked by \pkg{l3pdfmeta} when the version is set with
-%  \cs{DocumentMetadata} or \verb+\SetKeys[document/metadata]+ 
-%  and a warning is issued (but the version is
-%  not changed). More checks are only needed if the version is changed later.
+%  These requirements are checked by \pkg{l3pdfmeta} when the standard is set with
+%  \cs{DocumentMetadata} or \verb+\SetKeys[document/metadata]+
+%  and the version is if needed changed. At the begin of the document another
+%  check is done and error is issued if the version doesn't fit as this means that
+%  the document has used conflicting standard and version setting.
 %
 % \item[|named_actions|]    this requirement restricts the list of
 % allowed named actions to |NextPage|, |PrevPage|, |FirstPage|, |LastPage|.
@@ -338,7 +341,7 @@
 %        }
 %
 %    }
-% \end{verbatim} 
+% \end{verbatim}
 %
 % |sRGB.icc| and |FOGRA39L_coated.icc| (from the \pkg{colorprofiles} package
 % are predefined and will work directly\footnote{The \texttt{dvips} route
@@ -435,7 +438,7 @@
 % \DocumentMetadata{debug={xmp-export=true}}
 % %or
 % \DocumentMetadata{debug={xmp-export=filename}}
-% %or  
+% %or
 % \SetKeys[document/metadata]{debug={xmp-export}}
 % \end{verbatim}
 %
@@ -480,7 +483,7 @@
 %
 % The \pkg{hyperxmp}/\pkg{hyperref} keys |pdfapart|, |pdfaconformance|, |pdfuapart|,
 % |pdfxstandard| and |pdfa| are ignored by this code. Standards must be set with the
-% |pdfstandard| key of |\DocumentMetadata| or |\SetKeys[document/metadata]|. 
+% |pdfstandard| key of |\DocumentMetadata| or |\SetKeys[document/metadata]|.
 % This key can be used more than once,
 % e.g. \\
 % |pdfstandard=A-2b,pdfstandard=X-4,pdfstandard=UA-1|.
@@ -570,7 +573,7 @@
 % (as the pdfmanagement gives the |/Lang| entry in the catalog a default value)
 % This language can be changed with the key |lang| of |\DocumentMetadata| and |\SetKeys[document/metadata]|.
 % This is the preferred method. \pkg{babel} will look for this value and
-% adjust its language settings. 
+% adjust its language settings.
 % The \pkg{hyperref} key |pdflang| is also honored. Its value should be a
 % simple language tag like |de| or |de-DE|.
 %
@@ -708,7 +711,9 @@
 % Message for not fitting pdf version
 %    \begin{macrocode}
 \msg_new:nnn  {pdf }{wrong-pdfversion}
-  {PDF~version~#1~is~too~#2~for~standard~'#3'.}
+  {PDF~version~#1~is~too~#2~for~standard~'#3'.\\
+   Check~if~there~are~conflicting~PDF~standard\\
+   and~PDF~version~settings!}
 %    \end{macrocode}
 % Messages for embedded files
 %    \begin{macrocode}
@@ -897,7 +902,7 @@
      { \__pdf_backend_omit_cidset:n {1} }
     \pdfmeta_standard_verify:nnF { min_pdf_version }
      { \pdf_version: }
-     { \msg_warning:nneee {pdf}{wrong-pdfversion}
+     { \msg_error:nneee {pdf}{wrong-pdfversion}
        {\pdf_version:}{low}
        {
         \pdfmeta_standard_item:n{type}
@@ -907,7 +912,7 @@
      }
     \pdfmeta_standard_verify:nnF { max_pdf_version }
      { \pdf_version: }
-     { \msg_warning:nneee {pdf}{wrong-pdfversion}
+     { \msg_error:nneee {pdf}{wrong-pdfversion}
        {\pdf_version:}{high}
        {
         \pdfmeta_standard_item:n{type}
@@ -1141,7 +1146,7 @@
   \pdfmeta_standard_verify:nF{Catalog_EmbeddedFiles}
    {
     \tl_gput_right:Nn\g__kernel_pdfmanagement_end_run_code_tl
-     {      
+     {
        \pdfdict_if_empty:nT { g__pdf_Core/Catalog/Names/EmbeddedFiles }
         {
           \group_begin:
@@ -1154,7 +1159,7 @@
             \l_@@_tmpa_tl
           \exp_args:Nne \__pdf_backend_Names_gpush:nn{EmbeddedFiles}{(pdf-A4f)~\l_@@_tmpa_tl}
           \group_end:
-        }     
+        }
      }
    }
 }
@@ -1462,28 +1467,48 @@
 %    \end{macrocode}
 % \subsection{New document keys}
 %    \begin{macrocode}
+\cs_generate_variant:Nn\pdf_version_gset:n{e}
+%    \end{macrocode}
+% if the pdf version is wrong for the standard we force the highest possible.
+%    \begin{macrocode}
+\cs_new_protected:Nn\@@_force_standard_pdfversion:
+ {
+   \pdfmeta_standard_verify:nnF { min_pdf_version }
+    { \pdf_version: }
+    {
+      \pdf_version_gset:e{ \pdfmeta_standard_item:n{ max_pdf_version } }
+    }
+  \pdfmeta_standard_verify:nnF { max_pdf_version }
+    { \pdf_version: }
+    {
+      \pdf_version_gset:e{ \pdfmeta_standard_item:n{ max_pdf_version } }
+    }
+ }
 \keys_define:nn { document / metadata }
  {
    _pdfstandard .choices:nn =
       {A-1B,A-2A,A-2B,A-2U,A-3A,A-3B,A-3U,A-4}
       {
         \prop_gset_eq:Nc \g__pdfmeta_standard_prop { g__pdfmeta_standard_pdf/#1 _prop }
+        \@@_force_standard_pdfversion:
         \AddToDocumentProperties [document]{pdfstandard}{#1}
-      }, 
+      },
    _pdfstandard / A-4F .code:n =
       {
         \prop_gset_eq:Nc \g__pdfmeta_standard_prop { g__pdfmeta_standard_pdf/A-4F_prop }
+        \@@_force_standard_pdfversion:
         \AddToDocumentProperties [document]{pdfstandard}{A-4F}
       },
    _pdfstandard / A-4E .code:n =
       {
         \prop_gset_eq:Nc \g__pdfmeta_standard_prop { g__pdfmeta_standard_pdf/A-4E_prop }
+        \@@_force_standard_pdfversion:
         \AddToDocumentProperties [document]{pdfstandard}{A-4E}
       },
    _pdfstandard / unknown .code:n =
       {
         \msg_error:nnn{pdf}{unknown-standard}{#1}
-      },      
+      },
    _pdfstandard / X-4 .code:n =
     {
       \AddToDocumentProperties [document]{pdfstandard-X}{PDF/X-4}
@@ -1526,13 +1551,17 @@
     },
    _pdfstandard / UA-1 .code:n =
     {
+     \pdf_version_compare:NnF < {2.0}
+      {
+        \pdf_version_gset:n {1.7}
+      }
      \AddToDocumentProperties [document]{pdfstandard-UA}{{1}{}}
      \AddToHook{begindocument/before}
        {
          \prop_gput:Nnn \g__pdfmeta_standard_prop {omit_CID}{}
          \pdf_version_compare:NnF < {2.0}
            {
-             \msg_warning:nneee
+             \msg_error:nneee
               {pdf}{wrong-pdfversion}
               {\pdf_version:}{high}{UA-1}
            }
@@ -1542,10 +1571,14 @@
 % currently it is not possible to merge requirements - these need some thoughts as
 % every standard has some common keys like the name or the yes.
 % We therefore add some requirements manually.
-% 
+%
 %    \begin{macrocode}
    _pdfstandard / UA-2 .code:n =
     {
+      \pdf_version_compare:NnT < {2.0}
+       {
+         \pdf_version_gset:n {2.0}
+       }
       \AddToDocumentProperties [document]{pdfstandard-UA}{{2}{2024}}
 %    \end{macrocode}
 % 2025-06-11 \verb+Trailer_no_Info+ is only a should not a shall in UA-2 so we do not force it.
@@ -1558,7 +1591,7 @@
          \@@_xmp_wtpdf_reuse_declaration:
          \pdf_version_compare:NnT < {2.0}
            {
-             \msg_warning:nneee
+             \msg_error:nneee
               {pdf}{wrong-pdfversion}
               {\pdf_version:}{low}{UA-2}
            }
@@ -1604,7 +1637,7 @@
     ,debug .code:n =
       {
         \keys_set:nn { document / metadata / debug } {#1}
-      }  
+      }
     ,debug / xmp-export .choice:
     ,debug / xmp-export / true .code:n=
       {
@@ -2039,13 +2072,13 @@
          \@@_xmp_add_packet_open:nn {rdf}{#3}
           \clist_map_inline:nn {#4}
             {
-              \@@_xmp_lang_get:nNN {##1}\l_@@_tmpa_tl\l_@@_tmpb_tl              
+              \@@_xmp_lang_get:nNN {##1}\l_@@_tmpa_tl\l_@@_tmpb_tl
 %    \end{macrocode}
 % change 2024-02-22. There should be if possible a x-default
 % entry as some viewers need that.  So if the language is equal to the
 % main language we use that. This assumes that the user hasn't marked
 % every entry as some other language!
-% x-default has to be the first entry, see issue \#92, 
+% x-default has to be the first entry, see issue \#92,
 % so we have to go through the list twice.
 %    \begin{macrocode}
                \tl_if_eq:eeT{\l_@@_tmpa_tl}{\l_@@_xmp_metalang_tl}
@@ -2053,17 +2086,17 @@
                    \@@_xmp_add_packet_line_attr:nneV
                     {rdf}{li}{xml:lang="x-default" }\l_@@_tmpb_tl
                    \@@_xmp_add_packet_line_attr:nneV
-                    {rdf}{li}{xml:lang="\l_@@_tmpa_tl" }\l_@@_tmpb_tl 
+                    {rdf}{li}{xml:lang="\l_@@_tmpa_tl" }\l_@@_tmpb_tl
                  }
              }
            \clist_map_inline:nn {#4}
              {
-               \@@_xmp_lang_get:nNN {##1}\l_@@_tmpa_tl\l_@@_tmpb_tl 
-               \tl_if_eq:eeF{\l_@@_tmpa_tl}{\l_@@_xmp_metalang_tl}                             
+               \@@_xmp_lang_get:nNN {##1}\l_@@_tmpa_tl\l_@@_tmpb_tl
+               \tl_if_eq:eeF{\l_@@_tmpa_tl}{\l_@@_xmp_metalang_tl}
                  {
                    \@@_xmp_add_packet_line_attr:nneV
                     {rdf}{li}{xml:lang="\l_@@_tmpa_tl" }\l_@@_tmpb_tl
-                 }             
+                 }
              }
          \@@_xmp_add_packet_close:nn{rdf}{#3}
         \@@_xmp_add_packet_close:nn {#1}{#2}
