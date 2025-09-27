@@ -391,7 +391,13 @@
 % This package uses \cs{pdfpageattr} and \pkg{acrotex} and so must be reviewed.
 % \end{documentation}
 %
-%
+% \subsection{bidi}
+% 
+% The package \pkg{bidi} (loaded e.g. by \pkg{polyglossia} for right-to-left scripts) 
+% patches and redefines internals of \pkg{hyperref} and overwrites
+% the new definition of the generic driver. It is therefore not
+% compatible with the PDF management if \pkg{hyperref} is used. 
+% 
 % \begin{implementation}
 %
 % \section{Implementation}
