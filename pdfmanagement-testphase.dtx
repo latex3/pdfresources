@@ -50,7 +50,7 @@
 %    }^^A
 % }
 %
-% \date{Version 0.96v, released 2025-08-05}
+% \date{Version 0.96w, released 2025-08-22}
 %
 % \maketitle
 % \begin{documentation}
@@ -84,6 +84,19 @@
 %  this will do nothing. The package has one option, \texttt{backend} that allows
 %  to set a special backend like \texttt{dvipdfmx}. It will do nothing if the backend
 %  code has already been loaded. 
+%  
+%  Other options, e.g., the PDF standard or the PDF version should then be set with a \cs{SetKeys} command:
+%  
+%  \begin{verbatim}
+%  \RequirePackage{pdfmanagement}
+%  \SetKeys[document/metadata]
+%    {
+%      pdfversion=2.0,
+%      lang=de,
+%      xmp=false,
+%      ...
+%    }  
+%  \end{verbatim}
 %  
 %  Note that PDF management should be loaded as early as possible. 
 %
@@ -392,7 +405,7 @@
 %    \begin{macrocode}
 %<@@=pdfmanagement>
 %<*package>
-\ProvidesExplPackage{pdfmanagement-testphase}{2025-08-05}{0.96v}
+\ProvidesExplPackage{pdfmanagement-testphase}{2025-08-22}{0.96w}
   {LaTeX PDF management bundle}
 
 \DeclareOption { debug }
@@ -405,7 +418,7 @@
 %    \end{macrocode}
 %<*standalone>
 %    \begin{macrocode}
-\ProvidesExplPackage{pdfmanagement}{2025-08-05}{0.96v}
+\ProvidesExplPackage{pdfmanagement}{2025-08-22}{0.96w}
   {LaTeX PDF management bundle}
 %    \end{macrocode}
 % The only package option is for the backend. Other options can be
@@ -496,7 +509,7 @@
 % to allow to set it in the document.
 %    \begin{macrocode}
 %<*header>
-\ProvidesExplFile{pdfmanagement.ltx}{2025-08-05}{0.96v}
+\ProvidesExplFile{pdfmanagement.ltx}{2025-08-22}{0.96w}
   {PDF~management~code}
 %</header>  
 %    \end{macrocode}
