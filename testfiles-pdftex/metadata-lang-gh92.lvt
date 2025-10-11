@@ -1,0 +1,21 @@
+\ExplSyntaxOn
+\debug_on:n { check-declarations , deprecation }
+\msg_redirect_module:nnn { pdf } { none } { warning }
+\ExplSyntaxOff
+\DocumentMetadata{debug={xmp-export}}
+\input{regression-test}
+\documentclass{article}
+\usepackage{hyperref}
+
+\hypersetup{%
+pdftitle={[it-IT]Un titolo significativo,[en-US]A meaningful title},
+pdfauthor={Lorenzo Ferron},
+pdfmetalang={en-US}
+}
+
+\START
+\SHOWFILE{\jobname.xmpi}
+\OMIT
+\begin{document}
+text
+\end{document} 

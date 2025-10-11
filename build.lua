@@ -1,6 +1,6 @@
 #!/usr/bin/env texlua
-packageversion="0.96s"
-packagedate="2025-06-23"
+packageversion="0.96w"
+packagedate="2025-08-22"
 
 local luatexstatus = status.list()
 
@@ -87,7 +87,8 @@ tagfiles = {
             "*dtx",
             "firstaid/*.sty",
             "README.md",
-            "CHANGELOG.md"
+            "CHANGELOG.md",
+            "lualinksplit.lua"
            }
 
 function update_tag (file,content,tagname,tagdate)
@@ -138,6 +139,11 @@ function update_tag (file,content,tagname,tagdate)
                          "(%d%d%d%d)%-%d%d%d%d",
                          "%1-"..os.date("%Y"))
    return content
+ elseif string.match (file, "lualinksplit.lua") then
+   content = string.gsub (content,
+                         "Version: %d%.%d+%a, %d%d%d%d%-%d%d%-%d%d",
+                         "Version: " .. packageversion .. ", " .. packagedate )   
+   return content   
  elseif string.match (file, "^CHANGELOG.md$") then
    content = string.gsub (content,
                          "%[Unreleased%]",

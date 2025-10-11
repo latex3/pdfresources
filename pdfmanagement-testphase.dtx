@@ -50,7 +50,7 @@
 %    }^^A
 % }
 %
-% \date{Version 0.96s, released 2025-06-23}
+% \date{Version 0.96w, released 2025-08-22}
 %
 % \maketitle
 % \begin{documentation}
@@ -84,6 +84,19 @@
 %  this will do nothing. The package has one option, \texttt{backend} that allows
 %  to set a special backend like \texttt{dvipdfmx}. It will do nothing if the backend
 %  code has already been loaded. 
+%  
+%  Other options, e.g., the PDF standard or the PDF version should then be set with a \cs{SetKeys} command:
+%  
+%  \begin{verbatim}
+%  \RequirePackage{pdfmanagement}
+%  \SetKeys[document/metadata]
+%    {
+%      pdfversion=2.0,
+%      lang=de,
+%      xmp=false,
+%      ...
+%    }  
+%  \end{verbatim}
 %  
 %  Note that PDF management should be loaded as early as possible. 
 %
@@ -378,7 +391,13 @@
 % This package uses \cs{pdfpageattr} and \pkg{acrotex} and so must be reviewed.
 % \end{documentation}
 %
-%
+% \subsection{bidi}
+% 
+% The package \pkg{bidi} (loaded e.g. by \pkg{polyglossia} for right-to-left scripts) 
+% patches and redefines internals of \pkg{hyperref} and overwrites
+% definitions of the generic driver. It is therefore not guarantied to be
+% compatible with the PDF management if \pkg{hyperref} is used. 
+% 
 % \begin{implementation}
 %
 % \section{Implementation}
@@ -386,7 +405,7 @@
 %    \begin{macrocode}
 %<@@=pdfmanagement>
 %<*package>
-\ProvidesExplPackage{pdfmanagement-testphase}{2025-06-23}{0.96s}
+\ProvidesExplPackage{pdfmanagement-testphase}{2025-08-22}{0.96w}
   {LaTeX PDF management bundle}
 
 \DeclareOption { debug }
@@ -399,7 +418,7 @@
 %    \end{macrocode}
 %<*standalone>
 %    \begin{macrocode}
-\ProvidesExplPackage{pdfmanagement}{2025-06-23}{0.96s}
+\ProvidesExplPackage{pdfmanagement}{2025-08-22}{0.96w}
   {LaTeX PDF management bundle}
 %    \end{macrocode}
 % The only package option is for the backend. Other options can be
@@ -434,7 +453,7 @@
 
 \RequirePackage{tagpdf-base}
 \input{pdfmanagement.ltx}
-\RequirePackage{pdfmanagement-firstaid}
+
 
 %    \end{macrocode}
 % These keys are only defined in documentmetadata-support, so need to be copied:
@@ -476,7 +495,12 @@
     \sys_ensure_backend:
   } 
 \file_input:n {l3backend-testphase-\c_sys_backend_str.def}
-\hook_use_once:n {pdfmanagement/add}           
+\hook_use_once:n {pdfmanagement/add} 
+%    \end{macrocode}
+% firstaid should be loaded only after the backend has been set as
+% it can contain backend dependant code.
+%    \begin{macrocode}
+\RequirePackage{pdfmanagement-firstaid}     
 %</standalone>
 %    \end{macrocode}
 %
@@ -485,7 +509,7 @@
 % to allow to set it in the document.
 %    \begin{macrocode}
 %<*header>
-\ProvidesExplFile{pdfmanagement.ltx}{2025-06-23}{0.96s}
+\ProvidesExplFile{pdfmanagement.ltx}{2025-08-22}{0.96w}
   {PDF~management~code}
 %</header>  
 %    \end{macrocode}
