@@ -23,11 +23,12 @@
 % for those people who are interested.
 %
 %<*driver>
-\DocumentMetadata{pdfstandard=A-2b}
-\documentclass[full]{l3doc}
+\DocumentMetadata{tagging=on,pdfstandard=ua-2}
+\documentclass[kernel]{l3doc}
+\usepackage{latex-lab-testphase-l3doc}
 \usepackage{array,booktabs}
 \hypersetup{pdfauthor=The LaTeX Project,
- pdftitle=l3pdfoutline (LaTeX PDF management testphase bundle)}
+ pdftitle=l3pdfoutline (LaTeX PDF management bundle)}
 \begin{document}
   \DocInput{\jobname.dtx}
 \end{document}
@@ -36,7 +37,7 @@
 % \providecommand\hook[1]{\texttt{#1}}
 % \title{^^A
 %   The \pkg{l3pdfoutline} module\\ Commands for PDF bookmarks   ^^A
-%   \\ \LaTeX{} PDF management testphase bundle
+%   \\ \LaTeX{} PDF management bundle
 % }
 %
 % \author{^^A
@@ -48,7 +49,7 @@
 %    }^^A
 % }
 %
-% \date{Version 0.96i, released 2024-05-23}
+% \date{Version 0.96i, released 2025-10-12}
 %
 % \maketitle
 % \begin{documentation}
@@ -91,11 +92,11 @@
 % (the \texttt{SD} key is used when there are structures).
 % 
 % While in most cases the outline is used with a \texttt{GoTo} action and more or less mirrors
-% the  table of contents, other actions are possible to, a outline item
+% the  table of contents, other actions are possible too, a outline item
 % can e.g. open an external url or another file. The PDF reference lists in total 
 % 17 different, theoretically usable actions\footnote{Sound and Movie are deprecated in PDF~2.0}:
 % GoTo, GoToR, GoToE, GoToDp (PDF~2.0), Launch, Thread, URI, Sound, Movie,
-% Hide, Named, SetOCGState, Rendition,Trans, GoTo3DView, JavaScript, RichMediaExecute.
+% Hide, Named, SetOCGState, Rendition, Trans, GoTo3DView, JavaScript, RichMediaExecute.
 %
 % An action dictionary typically looks like this:
 % \begin{verbatim}
@@ -136,7 +137,7 @@
 % but getting all the management keys right wouldn't be trivial. 
 % For \texttt{/Count} e.g. one would have to track recursively
 % the number of visible subitems. Luckily all backends have
-% dedicated primitives or \verb+\special+'s to create an outline items which take
+% dedicated primitives or \verb+\special+'s to create outline items which take
 % care of the management keys. Not quite so lucky is that the 
 % backends use different methods to decide if
 % an outline item is a sibling or a child or some great-uncle of the previous item.
@@ -156,7 +157,7 @@
 % The backend then collects (recursively) following items until all children are found 
 % and then goes up a level again. 
 % To get the number of children the code has obviously to look ahead
-% to e.g. count all subsections below the current subsection. \pkg{hyperref} resolved
+% to e.g. count all subsections below the current subsection. \pkg{hyperref} solved
 % this problem by writing everything into the \texttt{.out} file and to 
 % process it at begin of the next compilation to get the correct count. 
 % The \pkg{bookmark} package writes
@@ -179,7 +180,7 @@
 % \begin{function}
 %   {\pdfoutline_action:nnn,\pdfoutline_action:neo,\pdfoutline_action:nee}
 %   \begin{syntax}
-%     \cs{pdfoutline_action:nnnn}\Arg{level}\Arg{action}\Arg{title}
+%     \cs{pdfoutline_action:nnn}\Arg{level}\Arg{action}\Arg{title}
 %   \end{syntax}
 %   This creates an outline. \meta{level} is an integer expression 
 %   and sets the (relative) level: A positive
@@ -187,7 +188,7 @@
 %   go back. 
 %   \meta{action} should be a list of dictionary keys and its values
 %   that can be used within the |/A| key, e.g. the  output from |\pdfdict_use:n|\footnote{It can
-%   not be an object reference as this doesn't work with most backends.}\footnote{This is not completly
+%   not be an object reference as this doesn't work with most backends.}\footnote{This is not completely
 %   accurate: the dvips backend expects in some cases special names, e.g. a color must be given
 %   with \texttt{/Color} and not \texttt{/C}. Complex actions must therefore be tested 
 %   and if needed one must add backend abstractions.}. 
@@ -206,8 +207,8 @@
 %   \end{syntax}
 %   This creates an outline which creates a link to a named destination.
 %   While such a GoTo link can also be created with \cs{pdfoutline_action:nnn}
-%   the use of this command is recommended as it will also create a structure destination
-%   if tagging is activated.
+%   the use of this command is recommended as it will also create a reference to a
+%   structure destination if tagging is activated.
 %   \meta{level} is an integer expression 
 %   and sets the (relative) level: A positive
 %   number creates a child of the current outline, 0 creates a sibling, and negative numbers
@@ -238,7 +239,7 @@
 %   only the top level bookmarks are shown 
 %   if its value is 2, the first level will show its children,
 %   etc. By default this integer is set to |\c_max_int| and 
-%   so has not effect.
+%   so everything is open. 
 % \end{variable}
 % 
 % \begin{variable}
@@ -290,7 +291,7 @@
 %    \begin{macrocode}
 %<@@=pdfoutline>
 %<*header>
-\ProvidesExplPackage{l3pdfoutline}{2024-06-12}{0.95s}
+\ProvidesExplPackage{l3pdfoutline}{2025-10-12}{0.95s}
   {PDF outlines}
 %</header>
 %    \end{macrocode}
@@ -314,8 +315,8 @@
 % \end{variable}
 % 
 % \begin{variable}{\l_pdfoutline_open_int}
-% This is level up to which a bookmark is opened. By default the maximum
-% in is used.
+% This is the level up to which a bookmark is opened. By default the maximum
+% integer value is used and everything is open.
 % 
 %    \begin{macrocode}
 \int_new:N  \l_pdfoutline_open_int
