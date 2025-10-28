@@ -443,9 +443,131 @@
 % setups a number of sensible replacements and the outputs into a variable something
 % that can be used in a PDF string.
 % 
-% 
+% \subsubsection{TeX or PDF?}
+% We need a \enquote{TeX  or PDF} command, we use for now the conditional and definition
+% of hyperref but this should perhaps be changed. 
+%    \begin{macrocode}
+\newif\ifHy@pdfstring
+\def\texorpdfstring{%
+   \ifHy@pdfstring
+     \expandafter\@secondoftwo
+   \else
+     \expandafter\@firstoftwo
+   \fi
+}
+%    \end{macrocode}
 %
-% \subsubsection{BDC  operator commands}
+% \subsubsection{The main conversion command}
+% 
+% \subsubsection{Converting text}
+% The title text of the bookmark and other strings must be converted to strings
+% suitable for a PDF. With hyperref on can use |\pdfstringdef| but
+% we also provide a native version. This follows the implementation
+% in the generic hyperref driver but is currently
+% simpler -- both should be merged and extended to match the hyperref command.
+%
+%    \begin{macrocode}
+\tl_new:N\l_@@_string_tmpa_tl
+\str_new:N\g_@@_string_tmpa_str
+
+\cs_new_protected:Npn \__pdf_string_def:nnN #1 #2 #3 %#1 method, #2 content, #3 str-var
+ {
+   \group_begin:
+   \Hy@pdfstringtrue
+   \tl_set:Nn\l_@@_string_tmpa_tl{#2}
+%    \end{macrocode}
+% to be able to remove/format the |\numberline| in a bookmark
+% we must remove |\protect|.
+%    \begin{macrocode}
+   \tl_remove_all:Nn\l_@@_string_tmpa_tl { \protect }
+%    \end{macrocode}
+% This setups the replacements of problematic commands.
+% It contains a hook which allows to extend the list.
+%    \begin{macrocode}
+   \@@_string_def_equivalents:
+   \str_set:Ne #3 {\text_purify:n { \l_@@_string_tmpa_tl } }
+   \pdf_string_from_unicode:nVN   { #1 } #3 #3
+   \str_gset_eq:NN \g_@@_string_tmpa_str #3
+   \group_end:
+   \str_set_eq:NN #3 \g_@@_string_tmpa_str
+ }
+%    \end{macrocode}
+%
+% \subsubsection{Equivalent definition for pdf strings}
+% Similar to |\pdfstringdef| we need to declare various equivalents
+% We use as hook the hyperref command.
+%    \begin{macrocode}
+\providecommand\pdfstringdefPreHook{}
+
+\cs_new_protected:Npn \@@_string_def_equivalents:
+ {
+   \text_declare_expand_equivalent:Nn\MakeUppercase{\@@_string_def_makeuppercase:n}
+   \text_declare_expand_equivalent:Nn\MakeLowercase{\@@_string_def_makelowercase:n}
+   \cs_set:Npn\dots{…} %U+2026
+   \cs_set:Npn\ldots{…}
+   \cs_set:Npn\P{¶}
+   \cs_set:Npn\TeX{TeX}
+   \cs_set:Npn\LaTeX{LaTeX}
+   \cs_set:Npn\LaTeXe{LaTeX2ε}
+   \cs_set:Npn\SliTeX{Sli\TeX}%
+   \cs_set:Npn\MF{Metafont}%
+   \cs_set:Npn\MP{Metapost}%
+   \cs_set_eq:NN\phantom\use_none:n
+   \cs_set_eq:NN\vphantom\use_none:n
+   \cs_set_eq:NN\hphantom\use_none:n
+   \cs_set_eq:NN\mathversion\use_none:n
+   % \ding ?
+   % \Cube ?
+   % \begin ?
+   % \end ?
+   \cs_set_eq:NN\textcolor\use_ii:nn
+%    \end{macrocode}
+% this only handle normal color commands, for other arguments a more complicated
+% replacement would be needed. But pdfstringdef ignores it completly, so probably not
+% a practical problem.
+%    \begin{macrocode}
+   \cs_set_eq:NN\color\use_none:n
+   \cs_set_eq:NN\label \@gobble@om
+   \cs_set_eq:NN\index \@gobble@som
+   \cs_set_eq:NN\glossary \@gobble@om
+   \cs_set_eq:NN\ref\@@_string_def_ref:w
+   \cs_set_eq:NN\pageref\@@_string_def_pageref:w
+   \cs_set_eq:NN\nameref\@@_string_def_nameref:w
+   \cs_set_eq:NN\autoref\HyPsd@autoref
+   % what to do with all the \textxxx commands?
+   \text_declare_expand_equivalent:Nn\textparagraph{¶}
+   \text_declare_expand_equivalent:Nn\textdollar{\$}
+   \pdfstringdefPreHook
+ }
+%    \end{macrocode}
+%
+% Replacements for reference commands
+%    \begin{macrocode}
+\cs_new:Npn\@@_string_def_nameref:n #1
+  {\cs_if_exist:cTF {r@#1}{\tl_item:cn{r@#1}{3}}{0}}
+\DeclareExpandableDocumentCommand\@@_string_def_ref:w{sm}{\@kernel@ref@exp{#2}}
+\DeclareExpandableDocumentCommand\@@_string_def_pageref:w{sm}{\@kernel@pageref@exp{#2}}
+\DeclareExpandableDocumentCommand\@@_string_def_nameref:w{sm}{\@@_string_def_nameref:n{#2}}
+%
+%    \end{macrocode}
+% Replacements for uppercase and lowercase command
+%    \begin{macrocode}
+\cs_new:Npn \@@_string_def_makeuppercase:n #1
+  {\use:e
+    {\exp_args:Ne
+       \text_uppercase:nn{\BCPdata { casing }}{#1}
+    }
+  }
+\cs_new:Npn \@@_string_def_makelowercase:n #1
+  {\use:e
+    {\exp_args:Ne
+       \text_lowercase:nn{\BCPdata { casing }}{#1}
+    }
+  }
+%    \end{macrocode}
+
+%
+% \subsection{BDC  operator commands}
 % \begin{macro}{\pdf_bdc:nn,\pdf_bdc:ee}
 % \begin{macro}{\pdf_bdc_property:nn}
 % \begin{macro}{\pdf_bdc_shipout:ee}

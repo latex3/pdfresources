@@ -304,43 +304,10 @@
 % The following commands are also needed in the hyperref driver.
 % They use here a different prefix, but this should be merged and shared.
 %
-% \subsubsection{TeX or PDF?}
-%    \begin{macrocode}
-\newif\ifHy@pdfstring
-\def\texorpdfstring{%
-   \ifHy@pdfstring
-     \expandafter\@secondoftwo
-   \else
-     \expandafter\@firstoftwo
-   \fi
-}
-%    \end{macrocode}
 % \subsubsection{Converting text}
 % The title text of the bookmark and other strings must be converted to strings
 % suitable for a PDF. With hyperref on can use |\pdfstringdef| but
-% we also provide a native version. This follows the implementation
-% in the generic hyperref driver but is currently
-% simpler -- both should be merged and extended to match the hyperref command.
-%
-%    \begin{macrocode}
-\cs_new_protected:Npn \__hyp_outline_pdfstring:nnN #1 #2 #3
- {
-   \group_begin:
-   \Hy@pdfstringtrue
-   \tl_set:Nn\l__hyp_outline_tmpa_tl{#2}
-%    \end{macrocode}
-% to be able to remove/format the |\numberline|
-% we must remove |\protect|.
-%    \begin{macrocode}
-   \tl_remove_all:Nn\l__hyp_outline_tmpa_tl{ \protect }
-   \__hyp_pdfstring_equivalents:
-   \str_set:Ne #3 {\text_purify:n { \l__hyp_outline_tmpa_tl } }
-   \pdf_string_from_unicode:nVN   { #1 } #3 #3
-   \str_gset_eq:NN \g__hyp_outline_tmpa_str #3
-   \group_end:
-   \str_set_eq:NN #3 \g__hyp_outline_tmpa_str
- }
-%    \end{macrocode}
+% in l3pdftools we also provide a native version which is used by default. 
 %    \begin{macrocode}
 \socket_new:nn       {hyp/outline/title}{2}
 \socket_new_plug:nnn {hyp/outline/title}{pdfstringdef}
@@ -349,86 +316,18 @@
  }
 %    \end{macrocode}
 %
-% This uses the kernel pdfstringdef. We use that socket by default.
+% This uses the pdfmanagement version of \cs{pdfstringdef} defined
+% in l3pdftools. We use that socket by default.
 % Ensure that a text without parentheses is produced by using
 % |string-raw|!
 %    \begin{macrocode}
 \socket_new_plug:nnn {hyp/outline/title}{default}
  {
-   \__hyp_outline_pdfstring:nnN{utf16/string-raw}{#1}#2
+   \__pdf_string_def:nnN {utf16/string-raw}{#1}#2
  }
 \socket_assign_plug:nn  {hyp/outline/title}{default}
 %    \end{macrocode}
 %
-% \subsubsection{Equivalent definition for pdf strings}
-% Similar to |\pdfstringdef| we need to declare various equivalents
-% TODO: add a user hook.
-%    \begin{macrocode}
-\cs_new_protected:Npn \__hyp_pdfstring_equivalents:
- {
-   \text_declare_expand_equivalent:Nn\MakeUppercase{\__hyp_pdfstring_makeuppercase:n}
-   \text_declare_expand_equivalent:Nn\MakeLowercase{\__hyp_pdfstring_makelowercase:n}
-   \cs_set:Npn\dots{…} %U+2026
-   \cs_set:Npn\ldots{…}
-   \cs_set:Npn\P{¶}
-   \cs_set:Npn\TeX{TeX}
-   \cs_set:Npn\LaTeX{LaTeX}
-   \cs_set:Npn\LaTeXe{LaTeX2ε}
-   \cs_set:Npn\SliTeX{Sli\TeX}%
-   \cs_set:Npn\MF{Metafont}%
-   \cs_set:Npn\MP{Metapost}%
-   \cs_set_eq:NN\phantom\use_none:n
-   \cs_set_eq:NN\vphantom\use_none:n
-   \cs_set_eq:NN\hphantom\use_none:n
-   \cs_set_eq:NN\mathversion\use_none:n
-   % \ding ?
-   % \Cube ?
-   % \begin ?
-   % \end ?
-   \cs_set_eq:NN\textcolor\use_ii:nn
-%    \end{macrocode}
-% this only handle normal color commands, for other arguments a more complicated
-% replacement would be needed. But pdfstringdef ignores it completly, so probably not
-% a practical problem.
-%    \begin{macrocode}
-   \cs_set_eq:NN\color\use_none:n
-   \cs_set_eq:NN\label \@gobble@om
-   \cs_set_eq:NN\index \@gobble@som
-   \cs_set_eq:NN\glossary \@gobble@om
-   \cs_set_eq:NN\ref\__hyp_pdfstring_ref:w
-   \cs_set_eq:NN\pageref\__hyp_pdfstring_pageref:w
-   \cs_set_eq:NN\nameref\__hyp_pdfstring_nameref:w
-   \cs_set_eq:NN\autoref\HyPsd@autoref
-   % what to do with all the \textxxx commands?
-   \text_declare_expand_equivalent:Nn\textparagraph{¶}
-   \text_declare_expand_equivalent:Nn\textdollar{\$}
-   \pdfstringdefPreHook
- }
-%    \end{macrocode}
-% Replacements for reference commands
-%    \begin{macrocode}
-\cs_new:Npn\__hyp_pdfstring_nameref:n #1
-  {\cs_if_exist:cTF {r@#1}{\tl_item:cn{r@#1}{3}}{0}}
-\DeclareExpandableDocumentCommand\__hyp_pdfstring_ref:w{sm}{\@kernel@ref@exp{#2}}
-\DeclareExpandableDocumentCommand\__hyp_pdfstring_pageref:w{sm}{\@kernel@pageref@exp{#2}}
-\DeclareExpandableDocumentCommand\__hyp_pdfstring_nameref:w{sm}{\__hyp_pdfstring_nameref:n{#2}}
-
-%    \end{macrocode}
-% Replacements for uppercase command
-%    \begin{macrocode}
-\cs_new:Npn \__hyp_pdfstring_makeuppercase:n#1
-  {\use:e
-    {\exp_args:Ne
-       \text_uppercase:nn{\BCPdata { casing }}{#1}
-    }
-  }
-\cs_new:Npn \__hyp_pdfstring_makelowercase:n #1
-  {\use:e
-    {\exp_args:Ne
-       \text_lowercase:nn{\BCPdata { casing }}{#1}
-    }
-  }
-%    \end{macrocode}
 
 % \subsubsection{Regex to check the view value}
 %
@@ -638,7 +537,7 @@
     {
       \bitset_clear:N      \l__hyp_outline_action_bitset
       \bitset_set_true:Nn  \l__hyp_outline_action_bitset { uri }
-      \__hyp_outline_pdfstring:nnN {utf8/URI}{#1}\l__hyp_outline_action_data_tl
+      \__pdf_string_def:nnN {utf8/URI}{#1}\l__hyp_outline_action_data_tl
       %\tl_set:Ne \l__hyp_outline_action_data_tl {(#1)}
     }
    ,lists .code:n =
