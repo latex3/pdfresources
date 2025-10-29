@@ -939,7 +939,7 @@
 %^^A %% @@_destination:n     :  sets an anchor, replaces \new@pdflink
 %^^A %% \@@_PageLabels_gpush: : puts pagelabels in the catalog, used on every storing
 %^^A %% PDF String (text)
-%^^A %% *\@@_text_pdfstring:nnN  : replaces Hy@pstringdef, converts #1 to pdfstring in encoding #2
+%^^A %% *\__pdf_string_def:nnN  : replaces Hy@pstringdef, converts #1 to pdfstring in encoding #2
 %^^A %%                           and stores in N
 %^^A %% Build with:
 %^^A %% *\@@_text_purify:nN
@@ -1750,7 +1750,7 @@
 \socket_new:nn {hyp/link/GoToR/Contents}{1}
 \socket_new_plug:nnn {hyp/link/GoTo/Contents}{default}
   {
-    \@@_text_pdfstring:eoN
+    \__pdf_string_def:eoN
       { Go~to~destination~#1  }
       { \l_@@_text_enc_info_print_tl }
       \l_@@_link_Contents_tl
@@ -1759,7 +1759,7 @@
   }
 \socket_new_plug:nnn {hyp/link/GoToR/Contents}{default}
   {
-    \@@_text_pdfstring:eoN
+    \__pdf_string_def:eoN
       { Open~file~#1  }
       { \l_@@_text_enc_info_print_tl }
       \l_@@_link_Contents_tl
@@ -1768,7 +1768,7 @@
   }  
 \socket_new_plug:nnn {hyp/link/URI/Contents}{default}
   {
-    \@@_text_pdfstring:eoN
+    \__pdf_string_def:eoN
       { #1  }
       { \l_@@_text_enc_info_print_tl }
       \l_@@_link_Contents_tl
@@ -1976,6 +1976,7 @@
     \str_set_eq:NN #3 \g_@@_text_tmpa_str
  }
 \cs_generate_variant:Nn \@@_text_pdfstring:nnN {enN,onN,eoN,ooN,noN}
+\cs_generate_variant:Nn \__pdf_string_def:nnN {enN,onN,eoN,ooN,noN}
 %    \end{macrocode}
 % \end{macro}
 % !!! temporary until all instances are gone
@@ -1986,7 +1987,7 @@
 %^^A  \char_set_catcode_active:N \~
 %    \begin{macrocode}
 \cs_new_protected:Npn\Hy@pstringdef #1 #2
-  { \@@_text_pdfstring:enN {#2} {utf8/string-raw}#1 }
+  { \__pdf_string_def:enN {#2} {utf8/string-raw}#1 }
 %    \end{macrocode}
 %
 % This is a special version for info keys:
@@ -1994,7 +1995,7 @@
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_text_pdfstring_info:nN #1 #2
   {
-    \@@_text_pdfstring:noN  { #1 }{ \l_@@_text_enc_info_print_tl } #2
+    \__pdf_string_def:noN  { #1 }{ \l_@@_text_enc_info_print_tl } #2
   }
 \cs_generate_variant:Nn \@@_text_pdfstring_info:nN {eN,oN}
 %    \end{macrocode}
@@ -2141,7 +2142,7 @@
     \mode_if_horizontal:T { \@savsf\spacefactor }
     \Hy@SaveLastskip      %defined in hyperref
     \Hy@VerboseAnchor{#1} %defined in hyperref, for debugging
-    \@@_text_pdfstring:eoN
+    \__pdf_string_def:eoN
       { \HyperDestNameFilter{#1}  }
       { \l_@@_text_enc_dest_tl }
       \l_@@_tmpa_tl
@@ -2230,7 +2231,7 @@
         \tl_set_eq:NN \l_@@_dest_name_tmpa_tl \c_@@_dest_undefined_tl
       }
       {
-        \@@_text_pdfstring:eoN
+        \__pdf_string_def:eoN
           { \exp_args:No \HyperDestNameFilter { \l_@@_dest_name_tmpa_tl } }
           { \l_@@_text_enc_dest_tl }
           \l_@@_dest_name_tmpa_tl
@@ -2365,7 +2366,7 @@
         \@@_check_link_nesting:TF
           {
            \group_begin:
-            \@@_text_pdfstring:eoN
+            \__pdf_string_def:eoN
               { #2}
               { \l_@@_text_enc_uri_print_tl }
               \l_@@_uri_tmpa_tl
@@ -2432,7 +2433,7 @@
                {l_hyp/annot/A/GoToR}
                {F}
                {\pdf_object_ref:e {@@_file_\tl_to_str:N \l_@@_filename_tmpa_tl}}
-            \@@_text_pdfstring:nnN
+            \__pdf_string_def:nnN
               { #3 }
               { \l_@@_text_enc_dest_print_tl }
               \l_@@_dest_name_tmpa_tl
@@ -2498,12 +2499,12 @@
         \@@_check_link_nesting:TF
           {
            \group_begin:
-             \@@_text_pdfstring:nnN
+             \__pdf_string_def:nnN
                { #1 }
                { \l_@@_text_enc_file_print_tl }
                \l_@@_filename_tmpa_tl
              \pdfdict_put:nno {l_hyp/annot/A/Launch}{F}{\l_@@_filename_tmpa_tl}
-             \@@_text_pdfstring:noN
+             \__pdf_string_def:noN
                { #3 }
                { \l_@@_text_enc_para_print_tl }
                \l_@@_para_tmpa_tl
@@ -3340,7 +3341,7 @@
  {
    ,baseurl       .code:n =
      {
-       \@@_text_pdfstring:ooN  { #1 } {\l_@@_text_enc_uri_print_tl} \l_@@_tmpa_tl
+       \__pdf_string_def:ooN  { #1 } {\l_@@_text_enc_uri_print_tl} \l_@@_tmpa_tl
         \tl_if_empty:NTF \l_@@_tmpa_tl
           {
              \pdfmanagement_remove:nn {Catalog} { URI }
