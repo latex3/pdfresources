@@ -463,29 +463,62 @@
 % The title text of the bookmark and other strings must be converted to strings
 % suitable for a PDF. With hyperref on can use |\pdfstringdef| but
 % we also provide a native version. This follows the implementation
-% in the generic hyperref driver but is currently
-% simpler -- both should be merged and extended to match the hyperref command.
+% in the generic hyperref driver, the hyperref driver should at the end use this
+% implemention too.
 %
+% \begin{variable}{\l_@@_string_tmpa_tl,\g_@@_string_tmpa_str}
+% Temporary variables
 %    \begin{macrocode}
 \tl_new:N\l_@@_string_tmpa_tl
 \str_new:N\g_@@_string_tmpa_str
+%    \end{macrocode}
+% \end{variable}
+% A socket which should contain the contain the setup definitions.
+% A plug should at the end make use of the hook.
+%    \begin{macrocode}
+\socket_new:nn{pdf/string/setup}{0}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\hook_new:n{pdf/string/setup}
+%    \end{macrocode}
 
+% A socket which should contains the code to process the content.
+% The argument is a variable. 
+%    \begin{macrocode}
+\socket_new:nn{pdf/string/process}{1}
+\socket_new_plug:nnn{pdf/string/process}{kernel}
+ {
+ 
+ }
+\socket_assign_plug:nn{pdf/string/process}{kernel} 
+%    \end{macrocode}
+% A socket for final cleanup, currently it does nothing.
+%    \begin{macrocode}
+\socket_new:nn{pdf/string/cleanup}{1}
+\socket_assign_plug:nn{pdf/string/cleanup}{noop} 
+%    \end{macrocode}
+%    \begin{macrocode}
 \cs_new_protected:Npn \__pdf_string_def:nnN #1 #2 #3 %#1 content #2 method #3 str-var
  {
    \group_begin:
    \Hy@pdfstringtrue
    \tl_set:Nn\l_@@_string_tmpa_tl{#1}
+   \@@_string_def_equivalents:
 %    \end{macrocode}
-% to be able to remove/format the |\numberline| in a bookmark
-% we must remove |\protect|.
+% \cs{text_expand:n} does not remove a \cs{protect} command
+% and does not expand a following token even if it has a declared replacement. 
+% But in PDF strings we want to expand as much as possible, and
+% e.g. should to remove/format the |\numberline| command in a bookmark.
+% We therefore remove all occurences of |\protect|.
 %    \begin{macrocode}
    \tl_remove_all:Nn\l_@@_string_tmpa_tl { \protect }
 %    \end{macrocode}
 % This setups the replacements of problematic commands.
 % It contains a hook which allows to extend the list.
-%    \begin{macrocode}
-   \@@_string_def_equivalents:
+%    \begin{macrocode}   
    \str_set:Ne #3 {\text_purify:n { \l_@@_string_tmpa_tl } }
+   \@@_string_def_cleanup:N \l_@@_string_tmpa_tl
    \pdf_string_from_unicode:nVN   { #2 } #3 #3
    \str_gset_eq:NN \g_@@_string_tmpa_str #3
    \group_end:
