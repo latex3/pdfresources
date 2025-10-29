@@ -470,11 +470,11 @@
 \tl_new:N\l_@@_string_tmpa_tl
 \str_new:N\g_@@_string_tmpa_str
 
-\cs_new_protected:Npn \__pdf_string_def:nnN #1 #2 #3 %#1 method, #2 content, #3 str-var
+\cs_new_protected:Npn \__pdf_string_def:nnN #1 #2 #3 %#1 content #2 method #3 str-var
  {
    \group_begin:
    \Hy@pdfstringtrue
-   \tl_set:Nn\l_@@_string_tmpa_tl{#2}
+   \tl_set:Nn\l_@@_string_tmpa_tl{#1}
 %    \end{macrocode}
 % to be able to remove/format the |\numberline| in a bookmark
 % we must remove |\protect|.
@@ -486,7 +486,7 @@
 %    \begin{macrocode}
    \@@_string_def_equivalents:
    \str_set:Ne #3 {\text_purify:n { \l_@@_string_tmpa_tl } }
-   \pdf_string_from_unicode:nVN   { #1 } #3 #3
+   \pdf_string_from_unicode:nVN   { #2 } #3 #3
    \str_gset_eq:NN \g_@@_string_tmpa_str #3
    \group_end:
    \str_set_eq:NN #3 \g_@@_string_tmpa_str

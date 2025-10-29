@@ -323,7 +323,7 @@
 %    \begin{macrocode}
 \socket_new_plug:nnn {hyp/outline/title}{default}
  {
-   \__pdf_string_def:nnN {utf16/string-raw}{#1}#2
+   \__pdf_string_def:nnN {#1}{utf16/string-raw}#2
  }
 \socket_assign_plug:nn  {hyp/outline/title}{default}
 %    \end{macrocode}
@@ -537,7 +537,7 @@
     {
       \bitset_clear:N      \l__hyp_outline_action_bitset
       \bitset_set_true:Nn  \l__hyp_outline_action_bitset { uri }
-      \__pdf_string_def:nnN {utf8/URI}{#1}\l__hyp_outline_action_data_tl
+      \__pdf_string_def:nnN {#1}{utf8/URI}\l__hyp_outline_action_data_tl
       %\tl_set:Ne \l__hyp_outline_action_data_tl {(#1)}
     }
    ,lists .code:n =
