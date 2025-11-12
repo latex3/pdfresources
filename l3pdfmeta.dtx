@@ -3200,9 +3200,10 @@
        \@@_xmp_date_split:VN\l_@@_xmp_currentdate_tl\l_@@_xmp_currentdate_seq
        \hook_use:n { pdfmeta/xmp }
        \@@_xmp_build_packet:
+       \pdf_object_new:n {__pdfmeta/xmp}
        \exp_args:No
        \__pdf_backend_metadata_stream:n {\g_@@_xmp_packet_tl}
-        \pdfmanagement_add:nne {Catalog} {Metadata}{\pdf_object_ref_last:}
+        \pdfmanagement_add:nne {Catalog} {Metadata}{\pdf_object_ref:n{__pdfmeta/xmp}}
        \bool_if:NT \g_@@_xmp_export_bool
         {
           \iow_open:Nn\g_tmpa_iow{\g_@@_xmp_export_str.xmpi}

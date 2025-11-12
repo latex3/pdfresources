@@ -2407,8 +2407,9 @@
 %    \begin{macrocode}
 %<*luatex>
 \cs_new_protected:Npn \@@_backend_metadata_stream:n #1
-  {
-    \tex_immediate:D \tex_pdfextension:D obj ~uncompressed~
+  {        
+    \tex_immediate:D \tex_pdfextension:D obj ~
+      useobjnum ~ \int_eval:n{\__pdf_object_retrieve:n {__pdfmeta/xmp}}~uncompressed~
       \@@_backend_object_write:nn {stream} {{/Type~/Metadata~/Subtype~/XML}{#1}}
   }
 %</luatex>
@@ -2417,7 +2418,8 @@
   {
     \group_begin:
      \tex_pdfcompresslevel:D  0 \scan_stop:
-     \tex_immediate:D \tex_pdfobj:D
+     \tex_immediate:D \tex_pdfobj:D useobjnum ~ \int_eval:n{\__pdf_object_retrieve:n 
+     {__pdfmeta/xmp}}~
      \@@_backend_object_write:nn {stream} {{/Type~/Metadata~/Subtype~/XML}{#1}}
     \group_end:
   }
@@ -2425,7 +2427,7 @@
 %<*xdvipdfmx|dvipdfmx|dvips|dvisvgm>
 \cs_new_protected:Npn \@@_backend_metadata_stream:n #1
   {
-    \pdf_object_unnamed_write:nn {stream}{{/Type~/Metadata~/Subtype~/XML}{#1}}
+    \pdf_object_write:nnn{__pdfmeta/xmp} {stream}{{/Type~/Metadata~/Subtype~/XML}{#1}}
   }
 %</xdvipdfmx|dvipdfmx|dvips|dvisvgm>
 %    \end{macrocode}
