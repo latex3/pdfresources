@@ -1,5 +1,5 @@
 --  This is file lualinksplit.lua
---  Version: 0.96w, 2025-08-22
+--  Version: 0.96x, 2025-11-12
 --
 --  Copyright (C) 2025 Marcel Krüger, The LaTeX Project
 --  
