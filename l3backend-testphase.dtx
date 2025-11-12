@@ -2403,14 +2403,23 @@
 % it automatically and doesn't need some special command. No solution
 % is known for the dvips route. We need it only once, so we make
 % it special and probably no public interface is needed. It writes
-% an unnamed object so should be referenced directly with |\pdf_object_ref_last:|
+% the |__pdfmeta/xmp| object which should be declared before.
+% 
+% luatex has of now (2025-11-12) a bug: using the |uncompressed| key disables 
+% object compression for all following objects. We therefor delay the writing
+% into the |enddocument/end| hook after the tagpdf code.
+% 
 %    \begin{macrocode}
 %<*luatex>
 \cs_new_protected:Npn \@@_backend_metadata_stream:n #1
-  {        
-    \tex_immediate:D \tex_pdfextension:D obj ~
-      useobjnum ~ \int_eval:n{\__pdf_object_retrieve:n {__pdfmeta/xmp}}~uncompressed~
-      \@@_backend_object_write:nn {stream} {{/Type~/Metadata~/Subtype~/XML}{#1}}
+  { 
+    \AddToHook{enddocument/end}
+     {       
+      \tex_immediate:D \tex_pdfextension:D obj ~
+        useobjnum ~ \int_eval:n{\__pdf_object_retrieve:n {__pdfmeta/xmp}}~uncompressed~
+        \@@_backend_object_write:nn {stream} 
+        {{/Type~/Metadata~/Subtype~/XML}{#1}}
+     } 
   }
 %</luatex>
 %<*pdftex>
