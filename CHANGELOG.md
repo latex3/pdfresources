@@ -5,6 +5,22 @@ first release 0.95a, 2021-02-23 will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 this project uses date-based 'snapshot' version identifiers.
 
+## [2025-11-12]
+Version: 2025-11-12 v0.96x
+
+ * use named object for xmp-metadata
+ * reduce PDF file size with luatex by delaying writing of xmp-metadata (work-around bug with uncompress objects)
+
+## [2025-08-22]
+Version: 2025-08-22 v0.96w
+
+### Changed
+ * Adapted documentation to change on \DocumentMetadata handling in LaTeX 2025-11-01
+ * l3pdfmeta.dtx: standards now change the pdfversion if needed. 
+ 
+### Fixed
+ - debug key was not properly defined if only pdfmanagement is loaded. 
+
 ## [2025-08-05]
 Version: 2025-08-05 v0.96v
 
