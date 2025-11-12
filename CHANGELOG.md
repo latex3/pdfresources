@@ -7,7 +7,8 @@ this project uses date-based 'snapshot' version identifiers.
 
 ## [Unreleased]
 
- * use name object for xmp-metadata
+ * use named object for xmp-metadata
+ * reduce PDF file size with luatex by delaying writing of xmp-metadata (work-around bug bug with)
 
 ## [2025-08-22]
 
