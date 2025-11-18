@@ -1476,7 +1476,13 @@
    \pdfmeta_standard_verify:nnF { min_pdf_version }
     { \pdf_version: }
     {
-      \pdf_version_gset:e{ \pdfmeta_standard_item:n{ max_pdf_version } }
+      \pdfmeta_standard_verify:nTF { max_pdf_version }
+       {
+         \pdf_version_gset:n { 2.0 } 
+       }
+       {
+         \pdf_version_gset:e{ \pdfmeta_standard_item:n{ max_pdf_version } }
+       }
     }
   \pdfmeta_standard_verify:nnF { max_pdf_version }
     { \pdf_version: }
