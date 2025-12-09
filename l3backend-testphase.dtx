@@ -24,7 +24,9 @@
 %
 %
 %<*driver>
-\DocumentMetadata{} %no tagging yet, as the arguments environment errors
+\RequirePackage{pdfmanagement}
+\SetKeys[document/metadata]{pdfversion=2.0}
+%\DocumentMetadata{} %no tagging yet, as the arguments environment errors
 \documentclass[full]{l3doc}
 %\usepackage{latex-lab-testphase-l3doc}
 \begin{document}
@@ -47,7 +49,7 @@
 %    }^^A
 % }
 %
-% \date{Version 0.96w, released 2025-08-22}
+% \date{Version 0.96x, released 2025-11-12}
 %
 % \maketitle
 %
@@ -58,27 +60,27 @@
 %    \begin{macrocode}
 %<drivers>\ProvidesExplFile
 %<*dvipdfmx>
-  {l3backend-testphase-dvipdfmx.def}{2025-08-22}{0.96s}
+  {l3backend-testphase-dvipdfmx.def}{2025-11-12}{0.96s}
   {LaTeX~PDF~management~bundle~backend~support: dvipdfmx}
 %</dvipdfmx>
 %<*dvips>
-  {l3backend-testphase-dvips.def}{2025-08-22}{0.96s}
+  {l3backend-testphase-dvips.def}{2025-11-12}{0.96s}
   {LaTeX~PDF~management~bundle~backend~support: dvips}
 %</dvips>
 %<*dvisvgm>
-  {l3backend-testphase-dvisvgm.def}{2025-08-22}{0.96s}
+  {l3backend-testphase-dvisvgm.def}{2025-11-12}{0.96s}
   {LaTeX~PDF~management~bundle~backend~support: dvisvgm}
 %</dvisvgm>
 %<*luatex>
-  {l3backend-testphase-luatex.def}{2025-08-22}{0.96s}
+  {l3backend-testphase-luatex.def}{2025-11-12}{0.96s}
   {LaTeX~PDF~management~bundle~backend~support: PDF output (LuaTeX)}
 %</luatex>
 %<*pdftex>
-  {l3backend-testphase-pdftex.def}{2025-08-22}{0.96s}
+  {l3backend-testphase-pdftex.def}{2025-11-12}{0.96s}
   {LaTeX~PDF~management~bundle~backend~support: PDF output (pdfTeX)}
 %</pdftex>
 %<*xdvipdfmx>
-  {l3backend-testphase-xetex.def}{2025-08-22}{0.96s}
+  {l3backend-testphase-xetex.def}{2025-11-12}{0.96s}
   {LaTeX~PDF~management~bundle~backend~support: XeTeX}
 %</xdvipdfmx>
 %    \end{macrocode}
@@ -2403,13 +2405,23 @@
 % it automatically and doesn't need some special command. No solution
 % is known for the dvips route. We need it only once, so we make
 % it special and probably no public interface is needed. It writes
-% an unnamed object so should be referenced directly with |\pdf_object_ref_last:|
+% the |__pdfmeta/xmp| object which should be declared before.
+% 
+% luatex has of now (2025-11-12) a bug: using the |uncompressed| key disables 
+% object compression for all following objects. We therefor delay the writing
+% into the |enddocument/end| hook after the tagpdf code.
+% 
 %    \begin{macrocode}
 %<*luatex>
 \cs_new_protected:Npn \@@_backend_metadata_stream:n #1
-  {
-    \tex_immediate:D \tex_pdfextension:D obj ~uncompressed~
-      \@@_backend_object_write:nn {stream} {{/Type~/Metadata~/Subtype~/XML}{#1}}
+  { 
+    \AddToHook{enddocument/end}
+     {       
+      \tex_immediate:D \tex_pdfextension:D obj ~
+        useobjnum ~ \int_eval:n{\__pdf_object_retrieve:n {__pdfmeta/xmp}}~uncompressed~
+        \@@_backend_object_write:nn {stream} 
+        {{/Type~/Metadata~/Subtype~/XML}{#1}}
+     } 
   }
 %</luatex>
 %<*pdftex>
@@ -2417,7 +2429,8 @@
   {
     \group_begin:
      \tex_pdfcompresslevel:D  0 \scan_stop:
-     \tex_immediate:D \tex_pdfobj:D
+     \tex_immediate:D \tex_pdfobj:D useobjnum ~ \int_eval:n{\__pdf_object_retrieve:n 
+     {__pdfmeta/xmp}}~
      \@@_backend_object_write:nn {stream} {{/Type~/Metadata~/Subtype~/XML}{#1}}
     \group_end:
   }
@@ -2425,7 +2438,7 @@
 %<*xdvipdfmx|dvipdfmx|dvips|dvisvgm>
 \cs_new_protected:Npn \@@_backend_metadata_stream:n #1
   {
-    \pdf_object_unnamed_write:nn {stream}{{/Type~/Metadata~/Subtype~/XML}{#1}}
+    \pdf_object_write:nnn{__pdfmeta/xmp} {stream}{{/Type~/Metadata~/Subtype~/XML}{#1}}
   }
 %</xdvipdfmx|dvipdfmx|dvips|dvisvgm>
 %    \end{macrocode}

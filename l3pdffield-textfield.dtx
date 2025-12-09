@@ -27,7 +27,7 @@
 \documentclass[full]{l3doc}
 \usepackage{latex-lab-testphase-l3doc}
 
-\usepackage{array,booktabs}
+\usepackage{array,booktabs,csquote}
 \usepackage{l3pdffield}
 \hypersetup{pdfauthor=The LaTeX Project,
  pdftitle=l3pdffield (LaTeX PDF management bundle)}
@@ -51,7 +51,7 @@
 %    }^^A
 % }
 %
-% \date{Version 0.96w, released 2025-08-22}
+% \date{Version 0.96x, released 2025-11-12}
 %
 % \maketitle
 % \begin{documentation}
@@ -88,6 +88,8 @@
 % The font color and font size can be changed with the keys |fontcolor| and
 % |fontsize| described below. This works quite reliably (but e.g.
 % the PDF viewer of my browser insists to show the font in blue while editing).
+% The |fontsize| can be set to 0pt, this is interpreted as an \enquote{auto} fontsize
+% and it will shrink if the text gets too long for the field.
 %
 % Much more difficult is the font family:
 % a typical wish for textfields is that a font matching the document font is used
@@ -164,7 +166,7 @@
 % \subsection{Commands}
 % \begin{function}{\pdffield_textfield:n}
 % \begin{syntax}
-%  \cs{pdffield_textfield:n}\Arg{key val list}
+%  \cs{pdffield_textfield:n} \Arg{key val list}
 % \end{syntax}
 % This creates a textfield. The list of allowed keys is described below.
 % The \meta{key val list} should at least set the name, without it the default name
@@ -205,7 +207,7 @@
 %
 % \begin{function}{preset-textfield}
 %  \begin{syntax}
-%   |preset-textfield| = \Arg{key-val-list}
+%   |preset-textfield| = \Arg{key val list}
 %  \end{syntax}
 % This key can be used with \cs{pdffield_setup:n} and allows to set default keys for a textfield.
 % \end{function}
@@ -332,7 +334,7 @@
 % This is sets the size of the font in the textfield.
 % The default value is the current font size (\cs{f@size} in pt).
 % It is a \emph{field} setting, that means instances
-% share the size.
+% share the size. A value of |0pt| means |auto|.
 % \end{function}
 %
 % \begin{function}{font}

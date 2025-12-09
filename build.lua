@@ -1,6 +1,6 @@
 #!/usr/bin/env texlua
-packageversion="0.96w"
-packagedate="2025-08-22"
+packageversion="0.96x"
+packagedate="2025-11-12"
 
 local luatexstatus = status.list()
 
@@ -63,7 +63,7 @@ if os.type == "windows" then
   checkconfigs = {"build", -- luatex, pdftex, xetex
                   "config-noxetex", --pdftex + luatex (std)
                   "config-luatex",  -- luatex
-                  "config-dvips",   -- latex + dvips
+                  -- "config-dvips",   -- latex + dvips
                   "config-pdftex",  -- pdftex
                   "config-xetex",    -- xetex
                   "config-bookmark" -- temporarly!!!
