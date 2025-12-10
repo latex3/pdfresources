@@ -50,8 +50,7 @@
 %
 % \section{Introduction}
 % This package implements support for the PDF outline aka bookmarks based on
-% the l3pdfoutline module in the PDF management. That means
-% it requires \cs{DocumentMetadata} and does not work without it.
+% the l3pdfoutline module in the PDF management. 
 % It is based on the
 % \pkg{bookmark} and the \pkg{hyperref} package and mostly implements the same user commands,
 % most importantly the main commands |\bookmark| and |\bookmarksetup|.
@@ -61,13 +60,21 @@
 % and to replicate every option in the same way as the other packages.
 %
 % \subsection{Usage}
-% The package should currently be loaded with the |testphase| key:
+% If \cs{DocumentMetadata} is used, the package should (currently) be loaded additionally 
+% with the |testphase| key:
 % \begin{verbatim}
 % \DocumentMetadata{testphase=bookmark}
 % \documentclass{...}
 % \end{verbatim}
-% If loaded it will replace the code used for bookmarks of sectioning commands
-% and the like in the
+% This will also load all the other tagging support code. 
+% 
+% If only the PDF management is loaded the code should be loaded as package:
+% \begin{verbatim}
+% \RequirePackage{pdfmanagement}
+% \RequirePackage{latex-lab-testphase-bookmark}
+% \end{verbatim}
+% 
+% If loaded it will replace the code used for bookmarks in the
 % \pkg{hyperref} and \pkg{bookmark} packages. It is possible to
 % manually create bookmarks with this package even if \pkg{hyperref} or \pkg{bookmark}
 % are not loaded, but then the targets must be created manually too, e.g. with
@@ -403,6 +410,7 @@
      { \socket_assign_plug:nn { hyp/outline/numberformat } {#1}}
    ,numbered .default:n = true
    ,numbered .initial:n = false
+   ,bookmarksnumbered .meta:n = {numbered}
    ,color .tl_set:N = \l_pdfoutline_color_tl
 
    ,open .bool_set:N = \l_pdfoutline_open_bool
@@ -421,6 +429,7 @@
 % openlevel is relative to the bookmark levels, not some document level!
 %    \begin{macrocode}
    ,openlevel .int_set:N = \l_pdfoutline_open_int
+   ,bookmarksopenlevel .meta:n = { openlevel = #1 }
    ,level .code:n =
     {
       \cs_if_exist:cTF {toclevel@#1}
@@ -794,6 +803,14 @@
     \def\belopdfbookmark#1#2#3{%
       \bookmark[keeplevel,rellevel=1,dest={#3.#1}]{#2}%
       \hyper@anchorstart{#3.#1}\hyper@anchorend}
+%    \end{macrocode}
+% This doesn't yet handle the package options. This must be done in hyperref.
+%    \begin{macrocode}
+    \keys_define:nn{hyp}
+     {bookmarksdepth      .meta:nn = {hyp/outline}{depth=#1},        
+      bookmarksopen       .meta:nn = {hyp/outline}{open},
+      bookmarksopenlevel  .meta:nn = {hyp/outline}{openlevel=#1},
+      bookmarksnumbered   .meta:nn = {hyp/outline}{numbered}}
    }
 \DeclareHookRule{package/hyperref/after}{latex-lab-testphase-bookmark}{after}{latex-lab-testphase-toc}
 %    \end{macrocode}
