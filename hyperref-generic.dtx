@@ -1566,6 +1566,14 @@
             \BKM@color
         }
      }
+   \keys_define:nn {hyp}
+    { 
+      bookmarksnumbered .legacy_if_set:n  = {BKM@numbered} 
+     ,bookmarksopen .code:n = {\bookmarksetup{open=#1}}
+     ,bookmarksopen .default:n = true
+     ,bookmarksdepth .code:n = {\bookmarksetup{depth=#1}}
+     ,bookmarksopenlevel .code:n = {\bookmarksetup{openlevel=#1}}     
+    }   
  }
 \legacy_if:nTF { Hy@bookmarks }
   {
