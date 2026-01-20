@@ -62,7 +62,24 @@
 % for PDF standards in general.
 % The goal is to collect the requirements and to provide code to check and fulfill them.
 %
-%
+% \subsection{Standard families}
+% 
+% A PDF can claim that it complies to more than one standard but always only to one
+% version of a specific family. For \LaTeX{} relevant are the A-, UA- and X-standards.
+% 
+% The \pkg{l3pdfmeta} module started with support for the A-standards, 
+% some basic support for UA- and X-requirements were added in a rather ad-hoc way because
+% there isn't a easy way to merge requirements and because a merge loses
+% the option to report for which standard a requirement failed: if e.g. A-4 requires PDF 2.0
+% and UA-1 PDF 1.7 it is not clear what a merge should do. 
+% 
+% So instead of merging the requirements the code now keeps track of the requirements of standard 
+% \emph{families} (currently A, UA and X)
+% and offers a command to switch the family to enable validation of their requirements. 
+% The default family is always the A-family -- it has the largest numbers of requirements and
+% also the largest numbers of requirements that the code can actually check. 
+% 
+% 
 % \subsection{Verifying requirements of PDF standards}
 %
 % Standards like pdf/A set requirements on a PDF: Some things have be in the PDF,
@@ -100,6 +117,18 @@
 % in this case it is needed to check not only if the requirement is
 % in the standard but also if the user value is in the allowed list.
 %
+% \begin{function}{\pdfmeta_standard_family:nn}
+% \begin{syntax}
+% \cs{pdfmeta_standard_family:nn} \Arg{family} \Arg{code} 
+% \end{syntax}
+% This command allows to change the family for which requirements should be checked. 
+% \meta{family} should be one of \texttt{A}, \texttt{X} or \texttt{UA}. The function
+% switches to the requirements of this family, then executes \meta{code} and then switches
+% back to the A-standard family (this means that the command is not needed for a test
+% of an A-standard requirement as that is the default anyway). \meta{code} can do testing
+% or retrieve values or other things but it shouldn't contain another \cs{pdfmeta_standard_family:nn}.  
+% \end{function}
+% 
 % \begin{function}[EXP,TF]{\pdfmeta_standard_verify:n}
 % \begin{syntax}
 % \cs{pdfmeta_standard_verify:nTF} \Arg{requirement} \Arg{true code} \Arg{false code}
@@ -254,9 +283,10 @@
 % \item[|max_pdf_version|]  stores the maximal PDF version.
 %  It should be checked against the current PDF version (\cs{pdf_version:}).
 %  A failure means that the version should be changed.
-%  The check is currently relevant only for the A-1 to A-3 standards:
+%  The check is currently relevant for the A-1 to A-3 standards,
 %  PDF 2.0 leads to a failure in a validator like verapdf so the maximal
-%  version should be PDF 1.7.
+%  version should be PDF 1.7, for UA-1 which requires PDF 1.7 or lower, and for UA-2
+%  which requires PDF 2.0. 
 %  These requirements are checked by \pkg{l3pdfmeta} when the standard is set with
 %  \cs{DocumentMetadata} or \verb+\SetKeys[document/metadata]+
 %  and the version is if needed changed. At the begin of the document another
@@ -710,6 +740,11 @@
 %<*package>
 \msg_new:nnn  {pdf }{unknown-standard}{The~standard~'#1'~is~unknown~and~has~been~ignored}
 %    \end{macrocode}
+% Message for unknown standard family
+%    \begin{macrocode}
+%<*package>
+\msg_new:nnn  {pdf }{unknown-standard-family}{The~standard~family~'#1'~is~unknown}
+%    \end{macrocode}
 % Message for not fitting pdf version
 %    \begin{macrocode}
 \msg_new:nnn  {pdf }{wrong-pdfversion}
@@ -739,13 +774,47 @@
 % \end{variable}
 % \subsection{Standards (work in progress)}
 % \subsubsection{Tools and tests}
-% This internal property will contain for now the settings for the document.
-% \begin{variable}{\g_@@_standard_prop}
+% These internal properties will contain the active
+% settings for a standard family. \cs{g_@@_standard_prop}
+% will be used to contain the requirements of the current family for a  validation.
+% \begin{variable}{\g_@@_standard_prop,
+%  \g_@@_standard_A_prop,
+%  \g_@@_standard_UA_prop,
+%  \g_@@_standard_X_prop}
 %    \begin{macrocode}
 \prop_new:N \g_@@_standard_prop
+\prop_new:N \g_@@_standard_A_prop
+\prop_new:N \g_@@_standard_UA_prop
+\prop_new:N \g_@@_standard_X_prop
 %    \end{macrocode}
 % \end{variable}
 % \subsubsection{Functions to check a requirement}
+% 
+% \begin{macro}{\pdfmeta_standard_use_family:nn}
+% This allows to run tests for another standard family: it switches the requirements,
+% executes the code stored in the second argument and then switches back. 
+% 
+%    \begin{macrocode}
+\cs_new_protected:Npn \pdfmeta_standard_family:nn #1 #2
+ {
+   \prop_if_exist:cTF { g_@@_standard_#1_prop }
+    {
+%    \end{macrocode}
+% until documentmetadata-support is update we can not be sure that
+% the A prop is properly filled. 
+%    \begin{macrocode}
+      \prop_gset_eq:NN \g_@@_standard_A_prop \g_@@_standard_prop
+      \prop_gset_eq:Nc \g_@@_standard_prop { g_@@_standard_#1_prop }      
+       #2      
+      \prop_gset_eq:NN \g_@@_standard_prop \g_@@_standard_A_prop 
+    }
+    {
+      \msg_warning:nnn {pdf} {unknown-standard-family}{#1}
+    }  
+ }
+%    \end{macrocode}
+% \end{macro}
+% 
 % At first two commands to get the standard value if needed:
 % \begin{macro}[EXP]{\pdfmeta_standard_item:n}
 %    \begin{macrocode}
@@ -902,26 +971,7 @@
      { \__pdf_backend_omit_charset:n {1} }
     \pdfmeta_standard_verify:nF { omit_CID }
      { \__pdf_backend_omit_cidset:n {1} }
-    \pdfmeta_standard_verify:nnF { min_pdf_version }
-     { \pdf_version: }
-     { \msg_warning:nneee {pdf}{wrong-pdfversion} %TODO make error
-       {\pdf_version:}{low}
-       {
-        \pdfmeta_standard_item:n{type}
-        -
-        \pdfmeta_standard_item:n{level}
-       }
-     }
-    \pdfmeta_standard_verify:nnF { max_pdf_version }
-     { \pdf_version: }
-     { \msg_warning:nneee {pdf}{wrong-pdfversion}
-       {\pdf_version:}{high}
-       {
-        \pdfmeta_standard_item:n{type}
-        -
-        \pdfmeta_standard_item:n{level}
-       }
-     }
+    \@@_check_standard_pdfversion:      
   }
 %    \end{macrocode}
 %
@@ -952,7 +1002,7 @@
     ,conformance      = B
     ,year             = 2005
     ,min_pdf_version  = 1.4        %minimum
-    ,max_pdf_version  = 1.4        %minimum
+    ,max_pdf_version  = 1.4        %maximum
     ,no_encryption    =
     ,no_external_content =  % no F, FFilter, or FDecodeParms in stream dicts
     ,no_embed_content = % no EF key in filespec, no /Type/EmbeddedFiles
@@ -1137,6 +1187,94 @@
 %    \end{macrocode}
 % \end{variable}
 %
+% \subsubsection{pdf/UA}
+% \begin{variable}{
+%   \g_@@_standard_pdf/UA-1_prop ,
+%   \g_@@_standard_pdf/UA-2_prop ,
+%   }
+%    \begin{macrocode}
+\prop_new:c { g_@@_standard_pdf/UA-1_prop}
+\prop_new:c { g_@@_standard_pdf/UA-2_prop}
+\prop_gset_from_keyval:cn { g_@@_standard_pdf/UA-1_prop }
+  {
+    ,name             = pdf/UA-1
+    ,level            = 1
+    ,year             = 2014
+    ,min_pdf_version  = 1.4        %minimum
+    ,max_pdf_version  = 1.7        %maximum
+    ,tagged           =
+  }
+\prop_gset_eq:cc
+  { g_@@_standard_pdf/UA-2_prop }
+  { g_@@_standard_pdf/UA-1_prop }
+\prop_gset_from_keyval:cn { g_@@_standard_pdf/UA-2_prop }
+  {
+    ,name             = pdf/UA-2
+    ,level            = 2
+    ,year             = 2024
+    ,min_pdf_version  = 2.0        %minimum
+    ,tagged           =
+  }  
+%    \end{macrocode}
+% \end{variable}  
+% 
+% \subsubsection{pdf/X}
+%  We know only the names \ldots 
+% \begin{variable}{
+%   \g_@@_standard_pdf/X-4_prop ,
+%   \g_@@_standard_pdf/X-4P_prop,
+%   \g_@@_standard_pdf/X-5G_prop,
+%   \g_@@_standard_pdf/X-5N_prop,
+%   \g_@@_standard_pdf/X-5PG_prop,      
+%   \g_@@_standard_pdf/X-6_prop,   
+%   \g_@@_standard_pdf/X-6N_prop,   
+%   \g_@@_standard_pdf/X-6P_prop,   
+%   }
+%    \begin{macrocode}
+\prop_new:c { g_@@_standard_pdf/X-4_prop}
+\prop_new:c { g_@@_standard_pdf/X-4P_prop}
+\prop_new:c { g_@@_standard_pdf/X-5G_prop}
+\prop_new:c { g_@@_standard_pdf/X-5N_prop}
+\prop_new:c { g_@@_standard_pdf/X-5PG_prop}
+\prop_new:c { g_@@_standard_pdf/X-6_prop}
+\prop_new:c { g_@@_standard_pdf/X-6N_prop}
+\prop_new:c { g_@@_standard_pdf/X-6P_prop}
+
+\prop_gset_from_keyval:cn { g_@@_standard_pdf/X-4_prop }
+  {
+    ,name             = PDF/X-4
+  }
+\prop_gset_from_keyval:cn { g_@@_standard_pdf/X-4P_prop }
+  {
+    ,name             = PDF/X-4p
+  }
+\prop_gset_from_keyval:cn { g_@@_standard_pdf/X-5G_prop }
+  {
+    ,name             = PDF/X-5g
+  }
+\prop_gset_from_keyval:cn { g_@@_standard_pdf/X-5N_prop }
+  {
+    ,name             = PDF/X-5n
+  }
+\prop_gset_from_keyval:cn { g_@@_standard_pdf/X-5PG_prop }
+  {
+    ,name             = PDF/X-5pg
+  }  
+\prop_gset_from_keyval:cn { g_@@_standard_pdf/X-6_prop }
+  {
+    ,name             = PDF/X-6
+  }
+\prop_gset_from_keyval:cn { g_@@_standard_pdf/X-6N_prop }
+  {
+    ,name             = PDF/X-6n
+  }
+\prop_gset_from_keyval:cn { g_@@_standard_pdf/X-6P_prop }
+  {
+    ,name             = PDF/X-6p
+  }
+%    \end{macrocode}
+% \end{variable}  
+% 
 % \subsubsection{Embedded Files}
 % Standard 4-AF is needed if we add AF files for
 % tagging but it also requires an EmbeddedFiles name tree,
@@ -1492,24 +1630,58 @@
       \pdf_version_gset:e{ \pdfmeta_standard_item:n{ max_pdf_version } }
     }
  }
+%    \end{macrocode}
+% At begin document we then want to test if there is a version problem.
+%    \begin{macrocode}
+
+%    \end{macrocode}
+\cs_new_protected:Npn \@@_check_standard_pdfversion:
+ {
+   \clist_map_inline:nn{A,UA,X}
+    {
+     \pdfmeta_standard_family:nn { ##1 }
+      {
+        \pdfmeta_standard_verify:nnF { min_pdf_version }
+          { \pdf_version: }
+          { \msg_warning:nneee {pdf}{wrong-pdfversion} %TODO make error
+            {\pdf_version:}{low}
+            {
+             \pdfmeta_standard_item:n{name}
+            }
+          }
+        \pdfmeta_standard_verify:nnF { max_pdf_version }
+         { \pdf_version: }
+         { \msg_warning:nneee {pdf}{wrong-pdfversion}
+           {\pdf_version:}{high}
+           {
+            \pdfmeta_standard_item:n{name}
+           }
+         }
+       }
+    }
+ }
+%    \begin{macrocode}
 \keys_define:nn { document / metadata }
  {
    _pdfstandard .choices:nn =
       {A-1B,A-2A,A-2B,A-2U,A-3A,A-3B,A-3U,A-4}
-      {
-        \prop_gset_eq:Nc \g__pdfmeta_standard_prop { g__pdfmeta_standard_pdf/#1 _prop }
+      {        
+        \prop_gset_eq:Nc \g__pdfmeta_standard_A_prop { g__pdfmeta_standard_pdf/#1 _prop }
+        \prop_gset_eq:NN \g__pdfmeta_standard_prop \g__pdfmeta_standard_A_prop
         \@@_force_standard_pdfversion:
         \AddToDocumentProperties [document]{pdfstandard}{#1}
       },
    _pdfstandard / A-4F .code:n =
-      {
-        \prop_gset_eq:Nc \g__pdfmeta_standard_prop { g__pdfmeta_standard_pdf/A-4F_prop }
+      {        
+        \prop_gset_eq:Nc \g__pdfmeta_standard_A_prop { g__pdfmeta_standard_pdf/#1 _prop }
+        \prop_gset_eq:NN \g__pdfmeta_standard_prop \g__pdfmeta_standard_A_prop
         \@@_force_standard_pdfversion:
         \AddToDocumentProperties [document]{pdfstandard}{A-4F}
       },
    _pdfstandard / A-4E .code:n =
       {
-        \prop_gset_eq:Nc \g__pdfmeta_standard_prop { g__pdfmeta_standard_pdf/A-4E_prop }
+        \prop_gset_eq:Nc \g__pdfmeta_standard_A_prop { g__pdfmeta_standard_pdf/A-4E_prop }
+        \prop_gset_eq:NN \g__pdfmeta_standard_prop \g__pdfmeta_standard_A_prop
         \@@_force_standard_pdfversion:
         \AddToDocumentProperties [document]{pdfstandard}{A-4E}
       },
@@ -1519,60 +1691,60 @@
       },
    _pdfstandard / X-4 .code:n =
     {
+      \prop_gset_eq:Nc \g__pdfmeta_standard_X_prop { g__pdfmeta_standard_pdf/X-4_prop }      
       \AddToDocumentProperties [document]{pdfstandard-X}{PDF/X-4}
       \@@_xmp_add_pdfxid:
     },
    _pdfstandard / X-4P .code:n =
     {
+      \prop_gset_eq:Nc \g__pdfmeta_standard_X_prop { g__pdfmeta_standard_pdf/X-4P_prop }
       \AddToDocumentProperties [document]{pdfstandard-X}{PDF/X-4p}
       \@@_xmp_add_pdfxid:
     },
    _pdfstandard / X-5G .code:n =
     {
+      \prop_gset_eq:Nc \g__pdfmeta_standard_X_prop { g__pdfmeta_standard_pdf/X-5G_prop }      
       \AddToDocumentProperties [document]{pdfstandard-X}{PDF/X-5g}
       \@@_xmp_add_pdfxid:
     },
    _pdfstandard / X-5N .code:n =
     {
+      \prop_gset_eq:Nc \g__pdfmeta_standard_X_prop { g__pdfmeta_standard_pdf/X-5N_prop }      
       \AddToDocumentProperties [document]{pdfstandard-X}{PDF/X-5n}
       \@@_xmp_add_pdfxid:
     },
    _pdfstandard / X-5PG .code:n =
     {
+      \prop_gset_eq:Nc \g__pdfmeta_standard_X_prop { g__pdfmeta_standard_pdf/X-5PG_prop }
       \AddToDocumentProperties [document]{pdfstandard-X}{PDF/X-5pg}
       \@@_xmp_add_pdfxid:
     },
    _pdfstandard / X-6 .code:n =
     {
-      \AddToDocumentProperties [document]{pdfstandard-X}{PDF/X-6p}
+      \prop_gset_eq:Nc \g__pdfmeta_standard_X_prop { g__pdfmeta_standard_pdf/X-6_prop }
+      \AddToDocumentProperties [document]{pdfstandard-X}{PDF/X-6}
       \@@_xmp_add_pdfxid:
     },
    _pdfstandard / X-6N .code:n =
     {
+      \prop_gset_eq:Nc \g__pdfmeta_standard_X_prop { g__pdfmeta_standard_pdf/X-6N_prop }
       \AddToDocumentProperties [document]{pdfstandard-X}{PDF/X-6n}
       \@@_xmp_add_pdfxid:
     },
    _pdfstandard / X-6P .code:n =
     {
+      \prop_gset_eq:Nc \g__pdfmeta_standard_X_prop { g__pdfmeta_standard_pdf/X-6P_prop }
       \AddToDocumentProperties [document]{pdfstandard-X}{PDF/X-6p}
       \@@_xmp_add_pdfxid:
     },
    _pdfstandard / UA-1 .code:n =
     {
-     \pdf_version_compare:NnF < {2.0}
-      {
-        \pdf_version_gset:n {1.7}
-      }
-     \AddToDocumentProperties [document]{pdfstandard-UA}{{1}{}}
-     \AddToHook{begindocument/before}
+      \prop_gset_eq:Nc \g__pdfmeta_standard_UA_prop { g__pdfmeta_standard_pdf/UA-1_prop }
+      \pdfmeta_standard_family:nn{UA}{ \@@_force_standard_pdfversion: }     
+      \AddToDocumentProperties [document]{pdfstandard-UA}{{1}{}}
+      \AddToHook{begindocument/before}
        {
          \prop_gput:Nnn \g__pdfmeta_standard_prop {omit_CID}{}
-         \pdf_version_compare:NnF < {2.0}
-           {
-             \msg_warning:nneee %TODO make an error
-              {pdf}{wrong-pdfversion}
-              {\pdf_version:}{high}{UA-1}
-           }
        }
     },
 %    \end{macrocode}
@@ -1583,10 +1755,8 @@
 %    \begin{macrocode}
    _pdfstandard / UA-2 .code:n =
     {
-      \pdf_version_compare:NnT < {2.0}
-       {
-         \pdf_version_gset:n {2.0}
-       }
+      \prop_gset_eq:Nc \g__pdfmeta_standard_UA_prop { g__pdfmeta_standard_pdf/UA-2_prop }
+      \pdfmeta_standard_family:nn{UA}{\@@_force_standard_pdfversion:}
       \AddToDocumentProperties [document]{pdfstandard-UA}{{2}{2024}}
 %    \end{macrocode}
 % 2025-06-11 \verb+Trailer_no_Info+ is only a should not a shall in UA-2 so we do not force it.
@@ -1597,12 +1767,6 @@
        {
          \@@_xmp_wtpdf_accessibility_declaration:
          \@@_xmp_wtpdf_reuse_declaration:
-         \pdf_version_compare:NnT < {2.0}
-           {
-             \msg_warning:nneee %TODO make an error
-              {pdf}{wrong-pdfversion}
-              {\pdf_version:}{low}{UA-2}
-           }
        }
     },
    xmp  .choice:,
