@@ -8,6 +8,8 @@ this project uses date-based 'snapshot' version identifiers.
 ## [Unreleased]
 
 * l3pdfmeta.dtx: fix missing test if max pdf version is set, issue #104 
+* hyperref-generic.dtx: fix implementation of bookmark options, issue #108
+
 
 ## [2025-11-12]
 Version: 2025-11-12 v0.96x
