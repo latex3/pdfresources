@@ -1634,8 +1634,6 @@
 %    \end{macrocode}
 % At begin document we then want to test if there is a version problem.
 %    \begin{macrocode}
-
-%    \end{macrocode}
 \cs_new_protected:Npn \@@_check_standard_pdfversion:
  {
    \clist_map_inline:nn{A,UA,X}
@@ -1661,6 +1659,8 @@
        }
     }
  }
+%    \end{macrocode}
+%
 %    \begin{macrocode}
 \keys_define:nn { document / metadata }
  {
