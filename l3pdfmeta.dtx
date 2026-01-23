@@ -2346,6 +2346,7 @@
         \@@_xmp_build_xmpMM:
         \@@_xmp_build_prism:
         \@@_xmp_build_iptc:
+        \@@_xmp_build_tdm:
         \@@_xmp_build_user: %user additions
     % end
       \@@_xmp_add_packet_close:nn {rdf}{Description}
@@ -2411,6 +2412,7 @@
 \@@_xmp_xmlns_new:nn {pdfaProperty}{http://www.aiim.org/pdfa/ns/property\c_hash_str}
 \@@_xmp_xmlns_new:nn {pdfaType} {http://www.aiim.org/pdfa/ns/type\c_hash_str}
 \@@_xmp_xmlns_new:nn {pdfaField}{http://www.aiim.org/pdfa/ns/field\c_hash_str}
+\@@_xmp_xmlns_new:nn {tdm}{http://www.w3.org/ns/tdmrep/}
 %    \end{macrocode}
 
 % \subsection{Building the chunks: Extensions}
@@ -2767,6 +2769,27 @@
 %    \end{macrocode}
 % \end{macro}
 % \item[jav]: currently ignored
+% \item[tdm]
+% \begin{macro}[no-user-doc]{tdmrep (schema)}
+%    \begin{macrocode}
+\@@_xmp_schema_new:nnn
+  {TDMRep}
+  {tdm}
+  {http://www.w3.org/ns/tdmrep/}
+\@@_xmp_property_new:nnnnn
+  {tdm}
+  {reservation}
+  {Closed~Choice~of~Integer}
+  {internal}
+  {TDM~rights~are~reserved~(1)~or~not~reserved~(0)}
+\@@_xmp_property_new:nnnnn
+  {tdm}
+  {policy}
+  {URI}
+  {internal}
+  {URL~pointing~to~a~TDM~Policy~set~by~the~rightsholder}  
+%    \end{macrocode}
+% \end{macro}
 %
 % \item[declarations] The PDF Declarations mechanism allows creation and
 % editing software to declare, via a PDF Declaration, a PDF file to be in
@@ -3336,8 +3359,29 @@
 %    \end{macrocode}
 % \end{macro}
 % \end{macro}
+
+% \subsection{TDM}
+% \begin{macro}{\@@_xmp_build_tdm:}
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_xmp_build_tdm:
+  {
+%    \end{macrocode}
+% pdftdmreservation/tdm:reservation
+%    \begin{macrocode}
+   \@@_xmp_add_packet_line:nne{tdm}{reservation}
+     { \GetDocumentProperties{hyperref/pdftdmreservation} }
+%    \end{macrocode}
+% pdftdmpolicy/tdm:policy
+%    \begin{macrocode}
+   \@@_xmp_add_packet_line:nne{tdm}{policy}
+     { \GetDocumentProperties{hyperref/pdftdmpolicy} }
+%    \end{macrocode}
+%    \begin{macrocode}
+  }
+%    \end{macrocode}
+% \end{macro}
 %
-% \subsubsection{User additions}
+% \subsection{User additions}
 %
 % \begin{variable}{\g_@@_xmp_user_packet_str }
 %    \begin{macrocode}

@@ -245,6 +245,10 @@
  
 %  The value can be retrieved as |document/lang|.
 %
+% \item The code supports two new keys now to set the reservation of rights relative to text \& data mining
+% (TDM): |pdftdmreservation| which should be either 0 or 1, and |pdftdmpolicy| which
+% should be an url pointing to the policy, see \url{https://pdfa.org/resource/xmp-extension-schema-templates/#tdmrep}.
+% 
 %  \end{itemize}
 %  \section{Dates}
 %  \pkg{hyperref} has a few keys to set dates. They typically expect the date
@@ -4245,6 +4249,11 @@
    ,pdfcontactemail
    ,pdfcontacturl
    ,pdfdate
+%    \end{macrocode}
+% these are not hyperxmp but new keys
+%    \begin{macrocode}
+   ,pdftdmreservation
+   ,pdftdmpolicy
   }
   {
     \keys_define:nn { hyp }

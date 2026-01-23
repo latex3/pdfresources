@@ -93,8 +93,8 @@ function update_tag (file,content,tagname,tagdate)
  tagdate = string.gsub (packagedate,"-", "/")
  if string.match (file, "l3backend%-testphase.dtx" ) then
   content = string.gsub (content,
-                          "{%d%d%d%d%-%d%d%-%d%d}",
-                          "{".. packagedate .. "}")
+                          "{%d%d%d%d%-%d%d%-%d%d}{%d%.%d+%a}",
+                          "{".. packagedate .. "}{".. packageversion .."}")
   content = string.gsub (content,
                          "date{Version %d%.%d+%a, released %d%d%d%d%-%d%d%-%d%d",
                          "date{Version "..packageversion..", released ".. packagedate)
