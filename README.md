@@ -1,6 +1,6 @@
 # LaTeX PDF management bundle
 
-Version: 0.96x, 2025-11-12
+Version: 0.96y, 2026-01-23
 
 This package is used to load the new PDF management code
 of LaTeX.
@@ -30,7 +30,7 @@ For manual installation: unpack by compiling the .ins, then move all
 
 
 ## Copyright (C)
-* 2021-2025 The LaTeX Project
+* 2021-2026 The LaTeX Project
 
 ## License
 LaTeX Project Public License, version 1.3c or later.
