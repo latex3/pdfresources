@@ -258,8 +258,11 @@
 % texlive 2023 the engines pdftex and luatex have primitives
 % to suppress the dictionary
 % and l3pdfmeta will make use of it.
+% \item[|tagged|] (A- and UA-standards) The document must be a tagged PDF.
+% \item[|link_Contents|] (UA-standards) 
+% A link annotation must have a |Contents| entry (true for UA-1)
 % \end{description}
-%
+% 
 % \subsubsection{Tests with values and special handlers}
 %
 % \begin{description}
@@ -1203,10 +1206,8 @@
     ,min_pdf_version  = 1.4        %minimum
     ,max_pdf_version  = 1.7        %maximum
     ,tagged           =
+    ,link_Contents    =
   }
-\prop_gset_eq:cc
-  { g_@@_standard_pdf/UA-2_prop }
-  { g_@@_standard_pdf/UA-1_prop }
 \prop_gset_from_keyval:cn { g_@@_standard_pdf/UA-2_prop }
   {
     ,name             = pdf/UA-2
