@@ -2,7 +2,7 @@
 %
 %% File: l3pdftools.dtx
 %
-% Copyright (C) 2018-2025 The LaTeX Project
+% Copyright (C) 2018-2026 The LaTeX Project
 %
 % It may be distributed and/or modified under the conditions of the
 % LaTeX Project Public License (LPPL), either version 1.3c of this
@@ -50,7 +50,7 @@
 %    }^^A
 % }
 %
-% \date{Version 0.96x, released 2025-11-12}
+% \date{Version 0.96y, released 2026-01-23}
 %
 % \maketitle
 % \begin{documentation}
@@ -60,9 +60,9 @@
 % This module collects a number of candidate commands for the l3pdf module
 %
 % \begin{function}[EXP,added=2021-02-14]
-%   {\pdf_name_from_unicode_e:n}
+%   {\pdf_name_from_unicode_e:n,\pdf_name_from_unicode_e:V}
 %  \begin{syntax}
-%   \cs{pdf_name_from_unicode_e:n}  \Arg{content}
+%   \cs{pdf_name_from_unicode_e:n} \Arg{content}
 %  \end{syntax}
 %  This converts \meta{content} to a format suitable for a PDF Name.
 %  The output depends on the backend: For almost all backends
@@ -81,9 +81,9 @@
 %
 % \end{function}
 % \begin{function}[added=2020-07-04]
-%   {\pdf_string_from_unicode:nnN}
+%   {\pdf_string_from_unicode:nnN,\pdf_string_from_unicode:nVN}
 %  \begin{syntax}
-%   \cs{pdf_string_from_unicode:nnN}  \Arg{format}  \Arg{content} \Arg{tlvar}
+%   \cs{pdf_string_from_unicode:nnN} \Arg{format} \Arg{content} \meta{tl var}
 %  \end{syntax}
 %  This converts \meta{content} following the rules defined by \meta{format} and stores
 %  the result in \meta{tlvar}. The assignment is done locally.
@@ -239,7 +239,7 @@
 %
 %    \begin{macrocode}
 %<*header>
-\ProvidesExplPackage{l3pdftools}{2025-11-12}{0.96x}
+\ProvidesExplPackage{l3pdftools}{2026-01-23}{0.96y}
   {candidate commands for l3pdf---LaTeX PDF management bundle}
 %</header>
 %    \end{macrocode}

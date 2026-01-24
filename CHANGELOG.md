@@ -5,6 +5,19 @@ first release 0.95a, 2021-02-23 will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 this project uses date-based 'snapshot' version identifiers.
 
+## [2026-01-23]
+
+### Fixed
+* l3pdfmeta.dtx: fix missing test if max pdf version is set, issue #104 
+* hyperref-generic.dtx: fix implementation of bookmark options, issue #108
+* X-6 standard, issue #110
+
+### Changed
+* handling of standards has been extended to better support other families beside the A-standard.
+
+### Added
+* support for TDM (reservation of text&data mining rights)
+
 ## [2025-11-12]
 Version: 2025-11-12 v0.96x
 

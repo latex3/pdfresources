@@ -1,0 +1,35 @@
+\RequirePackage{pdfmanagement}
+\SetKeys[document/metadata]{pdfstandard={UA-2,A-2b}}
+\input{regression-test}
+\documentclass{article}
+\begin{document}
+\START
+\ExplSyntaxOn
+\TEST{min~version~A-2b}
+ {
+   \ASSERT{1.4}
+    {
+      \pdfmeta_standard_item:n{min_pdf_version}
+    }  
+ }
+\TEST{min~version~UA-2}
+ {
+   \pdfmeta_standard_family:nn{UA}
+     {\tl_set:Ne\l_tmpa_tl{\pdfmeta_standard_item:n{min_pdf_version}}}
+   \ASSERT{2.0}
+    {
+      \l_tmpa_tl
+    }  
+ }
+
+\TEST{min~version~A-2b}
+ {
+   \ASSERT{1.4}
+    {
+      \pdfmeta_standard_item:n{min_pdf_version}
+    }  
+ }
+ 
+ \ExplSyntaxOff
+
+\end{document}
