@@ -521,6 +521,25 @@
 \hook_new_with_args:nn {pdf/string/posthook}{1}
 %    \end{macrocode}
 %
+% \begin{macro}{\__pdf_string_def:nN,\__pdf_string_def:nnN}
+% \cs{__pdf_string_def:nN} runs all the purifing steps but does
+% not convert to a PDF string. It is meant to produce input for 
+% commmands doing the conversion later. \cs{__pdf_string_def:nnN}
+% runs also \cs{pdf_string_from_unicode:nnN}. 
+% TODO decide which one makes more sense.
+%    \begin{macrocode}
+\cs_new_protected:Npn \__pdf_string_def:nN #1 #2 %#1 content #2 str-var
+ {
+   \group_begin:
+   \socket_use:n {pdf/string/setup}  
+   \socket_use:nnn {pdf/string/purify} {#1} {#2}
+   \hook_use:nnw {pdf/string/posthook} {1} {#2}
+   \str_gset_eq:NN \g_@@_string_tmpa_str #2
+   \group_end:
+   \str_set_eq:NN #2 \g_@@_string_tmpa_str
+ }
+%    \end{macrocode}
+
 %    \begin{macrocode}
 \cs_new_protected:Npn \__pdf_string_def:nnN #1 #2 #3 %#1 content #2 method #3 str-var
  {
@@ -537,6 +556,7 @@
    \str_set_eq:NN #3 \g_@@_string_tmpa_str
  }
 %    \end{macrocode}
+% \end{macro}
 %
 % \subsubsection{Setup: replacement definition for pdf strings}
 % Similar to |\pdfstringdef| we need to declare various equivalents
@@ -577,6 +597,7 @@
    \cs_set_eq:NN\pageref\@@_string_def_pageref:w
    \cs_set_eq:NN\nameref\@@_string_def_nameref:w
    \cs_set_eq:NN\autoref\HyPsd@autoref
+   \let\@mkboth\@gobbletwo
    % what to do with all the \textxxx commands?
    \text_declare_expand_equivalent:Nn\textparagraph{¶}
    \text_declare_expand_equivalent:Nn\textdollar{\$}   
