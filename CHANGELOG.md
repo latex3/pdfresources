@@ -11,7 +11,8 @@ this project uses date-based 'snapshot' version identifiers.
 * css-files were not detected by A-4 test
 
 ### Changed 
-* Moving away from testphase names: renamded pdfmanagement-testphase.sty to pdfmanagment-init.sty (with a copy)
+* Moving away from testphase names: renamed pdfmanagement-testphase.sty to pdfmanagment-init.sty (with a copy), renamed backend files (with copy) and dtx.
+
 * The standard is not longer switched automatically from A-4 to A-4f is a file is found.
   comment in issue #107
 

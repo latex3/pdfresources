@@ -1,8 +1,8 @@
 \iffalse meta-comment
 
-File: pdfmanagement-testphase.ins
+File: pdfmanagement.ins
 
-Copyright (C) 2019-2025 The LaTeX Project
+Copyright (C) 2019-2026 The LaTeX Project
 
 It may be distributed and/or modified under the conditions of the
 LaTeX Project Public License (LPPL), either version 1.3c of this
@@ -34,7 +34,7 @@ for those people who are interested.
 \let\MetaPrefix\relax
 \preamble
 
-Copyright (C) 2019-2025 The LaTeX Project
+Copyright (C) 2019-2026 The LaTeX Project
 
 It may be distributed and/or modified under the conditions of
 the LaTeX Project Public License (LPPL), either version 1.3c of
@@ -58,13 +58,13 @@ and all files in that bundle must be distributed together.
   {%
     \file{pdfmanagement-testphase.sty}
       {%
-        \from{pdfmanagement-testphase.dtx}{headtestphase}
-        \from{pdfmanagement-testphase.dtx}{package}
+        \from{pdfmanagement.dtx}{headtestphase}
+        \from{pdfmanagement.dtx}{package}
       }%
     \file{pdfmanagement-init.sty}
       {%
-        \from{pdfmanagement-testphase.dtx}{headinit}
-        \from{pdfmanagement-testphase.dtx}{package}
+        \from{pdfmanagement.dtx}{headinit}
+        \from{pdfmanagement.dtx}{package}
       }  
   }
 
@@ -72,7 +72,7 @@ and all files in that bundle must be distributed together.
   {%
     \file{pdfmanagement.sty}
       {%
-        \from{pdfmanagement-testphase.dtx}{standalone}
+        \from{pdfmanagement.dtx}{standalone}
       }%
   }
 \generate
@@ -108,9 +108,58 @@ and all files in that bundle must be distributed together.
 
 \generate
   {
+   \file{l3backend-pdf-dvipdfmx.def}
+     {
+       \from{l3backend-pdfmanagement.dtx}{drivers,dvipdfmx}
+     }     
+  }
+
+\generate
+  {
+    \file{l3backend-pdf-dvips.def}
+      {
+        \from{l3backend-pdfmanagement.dtx}{drivers,dvips}
+      }
+  }
+
+\generate
+  {
+    \file{l3backend-pdf-dvisvgm.def}
+      {
+        \from{l3backend-pdfmanagement.dtx}{drivers,dvisvgm}
+      }
+  }
+
+\generate
+  {
+    \file{l3backend-pdf-luatex.def}
+      {
+        \from{l3backend-pdfmanagement.dtx}{drivers,luatex}
+      }
+  }
+
+\generate
+  {
+    \file{l3backend-pdf-pdftex.def}
+      {
+        \from{l3backend-pdfmanagement.dtx}{drivers,pdftex}
+      }
+  }
+\generate
+  {
+    \file {l3backend-pdf-xetex.def}
+      {
+       \from{l3backend-pdfmanagement.dtx}{drivers,xdvipdfmx}
+      }
+  }
+
+% during transition away from testphase we have to provide duplicates.
+
+\generate
+  {
    \file{l3backend-testphase-dvipdfmx.def}
      {
-       \from{l3backend-testphase.dtx}{drivers,dvipdfmx}
+       \from{l3backend-pdfmanagement.dtx}{drivers,dvipdfmx}
      }
   }
 
@@ -118,7 +167,7 @@ and all files in that bundle must be distributed together.
   {
     \file{l3backend-testphase-dvips.def}
       {
-        \from{l3backend-testphase.dtx}{drivers,dvips}
+        \from{l3backend-pdfmanagement.dtx}{drivers,dvips}
       }
   }
 
@@ -126,7 +175,7 @@ and all files in that bundle must be distributed together.
   {
     \file{l3backend-testphase-dvisvgm.def}
       {
-        \from{l3backend-testphase.dtx}{drivers,dvisvgm}
+        \from{l3backend-pdfmanagement.dtx}{drivers,dvisvgm}
       }
   }
 
@@ -134,7 +183,7 @@ and all files in that bundle must be distributed together.
   {
     \file{l3backend-testphase-luatex.def}
       {
-        \from{l3backend-testphase.dtx}{drivers,luatex}
+        \from{l3backend-pdfmanagement.dtx}{drivers,luatex}
       }
   }
 
@@ -142,14 +191,14 @@ and all files in that bundle must be distributed together.
   {
     \file{l3backend-testphase-pdftex.def}
       {
-        \from{l3backend-testphase.dtx}{drivers,pdftex}
+        \from{l3backend-pdfmanagement.dtx}{drivers,pdftex}
       }
   }
 \generate
   {
     \file {l3backend-testphase-xetex.def}
       {
-       \from{l3backend-testphase.dtx}{drivers,xdvipdfmx}
+       \from{l3backend-pdfmanagement.dtx}{drivers,xdvipdfmx}
       }
   }
 
@@ -179,7 +228,7 @@ and all files in that bundle must be distributed together.
   {
     \file {pdfmanagement.ltx}
       {
-       \from{pdfmanagement-testphase.dtx}{header}
+       \from{pdfmanagement.dtx}{header}
        \from{l3pdfdict.dtx}{package}
        \from{l3pdfmanagement.dtx}{package}
        \from{ltdocinit.dtx}{package}
@@ -198,5 +247,5 @@ and all files in that bundle must be distributed together.
   \MetaPrefix\space End of File `\outFileName'.%
 }
 \def\currentpostamble{\defaultpostamble}%
-\generate{\file{l3backend-testphase.lua}   {\from{l3backend-testphase.dtx}{lua}}}
+\generate{\file{l3backend-pdf.lua}   {\from{l3backend-pdfmanagement.dtx}{lua}}}
 \endbatchfile
