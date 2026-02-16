@@ -5,6 +5,16 @@ first release 0.95a, 2021-02-23 will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 this project uses date-based 'snapshot' version identifiers.
 
+## [Unreleased]
+
+### Fixed
+* css-files were not detected by A-4 test
+
+### Changed 
+* Moving away from testphase names: renamded pdfmanagement-testphase.sty to pdfmanagment-init.sty (with a copy)
+* The standard is not longer switched automatically from A-4 to A-4f is a file is found.
+  comment in issue #107
+
 ## [2026-01-23]
 
 ### Fixed
