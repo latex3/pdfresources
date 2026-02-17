@@ -8,13 +8,16 @@ this project uses date-based 'snapshot' version identifiers.
 ## [Unreleased]
 
 ### Fixed
-* css-files were not detected by A-4 test
+* css-files embedded at the end were not detected by embedded file test
 
 ### Changed 
+
+* Force `/Contents` key on Link only if PDF/UA-1 is detected
+
 * Moving away from testphase names: renamed pdfmanagement-testphase.sty to pdfmanagment-init.sty (with a copy), renamed backend files (with copy) and dtx.
 
-* The standard is not longer switched automatically from A-4 to A-4f is a file is found.
-  comment in issue #107
+* The standard is not longer switched automatically from A-4 to A-4f is an embedded file is found, a note is written to the log-file.
+  See comment in issue #107
 
 ## [2026-01-23]
 

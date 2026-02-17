@@ -1788,9 +1788,15 @@
     \pdfannot_dict_put:nne {link/URI}{Contents}
       {\l_@@_link_Contents_tl}
   }
-\socket_assign_plug:nn{hyp/link/GoTo/Contents}{default}
-\socket_assign_plug:nn{hyp/link/GoToR/Contents}{default}
-\socket_assign_plug:nn{hyp/link/URI/Contents}{default}
+\pdfmeta_standard_family:nn{UA}
+ {
+  \pdfmeta_standard_verify:nF{link_Contents}
+   {  
+     \socket_assign_plug:nn{hyp/link/GoTo/Contents}{default}
+     \socket_assign_plug:nn{hyp/link/GoToR/Contents}{default}
+     \socket_assign_plug:nn{hyp/link/URI/Contents}{default}
+   }
+ }    
 %    \end{macrocode}
 % \begin{variable}{\l_@@_dest_pdfview_tl}
 % This hold the destination instructions in a format suitable for
