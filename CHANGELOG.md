@@ -1,5 +1,5 @@
 # Changelog
-All notable changes to the `pdfmanagement-testphase` bundle since the
+All notable changes to the `pdfmanagement` bundle since the
 first release 0.95a, 2021-02-23 will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
@@ -11,6 +11,8 @@ this project uses date-based 'snapshot' version identifiers.
 * css-files embedded at the end were not detected by embedded file test
 
 ### Changed 
+
+* Name of the bundle is now pdfmanagement. File names no longer use testphase in their name. 
 
 * Force `/Contents` key on Link only if PDF/UA-1 is detected
 
