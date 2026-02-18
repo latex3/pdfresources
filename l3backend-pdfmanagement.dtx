@@ -1,6 +1,6 @@
 % \iffalse meta-comment
 %
-%% File: l3backend-testphase.dtx
+%% File: l3backend-pdfmanagement.dtx
 %
 % Copyright (C) 2019-2026 The LaTeX Project
 %
@@ -36,7 +36,7 @@
 % \fi
 %
 % \title{^^A
-%   The \textsf{l3backend-testphase} package\\ Additional backend PDF features^^A
+%   The \textsf{l3backend-pdfmanagement} package\\ Additional backend PDF features^^A
 %   \\ \LaTeX{} PDF management bundle
 % }
 %
@@ -56,32 +56,32 @@
 %
 % \begin{implementation}
 %
-% \section{\pkg{l3backend-testphase} Implementation}
+% \section{\pkg{l3backend-pdfmanagement} Implementation}
 %    \begin{macrocode}
 %<drivers>\ProvidesExplFile
 %<*dvipdfmx>
-  {l3backend-testphase-dvipdfmx.def}{2026-01-23}{0.96y}
-  {LaTeX~PDF~management~bundle~backend~support: dvipdfmx}
+  {l3backend-pdf-dvipdfmx.def}{2026-01-23}{0.96y}
+  {LaTeX~PDF~management~bundle~backend~support:~dvipdfmx}
 %</dvipdfmx>
 %<*dvips>
-  {l3backend-testphase-dvips.def}{2026-01-23}{0.96y}
-  {LaTeX~PDF~management~bundle~backend~support: dvips}
+  {l3backend-pdf-dvips.def}{2026-01-23}{0.96y}
+  {LaTeX~PDF~management~bundle~backend~support:~dvips}
 %</dvips>
 %<*dvisvgm>
-  {l3backend-testphase-dvisvgm.def}{2026-01-23}{0.96y}
-  {LaTeX~PDF~management~bundle~backend~support: dvisvgm}
+  {l3backend-pdf-dvisvgm.def}{2026-01-23}{0.96y}
+  {LaTeX~PDF~management~bundle~backend~support:~dvisvgm}
 %</dvisvgm>
 %<*luatex>
-  {l3backend-testphase-luatex.def}{2026-01-23}{0.96y}
-  {LaTeX~PDF~management~bundle~backend~support: PDF output (LuaTeX)}
+  {l3backend-pdf-luatex.def}{2026-01-23}{0.96y}
+  {LaTeX~PDF~management~bundle~backend~support:~PDF~output~(LuaTeX)}
 %</luatex>
 %<*pdftex>
-  {l3backend-testphase-pdftex.def}{2026-01-23}{0.96y}
-  {LaTeX~PDF~management~bundle~backend~support: PDF output (pdfTeX)}
+  {l3backend-pdf-pdftex.def}{2026-01-23}{0.96y}
+  {LaTeX~PDF~management~bundle~backend~support:~PDF~output~(pdfTeX)}
 %</pdftex>
 %<*xdvipdfmx>
-  {l3backend-testphase-xetex.def}{2026-01-23}{0.96y}
-  {LaTeX~PDF~management~bundle~backend~support: XeTeX}
+  {l3backend-pdf-xetex.def}{2026-01-23}{0.96y}
+  {LaTeX~PDF~management~bundle~backend~support:~XeTeX}
 %</xdvipdfmx>
 %    \end{macrocode}
 % \subsection{Variants}
@@ -224,7 +224,7 @@
 % Load the lua code.
 %    \begin{macrocode}
 %<*luatex>
-    \directlua { require("l3backend-testphase.lua") }
+    \directlua { require("l3backend-pdf.lua") }
 %</luatex>
 %    \end{macrocode}
 % \subsection{Converting unicode strings to a pdfname}
