@@ -944,12 +944,8 @@
 %^^A %% @@_destination:n     :  sets an anchor, replaces \new@pdflink
 %^^A %% \@@_PageLabels_gpush: : puts pagelabels in the catalog, used on every storing
 %^^A %% PDF String (text)
-%^^A %% *\__pdf_string_def:nnN  : replaces Hy@pstringdef, converts #1 to pdfstring in encoding #2
+%^^A %% *\pdf_purify:nN  : replaces (part of) Hy@pstringdef, converts #1 to pdfstring in encoding #2
 %^^A %%                           and stores in N
-%^^A %% Build with:
-%^^A %% *\@@_text_purify:nN
-%^^A %% *\@@_text_cleanup:N
-%^^A %% *\@@_text_convert:nN
 %^^A %%
 %^^A %% Destinations (dest)
 %^^A %% \l_@@_dest_box
@@ -1767,8 +1763,8 @@
 \socket_assign_plug:nn{hyp/link/URI/Contents}{noop}
 \socket_new_plug:nnn {hyp/link/GoTo/Contents}{default}
   {
-    \__pdf_string_def:eoN
-      { Go~to~destination~#1  }
+    \@@_text_pdfstring:noN
+      { Go~to~destination~#1  }      
       { \l_@@_text_enc_info_print_tl }
       \l_@@_link_Contents_tl
     \pdfannot_dict_put:nne {link/GoTo}{Contents}
@@ -1776,17 +1772,17 @@
   }
 \socket_new_plug:nnn {hyp/link/GoToR/Contents}{default}
   {
-    \__pdf_string_def:eoN
-      { Open~file~#1  }
-      { \l_@@_text_enc_info_print_tl }
+    \@@_text_pdfstring:noN
+      { Open~file~#1  }   
+      { \l_@@_text_enc_info_print_tl }   
       \l_@@_link_Contents_tl
     \pdfannot_dict_put:nne {link/GoToR}{Contents}
       {\l_@@_link_Contents_tl}
   }  
 \socket_new_plug:nnn {hyp/link/URI/Contents}{default}
   {
-    \__pdf_string_def:eoN
-      { #1  }
+    \@@_text_pdfstring:noN
+      { #1  }      
       { \l_@@_text_enc_info_print_tl }
       \l_@@_link_Contents_tl
     \pdfannot_dict_put:nne {link/URI}{Contents}
@@ -1922,45 +1918,15 @@
 % \end{variable}
 
 % \section{PDF string conversion}
+% 
+% This is now done with \cs{pdf_purify:nN} which is defined and documented in
+% l3pdftools. 
 %
-% This defines a command which is used to replace
-% \cs{pdfstringdef}. This is probably temporary and will be adjusted or
-% replaced if some more generic PDF string command/module exists.
-% All commands here use the \enquote{submodule} name \texttt{text}.
-% At first a hook for user additions:
-% \begin{macro}[no-user-doc]{hyp/text/pdfstring}
-%    \begin{macrocode}
-\hook_new:n {hyp/text/pdfstring}
-%    \end{macrocode}
-% \end{macro}
-% The first step to convert input in a PDF string is to purify it, that means
-% to remove/expand commands. As the whole process is not expandable anyway we
-% can use a protected command. The \enquote{output} is a string:
-% \begin{macro}{\@@_text_purify:nN}
-%    \begin{macrocode}
-\cs_new_protected:Npn \@@_text_purify:nN #1 #2 %#1 input, #2  str command
-  {
-     \str_set:Ne #2 {\text_purify:n { #1 } }
-  }
-%    \end{macrocode}
-% \end{macro}
-% The second step is to cleanup the output of the first step. This is a dummy
-% currently. The argument should be a string variable.
-% \begin{macro}{\@@_text_cleanup:N}
-%    \begin{macrocode}
-\cs_new_protected:Npn \@@_text_cleanup:N #1
- {
-
- }
-%    \end{macrocode}
-% \end{macro}
-% The last step converts the string to a PDF encoding. As we have at least two
-% targets (hex and literal) there is an argument. The conversion assumes
-% utf8 input, it is based on cs{pdf_string_from_unicode:nnN} in l3pdftools.
-%
-% \#2 is str variable,
-% \#1 should be one of
-%
+% After the content is purified the last step has to convert 
+% the string to a PDF encoding. This should be done with 
+% cs{pdf_string_from_unicode:nnN} in l3pdftools and typically use one of these
+% methods:
+% 
 % \begin{tabular}{ll}
 %  utf8/string         & \texttt{(lit)} (utf8/string)\\
 %  utf8/string-raw     & \texttt{lit}   (utf8/string)\\
@@ -1971,7 +1937,10 @@
 %  utf16/string        & \texttt{(lit)} (utf16/string)\\
 %  utf16/string-raw    & \texttt{lit}   (utf16/string)
 %  \end{tabular}
+%  
 %  \begin{macro}{ \@@_text_string_from_unicode:nN }
+%  As normally we have to duplicate the argument we define a helper command:
+%  
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_text_string_from_unicode:nN #1 #2
   {
@@ -1979,27 +1948,19 @@
   }
 %    \end{macrocode}
 % \end{macro}
-% This command combines everything.
+% 
+% This command combines the two parts:
 % |#1|=input, |#2|= handler shortcut |#3|= output str variable
-% The commands uses a group to locally set \cs{Hy@pdfstringtrue}
-% so that \cs{texorpdfstring} works and other local settings can be done.
 %
 % \begin{macro}{ \@@_text_pdfstring:nnN }
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_text_pdfstring:nnN #1 #2 #3
   {
-    \group_begin:
-    \Hy@pdfstringtrue
-    \hook_use:n {hyp/text/pdfstring}
-    \@@_text_purify:nN  { #1 } \l_@@_text_tmpa_str
-    \@@_text_cleanup:N         \l_@@_text_tmpa_str
-    \@@_text_string_from_unicode:nN { #2 } \l_@@_text_tmpa_str
-    \str_gset_eq:NN \g_@@_text_tmpa_str\l_@@_text_tmpa_str
-    \group_end:
-    \str_set_eq:NN #3 \g_@@_text_tmpa_str
+    \pdf_purify:nN {#1}#3    
+    \pdf_string_from_unicode:nVN   { #2 } #3 #3 
  }
-\cs_generate_variant:Nn \@@_text_pdfstring:nnN {enN,onN,eoN,ooN,noN}
-\cs_generate_variant:Nn \__pdf_string_def:nnN {enN,onN,eoN,ooN,noN}
+\cs_generate_variant:Nn \@@_text_pdfstring:nnN {noN,eoN}
+
 %    \end{macrocode}
 % \end{macro}
 % !!! temporary until all instances are gone
@@ -2010,7 +1971,7 @@
 %^^A  \char_set_catcode_active:N \~
 %    \begin{macrocode}
 \cs_new_protected:Npn\Hy@pstringdef #1 #2
-  { \__pdf_string_def:enN {#2} {utf8/string-raw}#1 }
+  { \@@_text_pdfstring:nnN {#2} {utf8/string-raw}#1 }
 %    \end{macrocode}
 %
 % This is a special version for info keys:
@@ -2018,7 +1979,7 @@
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_text_pdfstring_info:nN #1 #2
   {
-    \__pdf_string_def:noN  { #1 }{ \l_@@_text_enc_info_print_tl } #2
+    \@@_text_pdfstring:noN  { #1 }{ \l_@@_text_enc_info_print_tl } #2
   }
 \cs_generate_variant:Nn \@@_text_pdfstring_info:nN {eN,oN}
 %    \end{macrocode}
@@ -2165,7 +2126,7 @@
     \mode_if_horizontal:T { \@savsf\spacefactor }
     \Hy@SaveLastskip      %defined in hyperref
     \Hy@VerboseAnchor{#1} %defined in hyperref, for debugging
-    \__pdf_string_def:eoN
+    \@@_text_pdfstring:noN
       { \HyperDestNameFilter{#1}  }
       { \l_@@_text_enc_dest_tl }
       \l_@@_tmpa_tl
@@ -2253,8 +2214,8 @@
           { \c_@@_dest_undefined_tl }
         \tl_set_eq:NN \l_@@_dest_name_tmpa_tl \c_@@_dest_undefined_tl
       }
-      {
-        \__pdf_string_def:eoN
+      {        
+        \@@_text_pdfstring:eoN
           { \exp_args:No \HyperDestNameFilter { \l_@@_dest_name_tmpa_tl } }
           { \l_@@_text_enc_dest_tl }
           \l_@@_dest_name_tmpa_tl
@@ -2389,11 +2350,8 @@
         \@@_check_link_nesting:TF
           {
            \group_begin:
-            \__pdf_string_def:eoN
-              { #2}
-              { \l_@@_text_enc_uri_print_tl }
-              \l_@@_uri_tmpa_tl
-            \pdfdict_put:nno{l_hyp/annot/A/URI}{URI}{\l_@@_uri_tmpa_tl}
+           \@@_text_pdfstring:noN {#2}{ \l_@@_text_enc_uri_print_tl }\l_@@_uri_tmpa_tl
+           \pdfdict_put:nno{l_hyp/annot/A/URI}{URI}{\l_@@_uri_tmpa_tl}
             \bool_if:NT \l_@@_href_url_ismap_bool
               {
                \pdfdict_put:nnn{l_hyp/annot/A/URI}{IsMap}{true}
@@ -2456,10 +2414,10 @@
                {l_hyp/annot/A/GoToR}
                {F}
                {\pdf_object_ref:e {@@_file_\tl_to_str:N \l_@@_filename_tmpa_tl}}
-            \__pdf_string_def:nnN
-              { #3 }
-              { \l_@@_text_enc_dest_print_tl }
-              \l_@@_dest_name_tmpa_tl
+            \@@_text_pdfstring:noN 
+               { #3 }
+               { \l_@@_text_enc_dest_print_tl }
+               \l_@@_dest_name_tmpa_tl            
 %    \end{macrocode}
 % This socket adds something to the /Contents key.
 %    \begin{macrocode}
@@ -2522,13 +2480,13 @@
         \@@_check_link_nesting:TF
           {
            \group_begin:
-             \__pdf_string_def:nnN
+             \@@_text_pdfstring:noN             
                { #1 }
                { \l_@@_text_enc_file_print_tl }
                \l_@@_filename_tmpa_tl
              \pdfdict_put:nno {l_hyp/annot/A/Launch}{F}{\l_@@_filename_tmpa_tl}
-             \__pdf_string_def:noN
-               { #3 }
+             \@@_text_pdfstring:noN
+               { #3 }               
                { \l_@@_text_enc_para_print_tl }
                \l_@@_para_tmpa_tl
              \bool_if:nTF
@@ -3364,7 +3322,7 @@
  {
    ,baseurl       .code:n =
      {
-       \__pdf_string_def:ooN  { #1 } {\l_@@_text_enc_uri_print_tl} \l_@@_tmpa_tl
+       \@@_text_pdfstring:noN  { #1 } {\l_@@_text_enc_uri_print_tl} \l_@@_tmpa_tl
         \tl_if_empty:NTF \l_@@_tmpa_tl
           {
              \pdfmanagement_remove:nn {Catalog} { URI }
