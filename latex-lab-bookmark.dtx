@@ -327,6 +327,10 @@
 % Ensure that a text without parentheses is produced by using
 % |string-raw|!
 %    \begin{macrocode}
+\AddToHook{pdf/purify/setup}{
+  \let\protect\@empty
+  \cs_set:Npn \__text_purify_expand:N #1
+    {\__text_purify_encoding:N #1}}
 \socket_new_plug:nnn {hyp/outline/title}{default}
  {
    \pdf_purify:nN {#1}#2

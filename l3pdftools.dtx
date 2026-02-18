@@ -530,18 +530,12 @@
 \socket_new_plug:nnn {pdf/purify} {kernel}
  {
 %    \end{macrocode}
-% \cs{text_expand:n} does not remove a \cs{protect} command
+% Note: currently \cs{text_expand:n} does not remove a \cs{protect} command
 % and does not expand a following token even if it has a declared replacement. 
 % But in PDF strings we want to expand as much as possible, and
 % e.g. should be able to remove/format the |\numberline| command in a bookmark.
-% We therefore remove all occurrences of |\protect|.
-%    \begin{macrocode}
-   \tl_set:Nn\l_@@_purify_tmpa_tl {#1 } 
-   \tl_remove_all:Nn\l_@@_purify_tmpa_tl { \protect }
-%    \end{macrocode}
-% And then run the string through the purify command
 %    \begin{macrocode}   
-   \str_set:Ne #2 {\text_purify:n { \l_@@_purify_tmpa_tl } }   
+   \str_set:Ne #2 {\text_purify:n { #1 } }   
  }
 \socket_assign_plug:nn{pdf/purify}{kernel} 
 %    \end{macrocode}
@@ -551,12 +545,10 @@
 \hook_new_with_args:nn {pdf/purify/after}{1}
 %    \end{macrocode}
 %
-% \begin{macro}{\pdf_purify:nN,\@@_purify:nN,\@@_purify:nnN}
+% \begin{macro}{\pdf_purify:nN,\@@_purify:nN}
 % \cs{pdf_purify:nN} runs all the purifying steps but does
 % not convert to a PDF string. It is meant to produce input for 
-% commmands doing the conversion later. \cs{__pdf_string_def:nnN}
-% runs also \cs{pdf_string_from_unicode:nnN}. 
-% TODO decide which one makes more sense.
+% commands doing the conversion later.
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_purify:nN #1 #2 %#1 content #2 str-var
  {
@@ -597,12 +589,47 @@
    % \Cube ?
    % \begin ?
    % \end ?
-   \cs_set_eq:NN\textcolor\use_ii:nn
 %    \end{macrocode}
-% this handles only |\color{red}| and |\color[model]{values}|.
+% Font commands. 
+%    \begin{macrocode}
+   \cs_set_eq:NN\emph\use_i:n
+   \cs_set_eq:NN\em\prg_do_nothing:
+   \cs_set_eq:NN\textnormal\use_i:n
+   \cs_set_eq:NN\textrm\use_i:n
+   \cs_set_eq:NN\textsf\use_i:n
+   \cs_set_eq:NN\texttt\use_i:n
+   \cs_set_eq:NN\textbf\use_i:n
+   \cs_set_eq:NN\textmd\use_i:n
+   \cs_set_eq:NN\textit\use_i:n
+   \cs_set_eq:NN\textsc\use_i:n
+   \cs_set_eq:NN\textsl\use_i:n
+   \cs_set_eq:NN\textup\use_i:n
+   \cs_set_eq:NN\normalfont\prg_do_nothing:
+   \cs_set_eq:NN\rmfamily\prg_do_nothing:
+   \cs_set_eq:NN\sffamily\prg_do_nothing:
+   \cs_set_eq:NN\ttfamily\prg_do_nothing:
+   \cs_set_eq:NN\bfseries\prg_do_nothing:
+   \cs_set_eq:NN\mdseries\prg_do_nothing:
+   \cs_set_eq:NN\itshape\prg_do_nothing:
+   \cs_set_eq:NN\scshape\prg_do_nothing:
+   \cs_set_eq:NN\slshape\prg_do_nothing:
+   \cs_set_eq:NN\upshape\prg_do_nothing:
+   \cs_set_eq:NN\Huge\prg_do_nothing:
+   \cs_set_eq:NN\LARGE\prg_do_nothing:
+   \cs_set_eq:NN\Large\prg_do_nothing:
+   \cs_set_eq:NN\footnotesize\prg_do_nothing:
+   \cs_set_eq:NN\huge\prg_do_nothing:
+   \cs_set_eq:NN\large\prg_do_nothing:
+   \cs_set_eq:NN\normalsize\prg_do_nothing:
+   \cs_set_eq:NN\scriptsize\prg_do_nothing:
+   \cs_set_eq:NN\small\prg_do_nothing:
+   \cs_set_eq:NN\tiny\prg_do_nothing:      
+%    \end{macrocode}
+% Colors. this handles only a few commands.
 % But pdfstringdef ignores color completely, so probably not
 % a practical problem.
 %    \begin{macrocode}
+   \cs_set_eq:NN\textcolor\use_ii:nn
    \cs_set_eq:NN\color \@gobble@om
    \cs_set_eq:NN\label \@gobble@om
    \cs_set_eq:NN\index \@gobble@som
