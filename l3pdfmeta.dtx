@@ -3400,7 +3400,7 @@
 % in the |shipout/lastpage| hook
 %    \begin{macrocode}
 \hook_new:n { pdfmeta/xmp }
-\AddToHook{shipout/lastpage}
+\AddToHook{shipout/lastpage}[pdfmanagement-testphase]
   {
     \bool_if:NT\g_@@_xmp_bool
      {
