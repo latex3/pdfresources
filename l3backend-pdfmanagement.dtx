@@ -656,7 +656,7 @@
 % \end{arguments}
 % \begin{macro}{\@@_backend_PageResources_obj_gpush:}
 % This pushes out the objects. It should be a no-op with xdvipdfmx and dvips
-% as it currently issued in the end-of-run hook!
+% as it is currently issued in the end-of-run hook!
 % create the backend objects:
 %    \begin{macrocode}
 %<*pdftex|luatex>
@@ -696,21 +696,18 @@
    }
 %</pdftex>
 %    \end{macrocode}
-% code for end of document code
+% code for end of document code. Change 2026-03-11: we push out the 
+% objects even if they are empty as tikz references them in X-objects (fadings)
 %    \begin{macrocode}
 %<*pdftex|luatex>
 \cs_new_protected:Npn \@@_backend_PageResources_obj_gpush:
   {
     \clist_map_inline:Nn \c_@@_backend_PageResources_clist
       {
-        \prop_if_empty:cF
-          { \__kernel_pdfdict_name:n { g_@@_Core/Page/Resources/##1} }
-          {
-            \pdf_object_write:nne
-              { @@/Page/Resources/##1 } { dict }
-              { \pdfdict_use:n { g_@@_Core/Page/Resources/##1} }
-          }
-     }
+        \pdf_object_write:nne
+          { @@/Page/Resources/##1 } { dict }
+          { \pdfdict_use:n { g_@@_Core/Page/Resources/##1} }
+      }
   }
 %</pdftex|luatex>
 %    \end{macrocode}

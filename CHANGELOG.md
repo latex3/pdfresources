@@ -9,6 +9,7 @@ this project uses date-based 'snapshot' version identifiers.
 
 ### Fixed
 * css-files embedded at the end were not detected by embedded file test
+* Object for /Pattern didn't exist if they were referenced in tikz fading/Xobject
 
 ### Changed 
 
