@@ -2307,8 +2307,7 @@
 % public tl |\l_hyp_current_dest_name_tl| so that the hook code can make use of
 % it
 %    \begin{macrocode}
-
-\cs_new_protected:Npn \hyper@link #1 #2 #3 %#1 context, #2=destination name, #3 content
+\cs_set_protected:Npn \hyper@link #1 #2 #3 %#1 context, #2=destination name, #3 content
   {
     \bool_if:NTF \l_@@_annot_GoTo_bool
       {
@@ -2335,7 +2334,7 @@
       }
       {{\let\protect\relax#3}}
   }
-\cs_new_protected:Npn \hyper@linkstart #1 #2 %#1 context, #2=destination name
+\cs_set_protected:Npn \hyper@linkstart #1 #2 %#1 context, #2=destination name
   {
     \bool_if:NT \l_@@_annot_GoTo_bool
       {
@@ -2354,8 +2353,7 @@
           }
       }
   }
-
-\cs_new_protected:Npn \hyper@linkend
+\cs_set_protected:Npn \hyper@linkend
   {
     \bool_if:NT \l_@@_annot_GoTo_bool
       {
