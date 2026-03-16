@@ -560,9 +560,9 @@
    ,bookmarkstype .meta:n = {lists={#1}}
  }
 %    \end{macrocode}
-% \begin{macro}{\}
+% \begin{macro}{\bookmarksetup}
 %    \begin{macrocode}
-\NewDocumentCommand{\bookmarksetup}{m}{\keys_set:nn{hyp/outline}{#1}}
+\NewDocumentCommand\bookmarksetup{m}{\keys_set:nn{hyp/outline}{#1}}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -570,14 +570,20 @@
 \NewHook{bookmark}
 %    \end{macrocode}
 %
+% \begin{macro}{\bookmarksetupnext}
+%    \begin{macrocode}
+\NewDocumentCommand\bookmarksetupnext{m}{\AddToHookNext{bookmark}{\bookmarksetup{#1}}}
+%    \end{macrocode}
+% \end{macro}
+% 
 % \begin{macro}{\bookmark}
 %    \begin{macrocode}
 \NewDocumentCommand\bookmark{O{}m}
   {
     \group_begin:
     \keys_set:nn {hyp/outline} { #1 }
-    \socket_use:nnn{hyp/outline/title}{#2}\l__hyp_outline_title_tl
     \UseHook{bookmark}
+    \socket_use:nnn{hyp/outline/title}{#2}\l__hyp_outline_title_tl    
     \int_compare:nNnF {\l__hyp_outline_level_int} > {\l__hyp_outline_depth_int}
      {
        \__hyp_outline_bookmark_aux:
