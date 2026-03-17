@@ -302,22 +302,22 @@
 %
 % \subsection{Variables}
 %
-% \begin{variable}{\g__hyp_outline_currentlevel_int,\g__hyp_outline_level_intarray}
+% \begin{variable}{\g_@@_outline_currentlevel_int,\g_@@_outline_level_intarray}
 % While bookmarks use relative levels, user set levels relative to document
 % sectioning.
 %    \begin{macrocode}
-\int_new:N    \g__hyp_outline_currentlevel_int
-\int_new:N    \l__hyp_outline_level_int
-\intarray_new:Nn   \g__hyp_outline_level_intarray {2000} %TODO size??
-\intarray_gset:Nnn \g__hyp_outline_level_intarray {1}{0}
-\int_new:N    \l__hyp_outline_depth_int
-\tl_new:N     \l__hyp_outline_title_tl
-\tl_new:N     \l__hyp_outline_action_data_tl
-\tl_new:N     \l__hyp_outline_action_dest_data_tl
-\tl_new:N     \l__hyp_outline_action_view_tl
-\bool_new:N   \l__hyp_outline_keeplevel_bool
-\seq_new:N    \l__hyp_outline_type_seq
-\bitset_new:Nn \l__hyp_outline_action_bitset
+\int_new:N    \g_@@_outline_currentlevel_int
+\int_new:N    \l_@@_outline_level_int
+\intarray_new:Nn   \g_@@_outline_level_intarray {2000} %TODO size??
+\intarray_gset:Nnn \g_@@_outline_level_intarray {1}{0}
+\int_new:N    \l_@@_outline_depth_int
+\tl_new:N     \l_@@_outline_title_tl
+\tl_new:N     \l_@@_outline_action_data_tl
+\tl_new:N     \l_@@_outline_action_dest_data_tl
+\tl_new:N     \l_@@_outline_action_view_tl
+\bool_new:N   \l_@@_outline_keeplevel_bool
+\seq_new:N    \l_@@_outline_type_seq
+\bitset_new:Nn \l_@@_outline_action_bitset
  {
    goto  = 1,
    gotor = 2,
@@ -330,14 +330,14 @@
    namedest  = 6,
    pagedest  = 7
  }
-\bitset_set_true:Nn  \l__hyp_outline_action_bitset { goto }
+\bitset_set_true:Nn  \l_@@_outline_action_bitset { goto }
 
-\int_new:N    \l__hyp_outline_tmpa_int
-\int_new:N    \l__hyp_outline_rellevel_tmpa_int
-\tl_new:N     \l__hyp_outline_parent_tmpa_tl
-\seq_new:N    \l__hyp_outline_tmpa_seq
-\tl_new:N     \l__hyp_outline_tmpa_tl
-\str_new:N    \g__hyp_outline_tmpa_str
+\int_new:N    \l_@@_outline_tmpa_int
+\int_new:N    \l_@@_outline_rellevel_tmpa_int
+\tl_new:N     \l_@@_outline_parent_tmpa_tl
+\seq_new:N    \l_@@_outline_tmpa_seq
+\tl_new:N     \l_@@_outline_tmpa_tl
+\str_new:N    \g_@@_outline_tmpa_str
 %    \end{macrocode}
 % \end{variable}
 %
@@ -382,7 +382,7 @@
 % \subsubsection{Regex to check the view value}
 %
 %    \begin{macrocode}
-\regex_const:Nn \c__hyp_outline_dest_startview_regex
+\regex_const:Nn \c_@@_outline_dest_startview_regex
   {
     \A\ *
      (?:
@@ -471,8 +471,8 @@
    ,depth .code:n =
     {
       \cs_if_exist:cTF {toclevel@#1}
-        { \int_set:Nn \l__hyp_outline_depth_int { \use:c {toclevel@#1} } }
-        { \int_set:Nn \l__hyp_outline_depth_int { #1 } }
+        { \int_set:Nn \l_@@_outline_depth_int { \use:c {toclevel@#1} } }
+        { \int_set:Nn \l_@@_outline_depth_int { #1 } }
     }
    ,bookmarksdepth .meta:n = { depth = #1 }
    ,depth .initial:n = {\int_use:N \c_max_int}
@@ -484,23 +484,23 @@
    ,level .code:n =
     {
       \cs_if_exist:cTF {toclevel@#1}
-        { \int_set:Nn \l__hyp_outline_level_int { \use:c {toclevel@#1} } }
-        { \int_set:Nn \l__hyp_outline_level_int { #1 } }
+        { \int_set:Nn \l_@@_outline_level_int { \use:c {toclevel@#1} } }
+        { \int_set:Nn \l_@@_outline_level_int { #1 } }
     }
    ,rellevel .code:n =
      {
        \int_set:Nn
-         \l__hyp_outline_level_int
-         { \g__hyp_outline_currentlevel_int + #1 }
+         \l_@@_outline_level_int
+         { \g_@@_outline_currentlevel_int + #1 }
      }
-   ,keeplevel .bool_set:N = \l__hyp_outline_keeplevel_bool
+   ,keeplevel .bool_set:N = \l_@@_outline_keeplevel_bool
    ,startatroot .code:n =
      {
-       \int_set:Nn \l__hyp_outline_level_int { -1000 }
-       \bool_if:NF \l__hyp_outline_keeplevel_bool
+       \int_set:Nn \l_@@_outline_level_int { -1000 }
+       \bool_if:NF \l_@@_outline_keeplevel_bool
          {
-           \int_gset:Nn \g__hyp_outline_currentlevel_int {#1}
-           \bool_set_true:NF \l__hyp_outline_keeplevel_bool
+           \int_gset:Nn \g_@@_outline_currentlevel_int {#1}
+           \bool_set_true:NF \l_@@_outline_keeplevel_bool
          }
      }
    ,startatroot .default:n = 0
@@ -510,47 +510,47 @@
    ,dest  .code:n =
      {
        \int_compare:nNnTF
-        { \bitset_item:Nn \l__hyp_outline_action_bitset {gotor} } = {1}
+        { \bitset_item:Nn \l_@@_outline_action_bitset {gotor} } = {1}
         {
-          \bitset_clear:N      \l__hyp_outline_action_bitset
-          \bitset_set_true:Nn  \l__hyp_outline_action_bitset { gotor }
+          \bitset_clear:N      \l_@@_outline_action_bitset
+          \bitset_set_true:Nn  \l_@@_outline_action_bitset { gotor }
         }
         {
-          \bitset_clear:N      \l__hyp_outline_action_bitset
-          \bitset_set_true:Nn  \l__hyp_outline_action_bitset { goto }
+          \bitset_clear:N      \l_@@_outline_action_bitset
+          \bitset_set_true:Nn  \l_@@_outline_action_bitset { goto }
         }
-       \bitset_set_true:Nn  \l__hyp_outline_action_bitset { namedest }
-       \tl_set:Nn\l__hyp_outline_action_dest_data_tl {#1}
+       \bitset_set_true:Nn  \l_@@_outline_action_bitset { namedest }
+       \tl_set:Nn\l_@@_outline_action_dest_data_tl {#1}
      }
    ,dest .default:n = Doc-Start
    ,goto .code:n =
      {
-       \bitset_clear:N      \l__hyp_outline_action_bitset
-       \bitset_set_true:Nn  \l__hyp_outline_action_bitset { goto }
-       \bitset_set_true:Nn  \l__hyp_outline_action_bitset { namedest }
-       \tl_set:Nn\l__hyp_outline_action_dest_data_tl {#1}
+       \bitset_clear:N      \l_@@_outline_action_bitset
+       \bitset_set_true:Nn  \l_@@_outline_action_bitset { goto }
+       \bitset_set_true:Nn  \l_@@_outline_action_bitset { namedest }
+       \tl_set:Nn\l_@@_outline_action_dest_data_tl {#1}
      }
    ,gotor .code:n =
      {
        \int_compare:nNnTF
-        { \bitset_item:Nn \l__hyp_outline_action_bitset {pagedest} } = {1}
+        { \bitset_item:Nn \l_@@_outline_action_bitset {pagedest} } = {1}
         {
-          \bitset_clear:N      \l__hyp_outline_action_bitset
-          \bitset_set_true:Nn  \l__hyp_outline_action_bitset { pagedest }
+          \bitset_clear:N      \l_@@_outline_action_bitset
+          \bitset_set_true:Nn  \l_@@_outline_action_bitset { pagedest }
         }
         {
-          \bitset_clear:N      \l__hyp_outline_action_bitset
-          \bitset_set_true:Nn  \l__hyp_outline_action_bitset { namedest }
+          \bitset_clear:N      \l_@@_outline_action_bitset
+          \bitset_set_true:Nn  \l_@@_outline_action_bitset { namedest }
         }
-       \bitset_set_true:Nn  \l__hyp_outline_action_bitset  { gotor }
-       \tl_set:Nn\l__hyp_outline_action_data_tl {#1}
+       \bitset_set_true:Nn  \l_@@_outline_action_bitset  { gotor }
+       \tl_set:Nn\l_@@_outline_action_data_tl {#1}
      }
    ,named .choices:nn =
      {FirstPage, NextPage, PrevPage, LastPage}
      {
-       \bitset_clear:N      \l__hyp_outline_action_bitset
-       \bitset_set_true:Nn  \l__hyp_outline_action_bitset { named }
-       \tl_set:Nn \l__hyp_outline_action_data_tl {/#1}
+       \bitset_clear:N      \l_@@_outline_action_bitset
+       \bitset_set_true:Nn  \l_@@_outline_action_bitset { named }
+       \tl_set:Nn \l_@@_outline_action_data_tl {/#1}
      }
 %    \end{macrocode}
 % page like dest applies to goto and gotor actions.
@@ -558,51 +558,51 @@
    ,page .code:n =
      {
        \int_compare:nNnTF
-        { \bitset_item:Nn \l__hyp_outline_action_bitset {gotor} } = {1}
+        { \bitset_item:Nn \l_@@_outline_action_bitset {gotor} } = {1}
         {
-          \bitset_clear:N      \l__hyp_outline_action_bitset
-          \bitset_set_true:Nn  \l__hyp_outline_action_bitset { gotor }
+          \bitset_clear:N      \l_@@_outline_action_bitset
+          \bitset_set_true:Nn  \l_@@_outline_action_bitset { gotor }
         }
         {
-          \bitset_clear:N      \l__hyp_outline_action_bitset
-          \bitset_set_true:Nn  \l__hyp_outline_action_bitset { goto }
+          \bitset_clear:N      \l_@@_outline_action_bitset
+          \bitset_set_true:Nn  \l_@@_outline_action_bitset { goto }
         }
-       \bitset_set_true:Nn   \l__hyp_outline_action_bitset { pagedest }
-       \tl_set:Nn \l__hyp_outline_action_dest_data_tl {#1}
+       \bitset_set_true:Nn   \l_@@_outline_action_bitset { pagedest }
+       \tl_set:Nn \l_@@_outline_action_dest_data_tl {#1}
      }
    ,page  .default:n    = 1
    ,rawaction .code:n =
     {
-      \bitset_clear:N      \l__hyp_outline_action_bitset
-      \bitset_set_true:Nn  \l__hyp_outline_action_bitset { uri }
-      \tl_set:Nn\l__hyp_outline_action_data_tl {#1}
+      \bitset_clear:N      \l_@@_outline_action_bitset
+      \bitset_set_true:Nn  \l_@@_outline_action_bitset { uri }
+      \tl_set:Nn\l_@@_outline_action_data_tl {#1}
      }
    ,view .code:n =
      {
-       \tl_set:Ne \l__hyp_outline_tmpa_tl {#1~null~null~null~}
+       \tl_set:Ne \l_@@_outline_tmpa_tl {#1~null~null~null~}
        \exp_args:NNV
        \regex_extract_once:NnNTF
-         \c__hyp_outline_dest_startview_regex
-         \l__hyp_outline_tmpa_tl
-         \l__hyp_outline_tmpa_seq
+         \c_@@_outline_dest_startview_regex
+         \l_@@_outline_tmpa_tl
+         \l_@@_outline_tmpa_seq
           {
-           \tl_set:Ne \l__hyp_outline_action_view_tl {/\seq_item:Nn \l__hyp_outline_tmpa_seq {1}}
+           \tl_set:Ne \l_@@_outline_action_view_tl {/\seq_item:Nn \l_@@_outline_tmpa_seq {1}}
           }
           {
             \msg_warning:nnnn {hyp/outline}{invalid-view-value}{#1}{view}
-            \tl_set:Nn \l__hyp_outline_action_view_tl {Fit}
+            \tl_set:Nn \l_@@_outline_action_view_tl {Fit}
           }
      }
    ,uri .code:n =
     {
-      \bitset_clear:N      \l__hyp_outline_action_bitset
-      \bitset_set_true:Nn  \l__hyp_outline_action_bitset { uri }
-      \pdf_purify:nN{#1}\l__hyp_outline_action_data_tl
+      \bitset_clear:N      \l_@@_outline_action_bitset
+      \bitset_set_true:Nn  \l_@@_outline_action_bitset { uri }
+      \pdf_purify:nN{#1}\l_@@_outline_action_data_tl
       \pdf_string_from_unicode:nVN   
-        { utf8/URI } \l__hyp_outline_action_data_tl \l__hyp_outline_action_data_tl            
+        { utf8/URI } \l_@@_outline_action_data_tl \l_@@_outline_action_data_tl            
     }
    ,lists .code:n =
-     { \seq_set_from_clist:Nn \l__hyp_outline_type_seq { #1 } }
+     { \seq_set_from_clist:Nn \l_@@_outline_type_seq { #1 } }
    ,lists .initial:n = toc
    ,bookmarkstype .meta:n = {lists={#1}}
  }
@@ -636,132 +636,132 @@
     \group_begin:
     \keys_set:nn {hyp/outline} { #1 }
     \UseHook{bookmark}
-    \socket_use:nnn{hyp/outline/title}{#2}\l__hyp_outline_title_tl    
-    \int_compare:nNnF {\l__hyp_outline_level_int} > {\l__hyp_outline_depth_int}
+    \socket_use:nnn{hyp/outline/title}{#2}\l_@@_outline_title_tl    
+    \int_compare:nNnF {\l_@@_outline_level_int} > {\l_@@_outline_depth_int}
      {
-       \__hyp_outline_bookmark_aux:
+       \@@_outline_bookmark_aux:
      }
     \group_end:
   }
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\__hyp_outline_bookmark_aux:}
+% \begin{macro}{\@@_outline_bookmark_aux:}
 %    \begin{macrocode}
-\cs_new_protected:Npn \__hyp_outline_bookmark_aux:
+\cs_new_protected:Npn \@@_outline_bookmark_aux:
 %    \end{macrocode}
 % At first we calculate the rellevel from the requested level.
 %    \begin{macrocode}
   {
-    \__hyp_outline_calc_rellevel:NN \l__hyp_outline_level_int \l__hyp_outline_rellevel_tmpa_int
+    \@@_outline_calc_rellevel:NN \l_@@_outline_level_int \l_@@_outline_rellevel_tmpa_int
 %    \end{macrocode}
 % Update the global current level
 %    \begin{macrocode}
-    \bool_if:NF\l__hyp_outline_keeplevel_bool
+    \bool_if:NF\l_@@_outline_keeplevel_bool
      {
-       \int_gset:Nn \g__hyp_outline_currentlevel_int { \l__hyp_outline_level_int }
+       \int_gset:Nn \g_@@_outline_currentlevel_int { \l_@@_outline_level_int }
      }
     \int_compare:nNnTF
       {
-        \bitset_item:Nn \l__hyp_outline_action_bitset {goto} *
-        \bitset_item:Nn \l__hyp_outline_action_bitset {namedest}
+        \bitset_item:Nn \l_@@_outline_action_bitset {goto} *
+        \bitset_item:Nn \l_@@_outline_action_bitset {namedest}
       } = {1}
       {
         \pdfoutline_goto:nee
-          { \l__hyp_outline_rellevel_tmpa_int } %level
-          { \l__hyp_outline_action_dest_data_tl }
-          { \l__hyp_outline_title_tl            }
+          { \l_@@_outline_rellevel_tmpa_int } %level
+          { \l_@@_outline_action_dest_data_tl }
+          { \l_@@_outline_title_tl            }
       }
       {
-        \int_case:nnF { \bitset_to_arabic:N \l__hyp_outline_action_bitset }
+        \int_case:nnF { \bitset_to_arabic:N \l_@@_outline_action_bitset }
           {
             { 65 } % goto (1) + pagedest (65)
             {
               \pdfoutline_action:nee
-               {  \l__hyp_outline_rellevel_tmpa_int }
+               {  \l_@@_outline_rellevel_tmpa_int }
                { /S/GoTo~
                  /D
                   [
-                   \pdf_pageobject_ref:n { \l__hyp_outline_action_dest_data_tl }~
-                   \l__hyp_outline_action_view_tl
+                   \pdf_pageobject_ref:n { \l_@@_outline_action_dest_data_tl }~
+                   \l_@@_outline_action_view_tl
                   ]
                }
-               { \l__hyp_outline_title_tl }
+               { \l_@@_outline_title_tl }
             }
             { 34 } % gotor (2) + namedest (32)
             {
               \pdfoutline_action:nee
-               {  \l__hyp_outline_rellevel_tmpa_int }
+               {  \l_@@_outline_rellevel_tmpa_int }
                { /S/GoToR~
-                 /F ( \l__hyp_outline_action_data_tl ) %Todo check format
-                 /D ( \l__hyp_outline_action_dest_data_tl ) %Todo check format
+                 /F ( \l_@@_outline_action_data_tl ) %Todo check format
+                 /D ( \l_@@_outline_action_dest_data_tl ) %Todo check format
                }
-               { \l__hyp_outline_title_tl }
+               { \l_@@_outline_title_tl }
             }
             { 66 } % gotor (2) + pagedest (64)
             {
               \pdfoutline_action:nee
-               {  \l__hyp_outline_rellevel_tmpa_int }
+               {  \l_@@_outline_rellevel_tmpa_int }
                { /S/GoToR~
-                 /F ( \l__hyp_outline_action_data_tl ) %Todo check format
+                 /F ( \l_@@_outline_action_data_tl ) %Todo check format
                  /D
                   [
-                   \pdf_pageobject_ref:n { \l__hyp_outline_action_dest_data_tl }~
-                   \l__hyp_outline_action_view_tl
+                   \pdf_pageobject_ref:n { \l_@@_outline_action_dest_data_tl }~
+                   \l_@@_outline_action_view_tl
                   ]
                }
-               { \l__hyp_outline_title_tl }
+               { \l_@@_outline_title_tl }
 
             }
             {  4 }  % named (4)
             {
              \pdfoutline_action:nee
-               {  \l__hyp_outline_rellevel_tmpa_int }
+               {  \l_@@_outline_rellevel_tmpa_int }
                { /S/Named~
-                 /N \l__hyp_outline_action_data_tl %TODO check formt
+                 /N \l_@@_outline_action_data_tl %TODO check formt
                }
-               { \l__hyp_outline_title_tl }
+               { \l_@@_outline_title_tl }
 
             }
             {  8 } % uri (8)
             {
              \pdfoutline_action:nee
-               {  \l__hyp_outline_rellevel_tmpa_int }
+               {  \l_@@_outline_rellevel_tmpa_int }
                { /S/URI~
-                 /URI \l__hyp_outline_action_data_tl %TODO check formt
+                 /URI \l_@@_outline_action_data_tl %TODO check formt
                }
-               { \l__hyp_outline_title_tl }
+               { \l_@@_outline_title_tl }
             }
             { 16 } % raw (16)
             {
               \pdfoutline_action:nee
-               {  \l__hyp_outline_rellevel_tmpa_int }
+               {  \l_@@_outline_rellevel_tmpa_int }
                {
-                 \l__hyp_outline_action_data_tl %TODO check formt
+                 \l_@@_outline_action_data_tl %TODO check formt
                }
-               { \l__hyp_outline_title_tl }
+               { \l_@@_outline_title_tl }
             }
           }
           { \msg_error:nn {hyp/outline}{no-action} }
       }
     \intarray_gset:Nnn
-      \g__hyp_outline_level_intarray
+      \g_@@_outline_level_intarray
       { \pdfoutline_id_ref_last: }
-      { \g__hyp_outline_currentlevel_int }
+      { \g_@@_outline_currentlevel_int }
   }  %
 %    \end{macrocode}
 % \end{macro}
 %
 %
-% \begin{macro}{\__hyp_outline_calc_rellevel:NN}
+% \begin{macro}{\@@_outline_calc_rellevel:NN}
 % This function computes the relative level.
 %    \begin{macrocode}
-\cs_new_protected:Npn\__hyp_outline_calc_rellevel:NN #1 #2 % #1 the requested level, #2 the return value
+\cs_new_protected:Npn\@@_outline_calc_rellevel:NN #1 #2 % #1 the requested level, #2 the return value
   {
     \int_compare:nNnTF
       { #1 }
        <
-      { \g__hyp_outline_currentlevel_int }
+      { \g_@@_outline_currentlevel_int }
 %    \end{macrocode}
 % if the requested level is lower, we must inspect the parents to find the best fit.
 % starting with the previous bookmark
@@ -771,66 +771,66 @@
 %    \end{macrocode}
 % get the first parent
 %    \begin{macrocode}
-        \tl_set:Ne \l__hyp_outline_parent_tmpa_tl
+        \tl_set:Ne \l_@@_outline_parent_tmpa_tl
                    { \pdfoutline_parent_ref:n { \pdfoutline_id_ref_last: } }
 %    \end{macrocode}
 % get the document level of the first parent.
 %    \begin{macrocode}
        \int_compare:nNnTF
-         { \l__hyp_outline_parent_tmpa_tl } > { 0 }
+         { \l_@@_outline_parent_tmpa_tl } > { 0 }
          {
-           \int_set:Nn \l__hyp_outline_tmpa_int
+           \int_set:Nn \l_@@_outline_tmpa_int
              {
                \intarray_item:Nn
-                \g__hyp_outline_level_intarray
-                {  \l__hyp_outline_parent_tmpa_tl }
+                \g_@@_outline_level_intarray
+                {  \l_@@_outline_parent_tmpa_tl }
              }
          }
-         { \int_set_eq:NN \l__hyp_outline_tmpa_int #1 }
-% if \l__hyp_outline_tmpa_int = #1
+         { \int_set_eq:NN \l_@@_outline_tmpa_int #1 }
+% if \l_@@_outline_tmpa_int = #1
 % stop, decr rellevel (this sets it as sibling of the parent)
-% if \l__hyp_outline_tmpa_int < #1
+% if \l_@@_outline_tmpa_int < #1
 % stop (this sets it as child of the parent as rellevel is unchanged)
-% if \l__hyp_outline_tmpa_int > #1
+% if \l_@@_outline_tmpa_int > #1
 % get next parent and continue.
         \int_do_while:nNnn
-          { \l__hyp_outline_tmpa_int  }
+          { \l_@@_outline_tmpa_int  }
            >
           { #1 }
           {
             \int_case:nn
              {
                \int_sign:n
-                { \l__hyp_outline_tmpa_int-#1 }
+                { \l_@@_outline_tmpa_int-#1 }
              }
              {
                { 0 } { \int_decr:N #2 }
                { 1 }
                {
                  \int_decr:N #2
-                 \tl_set:Ne \l__hyp_outline_parent_tmpa_tl
-                   { \pdfoutline_parent_ref:n { \l__hyp_outline_parent_tmpa_tl } }
+                 \tl_set:Ne \l_@@_outline_parent_tmpa_tl
+                   { \pdfoutline_parent_ref:n { \l_@@_outline_parent_tmpa_tl } }
 %    \end{macrocode}
 % We need to check if we reached the root level.
 %    \begin{macrocode}
                  \int_compare:nNnTF
-                   { \l__hyp_outline_parent_tmpa_tl } > { 1 }
+                   { \l_@@_outline_parent_tmpa_tl } > { 1 }
                    {
-                     \int_set:Nn \l__hyp_outline_tmpa_int
+                     \int_set:Nn \l_@@_outline_tmpa_int
                        {
                          \intarray_item:Nn
-                         \g__hyp_outline_level_intarray
-                         { \l__hyp_outline_parent_tmpa_tl }
+                         \g_@@_outline_level_intarray
+                         { \l_@@_outline_parent_tmpa_tl }
                        }
                    }
                    {
                      % root
-                     \int_set_eq:NN \l__hyp_outline_tmpa_int #1
+                     \int_set_eq:NN \l_@@_outline_tmpa_int #1
                    }
                }
              }
           }
-        \int_if_zero:nT {\l__hyp_outline_tmpa_int-#1}{\int_decr:N #2}
+        \int_if_zero:nT {\l_@@_outline_tmpa_int-#1}{\int_decr:N #2}
       }
 %    \end{macrocode}
 % requested level >= current level is the easy case: we create either a sibling or
@@ -838,7 +838,7 @@
 %    \begin{macrocode}
       {
         \int_set:Nn #2
-         { #1 - \g__hyp_outline_currentlevel_int }
+         { #1 - \g_@@_outline_currentlevel_int }
       }
  }
 %    \end{macrocode}
@@ -852,7 +852,7 @@
   {
     \RemoveFromHook{cmd/addcontentsline/before}[hyp]
     \AddToHookWithArguments{cmd/addcontentsline/before}[hyp/outline]
-      { \__hyp_addcontentsline_bookmark:nnn {#1}{#2}{#3} }
+      { \@@_addcontentsline_bookmark:nnn {#1}{#2}{#3} }
     \legacy_if:nF{Hy@bookmarks}{\bool_set_false:N\l_pdfoutline_bool}
     \renewcommand*{\pdfbookmark}[3][0]{%
     \bookmark[level=#1,dest={#3.#1}]{#2}%
@@ -878,12 +878,12 @@
 \DeclareHookRule{package/hyperref/after}{latex-lab-testphase-bookmark}{after}{latex-lab-testphase-toc}
 %    \end{macrocode}
 %
-% \begin{macro}{\__hyp_addcontentsline_bookmark:nnn}
+% \begin{macro}{\@@_addcontentsline_bookmark:nnn}
 % This is the command used at the begin of \cs{addcontentsline} which creates the bookmark.
 %    \begin{macrocode}
-\cs_new_protected:Npn \__hyp_addcontentsline_bookmark:nnn #1 #2 #3 %%#1 toc type, #2 level, #3 content
+\cs_new_protected:Npn \@@_addcontentsline_bookmark:nnn #1 #2 #3 %%#1 toc type, #2 level, #3 content
   {
-    \seq_if_in:NeT \l__hyp_outline_type_seq { #1 }
+    \seq_if_in:NeT \l_@@_outline_type_seq { #1 }
       {
         \tl_if_empty:NT\@currentHref
           { \MakeLinkTarget[page] {} }
