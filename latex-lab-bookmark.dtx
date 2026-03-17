@@ -361,11 +361,15 @@
 % in l3pdftools. We use that socket by default.
 % Ensure that a text without parentheses is produced by using
 % |string-raw|!
+% Until expl3 is update we have work around the |\protect| problem:
 %    \begin{macrocode}
-\AddToHook{pdf/purify/setup}{
-  \let\protect\@empty
-  \cs_set:Npn \__text_purify_expand:N #1
-    {\__text_purify_encoding:N #1}}
+\@ifl@t@r\ExplFileDate{2026-03-16}{}
+ {
+  \AddToHook{pdf/purify/setup}{
+    \let\protect\@empty
+    \cs_set:Npn \__text_purify_expand:N #1
+      {\__text_purify_encoding:N #1}}
+  }  
 \socket_new_plug:nnn {hyp/outline/title}{default}
  {
    \pdf_purify:nN {#1}#2
@@ -417,18 +421,26 @@
 \socket_new:nn {hyp/outline/numberformat}{0}
 \socket_new_plug:nnn {hyp/outline/numberformat}{false}
  {
+   \text_declare_purify_equivalent:Nn\numberline\use_none:n
+   \text_declare_purify_equivalent:Nn\booknumberline\use_none:n
+   \text_declare_purify_equivalent:Nn\partnumberline\use_none:n
+   \text_declare_purify_equivalent:Nn\chapternumberline\use_none:n
    \cs_set_eq:NN\numberline\use_none:n
    \cs_set_eq:NN\booknumberline\use_none:n
    \cs_set_eq:NN\partnumberline\use_none:n
    \cs_set_eq:NN\chapternumberline\use_none:n
  }
-\cs_new:Npn \__hyp_outline_use_numberline:n #1 {#1\c_space_tl}
+\cs_new:Npn \@@_outline_use_numberline:n #1 {#1\c_space_tl}
 \socket_new_plug:nnn {hyp/outline/numberformat}{true}
  {
-   \cs_set_eq:NN\numberline       \__hyp_outline_use_numberline:n
-   \cs_set_eq:NN\booknumberline   \__hyp_outline_use_numberline:n
-   \cs_set_eq:NN\partnumberline   \__hyp_outline_use_numberline:n
-   \cs_set_eq:NN\chapternumberline\__hyp_outline_use_numberline:n
+   \text_declare_purify_equivalent:Nn\numberline       \@@_outline_use_numberline:n
+   \text_declare_purify_equivalent:Nn\booknumberline   \@@_outline_use_numberline:n
+   \text_declare_purify_equivalent:Nn\partnumberline   \@@_outline_use_numberline:n
+   \text_declare_purify_equivalent:Nn\chapternumberline\@@_outline_use_numberline:n
+   \cs_set_eq:NN \numberline \@@_outline_use_numberline:n
+   \cs_set_eq:NN\booknumberline   \@@_outline_use_numberline:n
+   \cs_set_eq:NN\partnumberline   \@@_outline_use_numberline:n
+   \cs_set_eq:NN\chapternumberline\@@_outline_use_numberline:n
  }
 %    \end{macrocode}
 %

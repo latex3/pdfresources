@@ -625,6 +625,12 @@
    \cs_set_eq:NN\small\prg_do_nothing:
    \cs_set_eq:NN\tiny\prg_do_nothing:      
 %    \end{macrocode}
+%  Spaces
+%    \begin{macrocode}
+   \cs_set_eq:NN\quad\space
+   \cs_set_eq:NN\qquad\space 
+   \cs_set_eq:NN\hspace\@@_purify_hspace:w      
+%    \end{macrocode}
 % Colors. this handles only a few commands.
 % But pdfstringdef ignores color completely, so probably not
 % a practical problem.
@@ -669,7 +675,13 @@
     }
   }
 %    \end{macrocode}
-
+% Replacement for hspace:
+%    \begin{macrocode}
+\NewExpandableDocumentCommand\@@_purify_hspace:w{sm}
+  {
+    \dim_compare:nNnT{#2}>{0pt}{\space}  
+  }
+%    \end{macrocode}
 %
 % \subsection{BDC  operator commands}
 % \begin{macro}{\pdf_bdc:nn,\pdf_bdc:ee}
