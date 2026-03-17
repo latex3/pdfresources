@@ -1,0 +1,15 @@
+\input{regression-test}
+\DocumentMetadata{testphase=bookmark}
+\documentclass{book}
+\usepackage{bookmark}
+\bookmarksetup{open}
+\AddToHook{bookmark}
+ {\ifnum\bookmarkget{level}=0 %
+    \bookmarksetup{bold}%
+        \fi}
+\begin{document}
+\part{part}
+\chapter{Chapter 1}
+\section{Section 1}
+\subsection{subsection}
+\end{document}
