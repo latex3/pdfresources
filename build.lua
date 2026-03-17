@@ -36,25 +36,26 @@ end
 checkruns = 4
 recordstatus=true
 
-
-  specialformats = specialformats or {}
+usedev=true
+specialformats = specialformats or {}
+if usedev then  
   specialformats["latex"] = specialformats["latex"] or
    {
     luatex     = {binary="luahbtex",format = "lualatex-dev"},
     pdftex     = {format = "pdflatex-dev"},
     xetex     = {format = "xelatex-dev"},
-    latexdvips = {binary="latex",format = "latex-dev"}
+    latexdvips = {binary="latex",format = "latex-dev"},
     }
-
+else
 -- to try without dev-format
---   specialformats["latex"] = specialformats["latex"] or
---    {
---     luatex     = {binary="luahbtex",format = "lualatex"},
---     pdftex     = {format = "pdflatex"},
---     xetex     = {format = "xelatex"},
---     latexdvips = {binary="latex",format = "latex"}
---     }
-
+   specialformats["latex"] = specialformats["latex"] or
+    {
+     luatex     = {binary="luahbtex",format = "lualatex"},
+     pdftex     = {format = "pdflatex"},
+     xetex     = {format = "xelatex"},
+     latexdvips = {binary="latex",format = "latex"}
+     }
+end
 -- packtdszip = true
 checkengines = {"pdftex","luatex","xetex"}
 
