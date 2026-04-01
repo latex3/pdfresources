@@ -52,7 +52,7 @@
 % the l3pdfoutline module in the PDF management. 
 % It is based on the
 % \pkg{bookmark} and the \pkg{hyperref} package and mostly implements the same user commands,
-% most importantly the main commands |\bookmark| and |\bookmarksetup|.
+% most importantly the main commands |\bookmark| and |\bookmarksetup|.%
 % \footnote{There is no clash here, as documents can use only one bookmark system: mixing
 % commands from more than one package or using manually the primitives is not
 % really possible without breaking the tree.} But it does not try to be a full replacement
@@ -77,7 +77,7 @@
 % \pkg{hyperref} and \pkg{bookmark} packages. It is possible to
 % manually create bookmarks with this package even if \pkg{hyperref} or \pkg{bookmark}
 % are not loaded, but then the targets must be created manually too, e.g. with
-% |pdf_destination:nn|.
+% |\pdf_destination:nn|.
 %
 % The package assumes that the input files are UTF-8 encoded!
 %
@@ -109,7 +109,7 @@
 % \end{syntax}
 % This is a small wrapper around |\AddToHookNext{bookmark}{\bookmarksetup{#1}}|
 % and provided for compatibility with the package \pkg{bookmark}. The hook it uses
-% is executed after the optional argument of |\bookmark| has been process and so allows
+% is executed after the optional argument of |\bookmark| has been processed and so allows
 % to change the settings done there. 
 % \end{function}
 % 
@@ -127,12 +127,12 @@
 % 
 % \begin{function}{\pdfbookmark,\subpdfbookmark,\belowpdfbookmark,\currentpdfbookmark}
 % \begin{syntax}
-% \cs{pdfbookmark}\oarg[level]\Arg{text}\Arg{name}
+% \cs{pdfbookmark}\oarg{level}\Arg{text}\Arg{name}
 % \end{syntax}
 %
 % These commands are defined if hyperref is loaded and work as described in the
 % hyperref documentation. They all not only create a bookmark with a GoTo link
-% but also with \Arg{name} a destination for this bookmark.
+% but also a destination \Arg{name} for this bookmark.
 % \end{function}
 
 
@@ -142,7 +142,10 @@
 % For the second method \pkg{hyperref} hooks into the \cs{addcontentsline}
 % command which means that only headings which can at least potentially appear
 % in a table of contents are added to the bookmarks --- the standard starred
-% headings currently not.   The following keys allow to
+% headings currently not%
+% \footnote{This will change with the new template implementation of headings.
+% In this implementation also starred headings can create bookmarks.}   
+% The following keys allow to
 % configure the bookmarks added with this second method\footnote{As mentioned above
 % hyperref is currently required for these bookmarks}.
 %
