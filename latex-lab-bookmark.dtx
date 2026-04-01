@@ -49,7 +49,7 @@
 %
 % \section{Introduction}
 % This package implements support for the PDF outline aka bookmarks based on
-% the l3pdfoutline module in the PDF management. 
+% the l3pdfoutline module in the PDF management.
 % It is based on the
 % \pkg{bookmark} and the \pkg{hyperref} package and mostly implements the same user commands,
 % most importantly the main commands |\bookmark| and |\bookmarksetup|.%
@@ -59,20 +59,20 @@
 % and to replicate every option in the same way as the other packages.
 %
 % \subsection{Usage}
-% If \cs{DocumentMetadata} is used, the package should (currently) be loaded additionally 
+% If \cs{DocumentMetadata} is used, the package should (currently) be loaded additionally
 % with the |testphase| key:
 % \begin{verbatim}
 % \DocumentMetadata{testphase=bookmark}
 % \documentclass{...}
 % \end{verbatim}
-% This will also load all the other tagging support code. 
-% 
+% This will also load all the other tagging support code.
+%
 % If only the PDF management is loaded the code should be loaded as package:
 % \begin{verbatim}
 % \RequirePackage{pdfmanagement}
 % \RequirePackage{latex-lab-testphase-bookmark}
 % \end{verbatim}
-% 
+%
 % If loaded it will replace the code used for bookmarks in the
 % \pkg{hyperref} and \pkg{bookmark} packages. It is possible to
 % manually create bookmarks with this package even if \pkg{hyperref} or \pkg{bookmark}
@@ -110,9 +110,9 @@
 % This is a small wrapper around |\AddToHookNext{bookmark}{\bookmarksetup{#1}}|
 % and provided for compatibility with the package \pkg{bookmark}. The hook it uses
 % is executed after the optional argument of |\bookmark| has been processed and so allows
-% to change the settings done there. 
+% to change the settings done there.
 % \end{function}
-% 
+%
 % \begin{function}[EXP]{\bookmarkget}
 % \begin{syntax}
 % \cs{bookmarkget}\Arg{option name}
@@ -124,7 +124,7 @@
 % chapter bookmarks bold. So currently only support for \texttt{level} has been implemented and
 % all other values returns an empty result.
 % \end{function}
-% 
+%
 % \begin{function}{\pdfbookmark,\subpdfbookmark,\belowpdfbookmark,\currentpdfbookmark}
 % \begin{syntax}
 % \cs{pdfbookmark}\oarg{level}\Arg{text}\Arg{name}
@@ -144,7 +144,7 @@
 % in a table of contents are added to the bookmarks --- the standard starred
 % headings currently not%
 % \footnote{This will change with the new template implementation of headings.
-% In this implementation also starred headings can create bookmarks.}   
+% In this implementation also starred headings can create bookmarks.}
 % The following keys allow to
 % configure the bookmarks added with this second method\footnote{As mentioned above
 % hyperref is currently required for these bookmarks}.
@@ -170,13 +170,13 @@
 % to override settings done in their optional argument. There is therefore a hook |bookmark|
 % to add additional options. If can for example change keys if you add a |\bookmarksetup{...}|
 % to it. This hook is executed after the keys in the optional argument has been processed
-% and so allows to overwrite them. 
-% 
+% and so allows to overwrite them.
+%
 % The package \pkg{bookmark} has actually two hook: one which is filled when using |\bookmarksetupnext|
-% and one which is filled by the |addtohook| key. 
+% and one which is filled by the |addtohook| key.
 % This is different here: there is only one hook and there is no |addtohook| key. The hook
-% should be filled with the standard commands, e.g., |\AddToHook|. 
-% 
+% should be filled with the standard commands, e.g., |\AddToHook|.
+%
 % As an example the following code will make all bookmarks of level 0 (in a book chapters) bold:
 % \begin{verbatim}
 % \AddToHook{bookmark}
@@ -351,7 +351,7 @@
 % \subsubsection{Converting text}
 % The title text of the bookmark and other strings must be converted to strings
 % suitable for a PDF. With hyperref on can use |\pdfstringdef| but
-% in l3pdftools we also provide a native version which is used by default. 
+% in l3pdftools we also provide a native version which is used by default.
 %    \begin{macrocode}
 \socket_new:nn       {hyp/outline/title}{2}
 \socket_new_plug:nnn {hyp/outline/title}{pdfstringdef}
@@ -372,7 +372,7 @@
     \let\protect\@empty
     \cs_set:Npn \__text_purify_expand:N #1
       {\__text_purify_encoding:N #1}}
-  }  
+  }
 \socket_new_plug:nnn {hyp/outline/title}{default}
  {
    \pdf_purify:nN {#1}#2
@@ -601,8 +601,8 @@
       \bitset_clear:N      \l_@@_outline_action_bitset
       \bitset_set_true:Nn  \l_@@_outline_action_bitset { uri }
       \pdf_purify:nN{#1}\l_@@_outline_action_data_tl
-      \pdf_string_from_unicode:nVN   
-        { utf8/URI } \l_@@_outline_action_data_tl \l_@@_outline_action_data_tl            
+      \pdf_string_from_unicode:nVN
+        { utf8/URI } \l_@@_outline_action_data_tl \l_@@_outline_action_data_tl
     }
    ,lists .code:n =
      { \seq_set_from_clist:Nn \l_@@_outline_type_seq { #1 } }
@@ -625,7 +625,7 @@
 \NewDocumentCommand\bookmarksetupnext{m}{\AddToHookNext{bookmark}{\bookmarksetup{#1}}}
 %    \end{macrocode}
 % \end{macro}
-% 
+%
 % \begin{macro}{\bookmarkget}
 %    \begin{macrocode}
 \cs_new:Npn\bookmarkget #1 {\use:c{@@_bookmarkget_#1:}}
@@ -639,7 +639,7 @@
     \group_begin:
     \keys_set:nn {hyp/outline} { #1 }
     \UseHook{bookmark}
-    \socket_use:nnn{hyp/outline/title}{#2}\l_@@_outline_title_tl    
+    \socket_use:nnn{hyp/outline/title}{#2}\l_@@_outline_title_tl
     \int_compare:nNnF {\l_@@_outline_level_int} > {\l_@@_outline_depth_int}
      {
        \@@_outline_bookmark_aux:
@@ -857,26 +857,26 @@
   {latex-lab-testphase-bookmark}{voids}{latex-lab-testphase-sec}
 \DeclareHookRule{package/hyperref/after}%
   {latex-lab-testphase-bookmark}{voids}{latex-lab-testphase-toc}
-  
+
 \AddToHook{package/hyperref/after}
   {
     \RemoveFromHook{cmd/addcontentsline/before}[hyp]
     \AddToHookWithArguments{cmd/addcontentsline/before}[hyp/outline]
       { \@@_addcontentsline_bookmark:nnn {#1}{#2}{#3} }
-    \providecommand\addcontentslinebookmark{}  
+    \providecommand\addcontentslinebookmark{}
     \providecommand\addcontentslinebookmarkOff{}
-    \RenewCommandCopy\addcontentslinebookmark\@@_addcontentsline_bookmark:nnn 
+    \RenewCommandCopy\addcontentslinebookmark\@@_addcontentsline_bookmark:nnn
     \renewcommand\addcontentslinebookmarkOff
      {
        \bool_if:NTF \l_pdfoutline_bool
-        { 
+        {
           \def\addcontentslinebookmarkReset{\bool_set_true:N\l_pdfoutline_bool}
         }
         {
           \let\addcontentslinebookmarkReset\relax
-        }  
+        }
        \bool_set_false:N\l_pdfoutline_bool
-     } 
+     }
     \legacy_if:nF{Hy@bookmarks}{\bool_set_false:N\l_pdfoutline_bool}
     \renewcommand*{\pdfbookmark}[3][0]{%
     \bookmark[level=#1,dest={#3.#1}]{#2}%
@@ -894,7 +894,7 @@
 % This doesn't yet handle the package options. This must be done in hyperref.
 %    \begin{macrocode}
     \keys_define:nn{hyp}
-     {bookmarksdepth      .meta:nn = {hyp/outline}{depth=#1},        
+     {bookmarksdepth      .meta:nn = {hyp/outline}{depth=#1},
       bookmarksopen       .meta:nn = {hyp/outline}{open},
       bookmarksopenlevel  .meta:nn = {hyp/outline}{openlevel=#1},
       bookmarksnumbered   .meta:nn = {hyp/outline}{numbered}}
