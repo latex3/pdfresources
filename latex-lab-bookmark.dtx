@@ -851,11 +851,32 @@
 %
 %    \begin{macrocode}
 \disable@package@load{bookmark}{\RequirePackage{hyperref}}
+\DeclareHookRule{package/hyperref/after}%
+  {latex-lab-testphase-bookmark}{voids}{latex-lab-testphase-sec-template}
+\DeclareHookRule{package/hyperref/after}%
+  {latex-lab-testphase-bookmark}{voids}{latex-lab-testphase-sec}
+\DeclareHookRule{package/hyperref/after}%
+  {latex-lab-testphase-bookmark}{voids}{latex-lab-testphase-toc}
+  
 \AddToHook{package/hyperref/after}
   {
     \RemoveFromHook{cmd/addcontentsline/before}[hyp]
     \AddToHookWithArguments{cmd/addcontentsline/before}[hyp/outline]
       { \@@_addcontentsline_bookmark:nnn {#1}{#2}{#3} }
+    \providecommand\addcontentslinebookmark{}  
+    \providecommand\addcontentslinebookmarkOff{}
+    \RenewCommandCopy\addcontentslinebookmark\@@_addcontentsline_bookmark:nnn 
+    \renewcommand\addcontentslinebookmarkOff
+     {
+       \bool_if:NTF \l_pdfoutline_bool
+        { 
+          \def\addcontentslinebookmarkReset{\bool_set_true:N\l_pdfoutline_bool}
+        }
+        {
+          \let\addcontentslinebookmarkReset\relax
+        }  
+       \bool_set_false:N\l_pdfoutline_bool
+     } 
     \legacy_if:nF{Hy@bookmarks}{\bool_set_false:N\l_pdfoutline_bool}
     \renewcommand*{\pdfbookmark}[3][0]{%
     \bookmark[level=#1,dest={#3.#1}]{#2}%
