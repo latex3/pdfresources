@@ -636,15 +636,18 @@
 %    \begin{macrocode}
 \NewDocumentCommand\bookmark{O{}m}
   {
-    \group_begin:
-    \keys_set:nn {hyp/outline} { #1 }
-    \UseHook{bookmark}
-    \socket_use:nnn{hyp/outline/title}{#2}\l_@@_outline_title_tl
-    \int_compare:nNnF {\l_@@_outline_level_int} > {\l_@@_outline_depth_int}
+    \bool_if:NT \l_pdfoutline_bool
      {
-       \@@_outline_bookmark_aux:
-     }
-    \group_end:
+       \group_begin:
+       \keys_set:nn {hyp/outline} { #1 }
+       \UseHook{bookmark}
+       \socket_use:nnn{hyp/outline/title}{#2}\l_@@_outline_title_tl
+       \int_compare:nNnF {\l_@@_outline_level_int} > {\l_@@_outline_depth_int}
+        {
+          \@@_outline_bookmark_aux:
+        }
+       \group_end:
+     }  
   }
 %    \end{macrocode}
 % \end{macro}
