@@ -2415,7 +2415,7 @@
     \AddToHook{enddocument/end}
      {       
       \tex_immediate:D \tex_pdfextension:D obj ~
-        useobjnum ~ \int_eval:n{\__pdf_object_retrieve:n {__pdfmeta/xmp}}~uncompressed~
+        useobjnum ~ \int_eval:n{\@@_object_retrieve:n {__pdfmeta/xmp}}~uncompressed~
         \@@_backend_object_write:nn {stream} 
         {{/Type~/Metadata~/Subtype~/XML}{#1}}
      } 
@@ -2426,7 +2426,7 @@
   {
     \group_begin:
      \tex_pdfcompresslevel:D  0 \scan_stop:
-     \tex_immediate:D \tex_pdfobj:D useobjnum ~ \int_eval:n{\__pdf_object_retrieve:n 
+     \tex_immediate:D \tex_pdfobj:D useobjnum ~ \int_eval:n{\@@_object_retrieve:n 
      {__pdfmeta/xmp}}~
      \@@_backend_object_write:nn {stream} {{/Type~/Metadata~/Subtype~/XML}{#1}}
     \group_end:
@@ -2526,10 +2526,10 @@
 %
 % \subsection{Outline backend}
 %<*dvips>
-\cs_new_protected:Npn \__pdf_backend_action:nnnnnnn #1#2#3#4#5#6#7
+\cs_new_protected:Npn \@@_backend_action:nnnnnnn #1#2#3#4#5#6#7
 % #1 level (ignored), #2 kid count, #3 open? #4 color (space separated values), #5 flag, #6 action, #7 title,    
   {  
-    \__pdf_backend_pdfmark:e 
+    \@@_backend_pdfmark:e 
       {
         /Title~(\exp_not:n{#7})~
         /Count~\bool_if:nF{#3}{-}#2~
@@ -2539,10 +2539,10 @@
         /OUT
       }          
   }
-\cs_new_protected:Npn \__pdf_backend_goto:nnnnnnn #1#2#3#4#5#6#7
+\cs_new_protected:Npn \@@_backend_goto:nnnnnnn #1#2#3#4#5#6#7
 % #1 level (ignored), #2 kid count, #3 open? #4 color (space separated values), #5 flag, #6 action, #7 title,    
   {  
-    \__pdf_backend_pdfmark:e 
+    \@@_backend_pdfmark:e 
       {
         /Title~(\exp_not:n{#7})~
         /Count~\bool_if:nF{#3}{-}#2~
@@ -2582,7 +2582,7 @@
   }
 %</pdftex> 
 %<*luatex>
-\cs_new_protected:Npn \__pdf_backend_action:nnnnnnn #1#2#3#4#5#6#7
+\cs_new_protected:Npn \@@_backend_action:nnnnnnn #1#2#3#4#5#6#7
 % #1 level (ignored), #2 kid count, #3 open? #4 color (space separated values), #5 flag, #6 action, #7 title,       
   {
     \tex_pdfextension:D~outline~attr 
@@ -2594,7 +2594,7 @@
       count~\bool_if:nF{#3}{-}#2~
       {\exp_not:n{#7}}
    } 
-\cs_new_protected:Npn \__pdf_backend_goto:nnnnnnn #1#2#3#4#5#6#7
+\cs_new_protected:Npn \@@_backend_goto:nnnnnnn #1#2#3#4#5#6#7
 % #1 level (ignored), #2 kid count, #3 open? #4 color (space separated values), #5 flag, #6 destination, #7 title,    
   {
     \tex_pdfextension:D~outline~attr 
@@ -2610,7 +2610,7 @@
   }
 %</luatex>
 %<*xdvipdfmx|dvipdfmx>
-\cs_new_protected:Npn \__pdf_backend_action:nnnnnnn #1#2#3#4#5#6#7
+\cs_new_protected:Npn \@@_backend_action:nnnnnnn #1#2#3#4#5#6#7
 % #1 level, #2 kid count (ignored), #3 open? #4 color (space separated values), #5 flag, #6 action, #7 title,       
   {
     \tex_special:D 
@@ -2625,7 +2625,7 @@
        >>
      }        
   } 
-\cs_new_protected:Npn \__pdf_backend_goto:nnnnnnn #1#2#3#4#5#6#7
+\cs_new_protected:Npn \@@_backend_goto:nnnnnnn #1#2#3#4#5#6#7
 % #1 level, #2 kid count (ignored), #3 open? #4 color (space separated values), #5 flag, #6 destination, #7 title,       
   {
     \tex_special:D 
@@ -2649,8 +2649,8 @@
   }      
 %</xdvipdfmx|dvipdfmx>
 %<*dvisvgm>
-\cs_new_protected:Npn \__pdf_backend_action:nnnnnnn #1#2#3#4#5#6#7{}
-\cs_new_protected:Npn \__pdf_backend_goto:nnnnnnn #1#2#3#4#5#6#7 {}
+\cs_new_protected:Npn \@@_backend_action:nnnnnnn #1#2#3#4#5#6#7{}
+\cs_new_protected:Npn \@@_backend_goto:nnnnnnn #1#2#3#4#5#6#7 {}
 %</dvisvgm>
 %
 % \subsection{lua code for lualatex}
