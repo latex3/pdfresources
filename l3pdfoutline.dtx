@@ -2,7 +2,7 @@
 %
 %% File: l3pdfoutline.dtx
 %
-% Copyright (C) 2024 The LaTeX Project
+% Copyright (C) 2026 The LaTeX Project
 %
 % It may be distributed and/or modified under the conditions of the
 % LaTeX Project Public License (LPPL), either version 1.3c of this
@@ -62,8 +62,11 @@
 % \emph{Attention:} There can be only one outline in a PDF and 
 % the commands of this module should not be mixed
 % with other code that create outline items, this would mess up the tree! 
+% 
+% A reference implementation that shows the use of the command is in \texttt{latex-lab-bookmark.dtx},
+% a package that can replace the package \pkg{bookmark}.
 %
-% The outline is a tree build from a set of objects. 
+% The outline is a tree build with a set of objects. 
 % The root is the \emph{outline dictionary}
 % which is referenced from the catalog with the \texttt{/Outline} key. The other objects
 % are called \emph{outline items}.
@@ -78,7 +81,7 @@
 %
 % \item[\enquote{Attributes}]
 % The \texttt{/Title} key contains the text shown in the bookmarks,
-% \texttt{/C} its color, the flag \texttt{/F} the font type (italic and/or bold).
+% \texttt{/C} sets its color, the flag \texttt{/F} sets the font type (italic and/or bold).
 % There is a \texttt{/SE} key which can reference a structure, but
 % its function is unclear (the note in the reference says, that it is not meant for
 % navigation, but does not say what it is for).
@@ -92,7 +95,7 @@
 % (the \texttt{SD} key is used when there are structures).
 % 
 % While in most cases the outline is used with a \texttt{GoTo} action and more or less mirrors
-% the  table of contents, other actions are possible too, a outline item
+% the  table of contents, other actions are possible too, an outline item
 % can e.g. open an external url or another file. The PDF reference lists in total 
 % 17 different, theoretically usable actions\footnote{Sound and Movie are deprecated in PDF~2.0}:
 % GoTo, GoToR, GoToE, GoToDp (PDF~2.0), Launch, Thread, URI, Sound, Movie,
@@ -122,7 +125,8 @@
 %  
 %  \item[GoTo link to a page] |/S /GoTo /D [5 0 R /FitH 0]|
 %  
-%  \item[Named] e.g. |/S/Named/N/FirstPage|, values are FirstPage, NextPage, PrevPage, LastPage.
+%  \item[Named] e.g. |/S/Named/N/FirstPage|, values are \texttt{FirstPage}, 
+%  \texttt{NextPage}, \texttt{PrevPage}, \texttt{LastPage}.
 %  
 %  \item[URI] e.g.|/S/URI/URI(https://blub.de)|
 %  
@@ -130,7 +134,8 @@
 %  |/S/GoToR/F(blub.pdf)/D(duck)|
 %  \end{description}
 % All other actions (and also chained actions) are not
-% directly supported but can be implemented by using the |rawaction| key. 
+% directly supported by \pkg{bookmark} but can be 
+% implemented by using the |rawaction| key. 
 % \end{description}
 % 
 % Theoretically all needed objects described above could be created manually, 
@@ -142,13 +147,13 @@
 % backends use different methods to decide if
 % an outline item is a sibling or a child or some great-uncle of the previous item.
 %
-% The easiest case is the \texttt{(x)dvipdfmx} case: 
+% The \texttt{(x)dvipdfmx} backend has the easiest implementation:
 % The general syntax is \verb+\special{pdf:out [-]number << attr>>}+
 % where the parameter \emph{number} is an integer representing
-% the level of the outline entry. The main problem is that the first item
-% has to start with the level 1 and that one can't skip levels, so one can't
-% simply use a fix number for the various headings but has to keep track which level
-% has been used previously. Nevertheless with this backend
+% the level of the outline entry. The first item
+% has to start with the level 1 and one can't skip levels, so one can't
+% simply use a fix number for the various headings, instead one has to keep track 
+% which level has been used previously. This is a bit awkward, nevertheless with this backend
 % it is possible to build the outline directly while compiling the document and
 % one doesn't have to use the \texttt{aux} or to delay code until the end of the document.
 %
@@ -156,23 +161,25 @@
 % in the primitive which describes the number of direct children of the outline. 
 % The backend then collects (recursively) following items until all children are found 
 % and then goes up a level again. 
-% To get the number of children the code has obviously to look ahead
-% to e.g. count all subsections below the current subsection. \pkg{hyperref} solved
+% To get this number the code has obviously to look ahead
+% to e.g. count all subsections below the current section. \pkg{hyperref} solved
 % this problem by writing everything into the \texttt{.out} file and to 
 % process it at begin of the next compilation to get the correct count. 
 % The \pkg{bookmark} package writes
-% the content and attributes (hex encoded) into the \texttt{.aux}. % 
+% the content and attributes (hex encoded) into the \texttt{.aux}-file. % 
 % Additionally it keeps track of the number of children during the compilation and
 % stores it for every bookmark in a command. When the
 % \texttt{.aux} file is read in again at the end of the document, it decodes
-% content and attributes again and so can process the outline commands 
+% content and attributes again and writes out all the outline objects. In
+% this way it can produce the outline tree 
 % for \pdfTeX{} and lua\TeX{} directly in the
 % first compilation. With the \texttt{dvips} backend it creates a \texttt{.ps} file
 % which is then read in at the next compilation.
 % 
-% The implementation here doesn't use external files but keeps all
+% The new implementation in this module doesn't use external files but keeps all
 % bookmarks in memory and outputs them at the end of the document (for the
-% dvi based engines in the shipout/lastpage hook).
+% dvi based engines in the shipout/lastpage hook, this can require a second compilation if the
+% page numbers change).
 %
 % \subsection{The commands}
 %
@@ -182,10 +189,10 @@
 %   \begin{syntax}
 %     \cs{pdfoutline_action:nnn}\Arg{level}\Arg{action}\Arg{title}
 %   \end{syntax}
-%   This creates an outline. \meta{level} is an integer expression 
+%   This creates an outline item. \meta{level} is an integer expression 
 %   and sets the (relative) level: A positive
-%   number creates a child of the current outline, 0 creates a sibling, and negative numbers
-%   go back. 
+%   number creates a child of the current outline item, 0 creates a sibling, 
+%   and negative numbers go back. 
 %   \meta{action} should be a list of dictionary keys and its values
 %   that can be used within the |/A| key, e.g. the  output from |\pdfdict_use:n|\footnote{It can
 %   not be an object reference as this doesn't work with most backends.}\footnote{This is not completely
@@ -195,7 +202,8 @@
 %   \meta{title} is the title, it should be 
 %   correctly escaped and encoded for a use as a literal string
 %   (but without the outer parentheses), such a representation can for example be created
-%   with |\pdfstringdef|.
+%   with |\pdfstringdef| or with a combination of |\pdf_purify:nN| and
+%   |\pdf_string_from_unicode:nnN| from the \texttt{l3pdftools} module.
 %   The command can be used for general outline item, for the special case of 
 %   a GoTo link to a named destination see the following command. 
 % \end{function}
@@ -216,7 +224,8 @@
 %   \meta{title} is the title, it should be 
 %   correctly escaped and encoded for a use as a literal string
 %   (but without the outer parentheses), such a representation can for example be created
-%   with |\pdfstringdef|. 
+%   with |\pdfstringdef| with a combination of |\pdf_purify:nN| and
+%   |\pdf_string_from_unicode:nnN| from the \texttt{l3pdftools} module.
 % \end{function}
 %
 % \begin{variable}
@@ -235,7 +244,7 @@
 %   {\l_pdfoutline_open_int}
 %   With this integer you can set the number of 
 %   visible levels. Bookmarks with a level above the value of this integer are 
-%   always closed. So if it set to 1, everything is closed and so 
+%   always closed. So if it is set to 1, everything is closed and so 
 %   only the top level bookmarks are shown 
 %   if its value is 2, the first level will show its children,
 %   etc. By default this integer is set to |\c_max_int| and 
