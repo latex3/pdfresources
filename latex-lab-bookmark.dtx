@@ -19,7 +19,7 @@
 \def\ltlabbookmarkdate{2026-02-18}
 \def\ltlabbookmarkversion{0.95}
 %<*driver>
-\DocumentMetadata{tagging=on,pdfstandard=ua-2}
+\DocumentMetadata{tagging=on,pdfstandard=ua-2,testphase=bookmark}
 \documentclass[kernel]{l3in2edoc}
 \EnableCrossrefs
 \CodelineIndex
@@ -344,13 +344,9 @@
 %    \end{macrocode}
 % \end{variable}
 %
-% \subsection{Commands shared with hyperref}
-% The following commands are also needed in the hyperref driver.
-% They use here a different prefix, but this should be merged and shared.
-%
-% \subsubsection{Converting text}
+% \subsection{Converting text}
 % The title text of the bookmark and other strings must be converted to strings
-% suitable for a PDF. With hyperref on can use |\pdfstringdef| but
+% suitable for a PDF. With hyperref one can use |\pdfstringdef| but
 % in l3pdftools we also provide a native version which is used by default.
 %    \begin{macrocode}
 \socket_new:nn       {hyp/outline/title}{2}
@@ -364,15 +360,7 @@
 % in l3pdftools. We use that socket by default.
 % Ensure that a text without parentheses is produced by using
 % |string-raw|!
-% Until expl3 is update we have work around the |\protect| problem:
 %    \begin{macrocode}
-\@ifl@t@r\ExplFileDate{2026-03-16}{}
- {
-  \AddToHook{pdf/purify/setup}{
-    \let\protect\@empty
-    \cs_set:Npn \__text_purify_expand:N #1
-      {\__text_purify_encoding:N #1}}
-  }
 \socket_new_plug:nnn {hyp/outline/title}{default}
  {
    \pdf_purify:nN {#1}#2
@@ -381,9 +369,9 @@
 \socket_assign_plug:nn  {hyp/outline/title}{default}
 %    \end{macrocode}
 %
-
-% \subsubsection{Regex to check the view value}
-%
+% \subsection{Regex to check the view value}
+% A similar regex is used in the generic driver of hyperref and should
+% perhaps be shared.
 %    \begin{macrocode}
 \regex_const:Nn \c_@@_outline_dest_startview_regex
   {
