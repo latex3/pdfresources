@@ -108,7 +108,7 @@
 % \SetKeys[document/metadata]
 %   {
 %    %% options
-%    %% e.g. pdf version, 
+%    %% e.g. pdf version,
 %    % pdfversion=1.7,
 %   }
 %  \end{verbatim}
@@ -118,8 +118,8 @@
 % \RequirePackage[backend=dvipdfmx]{pdfmanagement}
 % \end{verbatim}
 %
-% The pdfmanagement is also loaded if \cs{DocumentMetadata} is used e.g. for 
-% tagging 
+% The pdfmanagement is also loaded if \cs{DocumentMetadata} is used e.g. for
+% tagging
 % \begin{verbatim}
 % \DocumentMetadata %loads the PDF management and activates it
 %   {
@@ -242,13 +242,13 @@
 %  \RequirePackage{pdfmanagement}
 %  \SetKeys[document/metadata]{lang=de-DE}
 %  \end{verbatim}
- 
+
 %  The value can be retrieved as |document/lang|.
 %
 % \item The code supports two new keys now to set the reservation of rights relative to text \& data mining
 % (TDM): |pdftdmreservation| which should be either 0 or 1, and |pdftdmpolicy| which
 % should be an url pointing to the policy, see \url{https://pdfa.org/resource/xmp-extension-schema-templates/#tdmrep}.
-% 
+%
 %  \end{itemize}
 %  \section{Dates}
 %  \pkg{hyperref} has a few keys to set dates. They typically expect the date
@@ -997,14 +997,14 @@
 %<*headertestphase>
 \ProvidesFile{hgeneric-testphase.def}[2026-01-23 v0.96y %
   generic Hyperref driver for the LaTeX PDF management bundle]
-%</headertestphase>  
+%</headertestphase>
 %    \end{macrocode}
 %
 %    \begin{macrocode}
 %<*header>
 \ProvidesFile{hgeneric.def}[2026-01-23 v0.96y %
   generic Hyperref driver for the LaTeX PDF management bundle]
-%</header>  
+%</header>
 %    \end{macrocode}
 %    \begin{macrocode}
 %<*package>
@@ -1034,13 +1034,13 @@
   { missing-resource-management }
   { The~PDF~resource~management~is~required~for~this~hyperref~driver! }
   {
-     Activate~it~with \\        
+     Activate~it~with \\
      \tl_to_str:n{\DocumentMetadata{<options>}}\\
      before~\tl_to_str:n{\documentclass} or \\
      \RequirePackage{pdfmanagement}
   }
 %    \end{macrocode}
-% The pdfversion should be set in \cs{DocumentMetadata} or 
+% The pdfversion should be set in \cs{DocumentMetadata} or
 % \verb+\SetKeys[document/metadata]+
 %    \begin{macrocode}
 \msg_new:nnnn
@@ -1226,7 +1226,7 @@
 \def\Hy@numberline#1{#1\c_space_tl}   %needed by bookmark
 %    \end{macrocode}
 %
-% The pdfversion should be set in 
+% The pdfversion should be set in
 % \cs{DocumentMetadata} or\verb+\SetKeys[document/metadata]+ but we must
 % copy it to the \pkg{hyperref} command:
 %    \begin{macrocode}
@@ -1567,13 +1567,13 @@
         }
      }
    \keys_define:nn {hyp}
-    { 
-      bookmarksnumbered .legacy_if_set:n  = {BKM@numbered} 
+    {
+      bookmarksnumbered .legacy_if_set:n  = {BKM@numbered}
      ,bookmarksopen .code:n = {\bookmarksetup{open=#1}}
      ,bookmarksopen .default:n = true
      ,bookmarksdepth .code:n = {\bookmarksetup{depth=#1}}
-     ,bookmarksopenlevel .code:n = {\bookmarksetup{openlevel=#1}}     
-    }   
+     ,bookmarksopenlevel .code:n = {\bookmarksetup{openlevel=#1}}
+    }
  }
 \legacy_if:nTF { Hy@bookmarks }
   {
@@ -1749,7 +1749,7 @@
 % It is also unclear how the /Contents entry would look at best.
 % So we use sockets. The first argument is the target (url or destination),
 % For GoTo we also pass the text as argument.
-% The sockets should eat their arguments and 
+% The sockets should eat their arguments and
 % put something into the relevant annotation dictionaries.
 % \changes{v0.96o}{2024-10-27}{moved dictionary command into socket so that
 % it can be fully replaced.}
@@ -1764,7 +1764,7 @@
 \socket_new_plug:nnn {hyp/link/GoTo/Contents}{default}
   {
     \@@_text_pdfstring:noN
-      { Go~to~destination~#1  }      
+      { Go~to~destination~#1  }
       { \l_@@_text_enc_info_print_tl }
       \l_@@_link_Contents_tl
     \pdfannot_dict_put:nne {link/GoTo}{Contents}
@@ -1773,16 +1773,16 @@
 \socket_new_plug:nnn {hyp/link/GoToR/Contents}{default}
   {
     \@@_text_pdfstring:noN
-      { Open~file~#1  }   
-      { \l_@@_text_enc_info_print_tl }   
+      { Open~file~#1  }
+      { \l_@@_text_enc_info_print_tl }
       \l_@@_link_Contents_tl
     \pdfannot_dict_put:nne {link/GoToR}{Contents}
       {\l_@@_link_Contents_tl}
-  }  
+  }
 \socket_new_plug:nnn {hyp/link/URI/Contents}{default}
   {
     \@@_text_pdfstring:noN
-      { #1  }      
+      { #1  }
       { \l_@@_text_enc_info_print_tl }
       \l_@@_link_Contents_tl
     \pdfannot_dict_put:nne {link/URI}{Contents}
@@ -1791,12 +1791,12 @@
 \pdfmeta_standard_family:nn{UA}
  {
   \pdfmeta_standard_verify:nF{link_Contents}
-   {  
+   {
      \socket_assign_plug:nn{hyp/link/GoTo/Contents}{default}
      \socket_assign_plug:nn{hyp/link/GoToR/Contents}{default}
      \socket_assign_plug:nn{hyp/link/URI/Contents}{default}
    }
- }    
+ }
 %    \end{macrocode}
 % \begin{variable}{\l_@@_dest_pdfview_tl}
 % This hold the destination instructions in a format suitable for
@@ -1918,15 +1918,15 @@
 % \end{variable}
 
 % \section{PDF string conversion}
-% 
-% This is now done with \cs{pdf_purify:nN} which is defined and documented in
-% l3pdftools. 
 %
-% After the content is purified the last step has to convert 
-% the string to a PDF encoding. This should be done with 
-% cs{pdf_string_from_unicode:nnN} in l3pdftools and typically use one of these
+% This is now done with \cs{pdf_purify:nN} which is defined and documented in
+% l3pdftools.
+%
+% After the content is purified the last step has to convert
+% the string to a PDF encoding. This should be done with
+% cs{pdf_string_from_unicode:nnN} in l3pdftools and typically uses one of these
 % methods:
-% 
+%
 % \begin{tabular}{ll}
 %  utf8/string         & \texttt{(lit)} (utf8/string)\\
 %  utf8/string-raw     & \texttt{lit}   (utf8/string)\\
@@ -1937,10 +1937,10 @@
 %  utf16/string        & \texttt{(lit)} (utf16/string)\\
 %  utf16/string-raw    & \texttt{lit}   (utf16/string)
 %  \end{tabular}
-%  
+%
 %  \begin{macro}{ \@@_text_string_from_unicode:nN }
 %  As normally we have to duplicate the argument we define a helper command:
-%  
+%
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_text_string_from_unicode:nN #1 #2
   {
@@ -1948,7 +1948,7 @@
   }
 %    \end{macrocode}
 % \end{macro}
-% 
+%
 % This command combines the two parts:
 % |#1|=input, |#2|= handler shortcut |#3|= output str variable
 %
@@ -1956,8 +1956,8 @@
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_text_pdfstring:nnN #1 #2 #3
   {
-    \pdf_purify:nN {#1}#3    
-    \pdf_string_from_unicode:nVN   { #2 } #3 #3 
+    \pdf_purify:nN {#1}#3
+    \pdf_string_from_unicode:nVN   { #2 } #3 #3
  }
 \cs_generate_variant:Nn \@@_text_pdfstring:nnN {noN,eoN}
 
@@ -2214,7 +2214,7 @@
           { \c_@@_dest_undefined_tl }
         \tl_set_eq:NN \l_@@_dest_name_tmpa_tl \c_@@_dest_undefined_tl
       }
-      {        
+      {
         \@@_text_pdfstring:eoN
           { \exp_args:No \HyperDestNameFilter { \l_@@_dest_name_tmpa_tl } }
           { \l_@@_text_enc_dest_tl }
@@ -2412,14 +2412,14 @@
                {l_hyp/annot/A/GoToR}
                {F}
                {\pdf_object_ref:e {@@_file_\tl_to_str:N \l_@@_filename_tmpa_tl}}
-            \@@_text_pdfstring:noN 
+            \@@_text_pdfstring:noN
                { #3 }
                { \l_@@_text_enc_dest_print_tl }
-               \l_@@_dest_name_tmpa_tl            
+               \l_@@_dest_name_tmpa_tl
 %    \end{macrocode}
 % This socket adds something to the /Contents key.
 %    \begin{macrocode}
-            \socket_use:nn{hyp/link/GoToR/Contents}{#2}              
+            \socket_use:nn{hyp/link/GoToR/Contents}{#2}
             \tl_if_blank:eTF {#3}
               {
                 \pdfdict_put:nne {l_hyp/annot/A/GoToR}{D}
@@ -2478,13 +2478,13 @@
         \@@_check_link_nesting:TF
           {
            \group_begin:
-             \@@_text_pdfstring:noN             
+             \@@_text_pdfstring:noN
                { #1 }
                { \l_@@_text_enc_file_print_tl }
                \l_@@_filename_tmpa_tl
              \pdfdict_put:nno {l_hyp/annot/A/Launch}{F}{\l_@@_filename_tmpa_tl}
              \@@_text_pdfstring:noN
-               { #3 }               
+               { #3 }
                { \l_@@_text_enc_para_print_tl }
                \l_@@_para_tmpa_tl
              \bool_if:nTF
@@ -4700,11 +4700,11 @@
   \HyField@PDFChoices{#1}
   \mode_leave_vertical:
   \HyAnn@AbsPageLabel
-  \Hy@escapeform\PDFForm@List  
+  \Hy@escapeform\PDFForm@List
   \pdfannot_box:nnnn
    {\Fld@width}{\Fld@height}{0pt}
    {\PDFForm@List}
-  \MakeChoiceField{\Fld@width}{\Fld@height}  
+  \MakeChoiceField{\Fld@width}{\Fld@height}
   \HyField@AddToFields
  }
 

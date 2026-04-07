@@ -62,27 +62,27 @@
 % \begin{function}[added=2026-02-18]
 %   {\pdf_purify:nN}
 %  \begin{syntax}
-%   \cs{pdf_purify:nN} \Arg{content} \Arg{tl-var}
+%   \cs{pdf_purify:nN} \Arg{content} \Arg{tl var}
 %  \end{syntax}
-%  
+%
 %  This command calls \cs{text_purify:n} for \meta{content} and stores the result
-%  in \meta{tl-var}. It performs first various setups to make the conversion suitable
+%  in \meta{tl var}. It performs first various setups to make the conversion suitable
 %  for a PDF context, most importantly for the bookmarks. Beside other
-%  it executes the hyperref command \cs{pdfstringdefPreHook}, that means that it knows the 
+%  it executes the hyperref command \cs{pdfstringdefPreHook}, that means that it knows the
 %  exceptions added by \cs{pdfstringdefDisableCommands}. It also sets \cs{Hy@pdfstringtrue},
-%  this means that if the content uses \cs{texorpdfstring} the pdf branch is used. 
-%  
-%  At the begin the command calls the hook \texttt{pdf/purify/setup} which can be used to 
-%  add more definitions and exceptions. 
-%  
+%  this means that if the content uses \cs{texorpdfstring} the pdf branch is used.
+%
+%  At the begin the command calls the hook \texttt{pdf/purify/setup} which can be used to
+%  add more definitions and exceptions.
+%
 %  While the implementation is quite different the command has a similar purpose as
 %  \cs{pdfstringdef}. The most notable difference from a user viewpoint is that it doesn't directly
 %  encode the result as a PDF string, typically a call of \cs{pdf_purify:nN}
-%  should be followed with a call of \cs{pdf_string_from_unicode:nnN}. 
-%  
-%  
+%  should be followed with a call of \cs{pdf_string_from_unicode:nnN}.
+%
+%
 % \end{function}
-% 
+%
 % \begin{function}[EXP,added=2021-02-14]
 %   {\pdf_name_from_unicode_e:n,\pdf_name_from_unicode_e:V}
 %  \begin{syntax}
@@ -459,17 +459,17 @@
 % \end{macro}
 % \end{macro}
 % \end{macro}
-% 
+%
 % \subsection{A \cs{pdfstringdef} replacement}
-% 
+%
 % The following definitions are intended to replace the \cs{pdfstringdef} command of hyperref.
 % Like \cs{pdfstringdef} they take an input which can contain various \LaTeX-commands,
-% setups a number of sensible replacements and the outputs into a variable something
+% sets up a number of sensible replacements and then outputs into a variable something
 % that can be used in a PDF string.
-% 
+%
 % \subsubsection{TeX or PDF?}
 % We need a \enquote{TeX  or PDF} command, we use for now the conditional and definition
-% of hyperref but this should perhaps be changed. 
+% of hyperref but this should perhaps be changed.
 %    \begin{macrocode}
 \newif\ifHy@pdfstring
 \def\texorpdfstring{%
@@ -482,19 +482,19 @@
 %    \end{macrocode}
 %
 % \subsubsection{The main conversion command}
-% 
+%
 % \subsubsection{Converting text}
 % The title text of the bookmark and other strings must be converted to strings
-% suitable for a PDF. With hyperref on can use |\pdfstringdef| but
+% suitable for a PDF. With hyperref one can use |\pdfstringdef| but
 % we also provide a native version. This follows the implementation
-% in the generic hyperref driver, the hyperref driver should at the end use this
-% implemention too.
+% in the generic hyperref driver, the hyperref driver should in the end use this
+% implementation too.
 %
-% The conversion has to do two things: Purifying the input and then converting it
-% into a PDF string. |\pdfstringdef| does both together but we split up the task: 
+% The conversion has to do two things: purifying the input and then converting it
+% into a PDF string. |\pdfstringdef| does both together but we split up the task.
 % This allows to post process the purified text, it also allows to use more than one
-% conversion command.  
-% 
+% conversion command.
+%
 % \begin{variable}{\l_@@_purify_tmpa_tl,\g_@@_purify_tmpa_str}
 % Temporary variables
 %    \begin{macrocode}
@@ -502,7 +502,7 @@
 \str_new:N\g_@@_purify_tmpa_str
 %    \end{macrocode}
 % \end{variable}
-% 
+%
 % A socket which should contain the setup definitions.
 % A different plug should at the end call the hook \texttt{pdf/purify/setup}
 % (if user settings should be used too).
@@ -513,7 +513,7 @@
    \@@_purify_equivalents:
    \hook_use:n {pdf/purify/setup}
  }
-\socket_assign_plug:nn { pdf/purify/setup } { kernel}  
+\socket_assign_plug:nn { pdf/purify/setup } { kernel}
 %    \end{macrocode}
 % The hook inside the setup socket. By default it contains the hyperref
 % hook:
@@ -523,7 +523,7 @@
 \hook_gput_code:nnn{pdf/purify/setup}{pdf}{\pdfstringdefPreHook}
 %    \end{macrocode}
 %
-% A socket which should contains the code to expand/purify the content.
+% A socket which should contain the code to expand/purify the content.
 % The arguments are the content and a string variable for the result.
 %    \begin{macrocode}
 \socket_new:nn {pdf/purify} {2}
@@ -531,29 +531,29 @@
  {
 %    \end{macrocode}
 % Note: currently \cs{text_expand:n} does not remove a \cs{protect} command
-% and does not expand a following token even if it has a declared replacement. 
+% and does not expand a following token even if it has a declared replacement.
 % But in PDF strings we want to expand as much as possible, and
 % e.g. should be able to remove/format the |\numberline| command in a bookmark.
-%    \begin{macrocode}   
-   \str_set:Ne #2 {\text_purify:n { #1 } }   
+%    \begin{macrocode}
+   \str_set:Ne #2 {\text_purify:n { #1 } }
  }
-\socket_assign_plug:nn{pdf/purify}{kernel} 
+\socket_assign_plug:nn{pdf/purify}{kernel}
 %    \end{macrocode}
 % A hook for final cleanup, currently it contains nothing.
-% It gets as argument a string variable and so can adapt that. 
+% It gets as argument a string variable and so can adapt that.
 %    \begin{macrocode}
 \hook_new_with_args:nn {pdf/purify/after}{1}
 %    \end{macrocode}
 %
 % \begin{macro}{\pdf_purify:nN,\@@_purify:nN}
 % \cs{pdf_purify:nN} runs all the purifying steps but does
-% not convert to a PDF string. It is meant to produce input for 
+% not convert to a PDF string. It is meant to produce input for
 % commands doing the conversion later.
 %    \begin{macrocode}
 \cs_new_protected:Npn \@@_purify:nN #1 #2 %#1 content #2 str-var
  {
    \group_begin:
-   \socket_use:n {pdf/purify/setup}  
+   \socket_use:n {pdf/purify/setup}
    \socket_use:nnn {pdf/purify} {#1} {#2}
    \hook_use:nnw {pdf/purify/after} {1} {#2}
    \str_gset_eq:NN \g_@@_purify_tmpa_str #2
@@ -590,7 +590,7 @@
    % \begin ?
    % \end ?
 %    \end{macrocode}
-% Font commands. 
+% Font commands.
 %    \begin{macrocode}
    \cs_set_eq:NN\emph\use_i:n
    \cs_set_eq:NN\em\prg_do_nothing:
@@ -623,15 +623,15 @@
    \cs_set_eq:NN\normalsize\prg_do_nothing:
    \cs_set_eq:NN\scriptsize\prg_do_nothing:
    \cs_set_eq:NN\small\prg_do_nothing:
-   \cs_set_eq:NN\tiny\prg_do_nothing:      
+   \cs_set_eq:NN\tiny\prg_do_nothing:
 %    \end{macrocode}
 %  Spaces
 %    \begin{macrocode}
    \cs_set_eq:NN\quad\space
-   \cs_set_eq:NN\qquad\space 
-   \cs_set_eq:NN\hspace\@@_purify_hspace:w      
+   \cs_set_eq:NN\qquad\space
+   \cs_set_eq:NN\hspace\@@_purify_hspace:w
 %    \end{macrocode}
-% Colors. this handles only a few commands.
+% Colors. This handles only a few commands.
 % But pdfstringdef ignores color completely, so probably not
 % a practical problem.
 %    \begin{macrocode}
@@ -647,7 +647,7 @@
    \let\@mkboth\@gobbletwo
    % what to do with all the \textxxx commands?
    \text_declare_expand_equivalent:Nn\textparagraph{¶}
-   \text_declare_expand_equivalent:Nn\textdollar{\$}   
+   \text_declare_expand_equivalent:Nn\textdollar{\$}
  }
 %    \end{macrocode}
 %
@@ -679,7 +679,7 @@
 %    \begin{macrocode}
 \NewExpandableDocumentCommand\@@_purify_hspace:w{sm}
   {
-    \dim_compare:nNnT{#2}>{0pt}{\space}  
+    \dim_compare:nNnT{#2}>{0pt}{\space}
   }
 %    \end{macrocode}
 %
