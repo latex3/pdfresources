@@ -1753,7 +1753,8 @@
 % It is also unclear how the /Contents entry would look at best.
 % So we use sockets. The first argument is the target (url or destination),
 % For GoTo we also pass the text as argument.
-% The sockets should put something into the relevant annotation dictionaries.
+% The sockets should eat their arguments and 
+% put something into the relevant annotation dictionaries.
 % \changes{v0.96o}{2024-10-27}{moved dictionary command into socket so that
 % it can be fully replaced.}
 %    \begin{macrocode}
@@ -1761,6 +1762,9 @@
 \socket_new:nn {hyp/link/GoTo/Contents}{2}
 \socket_new:nn {hyp/link/URI/Contents}{1}
 \socket_new:nn {hyp/link/GoToR/Contents}{1}
+\socket_assign_plug:nn{hyp/link/GoTo/Contents}{noop}
+\socket_assign_plug:nn{hyp/link/GoToR/Contents}{noop}
+\socket_assign_plug:nn{hyp/link/URI/Contents}{noop}
 \socket_new_plug:nnn {hyp/link/GoTo/Contents}{default}
   {
     \@@_text_pdfstring:eoN
@@ -1788,9 +1792,15 @@
     \pdfannot_dict_put:nne {link/URI}{Contents}
       {\l_@@_link_Contents_tl}
   }
-\socket_assign_plug:nn{hyp/link/GoTo/Contents}{default}
-\socket_assign_plug:nn{hyp/link/GoToR/Contents}{default}
-\socket_assign_plug:nn{hyp/link/URI/Contents}{default}
+\pdfmeta_standard_family:nn{UA}
+ {
+  \pdfmeta_standard_verify:nF{link_Contents}
+   {  
+     \socket_assign_plug:nn{hyp/link/GoTo/Contents}{default}
+     \socket_assign_plug:nn{hyp/link/GoToR/Contents}{default}
+     \socket_assign_plug:nn{hyp/link/URI/Contents}{default}
+   }
+ }    
 %    \end{macrocode}
 % \begin{variable}{\l_@@_dest_pdfview_tl}
 % This hold the destination instructions in a format suitable for
@@ -2297,8 +2307,7 @@
 % public tl |\l_hyp_current_dest_name_tl| so that the hook code can make use of
 % it
 %    \begin{macrocode}
-
-\cs_new_protected:Npn \hyper@link #1 #2 #3 %#1 context, #2=destination name, #3 content
+\cs_set_protected:Npn \hyper@link #1 #2 #3 %#1 context, #2=destination name, #3 content
   {
     \bool_if:NTF \l_@@_annot_GoTo_bool
       {
@@ -2325,7 +2334,7 @@
       }
       {{\let\protect\relax#3}}
   }
-\cs_new_protected:Npn \hyper@linkstart #1 #2 %#1 context, #2=destination name
+\cs_set_protected:Npn \hyper@linkstart #1 #2 %#1 context, #2=destination name
   {
     \bool_if:NT \l_@@_annot_GoTo_bool
       {
@@ -2344,8 +2353,7 @@
           }
       }
   }
-
-\cs_new_protected:Npn \hyper@linkend
+\cs_set_protected:Npn \hyper@linkend
   {
     \bool_if:NT \l_@@_annot_GoTo_bool
       {

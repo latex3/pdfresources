@@ -10,7 +10,7 @@
 --  
 --     https://www.latex-project.org/lppl.txt
 --  
---  This file is part of the "LaTeX PDF management testphase bundle" (The Work in LPPL)
+--  This file is part of the "LaTeX PDF management bundle" (The Work in LPPL)
 --  and all files in that bundle must be distributed together.
 
 --[[

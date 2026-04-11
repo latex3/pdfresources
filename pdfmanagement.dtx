@@ -278,7 +278,7 @@
 % The driver will
 % be loaded automatically by hyperref if the PDF management code is active.
 %
-% \item[l3backend-testphase] This module contains backend code needed by the
+% \item[l3backend-pdfmanagement] This module contains backend code needed by the
 % PDF management. It will in due time be integrated into l3backend.
 %
 % \item[l3pdfmeta] This module contains code to handle PDF standards.
@@ -404,7 +404,18 @@
 %
 %    \begin{macrocode}
 %<@@=pdfmanagement>
-%<*package>
+%<*headinit>
+\ProvidesExplPackage{pdfmanagement-init}{2026-01-23}{0.96y}
+  {LaTeX PDF management bundle}
+
+\DeclareOption { debug }
+  {
+    \msg_redirect_module:nnn { pdf } { none } { warning }
+  }
+
+\ProcessOptions\relax
+%</headinit>
+%<*headtestphase>
 \ProvidesExplPackage{pdfmanagement-testphase}{2026-01-23}{0.96y}
   {LaTeX PDF management bundle}
 
@@ -414,7 +425,7 @@
   }
 
 \ProcessOptions\relax
-%</package>
+%</headtestphase>
 %    \end{macrocode}
 %<*standalone>
 %    \begin{macrocode}
@@ -451,13 +462,41 @@
    \endinput 
  }
 
+\RequirePackage{pdfmanagement-init}
+% the backend key must be processed first.
+%    \begin{macrocode}
+\tl_if_exist:NTF \l_@@_backend_tl
+  {
+    \exp_args:No \sys_load_backend:n { \l_@@_backend_tl }
+  }  
+  {
+    \sys_ensure_backend:
+  } 
+\file_input:n {l3backend-pdf-\c_sys_backend_str.def}
+\hook_use_once:n {pdfmanagement/add} 
+%    \end{macrocode}
+% firstaid should be loaded only after the backend has been set as
+% it can contain backend dependant code.
+%    \begin{macrocode}
+\RequirePackage{pdfmanagement-firstaid}     
+%</standalone>
+%    \end{macrocode}
+%
+% \subsection{Loading the core file}
+% This loads the core file. The backend should not be loaded
+% to allow to set it in the document.
+%    \begin{macrocode}
+%<*header>
+\ProvidesExplFile{pdfmanagement.ltx}{2026-01-23}{0.96y}
+  {PDF~management~code}
+%</header>  
+%    \end{macrocode}
+%    \begin{macrocode}
+%<*package>
 \RequirePackage{tagpdf-base}
 \input{pdfmanagement.ltx}
-
-
 %    \end{macrocode}
-% These keys are only defined in documentmetadata-support, so need to be copied:
-% 
+% These keys are also needed in documentmetadata-support, so need to be in the init-file:
 %    \begin{macrocode}
 \keys_define:nn { document / metadata }
   {
@@ -484,39 +523,6 @@
          }  
       }
    }   
-%    \end{macrocode}
-% the backend key must be processed first.
-%    \begin{macrocode}
-\tl_if_exist:NTF \l_@@_backend_tl
-  {
-    \exp_args:No \sys_load_backend:n { \l_@@_backend_tl }
-  }  
-  {
-    \sys_ensure_backend:
-  } 
-\file_input:n {l3backend-testphase-\c_sys_backend_str.def}
-\hook_use_once:n {pdfmanagement/add} 
-%    \end{macrocode}
-% firstaid should be loaded only after the backend has been set as
-% it can contain backend dependant code.
-%    \begin{macrocode}
-\RequirePackage{pdfmanagement-firstaid}     
-%</standalone>
-%    \end{macrocode}
-%
-% \subsection{Loading the core file}
-% This loads the core file. The backend should not be loaded
-% to allow to set it in the document.
-%    \begin{macrocode}
-%<*header>
-\ProvidesExplFile{pdfmanagement.ltx}{2026-01-23}{0.96y}
-  {PDF~management~code}
-%</header>  
-%    \end{macrocode}
-%    \begin{macrocode}
-%<*package>
-\RequirePackage{tagpdf-base}
-\input{pdfmanagement.ltx}
 %</package>
 %    \end{macrocode}
 % \end{implementation}

@@ -4,11 +4,11 @@ packagedate="2026-01-23"
 
 local luatexstatus = status.list()
 
--- Build script for "LaTeX PDF management testphase bundle" bundle
+-- Build script for "LaTeX PDF management bundle" bundle
 
 -- Identify the bundle and module
 bundle  = ""
-module  = "pdfmanagement-testphase"
+module  = "pdfmanagement"
 
 typesetexe="lualatex"
 installfiles = {"*.sty","*.cls","*.def","*.lua","*.ltx"}
@@ -91,7 +91,7 @@ tagfiles = {
 
 function update_tag (file,content,tagname,tagdate)
  tagdate = string.gsub (packagedate,"-", "/")
- if string.match (file, "l3backend%-testphase.dtx" ) then
+ if string.match (file, "l3backend%-pdfmanagement.dtx" ) then
   content = string.gsub (content,
                           "{%d%d%d%d%-%d%d%-%d%d}{%d%.%d+%a}",
                           "{".. packagedate .. "}{".. packageversion .."}")
