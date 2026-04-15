@@ -36,25 +36,26 @@ end
 checkruns = 4
 recordstatus=true
 
-
-  specialformats = specialformats or {}
+usedev=true
+specialformats = specialformats or {}
+if usedev then  
   specialformats["latex"] = specialformats["latex"] or
    {
     luatex     = {binary="luahbtex",format = "lualatex-dev"},
     pdftex     = {format = "pdflatex-dev"},
     xetex     = {format = "xelatex-dev"},
-    latexdvips = {binary="latex",format = "latex-dev"}
+    latexdvips = {binary="latex",format = "latex-dev"},
     }
-
+else
 -- to try without dev-format
---   specialformats["latex"] = specialformats["latex"] or
---    {
---     luatex     = {binary="luahbtex",format = "lualatex"},
---     pdftex     = {format = "pdflatex"},
---     xetex     = {format = "xelatex"},
---     latexdvips = {binary="latex",format = "latex"}
---     }
-
+   specialformats["latex"] = specialformats["latex"] or
+    {
+     luatex     = {binary="luahbtex",format = "lualatex"},
+     pdftex     = {format = "pdflatex"},
+     xetex     = {format = "xelatex"},
+     latexdvips = {binary="latex",format = "latex"}
+     }
+end
 -- packtdszip = true
 checkengines = {"pdftex","luatex","xetex"}
 
@@ -65,7 +66,8 @@ if os.type == "windows" then
                   "config-luatex",  -- luatex
                   -- "config-dvips",   -- latex + dvips
                   "config-pdftex",  -- pdftex
-                  "config-xetex"    -- xetex
+                  "config-xetex",    -- xetex
+                  "config-bookmark" -- temporarly!!!
                   }
 else 
 -- exclude dvips tests if not on windows
@@ -74,7 +76,8 @@ else
                   "config-luatex",  -- luatex
                   -- "config-dvips",   -- latex + dvips
                   "config-pdftex",  -- pdftex
-                  "config-xetex"    -- xetex
+                  "config-xetex",    -- xetex
+                  "config-bookmark" -- temporarly!!!
                   }
 -- exclude only record status works again                  
 excludetests = {"show","catalog-remove"}                   

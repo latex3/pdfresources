@@ -1,0 +1,38 @@
+\ExplSyntaxOn
+\debug_on:n { check-declarations , deprecation }
+\ExplSyntaxOff
+
+\DocumentMetadata{testphase=bookmark}
+\input{regression-test}
+\documentclass{article}
+\usepackage{xcolor}
+\usepackage{hyperref}
+%\AssignSocketPlug{hyp/outline/title}{pdfstringdef}
+\begin{document}
+\START
+\section{a}\section{Intro}\label{sec}
+\MakeLinkTarget*{blub}abc
+\bookmark[dest=blub]{uppercase: \MakeUppercase{grüße}}
+\bookmark[dest=blub]{lowercase: \MakeLowercase{GRÜßE}}
+\bookmark[dest=blub]{dots: \dots}
+\bookmark[dest=blub]{ldots: \ldots}
+\bookmark[dest=blub]{P, textparagraph: \P, \textparagraph}
+\bookmark[dest=blub]{TeX:  \TeX}
+\bookmark[dest=blub]{LaTeX:  \LaTeX}
+\bookmark[dest=blub]{LaTeXe:  \LaTeXe}
+\bookmark[dest=blub]{SliTeX:  \SliTeX}
+\bookmark[dest=blub]{Metafont:  \MF}
+\bookmark[dest=blub]{Metafont:  \MF}
+\bookmark[dest=blub]{phantom:  \phantom{unvisible}}
+\bookmark[dest=blub]{hphantom:  \hphantom{unvisible}}
+\bookmark[dest=blub]{vphantom:  \vphantom{unvisible}}
+\bookmark[dest=blub]{emph, em:  \emph{emphasize}, \em emphasize}
+\bookmark[dest=blub]{textit, itshape:  \textit{italic}, \itshape italic}
+\bookmark[dest=blub]{normalfont, Huge:  \normalfont normal, \Huge huge}
+\bookmark[dest=blub]{mathversion: \mathversion{bold} $\int a=b$}
+\bookmark[dest=blub]{textcolor, color: \textcolor{red}{text}, \color{red} text}
+\bookmark[dest=blub]{label: \label{test}}
+\bookmark[dest=blub]{ref, pageref: \ref{sec}, \pageref{sec}}
+\bookmark[dest=blub]{ref*, pageref*: \ref*{sec}, \pageref*{sec}}
+\bookmark[dest=blub]{nameref, autoref: \nameref{sec}, \autoref{sec} }
+\end{document} 
