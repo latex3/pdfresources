@@ -2,12 +2,12 @@
 
 Version: 0.96z, 2026-04-15
 
-This package is used to load the new PDF management code
+This package is used to load the PDF management code
 of LaTeX.
 
-The new PDF management code offers backend independent interfaces to central
-PDF dictionaries, tools to create annotations, form Xobjects, to embed
-files, and to handle PDF standards.
+The PDF management code offers backend independent interfaces to central
+PDF dictionaries, tools to create annotations, outlines, form Xobjects, form fields,
+to embed files, and to handle PDF standards.
 
 The code is currently provided as independent package. It is automatically
 loaded if a document uses `\DocumentMetadata`. It can also be loaded as a package.
@@ -26,7 +26,7 @@ and L3 programming layer.
 Installation should be done with the package managers of the TeX systems.
 
 For manual installation: unpack by compiling the .ins, then move all
-.sty, .def, .ltx, .lua into tex/latex/pdfmanagement-testphase.
+.sty, .def, .ltx, .lua into tex/latex/pdfmanagement.
 
 
 ## Copyright (C)
