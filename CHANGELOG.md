@@ -5,7 +5,7 @@ first release 0.95a, 2021-02-23 will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 this project uses date-based 'snapshot' version identifiers.
 
-## [Unreleased]
+## [2026-04-15]
 
 ### Fixed
 * css-files embedded at the end were not detected by embedded file test
@@ -21,6 +21,8 @@ this project uses date-based 'snapshot' version identifiers.
 
 * The standard is not longer switched automatically from A-4 to A-4f is an embedded file is found, a note is written to the log-file.
   See comment in issue #107
+  
+* removed some color definitions in firstaid/color-ltx.sty as they are done by the kernel directly.
 
 ### Added
 
