@@ -95,7 +95,7 @@
 %
 % While in most cases the outline is used with a \texttt{GoTo} action and more or less mirrors
 % the  table of contents, other actions are possible too, an outline item
-% can e.g. open an external url or another file. The PDF reference lists in total
+% can, e.g., open an external url or another file. The PDF reference lists in total
 % 17 different, theoretically usable actions\footnote{Sound and Movie are deprecated in PDF~2.0}:
 % GoTo, GoToR, GoToE, GoToDp (PDF~2.0), Launch, Thread, URI, Sound, Movie,
 % Hide, Named, SetOCGState, Rendition, Trans, GoTo3DView, JavaScript, RichMediaExecute.
@@ -228,7 +228,7 @@
 % \end{function}
 %
 % \begin{variable}
-%   {\l_pdfoutline_bool}
+%   {\l_pdfoutline_active_bool}
 %   This boolean decides if bookmarks are shown
 %   at all.
 % \end{variable}
@@ -308,15 +308,15 @@
 %    \end{macrocode}
 %
 % \subsection{Public variables}
-% \begin{variable}{\l_pdfoutline_bool,\l_pdfoutline_open_bool}
+% \begin{variable}{\l_pdfoutline_active_bool,\l_pdfoutline_open_bool}
 % The state of the first boolean decides
 % if a bookmark is created at all, this allows to disable bookmarks
 % fully or in parts.
 % The second boolean decides if a bookmark is open (so shows its children)
 % or not.
 %    \begin{macrocode}
-\bool_new:N      \l_pdfoutline_bool
-\bool_set_true:N \l_pdfoutline_bool
+\bool_new:N      \l_pdfoutline_active_bool
+\bool_set_true:N \l_pdfoutline_active_bool
 \bool_new:N      \l_pdfoutline_open_bool
 \bool_set_true:N \l_pdfoutline_open_bool
 %    \end{macrocode}
@@ -428,7 +428,7 @@
 \cs_new_protected:Npn \pdfoutline_action:nnn #1 #2 #3
 % #1 level, #2 action, #3 title
   {
-    \bool_if:NT \l_pdfoutline_bool
+    \bool_if:NT \l_pdfoutline_active_bool
       {
         \int_compare:nNnTF {\g_@@_id_int}={1}
          {
@@ -445,7 +445,7 @@
          }
         \cs_gset_protected:Npn \pdfoutline_action:nnn ##1 ##2 ##3
          {
-           \bool_if:NT \l_pdfoutline_bool
+           \bool_if:NT \l_pdfoutline_active_bool
              {\@@_item:nnnn {##1}{##2}{##3}{action}}
          }
      }
@@ -459,7 +459,7 @@
 \cs_new_protected:Npn \pdfoutline_goto:nnn #1 #2 #3
 % #1 level, #2 destination, #3 title
   {
-   \bool_if:NT \l_pdfoutline_bool
+   \bool_if:NT \l_pdfoutline_active_bool
       {
         \int_compare:nNnTF {\g_@@_id_int}={1}
          {
@@ -476,7 +476,7 @@
          }
         \cs_gset_protected:Npn \pdfoutline_goto:nnn ##1 ##2 ##3
          {
-           \bool_if:NT \l_pdfoutline_bool
+           \bool_if:NT \l_pdfoutline_active_bool
              {\@@_item:nnnn {##1}{##2}{##3}{goto}}
          }
      }

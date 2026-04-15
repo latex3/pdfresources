@@ -624,7 +624,7 @@
 %    \begin{macrocode}
 \NewDocumentCommand\bookmark{O{}m}
   {
-    \bool_if:NT \l_pdfoutline_bool
+    \bool_if:NT \l_pdfoutline_active_bool
      {
        \group_begin:
        \keys_set:nn {hyp/outline} { #1 }
@@ -859,16 +859,16 @@
     \RenewCommandCopy\addcontentslinebookmark\@@_addcontentsline_bookmark:nnn
     \renewcommand\addcontentslinebookmarkOff
      {
-       \bool_if:NTF \l_pdfoutline_bool
+       \bool_if:NTF \l_pdfoutline_active_bool
         {
-          \def\addcontentslinebookmarkReset{\bool_set_true:N\l_pdfoutline_bool}
+          \def\addcontentslinebookmarkReset{\bool_set_true:N\l_pdfoutline_active_bool}
         }
         {
           \let\addcontentslinebookmarkReset\relax
         }
-       \bool_set_false:N\l_pdfoutline_bool
+       \bool_set_false:N\l_pdfoutline_active_bool
      }
-    \legacy_if:nF{Hy@bookmarks}{\bool_set_false:N\l_pdfoutline_bool}
+    \legacy_if:nF{Hy@bookmarks}{\bool_set_false:N\l_pdfoutline_active_bool}
     \renewcommand*{\pdfbookmark}[3][0]{%
     \bookmark[level=#1,dest={#3.#1}]{#2}%
     \hyper@anchorstart{#3.#1}\hyper@anchorend}
