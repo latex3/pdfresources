@@ -50,7 +50,7 @@
 %    }^^A
 % }
 %
-% \date{Version 0.96y, released 2026-01-23}
+% \date{Version 0.96z, released 2026-04-15}
 %
 % \maketitle
 % \begin{documentation}
@@ -58,6 +58,30 @@
 % \section{\pkg{l3pdftools} documentation}
 %
 % This module collects a number of candidate commands for the l3pdf module
+%
+% \begin{function}[added=2026-02-18]
+%   {\pdf_purify:nN}
+%  \begin{syntax}
+%   \cs{pdf_purify:nN} \Arg{content} \Arg{tl var}
+%  \end{syntax}
+%
+%  This command calls \cs{text_purify:n} for \meta{content} and stores the result
+%  in \meta{tl var}. It performs first various setups to make the conversion suitable
+%  for a PDF context, most importantly for the bookmarks. Beside other
+%  it executes the hyperref command \cs{pdfstringdefPreHook}, that means that it knows the
+%  exceptions added by \cs{pdfstringdefDisableCommands}. It also sets \cs{Hy@pdfstringtrue},
+%  this means that if the content uses \cs{texorpdfstring} the pdf branch is used.
+%
+%  At the begin the command calls the hook \texttt{pdf/purify/setup} which can be used to
+%  add more definitions and exceptions.
+%
+%  While the implementation is quite different the command has a similar purpose as
+%  \cs{pdfstringdef}. The most notable difference from a user viewpoint is that it doesn't directly
+%  encode the result as a PDF string, typically a call of \cs{pdf_purify:nN}
+%  should be followed with a call of \cs{pdf_string_from_unicode:nnN}.
+%
+%
+% \end{function}
 %
 % \begin{function}[EXP,added=2021-02-14]
 %   {\pdf_name_from_unicode_e:n,\pdf_name_from_unicode_e:V}
@@ -239,7 +263,7 @@
 %
 %    \begin{macrocode}
 %<*header>
-\ProvidesExplPackage{l3pdftools}{2026-01-23}{0.96y}
+\ProvidesExplPackage{l3pdftools}{2026-04-15}{0.96z}
   {candidate commands for l3pdf---LaTeX PDF management bundle}
 %</header>
 %    \end{macrocode}
@@ -436,7 +460,230 @@
 % \end{macro}
 % \end{macro}
 %
-% \subsubsection{BDC  operator commands}
+% \subsection{A \cs{pdfstringdef} replacement}
+%
+% The following definitions are intended to replace the \cs{pdfstringdef} command of hyperref.
+% Like \cs{pdfstringdef} they take an input which can contain various \LaTeX-commands,
+% sets up a number of sensible replacements and then outputs into a variable something
+% that can be used in a PDF string.
+%
+% \subsubsection{TeX or PDF?}
+% We need a \enquote{TeX  or PDF} command, we use for now the conditional and definition
+% of hyperref but this should perhaps be changed.
+%    \begin{macrocode}
+\newif\ifHy@pdfstring
+\def\texorpdfstring{%
+   \ifHy@pdfstring
+     \expandafter\@secondoftwo
+   \else
+     \expandafter\@firstoftwo
+   \fi
+}
+%    \end{macrocode}
+%
+% \subsubsection{The main conversion command}
+%
+% \subsubsection{Converting text}
+% The title text of the bookmark and other strings must be converted to strings
+% suitable for a PDF. With hyperref one can use |\pdfstringdef| but
+% we also provide a native version. This follows the implementation
+% in the generic hyperref driver, the hyperref driver should in the end use this
+% implementation too.
+%
+% The conversion has to do two things: purifying the input and then converting it
+% into a PDF string. |\pdfstringdef| does both together but we split up the task.
+% This allows to post process the purified text, it also allows to use more than one
+% conversion command.
+%
+% \begin{variable}{\l_@@_purify_tmpa_tl,\g_@@_purify_tmpa_str}
+% Temporary variables
+%    \begin{macrocode}
+\tl_new:N\l_@@_purify_tmpa_tl
+\str_new:N\g_@@_purify_tmpa_str
+%    \end{macrocode}
+% \end{variable}
+%
+% A socket which should contain the setup definitions.
+% A different plug should at the end call the hook \texttt{pdf/purify/setup}
+% (if user settings should be used too).
+%    \begin{macrocode}
+\socket_new:nn{pdf/purify/setup}{0}
+\socket_new_plug:nnn { pdf/purify/setup } { kernel}
+ {
+   \@@_purify_equivalents:
+   \hook_use:n {pdf/purify/setup}
+ }
+\socket_assign_plug:nn { pdf/purify/setup } { kernel}
+%    \end{macrocode}
+% The hook inside the setup socket. By default it contains the hyperref
+% hook:
+%    \begin{macrocode}
+\hook_new:n{pdf/purify/setup}
+\providecommand\pdfstringdefPreHook{}
+\hook_gput_code:nnn{pdf/purify/setup}{pdf}{\pdfstringdefPreHook}
+%    \end{macrocode}
+%
+% A socket which should contain the code to expand/purify the content.
+% The arguments are the content and a string variable for the result.
+%    \begin{macrocode}
+\socket_new:nn {pdf/purify} {2}
+\socket_new_plug:nnn {pdf/purify} {kernel}
+ {
+%    \end{macrocode}
+% Note: currently \cs{text_expand:n} does not remove a \cs{protect} command
+% and does not expand a following token even if it has a declared replacement.
+% But in PDF strings we want to expand as much as possible, and
+% e.g. should be able to remove/format the |\numberline| command in a bookmark.
+%    \begin{macrocode}
+   \str_set:Ne #2 {\text_purify:n { #1 } }
+ }
+\socket_assign_plug:nn{pdf/purify}{kernel}
+%    \end{macrocode}
+% A hook for final cleanup, currently it contains nothing.
+% It gets as argument a string variable and so can adapt that.
+%    \begin{macrocode}
+\hook_new_with_args:nn {pdf/purify/after}{1}
+%    \end{macrocode}
+%
+% \begin{macro}{\pdf_purify:nN,\@@_purify:nN}
+% \cs{pdf_purify:nN} runs all the purifying steps but does
+% not convert to a PDF string. It is meant to produce input for
+% commands doing the conversion later.
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_purify:nN #1 #2 %#1 content #2 str-var
+ {
+   \group_begin:
+   \socket_use:n {pdf/purify/setup}
+   \socket_use:nnn {pdf/purify} {#1} {#2}
+   \hook_use:nnw {pdf/purify/after} {1} {#2}
+   \str_gset_eq:NN \g_@@_purify_tmpa_str #2
+   \group_end:
+   \str_set_eq:NN #2 \g_@@_purify_tmpa_str
+ }
+\cs_set_eq:NN \pdf_purify:nN\@@_purify:nN
+%    \end{macrocode}
+% \end{macro}
+%
+% \subsubsection{Setup: replacement definition for pdf strings}
+% Similar to |\pdfstringdef| we need to declare various equivalents
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_purify_equivalents:
+ {
+   \Hy@pdfstringtrue
+   \text_declare_expand_equivalent:Nn\MakeUppercase{\@@_purify_makeuppercase:n}
+   \text_declare_expand_equivalent:Nn\MakeLowercase{\@@_purify_makelowercase:n}
+   \cs_set:Npn\dots{…} %U+2026
+   \cs_set:Npn\ldots{…}
+   \cs_set:Npn\P{¶}
+   \cs_set:Npn\TeX{TeX}
+   \cs_set:Npn\LaTeX{LaTeX}
+   \cs_set:Npn\LaTeXe{LaTeX2ε}
+   \cs_set:Npn\SliTeX{Sli\TeX}%
+   \cs_set:Npn\MF{Metafont}%
+   \cs_set:Npn\MP{Metapost}%
+   \cs_set_eq:NN\phantom\use_none:n
+   \cs_set_eq:NN\vphantom\use_none:n
+   \cs_set_eq:NN\hphantom\use_none:n
+   \cs_set_eq:NN\mathversion\use_none:n
+   % \ding ?
+   % \Cube ?
+   % \begin ?
+   % \end ?
+%    \end{macrocode}
+% Font commands.
+%    \begin{macrocode}
+   \cs_set_eq:NN\emph\use_i:n
+   \cs_set_eq:NN\em\prg_do_nothing:
+   \cs_set_eq:NN\textnormal\use_i:n
+   \cs_set_eq:NN\textrm\use_i:n
+   \cs_set_eq:NN\textsf\use_i:n
+   \cs_set_eq:NN\texttt\use_i:n
+   \cs_set_eq:NN\textbf\use_i:n
+   \cs_set_eq:NN\textmd\use_i:n
+   \cs_set_eq:NN\textit\use_i:n
+   \cs_set_eq:NN\textsc\use_i:n
+   \cs_set_eq:NN\textsl\use_i:n
+   \cs_set_eq:NN\textup\use_i:n
+   \cs_set_eq:NN\normalfont\prg_do_nothing:
+   \cs_set_eq:NN\rmfamily\prg_do_nothing:
+   \cs_set_eq:NN\sffamily\prg_do_nothing:
+   \cs_set_eq:NN\ttfamily\prg_do_nothing:
+   \cs_set_eq:NN\bfseries\prg_do_nothing:
+   \cs_set_eq:NN\mdseries\prg_do_nothing:
+   \cs_set_eq:NN\itshape\prg_do_nothing:
+   \cs_set_eq:NN\scshape\prg_do_nothing:
+   \cs_set_eq:NN\slshape\prg_do_nothing:
+   \cs_set_eq:NN\upshape\prg_do_nothing:
+   \cs_set_eq:NN\Huge\prg_do_nothing:
+   \cs_set_eq:NN\LARGE\prg_do_nothing:
+   \cs_set_eq:NN\Large\prg_do_nothing:
+   \cs_set_eq:NN\footnotesize\prg_do_nothing:
+   \cs_set_eq:NN\huge\prg_do_nothing:
+   \cs_set_eq:NN\large\prg_do_nothing:
+   \cs_set_eq:NN\normalsize\prg_do_nothing:
+   \cs_set_eq:NN\scriptsize\prg_do_nothing:
+   \cs_set_eq:NN\small\prg_do_nothing:
+   \cs_set_eq:NN\tiny\prg_do_nothing:
+%    \end{macrocode}
+%  Spaces
+%    \begin{macrocode}
+   \cs_set_eq:NN\quad\space
+   \cs_set_eq:NN\qquad\space
+   \cs_set_eq:NN\hspace\@@_purify_hspace:w
+%    \end{macrocode}
+% Colors. This handles only a few commands.
+% But pdfstringdef ignores color completely, so probably not
+% a practical problem.
+%    \begin{macrocode}
+   \cs_set_eq:NN\textcolor\use_ii:nn
+   \cs_set_eq:NN\color \@gobble@om
+   \cs_set_eq:NN\label \@gobble@om
+   \cs_set_eq:NN\index \@gobble@som
+   \cs_set_eq:NN\glossary \@gobble@om
+   \cs_set_eq:NN\ref\@@_purify_ref:w
+   \cs_set_eq:NN\pageref\@@_purify_pageref:w
+   \cs_set_eq:NN\nameref\@@_purify_nameref:w
+   \cs_set_eq:NN\autoref\HyPsd@autoref
+   \let\@mkboth\@gobbletwo
+   % what to do with all the \textxxx commands?
+   \text_declare_expand_equivalent:Nn\textparagraph{¶}
+   \text_declare_expand_equivalent:Nn\textdollar{\$}
+ }
+%    \end{macrocode}
+%
+% Replacements for reference commands
+%    \begin{macrocode}
+\cs_new:Npn\@@_purify_nameref:n #1
+  {\cs_if_exist:cTF {r@#1}{\tl_item:cn{r@#1}{3}}{0}}
+\DeclareExpandableDocumentCommand\@@_purify_ref:w{sm}{\@kernel@ref@exp{#2}}
+\DeclareExpandableDocumentCommand\@@_purify_pageref:w{sm}{\@kernel@pageref@exp{#2}}
+\DeclareExpandableDocumentCommand\@@_purify_nameref:w{sm}{\@@_purify_nameref:n{#2}}
+%
+%    \end{macrocode}
+% Replacements for uppercase and lowercase command
+%    \begin{macrocode}
+\cs_new:Npn \@@_purify_makeuppercase:n #1
+  {\use:e
+    {\exp_args:Ne
+       \text_uppercase:nn{\BCPdata { casing }}{#1}
+    }
+  }
+\cs_new:Npn \@@_purify_makelowercase:n #1
+  {\use:e
+    {\exp_args:Ne
+       \text_lowercase:nn{\BCPdata { casing }}{#1}
+    }
+  }
+%    \end{macrocode}
+% Replacement for hspace:
+%    \begin{macrocode}
+\NewExpandableDocumentCommand\@@_purify_hspace:w{sm}
+  {
+    \dim_compare:nNnT{#2}>{0pt}{\space}
+  }
+%    \end{macrocode}
+%
+% \subsection{BDC  operator commands}
 % \begin{macro}{\pdf_bdc:nn,\pdf_bdc:ee}
 % \begin{macro}{\pdf_bdc_property:nn}
 % \begin{macro}{\pdf_bdc_shipout:ee}

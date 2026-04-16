@@ -1,0 +1,23 @@
+\ExplSyntaxOn
+\debug_on:n { check-declarations , deprecation }
+\sys_gset_rand_seed:n{1000}
+\ExplSyntaxOff
+\DocumentMetadata{testphase={bookmark},xmp=false,pdfversion=2.0}
+\input{regression-test}
+% test suppression of bookmarks with new template code.
+\documentclass{article}
+\title{bookmark test}
+\usepackage{bookmark}
+\bookmarksetup{lists={toc,lof,lot}}
+\makeatletter\def\toclevel@figure{2}\makeatother
+\begin{document}
+\section{text}
+\begin{figure}
+an image
+\caption{A duck}
+\end{figure}
+
+\subsection{subsec}
+\section[bookmark=]{no bookmark}
+\section{cde}
+\end{document}

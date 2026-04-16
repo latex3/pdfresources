@@ -49,7 +49,7 @@
 %    }^^A
 % }
 %
-% \date{Version 0.96y, released 2026-01-23}
+% \date{Version 0.96z, released 2026-04-15}
 %
 % \maketitle
 %
@@ -60,27 +60,27 @@
 %    \begin{macrocode}
 %<drivers>\ProvidesExplFile
 %<*dvipdfmx>
-  {l3backend-pdf-dvipdfmx.def}{2026-01-23}{0.96y}
+  {l3backend-pdf-dvipdfmx.def}{2026-04-15}{0.96z}
   {LaTeX~PDF~management~bundle~backend~support:~dvipdfmx}
 %</dvipdfmx>
 %<*dvips>
-  {l3backend-pdf-dvips.def}{2026-01-23}{0.96y}
+  {l3backend-pdf-dvips.def}{2026-04-15}{0.96z}
   {LaTeX~PDF~management~bundle~backend~support:~dvips}
 %</dvips>
 %<*dvisvgm>
-  {l3backend-pdf-dvisvgm.def}{2026-01-23}{0.96y}
+  {l3backend-pdf-dvisvgm.def}{2026-04-15}{0.96z}
   {LaTeX~PDF~management~bundle~backend~support:~dvisvgm}
 %</dvisvgm>
 %<*luatex>
-  {l3backend-pdf-luatex.def}{2026-01-23}{0.96y}
+  {l3backend-pdf-luatex.def}{2026-04-15}{0.96z}
   {LaTeX~PDF~management~bundle~backend~support:~PDF~output~(LuaTeX)}
 %</luatex>
 %<*pdftex>
-  {l3backend-pdf-pdftex.def}{2026-01-23}{0.96y}
+  {l3backend-pdf-pdftex.def}{2026-04-15}{0.96z}
   {LaTeX~PDF~management~bundle~backend~support:~PDF~output~(pdfTeX)}
 %</pdftex>
 %<*xdvipdfmx>
-  {l3backend-pdf-xetex.def}{2026-01-23}{0.96y}
+  {l3backend-pdf-xetex.def}{2026-04-15}{0.96z}
   {LaTeX~PDF~management~bundle~backend~support:~XeTeX}
 %</xdvipdfmx>
 %    \end{macrocode}
@@ -2415,7 +2415,7 @@
     \AddToHook{enddocument/end}
      {       
       \tex_immediate:D \tex_pdfextension:D obj ~
-        useobjnum ~ \int_eval:n{\__pdf_object_retrieve:n {__pdfmeta/xmp}}~uncompressed~
+        useobjnum ~ \int_eval:n{\@@_object_retrieve:n {__pdfmeta/xmp}}~uncompressed~
         \@@_backend_object_write:nn {stream} 
         {{/Type~/Metadata~/Subtype~/XML}{#1}}
      } 
@@ -2426,7 +2426,7 @@
   {
     \group_begin:
      \tex_pdfcompresslevel:D  0 \scan_stop:
-     \tex_immediate:D \tex_pdfobj:D useobjnum ~ \int_eval:n{\__pdf_object_retrieve:n 
+     \tex_immediate:D \tex_pdfobj:D useobjnum ~ \int_eval:n{\@@_object_retrieve:n 
      {__pdfmeta/xmp}}~
      \@@_backend_object_write:nn {stream} {{/Type~/Metadata~/Subtype~/XML}{#1}}
     \group_end:
@@ -2523,8 +2523,137 @@
 %</luatex>
 %    \end{macrocode}
 % \end{macro}
-
 %
+% \subsection{Outline backend}
+%    \begin{macrocode}
+%<*dvips>
+\cs_new_protected:Npn \@@_backend_action:nnnnnnn #1#2#3#4#5#6#7
+% #1 level (ignored), #2 kid count, #3 open? #4 color (space separated values), #5 flag, #6 action, #7 title,    
+  {  
+    \@@_backend_pdfmark:e 
+      {
+        /Title~(\exp_not:n{#7})~
+        /Count~\bool_if:nF{#3}{-}#2~
+        \tl_if_blank:nF { #4 }{/C~[#4]}
+        /F~#5
+        /Action <<\exp_not:n{#6}>>
+        /OUT
+      }          
+  }
+\cs_new_protected:Npn \@@_backend_goto:nnnnnnn #1#2#3#4#5#6#7
+% #1 level (ignored), #2 kid count, #3 open? #4 color (space separated values), #5 flag, #6 action, #7 title,    
+  {  
+    \@@_backend_pdfmark:e 
+      {
+        /Title~(\exp_not:n{#7})~
+        /Count~\bool_if:nF{#3}{-}#2~
+        \tl_if_blank:nF { #4 }{/C~[#4]}
+        /F~#5
+        /Action/GoTo/Dest(\exp_not:n{#6})~cvn
+        /OUT
+      }          
+  }
+%</dvips> 
+%<*pdftex>
+\cs_new_protected:Npn \@@_backend_action:nnnnnnn #1#2#3#4#5#6#7
+% #1 level (ignored), #2 kid count, #3 open? #4 color (space separated values), #5 flag, #6 action, #7 title,    
+  {
+    \tex_pdfoutline:D~attr 
+      {
+        /F~#5~
+        \tl_if_blank:nF { #4 }{/C~[#4]}
+      }~
+      user~{<<\exp_not:n{#6}>>}~
+      count~\bool_if:nF{#3}{-}#2~
+      {\exp_not:n{#7}}
+  }
+\cs_new_protected:Npn \@@_backend_goto:nnnnnnn #1#2#3#4#5#6#7
+% #1 level (ignored), #2 kid count, #3 open? #4 color (space separated values), #5 flag, #6 destination, #7 title,    
+  {
+    \tex_pdfoutline:D~attr 
+      {
+        /F~#5~
+        \tl_if_blank:nF { #4 }{/C~[#4]}
+      }~
+      \tag_if_active:TF
+       {goto~struct~name~{#6}~name~{#6}}
+       {goto~name~{#6}}~
+      count~\bool_if:nF{#3}{-}#2~
+      {\exp_not:n{#7}}
+  }
+%</pdftex> 
+%<*luatex>
+\cs_new_protected:Npn \@@_backend_action:nnnnnnn #1#2#3#4#5#6#7
+% #1 level (ignored), #2 kid count, #3 open? #4 color (space separated values), #5 flag, #6 action, #7 title,       
+  {
+    \tex_pdfextension:D~outline~attr 
+      {
+        /F~#5~
+        \tl_if_blank:nF { #4 }{/C~[#4]}
+      }~
+      user~{<<\exp_not:n{#6}>>}~
+      count~\bool_if:nF{#3}{-}#2~
+      {\exp_not:n{#7}}
+   } 
+\cs_new_protected:Npn \@@_backend_goto:nnnnnnn #1#2#3#4#5#6#7
+% #1 level (ignored), #2 kid count, #3 open? #4 color (space separated values), #5 flag, #6 destination, #7 title,    
+  {
+    \tex_pdfextension:D~outline~attr 
+      {
+        /F~#5~
+        \tl_if_blank:nF { #4 }{/Color~[#4]}
+      }~
+      \tag_if_active:TF
+       {goto~struct~name~{#6}~name~{#6}}
+       {goto~name~{#6}}~
+      count~\bool_if:nF{#3}{-}#2~
+      {\exp_not:n{#7}}
+  }
+%</luatex>
+%<*xdvipdfmx|dvipdfmx>
+\cs_new_protected:Npn \@@_backend_action:nnnnnnn #1#2#3#4#5#6#7
+% #1 level, #2 kid count (ignored), #3 open? #4 color (space separated values), #5 flag, #6 action, #7 title,       
+  {
+    \tex_special:D 
+     {
+       pdf:out~
+       [\bool_if:nF{#3}{-}]~#1~
+       << 
+         /A<<\exp_not:n{#6}>>~
+         /Title~(\exp_not:n{#7})~
+         /F~#5~
+         \tl_if_blank:nF { #4 }{/C~[#4]}
+       >>
+     }        
+  } 
+\cs_new_protected:Npn \@@_backend_goto:nnnnnnn #1#2#3#4#5#6#7
+% #1 level, #2 kid count (ignored), #3 open? #4 color (space separated values), #5 flag, #6 destination, #7 title,       
+  {
+    \tex_special:D 
+     {
+       pdf:out~
+       [\bool_if:nF{#3}{-}]~#1~
+       << 
+         /A
+           <<
+             /S/GoTo/D(\exp_not:n{#6})
+             \tag_if_active:T
+              {
+                /SD~@pdf.SDest.#6
+              }
+           >>~
+         /Title~(\exp_not:n{#7})~
+         /F~#5~
+         \tl_if_blank:nF { #4 }{/C~[#4]}
+       >>
+     }        
+  }      
+%</xdvipdfmx|dvipdfmx>
+%<*dvisvgm>
+\cs_new_protected:Npn \@@_backend_action:nnnnnnn #1#2#3#4#5#6#7{}
+\cs_new_protected:Npn \@@_backend_goto:nnnnnnn #1#2#3#4#5#6#7 {}
+%</dvisvgm>
+%    \end{macrocode}
 % \subsection{lua code for lualatex}
 %    \begin{macrocode}
 %<*lua>

@@ -5,7 +5,7 @@ first release 0.95a, 2021-02-23 will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 this project uses date-based 'snapshot' version identifiers.
 
-## [Unreleased]
+## [2026-04-15]
 
 ### Fixed
 * css-files embedded at the end were not detected by embedded file test
@@ -21,6 +21,15 @@ this project uses date-based 'snapshot' version identifiers.
 
 * The standard is not longer switched automatically from A-4 to A-4f is an embedded file is found, a note is written to the log-file.
   See comment in issue #107
+  
+* removed some color definitions in firstaid/color-ltx.sty as they are done by the kernel directly.
+
+### Added
+
+* new module l3pdfoutline to create bookmarks
+* latex-lab-bookmark.dtx: a reimplementation of the bookmark package which uses the new module l3pdfoutline
+* l3pdftools: new command `\pdf_purify:nN`, a replacement for hyperref's `\pdfstringdef`.
+ 
 
 ## [2026-01-23]
 
@@ -189,6 +198,8 @@ Version: 2024-08-17 v0.96j
 
 ### Added
 
+ - new module l3pdfoutline for bookmark support
+ - new latex-lab module bookmark for bookmark support
  - added a verification 'omit_CID' used by PDF/a-2 and newer with luatex.
  - warnings if pdfversion does not fit ua-1 and ua-2
 
