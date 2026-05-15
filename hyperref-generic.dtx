@@ -166,9 +166,7 @@
 %  The new driver doesn't contain code to handle bookmarks/outlines.
 %  Instead it forces the loading of the \pkg{bookmark} package
 %  unless the package option |bookmarks=false|
-%  has been used. Currently \pkg{bookmark} is loaded at the end of the preamble
-%  so if commands from \pkg{bookmark} are needed in the preamble the document
-%  should load it manually. This is subject to change at some time in the future.
+%  has been used. 
 %
 %  \section{\enquote{Metadata}}
 %
@@ -1574,22 +1572,16 @@
      ,bookmarksopenlevel .code:n = {\bookmarksetup{openlevel=#1}}
     }
  }
-\legacy_if:nTF { Hy@bookmarks }
-  {
-    \AddToHook{begindocument/before}[hyperref/bookmark]
-     {
-       \RequirePackage{bookmark}
-     }
-  }
 %    \end{macrocode}
-% empty hook chunk to ensure that the chunk exists.
+% \changes{v0.97b}{2026-05-15}{load bookmark earlier for issue \#115}
 %    \begin{macrocode}
+\legacy_if:nT { Hy@bookmarks }
   {
-    \AddToHook{begindocument/before}[hyperref/bookmark]{}
-  }
-\legacy_if:nT {Hy@draft}
-  {
-    \PassOptionsToPackage{draft}{bookmark}
+    \legacy_if:nT {Hy@draft}
+     {
+      \PassOptionsToPackage{draft}{bookmark}
+     }
+    \RequirePackage{bookmark}
   }
 %    \end{macrocode}
 %
@@ -3329,9 +3321,9 @@
           }
         \@@_store_metadata:nn {baseurl}{#1}
      }
-   %only false does something ...
+   %only to avoid warnings ...
    ,bookmarks .choice:
-   ,bookmarks / false .code:n = {\RemoveFromHook {begindocument/before}[hyperref/bookmark]}
+   ,bookmarks / false .code:n = {}
    ,bookmarks / true .code:n = {}
    ,bookmarks .default:n = {true}
    ,bookmarksnumbered .legacy_if_set:n  = {Hy@bookmarksnumbered}
