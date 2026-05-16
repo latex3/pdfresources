@@ -10,7 +10,7 @@ local luatexstatus = status.list()
 bundle  = ""
 module  = "pdfmanagement"
 
-typesetexe="lualatex"
+typesetexe="lualatex-dev"
 installfiles = {"*.sty","*.cls","*.def","*.lua","*.ltx"}
 
 if options["target"] == "ctan" then
