@@ -166,7 +166,7 @@
 %  The new driver doesn't contain code to handle bookmarks/outlines.
 %  Instead it forces the loading of the \pkg{bookmark} package
 %  unless the package option |bookmarks=false|
-%  has been used. 
+%  has been used. It is possible to disable bookmarks with |\hypersetup{bookmarks=false}|.
 %
 %  \section{\enquote{Metadata}}
 %
@@ -1544,13 +1544,14 @@
   { \cs_if_exist_p:N \pdfmanagement_if_active_p: }{ \pdfmanagement_if_active_p: }
   { \msg_error:nn { hyp}{ missing-resource-management } }
 %    \end{macrocode}
+%
+% \section{bookmarks}
 % Outlines/bookmarks require the bookmark package.
 % TODO check pdfpagemode if bookmarks are suppressed.
 % TODO We overwrite the color key here for now, but this should be moved to bookmark
-%
 %    \begin{macrocode}
-\AddToHook { package/bookmark/after}
- {
+\AddToHook { package/bookmark/after }
+  {
    \define@key{BKM}{color}
      {
       \tl_if_blank:nTF {#1}
@@ -1563,25 +1564,26 @@
             \BKM@color
         }
      }
-   \keys_define:nn {hyp}
-    {
-      bookmarksnumbered .legacy_if_set:n  = {BKM@numbered}
-     ,bookmarksopen .code:n = {\bookmarksetup{open=#1}}
-     ,bookmarksopen .default:n = true
-     ,bookmarksdepth .code:n = {\bookmarksetup{depth=#1}}
-     ,bookmarksopenlevel .code:n = {\bookmarksetup{openlevel=#1}}
-    }
- }
+  }
 %    \end{macrocode}
 % \changes{v0.97b}{2026-05-15}{load bookmark earlier for issue \#115}
 %    \begin{macrocode}
-\legacy_if:nT { Hy@bookmarks }
+\legacy_if:nTF { Hy@bookmarks }
   {
     \legacy_if:nT {Hy@draft}
      {
       \PassOptionsToPackage{draft}{bookmark}
      }
     \RequirePackage{bookmark}
+  }
+%    \end{macrocode}
+% Some of the bookmark keys make use of \cs{bookmarksetup}.
+% So we provide the command so that the keys do not error if \pkg{bookmark} is not loaded. 
+% In case someone loads bookmarks afterwards we undefine it before the file: 
+%    \begin{macrocode}
+  {
+    \providecommand\bookmarksetup[1]{}
+    \AddToHook{file/bookmark.sty/before}{\let\bookmarksetup\undefined}
   }
 %    \end{macrocode}
 %
@@ -3320,15 +3322,17 @@
              \pdfmanagement_add:nne {Catalog} { URI }{ <</Base \l_@@_tmpa_tl>> }
           }
         \@@_store_metadata:nn {baseurl}{#1}
-     }
-   %only to avoid warnings ...
+     }   
    ,bookmarks .choice:
-   ,bookmarks / false .code:n = {}
-   ,bookmarks / true .code:n = {}
+   ,bookmarks / false .code:n = {\Hy@bookmarksfalse}
+   ,bookmarks / true .code:n = {\Hy@bookmarkstrue}
    ,bookmarks .default:n = {true}
-   ,bookmarksnumbered .legacy_if_set:n  = {Hy@bookmarksnumbered}
-   ,bookmarksopen .legacy_if_set:n = {Hy@bookmarksopen}
-   ,bookmarksopenlevel .tl_set:N = \@bookmarksopenlevel
+   ,bookmarksnumbered .code:n  = {\bookmarksetup{numbered=#1}}
+   ,bookmarksnumbered .default:n = true 
+   ,bookmarksopen .code:n = {\bookmarksetup{open=#1}}
+   ,bookmarksopen .default:n = true
+   ,bookmarksdepth .code:n = {\bookmarksetup{depth=#1}}
+   ,bookmarksopenlevel .code:n = {\bookmarksetup{openlevel=#1}}   
    ,bookmarkstype .tl_set:N = \Hy@bookmarkstype
    ,pdfcenterwindow    .choice:
    ,pdfcenterwindow / false .code:n =
