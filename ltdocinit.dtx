@@ -102,7 +102,7 @@
 % that the \meta{value} does not expand further
 % when appearing in an x-type argument expansion.
 % The older names \cs{GetDocumentProperties} and \cs{pdfmanagement_get_documentproperties:n}
-% are still provided for compatibility. 
+% are still provided for compatibility.
 % \end{function}
 %
 % \begin{function}[updated=2025-06-21,TF]{\pdfmanagement_get_documentproperty:nN}
@@ -120,7 +120,7 @@
 %   container, then leaves the \meta{true code} in the input
 %   stream.  The \meta{tl var} is assigned locally.
 %   The older name \cs{pdfmanagement_get_documentproperty:nN}
-%   is still provided for compatibility. 
+%   is still provided for compatibility.
 % \end{function}
 %
 % \begin{function}{\ShowDocumentProperties,\LogDocumentProperties}
@@ -168,32 +168,54 @@
 %
 %
 % \subsection{Container for document Properties}
+% This should move into the kernel, so we test if the command is already defined.
+%    \begin{macrocode}
+\cs_if_exist:NTF\AddToDocumentProperties
+ {
+   \cs_new:Npn\pdfmanagement_get_documentproperty:n #1
+     {
+       \prop_item:Nn \g__kernel_documentproperties_prop {#1}
+     }
+   \prg_new_protected_conditional:Npnn
+     \pdfmanagement_get_documentproperty:nN #1#2 { T , F , TF }
+       {
+        \prop_get:NnNTF \g__kernel_documentproperties_prop  {#1} #2
+          {
+           \prg_return_true:
+          }
+          {
+           \prg_return_false:
+          }
+       }
+ }
+ {
+%    \end{macrocode}
 % The container for the document properties is a prop
 % \begin{variable}{\g_@@_documentproperties_prop}
 %    \begin{macrocode}
-\prop_new:N \g_@@_documentproperties_prop %
+   \prop_new:N \g_@@_documentproperties_prop %
 %    \end{macrocode}
 % \end{variable}
 % \begin{macro}{\AddToDocumentProperties}
 %    \begin{macrocode}
-\NewDocumentCommand\AddToDocumentProperties{O{\@currname}mm}
-  {
-    \exp_args:NNe
-      \prop_gput:Nnn \g_@@_documentproperties_prop
-        {
-          \tl_if_blank:eTF {#1}{top-level/}{#1/} #2
-        }
-        { #3}
-  }
+   \NewDocumentCommand\AddToDocumentProperties{O{\@currname}mm}
+     {
+       \exp_args:NNe
+         \prop_gput:Nnn \g_@@_documentproperties_prop
+           {
+             \tl_if_blank:eTF {#1}{top-level/}{#1/} #2
+           }
+           { #3}
+     }
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}[EXP]{\GetDocumentProperty,\GetDocumentProperties}
 %    \begin{macrocode}
-\cs_new:Npn\GetDocumentProperty #1
-  {
-    \prop_item:Nn \g_@@_documentproperties_prop {#1}
-  }
-\cs_new_eq:NN\GetDocumentProperties\GetDocumentProperty
+   \cs_new:Npn\GetDocumentProperty #1
+     {
+       \prop_item:Nn \g_@@_documentproperties_prop {#1}
+     }
+   \cs_new_eq:NN\GetDocumentProperties\GetDocumentProperty
 %    \end{macrocode}
 % \end{macro}
 % For uses in modules (e.g. l3pdfmeta)
@@ -201,56 +223,59 @@
 %
 % \begin{macro}[EXP]{\pdfmanagement_get_documentproperty:n}
 %    \begin{macrocode}
-\cs_new:Npn\pdfmanagement_get_documentproperty:n #1
-  {
-    \prop_item:Nn \g_@@_documentproperties_prop {#1}
-  }
-\cs_new_eq:NN 
-  \pdfmanagement_get_documentproperties:n 
-  \pdfmanagement_get_documentproperty:n  
+   \cs_new:Npn\pdfmanagement_get_documentproperty:n #1
+     {
+       \prop_item:Nn \g_@@_documentproperties_prop {#1}
+     }
+   \cs_new_eq:NN
+     \pdfmanagement_get_documentproperties:n
+     \pdfmanagement_get_documentproperty:n
 %    \end{macrocode}
 % \end{macro}
 % The following allows to retrieve the values with branching.
 % \begin{macro}[added=2025-06-21]{\pdfmanagement_get_documentproperty:nNTF}
 %    \begin{macrocode}
-\prg_new_protected_conditional:Npnn
-  \pdfmanagement_get_documentproperty:nN #1#2 { T , F , TF }
-    {
-     \prop_get:NnNTF \g_@@_documentproperties_prop  {#1} #2
+   \prg_new_protected_conditional:Npnn
+     \pdfmanagement_get_documentproperty:nN #1#2 { T , F , TF }
        {
-        \prg_return_true:
+        \prop_get:NnNTF \g_@@_documentproperties_prop  {#1} #2
+          {
+           \prg_return_true:
+          }
+          {
+           \prg_return_false:
+          }
        }
-       {
-        \prg_return_false:
-       }
-    }
-\prg_new_eq_conditional:NNn   
-  \pdfmanagement_get_documentproperties:nN  
-  \pdfmanagement_get_documentproperty:nN
-  { T , F , TF }
+   \prg_new_eq_conditional:NNn
+     \pdfmanagement_get_documentproperties:nN
+     \pdfmanagement_get_documentproperty:nN
+     { T , F , TF }
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\ShowDocumentProperties}
 %    \begin{macrocode}
-\msg_new:nnn  { pdfmanagement } { show-properties }
-  {
-    The~following~document~properties~have~been~stored:
-    #1
-  }
-\NewDocumentCommand\ShowDocumentProperties {}
-  {
-    \msg_show:nne {pdfmanagement}{show-properties}
+    \msg_new:nnn  { pdfmanagement } { show-properties }
       {
-        \prop_map_function:NN \g_@@_documentproperties_prop \msg_show_item:nn
+        The~following~document~properties~have~been~stored:
+        #1
       }
-  }
-\NewDocumentCommand\LogDocumentProperties {}
-  {
-    \msg_log:nne {pdfmanagement}{show-properties}
+    \NewDocumentCommand\ShowDocumentProperties {}
       {
-        \prop_map_function:NN \g_@@_documentproperties_prop \msg_show_item:nn
+        \msg_show:nne {pdfmanagement}{show-properties}
+          {
+            \prop_map_function:NN \g_@@_documentproperties_prop \msg_show_item:nn
+          }
       }
-  }
+    \NewDocumentCommand\LogDocumentProperties {}
+      {
+        \msg_log:nne {pdfmanagement}{show-properties}
+          {
+            \prop_map_function:NN \g_@@_documentproperties_prop \msg_show_item:nn
+          }
+      }
+%    \end{macrocode}
+%    \begin{macrocode}
+ } % end of existence test
 %    \end{macrocode}
 % \end{macro}
 %    \begin{macrocode}
