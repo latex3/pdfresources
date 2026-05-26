@@ -187,6 +187,13 @@
            \prg_return_false:
           }
        }
+%    \end{macrocode}
+% We provide the old commands as fallback:
+%    \begin{macrocode}
+   \cs_new_eq:NN\GetDocumentProperties\GetDocumentProperty  
+    \cs_new_eq:NN
+     \pdfmanagement_get_documentproperties:n
+     \pdfmanagement_get_documentproperty:n 
  }
  {
 %    \end{macrocode}
