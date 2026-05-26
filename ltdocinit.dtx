@@ -172,10 +172,17 @@
 %    \begin{macrocode}
 \cs_if_exist:NTF\AddToDocumentProperties
  {
+%    \end{macrocode}
+% \begin{macro}{\pdfmanagement_get_documentproperty:n}
+%    \begin{macrocode}
    \cs_new:Npn\pdfmanagement_get_documentproperty:n #1
      {
        \prop_item:Nn \g__kernel_documentproperties_prop {#1}
      }
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\pdfmanagement_get_documentproperty:nNTF}
+%    \begin{macrocode}
    \prg_new_protected_conditional:Npnn
      \pdfmanagement_get_documentproperty:nN #1#2 { T , F , TF }
        {
@@ -188,13 +195,18 @@
           }
        }
 %    \end{macrocode}
+% \end{macro}
 % We provide the old commands as fallback:
 %    \begin{macrocode}
    \cs_new_eq:NN\GetDocumentProperties\GetDocumentProperty  
-    \cs_new_eq:NN
+   \cs_new_eq:NN
      \pdfmanagement_get_documentproperties:n
      \pdfmanagement_get_documentproperty:n 
- }
+   \prg_new_eq_conditional:NNn
+     \pdfmanagement_get_documentproperties:nN
+     \pdfmanagement_get_documentproperty:nN
+     { T , F , TF }  
+ }% else existence
  {
 %    \end{macrocode}
 % The container for the document properties is a prop
