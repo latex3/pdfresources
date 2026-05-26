@@ -1965,7 +1965,7 @@
 \cs_new_protected:Npn \@@_xmp_date_get:nNN #1 #2 #3
   %#1 property, #2 tl var with PDF date, #3 seq for split date
   {
-    \tl_set:Ne #2 { \GetDocumentProperties{#1} }
+    \tl_set:Ne #2 { \pdfmanagement_get_documentproperty:n{#1} }
     \tl_if_blank:VTF #2
       {
         \seq_set_eq:NN #3 \l_@@_xmp_currentdate_seq
@@ -2287,8 +2287,8 @@
 % think if an error is needed for empty lang.
 % \end{NOTE}
 %    \begin{macrocode}
-   \tl_set:Ne \l_@@_xmp_doclang_tl  {\GetDocumentProperties{document/lang}}
-   \tl_set:Ne \l_@@_xmp_metalang_tl {\GetDocumentProperties{hyperref/pdfmetalang}}
+   \tl_set:Ne \l_@@_xmp_doclang_tl  {\pdfmanagement_get_documentproperty:n{document/lang}}
+   \tl_set:Ne \l_@@_xmp_metalang_tl {\pdfmanagement_get_documentproperty:n{hyperref/pdfmetalang}}
    \tl_if_blank:VT \l_@@_xmp_metalang_tl
     { \cs_set_eq:NN \l_@@_xmp_metalang_tl\l_@@_xmp_doclang_tl}
 %    \end{macrocode}
@@ -2882,7 +2882,7 @@
   \@@_xmp_add_packet_line_default:nnee
     {pdf}{Producer}
     {\c_sys_engine_exec_str-\c_sys_engine_version_str}
-    {\GetDocumentProperties{hyperref/pdfproducer}}
+    {\pdfmanagement_get_documentproperty:n{hyperref/pdfproducer}}
 %    \end{macrocode}
 %  Now the PDF version
 %    \begin{macrocode}
@@ -2910,13 +2910,13 @@
   \@@_xmp_add_packet_line_default:nnee
     {xmp}{CreatorTool}
     {LaTeX}
-    { \GetDocumentProperties{hyperref/pdfcreator} }
+    { \pdfmanagement_get_documentproperty:n{hyperref/pdfcreator} }
 %    \end{macrocode}
 % The baseurl
 %    \begin{macrocode}
    \@@_xmp_add_packet_line_default:nnee
      {xmp}{BaseURL}{}
-     { \GetDocumentProperties{hyperref/baseurl} }
+     { \pdfmanagement_get_documentproperty:n{hyperref/baseurl} }
 %    \end{macrocode}
 % CreationDate
 %    \begin{macrocode}
@@ -2961,7 +2961,7 @@
      {\@@_xmp_add_packet_line:nne {pdfaid}{year} {\pdfmeta_standard_item:n{year}}}
      {\@@_xmp_add_packet_line:nne {pdfaid}{rev}  {\pdfmeta_standard_item:n{year}}}
     \@@_xmp_add_packet_line:nne
-      {pdfxid}{GTS_PDFXVersion}{\GetDocumentProperties{document/pdfstandard-X}}
+      {pdfxid}{GTS_PDFXVersion}{\pdfmanagement_get_documentproperty:n{document/pdfstandard-X}}
     \pdfmanagement_get_documentproperties:nNT {document/pdfstandard-UA}\l_@@_tmpa_tl
      {
        \@@_xmp_add_packet_line:nne
@@ -3031,12 +3031,12 @@
 % pdfauthortitle/photoshop:AuthorsPosition
 %    \begin{macrocode}
    \@@_xmp_add_packet_line:nne{photoshop}{AuthorsPosition}
-     { \GetDocumentProperties{hyperref/pdfauthortitle} }
+     { \pdfmanagement_get_documentproperty:n{hyperref/pdfauthortitle} }
 %    \end{macrocode}
 % pdfcaptionwriter/photoshop:CaptionWriter
 %    \begin{macrocode}
    \@@_xmp_add_packet_line:nne{photoshop}{CaptionWriter}
-     { \GetDocumentProperties{hyperref/pdfcaptionwriter} }
+     { \pdfmanagement_get_documentproperty:n{hyperref/pdfcaptionwriter} }
 %    \end{macrocode}
 %    \begin{macrocode}
   }
@@ -3053,11 +3053,11 @@
 %    \end{macrocode}
 % pdfdocumentid / xmpMM:DocumentID
 %    \begin{macrocode}
-    \str_set:Ne\l_@@_tmpa_str {\GetDocumentProperties{hyperref/pdfdocumentid}}
+    \str_set:Ne\l_@@_tmpa_str {\pdfmanagement_get_documentproperty:n{hyperref/pdfdocumentid}}
     \str_if_empty:NT \l_@@_tmpa_str
       {
         \@@_xmp_create_uuid:nN
-          {\jobname\GetDocumentProperties{hyperref/pdftitle}}
+          {\jobname\pdfmanagement_get_documentproperty:n{hyperref/pdftitle}}
           \l_@@_tmpa_str
       }
     \@@_xmp_add_packet_line:nnV{xmpMM}{DocumentID}
@@ -3065,7 +3065,7 @@
 %    \end{macrocode}
 % pdfinstanceid / xmpMM:InstanceID
 %    \begin{macrocode}
-    \str_set:Ne\l_@@_tmpa_str {\GetDocumentProperties{hyperref/pdfinstanceid}}
+    \str_set:Ne\l_@@_tmpa_str {\pdfmanagement_get_documentproperty:n{hyperref/pdfinstanceid}}
     \str_if_empty:NT \l_@@_tmpa_str
       {
         \@@_xmp_create_uuid:nN
@@ -3078,12 +3078,12 @@
 % pdfversionid/xmpMM:VersionID
 %    \begin{macrocode}
    \@@_xmp_add_packet_line:nne{xmpMM}{VersionID}
-     { \GetDocumentProperties{hyperref/pdfversionid} }
+     { \pdfmanagement_get_documentproperty:n{hyperref/pdfversionid} }
 %    \end{macrocode}
 % pdfrendition/xmpMM:RenditionClass
 %    \begin{macrocode}
    \@@_xmp_add_packet_line:nne{xmpMM}{RenditionClass}
-     { \GetDocumentProperties{hyperref/pdfrendition} }
+     { \pdfmanagement_get_documentproperty:n{hyperref/pdfrendition} }
 %    \end{macrocode}
 %    \begin{macrocode}
   }
@@ -3111,7 +3111,7 @@
 % pdfauthor/dc:creator
 %    \begin{macrocode}
     \@@_xmp_add_packet_list_simple:nnne {dc}{creator}{Seq}
-       { \GetDocumentProperties{hyperref/pdfauthor} }
+       { \pdfmanagement_get_documentproperty:n{hyperref/pdfauthor} }
     \int_compare:nNnT {0\pdfmeta_standard_item:n{level}}={1}
        { \pdfmanagement_remove:nn{Info}{Author} }
 %    \end{macrocode}
@@ -3119,12 +3119,12 @@
 % with different languages.
 %    \begin{macrocode}
     \@@_xmp_add_packet_list:nnne {dc}{title}{Alt}
-       { \GetDocumentProperties{hyperref/pdftitle} }
+       { \pdfmanagement_get_documentproperty:n{hyperref/pdftitle} }
 %    \end{macrocode}
 % pdfkeywords/dc:subject
 %    \begin{macrocode}
     \@@_xmp_add_packet_list_simple:nnne {dc}{subject}{Bag}
-       { \GetDocumentProperties{hyperref/pdfkeywords} }
+       { \pdfmanagement_get_documentproperty:n{hyperref/pdfkeywords} }
     \int_compare:nNnT {0\pdfmeta_standard_item:n{level}}={1}
        { \pdfmanagement_remove:nn{Info}{Keywords} }
 %    \end{macrocode}
@@ -3141,13 +3141,13 @@
 % pdfpublisher/dc:publisher
 %    \begin{macrocode}
    \@@_xmp_add_packet_list_simple:nnne {dc}{publisher}{Bag}
-     { \GetDocumentProperties{hyperref/pdfpublisher} }
+     { \pdfmanagement_get_documentproperty:n{hyperref/pdfpublisher} }
 %    \end{macrocode}
 % pdfsubject/dc:description
 %    \begin{macrocode}
    \@@_xmp_add_packet_list:nnne
     {dc}{description}{Alt}
-    {\GetDocumentProperties{hyperref/pdfsubject}}
+    {\pdfmanagement_get_documentproperty:n{hyperref/pdfsubject}}
 %    \end{macrocode}
 % lang/pdflang/dc:language
 %    \begin{macrocode}
@@ -3157,7 +3157,7 @@
 % pdfidentifier/dc:identifier
 %    \begin{macrocode}
    \@@_xmp_add_packet_line:nne{dc}{identifier}
-     { \GetDocumentProperties{hyperref/pdfidentifier} }
+     { \pdfmanagement_get_documentproperty:n{hyperref/pdfidentifier} }
 %    \end{macrocode}
 % pdfdate/dc:date
 %    \begin{macrocode}
@@ -3174,11 +3174,11 @@
     \@@_xmp_add_packet_line_default:nnee
      {dc}{source}
      { \c_sys_jobname_str.tex }
-     { \GetDocumentProperties{hyperref/pdfsource} }
+     { \pdfmanagement_get_documentproperty:n{hyperref/pdfsource} }
 %    \end{macrocode}
 %    \begin{macrocode}
     \@@_xmp_add_packet_list:nnne{dc}{rights}{Alt}
-     {\GetDocumentProperties{hyperref/pdfcopyright}}
+     {\pdfmanagement_get_documentproperty:n{hyperref/pdfcopyright}}
 %    \end{macrocode}
 %    \begin{macrocode}
   }
@@ -3194,12 +3194,12 @@
     \@@_xmp_add_packet_line:nne
       {xmpRights}
       {WebStatement}
-      {\GetDocumentProperties{hyperref/pdflicenseurl}}
+      {\pdfmanagement_get_documentproperty:n{hyperref/pdflicenseurl}}
     \@@_xmp_add_packet_line:nne
       {xmpRights}
       {Marked}
       {
-       \str_case:en {\GetDocumentProperties{document/copyright}}
+       \str_case:en {\pdfmanagement_get_documentproperty:n{document/copyright}}
         {
           {true}{True}
           {false}{False}
@@ -3225,31 +3225,31 @@
      \@@_xmp_incr_indent:\@@_xmp_incr_indent:\@@_xmp_incr_indent:\@@_xmp_incr_indent:
      \@@_xmp_add_packet_line:nneN
        {Iptc4xmpCore}{CiAdrExtadr}
-       {\GetDocumentProperties{hyperref/pdfcontactaddress}}
+       {\pdfmanagement_get_documentproperty:n{hyperref/pdfcontactaddress}}
        #1
      \@@_xmp_add_packet_line:nneN
        {Iptc4xmpCore}{CiAdrCity}
-       {\GetDocumentProperties{hyperref/pdfcontactcity}}
+       {\pdfmanagement_get_documentproperty:n{hyperref/pdfcontactcity}}
        #1
      \@@_xmp_add_packet_line:nneN
        {Iptc4xmpCore}{CiAdrPcode}
-       {\GetDocumentProperties{hyperref/pdfcontactpostcode}}
+       {\pdfmanagement_get_documentproperty:n{hyperref/pdfcontactpostcode}}
        #1
      \@@_xmp_add_packet_line:nneN
        {Iptc4xmpCore}{CiAdrCtry}
-       {\GetDocumentProperties{hyperref/pdfcontactcountry}}
+       {\pdfmanagement_get_documentproperty:n{hyperref/pdfcontactcountry}}
        #1
      \@@_xmp_add_packet_line:nneN
        {Iptc4xmpCore}{CiTelWork}
-       {\GetDocumentProperties{hyperref/pdfcontactphone}}
+       {\pdfmanagement_get_documentproperty:n{hyperref/pdfcontactphone}}
        #1
      \@@_xmp_add_packet_line:nneN
        {Iptc4xmpCore}{CiEmailWork}
-       {\GetDocumentProperties{hyperref/pdfcontactemail}}
+       {\pdfmanagement_get_documentproperty:n{hyperref/pdfcontactemail}}
        #1
      \@@_xmp_add_packet_line:nneN
        {Iptc4xmpCore}{CiUrlWork}
-       {\GetDocumentProperties{hyperref/pdfcontacturl}}
+       {\pdfmanagement_get_documentproperty:n{hyperref/pdfcontacturl}}
        #1
      \@@_xmp_decr_indent:\@@_xmp_decr_indent:\@@_xmp_decr_indent:\@@_xmp_decr_indent:
   }
@@ -3292,7 +3292,7 @@
 % First subtitle
 %    \begin{macrocode}
     \@@_xmp_lang_get:eNN
-     {\GetDocumentProperties{hyperref/pdfsubtitle}}
+     {\pdfmanagement_get_documentproperty:n{hyperref/pdfsubtitle}}
      \l_@@_tmpa_tl\l_@@_tmpb_tl
     \@@_xmp_add_packet_line_attr:nneV
       {prism}{subtitle}
@@ -3302,7 +3302,7 @@
 % Then publicationName
 %    \begin{macrocode}
     \@@_xmp_lang_get:eNN
-     {\GetDocumentProperties{hyperref/pdfpublication}}
+     {\pdfmanagement_get_documentproperty:n{hyperref/pdfpublication}}
      \l_@@_tmpa_tl\l_@@_tmpb_tl
     \@@_xmp_add_packet_line_attr:nneV
       {prism}{publicationName}
@@ -3313,36 +3313,36 @@
 %    \begin{macrocode}
     \@@_xmp_add_packet_line:nne
       {prism}{bookEdition}
-      {\GetDocumentProperties{hyperref/pdfbookedition}}
+      {\pdfmanagement_get_documentproperty:n{hyperref/pdfbookedition}}
     \@@_xmp_add_packet_line:nne
       {prism}{aggregationType}
-      {\GetDocumentProperties{hyperref/pdfpubtype}}
+      {\pdfmanagement_get_documentproperty:n{hyperref/pdfpubtype}}
     \@@_xmp_add_packet_line:nne
       {prism}{volume}
-      {\GetDocumentProperties{hyperref/pdfvolumenum}}
+      {\pdfmanagement_get_documentproperty:n{hyperref/pdfvolumenum}}
     \@@_xmp_add_packet_line:nne
       {prism}{number}
-      {\GetDocumentProperties{hyperref/pdfissuenum}}
+      {\pdfmanagement_get_documentproperty:n{hyperref/pdfissuenum}}
     \@@_xmp_add_packet_line:nne
       {prism}{pageRange}
-      {\GetDocumentProperties{hyperref/pdfpagerange}}
+      {\pdfmanagement_get_documentproperty:n{hyperref/pdfpagerange}}
     \@@_xmp_add_packet_line:nne
       {prism}{issn}
-      {\GetDocumentProperties{hyperref/pdfissn}}
+      {\pdfmanagement_get_documentproperty:n{hyperref/pdfissn}}
     \@@_xmp_add_packet_line:nne
       {prism}{eIssn}
-      {\GetDocumentProperties{hyperref/pdfeissn}}
+      {\pdfmanagement_get_documentproperty:n{hyperref/pdfeissn}}
     \@@_xmp_add_packet_line:nne
       {prism}{doi}
-      {\GetDocumentProperties{hyperref/pdfdoi}}
+      {\pdfmanagement_get_documentproperty:n{hyperref/pdfdoi}}
     \@@_xmp_add_packet_line:nne
       {prism}{url}
-      {\GetDocumentProperties{hyperref/pdfurl}}
+      {\pdfmanagement_get_documentproperty:n{hyperref/pdfurl}}
 %    \end{macrocode}
 % The page count is take from the previous run or from
 % pdfnumpages.
 %    \begin{macrocode}
-     \tl_set:Ne \l_@@_tmpa_tl { \GetDocumentProperties{hyperref/pdfnumpages} }
+     \tl_set:Ne \l_@@_tmpa_tl { \pdfmanagement_get_documentproperty:n{hyperref/pdfnumpages} }
      \@@_xmp_add_packet_line:nne
       {prism}{pageCount}
       {\tl_if_blank:VTF \l_@@_tmpa_tl {\PreviousTotalPages}{\l_@@_tmpa_tl}}
@@ -3362,12 +3362,12 @@
 % pdftdmreservation/tdm:reservation
 %    \begin{macrocode}
    \@@_xmp_add_packet_line:nne{tdm}{reservation}
-     { \GetDocumentProperties{hyperref/pdftdmreservation} }
+     { \pdfmanagement_get_documentproperty:n{hyperref/pdftdmreservation} }
 %    \end{macrocode}
 % pdftdmpolicy/tdm:policy
 %    \begin{macrocode}
    \@@_xmp_add_packet_line:nne{tdm}{policy}
-     { \GetDocumentProperties{hyperref/pdftdmpolicy} }
+     { \pdfmanagement_get_documentproperty:n{hyperref/pdftdmpolicy} }
 %    \end{macrocode}
 %    \begin{macrocode}
   }
