@@ -5,6 +5,11 @@ first release 0.95a, 2021-02-23 will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 this project uses date-based 'snapshot' version identifiers.
 
+## [Unreleased]
+ 
+### Changed
+* removed luacolor code from pdfmanagement-firstaid, luacolor has the code now.
+
 ## [2026-05-26]
 
 ### Changed
