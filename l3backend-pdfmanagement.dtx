@@ -1282,6 +1282,9 @@
 %  It also allow to prevent that link areas spill over into unwanted regions like
 %  footnotes. See the documentation in lualinksplit.lua for more details.
 %  We therefore add a plug for the build/column/footnotes.
+%  We use a negative number as link state as this 
+%  ensures that the linkstate is automatically reverted at the end of the box,
+%  see the documentation in lualinksplit.lua.
 %    \begin{macrocode}
 %<*luatex>
 \lua_load_module:n{lualinksplit}
