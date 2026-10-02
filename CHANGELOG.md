@@ -5,17 +5,31 @@ first release 0.95a, 2021-02-23 will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 this project uses date-based 'snapshot' version identifiers.
 
-## [2026-04-21]
+## [Unreleased]
+ 
+### Changed
+* removed luacolor code from pdfmanagement-firstaid, luacolor has the code now.
 
-### Fixed
+## [2026-05-26]
 
-* pdfstandard A-4E errored
+### Changed
+* do not define \AddToDocumentProperties and related commands if they are already defined. 
+
+## [2026-05-17]
+Version: 2026-05-17 v0.97b
+
+### Changed
+* load the bookmark package directly, fixes #115
+* documentation of hyperref-generic is now tagged
+
 
 ## [2026-04-15]
+Version: 2026-04-15 v0.97a
 
 ### Fixed
 * css-files embedded at the end were not detected by embedded file test
 * Object for /Pattern didn't exist if they were referenced in tikz fading/Xobject
+* pdfstandard A-4E errored
 
 ### Changed 
 
@@ -38,6 +52,7 @@ this project uses date-based 'snapshot' version identifiers.
  
 
 ## [2026-01-23]
+Version: 2026-01-23 v0.96z
 
 ### Fixed
 * l3pdfmeta.dtx: fix missing test if max pdf version is set, issue #104 

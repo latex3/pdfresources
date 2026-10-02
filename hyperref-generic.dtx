@@ -25,11 +25,8 @@
 % for those people who are interested.
 %
 %<*driver>
-%\DocumentMetadata{tagging=on}                     %no tagging yet, errors
-\RequirePackage{pdfmanagement}
-\SetKeys[document/metadata]{pdfversion=2.0}
-\documentclass{l3doc}
-%\usepackage{latex-lab-testphase-l3doc} %errors currently
+\DocumentMetadata{tagging=on,pdfstandard=ua-2}                     
+\documentclass{l3in2edoc}
 \usepackage{tabularx,array,booktabs}
 \hypersetup{pdfauthor=The LaTeX Project,
   pdftitle=generic hyperref driver (LaTeX PDF management bundle)}
@@ -67,10 +64,6 @@
 %   \clist_map_inline:nn {#1}{\end{xhypcolor}}
 % }
 % \ExplSyntaxOff
-% \NewDocElement[
-%   idxgroup=Hooks,
-%   printtype= \textit{hook}
-%    ]{Hook}{hook}
 %
 % \title{^^A
 %   The \pkg{hyperref-generic} module  \\ A generic driver for hyperref ^^A
@@ -85,7 +78,7 @@
 %    }^^A
 % }
 %
-% \date{Version 0.97a, released 2026-04-21}
+% \date{Version 0.97c, released 2026-05-26}
 %
 % \maketitle
 % \begin{documentation}
@@ -166,9 +159,7 @@
 %  The new driver doesn't contain code to handle bookmarks/outlines.
 %  Instead it forces the loading of the \pkg{bookmark} package
 %  unless the package option |bookmarks=false|
-%  has been used. Currently \pkg{bookmark} is loaded at the end of the preamble
-%  so if commands from \pkg{bookmark} are needed in the preamble the document
-%  should load it manually. This is subject to change at some time in the future.
+%  has been used. It is possible to disable bookmarks with |\hypersetup{bookmarks=false}|.
 %
 %  \section{\enquote{Metadata}}
 %
@@ -223,10 +214,10 @@
 %
 %  \item All values of relevant keys (including keys from the hyperxmp package)
 %  will be stored in a Metadata container, and can be retrieved with
-%  \cs{GetDocumentProperties}.
+%  \cs{GetDocumentProperty}.
 %
 %  \begin{verbatim}
-%  \edef\my@pdfauthor{\GetDocumentProperties{hyperref/pdfauthor}}
+%  \edef\my@pdfauthor{\GetDocumentProperty{hyperref/pdfauthor}}
 %  \end{verbatim}
 %  If the key hasn't be set, the result is empty. This gives external
 %  packages a public and reliable access to the data.
@@ -994,14 +985,14 @@
 %    \end{macrocode}
 %    \begin{macrocode}
 %<*headertestphase>
-\ProvidesFile{hgeneric-testphase.def}[2026-04-21 v0.97a %
+\ProvidesFile{hgeneric-testphase.def}[2026-05-26 v0.97c %
   generic Hyperref driver for the LaTeX PDF management bundle]
 %</headertestphase>
 %    \end{macrocode}
 %
 %    \begin{macrocode}
 %<*header>
-\ProvidesFile{hgeneric.def}[2026-04-21 v0.97a %
+\ProvidesFile{hgeneric.def}[2026-05-26 v0.97c %
   generic Hyperref driver for the LaTeX PDF management bundle]
 %</header>
 %    \end{macrocode}
@@ -1546,13 +1537,14 @@
   { \cs_if_exist_p:N \pdfmanagement_if_active_p: }{ \pdfmanagement_if_active_p: }
   { \msg_error:nn { hyp}{ missing-resource-management } }
 %    \end{macrocode}
+%
+% \section{bookmarks}
 % Outlines/bookmarks require the bookmark package.
 % TODO check pdfpagemode if bookmarks are suppressed.
 % TODO We overwrite the color key here for now, but this should be moved to bookmark
-%
 %    \begin{macrocode}
-\AddToHook { package/bookmark/after}
- {
+\AddToHook { package/bookmark/after }
+  {
    \define@key{BKM}{color}
      {
       \tl_if_blank:nTF {#1}
@@ -1565,31 +1557,26 @@
             \BKM@color
         }
      }
-   \keys_define:nn {hyp}
-    {
-      bookmarksnumbered .legacy_if_set:n  = {BKM@numbered}
-     ,bookmarksopen .code:n = {\bookmarksetup{open=#1}}
-     ,bookmarksopen .default:n = true
-     ,bookmarksdepth .code:n = {\bookmarksetup{depth=#1}}
-     ,bookmarksopenlevel .code:n = {\bookmarksetup{openlevel=#1}}
-    }
- }
-\legacy_if:nTF { Hy@bookmarks }
-  {
-    \AddToHook{begindocument/before}[hyperref/bookmark]
-     {
-       \RequirePackage{bookmark}
-     }
   }
 %    \end{macrocode}
-% empty hook chunk to ensure that the chunk exists.
+% \changes{v0.97b}{2026-05-15}{load bookmark earlier for issue \#115}
+%    \begin{macrocode}
+\legacy_if:nTF { Hy@bookmarks }
+  {
+    \legacy_if:nT {Hy@draft}
+     {
+      \PassOptionsToPackage{draft}{bookmark}
+     }
+    \RequirePackage{bookmark}
+  }
+%    \end{macrocode}
+% Some of the bookmark keys make use of \cs{bookmarksetup}.
+% So we provide the command so that the keys do not error if \pkg{bookmark} is not loaded. 
+% In case someone loads bookmarks afterwards we undefine it before the file: 
 %    \begin{macrocode}
   {
-    \AddToHook{begindocument/before}[hyperref/bookmark]{}
-  }
-\legacy_if:nT {Hy@draft}
-  {
-    \PassOptionsToPackage{draft}{bookmark}
+    \providecommand\bookmarksetup[1]{}
+    \AddToHook{file/bookmark.sty/before}{\let\bookmarksetup\undefined}
   }
 %    \end{macrocode}
 %
@@ -3328,15 +3315,17 @@
              \pdfmanagement_add:nne {Catalog} { URI }{ <</Base \l_@@_tmpa_tl>> }
           }
         \@@_store_metadata:nn {baseurl}{#1}
-     }
-   %only false does something ...
+     }   
    ,bookmarks .choice:
-   ,bookmarks / false .code:n = {\RemoveFromHook {begindocument/before}[hyperref/bookmark]}
-   ,bookmarks / true .code:n = {}
+   ,bookmarks / false .code:n = {\Hy@bookmarksfalse}
+   ,bookmarks / true .code:n = {\Hy@bookmarkstrue}
    ,bookmarks .default:n = {true}
-   ,bookmarksnumbered .legacy_if_set:n  = {Hy@bookmarksnumbered}
-   ,bookmarksopen .legacy_if_set:n = {Hy@bookmarksopen}
-   ,bookmarksopenlevel .tl_set:N = \@bookmarksopenlevel
+   ,bookmarksnumbered .code:n  = {\bookmarksetup{numbered=#1}}
+   ,bookmarksnumbered .default:n = true 
+   ,bookmarksopen .code:n = {\bookmarksetup{open=#1}}
+   ,bookmarksopen .default:n = true
+   ,bookmarksdepth .code:n = {\bookmarksetup{depth=#1}}
+   ,bookmarksopenlevel .code:n = {\bookmarksetup{openlevel=#1}}   
    ,bookmarkstype .tl_set:N = \Hy@bookmarkstype
    ,pdfcenterwindow    .choice:
    ,pdfcenterwindow / false .code:n =

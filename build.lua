@@ -1,6 +1,6 @@
 #!/usr/bin/env texlua
-packageversion="0.97a"
-packagedate="2026-04-21"
+packageversion="0.97c"
+packagedate="2026-05-26"
 
 local luatexstatus = status.list()
 
@@ -10,7 +10,7 @@ local luatexstatus = status.list()
 bundle  = ""
 module  = "pdfmanagement"
 
-typesetexe="lualatex"
+typesetexe="lualatex-dev"
 installfiles = {"*.sty","*.cls","*.def","*.lua","*.ltx"}
 
 if options["target"] == "ctan" then
