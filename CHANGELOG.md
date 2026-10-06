@@ -10,6 +10,9 @@ this project uses date-based 'snapshot' version identifiers.
 ### Changed
 * removed luacolor code from pdfmanagement-firstaid, luacolor has the code now.
 
+### Added 
+* `\pdfxform_new:nnnn` to allow to suppress globabl resources (issue #119)
+
 ## [2026-05-26]
 
 ### Changed

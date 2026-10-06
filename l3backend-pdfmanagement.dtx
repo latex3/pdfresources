@@ -1303,13 +1303,31 @@
 %  \item content, this doesn't need to be a box!
 %  \end{arguments}
 %  \begin{macro}{ \@@_backend_xform_use:n, \@@_backend_xform_ref:n }
+%  We want to be able to suppress the global resources, for this we used booleans
 %    \begin{macrocode}
+%<*drivers>
+\bool_new:N\l_@@_backend_xform_res_pattern_bool
+\bool_new:N\l_@@_backend_xform_res_extgstate_bool
+\bool_new:N\l_@@_backend_xform_res_properties_bool
+\bool_new:N\l_@@_backend_xform_res_colorspace_bool
+\bool_new:N\l_@@_backend_xform_res_shading_bool
+\cs_new_protected:Npn\@@_backend_xform_res_reset:
+ {
+  \bool_set_true:N\l_@@_backend_xform_res_pattern_bool
+  \bool_set_true:N\l_@@_backend_xform_res_extgstate_bool
+  \bool_set_true:N\l_@@_backend_xform_res_properties_bool
+  \bool_set_true:N\l_@@_backend_xform_res_colorspace_bool
+  \bool_set_true:N\l_@@_backend_xform_res_shading_bool
+ }
+\@@_backend_xform_res_reset: 
+%</drivers>
 %<*pdftex>
-\cs_new_protected:Npn \@@_backend_xform_new:nnnn #1 #2 #3 #4
+\cs_new_protected:Npn \@@_backend_xform_new:nnnnn #1 #2 #3 #4 #5
 % #1 name
 % #2 attributes
 % #3 resources
 % #4 content, not necessarily a box!
+% #5 a clist to exclude resources
   {
     \hbox_set:Nn \l_@@_backend_tmpa_box
       {
@@ -1327,46 +1345,63 @@
     \tl_const:ce
       { c_@@_backend_xform_dp_ \tl_to_str:n {#1} _tl }
       { \tex_the:D \box_dp:N \l_@@_backend_tmpa_box }
-    %% do we need to test if #2 and #3 are empty??
+    \clist_map_inline:nn {#5}
+     { \bool_set_false:c { l_@@_backend_xform_res_##1_bool } }     
+    %% do we need to test if #2 and #3 are empty??     
     \tex_immediate:D \tex_pdfxform:D
       ~  attr      ~ { #2 }
     %% which other resources should be default? Is an argument actually needed?
       ~  resources ~
       {
         #3
-        \int_compare:nNnT
-          { \prop_count:c { \__kernel_pdfdict_name:n { g_@@_Core/Xform/Resources/Properties } } }
-          >
-          { 0 }
-          {
-            /Properties~
-              <<
-                \pdfdict_use:n { g_@@_Core/Xform/Resources/Properties }
-              >>
-          }
-
-        \prop_if_empty:cF
-          { \__kernel_pdfdict_name:n { g_@@_Core/Page/Resources/ExtGState } }
-          {
-            /ExtGState~ \pdf_object_ref:n { @@/Page/Resources/ExtGState }
-          }
-        \prop_if_empty:cF
-          { \__kernel_pdfdict_name:n { g_@@_Core/Page/Resources/Pattern } }
-          {
-            /Pattern~ \pdf_object_ref:n { @@/Page/Resources/Pattern }
-          }
-        \prop_if_empty:cF
-          { \__kernel_pdfdict_name:n { g_@@_Core/Page/Resources/Shading } }
-          {
-            /Shading~ \pdf_object_ref:n { @@/Page/Resources/Shading }
-          }
-        \prop_if_empty:cF
-          { \__kernel_pdfdict_name:n { g_@@_Core/Page/Resources/ColorSpace } }
-          {
-            /ColorSpace~ \pdf_object_ref:n { @@/Page/Resources/ColorSpace }
-          }
+        \bool_if:NT \l_@@_backend_xform_res_properties_bool
+         {
+           \int_compare:nNnT
+             { \prop_count:c { \__kernel_pdfdict_name:n { g_@@_Core/Xform/Resources/Properties } } }
+             >
+             { 0 }
+             {
+               /Properties~
+                 <<
+                   \pdfdict_use:n { g_@@_Core/Xform/Resources/Properties }
+                 >>
+             }
+         }
+        \bool_if:NT \l_@@_backend_xform_res_extgstate_bool
+         {
+          \prop_if_empty:cF
+            { \__kernel_pdfdict_name:n { g_@@_Core/Page/Resources/ExtGState } }
+            {
+              /ExtGState~ \pdf_object_ref:n { @@/Page/Resources/ExtGState }
+            }
+         } 
+        \bool_if:NT \l_@@_backend_xform_res_pattern_bool
+         {            
+          \prop_if_empty:cF
+            { \__kernel_pdfdict_name:n { g_@@_Core/Page/Resources/Pattern } }
+            {
+              /Pattern~ \pdf_object_ref:n { @@/Page/Resources/Pattern }
+            }
+         } 
+        \bool_if:NT \l_@@_backend_xform_res_shading_bool
+         {           
+          \prop_if_empty:cF
+            { \__kernel_pdfdict_name:n { g_@@_Core/Page/Resources/Shading } }
+            {
+              /Shading~ \pdf_object_ref:n { @@/Page/Resources/Shading }
+            }
+         } 
+        \bool_if:NT \l_@@_backend_xform_res_colorspace_bool
+         {           
+          \prop_if_empty:cF
+            { \__kernel_pdfdict_name:n { g_@@_Core/Page/Resources/ColorSpace } }
+            {
+              /ColorSpace~ \pdf_object_ref:n { @@/Page/Resources/ColorSpace }
+            }
+         } 
       }
       \l_@@_backend_tmpa_box
+   \@@_backend_xform_res_reset:    
    \int_const:cn
      { c_@@_backend_xform_ \tl_to_str:n {#1} _int }
      { \tex_pdflastxform:D }
@@ -1387,11 +1422,12 @@
 %<*luatex>
 %luatex
 %nearly identical but not completely ...
-\cs_new_protected:Npn \@@_backend_xform_new:nnnn #1 #2 #3 #4
+\cs_new_protected:Npn \@@_backend_xform_new:nnnnn #1 #2 #3 #4 #5
 % #1 name
 % #2 attributes
 % #3 resources
 % #4 content, not necessarily a box!
+% #5 a clist to exclude resources
   {
     \hbox_set:Nn \l_@@_backend_tmpa_box
       {
@@ -1408,6 +1444,8 @@
     \tl_const:ce
       { c_@@_backend_xform_dp_ \tl_to_str:n {#1} _tl }
       { \tex_the:D \box_dp:N \l_@@_backend_tmpa_box }
+    \clist_map_inline:nn {#5}
+     { \bool_set_false:c { l_@@_backend_xform_res_##1_bool } }           
     %% do we need to test if #2 and #3 are empty??
     \tex_immediate:D \tex_pdfxform:D
       ~  attr      ~ { #2 }
@@ -1415,38 +1453,54 @@
       ~  resources ~
       {
         #3
-        \int_compare:nNnT
-          {\prop_count:c { \__kernel_pdfdict_name:n { g_@@_Core/Xform/Resources/Properties } }}
-          >
-          { 0 }
-          {
-            /Properties~
-              <<
-                \pdfdict_use:n { g_@@_Core/Xform/Resources/Properties }
-              >>
-          }
-        \prop_if_empty:cF
-          { \__kernel_pdfdict_name:n { g_@@_Core/Page/Resources/ExtGState } }
-          {
-            /ExtGState~ \pdf_object_ref:n { @@/Page/Resources/ExtGState }
-          }
-        \prop_if_empty:cF
-          { \__kernel_pdfdict_name:n { g_@@_Core/Page/Resources/Pattern } }
-          {
-            /Pattern~ \pdf_object_ref:n { @@/Page/Resources/Pattern }
-          }
-        \prop_if_empty:cF
-          { \__kernel_pdfdict_name:n { g_@@_Core/Page/Resources/Shading } }
-          {
-            /Shading~ \pdf_object_ref:n { @@/Page/Resources/Shading }
-          }
-        \prop_if_empty:cF
-          { \__kernel_pdfdict_name:n { g_@@_Core/Page/Resources/ColorSpace } }
-          {
-            /ColorSpace~ \pdf_object_ref:n { @@/Page/Resources/ColorSpace }
-          }
+        \bool_if:NT \l_@@_backend_xform_res_properties_bool
+         {        
+          \int_compare:nNnT
+            {\prop_count:c { \__kernel_pdfdict_name:n { g_@@_Core/Xform/Resources/Properties } }}
+            >
+            { 0 }
+            {
+              /Properties~
+                <<
+                  \pdfdict_use:n { g_@@_Core/Xform/Resources/Properties }
+                >>
+            }
+         } 
+        \bool_if:NT \l_@@_backend_xform_res_extgstate_bool
+         {         
+          \prop_if_empty:cF
+            { \__kernel_pdfdict_name:n { g_@@_Core/Page/Resources/ExtGState } }
+            {
+              /ExtGState~ \pdf_object_ref:n { @@/Page/Resources/ExtGState }
+            }
+         } 
+        \bool_if:NT \l_@@_backend_xform_res_pattern_bool
+         {         
+           \prop_if_empty:cF
+             { \__kernel_pdfdict_name:n { g_@@_Core/Page/Resources/Pattern } }
+             {
+               /Pattern~ \pdf_object_ref:n { @@/Page/Resources/Pattern }
+             }
+         }  
+        \bool_if:NT \l_@@_backend_xform_res_shading_bool
+         {           
+           \prop_if_empty:cF
+             { \__kernel_pdfdict_name:n { g_@@_Core/Page/Resources/Shading } }
+             {
+               /Shading~ \pdf_object_ref:n { @@/Page/Resources/Shading }
+             }
+         } 
+        \bool_if:NT \l_@@_backend_xform_res_colorspace_bool
+         {         
+          \prop_if_empty:cF
+            { \__kernel_pdfdict_name:n { g_@@_Core/Page/Resources/ColorSpace } }
+            {
+              /ColorSpace~ \pdf_object_ref:n { @@/Page/Resources/ColorSpace }
+            }
+         } 
       }
       \l_@@_backend_tmpa_box
+      \@@_backend_xform_res_reset:      
       \int_const:cn
         { c_@@_backend_xform_ \tl_to_str:n {#1} _int }
         { \tex_pdflastxform:D }
@@ -1475,11 +1529,12 @@
    % as the object reference and the size is often wanted on the current page.
    % so we need to allocate a box - but probably they won't be thousands xform
    % in a document so it shouldn't matter.
-    \cs_new_protected:Npn \@@_backend_xform_new:nnnn #1 #2 #3 #4
+    \cs_new_protected:Npn \@@_backend_xform_new:nnnnn #1 #2 #3 #4 #5
     % #1 name
     % #2 attributes
     % #3 resources
     % #4 content, not necessarily a box!
+    % #5 a clist to exclude resources    
       {
          \int_gincr:N \g_@@_backend_object_int
          \int_const:cn
@@ -1515,36 +1570,51 @@
                }
              \box_use_drop:c { g_@@_backend_xform_#1_box }
              \@@_backend:e {put ~ @resources ~<<#3>> }
-             \@@_backend:e
-               {
-                 put~ @resources ~
+             \clist_map_inline:nn {#5}
+              { \bool_set_false:c { l_@@_backend_xform_res_##1_bool } }                  
+             \bool_if:NT \l_@@_backend_xform_res_extgstate_bool
+              {             
+               \@@_backend:e
+                 {
+                   put~ @resources ~
+                     <<
+                       /ExtGState~ \pdf_object_ref:n { @@/Page/Resources/ExtGState }
+                     >>
+                 }
+              }       
+             \bool_if:NT \l_@@_backend_xform_res_pattern_bool
+              {                                    
+               \@@_backend:e
+                 {
+                   put~ @resources ~
                    <<
-                     /ExtGState~ \pdf_object_ref:n { @@/Page/Resources/ExtGState }
+                     /Pattern~ \pdf_object_ref:n { @@/Page/Resources/Pattern }
                    >>
-               }
-             \@@_backend:e
-               {
-                 put~ @resources ~
-                 <<
-                   /Pattern~ \pdf_object_ref:n { @@/Page/Resources/Pattern }
-                 >>
-               }
-             \@@_backend:e
-               {
-                 put~ @resources ~
-                 <<
-                   /Shading~ \pdf_object_ref:n { @@/Page/Resources/Shading }
-                 >>
-               }
-             \@@_backend:e
-               {
-                 put~ @resources ~
-                 <<
-                   /ColorSpace~
-                   \pdf_object_ref:n { @@/Page/Resources/ColorSpace }
-                 >>
-               }
+                 }
+              } 
+             \bool_if:NT \l_@@_backend_xform_res_shading_bool
+              {                           
+                \@@_backend:e
+                  {
+                    put~ @resources ~
+                    <<
+                      /Shading~ \pdf_object_ref:n { @@/Page/Resources/Shading }
+                    >>
+                  }
+              }
+             \bool_if:NT \l_@@_backend_xform_res_colorspace_bool
+              {                               
+               \@@_backend:e
+                 {
+                   put~ @resources ~
+                   <<
+                     /ColorSpace~
+                     \pdf_object_ref:n { @@/Page/Resources/ColorSpace }
+                   >>
+                 }
+              }
              \@@_backend:e {exobj ~<<#2>>}
+             \@@_backend_xform_res_reset:
            }
       }
 
@@ -1572,7 +1642,7 @@
 %</dvipdfmx|xdvipdfmx>
 %<*dvisvgm>
 % unclear what it should do!!
-\cs_new_protected:Npn \@@_backend_xform_new:nnnn #1 #2 #3 #4 {}
+\cs_new_protected:Npn \@@_backend_xform_new:nnnnn #1 #2 #3 #4 #5 {}
 \cs_new_protected:Npn \@@_backend_xform_use:n #1 {}
 \cs_new:Npn \@@_backend_xform_ref:n {}
 %</dvisvgm>
@@ -1590,7 +1660,7 @@
 %    \end{macrocode}
 %
 %    \begin{macrocode}
-\cs_new_protected:Npn\@@_backend_xform_new:nnnn #1 #2 #3 #4 % #1 name, #2 attribute, #4  content
+\cs_new_protected:Npn\@@_backend_xform_new:nnnnn #1 #2 #3 #4 #5 % #1 name, #2 attribute, #4  content #5 clist
   {
     \int_gincr:N \g_@@_backend_object_int
     \int_const:cn

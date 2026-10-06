@@ -77,11 +77,30 @@
 %    If the \meta{content} contains BDC-marks it should \emph{not} be given as a
 %    previously typeset box, but directly so that the names of the
 %    BDC-marks can be added to the resources of the xform. The xform will automatically
-%    include the resources of the current page.
+%    include the resources of the current page, see below \cs{pdfxform_new:nnnn} if this is not wanted.
+%    \meta{attributes} can be used to extend the resources, e.g. to add a \texttt{XObject} 
+%    dictionary, but is generally empty (note that the \texttt{Font} is added automatically by the primitives). 
+%    If really a special resource management is needed
+%    \cs{pdfxform_new:nnnn} should be preferred. 
 %    The content will be typeset in a hbox. With pdflatex and luatex
 %    the surrounding color is \emph{not} stored in the form XObject
 %    but should be if wanted added e.g. with |\color_select:n{.}|. This keeps
 %    the option of color injection open.
+%   \end{function}
+%  \begin{function}[added = 2026-10-06]
+%   {
+%     \pdfxform_new:nnnn
+%   }
+%   \begin{syntax}
+%     \cs{pdfxform_new:nnnn} \Arg{name} \Arg{attributes} \Arg{content}\Arg{excluded resources}
+%   \end{syntax}
+%   This command is like \cs{pdfxform_new:nnn}. The additional argument \meta{excluded resources}
+%   can be used to suppress the global resources added by the former command. This only works for
+%   the backends pdftex, luatex, xetex and dvipdfmx. Suppressing resouces can
+%   be necessary if the form XObject is itself used as a resources, e.g.,  to define a pattern. 
+%   The argument takes a comma list of one or more of the five names 
+%   \texttt{pattern}, \texttt{shading}, \texttt{extgstate}, \texttt{properties}, \texttt{colorspace}
+%   and then suppresses the relevant resources. 
 %   \end{function}
 %   \begin{function}[added = 2019-08-05]
 %     {
@@ -154,7 +173,15 @@
 %<*package>
 \cs_new_protected:Npn  \pdfxform_new:nnn #1 #2 #3
   {
-    \@@_backend_xform_new:nnnn { #1 } { #2 } {  } { #3 }
+    \@@_backend_xform_new:nnnnn { #1 } { #2 } {  } { #3 } { }
+  }
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\pdfxform_new:nnnn}
+%    \begin{macrocode}
+\cs_new_protected:Npn  \pdfxform_new:nnnn #1 #2 #3 #4
+  { 
+    \@@_backend_xform_new:nnnnn { #1 } { #2 } {  } { #3 } { #4 }
   }
 %    \end{macrocode}
 % \end{macro}
