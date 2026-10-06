@@ -67,7 +67,7 @@ if os.type == "windows" then
                   -- "config-dvips",   -- latex + dvips
                   "config-pdftex",  -- pdftex
                   "config-xetex",    -- xetex
-                  "config-bookmark" -- temporarly!!!
+                  "config-bookmark" -- temporarily!!!
                   }
 else 
 -- exclude dvips tests if not on windows
@@ -77,7 +77,7 @@ else
                   -- "config-dvips",   -- latex + dvips
                   "config-pdftex",  -- pdftex
                   "config-xetex",    -- xetex
-                  "config-bookmark" -- temporarly!!!
+                  "config-bookmark" -- temporarily!!!
                   }
 -- exclude only record status works again                  
 excludetests = {"show","catalog-remove"}                   
