@@ -2013,16 +2013,32 @@
   }
 %</xdvipdfmx|dvipdfmx>
 %    \end{macrocode}
-% Now pdftex. We only redefine for version 1.40 revision 24 or later.
+% Now pdftex. We assume that 1.40 revision 24 or later is used.
 %    \begin{macrocode}
 %<*pdftex>
-\bool_lazy_and:nnT
-  { \int_compare_p:nNn {\tex_pdftexversion:D } > {139} }
-  { \int_compare_p:nNn {\tex_pdftexrevision:D } > {23} }
+\cs_set_protected:Npn \@@_backend_structure_destination:nn #1#2
   {
-    \cs_set_protected:Npn \@@_backend_structure_destination:nn #1#2
+    \tex_pdfdest:D
+       name {#1}
+       \str_case:nnF {#2}
+         {
+           { xyz }   { xyz }
+           { fit }   { fit }
+           { fitb }  { fitb }
+           { fitbh } { fitbh }
+           { fitbv } { fitbv }
+           { fith }  { fith }
+           { fitv }  { fitv }
+           { fitr }  { fitr }
+         }
+         { xyz ~ zoom \fp_eval:n { #2 * 10 } }
+       \scan_stop:
+    \exp_args:Ne \pdf_object_if_exist:nT { \l_pdf_current_structure_destination_tl }
       {
         \tex_pdfdest:D
+           struct~
+           \int_use:c
+             { c_@@_object_ \exp_args:Ne \tl_to_str:n {\l_pdf_current_structure_destination_tl} _int }~
            name {#1}
            \str_case:nnF {#2}
              {
@@ -2037,64 +2053,61 @@
              }
              { xyz ~ zoom \fp_eval:n { #2 * 10 } }
            \scan_stop:
-        \exp_args:Ne \pdf_object_if_exist:nT { \l_pdf_current_structure_destination_tl }
-          {
-            \tex_pdfdest:D
-               struct~
-               \int_use:c
-                 { c_@@_object_ \exp_args:Ne \tl_to_str:n {\l_pdf_current_structure_destination_tl} _int }~
-               name {#1}
-               \str_case:nnF {#2}
-                 {
-                   { xyz }   { xyz }
-                   { fit }   { fit }
-                   { fitb }  { fitb }
-                   { fitbh } { fitbh }
-                   { fitbv } { fitbv }
-                   { fith }  { fith }
-                   { fitv }  { fitv }
-                   { fitr }  { fitr }
-                 }
-                 { xyz ~ zoom \fp_eval:n { #2 * 10 } }
-               \scan_stop:
-          }
-      }
-    \cs_set_protected:Npn \@@_backend_structure_destination:nnnn #1#2#3#4
-      {
-       \tex_pdfdest:D
-        name {#1}
-        fitr ~
-        width  \dim_eval:n {#2} ~
-        height \dim_eval:n {#3} ~
-        depth  \dim_eval:n {#4} \scan_stop:
-       \exp_args:Ne \pdf_object_if_exist:nT { \l_pdf_current_structure_destination_tl }
-         {
-           \tex_pdfdest:D
-             struct~
-             \int_use:c
-               { c_@@_object_ \exp_args:Ne \tl_to_str:n {\l_pdf_current_structure_destination_tl} _int }~
-             name {#1}
-             fitr ~
-             width  \dim_eval:n {#2} ~
-             height \dim_eval:n {#3} ~
-             depth  \dim_eval:n {#4} \scan_stop:
-         }
-     }
-    \cs_set_protected:Npn \__pdfannot_backend_link_begin_structure_goto:nnw #1#2
-      {
-        \__pdfannot_backend_link_begin:nnnw {#1} { goto~struct~name~{#2}~name } {#2}
       }
   }
+\cs_set_protected:Npn \@@_backend_structure_destination:nnnn #1#2#3#4
+  {
+   \tex_pdfdest:D
+    name {#1}
+    fitr ~
+    width  \dim_eval:n {#2} ~
+    height \dim_eval:n {#3} ~
+    depth  \dim_eval:n {#4} \scan_stop:
+   \exp_args:Ne \pdf_object_if_exist:nT { \l_pdf_current_structure_destination_tl }
+     {
+       \tex_pdfdest:D
+         struct~
+         \int_use:c
+           { c_@@_object_ \exp_args:Ne \tl_to_str:n {\l_pdf_current_structure_destination_tl} _int }~
+         name {#1}
+         fitr ~
+         width  \dim_eval:n {#2} ~
+         height \dim_eval:n {#3} ~
+         depth  \dim_eval:n {#4} \scan_stop:
+     }
+ }
+\cs_set_protected:Npn \__pdfannot_backend_link_begin_structure_goto:nnw #1#2
+  {
+    \__pdfannot_backend_link_begin:nnnw {#1} { goto~struct~name~{#2}~name } {#2}
+  }  
 %</pdftex>
 %    \end{macrocode}
-% luatex is quite similar to pdftex. Mostly the test for the version is different
+% luatex is quite similar to pdftex. 
 %    \begin{macrocode}
 %<*luatex>
- \int_compare:nNnT {\directlua{tex.print(status.list()["development_id"])} } > {7468}
+\cs_set_protected:Npn \@@_backend_structure_destination:nn #1#2
   {
-    \cs_set_protected:Npn \@@_backend_structure_destination:nn #1#2
+    \tex_pdfextension:D dest
+       name {#1}
+       \str_case:nnF {#2}
+         {
+           { xyz }   { xyz }
+           { fit }   { fit }
+           { fitb }  { fitb }
+           { fitbh } { fitbh }
+           { fitbv } { fitbv }
+           { fith }  { fith }
+           { fitv }  { fitv }
+           { fitr }  { fitr }
+         }
+         { xyz ~ zoom \fp_eval:n { #2 * 10 } }
+       \scan_stop:
+    \exp_args:Ne \pdf_object_if_exist:nT { \l_pdf_current_structure_destination_tl }
       {
         \tex_pdfextension:D dest
+           struct~
+           \int_use:c
+             { c_@@_object_ \exp_args:Ne \tl_to_str:n {\l_pdf_current_structure_destination_tl} _int }~
            name {#1}
            \str_case:nnF {#2}
              {
@@ -2109,53 +2122,32 @@
              }
              { xyz ~ zoom \fp_eval:n { #2 * 10 } }
            \scan_stop:
-        \exp_args:Ne \pdf_object_if_exist:nT { \l_pdf_current_structure_destination_tl }
-          {
-            \tex_pdfextension:D dest
-               struct~
-               \int_use:c
-                 { c_@@_object_ \exp_args:Ne \tl_to_str:n {\l_pdf_current_structure_destination_tl} _int }~
-               name {#1}
-               \str_case:nnF {#2}
-                 {
-                   { xyz }   { xyz }
-                   { fit }   { fit }
-                   { fitb }  { fitb }
-                   { fitbh } { fitbh }
-                   { fitbv } { fitbv }
-                   { fith }  { fith }
-                   { fitv }  { fitv }
-                   { fitr }  { fitr }
-                 }
-                 { xyz ~ zoom \fp_eval:n { #2 * 10 } }
-               \scan_stop:
-          }
       }
-    \cs_set_protected:Npn \@@_backend_structure_destination:nnnn #1#2#3#4
-      {
+  }
+\cs_set_protected:Npn \@@_backend_structure_destination:nnnn #1#2#3#4
+  {
+   \tex_pdfextension:D dest
+    name {#1}
+    fitr ~
+    width  \dim_eval:n {#2} ~
+    height \dim_eval:n {#3} ~
+    depth  \dim_eval:n {#4} \scan_stop:
+   \exp_args:Ne \pdf_object_if_exist:nT { \l_pdf_current_structure_destination_tl }
+     {
        \tex_pdfextension:D dest
-        name {#1}
-        fitr ~
-        width  \dim_eval:n {#2} ~
-        height \dim_eval:n {#3} ~
-        depth  \dim_eval:n {#4} \scan_stop:
-       \exp_args:Ne \pdf_object_if_exist:nT { \l_pdf_current_structure_destination_tl }
-         {
-           \tex_pdfextension:D dest
-             struct~
-             \int_use:c
-               { c_@@_object_ \exp_args:Ne \tl_to_str:n {\l_pdf_current_structure_destination_tl} _int }~
-             name {#1}
-             fitr ~
-             width  \dim_eval:n {#2} ~
-             height \dim_eval:n {#3} ~
-             depth  \dim_eval:n {#4} \scan_stop:
-         }
+         struct~
+         \int_use:c
+           { c_@@_object_ \exp_args:Ne \tl_to_str:n {\l_pdf_current_structure_destination_tl} _int }~
+         name {#1}
+         fitr ~
+         width  \dim_eval:n {#2} ~
+         height \dim_eval:n {#3} ~
+         depth  \dim_eval:n {#4} \scan_stop:
      }
-    \cs_set_protected:Npn \__pdfannot_backend_link_begin_structure_goto:nnw #1#2
-      {
-        \__pdfannot_backend_link_begin:nnnw {#1} { goto~struct~name~{#2}~name } {#2}
-      }
+ }
+\cs_set_protected:Npn \__pdfannot_backend_link_begin_structure_goto:nnw #1#2
+  {
+    \__pdfannot_backend_link_begin:nnnw {#1} { goto~struct~name~{#2}~name } {#2}
   }
 %</luatex>
 %    \end{macrocode}
@@ -2278,16 +2270,29 @@
 %</xdvipdfmx|dvipdfmx>
 %    \end{macrocode}
 %
-% Now pdftex. We only redefine for version 1.40 revision 24 or later.
+% Now pdftex. We assume version 1.40 revision 24 or later.
 %    \begin{macrocode}
-%<*pdftex>
-\bool_lazy_and:nnT
-  { \int_compare_p:nNn {\tex_pdftexversion:D } > {139} }
-  { \int_compare_p:nNn {\tex_pdftexrevision:D } > {23} }
+%<*pdftex>  
+\cs_set_protected:Npn \@@_backend_indexed_structure_destination:nn #1#2
   {
-    \cs_set_protected:Npn \@@_backend_indexed_structure_destination:nn #1#2
-      {
+    \tex_pdfdest:D
+       name {#1}
+       \str_case:nnF {#2}
+         {
+           { xyz }   { xyz }
+           { fit }   { fit }
+           { fitb }  { fitb }
+           { fitbh } { fitbh }
+           { fitbv } { fitbv }
+           { fith }  { fith }
+           { fitv }  { fitv }
+           { fitr }  { fitr }
+         }
+         { xyz ~ zoom \fp_eval:n { #2 * 10 } }
+       \scan_stop:
         \tex_pdfdest:D
+           struct~
+           \exp_after:wN \__kernel_pdf_object_id_indexed:nn \l_pdf_current_structure_destination_tl ~
            name {#1}
            \str_case:nnF {#2}
              {
@@ -2302,105 +2307,84 @@
              }
              { xyz ~ zoom \fp_eval:n { #2 * 10 } }
            \scan_stop:
-            \tex_pdfdest:D
-               struct~
-               \exp_after:wN \__kernel_pdf_object_id_indexed:nn \l_pdf_current_structure_destination_tl ~
-               name {#1}
-               \str_case:nnF {#2}
-                 {
-                   { xyz }   { xyz }
-                   { fit }   { fit }
-                   { fitb }  { fitb }
-                   { fitbh } { fitbh }
-                   { fitbv } { fitbv }
-                   { fith }  { fith }
-                   { fitv }  { fitv }
-                   { fitr }  { fitr }
-                 }
-                 { xyz ~ zoom \fp_eval:n { #2 * 10 } }
-               \scan_stop:
-      }
-    \cs_set_protected:Npn \@@_backend_indexed_structure_destination:nnnn #1#2#3#4
-      {
-       \tex_pdfdest:D
-        name {#1}
-        fitr ~
-        width  \dim_eval:n {#2} ~
-        height \dim_eval:n {#3} ~
-        depth  \dim_eval:n {#4} \scan_stop:
-       \tex_pdfdest:D
-         struct~
-         \exp_after:wN \__kernel_pdf_object_id_indexed:nn \l_pdf_current_structure_destination_tl ~
-         name {#1}
-         fitr ~
-         width  \dim_eval:n {#2} ~
-         height \dim_eval:n {#3} ~
-         depth  \dim_eval:n {#4} \scan_stop:
-     }
   }
+\cs_set_protected:Npn \@@_backend_indexed_structure_destination:nnnn #1#2#3#4
+  {
+   \tex_pdfdest:D
+    name {#1}
+    fitr ~
+    width  \dim_eval:n {#2} ~
+    height \dim_eval:n {#3} ~
+    depth  \dim_eval:n {#4} \scan_stop:
+   \tex_pdfdest:D
+     struct~
+     \exp_after:wN \__kernel_pdf_object_id_indexed:nn \l_pdf_current_structure_destination_tl ~
+     name {#1}
+     fitr ~
+     width  \dim_eval:n {#2} ~
+     height \dim_eval:n {#3} ~
+     depth  \dim_eval:n {#4} \scan_stop:
+ }
 %</pdftex>
 %    \end{macrocode}
 % luatex is quite similar to pdftex. Mostly the test for the version is different
 %    \begin{macrocode}
 %<*luatex>
- \int_compare:nNnT {\directlua{tex.print(status.list()["development_id"])} } > {7468}
+\cs_set_protected:Npn \@@_backend_indexed_structure_destination:nn #1#2
   {
-    \cs_set_protected:Npn \@@_backend_indexed_structure_destination:nn #1#2
-      {
-        \tex_pdfextension:D dest
-           name {#1}
-           \str_case:nnF {#2}
-             {
-               { xyz }   { xyz }
-               { fit }   { fit }
-               { fitb }  { fitb }
-               { fitbh } { fitbh }
-               { fitbv } { fitbv }
-               { fith }  { fith }
-               { fitv }  { fitv }
-               { fitr }  { fitr }
-             }
-             { xyz ~ zoom \fp_eval:n { #2 * 10 } }
-           \scan_stop:
-         \tex_pdfextension:D dest
-            struct~
-             \exp_after:wN \__kernel_pdf_object_id_indexed:nn \l_pdf_current_structure_destination_tl ~
-            name {#1}
-            \str_case:nnF {#2}
-              {
-                { xyz }   { xyz }
-                { fit }   { fit }
-                { fitb }  { fitb }
-                { fitbh } { fitbh }
-                { fitbv } { fitbv }
-                { fith }  { fith }
-                { fitv }  { fitv }
-                { fitr }  { fitr }
-              }
-              { xyz ~ zoom \fp_eval:n { #2 * 10 } }
-            \scan_stop:
-      }
-    \cs_set_protected:Npn \@@_backend_indexed_structure_destination:nnnn #1#2#3#4
-      {
-       \tex_pdfextension:D dest
+    \tex_pdfextension:D dest
+       name {#1}
+       \str_case:nnF {#2}
+         {
+           { xyz }   { xyz }
+           { fit }   { fit }
+           { fitb }  { fitb }
+           { fitbh } { fitbh }
+           { fitbv } { fitbv }
+           { fith }  { fith }
+           { fitv }  { fitv }
+           { fitr }  { fitr }
+         }
+         { xyz ~ zoom \fp_eval:n { #2 * 10 } }
+       \scan_stop:
+     \tex_pdfextension:D dest
+        struct~
+         \exp_after:wN \__kernel_pdf_object_id_indexed:nn \l_pdf_current_structure_destination_tl ~
         name {#1}
-        fitr ~
-        width  \dim_eval:n {#2} ~
-        height \dim_eval:n {#3} ~
-        depth  \dim_eval:n {#4} \scan_stop:
-       \tex_pdfextension:D dest
-         struct~
-         \exp_after:wN \__kernel_pdf_object_id_indexed:nn \l_pdf_current_structure_destination_tl~
-         name {#1}
-         fitr ~
-         width  \dim_eval:n {#2} ~
-         height \dim_eval:n {#3} ~
-         depth  \dim_eval:n {#4} \scan_stop:
-     }
-    \cs_set_protected:Npn \__pdfannot_backend_link_begin_structure_goto:nnw #1#2
-      {
-        \__pdfannot_backend_link_begin:nnnw {#1} { goto~struct~name~{#2}~name } {#2}
-      }
+        \str_case:nnF {#2}
+          {
+            { xyz }   { xyz }
+            { fit }   { fit }
+            { fitb }  { fitb }
+            { fitbh } { fitbh }
+            { fitbv } { fitbv }
+            { fith }  { fith }
+            { fitv }  { fitv }
+            { fitr }  { fitr }
+          }
+          { xyz ~ zoom \fp_eval:n { #2 * 10 } }
+        \scan_stop:
+  }
+\cs_set_protected:Npn \@@_backend_indexed_structure_destination:nnnn #1#2#3#4
+  {
+   \tex_pdfextension:D dest
+    name {#1}
+    fitr ~
+    width  \dim_eval:n {#2} ~
+    height \dim_eval:n {#3} ~
+    depth  \dim_eval:n {#4} \scan_stop:
+   \tex_pdfextension:D dest
+     struct~
+     \exp_after:wN \__kernel_pdf_object_id_indexed:nn \l_pdf_current_structure_destination_tl~
+     name {#1}
+     fitr ~
+     width  \dim_eval:n {#2} ~
+     height \dim_eval:n {#3} ~
+     depth  \dim_eval:n {#4} \scan_stop:
+ }
+\cs_set_protected:Npn \__pdfannot_backend_link_begin_structure_goto:nnw #1#2
+  {
+    \__pdfannot_backend_link_begin:nnnw {#1} { goto~struct~name~{#2}~name } {#2}
   }
 %</luatex>
 %    \end{macrocode}
@@ -2565,16 +2549,10 @@
   }
 %</pdftex>
 %<*luatex>
- \int_compare:nNnTF {\directlua{tex.print(status.list()["development_id"])} } > {7560}
-  {
-    \cs_new_protected:Npn \@@_backend_omit_info:n #1 %#1 number
-     {
-       \tex_pdfvariable:D omitinfodict  = #1 \scan_stop:
-     }
-  }
-  {
-    \cs_new_protected:Npn \@@_backend_omit_info:n #1 {} %#1 number
-  }
+\cs_new_protected:Npn \@@_backend_omit_info:n #1 %#1 number
+ {
+   \tex_pdfvariable:D omitinfodict  = #1 \scan_stop:
+ }
 %</luatex>
 %    \end{macrocode}
 % \end{macro}
